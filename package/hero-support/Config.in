@@ -1,0 +1,9 @@
+comment "hero-support needs a Linux kernel to be built"
+	depends on !BR2_LINUX_KERNEL
+
+config BR2_PACKAGE_HERO_SUPPORT
+	bool "hero-support"
+	depends on BR2_LINUX_KERNEL
+	help
+		HERO support infrastructure with PULP linux kernel driver,
+		user-space libraries and support binaries.

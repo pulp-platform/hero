@@ -1,0 +1,13 @@
+# configure eth0 with dhcp IP
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+# iface eth0 inet static
+#         address 10.0.33.120
+#         netmask 255.255.255.0
+#         network 10.0.33.0
+#         broadcast 10.0.0.255
+#         gateway 10.0.33.11
+#         dns-nameservers 8.8.8.8 8.8.4.4

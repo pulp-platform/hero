@@ -1,0 +1,52 @@
+#!/bin/sh
+#
+# nfsroot     mount vdb and set bind mounts for chroot
+#
+
+umask 077
+
+start() {
+	  printf "Try to mount vdb drive as external root..."
+    mount /dev/vdb /mnt
+    if [ ! $? -eq 0 ]; then
+        echo "failed."
+        exit
+    fi
+    echo "done"
+	  printf "Binding to vdb filesystem..."
+	  cd /mnt
+	  mount -t proc proc proc/
+	  mount -t sysfs sys sys/
+	  mount -o bind /dev dev/
+    echo "done"
+}
+stop() {
+    cd /mnt
+    umount proc/
+    umount sys/
+    umount dev/
+    cd /
+    umount /mnt
+    echo "OK"
+}
+restart() {
+	  stop
+	  start
+}
+
+case "$1" in
+    start)
+	      start
+	      ;;
+    stop)
+	      stop
+	      ;;
+    restart|reload)
+	      restart
+	      ;;
+    *)
+	      echo "Usage: $0 {start|stop|restart}"
+	      exit 1
+esac
+
+exit $?

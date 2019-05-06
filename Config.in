@@ -1,0 +1,5 @@
+source "$BR2_EXTERNAL_HERO_PATH/package/ariane-support/Config.in"
+source "$BR2_EXTERNAL_HERO_PATH/package/hero-support/Config.in"
+source "$BR2_EXTERNAL_HERO_PATH/package/libhero-target/Config.in"
+source "$BR2_EXTERNAL_HERO_PATH/package/riscv-pk-ariane/Config.in"
+source "$BR2_EXTERNAL_HERO_PATH/package/vitetris/Config.in"

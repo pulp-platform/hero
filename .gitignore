@@ -1,0 +1,5 @@
+*.bin
+*.mcs
+output/*
+local.mk
+local.cfg

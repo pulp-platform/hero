@@ -1,0 +1,38 @@
+#!/bin/sh
+#
+# ethfix        Fix mac address and enable ethernet
+#
+
+umask 077
+
+start() {
+    ifconfig eth0 hw ether 00:18:3e:02:e3:7f
+    ifconfig eth0 up
+    sleep 3
+    echo "OK"
+}
+stop() {
+    echo "OK"
+}
+restart() {
+    stop
+    start
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart|reload)
+        restart
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit $?
+

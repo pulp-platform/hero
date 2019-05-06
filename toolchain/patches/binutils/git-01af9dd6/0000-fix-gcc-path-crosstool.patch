@@ -1,0 +1,22 @@
+--- a/gas/config/tc-riscv.c	2019-04-24 12:37:04.866393258 +0200
++++ b/gas/config/tc-riscv.c	2019-04-24 12:37:24.622998755 +0200
+@@ -34,7 +34,7 @@
+ #include "opcode/riscv.h"
+ 
+ #define _WITH_PULP_CHIP_INFO_FUNCT_
+-#include "../../../riscv-gcc/gcc/config/riscv/riscv-opts.h"
++#include "../../../gcc/gcc/config/riscv/riscv-opts.h"
+ 
+ #include <stdint.h>
+ 
+--- a/ld/emultempl/riscvelf.em	2019-04-24 12:38:39.014506780 +0200
++++ b/ld/emultempl/riscvelf.em	2019-04-24 12:38:50.797269557 +0200
+@@ -26,7 +26,7 @@
+ #include "elfxx-riscv.h"
+ 
+ #define _WITH_PULP_CHIP_INFO_FUNCT_
+-#include "../../riscv-gcc/gcc/config/riscv/riscv-opts.h"
++#include "../../gcc/gcc/config/riscv/riscv-opts.h"
+ 
+ 
+ static int TRACE = 0;

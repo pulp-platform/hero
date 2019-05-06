@@ -1,0 +1,4 @@
+config BR2_PACKAGE_VITETRIS
+	bool "vitetris"
+	help
+	  Classic multiplayer tetris for the terminal

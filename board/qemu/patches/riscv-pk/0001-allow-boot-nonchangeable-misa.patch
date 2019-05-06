@@ -1,0 +1,14 @@
+remove assertion when disabling floating-point extensions does not work
+
+--- a/machine/minit.c	2019-04-11 13:56:03.707325619 +0200
++++ b/machine/minit.c	2019-04-11 13:56:54.340407481 +0200
+@@ -75,7 +75,8 @@
+ #else
+   uintptr_t fd_mask = (1 << ('F' - 'A')) | (1 << ('D' - 'A'));
+   clear_csr(misa, fd_mask);
+-  assert(!(read_csr(misa) & fd_mask));
++  //FIXME: clearing misa flags not supported on upstream qemu, but system still boots
++  //assert(!(read_csr(misa) & fd_mask));
+ #endif
+ }
+ 
