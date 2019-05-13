@@ -5,14 +5,24 @@ config BR2_PACKAGE_ARIANE_SUPPORT
 
 if BR2_PACKAGE_ARIANE_SUPPORT
 
+config BR2_PACKAGE_ARIANE_SUPPORT_RANDOM_INIT
+  bool "Force random initialization from pre-generated data"
+  default y
+  help
+    Determines if random initialization from pre-generated data should be used.
+    As support for hardware random number generation is currently lacking, this
+    should prevent the boot from hanging waiting for random entropy. The
+    randomized data is pre-generated on the build system and will be the same
+    every boot, making this very INSECURE for production.
+
 config BR2_PACKAGE_ARIANE_SUPPORT_EXT_MOUNT
-  string "external mount point to switch after bootup"
+  string "External mount point to switch after bootup"
   help
     Location to mount as external root, for example NFS partition. Binds system
     to the filesystem. Leave empty to not mount external partition.
 
 config BR2_PACKAGE_ARIANE_SUPPORT_ETH_MAC
-  string "alternative mac address for ethernet"
+  string "Alternative mac address for ethernet"
   help
     Hack to update standard MAC address from device tree to custom version.
     Leave empty to use default MAC address 00:18:3e:02:e3:7f.

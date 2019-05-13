@@ -60,7 +60,7 @@ make pulp-sdk
 Complete Linux environment with kernel and filesystem are built using Buildroot, which uses the cross-compilation toolchain to build for the platform. 
 
 #### Ariane
-A ready-to-use image for Ariane can be created first with
+A ready-to-use image for standalone Ariane can be created first with
 ```
 make br-ariane
 ```
@@ -90,6 +90,7 @@ qemu-system-riscv64 \
    -device virtio-blk-device,drive=hd0 \
    -netdev user,id=net0,hostfwd=tcp::5555-:22 \
    -device virtio-net-device,netdev=net0 \
+   -device virtio-rng-device \
    -gdb tcp::3332
 
 ```
