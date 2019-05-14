@@ -12,22 +12,43 @@ RISCV_PK_ARIANE_DEPENDENCIES = linux
 RISCV_PK_ARIANE_SUBDIR = build
 RISCV_PK_ARIANE_INSTALL_IMAGES = YES
 
-define RISCV_PK_ARIANE_CONFIGURE_CMDS
+RISCV_PK_ARIANE_EXTRA_OPTS =
+ifneq ($(call qstrip,$(BR2_PACKAGE_RISCV_PK_ARIANE_LOGO)),)
+  RISCV_PK_ARIANE_EXTRA_OPTS += --enable-logo --with-logo=$(BR2_PACKAGE_RISCV_PK_ARIANE_LOGO)
+endif
+
+define RISCV_PK_ARIANE_CONFIGURE
+  rm -rf $(RISCV_PK_ARIANE_DIR)/build
 	mkdir -p $(RISCV_PK_ARIANE_DIR)/build
 	(cd $(RISCV_PK_ARIANE_DIR)/build; \
 		$(TARGET_CONFIGURE_OPTS) ../configure \
 		--host=$(GNU_TARGET_NAME) \
 		--with-payload=$(BINARIES_DIR)/vmlinux \
-		$(call qstrip,$(BR2_PACKAGE_RISCV_PK_ARIANE_EXTRA_CONFIG_OPTS)) \
+		$(RISCV_PK_ARIANE_EXTRA_OPTS) \
 	)
 endef
 
+define RISCV_PK_ARIANE_CONFIGURE_CMDS
+endef
 define RISCV_PK_ARIANE_BUILD_CMDS
+	@echo "Completing build after final Linux image is created"
+endef
+define RISCV_PK_ARIANE_INSTALL_IMAGES_CMDS
+endef
+
+define RISCV_PK_ARIANE_BUILD
 	$(TARGET_MAKE_ENV) $(MAKE) -C $(RISCV_PK_ARIANE_DIR)/build bbl
 endef
 
-define RISCV_PK_ARIANE_INSTALL_IMAGES_CMDS
+# Note this trick to add it to the RootFS targets will make sure the bbl is created last
+rootfs-riscv-pk-ariane: linux-rebuild-with-initramfs
+	$(RISCV_PK_ARIANE_CONFIGURE)
+	$(RISCV_PK_ARIANE_BUILD)
 	$(INSTALL) -D -m 0755 $(RISCV_PK_ARIANE_DIR)/build/bbl $(BINARIES_DIR)/bbl
-endef
+
+.PHONY: rootfs-riscv_pk_ariane
+ifeq (${BR2_PACKAGE_RISCV_PK_ARIANE},y)
+TARGETS_ROOTFS += rootfs-riscv-pk-ariane
+endif
 
 $(eval $(generic-package))
