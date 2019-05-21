@@ -26,13 +26,14 @@ define LIBHERO_TARGET_BUILD_CMDS
 endef
 
 define LIBHERO_TARGET_INSTALL_STAGING_CMDS
-	$(INSTALL) -D -m 0755 $(@D)/inc/hero-target.h $(STAGING_DIR)/usr/local/include/hero-target.h
-	$(INSTALL) -D -m 0755 $(@D)/lib/libhero-target.so $(STAGING_DIR)/usr/local/lib/libhero-target.so
-	$(INSTALL) -D -m 0644 $(@D)/lib/libhero-target.a $(STAGING_DIR)/usr/local/lib/libhero-target.a
+	$(INSTALL) -D -m 0644 $(@D)/inc/hero-target.h $(STAGING_DIR)/usr/include/hero-target.h
+	$(INSTALL) -D -m 0755 $(@D)/lib/libhero-target.so $(STAGING_DIR)/usr/lib/libhero-target.so
+	$(INSTALL) -D -m 0644 $(@D)/lib/libhero-target.a $(STAGING_DIR)/usr/lib/libhero-target.a
 endef
 
 define LIBHERO_TARGET_INSTALL_TARGET_CMDS
-	$(INSTALL) -D -m 0755 $(@D)/lib/libhero-target.so $(STAGING_DIR)/usr/local/lib/libhero-target.so
+	cp $(STAGING_DIR)/lib/libgomp.so* ${TARGET_DIR}/lib # FIXME: libgomp should be copied to the target automatically
+	$(INSTALL) -D -m 0755 $(@D)/lib/libhero-target.so $(TARGET_DIR)/usr/lib/libhero-target.so
 endef
 
 $(eval $(generic-package))
