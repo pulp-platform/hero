@@ -15,10 +15,9 @@ config BR2_PACKAGE_RISCV_PK_ARIANE
 
 if BR2_PACKAGE_RISCV_PK_ARIANE
 
-config BR2_PACKAGE_RISCV_PK_ARIANE_EXTRA_CONFIG_OPTS
+config BR2_PACKAGE_RISCV_PK_ARIANE_LOGO
 	string "extra configure opts"
 	help
-	  Applies extra configure options to RISC-V pk to, for 
-	  example, display a logo at startup.
+    Path to optional logo to display during load.
 
 endif

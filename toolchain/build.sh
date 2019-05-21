@@ -92,7 +92,12 @@ if [ -x "$RISCV/bin/$TUPLE-gcc" ]; then
         chmod -R u+w $SYSROOT
         rm -rf $SYSROOT/*
     fi
+fi
+
+# FIXME: remove gnumake symlink to prevent build stuck
+if grep -q "^CT_COMP_TOOLS_FOR_HOST=y" .config && grep -q "^CT_COMP_TOOLS_MAKE=y" .config; then
     # remove a symlink if it exists otherwise rebuild will break
+    echo "Removing symlink to gnumake to prevent build failure..."
     set +e
     chmod -f u+w $RISCV/bin/
     chmod -f u+w $RISCV/bin/gnumake
