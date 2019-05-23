@@ -7,3 +7,14 @@ config BR2_PACKAGE_HERO_SUPPORT
 	help
 		HERO support infrastructure with PULP linux kernel driver,
 		user-space libraries and support binaries.
+
+
+if BR2_PACKAGE_HERO_SUPPORT
+
+config BR2_PACKAGE_HERO_SUPPORT_DEBUG_LEVEL
+  int "Debug level"
+  help
+    Debug level for HERO support drivers and libraries. Higher is more verbose.
+    If more than zero the binaries are also compiled with debugging symbols.
+
+endif
