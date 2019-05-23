@@ -26,10 +26,17 @@ HERO_SUPPORT_TARGET_MAKE_ENV = $(TARGET_MAKE_ENV) $(HERO_SUPPORT_MK_OPTS) \
 		HERO_LIBPULP_DIR=$(@D)/libpulp \
 		CROSS_COMPILE=$(TARGET_CROSS)
 
+define HERO_SUPPORT_CLEAN_BUILD
+	$(HERO_SUPPORT_TARGET_MAKE_ENV) $(MAKE) -C $(@D)/libpulp clean
+	$(HERO_SUPPORT_TARGET_MAKE_ENV) $(MAKE) -C $(@D)/apps/standalone clean
+	$(HERO_SUPPORT_TARGET_MAKE_ENV) $(MAKE) -C $(@D)/apps/uart clean
+endef
+HERO_SUPPORT_PRE_BUILD_HOOKS += HERO_SUPPORT_CLEAN_BUILD
+
 define HERO_SUPPORT_BUILD_CMDS
-	$(HERO_SUPPORT_TARGET_MAKE_ENV) $(MAKE) -C $(@D)/libpulp clean build
-	$(HERO_SUPPORT_TARGET_MAKE_ENV) $(MAKE) -C $(@D)/apps/standalone clean build
-	$(HERO_SUPPORT_TARGET_MAKE_ENV) $(MAKE) -C $(@D)/apps/uart clean build
+	$(HERO_SUPPORT_TARGET_MAKE_ENV) $(MAKE) -C $(@D)/libpulp build
+	$(HERO_SUPPORT_TARGET_MAKE_ENV) $(MAKE) -C $(@D)/apps/standalone build
+	$(HERO_SUPPORT_TARGET_MAKE_ENV) $(MAKE) -C $(@D)/apps/uart build
 endef
 
 define HERO_SUPPORT_INSTALL_STAGING_CMDS
