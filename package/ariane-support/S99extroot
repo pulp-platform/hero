@@ -29,7 +29,11 @@ stop() {
     cd /mnt
     umount proc/
     umount sys/
+    umount dev/pts
+    umount dev/shm
     umount dev/
+    umount run/
+    umount tmp/
     cd /
     umount /mnt
     echo "OK"
