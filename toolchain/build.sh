@@ -43,6 +43,7 @@ fi
 
 # download and install crosstool-ng
 if [ ! -x "$RISCV/bin/ct-ng" ]; then
+    chmod -R u+w $RISCV
     echo "No crosstool-ng found, installing..."
     curl http://crosstool-ng.org/download/crosstool-ng/crosstool-ng-$CROSSTOOL_VERSION.tar.xz | tar -xJp
     cd crosstool-ng-$CROSSTOOL_VERSION
@@ -69,8 +70,12 @@ echo "Initializing toolchain build..."
 cp "$1" .config
 mkdir -p src
 echo >> .config
-echo 'CT_PREFIX_DIR="${RISCV}"' >> .config
-echo "CT_LOCAL_TARBALLS_DIR=\"$(pwd)/src"\" >> .config
+if ! grep -q "^CT_PREFIX_DIR=" .config; then
+    echo 'CT_PREFIX_DIR="${RISCV}"' >> .config
+fi
+if ! grep -q "^CT_LOCAL_TARBALLS_DIR=" .config; then
+    echo "CT_LOCAL_TARBALLS_DIR=\"$(pwd)/src"\" >> .config
+fi
 $RISCV/bin/ct-ng upgradeconfig > /dev/null
 
 # deduce tuple, sysroot
