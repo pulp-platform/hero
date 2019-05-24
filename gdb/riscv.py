@@ -46,6 +46,35 @@ class RVRegCommand(gdb.Command):
 
 RVRegCommand()
 
+INT_REG = {
+    "MEIx": 11,
+    "SEIx": 9,
+    "UEIx": 8,
+    "MTIx": 7,
+    "STIx": 5,
+    "UTIx": 4,
+    "MSIx": 3,
+    "SSIx": 1,
+    "USix": 0
+}
+
+EXC_REG = {
+    "IALI": 0,
+    "IACC": 1,
+    "IILL": 2,
+    "IBRK": 3,
+    "LALI": 4,
+    "LACC": 5,
+    "SALI": 6,
+    "SACC": 7,
+    "ENVU": 8,
+    "ENVS": 9,
+    "ENVM": 11,
+    "IPFAULT": 12,
+    "LPFAULT": 13,
+    "SPFAULT": 15
+}
+
 REG = \
     {"misa":
        {
@@ -104,7 +133,15 @@ REG = \
            "NMIP": 3,
            "STEP": 2,
            "PRV": (0, 1)
-       }
+       },
+       "mip": INT_REG,
+       "mie": INT_REG,
+       "mideleg": INT_REG,
+       "medeleg": EXC_REG,
+       "sip": INT_REG,
+       "sie": INT_REG,
+       "sideleg": INT_REG,
+       "sedeleg": EXC_REG,
     }
 
 # COMMAND TO GET ALL THE FIELDS FOR CONFIGURATION REGISTERS
