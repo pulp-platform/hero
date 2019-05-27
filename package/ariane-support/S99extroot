@@ -6,18 +6,18 @@
 umask 077
 
 start() {
-	  printf "Mounting external root partition..."
-	  mount EXTERNAL_MOUNT_POINT /mnt
+    printf "Mounting external root partition..."
+    mount EXTERNAL_MOUNT_POINT /mnt
     if [ ! $? -eq 0 ]; then
         echo "failed."
         exit
     fi
     echo "done"
-	  printf "Binding to external filesystem..."
-	  cd /mnt
+    printf "Binding to external filesystem..."
+    cd /mnt
     cp /etc/resolv.conf etc/resolv.conf
-	  mount -t proc proc proc/
-	  mount -t sysfs sys sys/
+    mount -t proc proc proc/
+    mount -t sysfs sys sys/
     mount --bind /dev dev/
     mount -t devpts devpts dev/pts/
     mount --bind /dev/shm/ dev/shm/
