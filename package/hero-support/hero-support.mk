@@ -54,6 +54,7 @@ define HERO_SUPPORT_INSTALL_STAGING_CMDS
 endef
 
 define HERO_SUPPORT_INSTALL_TARGET_CMDS
+  $(INSTALL) -D -m 0644 $(@D)/drivers/pulp/pulp.ko $(TARGET_DIR)/lib/modules/$(LINUX_VERSION_PROBED)/extra/pulp.ko
 	$(INSTALL) -D -m 0755 $(@D)/libpulp/lib/libpulp.so $(TARGET_DIR)/usr/local/lib/libpulp.so
 	$(INSTALL) -D -m 0755 $(@D)/apps/standalone/standalone $(TARGET_DIR)/usr/local/bin/pulp-standalone
 	$(INSTALL) -D -m 0755 $(@D)/apps/uart/uart $(TARGET_DIR)/usr/local/bin/pulp-uart
