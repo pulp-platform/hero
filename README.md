@@ -27,13 +27,12 @@ export RISCV=<your_path>
 
 The project contains several toolchains for various configurations. First the basic Linux Ariane toolchain with recent version of several host tools included (necessary for building the tools) can be built with
 ```
-make toolchain-ariane-linux
+make tc-ariane-linux
 ```
 
-For a full-blown HERO installation the PULP toolchain is required together with an extended version of the Linux toolchain, which can be built with
+For a full HERO installation the PULP toolchain is required, which can be built with
 ```
-make toolchain-ariane-hero
-make toolchain-pulp
+make tc-pulp
 ```
 
 ### Tools

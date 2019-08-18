@@ -7,23 +7,23 @@ all: br-ariane br-hero
 
 # buildroot
 br-ariane:
-	mkdir -p $(CURDIR)/output/ariane
-	$(MAKE) O=$(CURDIR)/output/ariane BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot ariane_defconfig
-	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/ariane/.config; fi
-	$(MAKE) -C $(CURDIR)/output/ariane
-	cp $(CURDIR)/output/ariane/images/bbl.bin $(CURDIR)
+	mkdir -p $(CURDIR)/output/br-ariane
+	$(MAKE) O=$(CURDIR)/output/br-ariane BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot ariane_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-ariane/.config; fi
+	$(MAKE) -C $(CURDIR)/output/br-ariane
+	cp $(CURDIR)/output/br-ariane/images/bbl.bin $(CURDIR)
 
 br-hero:
-	mkdir -p $(CURDIR)/output/hero
-	$(MAKE) O=$(CURDIR)/output/hero BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hero_defconfig
-	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/hero/.config; fi
-	$(MAKE) -C $(CURDIR)/output/hero
+	mkdir -p $(CURDIR)/output/br-hero
+	$(MAKE) O=$(CURDIR)/output/br-hero BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hero_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hero/.config; fi
+	$(MAKE) -C $(CURDIR)/output/br-hero
 
 br-qemu:
-	mkdir -p $(CURDIR)/output/qemu
-	$(MAKE) O=$(CURDIR)/output/qemu BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot qemu_defconfig
-	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/qemu/.config; fi
-	$(MAKE) -C $(CURDIR)/output/qemu
+	mkdir -p $(CURDIR)/output/br-qemu
+	$(MAKE) O=$(CURDIR)/output/br-qemu BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot qemu_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-qemu/.config; fi
+	$(MAKE) -C $(CURDIR)/output/br-qemu
 
 # support
 pulp-sdk:
@@ -33,17 +33,17 @@ pulp-sdk:
 	)
 
 # toolchain
-toolchain-ariane-linux:
-	mkdir -p $(CURDIR)/output/toolchain-ariane-linux/
-	cd $(CURDIR)/output/toolchain-ariane-linux/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/ariane-linux.config
+tc-ariane-bare:
+	mkdir -p $(CURDIR)/output/tc-ariane-bare/
+	cd $(CURDIR)/output/tc-ariane-bare/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/ariane-bare.config
 
-toolchain-ariane-hero:
-	mkdir -p $(CURDIR)/output/toolchain-ariane-hero/
-	cd $(CURDIR)/output/toolchain-ariane-hero/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/ariane-hero.config
+tc-ariane-linux:
+	mkdir -p $(CURDIR)/output/tc-ariane-linux/
+	cd $(CURDIR)/output/tc-ariane-linux/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/ariane-linux.config
 
-toolchain-pulp:
-	mkdir -p $(CURDIR)/output/toolchain-pulp/
-	cd $(CURDIR)/output/toolchain-pulp/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/pulp.config
+tc-pulp:
+	mkdir -p $(CURDIR)/output/tc-pulp/
+	cd $(CURDIR)/output/tc-pulp/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/pulp.config
 
 # hardware
 hw-ariane:
