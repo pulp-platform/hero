@@ -19,7 +19,7 @@ endef
 ifeq ($(BR2_PACKAGE_ARIANE_SUPPORT_RANDOM_INIT),y)
 define ARIANE_SUPPORT_INSTALL_TARGET_RANDOM_INIT
 	dd if=/dev/urandom of=$(TARGET_DIR)/etc/random-seed count=512 status=none
-	$(INSTALL) -D -m 0755 $(@D)/addentropy $(TARGET_DIR)/usr/local/bin/addentropy
+	$(INSTALL) -D -m 0755 $(@D)/addentropy $(TARGET_DIR)/usr/bin/addentropy
 endef
 define ARIANE_SUPPORT_INSTALL_INIT_SYSV_RANDOM_INIT
 	$(INSTALL) -D -m 0775 $(ARIANE_SUPPORT_PKGDIR)/S20urandom $(TARGET_DIR)/etc/init.d/

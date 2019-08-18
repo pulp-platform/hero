@@ -17,7 +17,7 @@ case "$1" in
     fi
     [ "$VERBOSE" != no ] && printf "Initializing random number generator... "
     # Use binary to force increase in entropy from data
-    /usr/local/bin/addentropy /etc/random-seed
+    /usr/bin/addentropy /etc/random-seed
     [ "$VERBOSE" != no ] && printf "done."
     ;;
   stop)

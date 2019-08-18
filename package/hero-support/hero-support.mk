@@ -48,16 +48,17 @@ endef
 HERO_SUPPORT_POST_BUILD_HOOKS += HERO_SUPPORT_BUILD_APPS
 
 define HERO_SUPPORT_INSTALL_STAGING_CMDS
-	$(INSTALL) -D -m 0644 $(@D)/libpulp/inc/pulp.h $(STAGING_DIR)/usr/local/include/pulp.h
-	$(INSTALL) -D -m 0755 $(@D)/libpulp/lib/libpulp.so $(STAGING_DIR)/usr/local/lib/libpulp.so
-	$(INSTALL) -D -m 0644 $(@D)/libpulp/lib/libpulp.a $(STAGING_DIR)/usr/local/lib/libpulp.a
+	$(INSTALL) -D -m 0644 $(@D)/libpulp/inc/pulp.h $(STAGING_DIR)/usr/include/pulp.h
+	$(INSTALL) -D -m 0644 $(@D)/libpulp/inc/pulp_common.h $(STAGING_DIR)/usr/include/pulp_common.h
+	$(INSTALL) -D -m 0755 $(@D)/libpulp/lib/libpulp.so $(STAGING_DIR)/usr/lib/libpulp.so
+	$(INSTALL) -D -m 0644 $(@D)/libpulp/lib/libpulp.a $(STAGING_DIR)/usr/lib/libpulp.a
 endef
 
 define HERO_SUPPORT_INSTALL_TARGET_CMDS
   $(INSTALL) -D -m 0644 $(@D)/drivers/pulp/pulp.ko $(TARGET_DIR)/lib/modules/$(LINUX_VERSION_PROBED)/extra/pulp.ko
-	$(INSTALL) -D -m 0755 $(@D)/libpulp/lib/libpulp.so $(TARGET_DIR)/usr/local/lib/libpulp.so
-	$(INSTALL) -D -m 0755 $(@D)/apps/standalone/standalone $(TARGET_DIR)/usr/local/bin/pulp-standalone
-	$(INSTALL) -D -m 0755 $(@D)/apps/uart/uart $(TARGET_DIR)/usr/local/bin/pulp-uart
+	$(INSTALL) -D -m 0755 $(@D)/libpulp/lib/libpulp.so $(TARGET_DIR)/usr/lib/libpulp.so
+	$(INSTALL) -D -m 0755 $(@D)/apps/standalone/standalone $(TARGET_DIR)/usr/bin/pulp-standalone
+	$(INSTALL) -D -m 0755 $(@D)/apps/uart/uart $(TARGET_DIR)/usr/bin/pulp-uart
 endef
 
 $(eval $(generic-package))
