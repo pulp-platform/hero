@@ -41,6 +41,7 @@ if ! command -v makeinfo >/dev/null 2>&1; then
     cd ..
 fi
 
+mkdir -p $RISCV
 # download and install crosstool-ng
 if [ ! -x "$RISCV/bin/ct-ng" ]; then
     chmod -R u+w $RISCV
