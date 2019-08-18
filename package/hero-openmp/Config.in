@@ -1,0 +1,7 @@
+config BR2_PACKAGE_HERO_OPENMP
+	bool "hero-openmp"
+  select BR2_PACKAGE_ELFUTILS
+  select BR2_PACKAGE_LIBFFI
+  select BR2_PACKAGE_HERO_SUPPORT
+	help
+	  LLVM OpenMP library with PULP plugin for HERO
