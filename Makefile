@@ -38,7 +38,7 @@ tc-ariane-linux:
 tc-pulp:
 	mkdir -p $(CURDIR)/output/tc-pulp/
 	cd $(CURDIR)/output/tc-pulp/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/pulp.config hero
-	ln -sf $(RISCV)/riscv32-unknown-elf $(RISCV)/riscv32-hero-unknown-elf
+	chmod -R u+w $(RISCV) && ln -sf $(RISCV)/riscv32-unknown-elf $(RISCV)/riscv32-hero-unknown-elf && chmod -R u-w $(RISCV)
 
 # sdk
 pulp-sdk:
