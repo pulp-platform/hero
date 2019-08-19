@@ -12,23 +12,28 @@ fi
 git clone $GIT_REPO/llvm.git -b $GIT_BRANCH
 git clone $GIT_REPO/clang.git -b $GIT_BRANCH
 git clone $GIT_REPO/openmp.git -b $GIT_BRANCH
-pushd openmp
+cd openmp
 git submodule update --init
-popd
+cd ..
+git clone $GIT_REPO/HerculesCompiler-public.git -b $GIT_BRANCH
 
 # include clang and openmp into llvm build
 ln -sf $PWD/clang llvm/tools
 ln -sf $PWD/openmp llvm/projects
 
-# setup build
+# prepare
+mkdir -p $RISCV
+chmod -R u+w $RISCV
+PATH=$RISCV/bin:$PATH
+
+# setup llvm build
 unset HERO_PULP_INC_DIR
 unset HERO_LIBPULP_DIR
-mkdir -p build
-cd build
-mkdir -p $RISCV
-chmod -R +w $RISCV
+mkdir -p llvm_build
+cd llvm_build
 
-# run build and install
+# run llvm build and install
+echo "Building LLVM project"
 cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
       -DBUILD_SHARED_LIBS=True -DLLVM_USE_SPLIT_DWARF=True \
       -DCMAKE_INSTALL_PREFIX=$RISCV \
@@ -39,6 +44,23 @@ cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
       -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON \
       ../llvm
 cmake --build . --target install
+cd ..
 
-# finalize build
-chmod -R -w $RISCV
+# setup hercules passes build
+mkdir -p hc_build
+cd hc_build
+
+# run hercules pass build
+echo "Building Hercules LLVM passes"
+cmake -DCMAKE_INSTALL_PREFIX=$RISCV -DLLVM_DIR:STRING=$RISCV/lib/cmake/llvm ../HerculesCompiler-public/llvm-passes/
+cmake --build . --target install
+cd ..
+
+# install wrapper script
+# FIXME: this wrapper script should be transparantly included in the HC compiler
+echo "Installing hc-omp-pass wrapper script"
+THIS_DIR=$(dirname "$(readlink -f "$0")")
+cp $THIS_DIR/hc-omp-pass $RISCV/bin
+
+# finalize install
+chmod -R u-w $RISCV
