@@ -1,6 +1,6 @@
 # HERO-V3
 
-HERO-V3, the open Heterogeneous Research Platform version 3, combines a PULP-based open-source parallel manycore accelerator implemented on FPGA with a hard open-source Ariane host processor running full-stack Linux.
+HERO-V3, the open Heterogeneous Research Platform version 3, combines a PULP-based open-source parallel manycore accelerator with an open-source Ariane host processor running full-stack Linux.
 
 This repository contains the top-level logic to build all required dependencies.
 
@@ -25,12 +25,12 @@ All toolchains are installed automatically to the location pointed to by the `RI
 export RISCV=<your_path>
 ```
 
-The project contains several toolchains for various configurations. First the basic Linux Ariane toolchain with recent version of several host tools included (necessary for building the tools) can be built with
+The project contains several toolchains for various configurations. The core Linux Ariane toolchain with recent version of several host tools included (necessary for building the tools) is required first and can be built with
 ```
 make tc-ariane-linux
 ```
 
-For a full HERO installation the PULP toolchain is required, which can be built with
+For a full HERO installation the PULP toolchain is also required, which can be built with
 ```
 make tc-pulp
 ```
@@ -56,7 +56,11 @@ make pulp-sdk
 ```
 
 ### Environment
-Complete Linux environment with kernel and filesystem are built using Buildroot, which uses the cross-compilation toolchain to build for the platform. 
+A complete Linux environment with kernel and filesystem is built using Buildroot, which uses the cross-compilation toolchain to build for the platform. 
+
+The environment is typically created from upstream repositories, but it is possible to overwrite the code source to be used. This can be done by creating and modifying a `local.mk` file in the root folder of the repository. Package sources can then be overwritten by adding a line with `<PACKAGE>_OVERRIDE_SRCDIR=<location>`. 
+
+**Currently two packages are required to have a overwritten source directory as the upstream versions are outdated. To achieve this clone `git@iis-git.ee.ethz.ch:kwolters/hero-support.git` and `git@iis-git.ee.ethz.ch:kwolters/libhero-target.git`, and add a `HERO_SUPPORT_OVERRIDE_SRCDIR` and `LIBHERO_TARGET_OVERRIDE_SRCDIR` pointing to the appropriate location of the sources.**
 
 #### Ariane
 A ready-to-use image for standalone Ariane can be created first with
@@ -73,6 +77,8 @@ The binary can the be copied onto the SD-card using the same disk label found be
 $ sudo dd if=bbl.bin of=/dev/sdb1 status=progress oflag=sync bs=1M
 ```
 If the FPGA bitstream is programmed correctly and the SD-card is put in, the system can now be booted up!
+
+Currently the default MAC address is fixed in the bitstream and should be changed later to allow for different devices on the same network. To achieve this the Ariane buildroot configuration can be customized by adding a single line with value `BR2_PACKAGE_ARIANE_SUPPORT_ETH_MAC="<custom-mac>"` to a file `local.cfg` in the root repository (create it if it does not yet exist). After changing this configuration parameter, the ariane support package needs to be rebuild, this can be achieved with `make -C output/br-ariane ariane-support-dirclean` and then rerunning `make br-ariane` from the top-level directory of the repository.
 
 #### QEMU
 For debugging it can be quite useful to test the environment first with the QEMU machine emulator. A clone of the Ariane environment without specific hardware patches and including virtual drivers instead, can be built with:
@@ -106,4 +112,16 @@ It is possible the filesystem image from `output/hero/images/` (referred as `<he
    -device virtio-blk-device,drive=hd1 \
 ```
 to the command to run above. Afterwards you can execute `chroot /mnt` to change to the HERO environment.
-On the Ariane hardware the environment can be chrooted via NFS instead. 
+On the Ariane hardware the environment can be chrooted via NFS instead. To automate the mounting of an NFS filesystem on boot, a configuration line with value `BR2_PACKAGE_ARIANE_SUPPORT_EXT_MOUNT="<mount-options> <ip>:<path>"` can be specified in `local.cfg`.
+
+### HERO-SDK
+From the HERO buildroot image an external sdk can be generated and integrated in the `RISCV` toolchain installation. This SDK is required to compile heterogeneous applications with OpenMP. The SDK can be installed with
+```
+make hero-sdk
+```
+
+### LLVM OpenMP RTE
+After the Ariane toolchain, the PULP toolchain, the PULP SDK and the HERO SDK are installed, the HERO LLVM RTE can be installed. This includes clang and OpenMP build support to create heterogeneous applications. It will be installed in the `RISCV` toolchain folder together with the other toolchain parts. To build and install the HERO LLVM setup, run:
+```
+make hero-llvm
+```
