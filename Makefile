@@ -35,15 +35,16 @@ pulp-sdk:
 # toolchain
 tc-ariane-bare:
 	mkdir -p $(CURDIR)/output/tc-ariane-bare/
-	cd $(CURDIR)/output/tc-ariane-bare/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/ariane-bare.config
+	cd $(CURDIR)/output/tc-ariane-bare/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/ariane-bare.config ariane
 
 tc-ariane-linux:
 	mkdir -p $(CURDIR)/output/tc-ariane-linux/
-	cd $(CURDIR)/output/tc-ariane-linux/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/ariane-linux.config
+  # NOTE: we add br_real suffix here as buildroot will use that suffix later
+	cd $(CURDIR)/output/tc-ariane-linux/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/ariane-linux.config hero br_real
 
 tc-pulp:
 	mkdir -p $(CURDIR)/output/tc-pulp/
-	cd $(CURDIR)/output/tc-pulp/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/pulp.config
+	cd $(CURDIR)/output/tc-pulp/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/pulp.config hero
 
 # hardware
 hw-ariane:

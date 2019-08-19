@@ -9,8 +9,8 @@ HELP2MAN_VERSION=1.47.10
 TEXINFO_VERSION=6.6
 PKGCONFIG_VERSION=1.1.0
 
-if [ "$#" -ne 1 ] || [ ! -f "$1" ]; then
-    echo "Fatal error: expects single argument with crosstool config"
+if [ "$#" -lt 1 ] || [ ! -f "$1" ]; then
+    echo "Fatal error: expects at least a single argument with crosstool config"
     exit
 fi
 if [ -z "$RISCV" ]; then
@@ -223,4 +223,16 @@ if grep -q "^CT_COMP_TOOLS_PKGCONF=y" $1; then # NOTE: not in .config file
     chmod -R u+w $RISCV
     make -C pkgconf-$PKGCONFIG_VERSION install
     chmod -R u-w $RISCV
+fi
+
+# alias the toolchain if requested ($2 = vendor alias, $3 = optional suffix useful for buildroot)
+if [ ! -z "$2" ] || [ ! -z "$3" ]; then
+    chmod -R u+w $RISCV/bin
+    vendor=$(echo "$TUPLE" | sed -E 's/^\w*-(\w*)-.*/\1/')
+    for tf in $RISCV/bin/$TUPLE*; do
+        alias=$tf.$3
+        alias=$(echo "$alias" | sed -e "s/$vendor/$2/")
+        ln -sf $(readlink -f $tf) $alias
+    done
+    chmod -R u-w $RISCV/bin
 fi
