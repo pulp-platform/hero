@@ -32,7 +32,6 @@ define LIBHERO_TARGET_INSTALL_STAGING_CMDS
 endef
 
 define LIBHERO_TARGET_INSTALL_TARGET_CMDS
-	cp $(STAGING_DIR)/lib/libgomp.so* ${TARGET_DIR}/lib # FIXME: libgomp should be copied to the target automatically
 	$(INSTALL) -D -m 0755 $(@D)/lib/libhero-target.so $(TARGET_DIR)/usr/lib/libhero-target.so
 endef
 
