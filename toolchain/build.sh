@@ -114,6 +114,7 @@ fi
 
 # build the toolchain
 echo "Starting toolchain build..."
+unset LD_LIBRARY_PATH
 $RISCV/bin/ct-ng build
 
 if [ ! -d $SYSROOT ]; then
