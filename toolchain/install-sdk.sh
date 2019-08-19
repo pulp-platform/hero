@@ -5,7 +5,7 @@ set -e
 
 # find external prefix
 prefix_var="BR2_TOOLCHAIN_EXTERNAL_PREFIX"
-prefix_asn=$(make printvars VARS="$prefix_var" 2>/dev/null)
+prefix_asn=$(make -s printvars VARS="$prefix_var" 2>/dev/null)
 if [ $(echo $prefix_asn | wc -l) -ne 1 ]; then
     echo "Fatal error: the script does not seem to be ran from a buildroot directory"
     exit 0
