@@ -206,25 +206,6 @@ if [ ! -z "$SYSROOT" ] && grep -q "^CT_DEMULTILIB=y" .config; then
     chmod -R u-w $SYSROOT
 fi
 
-# install pkg-config if requested
-# FIXME: pkg-config should be build directly by crosstool-ng
-if grep -q "^CT_COMP_TOOLS_PKGCONF=y" $1; then # NOTE: not in .config file
-    export PATH=$PATH:$RISCV/bin/
-    echo "Building missing pkg-config"
-    curl https://distfiles.dereferenced.org/pkgconf/pkgconf-$PKGCONFIG_VERSION.tar.xz | tar -xJp
-    cd pkgconf-$PKGCONFIG_VERSION
-    ./configure --prefix=$RISCV
-    if [ ! $? -eq 0 ]; then
-        echo "Fatal error: failed to configure pkgconf"
-	      exit
-    fi
-    cd ..
-    make -j$(nproc) -C pkgconf-$PKGCONFIG_VERSION
-    chmod -R u+w $RISCV
-    make -C pkgconf-$PKGCONFIG_VERSION install
-    chmod -R u-w $RISCV
-fi
-
 # alias the toolchain if requested ($2 = vendor alias, $3 = optional suffix useful for buildroot)
 if [ ! -z "$2" ] || [ ! -z "$3" ]; then
     chmod -R u+w $RISCV/bin
