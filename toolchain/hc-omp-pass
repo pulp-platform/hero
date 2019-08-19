@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# ======================== CONFIGURATION OPTIONS =========================== #
+
+# HERCULES passes build directory.
+PASSROOT="$RISCV/lib/hercules/"
+
+# LLVM bin directory (empty for standard PATH).
+# Note: Must end with slash character ("/") unless empty.
+LLVM_BIN_DIR="$RISCV/bin/"
+
+# Additional compilation flag for the final step (IR -> bin)
+CFLAGS=""
+
+# ============================= SANITY CHECK =============================== #
+
+# Ensure that a file name was given as argument.
+if [ -z "$1" ]; then
+  echo "Provide IR file as arg 1!"
+  exit
+fi
+
+# ========================= EXECUTION PARAMETERS =========================== #
+
+BASENAME=$(basename "$1" .ll)
+
+# Path to the passes, based on provided root directory.
+PASS_OMP_KERNEL_WRAPPER_PATH="$PASSROOT/libOmpKernelWrapper.so"
+
+# LLVM pass names.
+PASS_OMP_KERNEL_WRAPPER_NAME="-HERCULES-omp-kernel-wrapper"
+
+# Passes to run before each HERCULES pass.
+PASS_OMP_KERNEL_WRAPPER_PREREQ=""
+
+# Passes to run at the very end.
+FINAL_OPTIMIZATIONS="-dce -gvn -instcombine -mergefunc -always-inline -simplifycfg -instcombine -elim-avail-extern -branch-prob -loop-unroll -globaldce -constmerge -always-inline"
+
+# =============================== EXECUTION ================================ #
+
+${LLVM_BIN_DIR}opt "$BASENAME.ll" \
+-load="$PASS_OMP_KERNEL_WRAPPER_PATH"   $PASS_OMP_KERNEL_WRAPPER_PREREQ   $PASS_OMP_KERNEL_WRAPPER_NAME \
+$FINAL_OPTIMIZATIONS -o "$BASENAME.OMP.ll" -S
+
+# Check that the passes were successful before continuing.
+if [ $? -ne 0 ]; then
+  echo "Application of passes to $BASENAME failed, stopping here."
+  exit
+fi
