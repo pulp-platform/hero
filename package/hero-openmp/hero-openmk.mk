@@ -14,8 +14,8 @@ HERO_OPENMP_LICENSE_FILES = LICENSE.txt
 HERO_OPENMP_DEPENDENCIES = elfutils libffi hero-support
 
 define HERO_OPENMP_FETCH_SUBMODULE
-	git -C $(HERO_OPENMP_DL_DIR)/git submodule update --init
-  rsync -av $(HERO_OPENMP_DL_DIR)/git/libomptarget/plugins/pulp $(@D)/libomptarget/plugins/
+	cd $(HERO_OPENMP_DL_DIR)/git && git submodule update --init && \
+	rsync -av $(HERO_OPENMP_DL_DIR)/git/libomptarget/plugins/pulp $(@D)/libomptarget/plugins/
 endef
 HERO_OPENMP_POST_EXTRACT_HOOKS += HERO_OPENMP_FETCH_SUBMODULE
 
