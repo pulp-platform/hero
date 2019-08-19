@@ -39,7 +39,7 @@ fi
 
 # loop through toolchain symlinks and temporarily remove some for sdk packaging
 echo "Finding paths to exclude..."
-echo -n > exclude_sdk.txt
+echo "$sdk_name/lib64" > exclude_sdk.txt
 for f in host/bin/$prefix*; do
     tf=$(echo $f | sed -e "s/^host/$sdk_name/")
     # do not include br_real files
