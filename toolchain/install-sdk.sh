@@ -64,7 +64,11 @@ rm $RISCV/relocate-sdk.sh
 
 # add symlink to buildroot sysroot
 echo "Aliasing SDK sysroot to toolchain prefix..."
-ln -sf $RISCV/$br_prefix $RISCV/$prefix
+if [ -d "$RISCV/$br_prefix/sysroot" ]; then
+    ln -sf $RISCV/$br_prefix/sysroot $RISCV/$prefix
+else
+    ln -sf $RISCV/$br_prefix $RISCV/$prefix
+fi
 
 # finalize install
 chmod -R u-w $RISCV
