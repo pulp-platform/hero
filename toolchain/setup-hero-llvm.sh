@@ -1,3 +1,5 @@
+### SETUP A HERO LLVM RTE ###
+
 # config (FIXME: make publicly accessible)
 GIT_REPO=git@iis-git.ethz.ch:kwolters
 GIT_BRANCH=hero-v3
@@ -16,6 +18,9 @@ cd openmp
 git submodule update --init
 cd ..
 git clone $GIT_REPO/HerculesCompiler-public.git -b $GIT_BRANCH
+
+# stop on all errors
+set -e
 
 # include clang and openmp into llvm build
 ln -sf $PWD/clang llvm/tools

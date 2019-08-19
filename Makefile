@@ -1,7 +1,7 @@
 ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 export PATH := $(RISCV)/bin:$(RISCV)/usr/bin:$(PATH)
 
-.PHONY: all br-ariane br-hero br-qemu toolchain-ariane-linux tools tools-isa-sim tools-openocd
+.PHONY: all br-ariane br-hero br-qemu tc-ariane-bare tc-ariane-linux tc-pulp pulp-sdk hero-sdk hero-llvm tools tools-isa-sim tools-openocd
 
 all: br-ariane br-hero
 
@@ -25,13 +25,6 @@ br-qemu:
 	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-qemu/.config; fi
 	$(MAKE) -C $(CURDIR)/output/br-qemu
 
-# support
-pulp-sdk:
-	(export PULP_RISCV_GCC_TOOLCHAIN=$(RISCV); \
-	 	cd support/pulp-sdk; \
-		scripts/hero/setup.sh; \
-	)
-
 # toolchain
 tc-ariane-bare:
 	mkdir -p $(CURDIR)/output/tc-ariane-bare/
@@ -39,12 +32,29 @@ tc-ariane-bare:
 
 tc-ariane-linux:
 	mkdir -p $(CURDIR)/output/tc-ariane-linux/
-  # NOTE: we add br_real suffix here as buildroot will use that suffix later
+	# NOTE: we add br_real suffix here as buildroot will use that suffix later
 	cd $(CURDIR)/output/tc-ariane-linux/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/ariane-linux.config hero br_real
 
 tc-pulp:
 	mkdir -p $(CURDIR)/output/tc-pulp/
 	cd $(CURDIR)/output/tc-pulp/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/pulp.config hero
+	ln -sf $(RISCV)/riscv32-unknown-elf $(RISCV)/riscv32-hero-unknown-elf
+
+# sdk
+pulp-sdk:
+	(export PULP_RISCV_GCC_TOOLCHAIN=$(RISCV); \
+		cd support/pulp-sdk; \
+		source configs/hero-urania.sh; \
+		scripts/hero/setup.sh; \
+	)
+
+hero-sdk: br-hero
+	cd $(CURDIR)/output/br-hero && $(ROOT)/toolchain/install-sdk.sh
+
+# llvm
+hero-llvm:
+	mkdir -p $(CURDIR)/output/hero-llvm/
+	cd $(CURDIR)/output/hero-llvm/ && $(ROOT)/toolchain/setup-hero-llvm.sh
 
 # hardware
 hw-ariane:

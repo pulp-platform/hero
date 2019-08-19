@@ -1,3 +1,8 @@
+## INSTALL A SDK FROM A BUILDROOT ENVIRONMENT ##
+
+# stop on all errors
+set -e
+
 # find external prefix
 prefix_var="BR2_TOOLCHAIN_EXTERNAL_PREFIX"
 prefix_asn=$(make printvars VARS="$prefix_var" 2>/dev/null)
