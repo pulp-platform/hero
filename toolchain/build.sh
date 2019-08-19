@@ -230,9 +230,11 @@ if [ ! -z "$2" ] || [ ! -z "$3" ]; then
     chmod -R u+w $RISCV/bin
     vendor=$(echo "$TUPLE" | sed -E 's/^\w*-(\w*)-.*/\1/')
     for tf in $RISCV/bin/$TUPLE*; do
-        alias=$tf.$3
-        alias=$(echo "$alias" | sed -e "s/$vendor/$2/")
+        alias=$(echo "$tf" | sed -e "s/$vendor/$2/")
         ln -sf $(readlink -f $tf) $alias
+        if [ ! -z "$3" ]; then
+            ln -sf $(readlink -f $tf) $alias.$3
+        fi
     done
     chmod -R u-w $RISCV/bin
 fi
