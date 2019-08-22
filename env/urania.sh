@@ -4,6 +4,7 @@ if [[ -z "${RISCV}" ]]; then
     echo "Error: RISCV variable is not set (set it to toolchain installation path)"
     return
 fi
+export PATH=${RISCV}/bin:$PATH
 
 if [[ -z "${HERO_TARGET_HOST}" ]]; then
   export HERO_TARGET_PATH="/mnt/root/"
@@ -26,6 +27,7 @@ export KERNEL_CROSS_COMPILE=${CROSS_COMPILE}
 export HERCULES_ARCH=URANIA
 
 export CFLAGS=""
+# FIXME: we need this LDFLAGS to ensure clang embeds the correct linker
 export LDFLAGS="-Wl,-dynamic-linker,/lib/ld-linux-riscv64-lp64.so.1"
 
 export PULP_RISCV_GCC_TOOLCHAIN=${RISCV}
