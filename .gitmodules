@@ -12,5 +12,5 @@
 	url = https://github.com/pulp-platform/ariane
 [submodule "support/pulp-sdk"]
 	path = support/pulp-sdk
-	url = https://github.com/pulp-platform/pulp-sdk.git
-        ignore = dirty
+	url = git@iis-git.ee.ethz.ch:kwolters/pulp-sdk.git
+    ignore = dirty

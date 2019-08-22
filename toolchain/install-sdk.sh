@@ -39,7 +39,7 @@ fi
 
 # loop through toolchain symlinks and temporarily remove some for sdk packaging
 echo "Finding paths to exclude..."
-echo -n > exclude_sdk.txt
+echo "$sdk_name/lib64" > exclude_sdk.txt
 for f in host/bin/$prefix*; do
     tf=$(echo $f | sed -e "s/^host/$sdk_name/")
     # do not include br_real files
@@ -64,7 +64,11 @@ rm $RISCV/relocate-sdk.sh
 
 # add symlink to buildroot sysroot
 echo "Aliasing SDK sysroot to toolchain prefix..."
-ln -sf $RISCV/$br_prefix $RISCV/$prefix
+if [ -d "$RISCV/$br_prefix/sysroot" ]; then
+    ln -sf $RISCV/$br_prefix/sysroot $RISCV/$prefix
+else
+    ln -sf $RISCV/$br_prefix $RISCV/$prefix
+fi
 
 # finalize install
 chmod -R u-w $RISCV
