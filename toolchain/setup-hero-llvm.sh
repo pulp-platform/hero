@@ -29,7 +29,6 @@ ln -sf $PWD/openmp llvm/projects
 # prepare
 mkdir -p $RISCV
 chmod -R u+w $RISCV
-PATH=$RISCV/bin:$PATH
 
 # setup llvm build
 unset HERO_PULP_INC_DIR
@@ -39,7 +38,8 @@ cd llvm_build
 
 # run llvm build and install
 echo "Building LLVM project"
-cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
+# NOTE: use the cmake from the host tools to ensure a recent version
+${RISCV}/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
       -DBUILD_SHARED_LIBS=True -DLLVM_USE_SPLIT_DWARF=True \
       -DCMAKE_INSTALL_PREFIX=$RISCV \
       -DLLVM_OPTIMIZED_TABLEGEN=True -DLLVM_BUILD_TESTS=False \
