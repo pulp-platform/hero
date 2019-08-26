@@ -1,5 +1,4 @@
 ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-export PATH := $(RISCV)/bin:$(RISCV)/usr/bin:$(PATH)
 
 .PHONY: all br-ariane br-hero br-qemu tc-ariane-bare tc-ariane-linux tc-pulp pulp-sdk hero-sdk hero-llvm tools tools-isa-sim tools-openocd
 
@@ -71,9 +70,9 @@ tools-isa-sim:
 		echo ${PATH}; \
 		$(ROOT)/tools/riscv-isa-sim/configure --prefix=$(RISCV); \
 		$(MAKE); \
-	  chmod -R u+w $(RISCV); \
+		chmod -R u+w $(RISCV); \
 		$(MAKE) install; \
-	  chmod -R u-w $(RISCV); \
+		chmod -R u-w $(RISCV); \
 	)
 
 tools-openocd:
@@ -85,7 +84,7 @@ tools-openocd:
 		cd $(CURDIR)/output/tools-openocd/; \
 		$(ROOT)/tools/riscv-openocd/configure --prefix=$(RISCV); \
 		$(MAKE); \
-	  chmod -R u+w $(RISCV); \
+		chmod -R u+w $(RISCV); \
 		$(MAKE) install; \
-	  chmod -R u-w $(RISCV); \
+		chmod -R u-w $(RISCV); \
 	)

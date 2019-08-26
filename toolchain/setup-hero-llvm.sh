@@ -39,9 +39,10 @@ cd llvm_build
 # run llvm build and install
 echo "Building LLVM project"
 # NOTE: use the cmake from the host tools to ensure a recent version
-${RISCV}/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
+$RISCV/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
       -DBUILD_SHARED_LIBS=True -DLLVM_USE_SPLIT_DWARF=True \
       -DCMAKE_INSTALL_PREFIX=$RISCV \
+      -DCMAKE_FIND_NO_INSTALL_PREFIX=True \
       -DLLVM_OPTIMIZED_TABLEGEN=True -DLLVM_BUILD_TESTS=False \
       -DDEFAULT_SYSROOT=$RISCV/riscv64-hero-linux-gnu \
       -DLLVM_DEFAULT_TARGET_TRIPLE=riscv64-hero-linux-gnu \
