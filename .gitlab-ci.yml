@@ -1,0 +1,63 @@
+before_script:
+  - export RISCV=${CI_PROJECT_DIR}/install
+
+stages:
+  - prepare
+  - build_install_gcc
+  - build_install_pulp-sdk
+  - build_install_hero-sdk
+  - build_install_llvm
+  - build_examples
+
+prepare:
+  stage: prepare
+  script:
+    - test "${RISCV}" == "$(pwd)/install"
+    - mkdir -p install
+  artifacts:
+    paths: 
+      - install
+
+build_install_gcc:
+  stage: build_install_gcc
+  script: make tc-pulp tc-ariane-linux
+  artifacts:
+    paths:
+      - install
+
+build_install_pulp-sdk:
+  stage: build_install_pulp-sdk
+  script: make pulp-sdk
+  artifacts:
+    paths:
+      - install
+
+build_install_hero-sdk:
+  stage: build_install_hero-sdk
+  script:
+    - git clone -b hero-v3 git@iis-git.ee.ethz.ch:kwolters/hero-support.git
+    - echo HERO_SUPPORT_OVERRIDE_SRCDIR=$(pwd)/hero-support >> local.mk
+    - git clone -b hero-v3 git@iis-git.ee.ethz.ch:kwolters/libhero-target.git
+    - echo LIBHERO_TARGET_OVERRIDE_SRCDIR=$(pwd)/libhero-target >> local.mk
+    - make hero-sdk
+  artifacts:
+    paths:
+      - hero-support
+      - libhero-target
+      - local.mk
+      - install
+
+build_install_llvm:
+  stage: build_install_llvm
+  script: make hero-llvm
+  artifacts:
+    paths:
+      - install
+
+build_examples:
+  stage: build_examples
+  script:
+    - git clone -b hero-v3 git@iis-git.ee.ethz.ch:kwolters/hero-openmp-examples.git
+    - source env/urania.sh
+    - cd hero-openmp-examples/helloworld
+    - make all
