@@ -77,6 +77,9 @@ fi
 if ! grep -q "^CT_LOCAL_TARBALLS_DIR=" .config; then
     echo "CT_LOCAL_TARBALLS_DIR=\"$(pwd)/src"\" >> .config
 fi
+if [ -n "$CI" ]; then
+    echo "CT_LOG_PROGRESS_BAR=n" >> .config
+fi
 $RISCV/bin/ct-ng upgradeconfig > /dev/null
 
 # deduce tuple, sysroot
