@@ -20,6 +20,7 @@ LIBHERO_ACCEL_MAKE_ENV = PATH=$(PATH):$(LIBHERO_TARGET_PULP_SDK_HOME)/install/ws
 		PULP_RISCV_GCC_TOOLCHAIN=$(RISCV) \
 
 define LIBHERO_TARGET_BUILD_CMDS
+	cd $(@D)/host/ && $(LIBHERO_TARGET_MAKE_ENV) $(MAKE) clean
 	cd $(@D)/host/ && $(LIBHERO_TARGET_MAKE_ENV) $(MAKE) build
 endef
 
@@ -44,7 +45,7 @@ endef
 define LIBHERO_TARGET_INSTALL_ACCEL_CMDS
 	(source $(BR2_EXTERNAL_HERO_PATH)/support/pulp-sdk/sourceme.sh; \
 		cd $(@D)/pulp; \
-		$(LIBHERO_TARGET_MAKE_ENV) $(MAKE) install; \
+		$(LIBHERO_ACCEL_MAKE_ENV) $(MAKE) install; \
 	)
 endef
 LIBHERO_TARGET_POST_INSTALL_TARGET_HOOKS += LIBHERO_TARGET_INSTALL_ACCEL_CMDS
