@@ -1,0 +1,13 @@
+CAPI=2:
+name : pulp-platform.org::axi_mem_if:0
+
+filesets:
+  rtl:
+    files:
+      - src/axi_mem_if.sv
+    file_type : systemVerilogSource
+
+targets:
+  default:
+    filesets : [rtl]
+

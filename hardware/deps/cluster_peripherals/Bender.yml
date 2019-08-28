@@ -1,0 +1,48 @@
+package:
+  name: cluster_peripherals
+
+dependencies:
+  cluster_interconnect: { git: "https://github.com/pulp-platform/cluster_interconnect.git", rev: atomics } # for interfaces # TODO: switch to version once it's released
+
+sources:
+  - cluster_control_unit/cluster_control_unit.sv
+
+  - include_dirs:
+      - event_unit/include
+    files:
+      # Level 0
+      - event_unit/HW_barrier_logic.sv
+      - event_unit/event_unit_arbiter.sv
+      - event_unit/event_unit_mux.sv
+      - event_unit/event_unit_sm.sv
+      - event_unit/interrupt_mask.sv
+      - event_unit/interfaces/bbmux_config_bus.sv
+      - event_unit/interfaces/clkgate_config_bus.sv
+      # Level 1
+      - event_unit/HW_barrier.sv
+      - event_unit/event_unit_input.sv
+      # Level 2
+      - event_unit/event_unit.sv
+
+  # Level 0
+  - icache_ctrl_unit/interfaces/l0_ctrl_unit_bus.sv
+  - icache_ctrl_unit/interfaces/mp_icache_ctrl_unit_bus.sv
+  - icache_ctrl_unit/interfaces/mp_pf_icache_ctrl_unit_bus.sv
+  - icache_ctrl_unit/interfaces/pri_icache_ctrl_unit_bus.sv
+  - icache_ctrl_unit/interfaces/sp_icache_ctrl_unit_bus.sv
+  # Level 1
+  - icache_ctrl_unit/icache_ctrl_unit.sv
+  - icache_ctrl_unit/mp_icache_ctrl_unit.sv
+  - icache_ctrl_unit/mp_pf_icache_ctrl_unit.sv
+  - icache_ctrl_unit/new_icache_ctrl_unit.sv
+  - icache_ctrl_unit/pri_icache_ctrl_unit.sv
+  - icache_ctrl_unit/sp_icache_ctrl_unit.sv
+
+  # Level 0
+  - mmu_config_unit/interfaces/mmu_config_bus.sv
+  # Level 1
+  - mmu_config_unit/mmu_config_unit.sv
+
+  - perf_counters_unit/perf_counters_unit.sv
+
+  - tcdm_pipe_unit/tcdm_pipe_unit.sv

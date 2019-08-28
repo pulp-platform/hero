@@ -1,0 +1,5 @@
+*
+!/.gitignore
+!/compile.sh
+!/run.tcl
+!/start_sim.sh

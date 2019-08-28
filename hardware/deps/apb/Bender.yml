@@ -1,0 +1,6 @@
+package:
+  name: apb
+  authors: ["Fabian Schuiki <fschuiki@iis.ee.ethz.ch>"]
+
+sources:
+  - src/apb_intf.sv

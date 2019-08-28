@@ -1,0 +1,12 @@
+package:
+  name: axi2per
+
+dependencies:
+  axi_slice: { git: "https://github.com/pulp-platform/axi_slice.git", rev: atomics }
+
+sources:
+  # Level 0
+  - axi2per_req_channel.sv
+  - axi2per_res_channel.sv
+  # Level 1
+  - axi2per.sv

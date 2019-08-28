@@ -1,0 +1,5 @@
+*.swp
+*~
+/build
+/Bender.lock
+/Bender.local

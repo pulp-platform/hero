@@ -1,0 +1,46 @@
+package:
+  name: hero
+  authors: [ "Andreas Kurth <akurth@iis.ee.ethz.ch>" ]
+
+dependencies:
+  axi2apb: { git: "https://github.com/pulp-platform/axi2apb.git", rev: atop }
+  axi: { git: "https://github.com/pulp-platform/axi.git", rev: axi_dwc_akurth }
+  axi_mem_if: { git: "https://github.com/pulp-platform/axi_mem_if.git", rev: fix-name-conflict }
+  axi_node: { git: "https://github.com/pulp-platform/axi_node.git", rev: atop }
+  axi_riscv_atomics: { git: "https://github.com/pulp-platform/axi_riscv_atomics.git", rev: lrsc-v2 }
+  axi_slice_dc: { git: "https://github.com/pulp-platform/axi_slice_dc.git", rev: atomics }
+  common_verification: { git: "https://github.com/pulp-platform/common_verification.git", rev: release-0.2 }
+  pulp_cluster: { git: "https://github.com/pulp-platform/pulp_cluster.git", rev: atomics }
+
+workspace:
+  checkout_dir: "./deps"
+
+export_include_dirs:
+  - src/apb/include # TODO: move to APB repository
+
+sources:
+  # generic APB modules; to be moved to APB repository
+  - src/apb/apb_bus.sv
+  - src/apb/apb_ro_regs.sv
+  - src/apb/apb_rw_regs.sv
+  - src/apb/apb_bus_wrap.sv
+  # Level 0
+  - src/pulp_cluster_cfg_pkg.sv
+  - src/soc_bus.sv
+  - src/soc_ctrl_regs.sv
+  - src/sram.sv
+  # Level 1
+  - src/l2_mem.sv
+  - src/pulp_cluster_ooc.sv
+  - src/soc_peripherals.sv
+  # Level 2
+  - src/hero.sv
+  # Level 3
+  - src/hero_ooc.sv
+
+  - target: test
+    files:
+      # Level 0
+      - src/apb/apb_stdout.sv
+      # Level 1
+      - test/hero_tb.sv
