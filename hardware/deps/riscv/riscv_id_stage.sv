@@ -1523,7 +1523,6 @@ module riscv_id_stage
     end
   end
 
-
   // stall control
   assign id_ready_o = ((~misaligned_stall) & (~jr_stall) & (~load_stall) & (~apu_stall) & (~csr_apu_stall) & ex_ready_i);
   assign id_valid_o = (~halt_id) & id_ready_o;
@@ -1540,5 +1539,8 @@ module riscv_id_stage
     // the instruction delivered to the ID stage should always be valid
     assert property (
       @(posedge clk) (instr_valid_i & (~illegal_c_insn_i)) |-> (!$isunknown(instr_rdata_i)) ) else $display("Instruction is valid, but has at least one X");
+
+    assert property (disable iff (!rst_n) @(posedge clk) (is_decoding_o |-> !illegal_insn_dec))
+      else $error("Illegal instruction 0x%h at PC 0x%h!", instr, pc_id_i);
   `endif
 endmodule

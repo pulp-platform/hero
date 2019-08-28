@@ -175,22 +175,6 @@ module riscv_controller
   logic boot_done, boot_done_q;
   logic irq_enable_int;
 
-`ifndef SYNTHESIS
-  // synopsys translate_off
-  // make sure we are called later so that we do not generate messages for
-  // glitches
-  always_ff @(negedge clk)
-  begin
-    // print warning in case of decoding errors
-    if (is_decoding_o && illegal_insn_i) begin
-      $display("%t: Illegal instruction (core %0d) at PC 0x%h:", $time, riscv_core.core_id_i,
-               riscv_id_stage.pc_id_i);
-    end
-  end
-  // synopsys translate_on
-`endif
-
-
   ////////////////////////////////////////////////////////////////////////////////////////////
   //   ____ ___  ____  _____    ____ ___  _   _ _____ ____   ___  _     _     _____ ____    //
   //  / ___/ _ \|  _ \| ____|  / ___/ _ \| \ | |_   _|  _ \ / _ \| |   | |   | ____|  _ \   //
