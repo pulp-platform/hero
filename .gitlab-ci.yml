@@ -13,7 +13,6 @@ stages:
   - build_install_hero-sdk
   - build_install_llvm
   - build_examples
-  - cleanup
 
 prepare:
   stage: prepare
@@ -67,9 +66,3 @@ build_examples:
     - source env/urania.sh
     - cd hero-openmp-examples/helloworld
     - make all
-
-install_writable:
-  stage: cleanup
-  script:
-    - chmod -R u+w $RISCV
-  when: always
