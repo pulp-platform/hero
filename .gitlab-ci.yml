@@ -3,6 +3,9 @@ before_script:
 after_script:
   - chmod -R u+w $RISCV
 
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
 stages:
   - prepare
   - build_install_gcc
