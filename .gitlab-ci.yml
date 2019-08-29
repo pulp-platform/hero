@@ -1,27 +1,19 @@
-before_script:
-  - export RISCV=${CI_PROJECT_DIR}/install
-after_script:
-  - chmod -R u+w ${RISCV}
-
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
+  RISCV: '$CI_PROJECT_DIR/install'
+
+before_script:
+  - mkdir -p $RISCV
+
+after_script:
+  - chmod -R u+w $RISCV
 
 stages:
-  - prepare
   - build_install_gcc
   - build_install_pulp-sdk
   - build_install_hero-sdk
   - build_install_llvm
   - build_examples
-
-prepare:
-  stage: prepare
-  script:
-    - test "${RISCV}" == "$(pwd)/install"
-    - mkdir -p install
-  artifacts:
-    paths:
-      - install
 
 build_install_gcc:
   stage: build_install_gcc
