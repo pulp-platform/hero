@@ -1,7 +1,7 @@
 before_script:
   - export RISCV=${CI_PROJECT_DIR}/install
 after_script:
-  - chmod -R u+w $RISCV
+  - chmod -R u+w ${RISCV}
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
