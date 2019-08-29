@@ -34,7 +34,8 @@ only ?= # can be set to `pulp` to compile a binary only for PULP
 .PHONY: all exe clean veryclean
 
 ifeq ($(only),pulp)
-all : $(EXE) slm
+OBJDUMP := riscv32-hero-unknown-elf-objdump
+all : $(EXE) $(EXE).dis slm
 
 $(EXE) : $(SRC)
 	$(CC) -c -emit-llvm -S $(CFLAGS_PULP) -I../common $(SRC)
@@ -56,7 +57,8 @@ $(EXE)_l1.slm : $(EXE)
 	../common/one_word_per_line.py $@
 
 else
-all : $(EXE)
+OBJDUMP := riscv64-unknown-linux-gnu-objdump
+all : $(EXE) $(EXE).dis
 
 $(EXE) : $(SRC)
 	# generate llvm
@@ -71,8 +73,11 @@ $(EXE) : $(SRC)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BENCHMARK) "$(BENCHMARK)-out.ll"
 endif
 
+$(EXE).dis : $(EXE)
+	$(OBJDUMP) -d $^ > $@
+
 clean::
-	-rm -vf __hmpp* -vf $(EXE) *~ *.ll *.slm
+	-rm -vf __hmpp* -vf $(EXE) *~ *.dis *.ll *.slm
 
 init-target-host:
 ifndef HERO_TARGET_HOST
