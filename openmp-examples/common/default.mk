@@ -39,7 +39,7 @@ all : $(EXE) $(EXE).dis slm
 
 $(EXE) : $(SRC)
 	$(CC) -c -emit-llvm -S $(CFLAGS_PULP) $(INCPATHS) $(SRC)
-	$(CC) $(CFLAGS_PULP) $(LDFLAGS_PULP) -o $@ $@.ll
+	$(CC) $(CFLAGS_PULP) $(LDFLAGS_PULP) -o $@ $(SRC:.c=.ll)
 
 slm : $(EXE)_l1.slm $(EXE)_l2.slm
 
