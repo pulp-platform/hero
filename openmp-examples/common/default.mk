@@ -38,7 +38,7 @@ OBJDUMP := riscv32-hero-unknown-elf-objdump
 all : $(EXE) $(EXE).dis slm
 
 $(EXE) : $(SRC)
-	$(CC) -c -emit-llvm -S $(CFLAGS_PULP) -I../common $(SRC)
+	$(CC) -c -emit-llvm -S $(CFLAGS_PULP) $(INCPATHS) $(SRC)
 	$(CC) $(CFLAGS_PULP) $(LDFLAGS_PULP) -o $@ $@.ll
 
 slm : $(EXE)_l1.slm $(EXE)_l2.slm
