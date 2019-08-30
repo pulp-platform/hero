@@ -28,6 +28,7 @@ build_install_pulp-sdk:
   artifacts:
     paths:
       - install
+      - support/pulp-sdk/pkg
 
 build_install_hero-sdk:
   stage: build_install_hero-sdk
@@ -43,6 +44,7 @@ build_install_hero-sdk:
       - libhero-target
       - local.mk
       - install
+      - support/pulp-sdk/pkg
 
 build_install_llvm:
   stage: build_install_llvm
@@ -50,6 +52,7 @@ build_install_llvm:
   artifacts:
     paths:
       - install
+      - support/pulp-sdk/pkg
 
 build_examples:
   stage: build_examples
