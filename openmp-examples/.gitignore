@@ -1,0 +1,10 @@
+*~
+*.o
+*optimized
+*.c.*
+offload.so
+offload.bin
+imgs_out
+__pycache__
+testsuite
+hero-sdk
