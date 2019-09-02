@@ -8,3 +8,5 @@ imgs_out
 __pycache__
 testsuite
 hero-sdk
+*.ll
+*.slm
