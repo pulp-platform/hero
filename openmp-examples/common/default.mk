@@ -10,8 +10,16 @@ TARGET_DEV = riscv32-hero-unknown-elf
 ARCH_HOST = host-$(TARGET_HOST)
 ARCH_DEV = openmp-$(TARGET_DEV)
 
-CFLAGS += -target $(TARGET_HOST) -fopenmp=libomp -fopenmp-targets=$(TARGET_DEV) -O0 -g
-LDFLAGS += -lhero-target
+# CFLAGS and LDFLAGS have three components/stages
+# 1) without suffix, they apply to heterogeneous compilation;
+# 3) with _PULP suffix, they apply only to the PULP part of compilation;
+# 4) with _COMMON suffix, they apply to both PULP and host compilation.
+CFLAGS_COMMON += -fopenmp=libomp -O0 -g
+CFLAGS_PULP += $(CFLAGS_COMMON) -target riscv32-hero-unknown-elf
+CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
+LDFLAGS_COMMON += -lhero-target
+LDFLAGS_PULP += $(LDFLAGS_COMMON)
+LDFLAGS += $(LDFLAGS_COMMON)
 
 INCPATHS += -I../common
 
@@ -21,32 +29,50 @@ SRC = $(CSRCS)
 
 DEP_FLAG    := -MM
 
+only ?= # can be set to `pulp` to compile a binary only for PULP
+
 .PHONY: all exe clean veryclean
 
-all : exe
-
-exe : $(EXE)
+ifeq ($(only),pulp)
+all : $(EXE) slm
 
 $(EXE) : $(SRC)
-ifndef HERO_TOOLCHAIN_HOST_TARGET
-	$(error HERO_TOOLCHAIN_HOST_TARGET is not set)
-endif
+	$(CC) -c -emit-llvm -S $(CFLAGS_PULP) -I../common $(SRC)
+	$(CC) $(CFLAGS_PULP) $(LDFLAGS_PULP) -o $@ $@.ll
+
+slm : $(EXE)_l1.slm $(EXE)_l2.slm
+
+$(EXE)_l2.slm : $(EXE)
+	objdump -s --start-address=0x1c000000 --stop-address=0x1cffffff $^ | rg '^ ' | cut -c 2-45 \
+      | sort \
+      > $@
+	../common/one_word_per_line.py $@
+
+$(EXE)_l1.slm : $(EXE)
+	objdump -s --start-address=0x10000000 --stop-address=0x1bffffff $^ | rg '^ ' | cut -c 2-45 \
+      | perl -p -e 's/^1b/10/' \
+      | sort \
+      > $@
+	../common/one_word_per_line.py $@
+
+else
+all : $(EXE)
+
+$(EXE) : $(SRC)
 	# generate llvm
 	$(CC) -c -emit-llvm -S $(CFLAGS) $(INCPATHS) $^
-	
 	# unbundle
 	$(COB) -inputs="$(BENCHMARK).ll" -outputs="$(BENCHMARK)-host.ll,$(BENCHMARK)-dev.ll" -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)" -unbundle
-	
 	# apply omp passes
 	hc-omp-pass "$(BENCHMARK)-host.ll" OmpKernelWrapper "HERCULES-omp-kernel-wrapper"
 	hc-omp-pass "$(BENCHMARK)-dev.ll" OmpKernelWrapper "HERCULES-omp-kernel-wrapper"
-	
 	# rebundle and compile/link
 	$(COB) -inputs="$(BENCHMARK)-host.OMP.ll,$(BENCHMARK)-dev.OMP.ll" -outputs="$(BENCHMARK)-out.ll" -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)"
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BENCHMARK) "$(BENCHMARK)-out.ll"
+endif
 
 clean::
-	-rm -vf __hmpp* -vf $(EXE) *~ *.ll
+	-rm -vf __hmpp* -vf $(EXE) *~ *.ll *.slm
 
 init-target-host:
 ifndef HERO_TARGET_HOST
