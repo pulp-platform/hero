@@ -35,7 +35,8 @@ build_install_pulp-sdk:
 build_install_hero-sdk:
   stage: build_install_hero-sdk
   script:
-    - source env/urania.sh
+    - source support/pulp-sdk/sourceme.sh
+    - export PATH=$RISCV/bin:$PATH
     - git clone -b hero-v3 git@iis-git.ee.ethz.ch:kwolters/hero-support.git
     - echo HERO_SUPPORT_OVERRIDE_SRCDIR=$(pwd)/hero-support >> local.mk
     - git clone -b hero-v3 git@iis-git.ee.ethz.ch:kwolters/libhero-target.git
