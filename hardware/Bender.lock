@@ -1,0 +1,196 @@
+---
+packages:
+  apb:
+    revision: d077333a7e5cc80008935dc2761440532dfdce81
+    version: 0.1.0
+    source:
+      Git: "https://github.com/pulp-platform/apb.git"
+    dependencies: []
+  axi:
+    revision: 88c92c17563af8644920b4ef26456b5fa8e363e2
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/axi.git"
+    dependencies:
+      - common_cells
+      - common_verification
+  axi2apb:
+    revision: 61a07b11f7cf4b6aa96100ac1b0f3a86a780018b
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/axi2apb.git"
+    dependencies:
+      - apb
+      - axi
+  axi2mem:
+    revision: f038968581a54cc5c5fc6fac83fa5d914f89b036
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/axi2mem.git"
+    dependencies:
+      - axi_slice
+      - common_cells
+  axi2per:
+    revision: fa8d9137caef7bd0726b905efb0c20401f5cd70f
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/axi2per.git"
+    dependencies:
+      - axi_slice
+  axi_mem_if:
+    revision: 0c7456caa29262cca278fd28a23ab1c99eff4a79
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/axi_mem_if.git"
+    dependencies:
+      - axi
+  axi_node:
+    revision: dbf2610c95eeb43f0fbf9241618caafd36dc9d19
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/axi_node.git"
+    dependencies:
+      - axi
+      - common_cells
+  axi_riscv_atomics:
+    revision: e7c8cc93b2f6141366bb843995665c262784966c
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/axi_riscv_atomics.git"
+    dependencies:
+      - axi
+      - common_cells
+      - common_verification
+  axi_slice:
+    revision: a6d761ababbba9ec49daf840925977b4aa529556
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/axi_slice.git"
+    dependencies:
+      - common_cells
+  axi_slice_dc:
+    revision: 7e5ad1bf7b517589a89f92fe99a7fa9178d5c778
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/axi_slice_dc.git"
+    dependencies:
+      - axi
+      - axi_slice
+  cluster_interconnect:
+    revision: e3172c42789b13556dff798e5c8f640e66cc3052
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/cluster_interconnect.git"
+    dependencies: []
+  cluster_peripherals:
+    revision: 56206bf50bf5c1150b14cb958ea4eed716d21278
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/cluster_peripherals.git"
+    dependencies:
+      - cluster_interconnect
+  common_cells:
+    revision: 53fade6f0f101a236b6280d872a73c47cf08b83b
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/common_cells.git"
+    dependencies:
+      - common_verification
+      - tech_cells_generic
+  common_verification:
+    revision: 122a733f21027ce1098ebcc0e2a121e63d315b4d
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/common_verification.git"
+    dependencies: []
+  event_unit_flex:
+    revision: d0cb7e92bd23ad28701a765d413bbeeb9e9cd514
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/event_unit_flex.git"
+    dependencies: []
+  fpga-support:
+    revision: fbf6aa54195bc4398a869886ea2a2ce286b004ca
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/fpga-support.git"
+    dependencies:
+      - common_cells
+  icache-intc:
+    revision: 42aee659c80b682ceb7a74ec3f8fd9ba054fea59
+    version: 1.0.0
+    source:
+      Git: "https://github.com/pulp-platform/icache-intc.git"
+    dependencies: []
+  icache_mp_128_pf:
+    revision: 5344c4d8d1403e8b54c5c0c3ae8e4fb7c8296567
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/icache_mp_128_pf.git"
+    dependencies:
+      - axi_slice
+      - cluster_peripherals
+      - common_cells
+      - icache-intc
+      - scm
+  mchan:
+    revision: 528ec79ddef60b9dd0bb1db8beaac5d4bf34bf79
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/mchan.git"
+    dependencies:
+      - common_cells
+  per2axi:
+    revision: 3095411ea20f8f97cb72f0febff07a74e69b5d14
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/per2axi.git"
+    dependencies:
+      - axi_slice
+      - riscv
+  pulp_cluster:
+    revision: 2a5b16d72c08b6a8f73a8731d67aad0408fc54fb
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/pulp_cluster.git"
+    dependencies:
+      - axi
+      - axi2mem
+      - axi2per
+      - axi_node
+      - axi_slice
+      - axi_slice_dc
+      - cluster_interconnect
+      - cluster_peripherals
+      - event_unit_flex
+      - fpga-support
+      - icache_mp_128_pf
+      - mchan
+      - per2axi
+      - riscv
+      - timer_unit
+  riscv:
+    revision: 72c5a0de0598392b599f6e0ccc1f0c4469a84850
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/riscv.git"
+    dependencies:
+      - tech_cells_generic
+  scm:
+    revision: afd32402ac4636ca141fc0de1ae03d7b9078c527
+    version: 1.0.0
+    source:
+      Git: "https://github.com/pulp-platform/scm.git"
+    dependencies: []
+  tech_cells_generic:
+    revision: b84fd2e9cce42b25c9e7dcb285c197c0a15bebd2
+    version: 0.1.5
+    source:
+      Git: "https://github.com/pulp-platform/tech_cells_generic.git"
+    dependencies: []
+  timer_unit:
+    revision: 9227dc7c9b3c3b6899dc02c12e970bf27320adb5
+    version: 1.0.0
+    source:
+      Git: "https://github.com/pulp-platform/timer_unit.git"
+    dependencies: []

@@ -1,0 +1,12 @@
+icache-intc:
+  files: [
+    DistributedArbitrationNetwork_Req_icache_intc.sv,
+    DistributedArbitrationNetwork_Resp_icache_intc.sv,
+    icache_intc.sv,
+    Req_Arb_Node_icache_intc.sv,
+    Resp_Arb_Node_icache_intc.sv,
+    RoutingBlock_Req_icache_intc.sv,
+    RoutingBlock_Resp_icache_intc.sv,
+    lint_mux.sv,
+    RoutingBlock_2ch_Req_icache_intc.sv,    
+]

@@ -1,0 +1,12 @@
+axi2mem:
+  files: [
+    axi2mem_busy_unit.sv,
+    axi2mem_rd_channel.sv,
+    axi2mem.sv,
+    axi2mem_tcdm_rd_if.sv,
+    axi2mem_tcdm_synch.sv,
+    axi2mem_tcdm_unit.sv,
+    axi2mem_tcdm_wr_if.sv,
+    axi2mem_trans_unit.sv,
+    axi2mem_wr_channel.sv,
+  ]

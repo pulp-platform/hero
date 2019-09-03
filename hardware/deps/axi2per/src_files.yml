@@ -1,0 +1,6 @@
+axi2per:
+  files: [
+    axi2per_req_channel.sv,
+    axi2per_res_channel.sv,
+    axi2per.sv,
+  ]

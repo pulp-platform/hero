@@ -1,0 +1,23 @@
+package:
+  name: fpga-support
+  authors: ["Andreas Kurth <akurth@iis.ee.ethz.ch>"]
+
+dependencies:
+  common_cells: { git: "https://github.com/pulp-platform/common_cells.git", rev: cf_math_pkg } # for `cf_math_pkg`
+
+sources:
+  # Level 0
+  - rtl/AxiToAxiLitePc.sv
+  - rtl/BramPort.sv
+  - rtl/SyncDpRam.sv
+  - rtl/SyncSpRam.sv
+  - rtl/SyncSpRamBeNx32.sv
+  - rtl/SyncSpRamBeNx64.sv
+  - rtl/SyncTpRam.sv
+  # Level 1
+  - rtl/BramDwc.sv
+  - rtl/TdpBramArray.sv
+  # Level 2
+  - rtl/BramLogger.sv
+  # Level 3
+  - rtl/AxiBramLogger.sv

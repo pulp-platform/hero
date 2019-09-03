@@ -1,0 +1,17 @@
+package:
+  name: icache-intc
+
+sources:
+  # Level 0
+  - Req_Arb_Node_icache_intc.sv
+  - Resp_Arb_Node_icache_intc.sv
+  - lint_mux.sv
+  # Level 1
+  - DistributedArbitrationNetwork_Req_icache_intc.sv
+  - DistributedArbitrationNetwork_Resp_icache_intc.sv
+  # Level 2
+  - RoutingBlock_Req_icache_intc.sv
+  - RoutingBlock_2ch_Req_icache_intc.sv
+  - RoutingBlock_Resp_icache_intc.sv
+  # Level 3
+  - icache_intc.sv

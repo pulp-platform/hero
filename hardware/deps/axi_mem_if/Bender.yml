@@ -1,0 +1,9 @@
+package:
+  name: axi_mem_if
+  authors: [ "Florian Zaruba <zarubaf@iis.ee.ethz.ch>"]
+
+dependencies:
+  axi: { git: "https://github.com/pulp-platform/axi.git", version: 0.4.3 }
+
+sources:
+  - src/axi_mem_if.sv

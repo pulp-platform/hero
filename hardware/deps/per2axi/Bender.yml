@@ -1,0 +1,12 @@
+package:
+  name: per2axi
+
+dependencies:
+  axi_slice: { git: "https://github.com/pulp-platform/axi_slice.git", rev: atomics }
+  riscv: { git: "https://github.com/pulp-platform/riscv.git", rev: atomics } # TODO: proper way to get the AMO_ symbols?
+
+sources:
+  - src/per2axi_busy_unit.sv
+  - src/per2axi_req_channel.sv
+  - src/per2axi_res_channel.sv
+  - src/per2axi.sv

@@ -1,0 +1,14 @@
+icache_mp_128_pf:
+  incdirs: [
+    ../../rtl/includes,
+  ]
+  files: [
+    RTL/cache_controller_to_axi_128_PF.sv,
+    RTL/central_controller_128.sv,
+    RTL/icache_bank_mp_128.sv,
+    RTL/icache_bank_mp_PF.sv,
+    RTL/icache_top_mp_128_PF.sv,
+    RTL/merge_refill_cam_128_16.sv,
+    RTL/pf_miss_mux.sv,
+    RTL/prefetcher_if.sv,
+  ]

@@ -1,0 +1,43 @@
+cluster_control_unit:
+  files: [
+    cluster_control_unit/cluster_control_unit.sv,
+  ]
+event_unit:
+  incdirs: [
+    include,
+    event_unit/include,
+  ]
+  files: [
+    event_unit/event_unit_arbiter.sv,
+    event_unit/event_unit_input.sv,
+    event_unit/event_unit_mux.sv,
+    event_unit/event_unit_sm.sv,
+    event_unit/event_unit.sv,
+    event_unit/HW_barrier_logic.sv,
+    event_unit/HW_barrier.sv,
+    event_unit/interrupt_mask.sv,
+  ]
+icache_ctrl_unit:
+  incdirs: [
+    ../../rtl/includes,
+  ]
+  files: [
+    icache_ctrl_unit/icache_ctrl_unit.sv,
+    icache_ctrl_unit/new_icache_ctrl_unit.sv,
+    icache_ctrl_unit/mp_icache_ctrl_unit.sv,
+    icache_ctrl_unit/sp_icache_ctrl_unit.sv,
+    icache_ctrl_unit/pri_icache_ctrl_unit.sv,
+    icache_ctrl_unit/mp_pf_icache_ctrl_unit.sv,
+  ]
+mmu_config_unit:
+  files: [
+    mmu_config_unit/mmu_config_unit.sv,
+  ]
+perf_counters_unit:
+  files: [
+    perf_counters_unit/perf_counters_unit.sv,
+  ]
+tcdm_pipe_unit:
+  files: [
+    tcdm_pipe_unit/tcdm_pipe_unit.sv,
+  ]
