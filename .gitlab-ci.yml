@@ -13,7 +13,7 @@ stages:
   - build_install_pulp-sdk
   - build_install_hero-sdk
   - build_install_llvm
-  - build_examples
+  - try_examples
 
 build_install_gcc:
   stage: build_install_gcc
@@ -63,9 +63,19 @@ build_install_llvm:
       - support/pulp-sdk/sourceme.sh
 
 build_examples:
-  stage: build_examples
+  stage: try_examples
   script:
-    - git clone -b hero-v3 git@iis-git.ee.ethz.ch:kwolters/hero-openmp-examples.git
     - source env/urania.sh
-    - cd hero-openmp-examples/helloworld
+    - cd openmp-examples/helloworld
     - make all
+
+simulate_examples:
+  stage: try_examples
+  script:
+    - source env/urania.sh
+    - make -C openmp-examples/helloworld only=pulp all
+    - cd hardware
+    - test/gen_slm_files.sh helloworld
+    - cd vsim
+    - ./compile.sh
+    - ./start_sim.sh
