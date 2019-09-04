@@ -73,6 +73,15 @@ simulate_examples:
   stage: try_examples
   script:
     - source env/urania.sh
+    # BEGIN WORKAROUND (TODO: remove this)
+    - source support/pulp-sdk/init.sh
+    - git show origin/hw-orig:./patches/pulp-rt_sim_io.diff > pulp-rt_sim_io.diff
+    - git show origin/hw-orig:./patches/libomptarget-pulp-rtl_no_main.diff > libomptarget-pulp-rtl_no_main.diff
+    - patch -p0 -F 0 < libomptarget-pulp-rtl_no_main.diff
+    - plpbuild --m libomptarget-pulp-rtl clean build
+    - patch -p0 -F 0 < pulp-rt_sim_io.diff
+    - plpbuild --m pulp-rt clean build
+    # END WORKAROUND
     - make -C openmp-examples/helloworld only=pulp all
     - cd hardware
     - test/gen_slm_files.sh helloworld
