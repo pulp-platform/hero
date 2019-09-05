@@ -23,8 +23,8 @@ git clone $GIT_REPO/HerculesCompiler-public.git -b $GIT_BRANCH
 set -e
 
 # include clang and openmp into llvm build
-ln -sf $PWD/clang llvm/tools
-ln -sf $PWD/openmp llvm/projects
+ln -sf ../../clang llvm/tools/clang
+ln -sf ../../openmp llvm/projects/openmp
 
 # prepare
 mkdir -p $RISCV
