@@ -15,7 +15,7 @@ package automatic pulp_cluster_cfg_pkg;
   // -- Cores
   localparam int unsigned N_CORES = 8; // must be a power of 2 and <= 8
   // -- AXI
-  localparam int unsigned AXI_AW = 32; // [bit]
+  localparam int unsigned AXI_AW = 64; // [bit]
   localparam int unsigned AXI_DW = 64; // [bit]
   localparam int unsigned AXI_IW_MST = 6; // [bit]; do not change, seems to break instruction cache
   localparam int unsigned AXI_IW_SLV = 4; // [bit]

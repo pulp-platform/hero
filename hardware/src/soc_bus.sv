@@ -82,7 +82,7 @@ module soc_bus #(
 
     // Clusters
     for (int i = 0; i < N_CLUSTERS; i++) begin
-      start_addr[0][i]  = 32'h1000_0000 + i * 32'h0040_0000;
+      start_addr[0][i]  = 64'h0000_0000_1000_0000 + i * 32'h0040_0000;
       end_addr[0][i]    = start_addr[0][i] + 32'h002F_FFFF;
       valid_rule[0][i]  = 1'b1;
     end
@@ -90,13 +90,13 @@ module soc_bus #(
     // L2 Memory
     for (int i = 0; i < L2_N_PORTS; i++) begin
       automatic int unsigned idx = IDX_L2_MEM + i;
-      start_addr[0][idx]  = 32'h1C00_0000 + i*L2_N_BYTES_PER_PORT;
+      start_addr[0][idx]  = 64'h0000_0000_1C00_0000 + i*L2_N_BYTES_PER_PORT;
       end_addr[0][idx]    = start_addr[0][idx] + L2_N_BYTES_PER_PORT - 1;
       valid_rule[0][idx]  = 1'b1;
     end
 
     // Peripherals
-    start_addr[0][IDX_PERIPH] = 32'h1A10_0000;
+    start_addr[0][IDX_PERIPH] = 64'h0000_0000_1A10_0000;
     end_addr[0][IDX_PERIPH]   = start_addr[0][IDX_PERIPH] + PERIPH_N_BYTES - 1;
     valid_rule[0][IDX_PERIPH] = 1'b1;
 
