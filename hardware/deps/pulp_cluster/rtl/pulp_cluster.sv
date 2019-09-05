@@ -770,6 +770,7 @@ module pulp_cluster
         .periph_data_master_atop  ( s_core_periph_bus_atop[i] ),
         .apu_master               ( apu_cluster_bus[i]        )
       );
+      assign s_core_periph_bus[i].id = 1 << i;
     end
   endgenerate
 
