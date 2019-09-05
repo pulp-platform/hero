@@ -36,7 +36,12 @@ build_install_hero-sdk:
   stage: build_install_hero-sdk
   script:
     - export PULP_RISCV_GCC_TOOLCHAIN=$RISCV
+    - echo $PULP_PROJECT_HOME $PULP_SDK_HOME
     - source support/pulp-sdk/sourceme.sh
+    - echo $PULP_PROJECT_HOME $PULP_SDK_HOME
+    - export PULP_PROJECT_HOME=$CI_PROJECT_DIR/support/pulp-sdk
+    - export PULP_SDK_HOME=$PULP_PROJECT_HOME/pkg/sdk/dev
+    - source $PULP_SDK_HOME/sourceme.sh
     - git clone -b hero-v3 git@iis-git.ee.ethz.ch:kwolters/hero-support.git
     - echo HERO_SUPPORT_OVERRIDE_SRCDIR=$(pwd)/hero-support >> local.mk
     - git clone -b hero-v3 git@iis-git.ee.ethz.ch:kwolters/libhero-target.git
