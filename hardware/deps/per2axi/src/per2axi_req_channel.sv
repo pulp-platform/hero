@@ -22,6 +22,7 @@ module per2axi_req_channel
    parameter AXI_DATA_WIDTH = 64,
    parameter AXI_USER_WIDTH = 6,
    parameter AXI_ID_WIDTH   = 3,
+   parameter type tryx_req_t = logic,
    // LOCAL PARAMETERS --> DO NOT OVERRIDE
    parameter AXI_STRB_WIDTH = AXI_DATA_WIDTH/8 // DO NOT OVERRIDE
 )
@@ -39,7 +40,7 @@ module per2axi_req_channel
    output logic                      per_slave_gnt_o,
 
    // TRYX CTRL
-   input  logic [NB_CORES-1:0][AXI_USER_WIDTH-1:0] axi_axuser_i,
+   input  tryx_req_t [NB_CORES-1:0]  tryx_req_i,
 
    // AXI4 MASTER
    //***************************************
@@ -195,10 +196,6 @@ module per2axi_req_channel
         end
     end
 
-   // AXI ADDRESS GENERATION
-   assign axi_master_aw_addr_o = per_slave_add_i;
-   assign axi_master_ar_addr_o = per_slave_add_i;
-
    // AXI ID GENERATION - ONEHOT TO BIN DECODING
    always_comb
      begin
@@ -281,20 +278,24 @@ module per2axi_req_channel
    assign atop_id_o   = axi_master_aw_id_o;
    assign atop_add_o  = axi_master_aw_addr_o;
 
+   // AXI ADDRESS GENERATION
+   assign axi_master_aw_addr_o = {tryx_req_i[axi_master_aw_id_o].addrext, per_slave_add_i};
+   assign axi_master_ar_addr_o = {tryx_req_i[axi_master_ar_id_o].addrext, per_slave_add_i};
+
    // UNUSED SIGNALS
    assign axi_master_aw_prot_o   = '0;
    assign axi_master_aw_region_o = '0;
    assign axi_master_aw_len_o    = '0;
    assign axi_master_aw_cache_o  = '0;
    assign axi_master_aw_qos_o    = '0;
-   assign axi_master_aw_user_o   = axi_axuser_i[axi_master_aw_id_o];
+   assign axi_master_aw_user_o   = tryx_req_i[axi_master_aw_id_o].user;
 
    assign axi_master_ar_prot_o   = '0;
    assign axi_master_ar_region_o = '0;
    assign axi_master_ar_len_o    = '0;
    assign axi_master_ar_cache_o  = '0;
    assign axi_master_ar_qos_o    = '0;
-   assign axi_master_ar_user_o   = axi_axuser_i[axi_master_aw_id_o];
+   assign axi_master_ar_user_o   = tryx_req_i[axi_master_ar_id_o].user;
    
    assign axi_master_w_user_o    = '0;
    

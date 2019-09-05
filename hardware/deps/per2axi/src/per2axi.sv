@@ -19,7 +19,8 @@ module per2axi
    parameter AXI_DATA_WIDTH = 64,
    parameter AXI_USER_WIDTH = 6,
    parameter AXI_ID_WIDTH   = 3,
-   parameter AXI_STRB_WIDTH = AXI_DATA_WIDTH/8
+   parameter AXI_STRB_WIDTH = AXI_DATA_WIDTH/8,
+   parameter type tryx_req_t = logic
 )
 (
    input  logic                      clk_i,
@@ -45,7 +46,7 @@ module per2axi
    output logic [31:0]               per_slave_r_rdata_o,
 
    // TRYX CTRL
-   input  logic [NB_CORES-1:0][AXI_USER_WIDTH-1:0] axi_axuser_i,
+   input  tryx_req_t [NB_CORES-1:0]                tryx_req_i,
    output logic [NB_CORES-1:0]                     axi_xresp_slverr_o,
    output logic [NB_CORES-1:0]                     axi_xresp_valid_o,
 
@@ -179,7 +180,8 @@ module per2axi
       .AXI_ADDR_WIDTH   ( AXI_ADDR_WIDTH  ),
       .AXI_DATA_WIDTH   ( AXI_DATA_WIDTH  ),
       .AXI_USER_WIDTH   ( AXI_USER_WIDTH  ),
-      .AXI_ID_WIDTH     ( AXI_ID_WIDTH    )
+      .AXI_ID_WIDTH     ( AXI_ID_WIDTH    ),
+      .tryx_req_t       ( tryx_req_t      )
    )
    req_channel_i
    (
@@ -192,7 +194,7 @@ module per2axi
       .per_slave_id_i          ( per_slave_id_i     ),
       .per_slave_gnt_o         ( per_slave_gnt_o    ),
 
-      .axi_axuser_i            ( axi_axuser_i       ),
+      .tryx_req_i,
 
       .axi_master_aw_valid_o   ( s_aw_valid         ),
       .axi_master_aw_addr_o    ( s_aw_addr          ),
