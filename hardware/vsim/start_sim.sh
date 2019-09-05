@@ -8,4 +8,4 @@ else
     readonly exec_flag=""
 fi
 
-vsim-10.7b "$exec_flag" -do 'source run.tcl'
+vsim-10.7b "$exec_flag" -do 'source run.tcl' &>/dev/null
