@@ -21,6 +21,7 @@ module tryx_ctrl #(
   input  logic                      rst_ni,
 
   output tryx_req_t [NB_CORES-1:0]  tryx_req_o,
+  input  logic [NB_CORES-1:0]       axi_xresp_decerr_i,
   input  logic [NB_CORES-1:0]       axi_xresp_slverr_i,
   input  logic [NB_CORES-1:0]       axi_xresp_valid_i,
 
@@ -31,9 +32,9 @@ module tryx_ctrl #(
   for (genvar i = 0; i < NB_CORES; i++) begin : gen_tryx_ctrl
     tryx_req_t  tryx_d,   tryx_q;
     logic       rd_en_d,  rd_en_q,
-                slverr_d, slverr_q,
                 wait_d,   wait_q,
                 wr_en_d,  wr_en_q;
+    logic [1:0] err_d,    err_q;
 
     // Forward address, write data, and byte-enable from master to slave port.
     assign periph_data_master[i].add = periph_data_slave[i].add;
@@ -75,7 +76,7 @@ module tryx_ctrl #(
     always_comb begin
       if (rd_en_q || wr_en_q) begin // last request was to TRYX control
         periph_data_slave[i].r_opc = 1'b0;
-        periph_data_slave[i].r_rdata = {tryx_q.user, {{32-AXI_USER_WIDTH-1}{1'b0}}, slverr_q};
+        periph_data_slave[i].r_rdata = {tryx_q.user, {{32-AXI_USER_WIDTH-2}{1'b0}}, err_q};
         periph_data_slave[i].r_valid = 1'b1;
       end else begin // last request was beyond TRYX control
         periph_data_slave[i].r_opc    = periph_data_master[i].r_opc;
@@ -84,13 +85,13 @@ module tryx_ctrl #(
       end
     end
 
-    // Latch AXI slave error and clear it when TRYX control is read.
+    // Latch AXI error and clear it when TRYX control is read.
     always_comb begin
-      slverr_d = slverr_q;
+      err_d = err_q;
       if (axi_xresp_valid_i[i]) begin
-        slverr_d = axi_xresp_slverr_i[i];
+        err_d = {axi_xresp_decerr_i[i], axi_xresp_slverr_i[i]};
       end else if (rd_en_q) begin
-        slverr_d = 1'b0;
+        err_d = '0;
       end
     end
 
@@ -121,13 +122,13 @@ module tryx_ctrl #(
     always_ff @(posedge clk_i, negedge rst_ni) begin
       if (!rst_ni) begin
         rd_en_q   <= 1'b0;
-        slverr_q  <= 1'b0;
+        err_q     <=   '0;
         tryx_q    <= '{default: '0};
         wait_q    <= 1'b0;
         wr_en_q   <= 1'b0;
       end else begin
         rd_en_q   <= rd_en_d;
-        slverr_q  <= slverr_d;
+        err_q     <= err_d;
         tryx_q    <= tryx_d;
         wait_q    <= wait_d;
         wr_en_q   <= wr_en_d;

@@ -616,6 +616,7 @@ module pulp_cluster
     .clk_i              ( clk_cluster        ),
     .rst_ni             ( rst_ni             ),
     .tryx_req_o         ( tryx_req           ),
+    .axi_xresp_decerr_i ( tryx_xresp_decerr  ),
     .axi_xresp_slverr_i ( tryx_xresp_slverr  ),
     .axi_xresp_valid_i  ( tryx_xresp_valid   ),
     .periph_data_slave  ( s_core_periph_bus  ),
