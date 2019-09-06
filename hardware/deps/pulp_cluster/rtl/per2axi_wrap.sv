@@ -35,6 +35,7 @@ module per2axi_wrap
   XBAR_PERIPH_BUS.Slave                           periph_slave,
   input logic [5:0]                               periph_slave_atop_i,
   input  tryx_req_t [NB_CORES-1:0]                tryx_req_i,
+  output logic [NB_CORES-1:0]                     axi_xresp_decerr_o,
   output logic [NB_CORES-1:0]                     axi_xresp_slverr_o,
   output logic [NB_CORES-1:0]                     axi_xresp_valid_o,
   AXI_BUS.Master                                  axi_master,
@@ -70,6 +71,7 @@ module per2axi_wrap
     .per_slave_r_rdata_o    ( periph_slave.r_rdata                ),
 
     .tryx_req_i             ( tryx_req_i                          ),
+    .axi_xresp_decerr_o     ( axi_xresp_decerr_o                  ),
     .axi_xresp_slverr_o     ( axi_xresp_slverr_o                  ),
     .axi_xresp_valid_o      ( axi_xresp_valid_o                   ),
 

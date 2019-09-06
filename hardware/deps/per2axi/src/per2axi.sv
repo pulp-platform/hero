@@ -47,6 +47,7 @@ module per2axi
 
    // TRYX CTRL
    input  tryx_req_t [NB_CORES-1:0]                tryx_req_i,
+   output logic [NB_CORES-1:0]                     axi_xresp_decerr_o,
    output logic [NB_CORES-1:0]                     axi_xresp_slverr_o,
    output logic [NB_CORES-1:0]                     axi_xresp_valid_o,
 
@@ -262,6 +263,7 @@ module per2axi
       .per_slave_r_id_o      ( per_slave_r_id_o     ),
       .per_slave_r_rdata_o   ( per_slave_r_rdata_o  ),
 
+      .axi_xresp_decerr_o    ( axi_xresp_decerr_o   ),
       .axi_xresp_slverr_o    ( axi_xresp_slverr_o   ),
       .axi_xresp_valid_o     ( axi_xresp_valid_o    ),
 

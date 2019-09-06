@@ -34,6 +34,7 @@ module per2axi_res_channel
    output logic [31:0]               per_slave_r_rdata_o,
 
    // TRYX CTRL
+   output logic [NB_CORES-1:0]       axi_xresp_decerr_o,
    output logic [NB_CORES-1:0]       axi_xresp_slverr_o,
    output logic [NB_CORES-1:0]       axi_xresp_valid_o,
 
@@ -75,6 +76,7 @@ module per2axi_res_channel
    always_comb begin
       axi_master_b_ready_o = 1'b0;
       axi_master_r_ready_o = 1'b0;
+      axi_xresp_decerr_o   = '0;
       axi_xresp_slverr_o   = '0;
       axi_xresp_valid_o    = '0;
       per_slave_r_id_o     = '0;
@@ -87,9 +89,13 @@ module per2axi_res_channel
          per_slave_r_id_o[axi_master_r_id_i] = 1'b1;
          per_slave_r_rdata_o = s_per_slave_r_data;
          per_slave_r_valid_o = 1'b1;
-         if (axi_master_r_resp_i == 2'b10) begin // slave error -> RAB miss
-            axi_xresp_slverr_o[axi_master_r_id_i] = 1'b1;
-            axi_xresp_valid_o [axi_master_r_id_i] = 1'b1;
+         if (axi_master_r_resp_i[1]) begin // error
+            axi_xresp_valid_o[axi_master_r_id_i] = 1'b1;
+            if (axi_master_r_resp_i[0]) begin // decoding error
+               axi_xresp_decerr_o[axi_master_r_id_i] = 1'b1;
+            end else begin // slave error (e.g. RAB miss)
+               axi_xresp_slverr_o[axi_master_r_id_i] = 1'b1;
+            end
          end
       end else if (axi_master_b_valid_i) begin
          axi_master_b_ready_o = 1'b1;
@@ -102,9 +108,13 @@ module per2axi_res_channel
             // 00 -> 01, 01 -> 00, 10 -> 10, 11 -> 11
             per_slave_r_rdata_o
                = {30'b0, axi_master_b_resp_i[1], axi_master_b_resp_i[1] ~^ axi_master_b_resp_i[0]};
-            if (axi_master_b_resp_i == 2'b10) begin // slave error -> RAB miss
-               axi_xresp_slverr_o[axi_master_b_id_i] = 1'b1;
+            if (axi_master_b_resp_i[1]) begin // error
                axi_xresp_valid_o [axi_master_b_id_i] = 1'b1;
+               if (axi_master_b_resp_i[0]) begin // decording error
+                  axi_xresp_decerr_o[axi_master_b_id_i] = 1'b1;
+               end else begin // slave error (e.g. RAB miss)
+                  axi_xresp_slverr_o[axi_master_b_id_i] = 1'b1;
+               end
             end
          end
       end

@@ -288,6 +288,7 @@ module pulp_cluster
   } tryx_req_t;
 
   tryx_req_t  [NB_CORES-1:0]  tryx_req;
+  logic       [NB_CORES-1:0]  tryx_xresp_decerr;
   logic       [NB_CORES-1:0]  tryx_xresp_slverr;
   logic       [NB_CORES-1:0]  tryx_xresp_valid;
 
@@ -600,6 +601,7 @@ module pulp_cluster
     .periph_slave         ( s_xbar_speriph_bus[SPER_EXT_ID]   ),
     .periph_slave_atop_i  ( s_xbar_speriph_atop[SPER_EXT_ID]  ),
     .tryx_req_i           ( tryx_req                          ),
+    .axi_xresp_decerr_o   ( tryx_xresp_decerr                 ),
     .axi_xresp_slverr_o   ( tryx_xresp_slverr                 ),
     .axi_xresp_valid_o    ( tryx_xresp_valid                  ),
     .axi_master           ( s_core_ext_bus                    ),
