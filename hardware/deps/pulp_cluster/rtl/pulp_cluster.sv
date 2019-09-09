@@ -282,6 +282,7 @@ module pulp_cluster
   logic                               hwpe_en;
 
   localparam TRYX_ADDREXT_WIDTH = AXI_ADDR_WIDTH - 32;
+  localparam TRYX_ADDREXT = (AXI_ADDR_WIDTH > 32);
   typedef struct packed {
     logic [AXI_USER_WIDTH-1:0]      user;
     logic [TRYX_ADDREXT_WIDTH-1:0]  addrext;
@@ -746,6 +747,7 @@ module pulp_cluster
         .CLUSTER_ALIAS             ( CLUSTER_ALIAS          ),
         .CLUSTER_ALIAS_BASE        ( CLUSTER_ALIAS_BASE     ),
         .REMAP_ADDRESS             ( REMAP_ADDRESS          ),
+        .ADDREXT                   ( TRYX_ADDREXT           ),
         .DEM_PER_BEFORE_TCDM_TS    ( DEM_PER_BEFORE_TCDM_TS )
       ) core_region_i (
         .clk_i                    ( clk_cluster               ),
@@ -773,6 +775,7 @@ module pulp_cluster
         .debug_core_halted_o      ( dbg_core_halted[i]        ),
         .debug_core_halt_i        ( dbg_core_halt[i]          ),
         .debug_core_resume_i      ( dbg_core_resume[i]        ),
+        .addrext_i                ( tryx_req[i].addrext       ),
         .tcdm_data_master         ( s_core_xbar_bus[i]        ),
         .tcdm_data_master_atop    ( s_core_xbar_bus_atop[i]   ),
         .dma_ctrl_master          ( s_core_dmactrl_bus[i]     ),
