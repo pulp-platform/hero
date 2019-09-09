@@ -625,6 +625,10 @@ module pulp_cluster
   );
     
   /* cluster (log + periph) interconnect and attached peripherals */
+  logic [NB_CORES-1:0][TRYX_ADDREXT_WIDTH-1:0] s_core_periph_bus_addrext;
+  for (genvar i = 0; i < NB_CORES; i++) begin : gen_core_periph_slave_addrext
+    assign s_core_periph_bus_addrext[i] = tryx_req[i].addrext;
+  end
   cluster_interconnect_wrap #(
     .NB_CORES           ( NB_CORES           ),
     .NB_HWACC_PORTS     ( NB_HWACC_PORTS     ),
@@ -640,6 +644,7 @@ module pulp_cluster
     .LOG_CLUSTER        ( LOG_CLUSTER        ),
     .PE_ROUTING_LSB     ( PE_ROUTING_LSB     ),
     .PE_ROUTING_MSB     ( PE_ROUTING_MSB     ),
+    .ADDREXT            ( TRYX_ADDREXT       ),
     .CLUSTER_ALIAS      ( CLUSTER_ALIAS      ),
     .CLUSTER_ALIAS_BASE ( CLUSTER_ALIAS_BASE )
   ) cluster_interconnect_wrap_i (
@@ -649,6 +654,7 @@ module pulp_cluster
     .core_tcdm_slave_atop   ( s_core_xbar_bus_atop                ),
     .core_periph_slave      ( s_core_periph_tryx                  ),
     .core_periph_slave_atop ( s_core_periph_bus_atop              ),
+    .core_periph_slave_addrext ( s_core_periph_bus_addrext        ),
     .ext_slave              ( s_ext_xbar_bus                      ),
     .dma_slave              ( s_dma_xbar_bus                      ),
     .mperiph_slave          ( s_mperiph_xbar_bus[NB_MPERIPHS-1:0] ),
