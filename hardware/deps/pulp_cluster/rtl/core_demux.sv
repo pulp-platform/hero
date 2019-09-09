@@ -156,25 +156,19 @@ module core_demux
 
   assign data_add_int[27:0] = data_add_i[27:0];
 
-  generate
-    if(REMAP_ADDRESS) begin : remap_address_gen
-      always_comb
-      begin
-        if(data_add_i[31:28] == base_addr_i) begin
-          data_add_int[31:28] = 4'b0001;
-        end
-        else if(data_add_int[31:28] == 4'b0001) begin
-          data_add_int[31:28] = base_addr_i;
-        end
-        else begin
-          data_add_int[31:28] = data_add_i[31:28];
-        end
+  if (REMAP_ADDRESS) begin : gen_remap_address
+    always_comb begin
+      if (data_add_i[31:28] == base_addr_i) begin
+        data_add_int[31:28] = 4'b0001;
+      end else if (data_add_int[31:28] == 4'b0001) begin
+        data_add_int[31:28] = base_addr_i;
+      end else begin
+        data_add_int[31:28] = data_add_i[31:28];
       end
     end
-    else begin : no_remap_address_gen
-      assign data_add_int[31:28] = data_add_i[31:28]; 
-    end
-  endgenerate
+  end else begin : gen_no_remap_address
+    assign data_add_int[31:28] = data_add_i[31:28];
+  end
 
   // level 1 request arbiter
   assign data_add_o_SH   = data_add_int;
