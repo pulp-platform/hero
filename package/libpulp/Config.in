@@ -1,0 +1,20 @@
+comment "libpulp needs a Linux kernel to be built"
+	depends on !BR2_LINUX_KERNEL
+
+config BR2_PACKAGE_LIBPULP
+bool "libpulp"
+	depends on BR2_LINUX_KERNEL
+	help
+		PULP userspace library
+
+
+if BR2_PACKAGE_LIBPULP
+
+config BR2_PACKAGE_LIBPULP_DEBUG_LEVEL
+  int "Debug level"
+  default 0
+  help
+    Debug level for libpulp support library. Higher is more verbose.
+    If more than zero the binaries are also compiled with debugging symbols.
+
+endif

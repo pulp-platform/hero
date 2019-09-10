@@ -1,22 +1,18 @@
 obj-m := pulp.o
 
-PLATFORM      := ${PLATFORM}
-
 ARCH          := ${KERNEL_ARCH}
 CROSS_COMPILE := ${KERNEL_CROSS_COMPILE}
-
-KERNEL_DIR    := ${KERNEL_DIR}
 
 ccflags-y += -DPLATFORM=${PLATFORM} ${CFLAGS} -O2 -I${HERO_LIBPULP_DIR}/inc -I${HERO_PULP_INC_DIR}
 pulp-objs := pulp_module.o pulp_ctrl.o pulp_mem.o pulp_rab.o pulp_dma.o pulp_mbox.o pulp_profile.o
 
+# JUNO and ZynqMP require the stripped down pulp_cache.S
 ifeq ($(KERNEL_ARCH),arm64)
-	# JUNO and ZynqMP require the stripped down pulp_cache.S
 	pulp-objs += pulp_cache.o
 endif
 
+# ZynqMP requires pulp_smmu.*
 ifeq ($(PLATFORM),5)
-	# ZynqMP requires pulp_smmu.*
 	pulp-objs += pulp_smmu.o
 endif
 
