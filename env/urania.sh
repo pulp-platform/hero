@@ -33,7 +33,7 @@ export LDFLAGS="-Wl,-dynamic-linker,/lib/ld-linux-riscv64-lp64.so.1"
 export PULP_RISCV_GCC_TOOLCHAIN=${RISCV}
 
 if [[ -z "${HERO_PULP_SDK_DIR}" ]]; then
-    export HERO_PULP_SDK_DIR=$(readlink -f "$THIS_DIR/../support/pulp-sdk")
+    export HERO_PULP_SDK_DIR=$(readlink -f "$THIS_DIR/../pulp/sdk")
 fi
 
 if [ -f ${HERO_PULP_SDK_DIR}/sourceme.sh ]; then
