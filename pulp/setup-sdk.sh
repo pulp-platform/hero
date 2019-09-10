@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
-# Initialize
+# Initialize environment
+set -e
 THIS_DIR=$(dirname "$(readlink -f "$0")")
 if [ "$#" -ne 1 ] || [ ! -f "${THIS_DIR}/sdk/configs/${1}.sh" ]; then
-    echo "Fatal error: expects a single argument with existing board config name"
+    echo "Fatal error: expects a single argument with existing pulp chip"
     exit
 fi
 export PULP_RISCV_GCC_TOOLCHAIN=${RISCV}
-source ${THIS_DIR}/sdk/configs/${1}.sh
 cd ${THIS_DIR}/sdk
-
-# The following commands should work cleanly.
-set -e
+pulp_chip=${1}
+source configs/${1}.sh
 source configs/platform-hsa.sh
 
+# checkout packages
 for m in \
     json-tools \
     pulp-tools \
@@ -23,10 +23,9 @@ for m in \
     hal \
     debug-bridge2 \
     debug-bridge; \
-do
+
     plpbuild --m $m checkout build --stdout
 done
-
 plpbuild --g runtime checkout --stdout
 
 # Building `pulp-rt` will fail, but this is to be expected.
@@ -46,5 +45,13 @@ plpbuild --m pulp-rt build --stdout
 plpbuild --m libvmm build --stdout
 plpbuild --g runtime build --stdout
 
+# Setup environment
 plpbuild --g pkg build
 make env
+
+# Install hero config objects files
+cd ${THIS_DIR}
+source ${THIS_DIR}/sdk/sourceme.sh
+mkdir -p ${PULP_SDK_HOME}/install/hero/${pulp_chip}
+${RISCV}/bin/riscv32-unknown-elf-gcc -Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wundef -fdata-sections -ffunction-sections -I${PULP_SDK_INSTALL}/include/io -I${PULP_SDK_INSTALL}/include -march=rv32imcxpulpv2 -D__riscv__ -include refs/${pulp_chip}/cl_config.h -c refs/${pulp_chip}/rt_conf.c -o ${PULP_SDK_HOME}/install/hero/${pulp_chip}/rt_conf.o
+cp -r refs/* ${PULP_SDK_HOME}/install/hero/
