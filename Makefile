@@ -41,11 +41,7 @@ tc-pulp:
 
 # sdk
 pulp-sdk:
-	(export PULP_RISCV_GCC_TOOLCHAIN=$(RISCV); \
-		cd pulp/sdk; \
-		source configs/hero-urania.sh; \
-		scripts/hero/setup.sh; \
-	)
+	$(ROOT)/pulp/setup-sdk.sh hero-urania
 
 hero-sdk: br-hero
 	cd $(CURDIR)/output/br-hero && $(ROOT)/toolchain/install-sdk.sh
