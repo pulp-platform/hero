@@ -313,7 +313,8 @@ module pulp_cluster
   logic                              s_cluster_int_busy;
   logic                              s_fregfile_disable;
 
-  logic [NB_CORES-1:0]               core_busy;
+  logic [NB_CORES-1:0]               core_busy,
+                                     core_unaligned;
 
   logic                              s_incoming_req;
   logic                              s_isolate_cluster;
@@ -620,6 +621,7 @@ module pulp_cluster
     .axi_xresp_decerr_i ( tryx_xresp_decerr  ),
     .axi_xresp_slverr_i ( tryx_xresp_slverr  ),
     .axi_xresp_valid_i  ( tryx_xresp_valid   ),
+    .unaligned_i        ( core_unaligned     ),
     .periph_data_slave  ( s_core_periph_bus  ),
     .periph_data_master ( s_core_periph_tryx )
   );
@@ -781,6 +783,7 @@ module pulp_cluster
         .debug_core_halted_o      ( dbg_core_halted[i]        ),
         .debug_core_halt_i        ( dbg_core_halt[i]          ),
         .debug_core_resume_i      ( dbg_core_resume[i]        ),
+        .unaligned_o              ( core_unaligned[i]         ),
         .addrext_i                ( tryx_req[i].addrext       ),
         .tcdm_data_master         ( s_core_xbar_bus[i]        ),
         .tcdm_data_master_atop    ( s_core_xbar_bus_atop[i]   ),

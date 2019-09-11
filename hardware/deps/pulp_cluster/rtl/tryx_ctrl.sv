@@ -25,16 +25,18 @@ module tryx_ctrl #(
   input  logic [NB_CORES-1:0]       axi_xresp_slverr_i,
   input  logic [NB_CORES-1:0]       axi_xresp_valid_i,
 
+  input  logic [NB_CORES-1:0]       unaligned_i,
   XBAR_PERIPH_BUS.Slave             periph_data_slave[NB_CORES-1:0],
   XBAR_PERIPH_BUS.Master            periph_data_master[NB_CORES-1:0]
 );
 
   for (genvar i = 0; i < NB_CORES; i++) begin : gen_tryx_ctrl
-    tryx_req_t  tryx_d,   tryx_q;
-    logic       rd_en_d,  rd_en_q,
-                wait_d,   wait_q,
-                wr_en_d,  wr_en_q;
-    logic [1:0] err_d,    err_q;
+    tryx_req_t  tryx_d,       tryx_q;
+    logic       rd_en_d,      rd_en_q,
+                unaligned_d,  unaligned_q,
+                wait_d,       wait_q,
+                wr_en_d,      wr_en_q;
+    logic [3:0] err_d,        err_q;
 
     // Forward address, write data, and byte-enable from master to slave port.
     assign periph_data_master[i].add = periph_data_slave[i].add;
@@ -76,7 +78,7 @@ module tryx_ctrl #(
     always_comb begin
       if (rd_en_q || wr_en_q) begin // last request was to TRYX control
         periph_data_slave[i].r_opc = 1'b0;
-        periph_data_slave[i].r_rdata = {tryx_q.user, {{32-AXI_USER_WIDTH-2}{1'b0}}, err_q};
+        periph_data_slave[i].r_rdata = {tryx_q.user, {{32-AXI_USER_WIDTH-4}{1'b0}}, err_q};
         periph_data_slave[i].r_valid = 1'b1;
       end else begin // last request was beyond TRYX control
         periph_data_slave[i].r_opc    = periph_data_master[i].r_opc;
@@ -85,11 +87,29 @@ module tryx_ctrl #(
       end
     end
 
+    // Track unaligned accesses.
+    always_comb begin
+      unaligned_d = unaligned_q;
+      if (periph_data_master[i].req && periph_data_master[i].gnt && unaligned_i[i]) begin
+        unaligned_d = 1'b1;
+      end
+      if (periph_data_master[i].r_valid) begin
+        unaligned_d = 1'b0;
+      end
+    end
+
     // Latch AXI error and clear it when TRYX control is read.
+    logic [1:0] err;
+    assign err = {axi_xresp_decerr_i[i], axi_xresp_slverr_i[i]};
     always_comb begin
       err_d = err_q;
       if (axi_xresp_valid_i[i]) begin
-        err_d = {axi_xresp_decerr_i[i], axi_xresp_slverr_i[i]};
+        // If access was unaligned, put error into [3:2] otherwise into [1:0].
+        if (unaligned_q) begin
+          err_d[3:2] = err;
+        end else begin
+          err_d[1:0] = err;
+        end
       end else if (rd_en_q) begin
         err_d = '0;
       end
@@ -113,7 +133,7 @@ module tryx_ctrl #(
           `TRYX_CTRL_USER_ADDR: tryx_d.user = periph_data_slave[i].wdata[31:31-(AXI_USER_WIDTH-1)];
           `TRYX_CTRL_ADDREXT_ADDR: tryx_d.addrext = periph_data_slave[i].wdata;
         endcase
-      end else if (wait_q && !wait_d) begin
+      end else if (wait_q && !wait_d && !unaligned_q) begin
         tryx_d = '0;
       end
     end
@@ -121,17 +141,19 @@ module tryx_ctrl #(
     // Registers
     always_ff @(posedge clk_i, negedge rst_ni) begin
       if (!rst_ni) begin
-        rd_en_q   <= 1'b0;
-        err_q     <=   '0;
-        tryx_q    <= '{default: '0};
-        wait_q    <= 1'b0;
-        wr_en_q   <= 1'b0;
+        rd_en_q     <= 1'b0;
+        err_q       <=   '0;
+        tryx_q      <= '{default: '0};
+        unaligned_q <= 1'b0;
+        wait_q      <= 1'b0;
+        wr_en_q     <= 1'b0;
       end else begin
-        rd_en_q   <= rd_en_d;
-        err_q     <= err_d;
-        tryx_q    <= tryx_d;
-        wait_q    <= wait_d;
-        wr_en_q   <= wr_en_d;
+        rd_en_q     <= rd_en_d;
+        err_q       <= err_d;
+        tryx_q      <= tryx_d;
+        unaligned_q <= unaligned_d;
+        wait_q      <= wait_d;
+        wr_en_q     <= wr_en_d;
       end
     end
   end
