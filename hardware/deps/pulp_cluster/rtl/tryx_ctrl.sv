@@ -53,24 +53,23 @@ module tryx_ctrl #(
       wr_en_d = 1'b0;
 
       if (periph_data_slave[i].req) begin
-        case (periph_data_slave[i].add)
-          `TRYX_CTRL_USER_ADDR,
-          `TRYX_CTRL_ADDREXT_ADDR: begin // request to TRYX control
-            // Grant request.
-            periph_data_slave[i].gnt = 1'b1;
-            if (!periph_data_slave[i].wen) begin
-              wr_en_d = 1'b1;
-            end else if (periph_data_slave[i].wen && !rd_en_q) begin
-              rd_en_d = 1'b1;
-            end
+        if (tryx_q.addrext == '0 && (
+            periph_data_slave[i].add == `TRYX_CTRL_USER_ADDR
+            || periph_data_slave[i].add == `TRYX_CTRL_ADDREXT_ADDR
+        )) begin // request to TRYX control
+          // Grant request.
+          periph_data_slave[i].gnt = 1'b1;
+          if (!periph_data_slave[i].wen) begin
+            wr_en_d = 1'b1;
+          end else if (periph_data_slave[i].wen && !rd_en_q) begin
+            rd_en_d = 1'b1;
           end
-          default: begin // request beyond TRYX control
-            // Feed request through.
-            periph_data_master[i].wen = periph_data_slave[i].wen;
-            periph_data_master[i].req = 1'b1;
-            periph_data_slave[i].gnt  = periph_data_master[i].gnt;
-          end
-        endcase
+        end else begin // request beyond TRYX control
+          // Feed request through.
+          periph_data_master[i].wen = periph_data_slave[i].wen;
+          periph_data_master[i].req = 1'b1;
+          periph_data_slave[i].gnt  = periph_data_master[i].gnt;
+        end
       end
     end
 
