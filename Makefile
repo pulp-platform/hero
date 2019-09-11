@@ -51,11 +51,6 @@ hero-llvm:
 	mkdir -p $(CURDIR)/output/hero-llvm/
 	cd $(CURDIR)/output/hero-llvm/ && $(ROOT)/toolchain/setup-hero-llvm.sh
 
-# hardware
-hw-ariane:
-	$(MAKE) -C $(ROOT)/hardware/ariane fpga
-	mv $(ROOT)/hardware/ariane/fpga/work-fpga/ariane_xilinx.mcs $(ROOT)
-
 # tools
 tools: tools-isa-sim tools-openocd
 
