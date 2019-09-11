@@ -4,8 +4,9 @@
 #
 ################################################################################
 
-LIBHERO_TARGET_VERSION = 35ba09d378809080ae20e2131fc20320a900f0aa
-LIBHERO_TARGET_SITE = $(call github,pulp-platform,libhero-target,$(LIBHERO_TARGET_VERSION))
+LIBHERO_TARGET_VERSION = 0.1
+LIBHERO_TARGET_SITE_METHOD = local
+LIBHERO_TARGET_SITE = $(BR2_EXTERNAL_HERO_PATH)/support/libhero-target
 LIBHERO_TARGET_LICENSE = Apache-2.0
 LIBHERO_TARGET_LICENSE_FILES = LICENSE
 LIBHERO_TARGET_INSTALL_STAGING = YES
