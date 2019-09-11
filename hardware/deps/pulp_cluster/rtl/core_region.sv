@@ -79,6 +79,7 @@ module core_region
   input logic 			      debug_core_halt_i,
   input logic 			      debug_core_resume_i,
 
+  output logic                  unaligned_o,
   input logic [31:0]            addrext_i,
 				      
 				      // Interface for DEMUX to TCDM INTERCONNECT ,PERIPHERAL INTERCONNECT and DMA CONTROLLER
@@ -143,6 +144,7 @@ module core_region
     .data_gnt_i            ( s_core_bus.gnt           ),
     .data_rvalid_i         ( s_core_bus.r_valid       ),
     .data_err_i            ( 1'b0                     ),
+    .data_unaligned_o      ( unaligned_o              ),
 
     .irq_i                 ( irq_req_i                ),
     .irq_id_i              ( irq_id_i                 ),
