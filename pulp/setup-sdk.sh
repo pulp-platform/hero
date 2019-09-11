@@ -23,7 +23,7 @@ for m in \
     hal \
     debug-bridge2 \
     debug-bridge; \
-
+do
     plpbuild --m $m checkout build --stdout
 done
 plpbuild --g runtime checkout --stdout
