@@ -34,6 +34,7 @@ export PULP_RISCV_GCC_TOOLCHAIN=${RISCV}
 
 export HERO_PULP_SDK_DIR=$(readlink -f "$THIS_DIR/../pulp/sdk")
 
+source ${HERO_PULP_SDK_DIR}/init.sh > /dev/null
 if [ -f ${HERO_PULP_SDK_DIR}/sourceme.sh ]; then
     export HERO_PULP_INC_DIR=${HERO_PULP_SDK_DIR}/pkg/sdk/dev/install/include
     source ${HERO_PULP_SDK_DIR}/sourceme.sh

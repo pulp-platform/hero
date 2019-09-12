@@ -17,6 +17,9 @@
 #ifndef __HERO_API_H__
 #define __HERO_API_H__
 
+#include <stdio.h>
+#include <stdint.h>
+
 #ifdef __llvm__
 #define BIGPULP_SVM     (-1)
 #define BIGPULP_MEMCPY  (0)
@@ -33,6 +36,39 @@ typedef int hero_dma_job_t;
  *
  * @{
  */
+
+// TEMP
+#if __riscv_xlen == 32
+uint32_t hero_tryread32_32(uint32_t addr) {
+    return *((uint32_t*)addr);
+}
+uint64_t hero_tryread32_64(uint32_t addr) {
+    return *((uint64_t*)addr);
+}
+uint32_t hero_tryread64_32(uint64_t addr) {
+    //printf("read 64-bit pointer 0x%llx to 32-bit, truncating...\n", addr);
+    return *((uint32_t*)addr);
+}
+uint64_t hero_tryread64_64(uint64_t addr) {
+    //printf("read 64-bit pointer 0x%llx to 64-bit, truncating...\n", addr);
+    return *((uint32_t*)addr);
+}
+void hero_trywrite32_32(uint32_t addr, uint32_t val) {
+    *((uint32_t*)addr) = val;
+}
+void hero_trywrite32_64(uint32_t addr, uint64_t val) {
+    *((uint64_t*)addr) = val;
+}
+void hero_trywrite64_32(uint64_t addr, uint32_t val) {
+    //printf("store 64-bit pointer 0x%llx to 64-bit, truncating...\n", addr);
+    *((uint32_t*)addr) = val;
+}
+void hero_trywrite64_64(uint64_t addr, uint64_t val) {
+    //printf("store 64-bit pointer 0x%llx to 64-bit, truncating...\n", addr);
+    *((uint64_t*)addr) = val;
+}
+#endif
+// TEMP END
 
 /** Used by PULP to securely read from an address in SVM and block until the read completes.
 
