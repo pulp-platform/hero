@@ -83,6 +83,11 @@ build_install_llvm:
 
 build_examples:
   stage: try_examples
+  dependencies:
+    - build_install_gcc
+    - build_install_pulp-sdk
+    - build_install_hero-sdk
+    - build_install_llvm
   script:
     - source env/urania.sh
     - cd openmp-examples/helloworld
@@ -90,6 +95,11 @@ build_examples:
 
 simulate_examples:
   stage: try_examples
+  dependencies:
+    - build_install_gcc
+    - build_install_pulp-sdk
+    - build_install_hero-sdk
+    - build_install_llvm
   script:
     - source env/urania.sh
     # BEGIN WORKAROUND (TODO: remove this)
