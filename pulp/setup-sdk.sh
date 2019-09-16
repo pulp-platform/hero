@@ -55,3 +55,6 @@ source ${THIS_DIR}/sdk/sourceme.sh
 mkdir -p ${PULP_SDK_HOME}/install/hero/${pulp_chip}
 ${RISCV}/bin/riscv32-unknown-elf-gcc -Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wundef -fdata-sections -ffunction-sections -I${PULP_SDK_INSTALL}/include/io -I${PULP_SDK_INSTALL}/include -march=rv32imcxpulpv2 -D__riscv__ -include refs/${pulp_chip}/cl_config.h -c refs/rt_conf.c -o ${PULP_SDK_HOME}/install/hero/${pulp_chip}/rt_conf.o
 cp -r refs/* ${PULP_SDK_HOME}/install/hero/
+
+# Create symlink from current config to hero-sim
+ln -sf ${PULP_SDK_HOME}/install/lib/${pulp_chip} ${PULP_SDK_HOME}/install/lib/hero-sim

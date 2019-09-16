@@ -22,11 +22,11 @@ __ACTIVE_FC = DEFINED(__ACTIVE_FC) ? __ACTIVE_FC : 0x1;
 __NB_ACTIVE_PE = DEFINED(__NB_ACTIVE_PE) ? __NB_ACTIVE_PE : 8;
 
 __rt_stack_size = DEFINED(__rt_stack_size) ? __rt_stack_size : 0x800;
-__rt_platform = DEFINED(__rt_platform) ? __rt_platform : 3;
-__rt_iodev = DEFINED(__rt_iodev) ? __rt_iodev : 0;
+__rt_platform = DEFINED(__rt_platform) ? __rt_platform : 0;
+__rt_iodev = DEFINED(__rt_iodev) ? __rt_iodev : 1;
 __rt_iodev_uart_value = DEFINED(__rt_iodev_uart_value) ? __rt_iodev_uart_value : 1;
 __rt_iodev_uart_channel = DEFINED(__rt_iodev_uart_channel) ? __rt_iodev_uart_channel : 0;
-__rt_iodev_uart_baudrate = DEFINED(__rt_iodev_uart_baudrate) ? __rt_iodev_uart_baudrate : 625000;
+__rt_iodev_uart_baudrate = DEFINED(__rt_iodev_uart_baudrate) ? __rt_iodev_uart_baudrate : 115200;
 __rt_iodev_default_value = DEFINED(__rt_iodev_default_value) ? __rt_iodev_default_value : 0;
 __rt_nb_cluster = DEFINED(__rt_nb_cluster) ? __rt_nb_cluster : 1;
 __rt_nb_pe = DEFINED(__rt_nb_pe) ? __rt_nb_pe : 8;
