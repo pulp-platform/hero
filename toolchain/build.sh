@@ -171,14 +171,11 @@ if [ ! -z "$SYSROOT" ] && grep -q "^CT_DEMULTILIB=y" .config; then
             reldir=$(dirname $file)
             mkdir -p ../../lib/$reldir
             if [ -L $file ]; then
-                linkfile="$curdir/../../lib/$file"
-                target="$(realpath --relative-to=$linkfile $path)"
+                ln -s $path $curdir/../../lib/$file
             else
                 mv $file $curdir/../../lib/$file
-                linkfile="$file"
-                target="$(realpath --relative-to=$linkfile $curdir/../../lib/$file)"
+                ln -s $curdir/../../lib/$file $file
             fi
-            ln -s "$target" "$linkfile"
         done
     done
 
