@@ -171,11 +171,16 @@ if [ ! -z "$SYSROOT" ] && grep -q "^CT_DEMULTILIB=y" .config; then
             reldir=$(dirname $file)
             mkdir -p ../../lib/$reldir
             if [ -L $file ]; then
-                ln -s $path $curdir/../../lib/$file
+                # Keep symlink where it is and link to it from `../../lib`.
+                linkfile="../../lib/$file"
+                target="../$libdir/$abidir/$file"
             else
-                mv $file $curdir/../../lib/$file
-                ln -s $curdir/../../lib/$file $file
+                # Move regular file to `../../lib` and link to that.
+                linkfile="$file"
+                target="../../lib/$file"
+                mv "$file" "$target"
             fi
+            ln -s "$target" "$linkfile"
         done
     done
 
