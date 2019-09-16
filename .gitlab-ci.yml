@@ -17,6 +17,12 @@ stages:
 
 build_install_gcc:
   stage: build_install_gcc
+  only:
+    changes:
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/ariane-linux.config
+      - toolchain/pulp.config
   script: make tc-pulp tc-ariane-linux
   artifacts:
     paths:
@@ -24,6 +30,9 @@ build_install_gcc:
 
 build_install_pulp-sdk:
   stage: build_install_pulp-sdk
+  only:
+    changes:
+      - support/pulp-sdk/**/*
   script: make pulp-sdk
   artifacts:
     paths:
@@ -34,6 +43,10 @@ build_install_pulp-sdk:
 
 build_install_hero-sdk:
   stage: build_install_hero-sdk
+  only:
+    changes:
+      - support/pulp-sdk/**/*
+      - toolchain/install-sdk.sh # TODO: also hero-support and libhero-target
   script:
     - export PULP_RISCV_GCC_TOOLCHAIN=$RISCV
     - echo $PULP_PROJECT_HOME $PULP_SDK_HOME
@@ -59,6 +72,9 @@ build_install_hero-sdk:
 
 build_install_llvm:
   stage: build_install_llvm
+  only:
+    changes:
+      - toolchain/setup-hero-llvm.sh # TODO: also llvm, clang, openmp, HerculesCompiler-public
   script: make hero-llvm
   artifacts:
     paths:
