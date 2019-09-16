@@ -37,9 +37,7 @@ build_install_pulp-sdk:
   artifacts:
     paths:
       - install
-      - support/pulp-sdk/configs
-      - support/pulp-sdk/pkg
-      - support/pulp-sdk/sourceme.sh
+      - support/pulp-sdk
 
 build_install_hero-sdk:
   stage: build_install_hero-sdk
