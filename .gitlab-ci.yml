@@ -16,7 +16,7 @@ all:
     - make pulp-sdk
     ### build_install_hero-sdk
     - export PULP_RISCV_GCC_TOOLCHAIN=$RISCV
-    - source support/pulp-sdk/sourceme.sh
+    - source pulp/sdk/sourceme.sh
     - make hero-sdk
     ### build_install_llvm
     - make hero-llvm
@@ -28,7 +28,7 @@ all:
     - cd ../..
     #- source env/urania.sh
     # BEGIN WORKAROUND (TODO: remove this)
-    - source support/pulp-sdk/init.sh
+    - source pulp/sdk/init.sh
     - git show origin/hw-orig:./patches/pulp-rt_sim_io.diff > pulp-rt_sim_io.diff
     - git show origin/hw-orig:./patches/libomptarget-pulp-rtl_no_main.diff > libomptarget-pulp-rtl_no_main.diff
     - patch -p0 -F 0 < libomptarget-pulp-rtl_no_main.diff
@@ -48,5 +48,5 @@ all:
       - install
       - libhero-target
       - local.mk
-      - support/pulp-sdk
       - openmp-examples
+      - pulp/sdk
