@@ -17,10 +17,6 @@ all:
     ### build_install_hero-sdk
     - export PULP_RISCV_GCC_TOOLCHAIN=$RISCV
     - source support/pulp-sdk/sourceme.sh
-    - git clone -b hero-v3 git@iis-git.ee.ethz.ch:kwolters/hero-support.git
-    - echo HERO_SUPPORT_OVERRIDE_SRCDIR=$(pwd)/hero-support >> local.mk
-    - git clone -b hero-v3 git@iis-git.ee.ethz.ch:kwolters/libhero-target.git
-    - echo LIBHERO_TARGET_OVERRIDE_SRCDIR=$(pwd)/libhero-target >> local.mk
     - make hero-sdk
     ### build_install_llvm
     - make hero-llvm
