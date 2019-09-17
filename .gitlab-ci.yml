@@ -8,31 +8,13 @@ before_script:
 after_script:
   - chmod -R u+w $RISCV
 
-stages:
-  - build_install_gcc
-  - build_install_pulp-sdk
-  - build_install_hero-sdk
-  - build_install_llvm
-  - try_examples
-
-build_install_gcc:
-  stage: build_install_gcc
-  script: make tc-pulp tc-ariane-linux
-  artifacts:
-    paths:
-      - install
-
-build_install_pulp-sdk:
-  stage: build_install_pulp-sdk
-  script: make pulp-sdk
-  artifacts:
-    paths:
-      - install
-      - support/pulp-sdk
-
-build_install_hero-sdk:
-  stage: build_install_hero-sdk
+all:
   script:
+    ### build_install_gcc
+    - make tc-pulp tc-ariane-linux
+    ### build_install_pulp-sdk
+    - make pulp-sdk
+    ### build_install_hero-sdk
     - export PULP_RISCV_GCC_TOOLCHAIN=$RISCV
     - source support/pulp-sdk/sourceme.sh
     - git clone -b hero-v3 git@iis-git.ee.ethz.ch:kwolters/hero-support.git
@@ -40,59 +22,35 @@ build_install_hero-sdk:
     - git clone -b hero-v3 git@iis-git.ee.ethz.ch:kwolters/libhero-target.git
     - echo LIBHERO_TARGET_OVERRIDE_SRCDIR=$(pwd)/libhero-target >> local.mk
     - make hero-sdk
-  artifacts:
-    paths:
-      - hero-support
-      - libhero-target
-      - local.mk
-      - install
-      - support/pulp-sdk/configs
-      - support/pulp-sdk/pkg
-      - support/pulp-sdk/sourceme.sh
-
-build_install_llvm:
-  stage: build_install_llvm
-  script: make hero-llvm
-  artifacts:
-    paths:
-      - install
-      - support/pulp-sdk/configs
-      - support/pulp-sdk/pkg
-      - support/pulp-sdk/sourceme.sh
-
-build_examples:
-  stage: try_examples
-  dependencies:
-    - build_install_gcc
-    - build_install_pulp-sdk
-    - build_install_hero-sdk
-    - build_install_llvm
-  script:
+    ### build_install_llvm
+    - make hero-llvm
+    ### build_examples
     - source env/urania.sh
     - cd openmp-examples/helloworld
     - make all
-
-simulate_examples:
-  stage: try_examples
-  dependencies:
-    - build_install_gcc
-    - build_install_pulp-sdk
-    - build_install_hero-sdk
-    - build_install_llvm
-  script:
-    - source env/urania.sh
+    ### simulate_examples
+    - cd ../..
+    #- source env/urania.sh
     # BEGIN WORKAROUND (TODO: remove this)
     - source support/pulp-sdk/init.sh
     - git show origin/hw-orig:./patches/pulp-rt_sim_io.diff > pulp-rt_sim_io.diff
     - git show origin/hw-orig:./patches/libomptarget-pulp-rtl_no_main.diff > libomptarget-pulp-rtl_no_main.diff
     - patch -p0 -F 0 < libomptarget-pulp-rtl_no_main.diff
-    - plpbuild --m libomptarget-pulp-rtl clean build
+    - plpbuild --m libomptarget-pulp-rtl clean build --stdout
     - patch -p0 -F 0 < pulp-rt_sim_io.diff
-    - plpbuild --m pulp-rt clean build
+    - plpbuild --m pulp-rt clean build --stdout
     # END WORKAROUND
-    - make -C openmp-examples/helloworld only=pulp all
+    - make -C openmp-examples/helloworld only=pulp clean all
     - cd hardware
     - test/gen_slm_files.sh helloworld
     - cd vsim
     - ./compile.sh
     - ./start_sim.sh
+  artifacts:
+    paths:
+      - hero-support
+      - install
+      - libhero-target
+      - local.mk
+      - support/pulp-sdk
+      - openmp-examples
