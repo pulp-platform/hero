@@ -77,6 +77,9 @@ fi
 if ! grep -q "^CT_LOCAL_TARBALLS_DIR=" .config; then
     echo "CT_LOCAL_TARBALLS_DIR=\"$(pwd)/src"\" >> .config
 fi
+if [ -n "$CI" ]; then
+    echo "CT_LOG_PROGRESS_BAR=n" >> .config
+fi
 $RISCV/bin/ct-ng upgradeconfig > /dev/null
 
 # deduce tuple, sysroot
@@ -168,11 +171,16 @@ if [ ! -z "$SYSROOT" ] && grep -q "^CT_DEMULTILIB=y" .config; then
             reldir=$(dirname $file)
             mkdir -p ../../lib/$reldir
             if [ -L $file ]; then
-                ln -s $path $curdir/../../lib/$file
+                # Keep symlink where it is and link to it from `../../lib`.
+                linkfile="../../lib/$file"
+                target="../$libdir/$abidir/$file"
             else
-                mv $file $curdir/../../lib/$file
-                ln -s $curdir/../../lib/$file $file
+                # Move regular file to `../../lib` and link to that.
+                linkfile="$file"
+                target="../../lib/$file"
+                mv "$file" "$target"
             fi
+            ln -s "$target" "$linkfile"
         done
     done
 
@@ -211,12 +219,14 @@ fi
 if [ ! -z "$2" ] || [ ! -z "$3" ]; then
     chmod -R u+w $RISCV/bin
     vendor=$(echo "$TUPLE" | sed -E 's/^\w*-(\w*)-.*/\1/')
-    for tf in $RISCV/bin/$TUPLE*; do
+    cd "$RISCV/bin"
+    for tf in $TUPLE*; do
         alias=$(echo "$tf" | sed -e "s/$vendor/$2/")
-        ln -sf $(readlink -f $tf) $alias
+        ln -sf $tf $alias
         if [ ! -z "$3" ]; then
-            ln -sf $(readlink -f $tf) $alias.$3
+            ln -sf $tf $alias.$3
         fi
     done
+    cd -
     chmod -R u-w $RISCV/bin
 fi
