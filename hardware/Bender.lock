@@ -52,6 +52,13 @@ packages:
     dependencies:
       - axi
       - common_cells
+  axi_rab:
+    revision: 1a74fac92af1f3a2dfd851fb5f409bf1838f6367
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/axi_rab.git"
+    dependencies:
+      - axi
   axi_riscv_atomics:
     revision: e7c8cc93b2f6141366bb843995665c262784966c
     version: ~
