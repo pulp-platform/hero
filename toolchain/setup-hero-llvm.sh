@@ -1,4 +1,5 @@
 ### SETUP A HERO LLVM RTE ###
+THIS_DIR=$(dirname "$(readlink -f "$0")")
 
 # config (FIXME: make publicly accessible)
 GIT_REPO=git@iis-git.ethz.ch:kwolters
@@ -11,20 +12,10 @@ if [ -z "$RISCV" ]; then
 fi
 
 # clone required repositories and init submodules
-git clone $GIT_REPO/llvm.git -b $GIT_BRANCH
-git clone $GIT_REPO/clang.git -b $GIT_BRANCH
-git clone $GIT_REPO/openmp.git -b $GIT_BRANCH
-cd openmp
-git submodule update --init
-cd ..
 git clone $GIT_REPO/HerculesCompiler-public.git -b $GIT_BRANCH
 
 # stop on all errors
 set -e
-
-# include clang and openmp into llvm build
-ln -sf ../../clang llvm/tools/clang
-ln -sf ../../openmp llvm/projects/openmp
 
 # prepare
 mkdir -p $RISCV
@@ -48,7 +39,8 @@ $RISCV/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
       -DLLVM_DEFAULT_TARGET_TRIPLE=riscv64-hero-linux-gnu \
       -DLLVM_TARGETS_TO_BUILD="" -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="RISCV" \
       -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON \
-      ../llvm
+      -DLLVM_ENABLE_PROJECTS="clang;openmp" \
+      $THIS_DIR/llvm
 cmake --build . --target install
 cd ..
 
@@ -65,7 +57,6 @@ cd ..
 # install wrapper script
 # FIXME: this wrapper script should be transparantly included in the HC compiler
 echo "Installing hc-omp-pass wrapper script"
-THIS_DIR=$(dirname "$(readlink -f "$0")")
 cp $THIS_DIR/hc-omp-pass $RISCV/bin
 
 # finalize install

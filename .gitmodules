@@ -11,3 +11,15 @@
 	path = pulp/sdk
 	url = git@iis-git.ee.ethz.ch:kwolters/pulp-sdk.git
     ignore = dirty
+[submodule "toolchain/clang"]
+	path = toolchain/clang
+	url = git@iis-git.ee.ethz.ch:kwolters/clang.git
+	branch = hero-v3
+[submodule "toolchain/llvm"]
+	path = toolchain/llvm
+	url = git@iis-git.ee.ethz.ch:kwolters/llvm.git
+	branch = hero-v3
+[submodule "toolchain/openmp"]
+	path = toolchain/openmp
+	url = git@iis-git.ee.ethz.ch:kwolters/openmp.git
+	branch = hero-v3

@@ -14,8 +14,8 @@ ARCH_DEV = openmp-$(TARGET_DEV)
 # 1) without suffix, they apply to heterogeneous compilation;
 # 3) with _PULP suffix, they apply only to the PULP part of compilation;
 # 4) with _COMMON suffix, they apply to both PULP and host compilation.
-CFLAGS_COMMON += -fopenmp=libomp -O0 -g
-CFLAGS_PULP += $(CFLAGS_COMMON) -target riscv32-hero-unknown-elf
+CFLAGS_COMMON += -fopenmp=libomp -O1
+CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV)
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
 LDFLAGS_COMMON += -lhero-target
 LDFLAGS_PULP += $(LDFLAGS_COMMON)
@@ -39,7 +39,8 @@ all : $(EXE) $(EXE).dis slm
 
 $(EXE) : $(SRC)
 	$(CC) -c -emit-llvm -S $(CFLAGS_PULP) $(INCPATHS) $(SRC)
-	$(CC) $(CFLAGS_PULP) $(LDFLAGS_PULP) -o $@ $(SRC:.c=.ll)
+	hc-omp-pass $(SRC:.c=.ll)  OmpKernelWrapper "HERCULES-omp-kernel-wrapper"
+	$(CC) $(CFLAGS_PULP) $(LDFLAGS_PULP) -o $@ $(SRC:.c=.OMP.ll)
 
 slm : $(EXE)_l1.slm $(EXE)_l2.slm
 

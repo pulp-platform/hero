@@ -8,6 +8,9 @@ MEMORY
   L1_aliased         : ORIGIN = 0x1b000004, LENGTH = 0x0003fffc
 }
 
+/*
+ * Set default linker configuration
+ */
 __ZERO = DEFINED(__ZERO) ? __ZERO  : 0;
 __USE_UART = DEFINED(__USE_UART) ? __USE_UART : 0;
 __RT_DEBUG_CONFIG = DEFINED(__RT_DEBUG_CONFIG) ? __RT_DEBUG_CONFIG   : (0 << 8) | 0;
@@ -16,22 +19,25 @@ __L2 = DEFINED(__L2) ? __L2   : 0x80000;
 __L1Cl = DEFINED(__L1Cl) ? __L1Cl : 0x10000;
 __FETCH_ALL = DEFINED(__FETCH_ALL) ? __FETCH_ALL : 0x0;
 __ACTIVE_FC = DEFINED(__ACTIVE_FC) ? __ACTIVE_FC : 0x1;
-__rt_stack_size = DEFINED(__rt_stack_size) ? __rt_stack_size : 0x800;
 __NB_ACTIVE_PE = DEFINED(__NB_ACTIVE_PE) ? __NB_ACTIVE_PE : 8;
-__rt_platform = DEFINED(__rt_platform) ? __rt_platform : 3;
-__rt_iodev = DEFINED(__rt_iodev) ? __rt_iodev : 0;
+
+__rt_stack_size = DEFINED(__rt_stack_size) ? __rt_stack_size : 0x800;
+__rt_platform = DEFINED(__rt_platform) ? __rt_platform : 0;
+__rt_iodev = DEFINED(__rt_iodev) ? __rt_iodev : 1;
 __rt_iodev_uart_value = DEFINED(__rt_iodev_uart_value) ? __rt_iodev_uart_value : 1;
 __rt_iodev_uart_channel = DEFINED(__rt_iodev_uart_channel) ? __rt_iodev_uart_channel : 0;
-__rt_iodev_uart_baudrate = DEFINED(__rt_iodev_uart_baudrate) ? __rt_iodev_uart_baudrate : 625000;
+__rt_iodev_uart_baudrate = DEFINED(__rt_iodev_uart_baudrate) ? __rt_iodev_uart_baudrate : 115200;
 __rt_iodev_default_value = DEFINED(__rt_iodev_default_value) ? __rt_iodev_default_value : 0;
 __rt_nb_cluster = DEFINED(__rt_nb_cluster) ? __rt_nb_cluster : 1;
-__rt_nb_pe = DEFINED(__rt_nb_pe) ? __rt_nb_pe : 8;
+__rt_nb_pe = DEFINED(__NB_ACTIVE_PE) ? __NB_ACTIVE_PE : 8;
 __rt_cl_master_stack_size = DEFINED(__rt_cl_master_stack_size) ? __rt_cl_master_stack_size : 0x400;
 __rt_cl_slave_stack_size = DEFINED(__rt_cl_slave_stack_size) ? __rt_cl_slave_stack_size : 0x400;
 __rt_config = DEFINED(__rt_config) ? __rt_config : 0x1;
 __rt_debug_init_config = DEFINED(__rt_debug_init_config) ? __rt_debug_init_config : 0x3;
 __rt_debug_init_config_trace = DEFINED(__rt_debug_init_config_trace) ? __rt_debug_init_config_trace : 0x0;
+__rt_sim = DEFINED(__rt_sim) ? __rt_sim : 0x0;
 
+__omp_64bit = DEFINED(__omp_64bit) ? __omp_64bit : 0x0;
 
 /*
  * This linker script try to put FC data in L2 private bank0 and FC code 
