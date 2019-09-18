@@ -60,8 +60,6 @@ A complete Linux environment with kernel and filesystem is built using Buildroot
 
 The environment is typically created from upstream repositories, but it is possible to overwrite the code source to be used. This can be done by creating and modifying a `local.mk` file in the root folder of the repository. Package sources can then be overwritten by adding a line with `<PACKAGE>_OVERRIDE_SRCDIR=<location>`. 
 
-**Currently two packages are required to have a overwritten source directory as the upstream versions are outdated. To achieve this clone `git@iis-git.ee.ethz.ch:kwolters/hero-support.git` and `git@iis-git.ee.ethz.ch:kwolters/libhero-target.git`, and add a `HERO_SUPPORT_OVERRIDE_SRCDIR` and `LIBHERO_TARGET_OVERRIDE_SRCDIR` pointing to the appropriate location of the sources.**
-
 #### Ariane
 A ready-to-use image for standalone Ariane can be created first with
 ```

@@ -7,10 +7,7 @@
 [submodule "tools/riscv-isa-sim"]
 	path = tools/riscv-isa-sim
 	url = https://github.com/riscv/riscv-isa-sim.git
-[submodule "hardware/ariane"]
-	path = hardware/ariane
-	url = https://github.com/pulp-platform/ariane
-[submodule "support/pulp-sdk"]
-	path = support/pulp-sdk
+[submodule "pulp/sdk"]
+	path = pulp/sdk
 	url = git@iis-git.ee.ethz.ch:kwolters/pulp-sdk.git
     ignore = dirty

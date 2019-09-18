@@ -41,11 +41,7 @@ tc-pulp:
 
 # sdk
 pulp-sdk:
-	(export PULP_RISCV_GCC_TOOLCHAIN=$(RISCV); \
-		cd support/pulp-sdk; \
-		source configs/hero-urania.sh; \
-		scripts/hero/setup.sh; \
-	)
+	$(ROOT)/pulp/setup-sdk.sh hero-urania
 
 hero-sdk: br-hero
 	cd $(CURDIR)/output/br-hero && $(ROOT)/toolchain/install-sdk.sh
@@ -54,11 +50,6 @@ hero-sdk: br-hero
 hero-llvm:
 	mkdir -p $(CURDIR)/output/hero-llvm/
 	cd $(CURDIR)/output/hero-llvm/ && $(ROOT)/toolchain/setup-hero-llvm.sh
-
-# hardware
-hw-ariane:
-	$(MAKE) -C $(ROOT)/hardware/ariane fpga
-	mv $(ROOT)/hardware/ariane/fpga/work-fpga/ariane_xilinx.mcs $(ROOT)
 
 # tools
 tools: tools-isa-sim tools-openocd

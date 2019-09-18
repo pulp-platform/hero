@@ -1,21 +1,22 @@
-comment "hero-support needs a Linux kernel to be built"
+comment "pulp-driver needs a Linux kernel to be built"
 	depends on !BR2_LINUX_KERNEL
 
-config BR2_PACKAGE_HERO_SUPPORT
-	bool "hero-support"
+config BR2_PACKAGE_PULP_DRIVER
+bool "pulp-driver"
 	depends on BR2_LINUX_KERNEL
+  select libpulp
 	help
 		HERO support infrastructure with PULP linux kernel driver,
 		user-space libraries and support binaries.
 
 
-if BR2_PACKAGE_HERO_SUPPORT
+if BR2_PACKAGE_PULP_DRIVER
 
-config BR2_PACKAGE_HERO_SUPPORT_DEBUG_LEVEL
+config BR2_PACKAGE_PULP_DRIVER_DEBUG_LEVEL
   int "Debug level"
   default 0
   help
-    Debug level for HERO support drivers and libraries. Higher is more verbose.
+    Debug level for PULP driver. Higher is more verbose.
     If more than zero the binaries are also compiled with debugging symbols.
 
 endif
