@@ -31,6 +31,7 @@ all:
     - source pulp/sdk/init.sh
     - git show origin/hw-orig:./patches/pulp-rt_sim_io.diff > pulp-rt_sim_io.diff
     - git show origin/hw-orig:./patches/libomptarget-pulp-rtl_no_main.diff > libomptarget-pulp-rtl_no_main.diff
+    - perl -p -i -e 's|support/pulp-sdk|pulp/sdk|g' pulp-rt_sim_io.diff libomptarget-pulp-rtl_no_main.diff
     - patch -p0 -F 0 < libomptarget-pulp-rtl_no_main.diff
     - plpbuild --m libomptarget-pulp-rtl clean build --stdout
     - patch -p0 -F 0 < pulp-rt_sim_io.diff
