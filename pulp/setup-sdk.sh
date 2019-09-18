@@ -57,4 +57,6 @@ ${RISCV}/bin/riscv32-unknown-elf-gcc -Wextra -Wall -Wno-unused-parameter -Wno-un
 cp -r refs/* ${PULP_SDK_HOME}/install/hero/
 
 # Create symlink from current config to hero-sim
-ln -sf ${PULP_SDK_HOME}/install/lib/${pulp_chip} ${PULP_SDK_HOME}/install/lib/hero-sim
+# FIXME: remove the special logic for hero-sim after unifying this further
+ln -sf ${pulp_chip} ${PULP_SDK_HOME}/install/lib/hero-sim
+ln -sf ../${pulp_chip}/rt_conf.o ${PULP_SDK_HOME}/install/hero/hero-sim/
