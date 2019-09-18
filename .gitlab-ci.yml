@@ -33,8 +33,6 @@ all:
     - ./start_sim.sh
   artifacts:
     paths:
-      - hero-support
       - install
-      - libhero-target
       - openmp-examples
       - pulp/sdk
