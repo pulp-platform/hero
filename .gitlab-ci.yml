@@ -15,8 +15,6 @@ all:
     ### build_install_pulp-sdk
     - make pulp-sdk
     ### build_install_hero-sdk
-    - export PULP_RISCV_GCC_TOOLCHAIN=$RISCV
-    - source pulp/sdk/sourceme.sh
     - make hero-sdk
     ### build_install_llvm
     - make hero-llvm
