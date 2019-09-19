@@ -104,7 +104,7 @@ module soc_bus #(
 
   axi_node_wrap_with_slices #(
     .NB_MASTER          (N_MASTERS),
-    .NB_SLAVE           (soc_bus_pkg::n_slaves(N_CLUSTERS)),
+    .NB_SLAVE           (N_SLAVES),
     .NB_REGION          (N_REGIONS),
     .AXI_ADDR_WIDTH     (AXI_AW),
     .AXI_DATA_WIDTH     (AXI_DW),
