@@ -50,6 +50,8 @@
  * Pirmin Vogel <vogelpi@iis.ee.ethz.ch>
  */
 
+`include "axi/typedef.svh"
+
 module axi_rab_top
 
   // Parameters {{{
@@ -623,7 +625,14 @@ module axi_rab_top
 
   // }}}
 
-  // Local parameters {{{
+  // Local parameters and types {{{
+  `AXI_TYPEDEF_AW_CHAN_T( axi_aw_mst_t, axi_addr_mst_t, axi_id_t, axi_user_t);
+  `AXI_TYPEDEF_AW_CHAN_T( axi_aw_slv_t, axi_addr_slv_t, axi_id_t, axi_user_t);
+  `AXI_TYPEDEF_W_CHAN_T(  axi_w_t,      axi_data_t, axi_strb_t, axi_user_t);
+  `AXI_TYPEDEF_B_CHAN_T(  axi_b_t,      axi_id_t, axi_user_t);
+  `AXI_TYPEDEF_AR_CHAN_T( axi_ar_mst_t, axi_addr_mst_t, axi_id_t, axi_user_t);
+  `AXI_TYPEDEF_AR_CHAN_T( axi_ar_slv_t, axi_addr_slv_t, axi_id_t, axi_user_t);
+  `AXI_TYPEDEF_R_CHAN_T(  axi_r_t,      axi_data_t, axi_id_t, axi_user_t);
 
   // L2TLB parameters
   localparam integer HUM_BUFFER_DEPTH = (N_L2_SET_ENTRIES/2/N_L2_PAR_VA_RAMS)+13;
@@ -668,42 +677,46 @@ module axi_rab_top
    *
    */
 
-  axi4_aw_buffer
-    #(
-      .AXI_ID_WIDTH   ( AXI_ID_WIDTH   ),
-      .AXI_USER_WIDTH ( AXI_USER_WIDTH )
-      )
-    u_aw_buffer
-    (
-      .axi4_aclk       ( Clk_CI             ),
-      .axi4_arstn      ( Rst_RBI            ),
-      .s_axi4_awid     ( s_axi4_awid[i]     ),
-      .s_axi4_awaddr   ( s_axi4_awaddr[i]   ),
-      .s_axi4_awvalid  ( s_axi4_awvalid[i]  ),
-      .s_axi4_awready  ( s_axi4_awready[i]  ),
-      .s_axi4_awlen    ( s_axi4_awlen[i]    ),
-      .s_axi4_awsize   ( s_axi4_awsize[i]   ),
-      .s_axi4_awburst  ( s_axi4_awburst[i]  ),
-      .s_axi4_awlock   ( s_axi4_awlock[i]   ),
-      .s_axi4_awprot   ( s_axi4_awprot[i]   ),
-      .s_axi4_awcache  ( s_axi4_awcache[i]  ),
-      .s_axi4_awregion ( s_axi4_awregion[i] ),
-      .s_axi4_awqos    ( s_axi4_awqos[i]    ),
-      .s_axi4_awuser   ( s_axi4_awuser[i]   ),
-      .m_axi4_awid     ( int_awid[i]        ),
-      .m_axi4_awaddr   ( int_awaddr[i]      ),
-      .m_axi4_awvalid  ( int_awvalid[i]     ),
-      .m_axi4_awready  ( int_awready[i]     ),
-      .m_axi4_awlen    ( int_awlen[i]       ),
-      .m_axi4_awsize   ( int_awsize[i]      ),
-      .m_axi4_awburst  ( int_awburst[i]     ),
-      .m_axi4_awlock   ( int_awlock[i]      ),
-      .m_axi4_awprot   ( int_awprot[i]      ),
-      .m_axi4_awcache  ( int_awcache[i]     ),
-      .m_axi4_awregion ( int_awregion[i]    ),
-      .m_axi4_awqos    ( int_awqos[i]       ),
-      .m_axi4_awuser   ( int_awuser[i]      )
-    );
+  axi_aw_slv_t aw_buf_oup;
+  stream_fifo #(
+    .FALL_THROUGH (1'b0),
+    .DEPTH        (4),
+    .T            (axi_aw_slv_t)
+  ) i_aw_buf (
+    .clk_i      (Clk_CI),
+    .rst_ni     (Rst_RBI),
+    .flush_i    (1'b0),
+    .testmode_i (1'b0),
+    .data_i     ('{ id:       s_axi4_awid[i],
+                    addr:     s_axi4_awaddr[i],
+                    len:      s_axi4_awlen[i],
+                    size:     s_axi4_awsize[i],
+                    burst:    s_axi4_awburst[i],
+                    lock:     s_axi4_awlock[i],
+                    prot:     s_axi4_awprot[i],
+                    cache:    s_axi4_awcache[i],
+                    region:   s_axi4_awregion[i],
+                    qos:      s_axi4_awqos[i],
+                    user:     s_axi4_awuser[i],
+                    default:  '0}),
+    .valid_i    (s_axi4_awvalid[i]),
+    .ready_o    (s_axi4_awready[i]),
+    .data_o     (aw_buf_oup),
+    .valid_o    (int_awvalid[i]),
+    .ready_i    (int_awready[i]),
+    .usage_o    (/* unused */)
+  );
+  assign int_awid[i]      = aw_buf_oup.id;
+  assign int_awaddr[i]    = aw_buf_oup.addr;
+  assign int_awlen[i]     = aw_buf_oup.len;
+  assign int_awsize[i]    = aw_buf_oup.size;
+  assign int_awburst[i]   = aw_buf_oup.burst;
+  assign int_awlock[i]    = aw_buf_oup.lock;
+  assign int_awprot[i]    = aw_buf_oup.prot;
+  assign int_awcache[i]   = aw_buf_oup.cache;
+  assign int_awregion[i]  = aw_buf_oup.region;
+  assign int_awqos[i]     = aw_buf_oup.qos;
+  assign int_awuser[i]    = aw_buf_oup.user;
 
   axi4_aw_sender
     #(
@@ -987,47 +1000,55 @@ module axi_rab_top
    *  ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝   ╚═╝   ╚══════╝    ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝
    *
    */
-  axi4_b_buffer
-    #(
-        .AXI_ID_WIDTH   ( AXI_ID_WIDTH   ),
-        .AXI_USER_WIDTH ( AXI_USER_WIDTH )
-      )
-    u_b_buffer_m0
-    (
-      .axi4_aclk     ( Clk_CI            ),
-      .axi4_arstn    ( Rst_RBI           ),
-      .s_axi4_bid    ( int_m0_bid[i]     ),
-      .s_axi4_bresp  ( int_m0_bresp[i]   ),
-      .s_axi4_bvalid ( int_m0_bvalid[i]  ),
-      .s_axi4_buser  ( int_m0_buser[i]   ),
-      .s_axi4_bready ( int_m0_bready[i]  ),
-      .m_axi4_bid    ( m0_axi4_bid[i]    ),
-      .m_axi4_bresp  ( m0_axi4_bresp[i]  ),
-      .m_axi4_bvalid ( m0_axi4_bvalid[i] ),
-      .m_axi4_buser  ( m0_axi4_buser[i]  ),
-      .m_axi4_bready ( m0_axi4_bready[i] )
-    );
+  axi_b_t b_buf_m0_oup;
+  stream_fifo #(
+    .FALL_THROUGH (1'b0),
+    .DEPTH        (4),
+    .T            (axi_b_t)
+  ) i_b_buf_m0 (
+    .clk_i      (Clk_CI),
+    .rst_ni     (Rst_RBI),
+    .flush_i    (1'b0),
+    .testmode_i (1'b0),
+    .data_i     ('{ id:       m0_axi4_bid[i],
+                    resp:     m0_axi4_bresp[i],
+                    user:     m0_axi4_buser[i],
+                    default:  '0}),
+    .valid_i    (m0_axi4_bvalid[i]),
+    .ready_o    (m0_axi4_bready[i]),
+    .data_o     (b_buf_m0_oup),
+    .valid_o    (int_m0_bvalid[i]),
+    .ready_i    (int_m0_bready[i]),
+    .usage_o    (/* unused */)
+  );
+  assign int_m0_bid[i]   = b_buf_m0_oup.id;
+  assign int_m0_bresp[i] = b_buf_m0_oup.resp;
+  assign int_m0_buser[i] = b_buf_m0_oup.user;
 
-  axi4_b_buffer
-    #(
-        .AXI_ID_WIDTH   ( AXI_ID_WIDTH   ),
-        .AXI_USER_WIDTH ( AXI_USER_WIDTH )
-      )
-    u_b_buffer_m1
-    (
-      .axi4_aclk      ( Clk_CI            ),
-      .axi4_arstn     ( Rst_RBI           ),
-      .s_axi4_bid     ( int_m1_bid[i]     ),
-      .s_axi4_bresp   ( int_m1_bresp[i]   ),
-      .s_axi4_bvalid  ( int_m1_bvalid[i]  ),
-      .s_axi4_buser   ( int_m1_buser[i]   ),
-      .s_axi4_bready  ( int_m1_bready[i]  ),
-      .m_axi4_bid     ( m1_axi4_bid[i]    ),
-      .m_axi4_bresp   ( m1_axi4_bresp[i]  ),
-      .m_axi4_bvalid  ( m1_axi4_bvalid[i] ),
-      .m_axi4_buser   ( m1_axi4_buser[i]  ),
-      .m_axi4_bready  ( m1_axi4_bready[i] )
-    );
+  axi_b_t b_buf_m1_oup;
+  stream_fifo #(
+    .FALL_THROUGH (1'b0),
+    .DEPTH        (4),
+    .T            (axi_b_t)
+  ) i_b_buf_m1 (
+    .clk_i      (Clk_CI),
+    .rst_ni     (Rst_RBI),
+    .flush_i    (1'b0),
+    .testmode_i (1'b0),
+    .data_i     ('{ id:       m1_axi4_bid[i],
+                    resp:     m1_axi4_bresp[i],
+                    user:     m1_axi4_buser[i],
+                    default:  '0}),
+    .valid_i    (m1_axi4_bvalid[i]),
+    .ready_o    (m1_axi4_bready[i]),
+    .data_o     (b_buf_m1_oup),
+    .valid_o    (int_m1_bvalid[i]),
+    .ready_i    (int_m1_bready[i]),
+    .usage_o    (/* unused */)
+  );
+  assign int_m1_bid[i]   = b_buf_m1_oup.id;
+  assign int_m1_bresp[i] = b_buf_m1_oup.resp;
+  assign int_m1_buser[i] = b_buf_m1_oup.user;
 
   axi4_b_sender
     #(
@@ -1094,38 +1115,42 @@ module axi_rab_top
    * ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝     ╚═╝  ╚═╝╚═════╝ ╚═════╝ ╚═╝  ╚═╝
    *
    */
-  axi4_ar_buffer
-    #(
-      .AXI_ID_WIDTH   ( AXI_ID_WIDTH   ),
-      .AXI_USER_WIDTH ( AXI_USER_WIDTH )
-      )
-    u_ar_buffer
-    (
-      .axi4_aclk      ( Clk_CI            ),
-      .axi4_arstn     ( Rst_RBI           ),
-      .s_axi4_arid    ( s_axi4_arid[i]    ),
-      .s_axi4_araddr  ( s_axi4_araddr[i]  ),
-      .s_axi4_arvalid ( s_axi4_arvalid[i] ),
-      .s_axi4_arready ( s_axi4_arready[i] ),
-      .s_axi4_arlen   ( s_axi4_arlen[i]   ),
-      .s_axi4_arsize  ( s_axi4_arsize[i]  ),
-      .s_axi4_arburst ( s_axi4_arburst[i] ),
-      .s_axi4_arlock  ( s_axi4_arlock[i]  ),
-      .s_axi4_arprot  ( s_axi4_arprot[i]  ),
-      .s_axi4_arcache ( s_axi4_arcache[i] ),
-      .s_axi4_aruser  ( s_axi4_aruser[i]  ),
-      .m_axi4_arid    ( int_arid[i]       ),
-      .m_axi4_araddr  ( int_araddr[i]     ),
-      .m_axi4_arvalid ( int_arvalid[i]    ),
-      .m_axi4_arready ( int_arready[i]    ),
-      .m_axi4_arlen   ( int_arlen[i]      ),
-      .m_axi4_arsize  ( int_arsize[i]     ),
-      .m_axi4_arburst ( int_arburst[i]    ),
-      .m_axi4_arlock  ( int_arlock[i]     ),
-      .m_axi4_arprot  ( int_arprot[i]     ),
-      .m_axi4_arcache ( int_arcache[i]    ),
-      .m_axi4_aruser  ( int_aruser[i]     )
-    );
+  axi_ar_slv_t ar_buf_oup;
+  stream_fifo #(
+    .FALL_THROUGH (1'b0),
+    .DEPTH        (4),
+    .T            (axi_ar_slv_t)
+  ) i_ar_buf (
+    .clk_i      (Clk_CI),
+    .rst_ni     (Rst_RBI),
+    .flush_i    (1'b0),
+    .testmode_i (1'b0),
+    .data_i     ('{ id:       s_axi4_arid[i],
+                    addr:     s_axi4_araddr[i],
+                    len:      s_axi4_arlen[i],
+                    size:     s_axi4_arsize[i],
+                    burst:    s_axi4_arburst[i],
+                    lock:     s_axi4_arlock[i],
+                    prot:     s_axi4_arprot[i],
+                    cache:    s_axi4_arcache[i],
+                    user:     s_axi4_aruser[i],
+                    default:  '0}),
+    .valid_i    (s_axi4_arvalid[i]),
+    .ready_o    (s_axi4_arready[i]),
+    .data_o     (ar_buf_oup),
+    .valid_o    (int_arvalid[i]),
+    .ready_i    (int_arready[i]),
+    .usage_o    (/* unused */)
+  );
+  assign int_arid[i]    = ar_buf_oup.id;
+  assign int_araddr[i]  = ar_buf_oup.addr;
+  assign int_arlen[i]   = ar_buf_oup.len;
+  assign int_arsize[i]  = ar_buf_oup.size;
+  assign int_arburst[i] = ar_buf_oup.burst;
+  assign int_arlock[i]  = ar_buf_oup.lock;
+  assign int_arprot[i]  = ar_buf_oup.prot;
+  assign int_arcache[i] = ar_buf_oup.cache;
+  assign int_aruser[i]  = ar_buf_oup.user;
 
   axi4_ar_sender
     #(
@@ -1263,57 +1288,63 @@ module axi_rab_top
    * ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝
    *
    */
-  axi4_r_buffer
-    #(
-      .AXI_DATA_WIDTH ( AXI_DATA_WIDTH ),
-      .AXI_ID_WIDTH   ( AXI_ID_WIDTH   ),
-      .AXI_USER_WIDTH ( AXI_USER_WIDTH )
-      )
-    u_r_buffer_m0
-    (
-      .axi4_aclk     ( Clk_CI            ),
-      .axi4_arstn    ( Rst_RBI           ),
-      .s_axi4_rid    ( int_m0_rid[i]     ),
-      .s_axi4_rresp  ( int_m0_rresp[i]   ),
-      .s_axi4_rdata  ( int_m0_rdata[i]   ),
-      .s_axi4_rlast  ( int_m0_rlast[i]   ),
-      .s_axi4_rvalid ( int_m0_rvalid[i]  ),
-      .s_axi4_ruser  ( int_m0_ruser[i]   ),
-      .s_axi4_rready ( int_m0_rready[i]  ),
-      .m_axi4_rid    ( m0_axi4_rid[i]    ),
-      .m_axi4_rresp  ( m0_axi4_rresp[i]  ),
-      .m_axi4_rdata  ( m0_axi4_rdata[i]  ),
-      .m_axi4_rlast  ( m0_axi4_rlast[i]  ),
-      .m_axi4_rvalid ( m0_axi4_rvalid[i] ),
-      .m_axi4_ruser  ( m0_axi4_ruser[i]  ),
-      .m_axi4_rready ( m0_axi4_rready[i] )
-    );
+  axi_r_t r_buf_m0_oup;
+  stream_fifo #(
+    .FALL_THROUGH (1'b0),
+    .DEPTH        (4),
+    .T            (axi_r_t)
+  ) i_r_buf_m0 (
+    .clk_i      (Clk_CI),
+    .rst_ni     (Rst_RBI),
+    .flush_i    (1'b0),
+    .testmode_i (1'b0),
+    .data_i     ('{ id:       m0_axi4_rid[i],
+                    resp:     m0_axi4_rresp[i],
+                    data:     m0_axi4_rdata[i],
+                    last:     m0_axi4_rlast[i],
+                    user:     m0_axi4_ruser[i],
+                    default:  '0}),
+    .valid_i    (m0_axi4_rvalid[i]),
+    .ready_o    (m0_axi4_rready[i]),
+    .data_o     (r_buf_m0_oup),
+    .valid_o    (int_m0_rvalid[i]),
+    .ready_i    (int_m0_rready[i]),
+    .usage_o    (/* unused */)
+  );
+  assign int_m0_rid[i]   = r_buf_m0_oup.id;
+  assign int_m0_rresp[i] = r_buf_m0_oup.resp;
+  assign int_m0_rdata[i] = r_buf_m0_oup.data;
+  assign int_m0_rlast[i] = r_buf_m0_oup.last;
+  assign int_m0_ruser[i] = r_buf_m0_oup.user;
 
-  axi4_r_buffer
-    #(
-      .AXI_DATA_WIDTH ( AXI_DATA_WIDTH ),
-      .AXI_ID_WIDTH   ( AXI_ID_WIDTH   ),
-      .AXI_USER_WIDTH ( AXI_USER_WIDTH )
-      )
-    u_r_buffer_m1
-    (
-      .axi4_aclk     ( Clk_CI            ),
-      .axi4_arstn    ( Rst_RBI           ),
-      .s_axi4_rid    ( int_m1_rid[i]     ),
-      .s_axi4_rresp  ( int_m1_rresp[i]   ),
-      .s_axi4_rdata  ( int_m1_rdata[i]   ),
-      .s_axi4_rlast  ( int_m1_rlast[i]   ),
-      .s_axi4_rvalid ( int_m1_rvalid[i]  ),
-      .s_axi4_ruser  ( int_m1_ruser[i]   ),
-      .s_axi4_rready ( int_m1_rready[i]  ),
-      .m_axi4_rid    ( m1_axi4_rid[i]    ),
-      .m_axi4_rresp  ( m1_axi4_rresp[i]  ),
-      .m_axi4_rdata  ( m1_axi4_rdata[i]  ),
-      .m_axi4_rlast  ( m1_axi4_rlast[i]  ),
-      .m_axi4_rvalid ( m1_axi4_rvalid[i] ),
-      .m_axi4_ruser  ( m1_axi4_ruser[i]  ),
-      .m_axi4_rready ( m1_axi4_rready[i] )
-    );
+  axi_r_t r_buf_m1_oup;
+  stream_fifo #(
+    .FALL_THROUGH (1'b0),
+    .DEPTH        (4),
+    .T            (axi_r_t)
+  ) i_r_buf_m1 (
+    .clk_i      (Clk_CI),
+    .rst_ni     (Rst_RBI),
+    .flush_i    (1'b0),
+    .testmode_i (1'b0),
+    .data_i     ('{ id:       m1_axi4_rid[i],
+                    resp:     m1_axi4_rresp[i],
+                    data:     m1_axi4_rdata[i],
+                    last:     m1_axi4_rlast[i],
+                    user:     m1_axi4_ruser[i],
+                    default:  '0}),
+    .valid_i    (m1_axi4_rvalid[i]),
+    .ready_o    (m1_axi4_rready[i]),
+    .data_o     (r_buf_m1_oup),
+    .valid_o    (int_m1_rvalid[i]),
+    .ready_i    (int_m1_rready[i]),
+    .usage_o    (/* unused */)
+  );
+  assign int_m1_rid[i]   = r_buf_m1_oup.id;
+  assign int_m1_rresp[i] = r_buf_m1_oup.resp;
+  assign int_m1_rdata[i] = r_buf_m1_oup.data;
+  assign int_m1_rlast[i] = r_buf_m1_oup.last;
+  assign int_m1_ruser[i] = r_buf_m1_oup.user;
 
   axi4_r_sender
     #(

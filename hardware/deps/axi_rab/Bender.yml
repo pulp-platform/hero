@@ -6,18 +6,13 @@ dependencies:
   axi: { git: "https://github.com/pulp-platform/axi.git", rev: urania }
 
 sources:
-  - rtl/axi4_ar_buffer.sv
   - rtl/axi4_ar_sender.sv
-  - rtl/axi4_aw_buffer.sv
   - rtl/axi4_aw_sender.sv
-  - rtl/axi4_b_buffer.sv
   - rtl/axi4_b_sender.sv
-  - rtl/axi4_r_buffer.sv
   - rtl/axi4_r_sender.sv
   - rtl/axi4_w_buffer.sv
   - rtl/axi4_w_sender.sv
   - rtl/axi_buffer_rab_bram.sv
-  - rtl/axi_buffer_rab.sv
   - rtl/axi_rab_cfg.sv
   - rtl/axi_rab_top.sv
   - rtl/check_ram.sv
