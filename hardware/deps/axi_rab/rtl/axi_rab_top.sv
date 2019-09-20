@@ -102,6 +102,7 @@ module axi_rab_top
     input  axi_pkg::burst_t   [N_PORTS-1:0] s_axi4_awburst,
     input  logic              [N_PORTS-1:0] s_axi4_awlock,
     input  axi_pkg::prot_t    [N_PORTS-1:0] s_axi4_awprot,
+    input  axi_pkg::atop_t    [N_PORTS-1:0] s_axi4_awatop,
     input  axi_pkg::cache_t   [N_PORTS-1:0] s_axi4_awcache,
     input  axi_pkg::region_t  [N_PORTS-1:0] s_axi4_awregion,
     input  axi_pkg::qos_t     [N_PORTS-1:0] s_axi4_awqos,
@@ -151,6 +152,7 @@ module axi_rab_top
     output axi_pkg::burst_t   [N_PORTS-1:0] m0_axi4_awburst,
     output logic              [N_PORTS-1:0] m0_axi4_awlock,
     output axi_pkg::prot_t    [N_PORTS-1:0] m0_axi4_awprot,
+    output axi_pkg::atop_t    [N_PORTS-1:0] m0_axi4_awatop,
     output axi_pkg::cache_t   [N_PORTS-1:0] m0_axi4_awcache,
     output axi_pkg::region_t  [N_PORTS-1:0] m0_axi4_awregion,
     output axi_pkg::qos_t     [N_PORTS-1:0] m0_axi4_awqos,
@@ -200,6 +202,7 @@ module axi_rab_top
     output axi_pkg::burst_t   [N_PORTS-1:0] m1_axi4_awburst,
     output logic              [N_PORTS-1:0] m1_axi4_awlock,
     output axi_pkg::prot_t    [N_PORTS-1:0] m1_axi4_awprot,
+    output axi_pkg::atop_t    [N_PORTS-1:0] m1_axi4_awatop,
     output axi_pkg::cache_t   [N_PORTS-1:0] m1_axi4_awcache,
     output axi_pkg::region_t  [N_PORTS-1:0] m1_axi4_awregion,
     output axi_pkg::qos_t     [N_PORTS-1:0] m1_axi4_awqos,
@@ -319,6 +322,7 @@ module axi_rab_top
   logic [N_PORTS-1:0]                   [1:0] int_awburst;
   logic [N_PORTS-1:0]                         int_awlock;
   logic [N_PORTS-1:0]                   [2:0] int_awprot;
+  logic [N_PORTS-1:0]                   [5:0] int_awatop;
   logic [N_PORTS-1:0]                   [3:0] int_awcache;
   logic [N_PORTS-1:0]                   [3:0] int_awregion;
   logic [N_PORTS-1:0]                   [3:0] int_awqos;
@@ -694,6 +698,7 @@ module axi_rab_top
                     burst:    s_axi4_awburst[i],
                     lock:     s_axi4_awlock[i],
                     prot:     s_axi4_awprot[i],
+                    atop:     s_axi4_awatop[i],
                     cache:    s_axi4_awcache[i],
                     region:   s_axi4_awregion[i],
                     qos:      s_axi4_awqos[i],
@@ -713,6 +718,7 @@ module axi_rab_top
   assign int_awburst[i]   = aw_buf_oup.burst;
   assign int_awlock[i]    = aw_buf_oup.lock;
   assign int_awprot[i]    = aw_buf_oup.prot;
+  assign int_awatop[i]    = aw_buf_oup.atop;
   assign int_awcache[i]   = aw_buf_oup.cache;
   assign int_awregion[i]  = aw_buf_oup.region;
   assign int_awqos[i]     = aw_buf_oup.qos;
@@ -747,6 +753,7 @@ module axi_rab_top
       .s_axi4_awburst  ( int_awburst[i]        ),
       .s_axi4_awlock   ( int_awlock[i]         ),
       .s_axi4_awprot   ( int_awprot[i]         ),
+      .s_axi4_awatop   ( int_awatop[i]         ),
       .s_axi4_awcache  ( int_awcache[i]        ),
       .s_axi4_awregion ( int_awregion[i]       ),
       .s_axi4_awqos    ( int_awqos[i]          ),
@@ -760,6 +767,7 @@ module axi_rab_top
       .m_axi4_awburst  ( m0_axi4_awburst[i]    ),
       .m_axi4_awlock   ( m0_axi4_awlock[i]     ),
       .m_axi4_awprot   ( m0_axi4_awprot[i]     ),
+      .m_axi4_awatop   ( m0_axi4_awatop[i]     ),
       .m_axi4_awcache  (                       ),
       .m_axi4_awregion ( m0_axi4_awregion[i]   ),
       .m_axi4_awqos    ( m0_axi4_awqos[i]      ),
@@ -814,6 +822,7 @@ module axi_rab_top
       .s_axi4_awburst  ( int_awburst[i]        ),
       .s_axi4_awlock   ( int_awlock[i]         ),
       .s_axi4_awprot   ( int_awprot[i]         ),
+      .s_axi4_awatop   ( int_awatop[i]         ),
       .s_axi4_awcache  ( int_awcache[i]        ),
       .s_axi4_awregion ( int_awregion[i]       ),
       .s_axi4_awqos    ( int_awqos[i]          ),
@@ -827,6 +836,7 @@ module axi_rab_top
       .m_axi4_awburst  ( m1_axi4_awburst[i]    ),
       .m_axi4_awlock   ( m1_axi4_awlock[i]     ),
       .m_axi4_awprot   ( m1_axi4_awprot[i]     ),
+      .m_axi4_awatop   ( m1_axi4_awatop[i]     ),
       .m_axi4_awcache  (                       ),
       .m_axi4_awregion ( m1_axi4_awregion[i]   ),
       .m_axi4_awqos    ( m1_axi4_awqos[i]      ),

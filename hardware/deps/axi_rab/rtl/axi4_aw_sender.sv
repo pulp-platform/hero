@@ -41,6 +41,7 @@ module axi4_aw_sender #(
   input  axi_pkg::burst_t   s_axi4_awburst,
   input  logic              s_axi4_awlock,
   input  axi_pkg::prot_t    s_axi4_awprot,
+  input  axi_pkg::atop_t    s_axi4_awatop,
   input  axi_pkg::cache_t   s_axi4_awcache,
   input  axi_pkg::region_t  s_axi4_awregion,
   input  axi_pkg::qos_t     s_axi4_awqos,
@@ -55,6 +56,7 @@ module axi4_aw_sender #(
   output axi_pkg::burst_t   m_axi4_awburst,
   output logic              m_axi4_awlock,
   output axi_pkg::prot_t    m_axi4_awprot,
+  output axi_pkg::atop_t    m_axi4_awatop,
   output axi_pkg::cache_t   m_axi4_awcache,
   output axi_pkg::region_t  m_axi4_awregion,
   output axi_pkg::qos_t     m_axi4_awqos,
@@ -83,6 +85,7 @@ module axi4_aw_sender #(
     axi_pkg::region_t l2_axi4_awregion;
     axi_pkg::qos_t    l2_axi4_awqos;
     axi_pkg::prot_t   l2_axi4_awprot;
+    axi_pkg::atop_t   l2_axi4_awatop;
     logic             l2_axi4_awlock;
     axi_pkg::burst_t  l2_axi4_awburst;
     axi_pkg::size_t   l2_axi4_awsize;
@@ -94,6 +97,7 @@ module axi4_aw_sender #(
     assign m_axi4_awregion = l2_sending_o ? l2_axi4_awregion : s_axi4_awregion;
     assign m_axi4_awqos    = l2_sending_o ? l2_axi4_awqos    : s_axi4_awqos;
     assign m_axi4_awprot   = l2_sending_o ? l2_axi4_awprot   : s_axi4_awprot;
+    assign m_axi4_awatop   = l2_sending_o ? l2_axi4_awatop   : s_axi4_awatop;
     assign m_axi4_awlock   = l2_sending_o ? l2_axi4_awlock   : s_axi4_awlock;
     assign m_axi4_awburst  = l2_sending_o ? l2_axi4_awburst  : s_axi4_awburst;
     assign m_axi4_awsize   = l2_sending_o ? l2_axi4_awsize   : s_axi4_awsize;
@@ -109,6 +113,7 @@ module axi4_aw_sender #(
         l2_axi4_awregion <=  'b0;
         l2_axi4_awqos    <=  'b0;
         l2_axi4_awprot   <=  'b0;
+        l2_axi4_awatop   <=  'b0;
         l2_axi4_awlock   <= 1'b0;
         l2_axi4_awburst  <=  'b0;
         l2_axi4_awsize   <=  'b0;
@@ -120,6 +125,7 @@ module axi4_aw_sender #(
         l2_axi4_awregion <= s_axi4_awregion;
         l2_axi4_awqos    <= s_axi4_awqos;
         l2_axi4_awprot   <= s_axi4_awprot;
+        l2_axi4_awatop   <= s_axi4_awatop;
         l2_axi4_awlock   <= s_axi4_awlock;
         l2_axi4_awburst  <= s_axi4_awburst;
         l2_axi4_awsize   <= s_axi4_awsize;
@@ -152,6 +158,7 @@ module axi4_aw_sender #(
     assign m_axi4_awregion =  s_axi4_awregion;
     assign m_axi4_awqos    =  s_axi4_awqos;
     assign m_axi4_awprot   =  s_axi4_awprot;
+    assign m_axi4_awatop   =  s_axi4_awatop;
     assign m_axi4_awlock   =  s_axi4_awlock;
     assign m_axi4_awburst  =  s_axi4_awburst;
     assign m_axi4_awsize   =  s_axi4_awsize;
