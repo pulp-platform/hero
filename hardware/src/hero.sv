@@ -31,12 +31,15 @@ package automatic hero_pkg;
 endpackage
 import hero_pkg::*;
 
+`include "axi/assign.svh"
 
 module hero #(
   // SoC Parameters
   parameter int unsigned  N_CLUSTERS = 4,           // must be a power of 2
   parameter int unsigned  AXI_DW = 256,             // [bit]
-  parameter int unsigned  L2_N_AXI_PORTS = 1        // must be a power of 2
+  parameter int unsigned  L2_N_AXI_PORTS = 1,       // must be a power of 2
+  parameter type          axi_req_t = logic,
+  parameter type          axi_resp_t = logic
 ) (
   // Clocks and Resets
   input  logic                  clk_i,
@@ -45,7 +48,10 @@ module hero #(
   // Cluster Control
   input  logic [N_CLUSTERS-1:0] cl_fetch_en_i,
   output logic [N_CLUSTERS-1:0] cl_eoc_o,
-  output logic [N_CLUSTERS-1:0] cl_busy_o
+  output logic [N_CLUSTERS-1:0] cl_busy_o,
+
+  output axi_req_t              dram_req_o,
+  input  axi_resp_t             dram_resp_i
 );
 
   // Derived Constants
@@ -141,6 +147,44 @@ module hero #(
     .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
     .AXI_USER_WIDTH (AXI_UW)
   ) l2_mst_wo_atomics[L2_N_AXI_PORTS-1:0]();
+
+  // Interfaces from PULP through RAB to Host
+  // i_soc_bus.rab_mst -> [rab_mst] -> [rab_mst_{req,resp}]
+  // -> i_rab.from_pulp_{req_i,resp_o}
+  // -> i_rab.to_host_{req_o,resp_i}
+  // -> [dram_{req_o,resp_i}]
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
+    .AXI_USER_WIDTH (AXI_UW)
+  ) rab_mst();
+  axi_req_t   rab_mst_req;
+  axi_resp_t  rab_mst_resp;
+  `AXI_ASSIGN_TO_REQ(rab_mst_req, rab_mst);
+  `AXI_ASSIGN_FROM_RESP(rab_mst, rab_mst_resp);
+
+  // Interfaces from Host through RAB to PULP
+  // TODO -> i_rab.from_host_{req_i,resp_o}
+  // -> i_rab.to_pulp_{req_o,resp_i} -> [rab_slv_{req,resp}] -> [rab_slv]
+  // -> i_id_remap_rab_slv -> [rab_slv_remapped]
+  // -> i_soc_bus.rab_slv
+  axi_req_t   rab_slv_req;
+  axi_resp_t  rab_slv_resp;
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
+    .AXI_USER_WIDTH (AXI_UW)
+  ) rab_slv();
+  `AXI_ASSIGN_FROM_REQ(rab_slv, rab_slv_req);
+  `AXI_ASSIGN_TO_RESP(rab_slv_resp, rab_slv);
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW_SB_INP),
+    .AXI_USER_WIDTH (AXI_UW)
+  ) rab_slv_remapped();
 
   // Interfaces to Peripherals
   // i_soc_bus.periph_mst -> [periph_mst]
@@ -305,7 +349,9 @@ module hero #(
     .rst_ni,
     .cl_slv     (cl_oup),
     .cl_mst     (cl_inp),
-    .l2_mst     (l2_mst)
+    .l2_mst     (l2_mst),
+    .rab_mst    (rab_mst),
+    .rab_slv    (rab_slv_remapped)
   );
 
   for (genvar i = 0; i < L2_N_AXI_PORTS; i++) begin: gen_l2_ports
@@ -336,6 +382,54 @@ module hero #(
       .slv    (l2_mst_wo_atomics[i])
     );
   end
+
+  axi_rab_wrap #(
+    .L1NumSlicesPulp  (           32),
+    .L1NumSlicesHost  (            4),
+    .L2Enable         (         1'b1),
+    .L2NumSets        (           32),
+    .L2NumSetEntries  (           32),
+    .L2NumParVaRams   (            4),
+    .MhFifoDepth      (           16),
+    .AxiAddrWidth     (AXI_AW       ),
+    .AxiDataWidth     (AXI_DW       ),
+    .AxiIdWidth       (AXI_IW_SB_OUP),
+    .AxiUserWidth     (AXI_UW       ),
+    .axi_req_t        (axi_req_t    ),
+    .axi_resp_t       (axi_resp_t   )
+  ) i_rab (
+    .clk_i,
+    .rst_ni,
+    .from_pulp_req_i        (rab_mst_req),
+    .from_pulp_resp_o       (rab_mst_resp),
+    .from_pulp_miss_irq_o   (/* TODO */),
+    .from_pulp_multi_irq_o  (/* TODO */),
+    .from_pulp_prot_irq_o   (/* TODO */),
+    .to_host_req_o          (dram_req_o),
+    .to_host_resp_i         (dram_resp_i),
+    .from_host_req_i        ('0/* TODO */),
+    .from_host_resp_o       (/* TODO */),
+    .from_host_miss_irq_o   (/* TODO */),
+    .from_host_multi_irq_o  (/* TODO */),
+    .from_host_prot_irq_o   (/* TODO */),
+    .to_pulp_req_o          (rab_slv_req),
+    .to_pulp_resp_i         (rab_slv_resp),
+    .mh_fifo_full_irq_o     (/* TODO */)
+  );
+
+  axi_id_remap #(
+    .ADDR_WIDTH   (AXI_AW),
+    .DATA_WIDTH   (AXI_DW),
+    .USER_WIDTH   (AXI_UW),
+    .ID_WIDTH_IN  (AXI_IW_SB_OUP),
+    .ID_WIDTH_OUT (AXI_IW_SB_INP),
+    .TABLE_SIZE   (4)
+  ) i_id_remap_rab_slv (
+    .clk_i,
+    .rst_ni,
+    .in     (rab_slv),
+    .out    (rab_slv_remapped)
+  );
 
   axi_data_width_converter #(
     .ADDR_WIDTH     (AXI_AW),

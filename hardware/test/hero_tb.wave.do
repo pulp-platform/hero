@@ -1752,6 +1752,21 @@ add wave -noupdate -group {dma[0]/ext_master} {/hero_tb/dut/gen_clusters[0]/gen_
 add wave -noupdate -group {dma[0]/ext_master} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/dmac_wrap_i/ext_master/r_user}
 add wave -noupdate -group {dma[0]/ext_master} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/dmac_wrap_i/ext_master/r_valid}
 add wave -noupdate -group {dma[0]/ext_master} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/dmac_wrap_i/ext_master/r_ready}
+add wave -noupdate -group rab /hero_tb/dut/i_rab/from_pulp_req_i
+add wave -noupdate -group rab /hero_tb/dut/i_rab/from_pulp_resp_o
+add wave -noupdate -group rab /hero_tb/dut/i_rab/from_pulp_miss_irq_o
+add wave -noupdate -group rab /hero_tb/dut/i_rab/from_pulp_multi_irq_o
+add wave -noupdate -group rab /hero_tb/dut/i_rab/from_pulp_prot_irq_o
+add wave -noupdate -group rab /hero_tb/dut/i_rab/to_host_req_o
+add wave -noupdate -group rab /hero_tb/dut/i_rab/to_host_resp_i
+add wave -noupdate -group rab /hero_tb/dut/i_rab/from_host_req_i
+add wave -noupdate -group rab /hero_tb/dut/i_rab/from_host_resp_o
+add wave -noupdate -group rab /hero_tb/dut/i_rab/from_host_miss_irq_o
+add wave -noupdate -group rab /hero_tb/dut/i_rab/from_host_multi_irq_o
+add wave -noupdate -group rab /hero_tb/dut/i_rab/from_host_prot_irq_o
+add wave -noupdate -group rab /hero_tb/dut/i_rab/to_pulp_req_o
+add wave -noupdate -group rab /hero_tb/dut/i_rab/to_pulp_resp_i
+add wave -noupdate -group rab /hero_tb/dut/i_rab/mh_fifo_full_irq_o
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 3} {47567200 ps} 1} {{Cursor 4} {15131695 ps} 0}
 quietly wave cursor active 2

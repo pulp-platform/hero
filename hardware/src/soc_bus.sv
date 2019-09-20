@@ -9,7 +9,7 @@
 
 package automatic soc_bus_pkg;
   function int unsigned n_slaves(input int unsigned n_clusters);
-    return n_clusters;
+    return n_clusters + 1;
   endfunction
 
   function int unsigned oup_id_w(input int unsigned n_clusters, inp_id_w);
@@ -35,14 +35,17 @@ module soc_bus #(
   input  logic    rst_ni,
   AXI_BUS.Slave   cl_slv[N_CLUSTERS-1:0],
   AXI_BUS.Master  cl_mst[N_CLUSTERS-1:0],
-  AXI_BUS.Master  l2_mst[L2_N_PORTS-1:0]
+  AXI_BUS.Master  l2_mst[L2_N_PORTS-1:0],
+  AXI_BUS.Master  rab_mst,
+  AXI_BUS.Slave   rab_slv
 );
 
   localparam int unsigned N_REGIONS = 1;
-  localparam int unsigned N_MASTERS = N_CLUSTERS + L2_N_PORTS + 1;
+  localparam int unsigned N_MASTERS = N_CLUSTERS + L2_N_PORTS + 2;
   localparam int unsigned N_SLAVES = soc_bus_pkg::n_slaves(N_CLUSTERS);
   localparam int unsigned IDX_L2_MEM = N_CLUSTERS;
   localparam int unsigned IDX_PERIPH = IDX_L2_MEM + 1;
+  localparam int unsigned IDX_RAB = IDX_PERIPH + 1;
 
   typedef logic [AXI_AW-1:0] addr_t;
 
@@ -59,6 +62,7 @@ module soc_bus #(
   for (genvar i = 0; i < N_CLUSTERS; i++) begin: gen_bind_cluster_slv
     `AXI_ASSIGN(slaves[i], cl_slv[i]);
   end
+  `AXI_ASSIGN(slaves[N_CLUSTERS], rab_slv);
 
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
@@ -73,6 +77,7 @@ module soc_bus #(
     `AXI_ASSIGN(l2_mst[i], masters[IDX_L2_MEM+i]);
   end
   `AXI_ASSIGN(periph_mst, masters[IDX_PERIPH]);
+  `AXI_ASSIGN(rab_mst, masters[IDX_RAB]);
 
   // Address Map
   always_comb begin
@@ -100,6 +105,10 @@ module soc_bus #(
     end_addr[0][IDX_PERIPH]   = start_addr[0][IDX_PERIPH] + PERIPH_N_BYTES - 1;
     valid_rule[0][IDX_PERIPH] = 1'b1;
 
+    // Everything above L2 Memory to RAB
+    start_addr[0][IDX_RAB]  = end_addr[0][IDX_L2_MEM+L2_N_PORTS-1] + 1;
+    end_addr[0][IDX_RAB]    = 64'hFFFF_FFFF_FFFF_FFFF;
+    valid_rule[0][IDX_RAB]  = 1'b1;
   end
 
   axi_node_wrap_with_slices #(

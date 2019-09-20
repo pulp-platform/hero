@@ -26,6 +26,7 @@ sources:
   - src/apb/apb_rw_regs.sv
   - src/apb/apb_bus_wrap.sv
   # Level 0
+  - src/axi_rab_wrap.sv
   - src/pulp_cluster_cfg_pkg.sv
   - src/soc_bus.sv
   - src/soc_ctrl_regs.sv
