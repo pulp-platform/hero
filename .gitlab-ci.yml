@@ -23,13 +23,16 @@ all:
     ### build_examples
     - source env/urania.sh
     - make -C openmp-examples/helloworld all
+    ### compile_testbench
+    - cd hardware/vsim
+    - ./compile.sh
+    - cd -
     ### simulate_examples
     - source env/sim.sh
     - make -C openmp-examples/helloworld only=pulp clean all
     - cd hardware
     - test/gen_slm_files.sh helloworld
     - cd vsim
-    - ./compile.sh
     - ./start_sim.sh
   artifacts:
     paths:
