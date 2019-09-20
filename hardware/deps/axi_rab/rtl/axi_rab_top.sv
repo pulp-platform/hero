@@ -131,6 +131,8 @@ module axi_rab_top
     input  logic              [N_PORTS-1:0] s_axi4_arlock,
     input  axi_pkg::prot_t    [N_PORTS-1:0] s_axi4_arprot,
     input  axi_pkg::cache_t   [N_PORTS-1:0] s_axi4_arcache,
+    input  axi_pkg::region_t  [N_PORTS-1:0] s_axi4_arregion,
+    input  axi_pkg::qos_t     [N_PORTS-1:0] s_axi4_arqos,
     input  axi_user_t         [N_PORTS-1:0] s_axi4_aruser,
 
     output axi_id_t           [N_PORTS-1:0] s_axi4_rid,
@@ -181,6 +183,8 @@ module axi_rab_top
     output logic              [N_PORTS-1:0] m0_axi4_arlock,
     output axi_pkg::prot_t    [N_PORTS-1:0] m0_axi4_arprot,
     output axi_pkg::cache_t   [N_PORTS-1:0] m0_axi4_arcache,
+    output axi_pkg::region_t  [N_PORTS-1:0] m0_axi4_arregion,
+    output axi_pkg::qos_t     [N_PORTS-1:0] m0_axi4_arqos,
     output axi_user_t         [N_PORTS-1:0] m0_axi4_aruser,
 
     input  axi_id_t           [N_PORTS-1:0] m0_axi4_rid,
@@ -231,6 +235,8 @@ module axi_rab_top
     output logic              [N_PORTS-1:0] m1_axi4_arlock,
     output axi_pkg::prot_t    [N_PORTS-1:0] m1_axi4_arprot,
     output axi_pkg::cache_t   [N_PORTS-1:0] m1_axi4_arcache,
+    output axi_pkg::region_t  [N_PORTS-1:0] m1_axi4_arregion,
+    output axi_pkg::qos_t     [N_PORTS-1:0] m1_axi4_arqos,
     output axi_user_t         [N_PORTS-1:0] m1_axi4_aruser,
 
     input  axi_id_t           [N_PORTS-1:0] m1_axi4_rid,
@@ -351,6 +357,8 @@ module axi_rab_top
   logic [N_PORTS-1:0]                         int_arlock;
   logic [N_PORTS-1:0]                   [2:0] int_arprot;
   logic [N_PORTS-1:0]                   [3:0] int_arcache;
+  logic [N_PORTS-1:0]                   [3:0] int_arregion;
+  logic [N_PORTS-1:0]                   [3:0] int_arqos;
   logic [N_PORTS-1:0]    [AXI_USER_WIDTH-1:0] int_aruser;
 
   logic [N_PORTS-1:0]      [AXI_ID_WIDTH-1:0] int_rid;
@@ -1143,6 +1151,8 @@ module axi_rab_top
                     lock:     s_axi4_arlock[i],
                     prot:     s_axi4_arprot[i],
                     cache:    s_axi4_arcache[i],
+                    region:   s_axi4_arregion[i],
+                    qos:      s_axi4_arqos[i],
                     user:     s_axi4_aruser[i],
                     default:  '0}),
     .valid_i    (s_axi4_arvalid[i]),
@@ -1160,6 +1170,8 @@ module axi_rab_top
   assign int_arlock[i]  = ar_buf_oup.lock;
   assign int_arprot[i]  = ar_buf_oup.prot;
   assign int_arcache[i] = ar_buf_oup.cache;
+  assign int_arregion[i]= ar_buf_oup.region;
+  assign int_arqos[i]   = ar_buf_oup.qos;
   assign int_aruser[i]  = ar_buf_oup.user;
 
   axi4_ar_sender
@@ -1192,6 +1204,8 @@ module axi_rab_top
       .s_axi4_arlock   ( int_arlock[i]         ),
       .s_axi4_arprot   ( int_arprot[i]         ),
       .s_axi4_arcache  ( int_arcache[i]        ),
+      .s_axi4_arregion ( int_arregion[i]       ),
+      .s_axi4_arqos    ( int_arqos[i]          ),
       .s_axi4_aruser   ( int_aruser[i]         ),
       .m_axi4_arid     ( m0_axi4_arid[i]       ),
       .m_axi4_araddr   ( m0_axi4_araddr[i]     ),
@@ -1203,6 +1217,8 @@ module axi_rab_top
       .m_axi4_arlock   ( m0_axi4_arlock[i]     ),
       .m_axi4_arprot   ( m0_axi4_arprot[i]     ),
       .m_axi4_arcache  (                       ),
+      .m_axi4_arregion ( m0_axi4_arregion[i]   ),
+      .m_axi4_arqos    ( m0_axi4_arqos[i]      ),
       .m_axi4_aruser   ( m0_axi4_aruser[i]     )
     );
 
@@ -1255,6 +1271,8 @@ module axi_rab_top
       .s_axi4_arlock   ( int_arlock[i]         ),
       .s_axi4_arprot   ( int_arprot[i]         ),
       .s_axi4_arcache  ( int_arcache[i]        ),
+      .s_axi4_arregion ( int_arregion[i]       ),
+      .s_axi4_arqos    ( int_arqos[i]          ),
       .s_axi4_aruser   ( int_aruser[i]         ),
       .m_axi4_arid     ( m1_axi4_arid[i]       ),
       .m_axi4_araddr   ( m1_axi4_araddr[i]     ),
@@ -1266,6 +1284,8 @@ module axi_rab_top
       .m_axi4_arlock   ( m1_axi4_arlock[i]     ),
       .m_axi4_arprot   ( m1_axi4_arprot[i]     ),
       .m_axi4_arcache  (                       ),
+      .m_axi4_arregion ( m1_axi4_arregion[i]   ),
+      .m_axi4_arqos    ( m1_axi4_arqos[i]      ),
       .m_axi4_aruser   ( m1_axi4_aruser[i]     )
     );
 

@@ -42,6 +42,8 @@ module axi4_ar_sender #(
   input  logic              s_axi4_arlock,
   input  axi_pkg::prot_t    s_axi4_arprot,
   input  axi_pkg::cache_t   s_axi4_arcache,
+  input  axi_pkg::region_t  s_axi4_arregion,
+  input  axi_pkg::qos_t     s_axi4_arqos,
   input  user_t             s_axi4_aruser,
 
   output id_t               m_axi4_arid,
@@ -54,6 +56,8 @@ module axi4_ar_sender #(
   output logic              m_axi4_arlock,
   output axi_pkg::prot_t    m_axi4_arprot,
   output axi_pkg::cache_t   m_axi4_arcache,
+  output axi_pkg::region_t  m_axi4_arregion,
+  output axi_pkg::qos_t     m_axi4_arqos,
   output user_t             m_axi4_aruser
 );
 
@@ -87,6 +91,8 @@ module axi4_ar_sender #(
 
     assign m_axi4_aruser  = l2_sending_o ? l2_axi4_aruser   : s_axi4_aruser;
     assign m_axi4_arcache = l2_sending_o ? l2_axi4_arcache  : s_axi4_arcache;
+    assign m_axi4_arregion= l2_sending_o ? l2_axi4_arregion : s_axi4_arregion;
+    assign m_axi4_arqos   = l2_sending_o ? l2_axi4_arqos    : s_axi4_arqos;
     assign m_axi4_arprot  = l2_sending_o ? l2_axi4_arprot   : s_axi4_arprot;
     assign m_axi4_arlock  = l2_sending_o ? l2_axi4_arlock   : s_axi4_arlock;
     assign m_axi4_arburst = l2_sending_o ? l2_axi4_arburst  : s_axi4_arburst;
@@ -100,6 +106,8 @@ module axi4_ar_sender #(
       if (!axi4_arstn) begin
         l2_axi4_aruser  <=  'b0;
         l2_axi4_arcache <=  'b0;
+        l2_axi4_arregion<=  'b0;
+        l2_axi4_arqos   <=  'b0;
         l2_axi4_arprot  <=  'b0;
         l2_axi4_arlock  <= 1'b0;
         l2_axi4_arburst <=  'b0;
@@ -109,6 +117,8 @@ module axi4_ar_sender #(
       end else if (l1_save) begin
         l2_axi4_aruser  <= s_axi4_aruser;
         l2_axi4_arcache <= s_axi4_arcache;
+        l2_axi4_arregion<= s_axi4_arregion;
+        l2_axi4_arqos   <= s_axi4_arqos;
         l2_axi4_arprot  <= s_axi4_arprot;
         l2_axi4_arlock  <= s_axi4_arlock;
         l2_axi4_arburst <= s_axi4_arburst;
@@ -139,6 +149,8 @@ module axi4_ar_sender #(
   end else begin : gen_no_l2_tlb
     assign m_axi4_aruser  =  s_axi4_aruser;
     assign m_axi4_arcache =  s_axi4_arcache;
+    assign m_axi4_arregion=  s_axi4_arregion;
+    assign m_axi4_arqos   =  s_axi4_arqos;
     assign m_axi4_arprot  =  s_axi4_arprot;
     assign m_axi4_arlock  =  s_axi4_arlock;
     assign m_axi4_arburst =  s_axi4_arburst;
