@@ -22,18 +22,23 @@ all:
     - make hero-llvm
     ### build_examples
     - source env/urania.sh
-    - make -C openmp-examples/helloworld all
+    - >
+      for d in helloworld; do
+        make -C openmp-examples/$d all
+      done
     ### compile_testbench
     - cd hardware/vsim
     - ./compile.sh
     - cd -
     ### simulate_examples
     - source env/sim.sh
-    - make -C openmp-examples/helloworld only=pulp clean all
-    - cd hardware
-    - test/gen_slm_files.sh helloworld
-    - cd vsim
-    - ./start_sim.sh
+    - >
+      for d in tests-pulp helloworld; do
+        make -C openmp-examples/$d only=pulp clean all
+        cd hardware/vsim
+        ../test/gen_slm_files.sh $d
+        ./start_sim.sh
+      done
   artifacts:
     paths:
       - install
