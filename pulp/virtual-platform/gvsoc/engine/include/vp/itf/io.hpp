@@ -41,6 +41,22 @@ namespace vp {
     IO_REQ_FLAGS_DEBUG = (1<<0)
   } io_req_flags_e;
 
+  typedef enum
+  {
+    NO_AMO,
+    LR,
+    SC,
+    AMO_SWAP,
+    AMO_ADD,
+    AMO_XOR,
+    AMO_AND,
+    AMO_OR,
+    AMO_MIN,
+    AMO_MAX,
+    AMO_MINU,
+    AMO_MAXU
+  } io_req_amo_e;
+
   #define IO_REQ_PAYLOAD_SIZE 64
   #define IO_REQ_NB_ARGS 16
 
@@ -73,6 +89,12 @@ namespace vp {
 
     uint64_t get_is_write() { return is_write; }
     void set_is_write(bool is_write) { this->is_write = is_write; }
+
+    uint64_t get_core_id() { return core_id; }
+    void set_core_id(uint64_t value) { core_id = value; }
+
+    io_req_amo_e get_amo() { return this->amo; }
+    void set_amo(io_req_amo_e amo) { this->amo = amo; }
 
     void set_size(uint64_t size) { this->size = size; }
     uint64_t get_size() { return size; }
@@ -120,7 +142,7 @@ namespace vp {
     inline void **arg_get(int index) { return &args[index]; }
     inline void **arg_get_last() { return &args[current_arg]; }
 
-    inline void prepare() { latency = 0; duration=0; flags=0; }
+    inline void prepare() { latency = 0; duration=0; flags=0; amo=NO_AMO; }
     inline void init() { prepare(); current_arg=0; }
 
     uint64_t flags;
@@ -128,6 +150,8 @@ namespace vp {
     uint8_t *data;
     uint64_t size;
     uint64_t actual_size;
+    uint64_t core_id;
+    io_req_amo_e amo;
     bool is_write;
     io_req_status_e status;
     io_slave *resp_port;

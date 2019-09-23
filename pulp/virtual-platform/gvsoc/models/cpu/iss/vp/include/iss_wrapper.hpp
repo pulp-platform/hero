@@ -61,6 +61,10 @@ public:
   inline int data_req_aligned(iss_addr_t addr, uint8_t *data_ptr, int size, bool is_write);
   int data_misaligned_req(iss_addr_t addr, uint8_t *data_ptr, int size, bool is_write);
 
+  inline int amo_req(iss_addr_t addr, uint8_t *data, int size, vp::io_req_amo_e amo);
+  inline int amo_req_aligned(iss_addr_t addr, uint8_t *data_ptr, int size, vp::io_req_amo_e amo);
+  int amo_req_misaligned(iss_addr_t addr, uint8_t *data_ptr, int size, vp::io_req_amo_e amo);
+
   bool user_access(iss_addr_t addr, uint8_t *data, iss_addr_t size, bool is_write);
   std::string read_user_string(iss_addr_t addr, int len=-1);
 
@@ -222,6 +226,7 @@ inline int iss_wrapper::data_req_aligned(iss_addr_t addr, uint8_t *data_ptr, int
   req->set_size(size);
   req->set_is_write(is_write);
   req->set_data(data_ptr);
+  req->set_amo(vp::io_req_amo_e::NO_AMO);
   int err = data.req(req);
   if (err == vp::IO_REQ_OK) 
   {
@@ -246,6 +251,48 @@ inline int iss_wrapper::data_req(iss_addr_t addr, uint8_t *data_ptr, int size, b
     return data_req_aligned(addr, data_ptr, size, is_write);
   else
     return data_misaligned_req(addr, data_ptr, size, is_write);
+}
+
+inline int iss_wrapper::amo_req(iss_addr_t addr, uint8_t *data_ptr, int size, vp::io_req_amo_e amo)
+{
+
+  iss_addr_t addr0 = addr & ADDR_MASK;
+  iss_addr_t addr1 = (addr + size - 1) & ADDR_MASK;
+
+  if (likely(addr0 == addr1))
+    return amo_req_aligned(addr, data_ptr, size, amo);
+  else
+    return amo_req_misaligned(addr, data_ptr, size, amo);
+}
+
+inline int iss_wrapper::amo_req_aligned(iss_addr_t addr, uint8_t *data_ptr, int size, vp::io_req_amo_e amo)
+{
+  decode_trace.msg("AMO request (addr: 0x%lx, size: 0x%x, amo: %d)\n", addr, size, amo);
+  vp::io_req *req = &io_req;
+  req->init();
+  req->set_addr(addr);
+  req->set_size(size);
+  req->set_data(data_ptr);
+  req->set_amo(amo);
+  req->set_core_id(this->cpu.config.mhartid);
+  if (amo == vp::io_req_amo_e::LR)
+  {
+    req->set_is_write(false);
+  }
+  else
+  {
+    req->set_is_write(true);
+  }
+  int err = data.req(req);
+  if (err == vp::IO_REQ_OK)
+  {
+    this->cpu.state.insn_cycles += req->get_latency();
+  }
+  else if (err == vp::IO_REQ_INVALID)
+  {
+    vp_warning_always(&this->warning, "Invalid AMO access (offset: 0x%x, size: 0x%x, amo: %d)\n", addr, size, amo);
+  }
+  return err;
 }
 
 #endif

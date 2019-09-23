@@ -456,6 +456,14 @@ int iss_wrapper::data_misaligned_req(iss_addr_t addr, uint8_t *data_ptr, int siz
   }
 }
 
+int iss_wrapper::amo_req_misaligned(iss_addr_t addr, uint8_t *data_ptr, int size, vp::io_req_amo_e amo)
+{
+  trace.force_warning("Misaligned amo request (addr: 0x%lx, size: 0x%x, amo: %d)\n", addr, size, amo);
+
+  trace.force_warning("UNIMPLEMENTED AT %s %d\n", __FILE__, __LINE__);
+  return 0;
+}
+
 void iss_wrapper::irq_check()
 {
   current_event = check_all_event;
