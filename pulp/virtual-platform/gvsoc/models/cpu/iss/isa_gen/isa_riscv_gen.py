@@ -274,7 +274,7 @@ class R5(Instr):
                         ]
         elif format == 'LRES':
             self.args = [   OutReg(0, Range(7,  5)),
-                            Indirect(InReg (0, Range(15, 5))),
+                            InReg (0, Range(15, 5)),
                             UnsignedImm(0, Range(25, 1)),
                             UnsignedImm(1, Range(26, 1)),
                         ]
@@ -335,10 +335,10 @@ class R5(Instr):
             self.args = [   InReg(1, Range(20, 5)),
                             Indirect(InReg(0, Range(15, 5)), SignedImm(0, Ranges([[7, 5, 0], [25, 7, 5]]))),
                         ]
-        elif format == 'SCOND':
+        elif format == 'AMO':
             self.args = [   OutReg(0, Range(7, 5)),
                             InReg(1, Range(20, 5)),
-                            Indirect(InReg(0, Range(15, 5))),
+                            InReg(0, Range(15, 5)),
                             UnsignedImm(0, Range(25, 1)),
                             UnsignedImm(1, Range(26, 1)),
                         ]
@@ -613,8 +613,17 @@ rv32m = IsaSubset('m', [
 
 rv32a = IsaSubset('a', [
 
-    R5('lr.w', 'LRES',  '00010 -- 00000 ----- 010 ----- 0101111'),
-    R5('sc.w', 'SCOND', '00011 -- ----- ----- 010 ----- 0101111')
+    R5('lr.w'     , 'LRES', '00010 -- 00000 ----- 010 ----- 0101111'),
+    R5('sc.w'     ,  'AMO', '00011 -- ----- ----- 010 ----- 0101111'),
+    R5('amoswap.w',  'AMO', '00001 -- ----- ----- 010 ----- 0101111'),
+    R5('amoadd.w' ,  'AMO', '00000 -- ----- ----- 010 ----- 0101111'),
+    R5('amoxor.w' ,  'AMO', '00100 -- ----- ----- 010 ----- 0101111'),
+    R5('amoand.w' ,  'AMO', '01100 -- ----- ----- 010 ----- 0101111'),
+    R5('amoor.w'  ,  'AMO', '01000 -- ----- ----- 010 ----- 0101111'),
+    R5('amomin.w' ,  'AMO', '10000 -- ----- ----- 010 ----- 0101111'),
+    R5('amomax.w' ,  'AMO', '10100 -- ----- ----- 010 ----- 0101111'),
+    R5('amominu.w',  'AMO', '11000 -- ----- ----- 010 ----- 0101111'),
+    R5('amomaxu.w',  'AMO', '11100 -- ----- ----- 010 ----- 0101111')
 
 ])
 
@@ -1794,6 +1803,7 @@ isa = Isa(
         IsaDecodeTree('i', [rv32i]),
         IsaDecodeTree('m', [rv32m]),
         IsaDecodeTree('c', [rv32c]),
+        IsaDecodeTree('a', [rv32a]),
         IsaDecodeTree('priv', [priv]),
         IsaDecodeTree('pulp_v2', [pulp_v2]),
         IsaDecodeTree('rnnext', [pulp_v2_rnnext]),

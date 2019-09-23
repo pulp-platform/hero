@@ -72,6 +72,12 @@ static int iss_parse_isa(iss_t *iss)
         len--;
         break;
       }
+      case 'a': {
+        iss_decode_activate_isa(iss, (char *)"a");
+        current++;
+        len--;
+        break;
+      }
       case 'c': {
         iss_decode_activate_isa(iss, (char *)"c");
         current++;
