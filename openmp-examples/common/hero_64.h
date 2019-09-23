@@ -29,30 +29,30 @@
 //    return the loaded value.
 // -  The non-blocking functions (`_noblock` suffix) return 0 on success and a non-zero value on
 //    failure.  Loads pass the loaded value back through the `val` pointer.
-inline static uint32_t  hero_load_uint32          (const uint64_t addr);
-inline static void      hero_store_uint32         (const uint64_t addr, const uint32_t val);
-inline static int       hero_load_uint32_noblock  (const uint64_t addr, uint32_t* const val);
-inline static int       hero_store_uint32_noblock (const uint64_t addr, const uint32_t val);
-inline static int32_t   hero_load_int32           (const uint64_t addr);
-inline static void      hero_store_int32          (const uint64_t addr, const int32_t val);
-inline static int       hero_load_int32_noblock   (const uint64_t addr, int32_t* const val);
-inline static int       hero_store_int32_noblock  (const uint64_t addr, const int32_t val);
-inline static uint16_t  hero_load_uint16          (const uint64_t addr);
-inline static void      hero_store_uint16         (const uint64_t addr, const uint16_t val);
-inline static int       hero_load_uint16_noblock  (const uint64_t addr, uint16_t* const val);
-inline static int       hero_store_uint16_noblock (const uint64_t addr, const uint16_t val);
-inline static int16_t   hero_load_int16           (const uint64_t addr);
-inline static void      hero_store_int16          (const uint64_t addr, const int16_t val);
-inline static int       hero_load_int16_noblock   (const uint64_t addr, int16_t* const val);
-inline static int       hero_store_int16_noblock  (const uint64_t addr, const int16_t val);
-inline static uint8_t   hero_load_uint8           (const uint64_t addr);
-inline static void      hero_store_uint8          (const uint64_t addr, const uint8_t val);
-inline static int       hero_load_uint8_noblock   (const uint64_t addr, uint8_t* const val);
-inline static int       hero_store_uint8_noblock  (const uint64_t addr, const uint8_t val);
-inline static int8_t    hero_load_int8            (const uint64_t addr);
-inline static void      hero_store_int8           (const uint64_t addr, const int8_t val);
-inline static int       hero_load_int8_noblock    (const uint64_t addr, int8_t* const val);
-inline static int       hero_store_int8_noblock   (const uint64_t addr, const int8_t val);
+inline static __attribute__((used)) uint32_t  hero_load_uint32          (const uint64_t addr);
+inline static __attribute__((used)) void      hero_store_uint32         (const uint64_t addr, const uint32_t val);
+inline static __attribute__((used)) int       hero_load_uint32_noblock  (const uint64_t addr, uint32_t* const val);
+inline static __attribute__((used)) int       hero_store_uint32_noblock (const uint64_t addr, const uint32_t val);
+inline static __attribute__((used)) int32_t   hero_load_int32           (const uint64_t addr);
+inline static __attribute__((used)) void      hero_store_int32          (const uint64_t addr, const int32_t val);
+inline static __attribute__((used)) int       hero_load_int32_noblock   (const uint64_t addr, int32_t* const val);
+inline static __attribute__((used)) int       hero_store_int32_noblock  (const uint64_t addr, const int32_t val);
+inline static __attribute__((used)) uint16_t  hero_load_uint16          (const uint64_t addr);
+inline static __attribute__((used)) void      hero_store_uint16         (const uint64_t addr, const uint16_t val);
+inline static __attribute__((used)) int       hero_load_uint16_noblock  (const uint64_t addr, uint16_t* const val);
+inline static __attribute__((used)) int       hero_store_uint16_noblock (const uint64_t addr, const uint16_t val);
+inline static __attribute__((used)) int16_t   hero_load_int16           (const uint64_t addr);
+inline static __attribute__((used)) void      hero_store_int16          (const uint64_t addr, const int16_t val);
+inline static __attribute__((used)) int       hero_load_int16_noblock   (const uint64_t addr, int16_t* const val);
+inline static __attribute__((used)) int       hero_store_int16_noblock  (const uint64_t addr, const int16_t val);
+inline static __attribute__((used)) uint8_t   hero_load_uint8           (const uint64_t addr);
+inline static __attribute__((used)) void      hero_store_uint8          (const uint64_t addr, const uint8_t val);
+inline static __attribute__((used)) int       hero_load_uint8_noblock   (const uint64_t addr, uint8_t* const val);
+inline static __attribute__((used)) int       hero_store_uint8_noblock  (const uint64_t addr, const uint8_t val);
+inline static __attribute__((used)) int8_t    hero_load_int8            (const uint64_t addr);
+inline static __attribute__((used)) void      hero_store_int8           (const uint64_t addr, const int8_t val);
+inline static __attribute__((used)) int       hero_load_int8_noblock    (const uint64_t addr, int8_t* const val);
+inline static __attribute__((used)) int       hero_store_int8_noblock   (const uint64_t addr, const int8_t val);
 
 
 /***************************************************************************************************
