@@ -1,10 +1,5 @@
 onerror {resume}
 quietly WaveActivateNextPane {} 0
-add wave -noupdate /hero_tb/dut/clk_i
-add wave -noupdate /hero_tb/dut/rst_ni
-add wave -noupdate /hero_tb/dut/cl_fetch_en_i
-add wave -noupdate /hero_tb/dut/cl_busy_o
-add wave -noupdate /hero_tb/dut/cl_eoc_o
 add wave -noupdate -group {cl_inp[0]} {/hero_tb/dut/cl_inp[0]/aw_id}
 add wave -noupdate -group {cl_inp[0]} {/hero_tb/dut/cl_inp[0]/aw_addr}
 add wave -noupdate -group {cl_inp[0]} {/hero_tb/dut/cl_inp[0]/aw_len}
@@ -553,6 +548,7 @@ add wave -noupdate -group {core_demux[0]} {/hero_tb/dut/gen_clusters[0]/gen_clus
 add wave -noupdate -group {core_demux[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/core_demux_i/TCDM_RW}
 add wave -noupdate -group {core_demux[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/core_demux_i/TCDM_TS}
 add wave -noupdate -group {core_demux[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/core_demux_i/DEM_PER}
+add wave -noupdate -group {core_demux[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/core_demux_i/addrext_i}
 add wave -noupdate -group {eu_ctrl_master[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/eu_ctrl_master/req}
 add wave -noupdate -group {eu_ctrl_master[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/eu_ctrl_master/add}
 add wave -noupdate -group {eu_ctrl_master[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/eu_ctrl_master/wen}
@@ -1752,6 +1748,126 @@ add wave -noupdate -group {dma[0]/ext_master} {/hero_tb/dut/gen_clusters[0]/gen_
 add wave -noupdate -group {dma[0]/ext_master} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/dmac_wrap_i/ext_master/r_user}
 add wave -noupdate -group {dma[0]/ext_master} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/dmac_wrap_i/ext_master/r_valid}
 add wave -noupdate -group {dma[0]/ext_master} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/dmac_wrap_i/ext_master/r_ready}
+add wave -noupdate -group {tryx_ctrl[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/tryx_ctrl_i/gen_tryx_ctrl[0]/tryx_d}
+add wave -noupdate -group {tryx_ctrl[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/tryx_ctrl_i/gen_tryx_ctrl[0]/tryx_q}
+add wave -noupdate -group {tryx_ctrl[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/tryx_ctrl_i/gen_tryx_ctrl[0]/rd_en_d}
+add wave -noupdate -group {tryx_ctrl[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/tryx_ctrl_i/gen_tryx_ctrl[0]/rd_en_q}
+add wave -noupdate -group {tryx_ctrl[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/tryx_ctrl_i/gen_tryx_ctrl[0]/err_d}
+add wave -noupdate -group {tryx_ctrl[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/tryx_ctrl_i/gen_tryx_ctrl[0]/err_q}
+add wave -noupdate -group {tryx_ctrl[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/tryx_ctrl_i/gen_tryx_ctrl[0]/wait_d}
+add wave -noupdate -group {tryx_ctrl[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/tryx_ctrl_i/gen_tryx_ctrl[0]/wait_q}
+add wave -noupdate -group {tryx_ctrl[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/tryx_ctrl_i/gen_tryx_ctrl[0]/wr_en_d}
+add wave -noupdate -group {tryx_ctrl[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/tryx_ctrl_i/gen_tryx_ctrl[0]/wr_en_q}
+add wave -noupdate -group {speriph_master[EOC]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[0]/req}
+add wave -noupdate -group {speriph_master[EOC]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[0]/add}
+add wave -noupdate -group {speriph_master[EOC]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[0]/wen}
+add wave -noupdate -group {speriph_master[EOC]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[0]/wdata}
+add wave -noupdate -group {speriph_master[EOC]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[0]/be}
+add wave -noupdate -group {speriph_master[EOC]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[0]/gnt}
+add wave -noupdate -group {speriph_master[EOC]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[0]/id}
+add wave -noupdate -group {speriph_master[EOC]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[0]/r_valid}
+add wave -noupdate -group {speriph_master[EOC]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[0]/r_opc}
+add wave -noupdate -group {speriph_master[EOC]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[0]/r_id}
+add wave -noupdate -group {speriph_master[EOC]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[0]/r_rdata}
+add wave -noupdate -group {speriph_master[TIMER]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[1]/req}
+add wave -noupdate -group {speriph_master[TIMER]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[1]/add}
+add wave -noupdate -group {speriph_master[TIMER]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[1]/wen}
+add wave -noupdate -group {speriph_master[TIMER]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[1]/wdata}
+add wave -noupdate -group {speriph_master[TIMER]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[1]/be}
+add wave -noupdate -group {speriph_master[TIMER]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[1]/gnt}
+add wave -noupdate -group {speriph_master[TIMER]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[1]/id}
+add wave -noupdate -group {speriph_master[TIMER]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[1]/r_valid}
+add wave -noupdate -group {speriph_master[TIMER]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[1]/r_opc}
+add wave -noupdate -group {speriph_master[TIMER]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[1]/r_id}
+add wave -noupdate -group {speriph_master[TIMER]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[1]/r_rdata}
+add wave -noupdate -group {speriph_master[EVENTU]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[2]/req}
+add wave -noupdate -group {speriph_master[EVENTU]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[2]/add}
+add wave -noupdate -group {speriph_master[EVENTU]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[2]/wen}
+add wave -noupdate -group {speriph_master[EVENTU]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[2]/wdata}
+add wave -noupdate -group {speriph_master[EVENTU]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[2]/be}
+add wave -noupdate -group {speriph_master[EVENTU]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[2]/gnt}
+add wave -noupdate -group {speriph_master[EVENTU]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[2]/id}
+add wave -noupdate -group {speriph_master[EVENTU]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[2]/r_valid}
+add wave -noupdate -group {speriph_master[EVENTU]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[2]/r_opc}
+add wave -noupdate -group {speriph_master[EVENTU]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[2]/r_id}
+add wave -noupdate -group {speriph_master[EVENTU]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[2]/r_rdata}
+add wave -noupdate -group {speriph_master[UNUSED]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[3]/req}
+add wave -noupdate -group {speriph_master[UNUSED]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[3]/add}
+add wave -noupdate -group {speriph_master[UNUSED]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[3]/wen}
+add wave -noupdate -group {speriph_master[UNUSED]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[3]/wdata}
+add wave -noupdate -group {speriph_master[UNUSED]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[3]/be}
+add wave -noupdate -group {speriph_master[UNUSED]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[3]/gnt}
+add wave -noupdate -group {speriph_master[UNUSED]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[3]/id}
+add wave -noupdate -group {speriph_master[UNUSED]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[3]/r_valid}
+add wave -noupdate -group {speriph_master[UNUSED]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[3]/r_opc}
+add wave -noupdate -group {speriph_master[UNUSED]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[3]/r_id}
+add wave -noupdate -group {speriph_master[UNUSED]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[3]/r_rdata}
+add wave -noupdate -group {speriph_master[HWPE]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/req}
+add wave -noupdate -group {speriph_master[HWPE]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/add}
+add wave -noupdate -group {speriph_master[HWPE]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/wen}
+add wave -noupdate -group {speriph_master[HWPE]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/wdata}
+add wave -noupdate -group {speriph_master[HWPE]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/be}
+add wave -noupdate -group {speriph_master[HWPE]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/gnt}
+add wave -noupdate -group {speriph_master[HWPE]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/id}
+add wave -noupdate -group {speriph_master[HWPE]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/r_valid}
+add wave -noupdate -group {speriph_master[HWPE]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/r_opc}
+add wave -noupdate -group {speriph_master[HWPE]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/r_id}
+add wave -noupdate -group {speriph_master[HWPE]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/r_rdata}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/req}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/add}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/wen}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/wdata}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/be}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/gnt}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/id}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/r_valid}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/r_opc}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/r_id}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/r_rdata}
+add wave -noupdate -group {speriph_master[DMA]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/req}
+add wave -noupdate -group {speriph_master[DMA]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/add}
+add wave -noupdate -group {speriph_master[DMA]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/wen}
+add wave -noupdate -group {speriph_master[DMA]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/wdata}
+add wave -noupdate -group {speriph_master[DMA]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/be}
+add wave -noupdate -group {speriph_master[DMA]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/gnt}
+add wave -noupdate -group {speriph_master[DMA]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/id}
+add wave -noupdate -group {speriph_master[DMA]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/r_valid}
+add wave -noupdate -group {speriph_master[DMA]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/r_opc}
+add wave -noupdate -group {speriph_master[DMA]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/r_id}
+add wave -noupdate -group {speriph_master[DMA]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/r_rdata}
+add wave -noupdate -group {speriph_master[EXT]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/req}
+add wave -noupdate -group {speriph_master[EXT]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/add}
+add wave -noupdate -group {speriph_master[EXT]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/wen}
+add wave -noupdate -group {speriph_master[EXT]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/wdata}
+add wave -noupdate -group {speriph_master[EXT]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/be}
+add wave -noupdate -group {speriph_master[EXT]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/gnt}
+add wave -noupdate -group {speriph_master[EXT]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/id}
+add wave -noupdate -group {speriph_master[EXT]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/r_valid}
+add wave -noupdate -group {speriph_master[EXT]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/r_opc}
+add wave -noupdate -group {speriph_master[EXT]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/r_id}
+add wave -noupdate -group {speriph_master[EXT]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/r_rdata}
+add wave -noupdate -group {core_periph_slave[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[0]/req}
+add wave -noupdate -group {core_periph_slave[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[0]/gnt}
+add wave -noupdate -group {core_periph_slave[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[0]/add}
+add wave -noupdate -group {core_periph_slave[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[0]/wen}
+add wave -noupdate -group {core_periph_slave[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[0]/wdata}
+add wave -noupdate -group {core_periph_slave[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[0]/be}
+add wave -noupdate -group {core_periph_slave[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[0]/id}
+add wave -noupdate -group {core_periph_slave[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[0]/r_valid}
+add wave -noupdate -group {core_periph_slave[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[0]/r_opc}
+add wave -noupdate -group {core_periph_slave[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[0]/r_id}
+add wave -noupdate -group {core_periph_slave[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[0]/r_rdata}
+add wave -noupdate -group {core_periph_slave[5]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[5]/req}
+add wave -noupdate -group {core_periph_slave[5]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[5]/add}
+add wave -noupdate -group {core_periph_slave[5]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[5]/wen}
+add wave -noupdate -group {core_periph_slave[5]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[5]/wdata}
+add wave -noupdate -group {core_periph_slave[5]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[5]/be}
+add wave -noupdate -group {core_periph_slave[5]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[5]/gnt}
+add wave -noupdate -group {core_periph_slave[5]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[5]/id}
+add wave -noupdate -group {core_periph_slave[5]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[5]/r_valid}
+add wave -noupdate -group {core_periph_slave[5]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[5]/r_opc}
+add wave -noupdate -group {core_periph_slave[5]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[5]/r_id}
+add wave -noupdate -group {core_periph_slave[5]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[5]/r_rdata}
 add wave -noupdate -group rab /hero_tb/dut/i_rab/from_pulp_req_i
 add wave -noupdate -group rab /hero_tb/dut/i_rab/from_pulp_resp_o
 add wave -noupdate -group rab /hero_tb/dut/i_rab/from_pulp_miss_irq_o
@@ -1767,11 +1883,17 @@ add wave -noupdate -group rab /hero_tb/dut/i_rab/from_host_prot_irq_o
 add wave -noupdate -group rab /hero_tb/dut/i_rab/to_pulp_req_o
 add wave -noupdate -group rab /hero_tb/dut/i_rab/to_pulp_resp_i
 add wave -noupdate -group rab /hero_tb/dut/i_rab/mh_fifo_full_irq_o
+add wave -noupdate /hero_tb/dut/clk_i
+add wave -noupdate /hero_tb/dut/rst_ni
+add wave -noupdate /hero_tb/dut/cl_fetch_en_i
+add wave -noupdate /hero_tb/dut/cl_busy_o
+add wave -noupdate /hero_tb/dut/cl_eoc_o
+add wave -noupdate {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/pe_oup_gnt}
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 3} {47567200 ps} 1} {{Cursor 4} {15131695 ps} 0}
+WaveRestoreCursors {{Cursor 4} {6698680 ps} 1} {{Cursor 3} {15044664 ps} 0}
 quietly wave cursor active 2
 configure wave -namecolwidth 308
-configure wave -valuecolwidth 363
+configure wave -valuecolwidth 149
 configure wave -justifyvalue left
 configure wave -signalnamewidth 1
 configure wave -snapdistance 10
@@ -1784,4 +1906,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {10396448 ps} {15819552 ps}
+WaveRestoreZoom {14503748 ps} {15568252 ps}
