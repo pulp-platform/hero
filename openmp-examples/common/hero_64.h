@@ -23,8 +23,8 @@
  * Public API
  **************************************************************************************************/
 
-// This API provides loads and stores of 32-bit, 16-bit, and 8-bit signed and unsigned integers to
-// 64-bit addresses.  Each load and store exists in two variants:
+// This API provides loads and stores of 32-bit, 16-bit, and 8-bit unsigned integers to 64-bit
+// addresses.  Each load and store exists in two variants:
 // -  The blocking functions (no suffix) do not return until the memory access has succeeded.  Loads
 //    return the loaded value.
 // -  The non-blocking functions (`_noblock` suffix) return 0 on success and a non-zero value on
@@ -33,26 +33,14 @@ inline static __attribute__((used)) uint32_t  hero_load_uint32          (const u
 inline static __attribute__((used)) void      hero_store_uint32         (const uint64_t addr, const uint32_t val);
 inline static __attribute__((used)) int       hero_load_uint32_noblock  (const uint64_t addr, uint32_t* const val);
 inline static __attribute__((used)) int       hero_store_uint32_noblock (const uint64_t addr, const uint32_t val);
-inline static __attribute__((used)) int32_t   hero_load_int32           (const uint64_t addr);
-inline static __attribute__((used)) void      hero_store_int32          (const uint64_t addr, const int32_t val);
-inline static __attribute__((used)) int       hero_load_int32_noblock   (const uint64_t addr, int32_t* const val);
-inline static __attribute__((used)) int       hero_store_int32_noblock  (const uint64_t addr, const int32_t val);
 inline static __attribute__((used)) uint16_t  hero_load_uint16          (const uint64_t addr);
 inline static __attribute__((used)) void      hero_store_uint16         (const uint64_t addr, const uint16_t val);
 inline static __attribute__((used)) int       hero_load_uint16_noblock  (const uint64_t addr, uint16_t* const val);
 inline static __attribute__((used)) int       hero_store_uint16_noblock (const uint64_t addr, const uint16_t val);
-inline static __attribute__((used)) int16_t   hero_load_int16           (const uint64_t addr);
-inline static __attribute__((used)) void      hero_store_int16          (const uint64_t addr, const int16_t val);
-inline static __attribute__((used)) int       hero_load_int16_noblock   (const uint64_t addr, int16_t* const val);
-inline static __attribute__((used)) int       hero_store_int16_noblock  (const uint64_t addr, const int16_t val);
 inline static __attribute__((used)) uint8_t   hero_load_uint8           (const uint64_t addr);
 inline static __attribute__((used)) void      hero_store_uint8          (const uint64_t addr, const uint8_t val);
 inline static __attribute__((used)) int       hero_load_uint8_noblock   (const uint64_t addr, uint8_t* const val);
 inline static __attribute__((used)) int       hero_store_uint8_noblock  (const uint64_t addr, const uint8_t val);
-inline static __attribute__((used)) int8_t    hero_load_int8            (const uint64_t addr);
-inline static __attribute__((used)) void      hero_store_int8           (const uint64_t addr, const int8_t val);
-inline static __attribute__((used)) int       hero_load_int8_noblock    (const uint64_t addr, int8_t* const val);
-inline static __attribute__((used)) int       hero_store_int8_noblock   (const uint64_t addr, const int8_t val);
 
 
 /***************************************************************************************************
@@ -129,14 +117,14 @@ inline static void __loop_forever()
 #define __hero_64_op_suffix_16(type) "h" __hero_64_op_suffix_ ## type
 #define __hero_64_op_suffix_8(type)  "b" __hero_64_op_suffix_ ## type
 
-#define __hero_64_define_load_noblock(type, bits) \
-  inline static int hero_load_ ## type ## bits ## _noblock(\
-      const uint64_t addr, type ## bits ## _t* const val) { \
-    __hero_64_noblock_pre(type ## bits ## _t) \
-    type ## bits ## _t reg; \
+#define __hero_64_define_load_noblock(bits) \
+  inline static int hero_load_uint ## bits ## _noblock(\
+      const uint64_t addr, uint ## bits ## _t* const val) { \
+    __hero_64_noblock_pre(uint ## bits ## _t) \
+    uint ## bits ## _t reg; \
     __asm__ volatile( \
         "sw %[upper], 0(%[__addrext_reg])\n\t" /* set address extension register */ \
-        "l" __hero_64_op_suffix(type, bits) " %[reg], 0(%[lower])\n\t" /* do actual load */ \
+        "l" __hero_64_op_suffix(uint, bits) " %[reg], 0(%[lower])\n\t" /* do actual load */ \
         "lw %[tryx_res], 4(%[__addrext_reg])" /* read the tryx result */ \
         : [reg] "=&r" (reg), [tryx_res] "=r" (tryx_res) \
         : [upper] "r" (upper), [__addrext_reg] "r" (__addrext_reg), [lower] "r" (lower) \
@@ -146,10 +134,10 @@ inline static void __loop_forever()
     __hero_64_noblock_post \
   }
 
-#define __hero_64_define_store_noblock(type, bits) \
-  inline static int hero_store_ ## type ## bits ## _noblock(\
-      const uint64_t addr, const type ## bits ## _t val) { \
-    __hero_64_noblock_pre(type ## bits ## _t) \
+#define __hero_64_define_store_noblock(bits) \
+  inline static int hero_store_uint ## bits ## _noblock(\
+      const uint64_t addr, const uint ## bits ## _t val) { \
+    __hero_64_noblock_pre(uint ## bits ## _t) \
     __asm__ volatile( \
         "sw %[upper], 0(%[__addrext_reg])\n\t" /* set address extension register */ \
         "s" __hero_64_op_suffix(int, bits) " %[val], 0(%[lower])\n\t" /* do actual store */ \
@@ -169,32 +157,29 @@ inline static void __loop_forever()
   }
   // TODO: handle misses (or properly abort execution if misses cannot be handled?)
 
-#define __hero_64_define_load(type) \
-  inline static type ## _t hero_load_ ## type (const uint64_t addr) { \
-    type ## _t val; \
-    const int res = hero_load_ ## type ## _noblock(addr, &val); \
+#define __hero_64_define_load(size) \
+  inline static uint ## size ## _t hero_load_uint ## size(const uint64_t addr) { \
+    uint ## size ## _t val; \
+    const int res = hero_load_uint ## size ## _noblock(addr, &val); \
     __hero_64_check_mem_access \
     return val; \
   }
 
-#define __hero_64_define_store(type) \
-  inline static void hero_store_ ## type (const uint64_t addr, const type ## _t val) { \
-    const int res = hero_store_ ## type ## _noblock(addr, val); \
+#define __hero_64_define_store(size) \
+  inline static void hero_store_uint ## size (const uint64_t addr, const uint ## size ## _t val) { \
+    const int res = hero_store_uint ## size ## _noblock(addr, val); \
     __hero_64_check_mem_access \
   }
 
-#define __hero_64_define(type, size) \
-  __hero_64_define_load_noblock(type, size) \
-  __hero_64_define_load(type ## size) \
-  __hero_64_define_store_noblock(type, size) \
-  __hero_64_define_store(type ## size)
+#define __hero_64_define(size) \
+  __hero_64_define_load_noblock(size) \
+  __hero_64_define_load(size) \
+  __hero_64_define_store_noblock(size) \
+  __hero_64_define_store(size)
 
-__hero_64_define(uint, 32)
-__hero_64_define( int, 32)
-__hero_64_define(uint, 16)
-__hero_64_define( int, 16)
-__hero_64_define(uint,  8)
-__hero_64_define( int,  8)
+__hero_64_define(32)
+__hero_64_define(16)
+__hero_64_define( 8)
 
 #endif
 

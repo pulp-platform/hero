@@ -27,18 +27,12 @@ inline static void check_addr(const uint64_t base)
 
   hero_store_uint8(addr, (uint8_t)val);
   assert(hero_load_uint8(addr) == (uint8_t)val);
-  hero_store_int8(addr, -(int8_t)val);
-  assert(hero_load_int8(addr) == -(int8_t)val);
 
   hero_store_uint16(addr, (uint16_t)val);
   assert(hero_load_uint16(addr) == (uint16_t)val);
-  hero_store_int16(addr, -(uint16_t)val);
-  assert(hero_load_int16(addr) == -(uint16_t)val);
 
   hero_store_uint32(addr, (uint32_t)val);
   assert(hero_load_uint32(addr) == (uint32_t)val);
-  hero_store_int32(addr, -(uint32_t)val);
-  assert(hero_load_int32(addr) == -(uint32_t)val);
 }
 
 unsigned test_hero_64()
