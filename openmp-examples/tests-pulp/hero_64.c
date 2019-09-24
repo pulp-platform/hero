@@ -22,8 +22,8 @@
 
 inline static void check_addr(const uint64_t base)
 {
-  const uint64_t addr = base + 4*omp_get_thread_num();
-  const int val = 0x12345678 + omp_get_thread_num();
+  const uint64_t addr = base + 8*omp_get_thread_num();
+  const uint64_t val = 0x1234567812345678 + omp_get_thread_num();
 
   *(uint8_t*)addr = 0;
   hero_store_uint8(addr, (uint8_t)val);
@@ -36,6 +36,10 @@ inline static void check_addr(const uint64_t base)
   *(uint32_t*)addr = 0;
   hero_store_uint32(addr, (uint32_t)val);
   assert(hero_load_uint32(addr) == (uint32_t)val);
+
+  *(uint64_t*)addr = 0;
+  hero_store_uint64(addr, (uint64_t)val);
+  assert(hero_load_uint64(addr) == (uint64_t)val);
 }
 
 unsigned test_hero_64()

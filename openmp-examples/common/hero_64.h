@@ -23,14 +23,26 @@
  * Public API
  **************************************************************************************************/
 
-// This API provides loads and stores of 32-bit, 16-bit, and 8-bit unsigned integers to 64-bit
-// addresses.  Each load and store exists in two variants:
+// This API provides loads and stores of 64-bit, 32-bit, 16-bit, and 8-bit unsigned integers to
+// 64-bit addresses.  Each load and store exists in two variants:
 // -  The blocking functions (no suffix) do not return until the memory access has succeeded.  Loads
 //    return the loaded value.
 // -  The non-blocking functions (`_noblock` suffix) return 0 on success and a non-zero value on
 //    failure.  Loads pass the loaded value back through the `val` pointer.  The value stored in
 //    `val` after a failing load is undefined.  It is illegal to let `val` point to a memory
 //    location that might be unaccessible; violating this leads to undefined behavior.
+// Natively aligned 32-bit, 16-bit, and 8-bit memory accesses give rise to a single memory access
+// operation and are thus single-copy atomic.  Unaligned or 64-bit memory accesses give rise to at
+// least two memory access operations, and such loads from a memory location for which a race exists
+// return an undefined value.
+// For 64-bit memory accesses, the lower 32 bit are accessed before the upper 32 bit.  For the
+// `uint64_noblock` functions, the upper 32 bit are always accessed (i.e., even if access to the
+// lower 32 bit has failed), and the return value is the bitwise OR of the two `uint32_noblock`
+// return values.
+inline static __attribute__((used)) uint64_t  hero_load_uint64          (const uint64_t addr);
+inline static __attribute__((used)) void      hero_store_uint64         (const uint64_t addr, const uint64_t val);
+inline static __attribute__((used)) int       hero_load_uint64_noblock  (const uint64_t addr, uint64_t* const val);
+inline static __attribute__((used)) int       hero_store_uint64_noblock (const uint64_t addr, const uint64_t val);
 inline static __attribute__((used)) uint32_t  hero_load_uint32          (const uint64_t addr);
 inline static __attribute__((used)) void      hero_store_uint32         (const uint64_t addr, const uint32_t val);
 inline static __attribute__((used)) int       hero_load_uint32_noblock  (const uint64_t addr, uint32_t* const val);
@@ -182,6 +194,39 @@ inline static void __loop_forever()
 __hero_64_define(32)
 __hero_64_define(16)
 __hero_64_define( 8)
+
+uint64_t hero_load_uint64(const uint64_t addr)
+{
+  const uint32_t lower = hero_load_uint32(addr);
+  const uint32_t upper = hero_load_uint32(addr+4);
+  return ((uint64_t)upper << 32) | lower;
+}
+
+void hero_store_uint64(const uint64_t addr, const uint64_t val)
+{
+  const uint32_t lower = (uint32_t)val;
+  hero_store_uint32(addr, lower);
+  const uint32_t upper = (uint32_t)(val >> 32);
+  hero_store_uint32(addr+4, upper);
+}
+
+int hero_load_uint64_noblock(const uint64_t addr, uint64_t* const val)
+{
+  uint32_t* const lower = (uint32_t*)val;
+  const int res_lower = hero_load_uint32_noblock(addr, lower);
+  uint32_t* const upper = lower + 1;
+  const int res_upper = hero_load_uint32_noblock(addr+4, upper);
+  return res_lower | res_upper;
+}
+
+int hero_store_uint64_noblock(const uint64_t addr, const uint64_t val)
+{
+  const uint32_t lower = (uint32_t)val;
+  const int res_lower = hero_store_uint32_noblock(addr, lower);
+  const uint32_t upper = (uint32_t)(val >> 32);
+  const int res_upper = hero_store_uint32_noblock(addr+4, upper);
+  return res_lower | res_upper;
+}
 
 #endif
 
