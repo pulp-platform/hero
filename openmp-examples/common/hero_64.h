@@ -28,7 +28,9 @@
 // -  The blocking functions (no suffix) do not return until the memory access has succeeded.  Loads
 //    return the loaded value.
 // -  The non-blocking functions (`_noblock` suffix) return 0 on success and a non-zero value on
-//    failure.  Loads pass the loaded value back through the `val` pointer.
+//    failure.  Loads pass the loaded value back through the `val` pointer.  The value stored in
+//    `val` after a failing load is undefined.  It is illegal to let `val` point to a memory
+//    location that might be unaccessible; violating this leads to undefined behavior.
 inline static __attribute__((used)) uint32_t  hero_load_uint32          (const uint64_t addr);
 inline static __attribute__((used)) void      hero_store_uint32         (const uint64_t addr, const uint32_t val);
 inline static __attribute__((used)) int       hero_load_uint32_noblock  (const uint64_t addr, uint32_t* const val);
