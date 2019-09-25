@@ -24,7 +24,9 @@ module axi_rab_wrap #(
   parameter int unsigned  AxiIdWidth = 0,
   parameter int unsigned  AxiUserWidth = 0,
   parameter type          axi_req_t = logic,
-  parameter type          axi_resp_t = logic
+  parameter type          axi_resp_t = logic,
+  parameter type          axi_lite_req_t = logic,
+  parameter type          axi_lite_resp_t = logic
 ) (
   input  logic clk_i,
   input  logic rst_ni,
@@ -47,7 +49,10 @@ module axi_rab_wrap #(
   output axi_req_t  to_pulp_req_o,
   input  axi_resp_t to_pulp_resp_i,
 
-  output logic mh_fifo_full_irq_o
+  output logic mh_fifo_full_irq_o,
+
+  input  axi_lite_req_t   conf_req_i,
+  output axi_lite_resp_t  conf_resp_o
 );
 
   axi_rab_top #(
@@ -229,27 +234,27 @@ module axi_rab_wrap #(
     // }}}
 
     // AXI4 Lite Slave (Configuration Interface) {{{
-    .s_axi4lite_awaddr  ('0/* TODO */),
-    .s_axi4lite_awvalid ('0/* TODO */),
-    .s_axi4lite_awready (/* TODO */),
+    .s_axi4lite_awaddr  (conf_req_i.aw.addr),
+    .s_axi4lite_awvalid (conf_req_i.aw_valid),
+    .s_axi4lite_awready (conf_resp_o.aw_ready),
 
-    .s_axi4lite_wdata   ('0/* TODO */),
-    .s_axi4lite_wvalid  ('0/* TODO */),
-    .s_axi4lite_wready  (/* TODO */),
-    .s_axi4lite_wstrb   ('0/* TODO */),
+    .s_axi4lite_wdata   (conf_req_i.w.data),
+    .s_axi4lite_wvalid  (conf_req_i.w_valid),
+    .s_axi4lite_wready  (conf_resp_o.w_ready),
+    .s_axi4lite_wstrb   (conf_req_i.w.strb),
 
-    .s_axi4lite_bresp   (/* TODO */),
-    .s_axi4lite_bvalid  (/* TODO */),
-    .s_axi4lite_bready  ('0/* TODO */),
+    .s_axi4lite_bresp   (conf_resp_o.b.resp),
+    .s_axi4lite_bvalid  (conf_resp_o.b_valid),
+    .s_axi4lite_bready  (conf_req_i.b_ready),
 
-    .s_axi4lite_araddr  ('0/* TODO */),
-    .s_axi4lite_arvalid ('0/* TODO */),
-    .s_axi4lite_arready (/* TODO */),
+    .s_axi4lite_araddr  (conf_req_i.ar.addr),
+    .s_axi4lite_arvalid (conf_req_i.ar_valid),
+    .s_axi4lite_arready (conf_resp_o.ar_ready),
 
-    .s_axi4lite_rdata   (/* TODO */),
-    .s_axi4lite_rresp   (/* TODO */),
-    .s_axi4lite_rvalid  (/* TODO */),
-    .s_axi4lite_rready  ('0/* TODO */),
+    .s_axi4lite_rdata   (conf_resp_o.r.data),
+    .s_axi4lite_rresp   (conf_resp_o.r.resp),
+    .s_axi4lite_rvalid  (conf_resp_o.r_valid),
+    .s_axi4lite_rready  (conf_req_i.r_ready),
     // }}}
 
     .int_miss     ({from_pulp_miss_irq_o,   from_host_miss_irq_o}),

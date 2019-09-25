@@ -24,10 +24,17 @@ package automatic hero_pkg;
   endfunction
   // L2 Memory
   localparam int unsigned L2_SIZE = pulp_cluster_cfg_pkg::L2_SIZE;
-  // Interface Types
+  // Peripherals
+  localparam int unsigned AXI_LITE_AW = 32;
+  localparam int unsigned AXI_LITE_DW = 64;
+  // AXI Interface Types
   typedef logic [AXI_AW-1:0]        addr_t;
   typedef logic [AXI_IW_SB_INP-1:0] id_slv_t;
   typedef logic [AXI_UW-1:0]        user_t;
+  // AXI-Lite Interface Types
+  typedef logic [AXI_LITE_AW-1:0]   lite_addr_t;
+  typedef logic [AXI_LITE_DW-1:0]   lite_data_t;
+  typedef logic [AXI_LITE_DW/8-1:0] lite_strb_t;
 endpackage
 import hero_pkg::*;
 
@@ -39,7 +46,9 @@ module hero #(
   parameter int unsigned  AXI_DW = 256,             // [bit]
   parameter int unsigned  L2_N_AXI_PORTS = 1,       // must be a power of 2
   parameter type          axi_req_t = logic,
-  parameter type          axi_resp_t = logic
+  parameter type          axi_resp_t = logic,
+  parameter type          axi_lite_req_t = logic,
+  parameter type          axi_lite_resp_t = logic
 ) (
   // Clocks and Resets
   input  logic                  clk_i,
@@ -51,7 +60,9 @@ module hero #(
   output logic [N_CLUSTERS-1:0] cl_busy_o,
 
   output axi_req_t              dram_req_o,
-  input  axi_resp_t             dram_resp_i
+  input  axi_resp_t             dram_resp_i,
+  input  axi_lite_req_t         rab_conf_req_i,
+  output axi_lite_resp_t        rab_conf_resp_o
 );
 
   // Derived Constants
@@ -384,19 +395,21 @@ module hero #(
   end
 
   axi_rab_wrap #(
-    .L1NumSlicesPulp  (           32),
-    .L1NumSlicesHost  (            4),
-    .L2Enable         (         1'b1),
-    .L2NumSets        (           32),
-    .L2NumSetEntries  (           32),
-    .L2NumParVaRams   (            4),
-    .MhFifoDepth      (           16),
-    .AxiAddrWidth     (AXI_AW       ),
-    .AxiDataWidth     (AXI_DW       ),
-    .AxiIdWidth       (AXI_IW_SB_OUP),
-    .AxiUserWidth     (AXI_UW       ),
-    .axi_req_t        (axi_req_t    ),
-    .axi_resp_t       (axi_resp_t   )
+    .L1NumSlicesPulp  (           32  ),
+    .L1NumSlicesHost  (            4  ),
+    .L2Enable         (         1'b1  ),
+    .L2NumSets        (           32  ),
+    .L2NumSetEntries  (           32  ),
+    .L2NumParVaRams   (            4  ),
+    .MhFifoDepth      (           16  ),
+    .AxiAddrWidth     (AXI_AW         ),
+    .AxiDataWidth     (AXI_DW         ),
+    .AxiIdWidth       (AXI_IW_SB_OUP  ),
+    .AxiUserWidth     (AXI_UW         ),
+    .axi_req_t        (axi_req_t      ),
+    .axi_resp_t       (axi_resp_t     ),
+    .axi_lite_req_t   (axi_lite_req_t ),
+    .axi_lite_resp_t  (axi_lite_resp_t)
   ) i_rab (
     .clk_i,
     .rst_ni,
@@ -414,7 +427,9 @@ module hero #(
     .from_host_prot_irq_o   (/* TODO */),
     .to_pulp_req_o          (rab_slv_req),
     .to_pulp_resp_i         (rab_slv_resp),
-    .mh_fifo_full_irq_o     (/* TODO */)
+    .mh_fifo_full_irq_o     (/* TODO */),
+    .conf_req_i             (rab_conf_req_i),
+    .conf_resp_o            (rab_conf_resp_o)
   );
 
   axi_id_remap #(

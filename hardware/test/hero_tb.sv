@@ -27,13 +27,23 @@ module hero_tb #(
   typedef logic [AXI_IW-1:0]    axi_id_t;
   typedef logic [AXI_DW/8-1:0]  axi_strb_t;
   typedef hero_pkg::user_t      axi_user_t;
-  `AXI_TYPEDEF_AW_CHAN_T(       axi_aw_t,   axi_addr_t, axi_id_t, axi_user_t);
-  `AXI_TYPEDEF_W_CHAN_T(        axi_w_t,    axi_data_t, axi_strb_t, axi_user_t);
-  `AXI_TYPEDEF_B_CHAN_T(        axi_b_t,    axi_id_t, axi_user_t);
-  `AXI_TYPEDEF_AR_CHAN_T(       axi_ar_t,   axi_addr_t, axi_id_t, axi_user_t);
-  `AXI_TYPEDEF_R_CHAN_T(        axi_r_t,    axi_data_t, axi_id_t, axi_user_t);
-  `AXI_TYPEDEF_REQ_T(           axi_req_t,  axi_aw_t, axi_w_t, axi_ar_t);
-  `AXI_TYPEDEF_RESP_T(          axi_resp_t, axi_b_t, axi_r_t);
+  `AXI_TYPEDEF_AW_CHAN_T(       axi_aw_t,     axi_addr_t, axi_id_t, axi_user_t);
+  `AXI_TYPEDEF_W_CHAN_T(        axi_w_t,      axi_data_t, axi_strb_t, axi_user_t);
+  `AXI_TYPEDEF_B_CHAN_T(        axi_b_t,      axi_id_t, axi_user_t);
+  `AXI_TYPEDEF_AR_CHAN_T(       axi_ar_t,     axi_addr_t, axi_id_t, axi_user_t);
+  `AXI_TYPEDEF_R_CHAN_T(        axi_r_t,      axi_data_t, axi_id_t, axi_user_t);
+  `AXI_TYPEDEF_REQ_T(           axi_req_t,    axi_aw_t, axi_w_t, axi_ar_t);
+  `AXI_TYPEDEF_RESP_T(          axi_resp_t,   axi_b_t, axi_r_t);
+
+  typedef hero_pkg::lite_addr_t axi_lite_addr_t;
+  typedef hero_pkg::lite_data_t axi_lite_data_t;
+  typedef hero_pkg::lite_strb_t axi_lite_strb_t;
+  `AXI_LITE_TYPEDEF_AX_CHAN_T(  axi_lite_ax_t,    axi_lite_addr_t, axi_id_t, axi_user_t);
+  `AXI_LITE_TYPEDEF_W_CHAN_T(   axi_lite_w_t,     axi_lite_data_t, axi_lite_strb_t, axi_user_t);
+  `AXI_LITE_TYPEDEF_B_CHAN_T(   axi_lite_b_t,     axi_id_t, axi_user_t);
+  `AXI_LITE_TYPEDEF_R_CHAN_T(   axi_lite_r_t,     axi_lite_data_t, axi_id_t, axi_user_t);
+  `AXI_LITE_TYPEDEF_REQ_T(      axi_lite_req_t,   axi_lite_ax_t, axi_lite_w_t);
+  `AXI_LITE_TYPEDEF_RESP_T(     axi_lite_resp_t,  axi_lite_b_t, axi_lite_r_t);
 
   logic clk,
         rst_n;
@@ -44,6 +54,9 @@ module hero_tb #(
 
   axi_req_t   dram_req;
   axi_resp_t  dram_resp;
+
+  axi_lite_req_t  rab_conf_req;
+  axi_lite_resp_t rab_conf_resp;
 
   clk_rst_gen #(
     .CLK_PERIOD     (CLK_PERIOD),
@@ -58,7 +71,9 @@ module hero_tb #(
     .AXI_DW         (AXI_DW),
     .L2_N_AXI_PORTS (L2_N_AXI_PORTS),
     .axi_req_t      (axi_req_t),
-    .axi_resp_t     (axi_resp_t)
+    .axi_resp_t     (axi_resp_t),
+    .axi_lite_req_t (axi_lite_req_t),
+    .axi_lite_resp_t(axi_lite_resp_t)
   ) dut (
     .clk_i          (clk),
     .rst_ni         (rst_n),
@@ -68,7 +83,9 @@ module hero_tb #(
     .cl_busy_o      (cl_busy),
 
     .dram_req_o     (dram_req),
-    .dram_resp_i    (dram_resp)
+    .dram_resp_i    (dram_resp),
+    .rab_conf_req_i (rab_conf_req),
+    .rab_conf_resp_o(rab_conf_resp)
   );
 
   // No memory attached at the moment.
@@ -78,6 +95,7 @@ module hero_tb #(
   // terminating the simulation.
   initial begin
     cl_fetch_en = '0;
+    rab_conf_req = '{default: '0};
     wait (rst_n);
     cl_fetch_en[0] = 1'b1;
     wait (cl_eoc[0]);
