@@ -27,10 +27,11 @@ module hero_tb #(
   timeprecision 1ps;
 
   localparam int unsigned AXI_IW = hero_pkg::axi_iw_sb_oup(N_CLUSTERS);
+  localparam int unsigned AXI_SW = AXI_DW/8;  // width of strobe
   typedef hero_pkg::addr_t      axi_addr_t;
   typedef logic [AXI_DW-1:0]    axi_data_t;
   typedef logic [AXI_IW-1:0]    axi_id_t;
-  typedef logic [AXI_DW/8-1:0]  axi_strb_t;
+  typedef logic [AXI_SW-1:0]    axi_strb_t;
   typedef hero_pkg::user_t      axi_user_t;
   `AXI_TYPEDEF_AW_CHAN_T(       axi_aw_t,     axi_addr_t, axi_id_t, axi_user_t);
   `AXI_TYPEDEF_W_CHAN_T(        axi_w_t,      axi_data_t, axi_strb_t, axi_user_t);
@@ -93,8 +94,116 @@ module hero_tb #(
     .rab_conf_resp_o(rab_conf_resp)
   );
 
-  // No memory attached at the moment.
-  assign dram_resp = '0;
+  // Emulate infinite memory with AXI slave port.
+  initial begin
+    automatic logic [7:0] mem[axi_addr_t];
+    automatic axi_ar_t ar_queue[$];
+    automatic axi_aw_t aw_queue[$];
+    automatic axi_b_t b_queue[$];
+    automatic shortint unsigned r_cnt = 0, w_cnt = 0;
+    dram_resp = '0;
+    wait (rst_n);
+    @(posedge clk);
+    fork
+      // AW
+      forever begin
+        dram_resp.aw_ready = 1'b1;
+        if (dram_req.aw_valid) begin
+          aw_queue.push_back(dram_req.aw);
+        end
+        @(posedge clk);
+      end
+      // W
+      forever begin
+        if (aw_queue.size() != 0) begin
+          dram_resp.w_ready = 1'b1;
+          if (dram_req.w_valid) begin
+            automatic axi_addr_t addr = aw_queue[0].addr;
+            automatic axi_pkg::size_t size = aw_queue[0].size;
+            for (shortint unsigned
+                i_byte = axi_pkg::beat_lower_byte(addr, size, AXI_SW, w_cnt);
+                i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, w_cnt);
+                i_byte++) begin
+              if (dram_req.w.strb[i_byte]) begin
+                automatic axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
+                mem[byte_addr] = dram_req.w.data[i_byte*8+:8];
+              end
+            end
+            if (w_cnt == aw_queue[0].len) begin
+              automatic axi_b_t b_beat = '0;
+              assert (dram_req.w.last) else $error("Expected last beat of W burst!");
+              b_beat.id = aw_queue[0].id;
+              b_beat.resp = axi_pkg::RESP_OKAY;
+              b_queue.push_back(b_beat);
+              w_cnt = 0;
+              void'(aw_queue.pop_front());
+            end else begin
+              assert (!dram_req.w.last) else $error("Did not expect last beat of W burst!");
+              w_cnt++;
+            end
+          end
+        end else begin
+          dram_resp.w_ready = 1'b0;
+        end
+        @(posedge clk);
+      end
+      // B
+      forever begin
+        if (b_queue.size() != 0) begin
+          dram_resp.b = b_queue[0];
+          dram_resp.b_valid = 1'b1;
+          if (dram_req.b_ready) begin
+            void'(b_queue.pop_front());
+          end
+        end else begin
+          dram_resp.b_valid = 1'b0;
+        end
+        @(posedge clk);
+      end
+      // AR
+      forever begin
+        dram_resp.ar_ready = 1'b1;
+        if (dram_req.ar_valid) begin
+          ar_queue.push_back(dram_req.ar);
+        end
+        @(posedge clk);
+      end
+      // R
+      forever begin
+        if (ar_queue.size() != 0) begin
+          automatic axi_addr_t addr = ar_queue[0].addr;
+          automatic axi_pkg::size_t size = ar_queue[0].size;
+          automatic axi_r_t r_beat = '0;
+          r_beat.data = 'x;
+          r_beat.id = ar_queue[0].id;
+          r_beat.resp = axi_pkg::RESP_OKAY;
+          for (shortint unsigned
+              i_byte = axi_pkg::beat_lower_byte(addr, size, AXI_SW, r_cnt);
+              i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, r_cnt);
+              i_byte++) begin
+            automatic axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
+            r_beat.data[i_byte*8+:8] = mem[byte_addr];
+          end
+          if (r_cnt == ar_queue[0].len) begin
+            r_beat.last = 1'b1;
+          end
+          dram_resp.r = r_beat;
+          dram_resp.r_valid = 1'b1;
+          if (dram_req.r_ready) begin
+            if (r_beat.last) begin
+              r_cnt = 0;
+              void'(ar_queue.pop_front());
+            end else begin
+              r_cnt++;
+            end
+          end
+        end else begin
+          dram_resp.r_valid = 1'b0;
+        end
+        @(posedge clk);
+      end
+    join
+  end
 
   task write_rab(input axi_lite_addr_t addr, input axi_lite_data_t data);
     rab_conf_req.aw.addr = addr;
