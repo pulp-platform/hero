@@ -23,7 +23,7 @@
 inline static void check_addr(const uint64_t base)
 {
   const uint64_t addr = base + 8*omp_get_thread_num();
-  const uint64_t val = 0x1234567812345678 + omp_get_thread_num();
+  const uint64_t val = 0x8765432112345678 + omp_get_thread_num();
 
   hero_store_uint8(addr, (uint8_t)val + 0x11);
   assert(hero_load_uint8(addr) == (uint8_t)val + 0x11);
