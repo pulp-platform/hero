@@ -9,6 +9,11 @@
 
 `include "axi/typedef.svh"
 
+`define wait_for(signal) \
+  do \
+    @(posedge clk); \
+  while (!signal);
+
 module hero_tb #(
   // TB Parameters
   parameter time          CLK_PERIOD = 1000ps,
@@ -91,6 +96,30 @@ module hero_tb #(
   // No memory attached at the moment.
   assign dram_resp = '0;
 
+  task write_rab(input axi_lite_addr_t addr, input axi_lite_data_t data);
+    rab_conf_req.aw.addr = addr;
+    rab_conf_req.aw.size = 3'h3;
+    rab_conf_req.aw_valid = 1'b1;
+    `wait_for(rab_conf_resp.aw_ready)
+    rab_conf_req.aw_valid = 1'b0;
+    rab_conf_req.w.data = data;
+    rab_conf_req.w.strb = '1;
+    rab_conf_req.w_valid = 1'b1;
+    `wait_for(rab_conf_resp.w_ready)
+    rab_conf_req.w_valid = 1'b0;
+    rab_conf_req.b_ready = 1'b1;
+    `wait_for(rab_conf_resp.b_valid)
+    rab_conf_req.b_ready = 1'b0;
+  endtask
+
+  task write_rab_slice(input axi_lite_addr_t slice_addr, input axi_addr_t first,
+      input axi_addr_t last, input axi_addr_t phys_addr);
+    write_rab(slice_addr+8'h00, first);
+    write_rab(slice_addr+8'h08, last);
+    write_rab(slice_addr+8'h10, phys_addr);
+    write_rab(slice_addr+8'h18, 64'h7);
+  endtask
+
   // Simulation control
   initial begin
     cl_fetch_en = '0;
@@ -98,6 +127,14 @@ module hero_tb #(
     // Wait for reset.
     wait (rst_n);
     @(posedge clk);
+
+    // Set up RAB slice from PULP to external memory: everything below 0x1000_0000;
+    write_rab_slice(32'hA0, 64'h0000_0000_0000_0000, 64'h0000_0000_0FFF_FFFF,
+        64'h0000_0000_0000_0000);
+    // Set up RAB slice from PULP to external memory: everything above 0x1D00_0000;
+    write_rab_slice(32'hC0, 64'h0000_0000_1D00_0000, 64'hFFFF_FFFF_FFFF_FFFF,
+        64'h0000_0000_1D00_0000);
+
     // Start cluster 0.
     cl_fetch_en[0] = 1'b1;
     // Wait for EOC of cluster 0 before terminating the simulation.
