@@ -73,38 +73,12 @@ module axi4_w_buffer
   localparam L1_FIFO_DEPTH      = 8;
   localparam L2_FIFO_DEPTH      = 4;
 
-  logic      [AXI_DATA_WIDTH-1:0] axi4_wdata;
-  logic                           axi4_wvalid;
-  logic                           axi4_wready;
-  logic    [AXI_DATA_WIDTH/8-1:0] axi4_wstrb;
-  logic                           axi4_wlast;
-  logic      [AXI_USER_WIDTH-1:0] axi4_wuser;
-
-  logic                           l1_fifo_valid_out;
-  logic                           l1_fifo_ready_in;
-  logic                           l1_fifo_valid_in;
-  logic                           l1_fifo_ready_out;
-
   logic                             l1_req;
-  logic                             l1_accept_cur, l1_save_cur, l1_drop_cur;
-  logic                             l1_master_cur;
-  logic        [AXI_ID_WIDTH-1:0]   l1_id_cur;
-  logic                     [7:0]   l1_len_cur;
-  logic                             l1_hit_cur, l1_prefetch_cur;
   logic                             l1_save_in, l1_save_out;
   logic [$clog2(L1_FIFO_DEPTH)-1:0] n_l1_save_SP;
 
-  logic                           l2_fifo_valid_out;
-  logic                           l2_fifo_ready_in;
-  logic                           l2_fifo_valid_in;
-  logic                           l2_fifo_ready_out;
 
   logic                           l2_req;
-  logic                           l2_accept_cur, l2_drop_cur;
-  logic                           l2_master_cur;
-  logic        [AXI_ID_WIDTH-1:0] l2_id_cur;
-  logic                     [7:0] l2_len_cur;
-  logic                           l2_hit_cur, l2_prefetch_cur;
 
   logic                           fifo_select, fifo_select_SN, fifo_select_SP;
   logic                           w_done;
@@ -141,77 +115,112 @@ module axi4_w_buffer
   hum_buf_state_t                 hum_buf_SP; // Present state
   hum_buf_state_t                 hum_buf_SN; // Next State
 
-  axi_buffer_rab
-    #(
-      .DATA_WIDTH       ( BUFFER_WIDTH        ),
-      .BUFFER_DEPTH     ( INPUT_BUFFER_DEPTH  )
-      )
-    u_input_buf
-    (
-      .clk       ( axi4_aclk                                                ),
-      .rstn      ( axi4_arstn                                               ),
-      // Push
-      .data_in   ( {s_axi4_wuser, s_axi4_wstrb, s_axi4_wdata, s_axi4_wlast} ),
-      .valid_in  ( s_axi4_wvalid                                            ),
-      .ready_out ( s_axi4_wready                                            ),
-      // Pop
-      .data_out  ( {axi4_wuser,   axi4_wstrb,   axi4_wdata,   axi4_wlast}   ),
-      .valid_out ( axi4_wvalid                                              ),
-      .ready_in  ( axi4_wready                                              )
-    );
+  typedef struct packed {
+    logic [AXI_DATA_WIDTH-1:0]    data;
+    logic [AXI_DATA_WIDTH/8-1:0]  strb;
+    logic [AXI_USER_WIDTH-1:0]    user;
+    logic                         last;
+  } axi_w_t;
 
-  axi_buffer_rab
-    #(
-      .DATA_WIDTH       ( 2+AXI_ID_WIDTH+8+4  ),
-      .BUFFER_DEPTH     ( L1_FIFO_DEPTH       )
-      )
-    u_l1_fifo
-    (
-      .clk       ( axi4_aclk                                                                                                    ),
-      .rstn      ( axi4_arstn                                                                                                   ),
-      // Push
-      .data_in   ( {l1_prefetch_i,   l1_hit_i,   l1_id_i,   l1_len_i,   l1_master_i,   l1_accept_i,   l1_save_i,   l1_drop_i}   ),
-      .valid_in  ( l1_fifo_valid_in                                                                                             ),
-      .ready_out ( l1_fifo_ready_out                                                                                            ),
-      // Pop
-      .data_out  ( {l1_prefetch_cur, l1_hit_cur, l1_id_cur, l1_len_cur, l1_master_cur, l1_accept_cur, l1_save_cur, l1_drop_cur} ),
-      .valid_out ( l1_fifo_valid_out                                                                                            ),
-      .ready_in  ( l1_fifo_ready_in                                                                                             )
-    );
+  axi_w_t axi_w;
+  logic   axi_w_valid, axi_w_ready;
+  stream_fifo #(
+    .FALL_THROUGH (1'b0),
+    .DEPTH        (INPUT_BUFFER_DEPTH),
+    .T            (axi_w_t)
+  ) i_input_buf (
+    .clk_i      (axi4_aclk),
+    .rst_ni     (axi4_arstn),
+    .flush_i    (1'b0),
+    .testmode_i (1'b0),
+    .data_i     ('{ data: s_axi4_wdata,
+                    strb: s_axi4_wstrb,
+                    user: s_axi4_wuser,
+                    last: s_axi4_wlast}),
+    .valid_i    (s_axi4_wvalid),
+    .ready_o    (s_axi4_wready),
+    .data_o     (axi_w),
+    .valid_o    (axi_w_valid),
+    .ready_i    (axi_w_ready),
+    .usage_o    (/* unused */)
+  );
+
+  typedef struct packed {
+    logic                     prefetch;
+    logic                     hit;
+    logic [AXI_ID_WIDTH-1:0]  id;
+    axi_pkg::len_t            len;
+    logic                     master;
+    logic                     accept;
+    logic                     save;
+    logic                     drop;
+  } desc_t;
+
+  desc_t l1;
+  logic l1_fifo_inp_valid, l1_fifo_inp_ready,
+        l1_fifo_oup_valid, l1_fifo_oup_ready;
+  stream_fifo #(
+    .FALL_THROUGH (1'b0),
+    .DEPTH        (L1_FIFO_DEPTH),
+    .T            (desc_t)
+  ) i_l1_fifo (
+    .clk_i  (axi4_aclk),
+    .rst_ni (axi4_arstn),
+    .flush_i    (1'b0),
+    .testmode_i (1'b0),
+    .data_i     ('{ prefetch: l1_prefetch_i,
+                    hit:      l1_hit_i,
+                    id:       l1_id_i,
+                    len:      l1_len_i,
+                    master:   l1_master_i,
+                    accept:   l1_accept_i,
+                    save:     l1_save_i,
+                    drop:     l1_drop_i}),
+    .valid_i    (l1_fifo_inp_valid),
+    .ready_o    (l1_fifo_inp_ready),
+    .data_o     (l1),
+    .valid_o    (l1_fifo_oup_valid),
+    .ready_i    (l1_fifo_oup_ready),
+    .usage_o    (/* unused */)
+  );
+
+  desc_t l2;
+  logic l2_fifo_inp_valid, l2_fifo_inp_ready,
+        l2_fifo_oup_valid, l2_fifo_oup_ready;
 
     // Push upon receiving new requests from the TLB.
     assign l1_req           = l1_accept_i | l1_save_i | l1_drop_i;
-    assign l1_fifo_valid_in = l1_req & l1_fifo_ready_out;
+    assign l1_fifo_inp_valid = l1_req & l1_fifo_inp_ready;
 
     // Signal handshake
-    assign l1_done_o  = l1_fifo_valid_in;
-    assign l2_done_o  = l2_fifo_valid_in;
+    assign l1_done_o  = l1_fifo_inp_valid;
+    assign l2_done_o  = l2_fifo_inp_valid;
 
     // Stall AW input of L1 TLB
-    assign input_stall_o = ~(l1_fifo_ready_out & l2_fifo_ready_out);
+    assign input_stall_o = ~(l1_fifo_inp_ready & l2_fifo_inp_ready);
 
     // Interface b_drop signals + handshake
     always_comb begin
       if (fifo_select == 1'b0) begin
-        prefetch_o       = l1_prefetch_cur;
-        hit_o            = l1_hit_cur;
-        id_o             = l1_id_cur;
+        prefetch_o       = l1.prefetch;
+        hit_o            = l1.hit;
+        id_o             = l1.id;
 
-        l1_fifo_ready_in = w_done | b_done_i;
-        l2_fifo_ready_in = 1'b0;
+        l1_fifo_oup_ready = w_done | b_done_i;
+        l2_fifo_oup_ready = 1'b0;
       end else begin
-        prefetch_o       = l2_prefetch_cur;
-        hit_o            = l2_hit_cur;
-        id_o             = l2_id_cur;
+        prefetch_o       = l2.prefetch;
+        hit_o            = l2.hit;
+        id_o             = l2.id;
 
-        l1_fifo_ready_in = 1'b0;
-        l2_fifo_ready_in = w_done | b_done_i;
+        l1_fifo_oup_ready = 1'b0;
+        l2_fifo_oup_ready = w_done | b_done_i;
       end
     end
 
     // Detect when an L1 transaction save request enters or exits the L1 FIFO.
-    assign l1_save_in  = l1_fifo_valid_in & l1_save_i;
-    assign l1_save_out = l1_fifo_ready_in & l1_save_cur;
+    assign l1_save_in  = l1_fifo_inp_valid & l1_save_i;
+    assign l1_save_out = l1_fifo_oup_ready & l1.save;
 
     // Count the number of L1 transaction to save in the L1 FIFO.
     always_ff @(posedge axi4_aclk or negedge axi4_arstn) begin
@@ -244,7 +253,7 @@ module axi4_w_buffer
       .clk           ( axi4_aclk                                                    ),
       .rstn          ( axi4_arstn                                                   ),
       // Push
-      .data_in       ( {axi4_wuser,    axi4_wstrb,    axi4_wdata,    axi4_wlast}    ),
+      .data_in       ( {axi_w.user,    axi_w.strb,    axi_w.data,    axi_w.last}    ),
       .valid_in      ( hum_buf_valid_in                                             ),
       .ready_out     ( hum_buf_ready_out                                            ),
       // Pop
@@ -258,30 +267,36 @@ module axi4_w_buffer
       .drop_len      ( hum_buf_drop_len_SP                                          )
     );
 
-    axi_buffer_rab
-    #(
-      .DATA_WIDTH       ( 2+AXI_ID_WIDTH+8+3  ),
-      .BUFFER_DEPTH     ( L2_FIFO_DEPTH       )
-      )
-    u_l2_fifo
-    (
-      .clk       ( axi4_aclk                                                                                        ),
-      .rstn      ( axi4_arstn                                                                                       ),
-      // Push
-      .data_in   ( {l2_prefetch_i,   l2_hit_i,   l2_id_i,   l2_len_i,   l2_master_i,   l2_accept_i,   l2_drop_i}    ),
-      .valid_in  ( l2_fifo_valid_in                                                                                 ),
-      .ready_out ( l2_fifo_ready_out                                                                                ),
-      // Pop
-      .data_out  ( {l2_prefetch_cur, l2_hit_cur, l2_id_cur, l2_len_cur, l2_master_cur, l2_accept_cur, l2_drop_cur}  ),
-      .valid_out ( l2_fifo_valid_out                                                                                ),
-      .ready_in  ( l2_fifo_ready_in                                                                                 )
+    stream_fifo #(
+      .FALL_THROUGH (1'b0),
+      .DEPTH        (L2_FIFO_DEPTH),
+      .T            (desc_t)
+    ) i_l2_fifo (
+      .clk_i  (axi4_aclk),
+      .rst_ni (axi4_arstn),
+      .flush_i    (1'b0),
+      .testmode_i (1'b0),
+      .data_i     ('{ prefetch: l2_prefetch_i,
+                      hit:      l2_hit_i,
+                      id:       l2_id_i,
+                      len:      l2_len_i,
+                      master:   l2_master_i,
+                      accept:   l2_accept_i,
+                      save:     1'bx, /* unused in L2 */
+                      drop:     l2_drop_i}),
+      .valid_i    (l2_fifo_inp_valid),
+      .ready_o    (l2_fifo_inp_ready),
+      .data_o     (l2),
+      .valid_o    (l2_fifo_oup_valid),
+      .ready_i    (l2_fifo_oup_ready),
+      .usage_o    (/* unused */)
     );
 
     // Push upon receiving new result from TLB.
     assign l2_req           = l2_accept_i | l2_drop_i;
-    assign l2_fifo_valid_in = l2_req & l2_fifo_ready_out;
+    assign l2_fifo_inp_valid = l2_req & l2_fifo_inp_ready;
 
-    assign wlast_in  =    axi4_wlast & hum_buf_valid_in  & hum_buf_ready_out;
+    assign wlast_in  =    axi_w.last & hum_buf_valid_in  & hum_buf_ready_out;
     assign wlast_out = hum_buf_wlast & hum_buf_valid_out & hum_buf_ready_in;
 
     always_ff @(posedge axi4_aclk or negedge axi4_arstn) begin
@@ -322,7 +337,7 @@ module axi4_w_buffer
       m_axi4_wuser     =  'b0;
 
       m_axi4_wvalid    = 1'b0;
-      axi4_wready      = 1'b0;
+      axi_w_ready      = 1'b0;
 
       hum_buf_valid_in = 1'b0;
       hum_buf_ready_in = 1'b0;
@@ -344,8 +359,8 @@ module axi4_w_buffer
 
         STORE : begin
           // Simply store the data in the buffer.
-          hum_buf_valid_in = axi4_wvalid & hum_buf_ready_out;
-          axi4_wready      = hum_buf_ready_out;
+          hum_buf_valid_in = axi_w_valid & hum_buf_ready_out;
+          axi_w_ready      = hum_buf_ready_out;
 
           // We have got a full burst in the HUM buffer, thus stop storing.
           if (wlast_in & !hum_buf_underfull | (n_wlast_SP > $signed(0))) begin
@@ -357,17 +372,17 @@ module axi4_w_buffer
           end
 
           // Avoid the forwarding of L1 hits until we know whether we can bypass.
-          if (l1_fifo_valid_out & l1_save_cur) begin
+          if (l1_fifo_oup_valid & l1.save) begin
             block_forwarding = 1'b1;
           end
         end
 
         WAIT_L1_BYPASS_YES : begin
           // Wait for orders from L1 TLB.
-          if (l1_fifo_valid_out) begin
+          if (l1_fifo_oup_valid) begin
 
             // L1 hit - forward data from buffer
-            if (l1_accept_cur) begin
+            if (l1.accept) begin
               m_axi4_wlast       = hum_buf_wlast;
               m_axi4_wdata       = hum_buf_wdata;
               m_axi4_wstrb       = hum_buf_wstrb;
@@ -376,7 +391,7 @@ module axi4_w_buffer
               m_axi4_wvalid      = hum_buf_valid_out;
               hum_buf_ready_in   = m_axi4_wready;
 
-              master_select_o    = l1_master_cur;
+              master_select_o    = l1.master;
 
               // Detect last data beat.
               if (wlast_out) begin
@@ -386,16 +401,16 @@ module axi4_w_buffer
               end
 
             // L1 miss - wait for L2
-            end else if (l1_save_cur) begin
+            end else if (l1.save) begin
               fifo_select        = 1'b0;
               w_done             = 1'b1;
               hum_buf_SN         = WAIT_L2_BYPASS_YES;
 
             // L1 prefetch, prot, multi - drop data
-            end else if (l1_drop_cur) begin
+            end else if (l1.drop) begin
               fifo_select_SN      = 1'b0; // L1
               hum_buf_drop_req_SN = 1'b1;
-              hum_buf_drop_len_SN = l1_len_cur;
+              hum_buf_drop_len_SN = l1.len;
               hum_buf_SN          = FLUSH;
             end
           end
@@ -403,10 +418,10 @@ module axi4_w_buffer
 
         WAIT_L2_BYPASS_YES : begin
           // Wait for orders from L2 TLB.
-          if (l2_fifo_valid_out) begin
+          if (l2_fifo_oup_valid) begin
 
             // L2 hit - forward data from buffer
-            if (l2_accept_cur) begin
+            if (l2.accept) begin
               m_axi4_wlast       = hum_buf_wlast;
               m_axi4_wdata       = hum_buf_wdata;
               m_axi4_wstrb       = hum_buf_wstrb;
@@ -415,7 +430,7 @@ module axi4_w_buffer
               m_axi4_wvalid      = hum_buf_valid_out;
               hum_buf_ready_in   = m_axi4_wready;
 
-              master_select_o    = l2_master_cur;
+              master_select_o    = l2.master;
 
               // Detect last data beat.
               if (wlast_out) begin
@@ -425,22 +440,22 @@ module axi4_w_buffer
               end
 
             // L2 miss/prefetch hit
-            end else if (l2_drop_cur) begin
+            end else if (l2.drop) begin
               fifo_select_SN      = 1'b1; // L2
               hum_buf_drop_req_SN = 1'b1;
-              hum_buf_drop_len_SN = l2_len_cur;
+              hum_buf_drop_len_SN = l2.len;
               hum_buf_SN          = FLUSH;
             end
 
           // While we wait for orders from L2 TLB, we can still drop and accept L1 transactions.
-          end else if (l1_fifo_valid_out) begin
+          end else if (l1_fifo_oup_valid) begin
 
             // L1 hit
-            if (l1_accept_cur) begin
+            if (l1.accept) begin
               hum_buf_SN         = BYPASS;
 
             // L1 prefetch/prot/multi
-            end else if (l1_drop_cur) begin
+            end else if (l1.drop) begin
               hum_buf_SN         = DISCARD;
             end
           end
@@ -460,18 +475,18 @@ module axi4_w_buffer
 
         BYPASS : begin
           // Forward one full transaction from input buffer.
-          m_axi4_wlast       = axi4_wlast;
-          m_axi4_wdata       = axi4_wdata;
-          m_axi4_wstrb       = axi4_wstrb;
-          m_axi4_wuser       = axi4_wuser;
+          m_axi4_wlast       = axi_w.last;
+          m_axi4_wdata       = axi_w.data;
+          m_axi4_wstrb       = axi_w.strb;
+          m_axi4_wuser       = axi_w.user;
 
-          m_axi4_wvalid      = axi4_wvalid;
-          axi4_wready        = m_axi4_wready;
+          m_axi4_wvalid      = axi_w_valid;
+          axi_w_ready        = m_axi4_wready;
 
-          master_select_o    = l1_master_cur;
+          master_select_o    = l1.master;
 
           // We have got a full transaction.
-          if (axi4_wlast & axi4_wready & axi4_wvalid) begin
+          if (axi_w.last & axi_w_ready & axi_w_valid) begin
             fifo_select      = 1'b0;
             w_done           = 1'b1;
             hum_buf_SN       = WAIT_L2_BYPASS_YES;
@@ -480,14 +495,14 @@ module axi4_w_buffer
 
         DISCARD : begin
           // Discard one full transaction from input buffer.
-          axi4_wready        = 1'b1;
+          axi_w_ready        = 1'b1;
 
           // We have got a full transaction.
-          if (axi4_wlast & axi4_wready & axi4_wvalid) begin
+          if (axi_w.last & axi_w_ready & axi_w_valid) begin
             // Try to perform handshake with B sender.
             fifo_select      = 1'b0;
             b_drop_o         = 1'b1;
-            // We cannot wait here due to axi4_wready.
+            // We cannot wait here due to axi_w_ready.
             if (b_done_i) begin
               hum_buf_SN     = WAIT_L2_BYPASS_YES;
             end else begin
@@ -510,10 +525,10 @@ module axi4_w_buffer
           block_forwarding       = 1'b1;
 
           // Wait for orders from L1 TLB.
-          if (l1_fifo_valid_out) begin
+          if (l1_fifo_oup_valid) begin
 
             // L1 hit - forward data from/through HUM buffer and refill the buffer
-            if (l1_accept_cur) begin
+            if (l1.accept) begin
               // Forward data from HUM buffer.
               m_axi4_wlast       = hum_buf_wlast;
               m_axi4_wdata       = hum_buf_wdata;
@@ -523,12 +538,12 @@ module axi4_w_buffer
               m_axi4_wvalid      = hum_buf_valid_out;
               hum_buf_ready_in   = m_axi4_wready;
 
-              master_select_o    = l1_master_cur;
+              master_select_o    = l1.master;
 
               // Refill the HUM buffer. Stop when buffer full.
               stop_store         = ~hum_buf_ready_out;
-              hum_buf_valid_in   = stop_store ? 1'b0 : axi4_wvalid      ;
-              axi4_wready        = stop_store ? 1'b0 : hum_buf_ready_out;
+              hum_buf_valid_in   = stop_store ? 1'b0 : axi_w_valid      ;
+              axi_w_ready        = stop_store ? 1'b0 : hum_buf_ready_out;
 
               // Detect last data beat.
               if (wlast_out) begin
@@ -545,16 +560,16 @@ module axi4_w_buffer
               block_forwarding   = 1'b0;
 
             // L1 miss - wait for L2
-            end else if (l1_save_cur) begin
+            end else if (l1.save) begin
               fifo_select        = 1'b0;
               w_done             = 1'b1;
               hum_buf_SN         = WAIT_L2_BYPASS_NO;
 
             // L1 prefetch, prot, multi - drop data
-            end else if (l1_drop_cur) begin
+            end else if (l1.drop) begin
               fifo_select_SN      = 1'b0; // L1
               hum_buf_drop_req_SN = 1'b1;
-              hum_buf_drop_len_SN = l1_len_cur;
+              hum_buf_drop_len_SN = l1.len;
               hum_buf_SN          = FLUSH;
 
               // Allow the forwarding of L1 hits.
@@ -568,10 +583,10 @@ module axi4_w_buffer
           block_forwarding       = 1'b1;
 
           // Wait for orders from L2 TLB.
-          if (l2_fifo_valid_out) begin
+          if (l2_fifo_oup_valid) begin
 
             // L2 hit - forward first part from HUM buffer, rest from input buffer
-            if (l2_accept_cur) begin
+            if (l2.accept) begin
               // Forward data from HUM buffer.
               m_axi4_wlast       = hum_buf_wlast;
               m_axi4_wdata       = hum_buf_wdata;
@@ -581,12 +596,12 @@ module axi4_w_buffer
               m_axi4_wvalid      = hum_buf_valid_out;
               hum_buf_ready_in   = m_axi4_wready;
 
-              master_select_o    = l2_master_cur;
+              master_select_o    = l2.master;
 
               // Refill the HUM buffer. Stop when buffer full.
               stop_store         = ~hum_buf_ready_out;
-              hum_buf_valid_in   = stop_store ? 1'b0 : axi4_wvalid      ;
-              axi4_wready        = stop_store ? 1'b0 : hum_buf_ready_out;
+              hum_buf_valid_in   = stop_store ? 1'b0 : axi_w_valid      ;
+              axi_w_ready        = stop_store ? 1'b0 : hum_buf_ready_out;
 
               // Detect last data beat.
               if (wlast_out) begin
@@ -603,10 +618,10 @@ module axi4_w_buffer
               block_forwarding   = 1'b0;
 
             // L2 miss/prefetch hit - drop data
-            end else if (l2_drop_cur) begin
+            end else if (l2.drop) begin
               fifo_select_SN      = 1'b1; // L2
               hum_buf_drop_req_SN = 1'b1;
-              hum_buf_drop_len_SN = l2_len_cur;
+              hum_buf_drop_len_SN = l2.len;
               hum_buf_SN          = FLUSH;
 
               // Allow the forwarding of L1 hits.
@@ -650,36 +665,36 @@ module axi4_w_buffer
       m_axi4_wuser  =  'b0;
 
       m_axi4_wvalid = 1'b0;
-      axi4_wready   = 1'b0;
+      axi_w_ready   = 1'b0;
 
-      if (l1_fifo_valid_out) begin
+      if (l1_fifo_oup_valid) begin
         // forward data
-        if (l1_accept_cur) begin
-          m_axi4_wlast  = axi4_wlast;
-          m_axi4_wdata  = axi4_wdata;
-          m_axi4_wstrb  = axi4_wstrb;
-          m_axi4_wuser  = axi4_wuser;
+        if (l1.accept) begin
+          m_axi4_wlast  = axi_w.last;
+          m_axi4_wdata  = axi_w.data;
+          m_axi4_wstrb  = axi_w.strb;
+          m_axi4_wuser  = axi_w.user;
 
-          m_axi4_wvalid = axi4_wvalid;
-          axi4_wready   = m_axi4_wready;
+          m_axi4_wvalid = axi_w_valid;
+          axi_w_ready   = m_axi4_wready;
 
           // Simply pop from FIFO upon last data beat.
-          w_done        = axi4_wlast & axi4_wvalid & axi4_wready;
+          w_done        = axi_w.last & axi_w_valid & axi_w_ready;
 
         // discard entire burst
         end else if (b_drop_o == 1'b0) begin
-          axi4_wready   = 1'b1;
+          axi_w_ready   = 1'b1;
 
           // Simply pop from FIFO upon last data beat. Perform handshake with B sender.
-          if (axi4_wlast & axi4_wvalid & axi4_wready)
+          if (axi_w.last & axi_w_valid & axi_w_ready)
             b_drop_set  = 1'b1;
         end
       end
 
     end // OUTPUT_CTRL
 
-    assign master_select_o     = l1_master_cur;
-    assign l2_fifo_ready_out   = 1'b1;
+    assign master_select_o     = l1.master;
+    assign l2_fifo_inp_ready   = 1'b1;
     assign block_forwarding    = 1'b0;
 
     // unused signals
@@ -695,15 +710,9 @@ module axi4_w_buffer
     assign hum_buf_drop_req_SN = 1'b0;
     assign hum_buf_almost_full = 1'b0;
 
-    assign l2_fifo_valid_in    = 1'b0;
-    assign l2_fifo_valid_out   = 1'b0;
-    assign l2_prefetch_cur     = 1'b0;
-    assign l2_hit_cur          = 1'b0;
-    assign l2_id_cur           =  'b0;
-    assign l2_len_cur          =  'b0;
-    assign l2_master_cur       = 1'b0;
-    assign l2_accept_cur       = 1'b0;
-    assign l2_drop_cur         = 1'b0;
+    assign l2                  = '{default: '0};
+    assign l2_fifo_inp_valid   = 1'b0;
+    assign l2_fifo_oup_valid   = 1'b0;
 
     assign l2_req              = 1'b0;
 
