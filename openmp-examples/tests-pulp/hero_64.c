@@ -25,21 +25,17 @@ inline static void check_addr(const uint64_t base)
   const uint64_t addr = base + 8*omp_get_thread_num();
   const uint64_t val = 0x1234567812345678 + omp_get_thread_num();
 
-  *(uint8_t*)addr = 0;
-  hero_store_uint8(addr, (uint8_t)val);
-  assert(hero_load_uint8(addr) == (uint8_t)val);
+  hero_store_uint8(addr, (uint8_t)val + 0x11);
+  assert(hero_load_uint8(addr) == (uint8_t)val + 0x11);
 
-  *(uint16_t*)addr = 0;
-  hero_store_uint16(addr, (uint16_t)val);
-  assert(hero_load_uint16(addr) == (uint16_t)val);
+  hero_store_uint16(addr, (uint16_t)val + 0x2222);
+  assert(hero_load_uint16(addr) == (uint16_t)val + 0x2222);
 
-  *(uint32_t*)addr = 0;
-  hero_store_uint32(addr, (uint32_t)val);
-  assert(hero_load_uint32(addr) == (uint32_t)val);
+  hero_store_uint32(addr, (uint32_t)val + 0x33333333);
+  assert(hero_load_uint32(addr) == (uint32_t)val + 0x33333333);
 
-  *(uint64_t*)addr = 0;
-  hero_store_uint64(addr, (uint64_t)val);
-  assert(hero_load_uint64(addr) == (uint64_t)val);
+  hero_store_uint64(addr, (uint64_t)val + 0x4444444444444444);
+  assert(hero_load_uint64(addr) == (uint64_t)val + 0x4444444444444444);
 }
 
 unsigned test_hero_64()
