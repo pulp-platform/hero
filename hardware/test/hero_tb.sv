@@ -91,13 +91,16 @@ module hero_tb #(
   // No memory attached at the moment.
   assign dram_resp = '0;
 
-  // Simulation control: Activate fetch-enable of cluster 0 after reset and wait for its EOC before
-  // terminating the simulation.
+  // Simulation control
   initial begin
     cl_fetch_en = '0;
     rab_conf_req = '{default: '0};
+    // Wait for reset.
     wait (rst_n);
+    @(posedge clk);
+    // Start cluster 0.
     cl_fetch_en[0] = 1'b1;
+    // Wait for EOC of cluster 0 before terminating the simulation.
     wait (cl_eoc[0]);
     #1us;
     $finish();
