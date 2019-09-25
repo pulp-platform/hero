@@ -40,7 +40,7 @@ module soc_bus #(
   AXI_BUS.Slave   rab_slv
 );
 
-  localparam int unsigned N_REGIONS = 1;
+  localparam int unsigned N_REGIONS = 2;
   localparam int unsigned N_MASTERS = N_CLUSTERS + L2_N_PORTS + 2;
   localparam int unsigned N_SLAVES = soc_bus_pkg::n_slaves(N_CLUSTERS);
   localparam int unsigned IDX_L2_MEM = N_CLUSTERS;
@@ -85,6 +85,11 @@ module soc_bus #(
     end_addr    = '0;
     valid_rule  = '0;
 
+    // Everything below Cluster 0 to RAB
+    start_addr[0][IDX_RAB]  = 64'h0000_0000_0000_0000;
+    end_addr[0][IDX_RAB]    = 64'h0000_0000_0FFF_FFFF;
+    valid_rule[0][IDX_RAB]  = 1'b1;
+
     // Clusters
     for (int i = 0; i < N_CLUSTERS; i++) begin
       start_addr[0][i]  = 64'h0000_0000_1000_0000 + i * 32'h0040_0000;
@@ -106,9 +111,9 @@ module soc_bus #(
     valid_rule[0][IDX_PERIPH] = 1'b1;
 
     // Everything above L2 Memory to RAB
-    start_addr[0][IDX_RAB]  = end_addr[0][IDX_L2_MEM+L2_N_PORTS-1] + 1;
-    end_addr[0][IDX_RAB]    = 64'hFFFF_FFFF_FFFF_FFFF;
-    valid_rule[0][IDX_RAB]  = 1'b1;
+    start_addr[1][IDX_RAB]  = end_addr[0][IDX_L2_MEM+L2_N_PORTS-1] + 1;
+    end_addr[1][IDX_RAB]    = 64'hFFFF_FFFF_FFFF_FFFF;
+    valid_rule[1][IDX_RAB]  = 1'b1;
   end
 
   axi_node_wrap_with_slices #(
