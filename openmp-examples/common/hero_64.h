@@ -71,6 +71,7 @@ inline static void __mem_fence()
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h> // abort()
 
 static volatile uint32_t* const __addrext_reg = (uint32_t*)0x10200BF8;
 static volatile uint32_t* const __tryx_res_reg = (uint32_t*)0x10200BFC;
@@ -167,9 +168,9 @@ inline static void __loop_forever()
 #define __hero_64_check_mem_access \
   if (res != 0) { \
     printf("ERROR: Memory access violation at 0x%08x%08x!\n", __upper32(addr), __lower32(addr)); \
-    __loop_forever(); \
+    abort(); \
   }
-  // TODO: handle misses (or properly abort execution if misses cannot be handled?)
+  // TODO: handle misses
 
 #define __hero_64_define_load(size) \
   inline static uint ## size ## _t hero_load_uint ## size(const uint64_t addr) { \
