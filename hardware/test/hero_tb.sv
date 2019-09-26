@@ -281,12 +281,12 @@ module hero_tb #(
   // Observe SoC bus for errors.
   for (genvar iCluster = 0; iCluster < N_CLUSTERS; iCluster++) begin: gen_assert_cluster
     assert property (@(posedge dut.clk_i) dut.rst_ni && dut.cl_oup[iCluster].r_valid
-        |-> !dut.cl_oup[iCluster].r_resp[1])
-      else $warning("R resp error at cl_oup[%01d]", iCluster);
+        |-> dut.cl_oup[iCluster].r_resp != 2'b11)
+      else $warning("R resp decode error at cl_oup[%01d]", iCluster);
 
     assert property (@(posedge dut.clk_i) dut.rst_ni && dut.cl_oup[iCluster].b_valid
-        |-> !dut.cl_oup[iCluster].b_resp[1])
-      else $warning("B resp error at cl_oup[%01d]", iCluster);
+        |-> dut.cl_oup[iCluster].b_resp != 2'b11)
+      else $warning("B resp decode error at cl_oup[%01d]", iCluster);
   end
 
 endmodule
