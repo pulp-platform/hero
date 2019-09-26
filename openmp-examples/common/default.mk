@@ -31,7 +31,7 @@ DEP_FLAG    := -MM
 
 only ?= # can be set to `pulp` to compile a binary only for PULP
 
-.PHONY: all exe clean veryclean
+.PHONY: all exe clean
 
 ifeq ($(only),pulp)
 OBJDUMP := riscv32-hero-unknown-elf-objdump
