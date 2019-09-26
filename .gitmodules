@@ -10,7 +10,7 @@
 [submodule "pulp/sdk"]
 	path = pulp/sdk
 	url = git@iis-git.ee.ethz.ch:kwolters/pulp-sdk.git
-    ignore = dirty
+	ignore = dirty
 [submodule "toolchain/clang"]
 	path = toolchain/clang
 	url = git@iis-git.ee.ethz.ch:kwolters/clang.git
