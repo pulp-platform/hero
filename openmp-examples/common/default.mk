@@ -27,7 +27,8 @@ BENCHMARK = $(shell basename `pwd`)
 EXE = $(BENCHMARK)
 SRC = $(CSRCS)
 
-DEP_FLAG    := -MM
+DEPDIR := .deps
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 
 only ?= # can be set to `pulp` to compile a binary only for PULP
 
@@ -38,8 +39,8 @@ OBJDUMP := riscv32-hero-unknown-elf-objdump
 all : $(EXE) $(EXE).dis slm
 
 .PRECIOUS: %.ll
-%.ll: %.c
-	$(CC) -c -emit-llvm -S $(CFLAGS_PULP) $(INCPATHS) $(SRC)
+%.ll: %.c $(DEPDIR)/%.d | $(DEPDIR)
+	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS_PULP) $(INCPATHS) $(SRC)
 
 %.OMP.ll: %.ll
 	hc-omp-pass $< OmpKernelWrapper "HERCULES-omp-kernel-wrapper"
@@ -81,6 +82,14 @@ endif
 
 $(EXE).dis : $(EXE)
 	$(OBJDUMP) -d $^ > $@
+
+$(DEPDIR):
+	@mkdir -p $@
+
+DEPFILES := $(CSRCS:%.c=$(DEPDIR)/%.d)
+$(DEPFILES):
+
+include $(wildcard $(DEPFILES))
 
 clean::
 	-rm -vf __hmpp* -vf $(EXE) *~ *.dis *.ll *.slm
