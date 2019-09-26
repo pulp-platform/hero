@@ -37,10 +37,15 @@ ifeq ($(only),pulp)
 OBJDUMP := riscv32-hero-unknown-elf-objdump
 all : $(EXE) $(EXE).dis slm
 
-$(EXE) : $(SRC)
+.PRECIOUS: %.ll
+%.ll: %.c
 	$(CC) -c -emit-llvm -S $(CFLAGS_PULP) $(INCPATHS) $(SRC)
-	hc-omp-pass $(SRC:.c=.ll)  OmpKernelWrapper "HERCULES-omp-kernel-wrapper"
-	$(CC) $(CFLAGS_PULP) $(LDFLAGS_PULP) -o $@ $(SRC:.c=.OMP.ll)
+
+%.OMP.ll: %.ll
+	hc-omp-pass $< OmpKernelWrapper "HERCULES-omp-kernel-wrapper"
+
+$(EXE) : $(SRC:.c=.OMP.ll)
+	$(CC) $(CFLAGS_PULP) $(LDFLAGS_PULP) -o $@ $^
 
 slm : $(EXE)_l1.slm $(EXE)_l2.slm
 
