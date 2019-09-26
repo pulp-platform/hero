@@ -45,7 +45,7 @@ module tcdm_cmd_unpack #(
   logic [TCDM_OPC_WIDTH-1:0]  s_beat_opc;
   logic [TCDM_ADD_WIDTH-1:0]  s_beat_add;
   logic [TRANS_SID_WIDTH-1:0] s_beat_sid;
-  logic [7:0]                 s_beats_nb,
+  logic [8:0]                 s_beats_nb,
                               s_beats_nb_align,
                               s_beats_nb_reg,
                               s_beats_count;
@@ -149,7 +149,7 @@ module tcdm_cmd_unpack #(
 
         if (cmd_req_i && beat_gnt_i[0] && beat_gnt_i[1]) begin
           s_beat_req = 1'b1;
-          if (s_beats_nb_align == 8'd0) begin
+          if (s_beats_nb_align == 9'd0) begin
             s_beat_eop = 1'b1;
           end else begin
             NS = TRANS_RUN;
@@ -166,7 +166,7 @@ module tcdm_cmd_unpack #(
         s_beat_sid = s_cmd_sid_reg;
         if (beat_gnt_i[0] && beat_gnt_i[1]) begin
           s_beat_req      = 1'b1;
-          if (s_beats_nb_reg == 8'd1 || s_trans_complete) begin
+          if (s_beats_nb_reg == 9'd1 || s_trans_complete) begin
             s_beat_eop     = 1'b1;
             NS             = TRANS_IDLE;
           end
