@@ -237,10 +237,11 @@ module hero_tb #(
     wait (rst_n);
     @(posedge clk);
 
-    // Set up RAB slice from PULP to external memory: everything below 0x1000_0000;
-    write_rab_slice(32'hA0, 64'h0000_0000_0000_0000, 64'h0000_0000_0FFF_FFFF,
-        64'h0000_0000_0000_0000);
-    // Set up RAB slice from PULP to external memory: everything above 0x1D00_0000;
+    // Set up RAB slice from PULP to external memory: everything below 0x1000_0000 (except zero
+    // page).
+    write_rab_slice(32'hA0, 64'h0000_0000_0000_1000, 64'h0000_0000_0FFF_FFFF,
+        64'h0000_0000_0000_1000);
+    // Set up RAB slice from PULP to external memory: everything above 0x1D00_0000.
     write_rab_slice(32'hC0, 64'h0000_0000_1D00_0000, 64'hFFFF_FFFF_FFFF_FFFF,
         64'h0000_0000_1D00_0000);
 
