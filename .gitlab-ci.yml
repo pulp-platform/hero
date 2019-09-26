@@ -32,10 +32,10 @@ all:
     - cd -
     ### simulate_examples
     - source env/sim.sh
+    - cd hardware/vsim
     - >
       for d in tests-pulp helloworld; do
-        make -C openmp-examples/$d only=pulp clean all
-        cd hardware/vsim
+        make -C ../../openmp-examples/$d only=pulp clean all
         ../test/gen_slm_files.sh $d
         ./start_sim.sh
       done
