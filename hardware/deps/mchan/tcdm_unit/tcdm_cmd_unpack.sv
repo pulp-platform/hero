@@ -95,16 +95,10 @@ module tcdm_cmd_unpack #(
   always_ff @(posedge clk_i, negedge rst_ni) begin
     if (!rst_ni) begin
       s_cmd_add_reg <= '0;
-    end else begin
-      if (cmd_req_i && cmd_gnt_o) begin
-        s_cmd_add_reg <= cmd_add_i + 8;
-      end else begin
-        if (s_beat_req && beat_gnt_i[0] && beat_gnt_i[1]) begin
-          s_cmd_add_reg <= s_cmd_add_reg + 8;
-        end else begin
-          s_cmd_add_reg <= s_cmd_add_reg;
-        end
-      end
+    end else if (cmd_req_i && cmd_gnt_o) begin
+      s_cmd_add_reg <= cmd_add_i + 8;
+    end else if (s_beat_req && beat_gnt_i[0] && beat_gnt_i[1]) begin
+      s_cmd_add_reg <= s_cmd_add_reg + 8;
     end
   end
 
@@ -115,26 +109,14 @@ module tcdm_cmd_unpack #(
   always_ff @(posedge clk_i, negedge rst_ni) begin
     if (!rst_ni) begin
       s_beats_count <= '0;
-    end else begin
-      if (s_beat_eop) begin
-        s_beats_count <= '0;
-      end else begin
-        if (s_beat_req && beat_gnt_i[0] && beat_gnt_i[1]) begin
-          s_beats_count <= s_beats_count + 1;
-        end else begin
-          s_beats_count <= s_beats_count;
-        end
-      end
+    end else if (s_beat_eop) begin
+      s_beats_count <= '0;
+    end else if (s_beat_req && beat_gnt_i[0] && beat_gnt_i[1]) begin
+      s_beats_count <= s_beats_count + 1;
     end
   end
 
-  always_comb begin
-    if (s_beats_count == s_beats_nb_reg) begin
-      s_trans_complete = 1'b1;
-    end else begin
-      s_trans_complete = 1'b0;
-    end
-  end
+  assign s_trans_complete = (s_beats_count == s_beats_nb_reg);
 
   //**********************************************************
   //********** FINITE STATE MACHINE FOR CMD QUEUE ************
@@ -157,6 +139,7 @@ module tcdm_cmd_unpack #(
     s_beat_opc = '0;
     s_beat_add = '0;
     s_beat_sid = '0;
+    NS         = CS;
 
     case(CS)
       TRANS_IDLE: begin
@@ -168,13 +151,11 @@ module tcdm_cmd_unpack #(
           s_beat_req = 1'b1;
           if (s_beats_nb_align == 8'd0) begin
             s_beat_eop = 1'b1;
-            NS         = TRANS_IDLE;
           end else begin
             NS = TRANS_RUN;
           end
         end else begin
-          NS         = TRANS_IDLE;
-          cmd_gnt_o  = 1'b0;
+          cmd_gnt_o = 1'b0;
         end
       end
 
@@ -185,17 +166,10 @@ module tcdm_cmd_unpack #(
         s_beat_sid = s_cmd_sid_reg;
         if (beat_gnt_i[0] && beat_gnt_i[1]) begin
           s_beat_req      = 1'b1;
-          if (s_beats_nb_reg == 8'd1) begin
+          if (s_beats_nb_reg == 8'd1 || s_trans_complete) begin
             s_beat_eop     = 1'b1;
             NS             = TRANS_IDLE;
-          end else if (s_trans_complete) begin
-            s_beat_eop     = 1'b1;
-            NS             = TRANS_IDLE;
-          end else begin
-            NS = TRANS_RUN;
           end
-        end else begin
-          NS = TRANS_RUN;
         end
       end
 
