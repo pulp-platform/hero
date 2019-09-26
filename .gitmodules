@@ -4,9 +4,6 @@
 [submodule "tools/riscv-openocd"]
 	path = tools/riscv-openocd
 	url = https://github.com/riscv/riscv-openocd
-[submodule "tools/riscv-isa-sim"]
-	path = tools/riscv-isa-sim
-	url = https://github.com/riscv/riscv-isa-sim.git
 [submodule "pulp/sdk"]
 	path = pulp/sdk
 	url = git@iis-git.ee.ethz.ch:kwolters/pulp-sdk.git
