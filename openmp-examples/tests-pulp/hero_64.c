@@ -38,6 +38,20 @@ inline static void check_addr(const uint64_t base)
   assert(hero_load_uint64(addr) == (uint64_t)val + 0x4444444444444444);
 }
 
+inline static void check_fail(const uint64_t base)
+{
+  const uint64_t addr = base * 8*omp_get_thread_num();
+  uint64_t dummy;
+  assert(hero_store_uint8_noblock(addr, dummy) != 0);
+  assert(hero_load_uint8_noblock(addr, (uint8_t*)&dummy) != 0);
+  assert(hero_store_uint16_noblock(addr, dummy) != 0);
+  assert(hero_load_uint16_noblock(addr, (uint16_t*)&dummy) != 0);
+  assert(hero_store_uint32_noblock(addr, dummy) != 0);
+  assert(hero_load_uint32_noblock(addr, (uint32_t*)&dummy) != 0);
+  assert(hero_store_uint64_noblock(addr, dummy) != 0);
+  assert(hero_load_uint64_noblock(addr, &dummy) != 0);
+}
+
 unsigned test_hero_64()
 {
   const uint64_t l1_base        = 0x0000000010032000;
@@ -50,6 +64,7 @@ unsigned test_hero_64()
     check_addr(l1_alias_base);
     check_addr(l2_base);
     check_addr(dram);
+    check_fail(0);
   }
   printf("Tests passed on all threads!\n");
 
