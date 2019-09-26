@@ -58,15 +58,21 @@ unsigned test_hero_64()
   const uint64_t l1_alias_base  = 0x000000001B032000;
   const uint64_t l2_base        = 0x000000001C032000;
   const uint64_t dram           = 0x0123000000000000;
-  #pragma omp parallel
-  {
-    check_addr(l1_base);
-    check_addr(l1_alias_base);
-    check_addr(l2_base);
-    check_addr(dram);
-    check_fail(0);
+  for (uint32_t offset = 0; offset < 4; offset++) {
+    printf("Testing accesses with offset %d...\n", offset);
+    #pragma omp parallel
+    {
+      check_addr(l1_base + offset);
+      check_addr(l1_alias_base + offset);
+      check_addr(l2_base + offset);
+      check_addr(dram + offset);
+    }
+    printf("Testing failure response to zero page with offset %d...\n", offset);
+    #pragma omp parallel
+    {
+      check_fail(offset);
+    }
+    printf("Tests with offset %d passed on all threads.\n", offset);
   }
-  printf("Tests passed on all threads!\n");
-
   return 0;
 }
