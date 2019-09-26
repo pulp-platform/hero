@@ -15,7 +15,7 @@ ARCH_DEV = openmp-$(TARGET_DEV)
 # 3) with _PULP suffix, they apply only to the PULP part of compilation;
 # 4) with _COMMON suffix, they apply to both PULP and host compilation.
 CFLAGS_COMMON += -fopenmp=libomp -O1
-CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV)
+CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -march=rv32imac
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
 LDFLAGS_COMMON += -lhero-target
 LDFLAGS_PULP += $(LDFLAGS_COMMON)
