@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
   unsigned n_errors = 0;
 
   n_errors += test_m_instrs();
+  n_errors += test_dma();
 
   assert(n_errors == 0);
   return n_errors;
