@@ -3,6 +3,7 @@ package:
 
 dependencies:
   axi_slice: { git: "https://github.com/pulp-platform/axi_slice.git", rev: atomics }
+  common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.13.1 }
   riscv: { git: "https://github.com/pulp-platform/riscv.git", rev: atomics } # TODO: proper way to get the AMO_ symbols?
 
 sources:

@@ -27,6 +27,8 @@ module per2axi_req_channel
    parameter AXI_STRB_WIDTH = AXI_DATA_WIDTH/8 // DO NOT OVERRIDE
 )
 (
+   input  logic                      clk_i,
+
    // PERIPHERAL INTERCONNECT SLAVE
    //***************************************
    //REQUEST CHANNEL
@@ -237,33 +239,34 @@ module per2axi_req_channel
    // PERIPHERAL INTERCONNECT GRANT GENERATION
    assign per_slave_gnt_o = axi_master_aw_ready_i && axi_master_ar_ready_i;
 
-   always_comb
-     begin
-        axi_master_ar_size_o = 3'b000;
-        axi_master_aw_size_o = 3'b000;
-        if ( (per_slave_be_i == 4'b1000 ) ||
-             (per_slave_be_i == 4'b0100 ) ||
-             (per_slave_be_i == 4'b0010 ) ||
-             (per_slave_be_i == 4'b0001 ) )
-          begin
-             axi_master_ar_size_o = 3'b000;
-             axi_master_aw_size_o = 3'b000;
-          end
-        else
-          if ( (per_slave_be_i == 4'b1100 ) ||
-               (per_slave_be_i == 4'b0110 ) ||
-               (per_slave_be_i == 4'b0011 ) )
-            begin
-               axi_master_ar_size_o = 3'b001;
-               axi_master_aw_size_o = 3'b001;
-            end
-          else
-            if ( per_slave_be_i == 4'b1111)
-              begin
-                 axi_master_ar_size_o = 3'b010;
-                 axi_master_aw_size_o = 3'b010;
-              end
-     end // always_comb begin
+   always_comb begin
+      if (per_slave_be_i == (1 << per_slave_add_i[1:0])) begin
+         axi_master_aw_size_o = 3'd0;
+      end else if (per_slave_add_i[1:0] == 2'b00 && per_slave_be_i == 4'b0011
+         || per_slave_add_i[1:0] == 2'b10 && per_slave_be_i == 4'b1100) begin
+         axi_master_aw_size_o = 3'd1;
+      end else begin
+         axi_master_aw_size_o = 3'd2;
+      end
+   end
+   assign axi_master_ar_size_o = axi_master_aw_size_o;
+
+   // Assumptions
+   `ifndef TARGET_SYNTHESIS
+      assume property (@(posedge clk_i) per_slave_req_i |-> per_slave_be_i[per_slave_add_i[1:0]])
+         else $error("Byte enable of addressed byte must be active");
+      logic [1:0] be_trailing_zeros;
+      lzc #(
+         .WIDTH   (4),
+         .MODE    (1'b0)
+      ) i_lzc_be_trailing (
+         .in_i    (per_slave_be_i),
+         .cnt_o   (be_trailing_zeros)
+      );
+      assume property (@(posedge clk_i) per_slave_req_i
+            |-> per_slave_add_i[1:0] == be_trailing_zeros)
+         else $error("No byte enable below addressed byte may be active!");
+   `endif
 
    // use FIXED burst type, length is anyway 0
    assign axi_master_aw_burst_o = 2'b00;

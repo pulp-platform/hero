@@ -186,6 +186,7 @@ module per2axi
    )
    req_channel_i
    (
+      .clk_i,
       .per_slave_req_i         ( per_slave_req_i    ),
       .per_slave_add_i         ( per_slave_add_i    ),
       .per_slave_we_i          ( per_slave_we_i     ),
