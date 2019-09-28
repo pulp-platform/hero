@@ -61,11 +61,6 @@ inline static __attribute__((used)) int       hero_store_uint8_noblock  (const u
  * Implementation Internals
  **************************************************************************************************/
 
-inline static void __mem_fence()
-{
-  __asm__ __volatile__("" : : : "memory");
-}
-
 #if __riscv_xlen == 32 // FIXME: properly check for host/accelerator toolchain here
 
 #include <stdbool.h>
@@ -75,26 +70,6 @@ inline static void __mem_fence()
 
 static volatile uint32_t* const __addrext_reg = (uint32_t*)0x10200BF8;
 static volatile uint32_t* const __tryx_res_reg = (uint32_t*)0x10200BFC;
-
-inline static void __mstatus_write(const uint32_t val)
-{
-  __asm__ volatile (
-      "csrrw x0, 0x300, %[val]"
-      : /* no outputs */
-      : [val] "r" (val)
-  );
-}
-
-inline static uint32_t __disable_mirq()
-{
-  uint32_t mstatus;
-  __asm__ volatile (
-      "csrrci %[mstatus], 0x300, 3"
-      : [mstatus] "=r" (mstatus)
-      : /* no inputs */
-  );
-  return mstatus;
-}
 
 inline static uint32_t __upper32(const uint64_t dw)
 {
@@ -117,12 +92,9 @@ inline static void __loop_forever()
   const uint32_t upper = __upper32(addr); \
   volatile data_t* const lower = (volatile data_t*)__lower32(addr); \
   uint32_t tryx_res; \
-  const uint32_t mstatus = __disable_mirq(); \
-  __mem_fence();
+  uint32_t mstatus;
 
 #define __hero_64_noblock_post \
-  __mem_fence(); \
-  __mstatus_write(mstatus); \
   return (int)(tryx_res & 0xF);
 
 #define __hero_64_op_suffix(type, bits) __hero_64_op_suffix_ ## bits(type)
@@ -132,16 +104,21 @@ inline static void __loop_forever()
 #define __hero_64_op_suffix_16(type) "h" __hero_64_op_suffix_ ## type
 #define __hero_64_op_suffix_8(type)  "b" __hero_64_op_suffix_ ## type
 
+#define __hero_64_disable_mirq_asm    "csrrci %[mstatus], 0x300, 3"
+#define __hero_64_restore_mstatus_asm "csrrw x0, 0x300, %[mstatus]"
+
 #define __hero_64_define_load_noblock(bits) \
   inline static int hero_load_uint ## bits ## _noblock(\
       const uint64_t addr, uint ## bits ## _t* const val) { \
     __hero_64_noblock_pre(uint ## bits ## _t) \
     uint ## bits ## _t reg; \
     __asm__ volatile( \
+        __hero_64_disable_mirq_asm "\n\t" \
         "sw %[upper], 0(%[__addrext_reg])\n\t" /* set address extension register */ \
         "l" __hero_64_op_suffix(uint, bits) " %[reg], 0(%[lower])\n\t" /* do actual load */ \
-        "lw %[tryx_res], 4(%[__addrext_reg])" /* read the tryx result */ \
-        : [reg] "=&r" (reg), [tryx_res] "=r" (tryx_res) \
+        "lw %[tryx_res], 4(%[__addrext_reg])\n\t" /* read the tryx result */ \
+        __hero_64_restore_mstatus_asm \
+        : [reg] "=&r" (reg), [tryx_res] "=r" (tryx_res), [mstatus] "+&r" (mstatus) \
         : [upper] "r" (upper), [__addrext_reg] "r" (__addrext_reg), [lower] "r" (lower) \
         : "memory" \
     ); \
@@ -154,10 +131,12 @@ inline static void __loop_forever()
       const uint64_t addr, const uint ## bits ## _t val) { \
     __hero_64_noblock_pre(uint ## bits ## _t) \
     __asm__ volatile( \
+        __hero_64_disable_mirq_asm "\n\t" \
         "sw %[upper], 0(%[__addrext_reg])\n\t" /* set address extension register */ \
         "s" __hero_64_op_suffix(int, bits) " %[val], 0(%[lower])\n\t" /* do actual store */ \
-        "lw %[tryx_res], 4(%[__addrext_reg])" /* read the tryx result */ \
-        : [tryx_res] "=r" (tryx_res) \
+        "lw %[tryx_res], 4(%[__addrext_reg])\n\t" /* read the tryx result */ \
+        __hero_64_restore_mstatus_asm \
+        : [tryx_res] "=r" (tryx_res), [mstatus] "+&r" (mstatus) \
         : [upper] "r" (upper), [__addrext_reg] "r" (__addrext_reg), \
           [val] "r" (val), [lower] "r" (lower) \
         : "memory" \
