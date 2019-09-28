@@ -92,7 +92,7 @@ $(DEPFILES):
 include $(wildcard $(DEPFILES))
 
 clean::
-	-rm -vf __hmpp* -vf $(EXE) *~ *.dis *.ll *.slm
+	-rm -vf __hmpp* $(EXE) *~ *.dis *.ll *.slm
 
 init-target-host:
 ifndef HERO_TARGET_HOST
