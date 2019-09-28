@@ -495,13 +495,14 @@ module riscv_load_store_unit
 
   `ifndef VERILATOR
     // make sure there is no new request when the old one is not yet completely done
-    assert property (
-      @(posedge clk) ((CS == WAIT_RVALID) && (data_gnt_i == 1'b1)) |-> (data_rvalid_i == 1'b1) ) else $display("It should not be possible to get a grand without an rvalid for the last request %t", $time);
+    assert property (@(posedge clk) CS == WAIT_RVALID && data_gnt_i |-> data_rvalid_i)
+        else $warning("It should not be possible to get a grant without an rvalid for the last request!");
 
-    assert property (
-      @(posedge clk) (CS == IDLE) |-> (data_rvalid_i == 1'b0) ) else $display("There should be no rvalid when we the LSU is IDLE %t", $time);
+    assert property (@(posedge clk) CS == IDLE |-> !data_rvalid_i)
+        else $warning("There should be no rvalid when the LSU is idle!");
 
     // assert that the address does not contain X when request is sent
-    assert property ( @(posedge clk) (data_req_o) |-> (!$isunknown(data_addr_o)) ) else $display("There has been a data request but the address is unknown %t", $time);
+    assert property (@(posedge clk) data_req_o |-> !$isunknown(data_addr_o))
+        else $warning("There has been a data request but the address is unknown!");
   `endif
 endmodule
