@@ -40,7 +40,7 @@ all : $(EXE) $(EXE).dis slm
 
 .PRECIOUS: %.ll
 %.ll: %.c $(DEPDIR)/%.d | $(DEPDIR)
-	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS_PULP) $(INCPATHS) $(SRC)
+	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS_PULP) $(INCPATHS) $<
 
 %.OMP.ll: %.ll
 	hc-omp-pass $< OmpKernelWrapper "HERCULES-omp-kernel-wrapper"
