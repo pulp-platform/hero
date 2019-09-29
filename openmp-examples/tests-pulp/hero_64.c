@@ -58,7 +58,7 @@ unsigned test_hero_64()
   const uint64_t l1_alias_base  = 0x000000001B032000;
   const uint64_t l2_base        = 0x000000001C032000;
   const uint64_t dram           = 0x0123000000000000;
-  for (uint32_t offset = 0; offset < 4; offset++) {
+  for (uint32_t offset = 0; offset < 8; offset++) {
     printf("Testing accesses with offset %d...\n", offset);
     #pragma omp parallel
     {
