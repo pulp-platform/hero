@@ -11,6 +11,11 @@ if [ -z "$RISCV" ]; then
     exit
 fi
 
+BUILD_TYPE="Release"
+if [ ! -z "$1" ]; then
+    BUILD_TYPE=$1
+fi
+
 # clone required repositories and init submodules
 git clone $GIT_REPO/HerculesCompiler-public.git -b $GIT_BRANCH
 
@@ -30,7 +35,7 @@ cd llvm_build
 # run llvm build and install
 echo "Building LLVM project"
 # NOTE: use the cmake from the host tools to ensure a recent version
-$RISCV/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
+$RISCV/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DBUILD_SHARED_LIBS=True -DLLVM_USE_SPLIT_DWARF=True \
       -DCMAKE_INSTALL_PREFIX=$RISCV \
       -DCMAKE_FIND_NO_INSTALL_PREFIX=True \
