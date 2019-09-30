@@ -4,22 +4,22 @@
 [submodule "tools/riscv-openocd"]
 	path = tools/riscv-openocd
 	url = https://github.com/riscv/riscv-openocd
-[submodule "tools/riscv-isa-sim"]
-	path = tools/riscv-isa-sim
-	url = https://github.com/riscv/riscv-isa-sim.git
 [submodule "pulp/sdk"]
 	path = pulp/sdk
 	url = git@iis-git.ee.ethz.ch:kwolters/pulp-sdk.git
-    ignore = dirty
+	ignore = dirty
 [submodule "toolchain/clang"]
 	path = toolchain/clang
 	url = git@iis-git.ee.ethz.ch:kwolters/clang.git
 	branch = hero-v3
+	shallow = true
 [submodule "toolchain/llvm"]
 	path = toolchain/llvm
 	url = git@iis-git.ee.ethz.ch:kwolters/llvm.git
 	branch = hero-v3
+	shallow = true
 [submodule "toolchain/openmp"]
 	path = toolchain/openmp
 	url = git@iis-git.ee.ethz.ch:kwolters/openmp.git
 	branch = hero-v3
+	shallow = true
