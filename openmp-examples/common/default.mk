@@ -44,7 +44,8 @@ all : $(EXE) $(EXE).dis slm
 	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS_PULP) $(INCPATHS) $<
 
 %.OMP.ll: %.ll
-	hc-omp-pass $< OmpKernelWrapper "HERCULES-omp-kernel-wrapper"
+	hc-omp-pass $< OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(<:.ll=.TMP.ll)
+	hc-omp-pass $(<:.ll=.TMP.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(<:.ll=.OMP.ll)
 
 $(EXE) : $(SRC:.c=.OMP.ll)
 	$(CC) $(CFLAGS_PULP) $(LDFLAGS_PULP) -o $@ $^
@@ -75,7 +76,8 @@ $(EXE) : $(SRC)
 	$(COB) -inputs="$(BENCHMARK).ll" -outputs="$(BENCHMARK)-host.ll,$(BENCHMARK)-dev.ll" -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)" -unbundle
 	# apply omp passes
 	hc-omp-pass "$(BENCHMARK)-host.ll" OmpKernelWrapper "HERCULES-omp-kernel-wrapper"
-	hc-omp-pass "$(BENCHMARK)-dev.ll" OmpKernelWrapper "HERCULES-omp-kernel-wrapper"
+	hc-omp-pass "$(BENCHMARK)-dev.ll" OmpKernelWrapper "HERCULES-omp-kernel-wrapper" "$(BENCHMARK)-dev.TMP.ll"
+	hc-omp-pass "$(BENCHMARK)-dev.TMP.ll" OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" "$(BENCHMARK)-dev.OMP.ll"
 	# rebundle and compile/link
 	$(COB) -inputs="$(BENCHMARK)-host.OMP.ll,$(BENCHMARK)-dev.OMP.ll" -outputs="$(BENCHMARK)-out.ll" -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)"
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BENCHMARK) "$(BENCHMARK)-out.ll"
