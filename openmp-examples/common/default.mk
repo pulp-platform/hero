@@ -15,7 +15,7 @@ ARCH_DEV = openmp-$(TARGET_DEV)
 # 3) with _PULP suffix, they apply only to the PULP part of compilation;
 # 4) with _COMMON suffix, they apply to both PULP and host compilation.
 CFLAGS_COMMON += -fopenmp=libomp -O1
-CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV)
+CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -march=rv32imac
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
 LDFLAGS_COMMON += -lhero-target
 LDFLAGS_PULP += $(LDFLAGS_COMMON)
@@ -27,20 +27,26 @@ BENCHMARK = $(shell basename `pwd`)
 EXE = $(BENCHMARK)
 SRC = $(CSRCS)
 
-DEP_FLAG    := -MM
+DEPDIR := .deps
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 
 only ?= # can be set to `pulp` to compile a binary only for PULP
 
-.PHONY: all exe clean veryclean
+.PHONY: all exe clean
 
 ifeq ($(only),pulp)
 OBJDUMP := riscv32-hero-unknown-elf-objdump
 all : $(EXE) $(EXE).dis slm
 
-$(EXE) : $(SRC)
-	$(CC) -c -emit-llvm -S $(CFLAGS_PULP) $(INCPATHS) $(SRC)
-	hc-omp-pass $(SRC:.c=.ll)  OmpKernelWrapper "HERCULES-omp-kernel-wrapper"
-	$(CC) $(CFLAGS_PULP) $(LDFLAGS_PULP) -o $@ $(SRC:.c=.OMP.ll)
+.PRECIOUS: %.ll
+%.ll: %.c $(DEPDIR)/%.d | $(DEPDIR)
+	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS_PULP) $(INCPATHS) $<
+
+%.OMP.ll: %.ll
+	hc-omp-pass $< OmpKernelWrapper "HERCULES-omp-kernel-wrapper"
+
+$(EXE) : $(SRC:.c=.OMP.ll)
+	$(CC) $(CFLAGS_PULP) $(LDFLAGS_PULP) -o $@ $^
 
 slm : $(EXE)_l1.slm $(EXE)_l2.slm
 
@@ -77,8 +83,17 @@ endif
 $(EXE).dis : $(EXE)
 	$(OBJDUMP) -d $^ > $@
 
+$(DEPDIR):
+	@mkdir -p $@
+
+DEPFILES := $(CSRCS:%.c=$(DEPDIR)/%.d)
+$(DEPFILES):
+
+include $(wildcard $(DEPFILES))
+
 clean::
-	-rm -vf __hmpp* -vf $(EXE) *~ *.dis *.ll *.slm
+	-rm -vf __hmpp* $(EXE) *~ *.dis *.ll *.slm
+	-rm -rvf $(DEPDIR)
 
 init-target-host:
 ifndef HERO_TARGET_HOST

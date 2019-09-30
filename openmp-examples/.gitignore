@@ -11,3 +11,4 @@ hero-sdk
 *.dis
 *.ll
 *.slm
+.deps/
