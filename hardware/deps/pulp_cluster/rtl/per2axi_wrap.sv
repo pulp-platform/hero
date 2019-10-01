@@ -25,7 +25,8 @@ module per2axi_wrap
   parameter AXI_DATA_WIDTH = 64,
   parameter AXI_USER_WIDTH = 6,
   parameter AXI_ID_WIDTH   = 4,
-  parameter AXI_STRB_WIDTH = AXI_DATA_WIDTH/8
+  parameter AXI_STRB_WIDTH = AXI_DATA_WIDTH/8,
+  parameter type tryx_req_t = logic
 )
 (
   input logic	                                    clk_i,
@@ -33,7 +34,8 @@ module per2axi_wrap
   input logic                                     test_en_i,
   XBAR_PERIPH_BUS.Slave                           periph_slave,
   input logic [5:0]                               periph_slave_atop_i,
-  input  logic [NB_CORES-1:0][AXI_USER_WIDTH-1:0] axi_axuser_i,
+  input  tryx_req_t [NB_CORES-1:0]                tryx_req_i,
+  output logic [NB_CORES-1:0]                     axi_xresp_decerr_o,
   output logic [NB_CORES-1:0]                     axi_xresp_slverr_o,
   output logic [NB_CORES-1:0]                     axi_xresp_valid_o,
   AXI_BUS.Master                                  axi_master,
@@ -47,7 +49,8 @@ module per2axi_wrap
     .AXI_ADDR_WIDTH     ( AXI_ADDR_WIDTH  ),
     .AXI_DATA_WIDTH     ( AXI_DATA_WIDTH  ),
     .AXI_USER_WIDTH     ( AXI_USER_WIDTH  ),
-    .AXI_ID_WIDTH       ( AXI_ID_WIDTH    )
+    .AXI_ID_WIDTH       ( AXI_ID_WIDTH    ),
+    .tryx_req_t         ( tryx_req_t      )
   ) per2axi_i (
     .clk_i                  ( clk_i                               ),
     .rst_ni                 ( rst_ni                              ),
@@ -67,7 +70,8 @@ module per2axi_wrap
     .per_slave_r_id_o       ( periph_slave.r_id[PER_ID_WIDTH-1:0] ),
     .per_slave_r_rdata_o    ( periph_slave.r_rdata                ),
 
-    .axi_axuser_i           ( axi_axuser_i                        ),
+    .tryx_req_i             ( tryx_req_i                          ),
+    .axi_xresp_decerr_o     ( axi_xresp_decerr_o                  ),
     .axi_xresp_slverr_o     ( axi_xresp_slverr_o                  ),
     .axi_xresp_valid_o      ( axi_xresp_valid_o                   ),
 

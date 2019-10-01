@@ -18,6 +18,7 @@
 #define __TESTS_H__
 
 unsigned test_dma();
+unsigned test_hero_64();
 unsigned test_m_instrs();
 
 #endif

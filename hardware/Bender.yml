@@ -7,6 +7,7 @@ dependencies:
   axi: { git: "https://github.com/pulp-platform/axi.git", rev: axi_dwc_akurth }
   axi_mem_if: { git: "https://github.com/pulp-platform/axi_mem_if.git", rev: fix-name-conflict }
   axi_node: { git: "https://github.com/pulp-platform/axi_node.git", rev: atop }
+  axi_rab: { git: "https://github.com/pulp-platform/axi_rab.git", rev: urania }
   axi_riscv_atomics: { git: "https://github.com/pulp-platform/axi_riscv_atomics.git", rev: lrsc-v2 }
   axi_slice_dc: { git: "https://github.com/pulp-platform/axi_slice_dc.git", rev: atomics }
   common_verification: { git: "https://github.com/pulp-platform/common_verification.git", rev: release-0.2 }
@@ -25,6 +26,7 @@ sources:
   - src/apb/apb_rw_regs.sv
   - src/apb/apb_bus_wrap.sv
   # Level 0
+  - src/axi_rab_wrap.sv
   - src/pulp_cluster_cfg_pkg.sv
   - src/soc_bus.sv
   - src/soc_ctrl_regs.sv

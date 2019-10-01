@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
 
   n_errors += test_m_instrs();
   n_errors += test_dma();
+  n_errors += test_hero_64();
 
   assert(n_errors == 0);
   return n_errors;

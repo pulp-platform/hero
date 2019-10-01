@@ -35,6 +35,7 @@ module core_region
   parameter bit     CLUSTER_ALIAS           = 1'b1,
   parameter int     CLUSTER_ALIAS_BASE      = 12'h000,
   parameter int     REMAP_ADDRESS           = 0,
+  parameter bit     ADDREXT                 = 1'b0,
   parameter bit     DEM_PER_BEFORE_TCDM_TS  = 1'b0
 `ifndef SYNTHESIS
   ,
@@ -77,6 +78,9 @@ module core_region
   output logic 			      debug_core_halted_o,
   input logic 			      debug_core_halt_i,
   input logic 			      debug_core_resume_i,
+
+  output logic                  unaligned_o,
+  input logic [31:0]            addrext_i,
 				      
 				      // Interface for DEMUX to TCDM INTERCONNECT ,PERIPHERAL INTERCONNECT and DMA CONTROLLER
 				      XBAR_TCDM_BUS.Master tcdm_data_master,
@@ -140,6 +144,7 @@ module core_region
     .data_gnt_i            ( s_core_bus.gnt           ),
     .data_rvalid_i         ( s_core_bus.r_valid       ),
     .data_err_i            ( 1'b0                     ),
+    .data_unaligned_o      ( unaligned_o              ),
 
     .irq_i                 ( irq_req_i                ),
     .irq_id_i              ( irq_id_i                 ),
@@ -200,6 +205,7 @@ module core_region
     .CLUSTER_ALIAS          ( CLUSTER_ALIAS           ),
     .CLUSTER_ALIAS_BASE     ( CLUSTER_ALIAS_BASE      ),
     .DEM_PER_BEFORE_TCDM_TS ( DEM_PER_BEFORE_TCDM_TS  ),
+    .ADDREXT                ( ADDREXT                 ),
     .REMAP_ADDRESS          ( REMAP_ADDRESS           )
   ) core_demux_i (
     .clk                (  clk_int                    ),
@@ -214,6 +220,7 @@ module core_region
     .data_wdata_i       (  s_core_bus.wdata           ),
     .data_be_i          (  s_core_bus.be              ),
     .data_gnt_o         (  s_core_bus.gnt             ),
+    .addrext_i,
     .data_r_gnt_i       (  s_core_bus.r_gnt           ),
     .data_r_valid_o     (  s_core_bus.r_valid         ),
     .data_r_opc_o       (                             ),

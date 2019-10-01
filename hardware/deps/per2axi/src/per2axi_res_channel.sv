@@ -34,6 +34,7 @@ module per2axi_res_channel
    output logic [31:0]               per_slave_r_rdata_o,
 
    // TRYX CTRL
+   output logic [NB_CORES-1:0]       axi_xresp_decerr_o,
    output logic [NB_CORES-1:0]       axi_xresp_slverr_o,
    output logic [NB_CORES-1:0]       axi_xresp_valid_o,
 
@@ -71,68 +72,52 @@ module per2axi_res_channel
    typedef enum logic [1:0] { NONE, REQUEST, WAIT_R, WAIT_B } atop_res_t;
    atop_res_t [PER_ID_WIDTH-1:0] atop_state_d, atop_state_q;
    
-   // PERIPHERAL INTERCONNECT RESPONSE REQUEST GENERATION
-   always_comb
-   begin
-        per_slave_r_valid_o  = '0;
-        per_slave_r_opc_o    = '0;
-        per_slave_r_id_o     = '0;
-        per_slave_r_rdata_o  = '0;
-        axi_master_r_ready_o = '0;
-        axi_master_b_ready_o = '0;
-        axi_xresp_slverr_o   = '0;
-        axi_xresp_valid_o    = '0;
+   // Handle responses.
+   always_comb begin
+      axi_master_b_ready_o = 1'b0;
+      axi_master_r_ready_o = 1'b0;
+      axi_xresp_decerr_o   = '0;
+      axi_xresp_slverr_o   = '0;
+      axi_xresp_valid_o    = '0;
+      per_slave_r_id_o     = '0;
+      per_slave_r_opc_o    = '0;
+      per_slave_r_rdata_o  = '0;
+      per_slave_r_valid_o  = 1'b0;
 
-        if ( axi_master_r_valid_i == 1'b1 && atop_state_q[axi_master_r_id_i] == NONE)
-        begin
-             axi_master_r_ready_o = 1'b1;
-             per_slave_r_valid_o  = 1'b1;
-             per_slave_r_id_o[axi_master_r_id_i] = 1'b1;
-             per_slave_r_rdata_o  = s_per_slave_r_data;
-             if ( axi_master_r_resp_i == 2'b10 ) // slave error -> RAB miss
-             begin
-                axi_xresp_slverr_o[axi_master_r_id_i] = 1'b1;
-                axi_xresp_valid_o [axi_master_r_id_i] = 1'b1;
-             end
-        end
-        else if ( axi_master_b_valid_i == 1'b1 && atop_state_q[axi_master_b_id_i] == NONE)
-        begin
-           axi_master_b_ready_o                = 1'b1;
-           per_slave_r_valid_o                 = 1'b1;
-           per_slave_r_id_o[axi_master_b_id_i] = 1'b1;
+      if (axi_master_r_valid_i) begin
+         axi_master_r_ready_o = 1'b1;
+         per_slave_r_id_o[axi_master_r_id_i] = 1'b1;
+         per_slave_r_rdata_o = s_per_slave_r_data;
+         per_slave_r_valid_o = 1'b1;
+         if (axi_master_r_resp_i[1]) begin // error
+            axi_xresp_valid_o[axi_master_r_id_i] = 1'b1;
+            if (axi_master_r_resp_i[0]) begin // decoding error
+               axi_xresp_decerr_o[axi_master_r_id_i] = 1'b1;
+            end else begin // slave error (e.g. RAB miss)
+               axi_xresp_slverr_o[axi_master_r_id_i] = 1'b1;
+            end
+         end
+      end else if (axi_master_b_valid_i) begin
+         axi_master_b_ready_o = 1'b1;
+         if (atop_state_q[axi_master_b_id_i] == NONE) begin
+            per_slave_r_valid_o = 1'b1;
+            per_slave_r_id_o[axi_master_b_id_i] = 1'b1;
 
-           // Forward response/error to core
-           // axi_master_b_resp_i[1:0] -> per_slave_r_rdata_o[1:0]
-           // 00 -> 01
-           // 01 -> 00
-           // 10 -> 10
-           // 11 -> 11
-           // per_slave_r_rdata_o = {'{{AXI_DATA_WIDTH-2}{0}} ,axi_master_b_resp_i[1],axi_master_b_resp_i[1] ~^ axi_master_b_resp_i[0]};
-           per_slave_r_rdata_o = {30'b0 ,axi_master_b_resp_i[1],axi_master_b_resp_i[1] ~^ axi_master_b_resp_i[0]};
-           if ( axi_master_b_resp_i == 2'b10 ) // slave error -> RAB miss
-           begin
-              axi_xresp_slverr_o[axi_master_b_id_i] = 1'b1;
-              axi_xresp_valid_o [axi_master_b_id_i] = 1'b1;
-           end
-        end
-        else if ( axi_master_r_valid_i == 1'b1 && atop_state_q[axi_master_r_id_i] != NONE)
-        begin
-             axi_master_r_ready_o = 1'b1;
-             per_slave_r_valid_o  = 1'b1;
-             per_slave_r_id_o[axi_master_r_id_i] = 1'b1;
-             per_slave_r_rdata_o  = s_per_slave_r_data;
-             if ( axi_master_r_resp_i == 2'b10 ) // slave error -> RAB miss
-             begin
-                axi_xresp_slverr_o[axi_master_r_id_i] = 1'b1;
-                axi_xresp_valid_o [axi_master_r_id_i] = 1'b1;
-             end
-        end
-
-        if ( axi_master_b_valid_i == 1'b1 && atop_state_q[axi_master_b_id_i] != NONE)
-        begin
-           // ALways just ack B from AMO
-           axi_master_b_ready_o = 1'b1;
-        end
+            // Forward response/error to core.
+            // axi_master_b_resp_i[1:0] -> per_slave_r_rdata_o[1:0]
+            // 00 -> 01, 01 -> 00, 10 -> 10, 11 -> 11
+            per_slave_r_rdata_o
+               = {30'b0, axi_master_b_resp_i[1], axi_master_b_resp_i[1] ~^ axi_master_b_resp_i[0]};
+            if (axi_master_b_resp_i[1]) begin // error
+               axi_xresp_valid_o [axi_master_b_id_i] = 1'b1;
+               if (axi_master_b_resp_i[0]) begin // decording error
+                  axi_xresp_decerr_o[axi_master_b_id_i] = 1'b1;
+               end else begin // slave error (e.g. RAB miss)
+                  axi_xresp_slverr_o[axi_master_b_id_i] = 1'b1;
+               end
+            end
+         end
+      end
    end
 
    // Atomic memory operations

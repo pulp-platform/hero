@@ -90,4 +90,47 @@
     r_chan_t  r;                                        \
   } resp_t;
 
+// In AXI-Lite, the AR and AW channels have the same fields.
+`define AXI_LITE_TYPEDEF_AX_CHAN_T(ax_chan_t, addr_t, id_t, user_t) \
+  typedef struct packed {                                           \
+    id_t              id;                                           \
+    addr_t            addr;                                         \
+    axi_pkg::size_t   size;                                         \
+    axi_pkg::prot_t   prot;                                         \
+    user_t            user;                                         \
+  } ax_chan_t;
+
+`define AXI_LITE_TYPEDEF_W_CHAN_T(w_chan_t, data_t, strb_t, user_t) \
+  typedef struct packed {                                           \
+    data_t data;                                                    \
+    strb_t strb;                                                    \
+    user_t user;                                                    \
+  } w_chan_t;
+
+`define AXI_LITE_TYPEDEF_B_CHAN_T(b_chan_t, id_t, user_t) \
+  `AXI_TYPEDEF_B_CHAN_T(b_chan_t, id_t, user_t)
+
+`define AXI_LITE_TYPEDEF_R_CHAN_T(r_chan_t, data_t, id_t, user_t) \
+  typedef struct packed {                                         \
+    id_t            id;                                           \
+    data_t          data;                                         \
+    axi_pkg::resp_t resp;                                         \
+    user_t          user;                                         \
+  } r_chan_t;
+
+`define AXI_LITE_TYPEDEF_REQ_T(req_t, ax_chan_t, w_chan_t)  \
+  typedef struct packed {                                   \
+    ax_chan_t aw;                                           \
+    logic     aw_valid;                                     \
+    w_chan_t  w;                                            \
+    logic     w_valid;                                      \
+    logic     b_ready;                                      \
+    ax_chan_t ar;                                           \
+    logic     ar_valid;                                     \
+    logic     r_ready;                                      \
+  } req_t;
+
+`define AXI_LITE_TYPEDEF_RESP_T(resp_t, b_chan_t, r_chan_t) \
+  `AXI_TYPEDEF_RESP_T(resp_t, b_chan_t, r_chan_t)
+
 `endif

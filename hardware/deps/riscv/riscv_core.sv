@@ -85,6 +85,7 @@ module riscv_core
   input  logic        data_err_i,
 
   output logic [5:0]  data_atop_o,
+  output logic        data_unaligned_o,
 
   // apu-interconnect
   // handshake signals
@@ -875,8 +876,8 @@ module riscv_core
 
   riscv_load_store_unit  load_store_unit_i
   (
-    .clk                   ( clk                ),
-    .rst_n                 ( rst_ni             ),
+    .clk_i                 ( clk                ),
+    .rst_ni                ( rst_ni             ),
 
     //output to data memory
     .data_req_o            ( data_req_o         ),
@@ -923,6 +924,7 @@ module riscv_core
   );
 
   assign wb_valid = lsu_ready_wb & apu_ready_wb;
+  assign data_unaligned_o = data_misaligned;
 
 
   //////////////////////////////////////

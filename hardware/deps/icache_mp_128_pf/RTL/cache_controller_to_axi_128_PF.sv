@@ -368,7 +368,7 @@ module cache_controller_to_axi_128_PF
 
 
       .AXI_req_o              ( axi_master_arvalid_o   ),
-      .AXI_addr_o             ( axi_master_araddr_o    ),
+      .AXI_addr_o             ( axi_master_araddr_o[FETCH_ADDR_WIDTH-1:0] ),
       .AXI_ID_o               ( axi_master_arid_o      ),
       .AXI_gnt_i              ( axi_master_arready_i   ),
 
@@ -390,6 +390,9 @@ module cache_controller_to_axi_128_PF
       .SCM_DATA_write_wdata_o ( SCM_DATA_write_wdata_o ), 
       .SCM_DATA_write_way_o   ( SCM_DATA_write_way_o   )
    );
+   if (AXI_ADDR > FETCH_ADDR_WIDTH) begin : gen_zero_extend_araddr
+     assign axi_master_araddr_o[AXI_ADDR-1:FETCH_ADDR_WIDTH] = '0;
+   end
 
    //always accept read data
    assign axi_master_rready_o   = 1'b1;

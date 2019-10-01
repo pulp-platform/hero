@@ -4,4 +4,5 @@ set NumericStdNoWarnings 1
 
 source ../test/hero_tb.wave.do
 
+onfinish stop
 run -a

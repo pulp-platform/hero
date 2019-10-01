@@ -383,20 +383,20 @@ module cluster_bus_wrap
     s_end_addr   = '0;
     s_valid_rule = '0;
 
-    s_start_addr[0][0] = 32'h1000_0000 + ( cluster_id_i << 22);
-    s_end_addr  [0][0] = 32'h100F_FFFF + ( cluster_id_i << 22);
+    s_start_addr[0][0] = 64'h0000_0000_1000_0000 + ( cluster_id_i << 22);
+    s_end_addr  [0][0] = 64'h0000_0000_100F_FFFF + ( cluster_id_i << 22);
     s_valid_rule[0][0] = 1;
 
-    s_start_addr[0][1] = 32'h1020_0000 + ( cluster_id_i << 22);
-    s_end_addr  [0][1] = 32'h103F_FFFF + ( cluster_id_i << 22);
+    s_start_addr[0][1] = 64'h0000_0000_1020_0000 + ( cluster_id_i << 22);
+    s_end_addr  [0][1] = 64'h0000_0000_103F_FFFF + ( cluster_id_i << 22);
     s_valid_rule[0][1] = 1;
 
-    s_start_addr[0][2] = 32'h0000_0000;
+    s_start_addr[0][2] = 64'h0000_0000_0000_0000;
     s_end_addr  [0][2] = s_start_addr[0][0] - 1;
     s_valid_rule[0][2] = 1;
 
     s_start_addr[1][2] = s_end_addr[0][1] + 1;
-    s_end_addr  [1][2] = 32'hFFFF_FFFF;
+    s_end_addr  [1][2] = 64'hFFFF_FFFF_FFFF_FFFF;
     s_valid_rule[1][2] = 1;
 
     s_connectivity_map = {NB_MASTER*NB_SLAVE{1'b1}};
