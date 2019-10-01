@@ -28,7 +28,7 @@ int test_omp_for_schedule_static()
   int counter = 0;
   int tmp_count=1;
   int lastthreadsstarttid = -1;
-  int result = 1;
+  int result = 0;
 
   chunk_size = 7;
   tids = (int *) malloc (sizeof (int) * (CFSMAX_SIZE + 1));
@@ -124,25 +124,25 @@ int test_omp_for_schedule_static()
           } else {
              printf( "ERROR: Last thread (thread with"
               " number -1) was found before the end.\n");
-            result = 0;
+            result += 1;
           }
         } else {
            printf( "ERROR: chunk size was %d. (assigned"
             " was %d)\n", tmp_count, chunk_size);
-          result = 0;
+          result += 1;
         }
       }
     } else {
       printf("ERROR: Found thread with number %d (should be"
         " inbetween 0 and %d).", tids[i], threads - 1);
-      result = 0;
+      result += 1;
     }
 #ifdef VERBOSE
      printf( "%d: %d \n", i, tids[i]);
 #endif
   }
 
-  return result;
+  return (result==0);
 }
 
 // int main()
