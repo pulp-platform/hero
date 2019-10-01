@@ -62,7 +62,7 @@ inline static __attribute__((used)) int       hero_store_uint8_noblock  (const u
  * Implementation Internals
  **************************************************************************************************/
 
-#if __riscv_xlen == 32 // FIXME: properly check for host/accelerator toolchain here
+#ifdef __PULP__
 
 #include <stdbool.h>
 #include <stdint.h>
