@@ -52,19 +52,7 @@ hero-llvm:
 	cd $(CURDIR)/output/hero-llvm/ && $(ROOT)/toolchain/setup-hero-llvm.sh
 
 # tools
-tools: tools-isa-sim tools-openocd
-
-tools-isa-sim:
-	mkdir -p $(CURDIR)/output/tools-isa-sim/
-	(cd $(CURDIR)/output/tools-isa-sim/; \
-		export PATH=$(RISCV)/bin:${PATH}; \
-		echo ${PATH}; \
-		$(ROOT)/tools/riscv-isa-sim/configure --prefix=$(RISCV); \
-		$(MAKE); \
-		chmod -R u+w $(RISCV); \
-		$(MAKE) install; \
-		chmod -R u-w $(RISCV); \
-	)
+tools: tools-openocd
 
 tools-openocd:
 	mkdir -p $(CURDIR)/output/tools-openocd/
