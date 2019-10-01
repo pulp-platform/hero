@@ -30,7 +30,8 @@
 // -  The non-blocking functions (`_noblock` suffix) return 0 on success and a non-zero value on
 //    failure.  Loads pass the loaded value back through the `val` pointer.  The value stored in
 //    `val` after a failing load is undefined.  It is illegal to let `val` point to a memory
-//    location that might be unaccessible; violating this leads to undefined behavior.
+//    location that might be unaccessible; violating this leads to undefined behavior. Moreover,
+//    `val` has to be a native 32-bit device pointer as the load cannot be replaced recursively.
 // Natively aligned 32-bit, 16-bit, and 8-bit memory accesses give rise to a single memory access
 // operation and are thus single-copy atomic.  Unaligned or 64-bit memory accesses give rise to at
 // least two memory access operations, and such loads from a memory location for which a race exists
@@ -41,19 +42,19 @@
 // return values.
 inline static __attribute__((used)) uint64_t  hero_load_uint64          (const uint64_t addr);
 inline static __attribute__((used)) void      hero_store_uint64         (const uint64_t addr, const uint64_t val);
-inline static __attribute__((used)) int       hero_load_uint64_noblock  (const uint64_t addr, uint64_t* const val);
+inline static __attribute__((used)) int       hero_load_uint64_noblock  (const uint64_t addr, __device uint64_t* const val);
 inline static __attribute__((used)) int       hero_store_uint64_noblock (const uint64_t addr, const uint64_t val);
 inline static __attribute__((used)) uint32_t  hero_load_uint32          (const uint64_t addr);
 inline static __attribute__((used)) void      hero_store_uint32         (const uint64_t addr, const uint32_t val);
-inline static __attribute__((used)) int       hero_load_uint32_noblock  (const uint64_t addr, uint32_t* const val);
+inline static __attribute__((used)) int       hero_load_uint32_noblock  (const uint64_t addr, __device uint32_t* const val);
 inline static __attribute__((used)) int       hero_store_uint32_noblock (const uint64_t addr, const uint32_t val);
 inline static __attribute__((used)) uint16_t  hero_load_uint16          (const uint64_t addr);
 inline static __attribute__((used)) void      hero_store_uint16         (const uint64_t addr, const uint16_t val);
-inline static __attribute__((used)) int       hero_load_uint16_noblock  (const uint64_t addr, uint16_t* const val);
+inline static __attribute__((used)) int       hero_load_uint16_noblock  (const uint64_t addr, __device uint16_t* const val);
 inline static __attribute__((used)) int       hero_store_uint16_noblock (const uint64_t addr, const uint16_t val);
 inline static __attribute__((used)) uint8_t   hero_load_uint8           (const uint64_t addr);
 inline static __attribute__((used)) void      hero_store_uint8          (const uint64_t addr, const uint8_t val);
-inline static __attribute__((used)) int       hero_load_uint8_noblock   (const uint64_t addr, uint8_t* const val);
+inline static __attribute__((used)) int       hero_load_uint8_noblock   (const uint64_t addr, __device uint8_t* const val);
 inline static __attribute__((used)) int       hero_store_uint8_noblock  (const uint64_t addr, const uint8_t val);
 
 
@@ -68,8 +69,8 @@ inline static __attribute__((used)) int       hero_store_uint8_noblock  (const u
 #include <stdio.h>
 #include <stdlib.h> // abort()
 
-static volatile uint32_t* const __addrext_reg = (uint32_t*)0x10200BF8;
-static volatile uint32_t* const __tryx_res_reg = (uint32_t*)0x10200BFC;
+__device static volatile uint32_t* const __addrext_reg = (__device uint32_t*)0x10200BF8;
+__device static volatile uint32_t* const __tryx_res_reg = (__device uint32_t*)0x10200BFC;
 
 inline static uint32_t __upper32(const uint64_t dw)
 {
@@ -90,7 +91,7 @@ inline static void __loop_forever()
 
 #define __hero_64_noblock_pre(data_t) \
   const uint32_t upper = __upper32(addr); \
-  volatile data_t* const lower = (volatile data_t*)__lower32(addr); \
+  __device volatile data_t* const lower = (__device volatile data_t*)__lower32(addr); \
   uint32_t tryx_res; \
   uint32_t mstatus;
 
@@ -109,7 +110,7 @@ inline static void __loop_forever()
 
 #define __hero_64_define_load_noblock(bits) \
   inline static int hero_load_uint ## bits ## _noblock(\
-      const uint64_t addr, uint ## bits ## _t* const val) { \
+      const uint64_t addr, __device uint ## bits ## _t* const val) { \
     __hero_64_noblock_pre(uint ## bits ## _t) \
     uint ## bits ## _t reg; \
     __asm__ volatile( \
@@ -154,7 +155,7 @@ inline static void __loop_forever()
 #define __hero_64_define_load(size) \
   inline static uint ## size ## _t hero_load_uint ## size(const uint64_t addr) { \
     uint ## size ## _t val; \
-    const int res = hero_load_uint ## size ## _noblock(addr, &val); \
+    const int res = hero_load_uint ## size ## _noblock(addr, (__device uint ## size ## _t*)&val); \
     __hero_64_check_mem_access \
     return val; \
   }
@@ -190,11 +191,11 @@ void hero_store_uint64(const uint64_t addr, const uint64_t val)
   hero_store_uint32(addr+4, upper);
 }
 
-int hero_load_uint64_noblock(const uint64_t addr, uint64_t* const val)
+int hero_load_uint64_noblock(const uint64_t addr, __device uint64_t* const val)
 {
-  uint32_t* const lower = (uint32_t*)val;
+  __device uint32_t* const lower = (__device uint32_t*)val;
   const int res_lower = hero_load_uint32_noblock(addr, lower);
-  uint32_t* const upper = lower + 1;
+  __device uint32_t* const upper = lower + 1;
   const int res_upper = hero_load_uint32_noblock(addr+4, upper);
   return res_lower | res_upper;
 }
