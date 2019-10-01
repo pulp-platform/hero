@@ -43,13 +43,13 @@ inline static void check_fail(const uint64_t base)
   const uint64_t addr = base * 8*omp_get_thread_num();
   uint64_t dummy;
   assert(hero_store_uint8_noblock(addr, dummy) != 0);
-  assert(hero_load_uint8_noblock(addr, (uint8_t*)&dummy) != 0);
+  assert(hero_load_uint8_noblock(addr, (__device uint8_t*)&dummy) != 0);
   assert(hero_store_uint16_noblock(addr, dummy) != 0);
-  assert(hero_load_uint16_noblock(addr, (uint16_t*)&dummy) != 0);
+  assert(hero_load_uint16_noblock(addr, (__device uint16_t*)&dummy) != 0);
   assert(hero_store_uint32_noblock(addr, dummy) != 0);
-  assert(hero_load_uint32_noblock(addr, (uint32_t*)&dummy) != 0);
+  assert(hero_load_uint32_noblock(addr, (__device uint32_t*)&dummy) != 0);
   assert(hero_store_uint64_noblock(addr, dummy) != 0);
-  assert(hero_load_uint64_noblock(addr, &dummy) != 0);
+  assert(hero_load_uint64_noblock(addr, (__device uint64_t*)&dummy) != 0);
 }
 
 unsigned test_hero_64()
