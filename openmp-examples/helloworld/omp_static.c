@@ -1,6 +1,6 @@
 /* Adapted from llvm test suite:
  * https://github.com/llvm-mirror/openmp/blob/master/runtime/test/worksharing/for/omp_for_schedule_static.c
- * 
+ * Test passed. 
  */
 
 // RUN: %libomp-compile-and-run
