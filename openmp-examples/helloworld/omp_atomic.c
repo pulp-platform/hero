@@ -361,15 +361,15 @@ int test_omp_atomic()
   return (result == 0);
 } // test_omp_atomic()
 
-int main()
-{
-  int i;
-  int num_failed=0;
+// int main()
+// {
+//   int i;
+//   int num_failed=0;
 
-  for(i = 0; i < REPETITIONS; i++) {
-    if(!test_omp_atomic()) {
-      num_failed++;
-    }
-  }
-  return num_failed;
-}
+//   for(i = 0; i < REPETITIONS; i++) {
+//     if(!test_omp_atomic()) {
+//       num_failed++;
+//     }
+//   }
+//   return num_failed;
+// }
