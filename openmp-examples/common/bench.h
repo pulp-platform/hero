@@ -17,7 +17,7 @@
 #ifndef __BENCH_H__
 #define __BENCH_H__
 
-#if __riscv_xlen == 64 // FIXME: properly check for host/accelerator toolchain here
+#ifndef __PULP__
 
 #include <errno.h>    // error codes
 #include <stdarg.h>   // va_list, va_end(), va_start()
