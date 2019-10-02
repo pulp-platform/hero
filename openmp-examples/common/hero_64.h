@@ -64,6 +64,9 @@ inline static __attribute__((used)) int       hero_store_uint8_noblock  (const u
 
 #ifdef __PULP__
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wint-to-pointer-cast"
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -208,6 +211,8 @@ int hero_store_uint64_noblock(const uint64_t addr, const uint64_t val)
   const int res_upper = hero_store_uint32_noblock(addr+4, upper);
   return res_lower | res_upper;
 }
+
+#pragma clang diagnostic pop
 
 #endif
 
