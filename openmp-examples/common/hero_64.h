@@ -70,12 +70,11 @@ inline static __attribute__((used)) int       hero_store_uint8_noblock  (const u
 #pragma clang diagnostic ignored "-Wint-to-pointer-cast"
 
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h> // abort()
 
-__device static volatile uint32_t* const __addrext_reg = (__device uint32_t*)0x10200BF8;
-__device static volatile uint32_t* const __tryx_res_reg = (__device uint32_t*)0x10200BFC;
+#define ADDREXT_REG 0x10200BF8
+#define TRYX_RES_REG 0x10200BFC
 
 inline static uint32_t __upper32(const uint64_t dw)
 {
@@ -117,15 +116,16 @@ inline static void __loop_forever()
   inline static int hero_load_uint ## bits ## _noblock(\
       const uint64_t addr, __device uint ## bits ## _t* const val) { \
     __hero_64_noblock_pre(uint ## bits ## _t) \
+    __device static volatile uint32_t* const addrext_reg = (__device uint32_t*)ADDREXT_REG; \
     uint ## bits ## _t reg; \
     __asm__ volatile( \
         __hero_64_disable_mirq_asm "\n\t" \
-        "sw %[upper], 0(%[__addrext_reg])\n\t" /* set address extension register */ \
+        "sw %[upper], 0(%[addrext_reg])\n\t" /* set address extension register */ \
         "l" __hero_64_op_suffix(uint, bits) " %[reg], 0(%[lower])\n\t" /* do actual load */ \
-        "lw %[tryx_res], 4(%[__addrext_reg])\n\t" /* read the tryx result */ \
+        "lw %[tryx_res], 4(%[addrext_reg])\n\t" /* read the tryx result */ \
         __hero_64_restore_mstatus_asm \
         : [reg] "=&r" (reg), [tryx_res] "=r" (tryx_res), [mstatus] "+&r" (mstatus) \
-        : [upper] "r" (upper), [__addrext_reg] "r" (__addrext_reg), [lower] "r" (lower) \
+        : [upper] "r" (upper), [addrext_reg] "r" (addrext_reg), [lower] "r" (lower) \
         : "memory" \
     ); \
     *val = reg; \
@@ -136,14 +136,15 @@ inline static void __loop_forever()
   inline static int hero_store_uint ## bits ## _noblock(\
       const uint64_t addr, const uint ## bits ## _t val) { \
     __hero_64_noblock_pre(uint ## bits ## _t) \
+    __device static volatile uint32_t* const addrext_reg = (__device uint32_t*)ADDREXT_REG; \
     __asm__ volatile( \
         __hero_64_disable_mirq_asm "\n\t" \
-        "sw %[upper], 0(%[__addrext_reg])\n\t" /* set address extension register */ \
+        "sw %[upper], 0(%[addrext_reg])\n\t" /* set address extension register */ \
         "s" __hero_64_op_suffix(int, bits) " %[val], 0(%[lower])\n\t" /* do actual store */ \
-        "lw %[tryx_res], 4(%[__addrext_reg])\n\t" /* read the tryx result */ \
+        "lw %[tryx_res], 4(%[addrext_reg])\n\t" /* read the tryx result */ \
         __hero_64_restore_mstatus_asm \
         : [tryx_res] "=r" (tryx_res), [mstatus] "+&r" (mstatus) \
-        : [upper] "r" (upper), [__addrext_reg] "r" (__addrext_reg), \
+        : [upper] "r" (upper), [addrext_reg] "r" (addrext_reg), \
           [val] "r" (val), [lower] "r" (lower) \
         : "memory" \
     ); \
@@ -177,6 +178,7 @@ inline static void __loop_forever()
   __hero_64_define_store_noblock(size) \
   __hero_64_define_store(size)
 
+#pragma omp declare target
 __hero_64_define(32)
 __hero_64_define(16)
 __hero_64_define( 8)
@@ -213,6 +215,7 @@ int hero_store_uint64_noblock(const uint64_t addr, const uint64_t val)
   const int res_upper = hero_store_uint32_noblock(addr+4, upper);
   return res_lower | res_upper;
 }
+#pragma omp end declare target
 
 #pragma clang diagnostic pop
 
