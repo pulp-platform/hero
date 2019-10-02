@@ -17,8 +17,6 @@
 #ifndef __BENCH_H__
 #define __BENCH_H__
 
-#ifndef __PULP__
-
 #include <errno.h>    // error codes
 #include <stdarg.h>   // va_list, va_end(), va_start()
 #include <stdio.h>    // fclose(), fgets(), fopen(), printf(), vprintf()
@@ -38,7 +36,18 @@ static inline void bench_start(const char* const format, ...);
  *
  * @return  Time since the last `bench_start`, in miliseconds.
  */
-static inline double bench_stop();
+static inline double bench_stop(void);
+
+#ifdef __PULP__
+
+// FIXME: Implement benchmarking in standalone
+static inline void bench_start(const char* const format, ...) {}
+
+static inline double bench_stop(void) {
+  return 0.0;
+}
+
+#else
 
 /**
  * Get host clock frequency, in MHz.
@@ -64,7 +73,7 @@ static inline unsigned long long __ts_to_nsec(const struct timespec* const ts)
   return (unsigned long long)ts->tv_sec * 1000000000 + (unsigned long long)ts->tv_nsec;
 }
 
-static inline double bench_stop()
+static inline double bench_stop(void)
 {
   clock_gettime(CLOCK_MONOTONIC_RAW, &bench_ts_stop);
   const unsigned long long ns = __ts_to_nsec(&bench_ts_stop) - __ts_to_nsec(&bench_ts_start);
