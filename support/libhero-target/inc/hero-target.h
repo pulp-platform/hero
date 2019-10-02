@@ -20,15 +20,9 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#ifdef __llvm__
-#define BIGPULP_SVM     (-1)
-#define BIGPULP_MEMCPY  (0)
-#define HOST            (-1)
-#else
 #define BIGPULP_SVM     (0)
 #define BIGPULP_MEMCPY  (1)
 #define HOST            (2)
-#endif
 
 typedef int hero_dma_job_t;
 
