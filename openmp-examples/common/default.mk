@@ -22,7 +22,7 @@ LDFLAGS_COMMON += -lhero-target -Wl,-dynamic-linker,/lib/ld-linux-riscv64-lp64.s
 LDFLAGS_PULP += $(LDFLAGS_COMMON)
 LDFLAGS += $(LDFLAGS_COMMON)
 
-INCPATHS += -I../common
+INCPATHS += -I../common -include ../common/hero_64.h
 
 BENCHMARK = $(shell basename `pwd`)
 EXE = $(BENCHMARK)
@@ -119,4 +119,3 @@ ifeq ($(call ifndef_any_of,HERO_TARGET_HOST HERO_TARGET_PATH_APPS HERO_TARGET_PA
 else
 	$(error HERO_TARGET_HOST and/or HERO_TARGET_PATH_APPS is not set)
 endif
-
