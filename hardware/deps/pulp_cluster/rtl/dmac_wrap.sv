@@ -101,10 +101,10 @@ module dmac_wrap
     .CORE_TRANS_QUEUE_DEPTH   ( 2                     ),    // DEPTH OF PRIVATE PER-CORE COMMAND QUEUE (CTRL_UNIT)
     .GLOBAL_TRANS_QUEUE_DEPTH ( 2*NB_CORES            ),    // DEPTH OF GLOBAL COMMAND QUEUE (CTRL_UNIT)
     .TCDM_ADD_WIDTH           ( TCDM_ADD_WIDTH        ),    // WIDTH OF TCDM ADDRESS
-    .EXT_ADD_WIDTH            ( AXI_ADDR_WIDTH        ),    // WIDTH OF GLOBAL EXTERNAL ADDRESS
+    .EXT_ADD_WIDTH            ( 32                    ),    // WIDTH OF GLOBAL EXTERNAL ADDRESS
     .NB_OUTSND_TRANS          ( NB_OUTSND_BURSTS      ),    // NUMBER OF OUTSTANDING TRANSACTIONS
     .MCHAN_BURST_LENGTH       ( MCHAN_BURST_LENGTH    ),    // ANY POWER OF 2 VALUE FROM 32 TO 2048
-    .AXI_ADDR_WIDTH           ( AXI_ADDR_WIDTH        ),
+    .AXI_ADDR_WIDTH           ( 32                    ),
     .AXI_DATA_WIDTH           ( AXI_DATA_WIDTH        ),
     .AXI_USER_WIDTH           ( AXI_USER_WIDTH        ),
     .AXI_ID_WIDTH             ( AXI_ID_WIDTH          ),
@@ -141,7 +141,7 @@ module dmac_wrap
     .tcdm_init_r_valid_i       ( s_tcdm_bus_r_valid                 ),
     .tcdm_init_r_data_i        ( s_tcdm_bus_r_rdata                 ),
     .axi_master_aw_valid_o     ( ext_master.aw_valid                ),
-    .axi_master_aw_addr_o      ( ext_master.aw_addr                 ),
+    .axi_master_aw_addr_o      ( ext_master.aw_addr[31:0]           ),
     .axi_master_aw_prot_o      ( ext_master.aw_prot                 ),
     .axi_master_aw_region_o    ( ext_master.aw_region               ),
     .axi_master_aw_atop_o      ( ext_master.aw_atop                 ),
@@ -155,7 +155,7 @@ module dmac_wrap
     .axi_master_aw_user_o      ( ext_master.aw_user                 ),
     .axi_master_aw_ready_i     ( ext_master.aw_ready                ),
     .axi_master_ar_valid_o     ( ext_master.ar_valid                ),
-    .axi_master_ar_addr_o      ( ext_master.ar_addr                 ),
+    .axi_master_ar_addr_o      ( ext_master.ar_addr[31:0]           ),
     .axi_master_ar_prot_o      ( ext_master.ar_prot                 ),
     .axi_master_ar_region_o    ( ext_master.ar_region               ),
     .axi_master_ar_len_o       ( ext_master.ar_len                  ),
@@ -189,5 +189,9 @@ module dmac_wrap
     .term_int_o                ( {term_irq_pe_o,term_irq_o    }     ),
     .busy_o                    ( busy_o                             )
   );
+  if (AXI_ADDR_WIDTH > 32) begin : gen_zero_extend_axi_addr
+    assign ext_master.aw_addr[AXI_ADDR_WIDTH-1:32] = '0;
+    assign ext_master.ar_addr[AXI_ADDR_WIDTH-1:32] = '0;
+  end
 
 endmodule
