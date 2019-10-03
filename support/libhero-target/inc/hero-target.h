@@ -180,7 +180,16 @@ void hero_l2free(void * a);
 
   \return  The core ID.
  */
-int hero_rt_core_id();
+int hero_rt_core_id(void);
+
+/** Reset clock counter
+ */
+void hero_reset_clk_counter(void);
+
+/** Get clock counter
+ */
+int hero_get_clk_counter(void);
+
 //FIXME: hero_rt_info();
 //FIXME: hero_rt_error();
 

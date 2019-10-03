@@ -16,6 +16,7 @@
 
 #include <hero-target.h>
 #include <pulp.h>
+#include <bench/bench.h>
 #include <libgomp/pulp/memutils.h>
 #include <archi-host/pgtable_hwdef.h>
 #include <vmm/vmm.h>
@@ -52,7 +53,7 @@ hero_handle_rab_misses(void)
   return handle_rab_misses();
 }
 
-hero_dma_job_t 
+hero_dma_job_t
 hero_dma_memcpy_async(void *dst, void *src, int size)
 {
   int ext2loc;
@@ -107,7 +108,7 @@ hero_dma_memcpy_async(void *dst, void *src, int size)
     ext_addr += size_tmp;
     loc_addr += size_tmp;
   }
-  
+
   return dma;
 }
 
@@ -151,4 +152,15 @@ int
 hero_rt_core_id(void)
 {
   return rt_core_id();
+}
+
+void
+hero_reset_clk_counter(void) {
+    reset_timer();
+    start_timer();
+}
+
+int
+hero_get_clk_counter(void) {
+    return get_time();
 }
