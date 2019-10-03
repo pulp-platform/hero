@@ -6,8 +6,9 @@
 */
 
 static void my_sleep(double sleeptime){
-	int i;
-	for (i=0;i<sleeptime;i++){}
+  for (int i = 0; i < sleeptime; i++){
+    __asm__ volatile ("nop");
+  }
 }
 
 #endif // MY_SLEEP_H
