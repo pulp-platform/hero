@@ -2,10 +2,10 @@
 
 set -e
 
-if [ -z "$DISPLAY" ]; then
-    readonly exec_flag="-c"
+if [ -n "$CI" -o -z "$DISPLAY" ]; then
+    # Run in console-only mode.
+    vsim-10.7b -c -do 'source run.tcl; quit'
 else
-    readonly exec_flag=""
+    # Run in GUI mode and silence console output.
+    vsim-10.7b -do 'source run.tcl' &>/dev/null
 fi
-
-vsim-10.7b "$exec_flag" -do 'source run.tcl' &>/dev/null
