@@ -17,7 +17,8 @@ ARCH_DEV = openmp-$(TARGET_DEV)
 CFLAGS_COMMON += -fopenmp=libomp -O1
 CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -march=rv32imac
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
-LDFLAGS_COMMON += -lhero-target
+# FIXME: we explicitly need to embed the correct linker
+LDFLAGS_COMMON += -lhero-target -Wl,-dynamic-linker,/lib/ld-linux-riscv64-lp64.so.1
 LDFLAGS_PULP += $(LDFLAGS_COMMON)
 LDFLAGS += $(LDFLAGS_COMMON)
 
