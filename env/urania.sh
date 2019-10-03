@@ -26,10 +26,6 @@ export KERNEL_CROSS_COMPILE=${CROSS_COMPILE}
 
 export HERCULES_ARCH=URANIA
 
-export CFLAGS=""
-# FIXME: we need this LDFLAGS to ensure clang embeds the correct linker
-export LDFLAGS="-Wl,-dynamic-linker,/lib/ld-linux-riscv64-lp64.so.1"
-
 export PULP_RISCV_GCC_TOOLCHAIN=${RISCV}
 
 export HERO_PULP_SDK_DIR=$(readlink -f "$THIS_DIR/../pulp/sdk")
