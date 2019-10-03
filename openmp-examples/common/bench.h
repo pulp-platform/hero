@@ -17,6 +17,8 @@
 #ifndef __BENCH_H__
 #define __BENCH_H__
 
+#include <hero-target.h>
+
 #include <errno.h>    // error codes
 #include <stdarg.h>   // va_list, va_end(), va_start()
 #include <stdio.h>    // fclose(), fgets(), fopen(), printf(), vprintf()
@@ -40,11 +42,17 @@ static inline double bench_stop(void);
 
 #ifdef __PULP__
 
-// FIXME: Implement benchmarking in standalone
-static inline void bench_start(const char* const format, ...) {}
+// FIXME: Implement benchmarking properly in standalone
+static inline void bench_start(const char* const format, ...) {
+  __device const char *format_dev = (__device const char*)format;
+  hero_reset_clk_counter();
+  printf("BENCH -- %s!\n", format_dev);
+}
 
 static inline double bench_stop(void) {
-  return 0.0;
+  int time = hero_get_clk_counter();
+  printf("BENCH cycles %d!\n", time);
+  return time;
 }
 
 #else
