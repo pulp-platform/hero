@@ -12,7 +12,7 @@ ARCH_DEV = openmp-$(TARGET_DEV)
 
 ifeq ($(strip $(default-as)),)
 ifeq ($(only),pulp)
-	default-as=pulp
+  default-as=pulp
 else
   default-as=host
 endif
