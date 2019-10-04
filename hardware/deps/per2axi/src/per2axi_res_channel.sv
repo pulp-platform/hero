@@ -135,26 +135,26 @@ module per2axi_res_channel
                end
 
                REQUEST: begin
-                  if (axi_master_r_valid_i && (axi_master_r_id_i == i)) begin
+                  if (axi_master_r_valid_i && axi_master_r_ready_o && (axi_master_r_id_i == i)) begin
                      atop_state_d[i] = WAIT_B;
                   end
-                  if (axi_master_b_valid_i && (axi_master_b_id_i == i)) begin
+                  if (axi_master_b_valid_i && axi_master_b_ready_o && (axi_master_b_id_i == i)) begin
                      atop_state_d[i] = WAIT_R;
                   end
-                  if (axi_master_r_valid_i && (axi_master_r_id_i == i) &&
-                      axi_master_b_valid_i && (axi_master_b_id_i == i)) begin
+                  if (axi_master_r_valid_i && axi_master_r_ready_o && (axi_master_r_id_i == i) &&
+                      axi_master_b_valid_i && axi_master_b_ready_o && (axi_master_b_id_i == i)) begin
                      atop_state_d[i] = NONE;
                   end
                end
 
                WAIT_R: begin
-                  if (axi_master_r_valid_i && (axi_master_r_id_i == i)) begin
+                  if (axi_master_r_valid_i && axi_master_r_ready_o && (axi_master_r_id_i == i)) begin
                      atop_state_d[i] = NONE;
                   end
                end
 
                WAIT_B: begin
-                  if (axi_master_b_valid_i && (axi_master_b_id_i == i)) begin
+                  if (axi_master_b_valid_i && axi_master_b_ready_o && (axi_master_b_id_i == i)) begin
                      atop_state_d[i] = NONE;
                   end
                end
