@@ -22,7 +22,7 @@ endif
 # 1) without suffix, they apply to heterogeneous compilation;
 # 3) with _PULP suffix, they apply only to the PULP part of compilation;
 # 4) with _COMMON suffix, they apply to both PULP and host compilation.
-CFLAGS_COMMON += -fopenmp=libomp -O1
+CFLAGS_COMMON += -fopenmp=libomp -O1 # -O3
 ifeq ($(default-as),host)
   CFLAGS_COMMON += -fhero-device-default-as=host
 else
@@ -57,8 +57,12 @@ all : $(EXE) $(EXE).dis slm
 	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS_PULP) $(INCPATHS) $<
 
 %.OMP.ll: %.ll
-	hc-omp-pass $< OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(<:.ll=.TMP.ll)
-	hc-omp-pass $(<:.ll=.TMP.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(<:.ll=.OMP.ll)
+	hc-omp-pass $< OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(<:.ll=.TMP.1.ll)
+	# opt -O3 -S $(<:.ll=.TMP.1.ll) -o $(<:.ll=.TMP.2.ll)
+	mv $(<:.ll=.TMP.1.ll) $(<:.ll=.TMP.2.ll)
+	hc-omp-pass $(<:.ll=.TMP.2.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(<:.ll=.TMP.3.ll)
+	# opt -O3 -S $(<:.ll=.TMP.3.ll) -o $(<:.ll=.OMP.ll)
+	mv $(<:.ll=.TMP.3.ll) $(<:.ll=.OMP.ll)
 
 $(EXE) : $(SRC:.c=.OMP.ll)
 	$(CC) $(CFLAGS_PULP) $(LDFLAGS_PULP) -o $@ $^

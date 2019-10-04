@@ -53,14 +53,18 @@ int main(int argc, char *argv[])
 
   // Allocate memory
   uint32_t * a = (uint32_t *)hero_l1malloc(sizeof(uint32_t)*width*height);
+  // uint32_t * a = (uint32_t *)hero_l2malloc(sizeof(uint32_t)*width*height);
   uint32_t * b = (uint32_t *)hero_l1malloc(sizeof(uint32_t)*width*height);
+  // uint32_t * b = (uint32_t *)hero_l2malloc(sizeof(uint32_t)*width*height);
   uint32_t * c = (uint32_t *)hero_l1malloc(sizeof(uint32_t)*width*height);
+  // uint32_t * c = (uint32_t *)hero_l2malloc(sizeof(uint32_t)*width*height);
   uint32_t * d = (uint32_t *)hero_l1malloc(sizeof(uint32_t)*width*height);
+  // uint32_t * d = (uint32_t *)hero_l2malloc(sizeof(uint32_t)*width*height);
   if ( (a == NULL) || (b == NULL) || (c == NULL) || (d == NULL) ) {
     printf("ERROR: malloc() failed!\n");
     return -ENOMEM;
   }
-  printf("width = %u, height = %u, a @ %p, b @ %p, c @ %p\n", width, height, a, b, c);
+  printf("width = %u, height = %u, a @ 0x%llx, b @ 0x%llx, c @ 0x%llx\n", width, height, (unsigned long long) a, (unsigned long long) b, (unsigned long long) c);
 
   // Init matrices
   for (unsigned i=0; i<width; i++) {
@@ -110,8 +114,10 @@ int main(int argc, char *argv[])
   tmp_1 = tmp_2;
 
   bench_start("PULP: Single-threaded, copy-based, no DMA");
-  #pragma omp target device(BIGPULP_MEMCPY) map(to: a[0:width*height], b[0:width*height], width, height) map(from: c[0:width*height])
+  #pragma omp target device(BIGPULP_MEMCPY)
+  // map(to: a[0:width*height], b[0:width*height], width, height) map(from: c[0:width*height])
   {
+    // #pragma omp parallel for collapse(2) num_threads(1) firstprivate(a, b, c, width, height)
     for (unsigned i=0; i<width; i++) {
       for (unsigned j=0; j<height; j++) {
         uint32_t sum = 0;
@@ -125,6 +131,7 @@ int main(int argc, char *argv[])
   compare_matrices(c, d, width, height);
   memset((void *)c, 0, (size_t)(width*height));
 
+  // omp_set_num_threads(omp_get_thread_limit());
   bench_start("PULP: Parallel, copy-based, no DMA");
   #pragma omp target device(BIGPULP_MEMCPY)
   // map(to: a[0:width*height], b[0:width*height], width, height) map(from: c[0:width*height])
@@ -142,8 +149,6 @@ int main(int argc, char *argv[])
   bench_stop();
   compare_matrices(c, d, width, height);
   memset((void *)c, 0, (size_t)(width*height));
-
-  return 0;
 
   bench_start("PULP: Parallel, copy-based, DMA");
   #pragma omp target device(BIGPULP_MEMCPY) map(to: a[0:width*height], b[0:width*height], width, height) map(from: c[0:width*height])
