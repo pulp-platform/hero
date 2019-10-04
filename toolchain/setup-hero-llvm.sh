@@ -1,9 +1,8 @@
 ### SETUP A HERO LLVM RTE ###
 THIS_DIR=$(dirname "$(readlink -f "$0")")
 
-# config (FIXME: make publicly accessible)
-GIT_REPO=git@iis-git.ethz.ch:kwolters
-GIT_BRANCH=hero-v3
+# stop on all errors
+set -e
 
 # check installation path
 if [ -z "$RISCV" ]; then
@@ -11,11 +10,10 @@ if [ -z "$RISCV" ]; then
     exit
 fi
 
-# clone required repositories and init submodules
-git clone $GIT_REPO/HerculesCompiler-public.git -b $GIT_BRANCH
-
-# stop on all errors
-set -e
+BUILD_TYPE="Release"
+if [ ! -z "$1" ]; then
+    BUILD_TYPE=$1
+fi
 
 # prepare
 mkdir -p $RISCV
@@ -30,7 +28,7 @@ cd llvm_build
 # run llvm build and install
 echo "Building LLVM project"
 # NOTE: use the cmake from the host tools to ensure a recent version
-$RISCV/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
+$RISCV/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DBUILD_SHARED_LIBS=True -DLLVM_USE_SPLIT_DWARF=True \
       -DCMAKE_INSTALL_PREFIX=$RISCV \
       -DCMAKE_FIND_NO_INSTALL_PREFIX=True \
@@ -49,9 +47,12 @@ mkdir -p hc_build
 cd hc_build
 
 # run hercules pass build
+# FIXME: integrate LLVM passes better in the HERO architecture
 echo "Building Hercules LLVM passes"
-cmake -DCMAKE_INSTALL_PREFIX=$RISCV -DLLVM_DIR:STRING=$RISCV/lib/cmake/llvm ../HerculesCompiler-public/llvm-passes/
-cmake --build . --target install
+$RISCV/bin/cmake -DCMAKE_INSTALL_PREFIX=$RISCV -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+      -DLLVM_DIR:STRING=$RISCV/lib/cmake/llvm \
+      $THIS_DIR/hercules/llvm-passes/
+$RISCV/bin/cmake --build . --target install
 cd ..
 
 # install wrapper script

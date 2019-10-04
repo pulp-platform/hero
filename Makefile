@@ -49,7 +49,11 @@ hero-sdk: br-hero
 # llvm
 hero-llvm:
 	mkdir -p $(CURDIR)/output/hero-llvm/
-	cd $(CURDIR)/output/hero-llvm/ && $(ROOT)/toolchain/setup-hero-llvm.sh
+	cd $(CURDIR)/output/hero-llvm/ && $(ROOT)/toolchain/setup-hero-llvm.sh Release
+
+hero-llvm-debug:
+	mkdir -p $(CURDIR)/output/hero-llvm-debug/
+	cd $(CURDIR)/output/hero-llvm-debug/ && $(ROOT)/toolchain/setup-hero-llvm.sh Debug
 
 # tools
 tools: tools-openocd

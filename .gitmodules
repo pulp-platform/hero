@@ -20,3 +20,7 @@
 	path = toolchain/openmp
 	url = git@iis-git.ee.ethz.ch:kwolters/openmp.git
 	branch = hero-v3
+[submodule "toolchain/hercules"]
+	path = toolchain/hercules
+	url = git@iis-git.ee.ethz.ch:kwolters/HerculesCompiler-public.git
+	branch = hero-v3

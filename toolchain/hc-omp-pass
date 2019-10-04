@@ -14,6 +14,8 @@ CFLAGS=""
 
 # ============================= SANITY CHECK =============================== #
 
+BASENAME=$(basename "$1" .ll)
+
 # Ensure that a file name was given as argument.
 if [ -z "$1" ]; then
   echo "Fatal error: Provide IR file as arg 1!"
@@ -30,9 +32,12 @@ if [ -z "$3" ]; then
   exit 1
 fi
 
-# ========================= EXECUTION PARAMETERS =========================== #
+OUTPUT=$BASENAME.OMP.ll
+if [ ! -z "$4" ]; then
+  OUTPUT=$4
+fi
 
-BASENAME=$(basename "$1" .ll)
+# ========================= EXECUTION PARAMETERS =========================== #
 
 # Path to the passes, based on provided root directory.
 PASS_OMP_PATH="$PASSROOT/lib$2.so"
@@ -50,7 +55,7 @@ FINAL_OPTIMIZATIONS="-dce -gvn -instcombine -mergefunc -always-inline -simplifyc
 
 ${LLVM_BIN_DIR}opt "$BASENAME.ll" \
 -load="$PASS_OMP_PATH"   $PASS_OMP_PREREQ   $PASS_OMP_NAME \
-$FINAL_OPTIMIZATIONS -o "$BASENAME.OMP.ll" -S
+$FINAL_OPTIMIZATIONS -o "$OUTPUT" -S
 
 # Check that the passes were successful before continuing.
 if [ $? -ne 0 ]; then
