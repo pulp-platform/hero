@@ -10,11 +10,24 @@ TARGET_DEV = riscv32-hero-unknown-elf
 ARCH_HOST = host-$(TARGET_HOST)
 ARCH_DEV = openmp-$(TARGET_DEV)
 
+ifeq ($(strip $(default-as)),)
+ifeq ($(only),pulp)
+	default-as=pulp
+else
+    default-as=host
+endif
+endif
+
 # CFLAGS and LDFLAGS have three components/stages
 # 1) without suffix, they apply to heterogeneous compilation;
 # 3) with _PULP suffix, they apply only to the PULP part of compilation;
 # 4) with _COMMON suffix, they apply to both PULP and host compilation.
 CFLAGS_COMMON += -fopenmp=libomp -O1
+ifeq ($(default-as),host)
+  CFLAGS_COMMON += -mhero-device-default-as=host
+else
+  CFLAGS_COMMON += -mhero-device-default-as=device
+endif
 CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -march=rv32imac
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
 # FIXME: we explicitly need to embed the correct linker
