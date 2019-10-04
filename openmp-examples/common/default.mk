@@ -14,7 +14,7 @@ ifeq ($(strip $(default-as)),)
 ifeq ($(only),pulp)
 	default-as=pulp
 else
-    default-as=host
+  default-as=host
 endif
 endif
 
@@ -24,9 +24,9 @@ endif
 # 4) with _COMMON suffix, they apply to both PULP and host compilation.
 CFLAGS_COMMON += -fopenmp=libomp -O1
 ifeq ($(default-as),host)
-  CFLAGS_COMMON += -mhero-device-default-as=host
+  CFLAGS_COMMON += -fhero-device-default-as=host
 else
-  CFLAGS_COMMON += -mhero-device-default-as=device
+  CFLAGS_COMMON += -fhero-device-default-as=device
 endif
 CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -march=rv32imac
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
