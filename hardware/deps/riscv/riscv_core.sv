@@ -918,6 +918,10 @@ module riscv_core
     .data_misaligned_ex_i  ( data_misaligned_ex ), // from ID/EX pipeline
     .data_misaligned_o     ( data_misaligned    ),
 
+    // stack protection
+    .stack_access_i        ( stack_access       ),
+    .stack_base_i          ( stack_base         ),
+    .stack_limit_i         ( stack_limit        ),
 
     // exception signals
     .load_err_o            ( lsu_load_err       ),
