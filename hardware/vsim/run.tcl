@@ -1,6 +1,7 @@
 vsim -voptargs="+acc" -t 1ps -warning 3009 hero_tb
 set StdArithNoWarnings 1
 set NumericStdNoWarnings 1
+set BreakOnAssertion 2;# break also on assertion errors
 
 if { ! [batch_mode] } {
     source ../test/hero_tb.wave.do
