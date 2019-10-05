@@ -61,6 +61,9 @@ module riscv_id_stage
     input  logic        test_en_i,
     input  logic        fregfile_disable_i,
 
+    input  logic [31:0] stack_base_i,
+    input  logic [31:0] stack_limit_i,
+
     input  logic        fetch_enable_i,
     output logic        ctrl_busy_o,
     output logic        core_ctrl_firstfetch_o,
@@ -943,6 +946,9 @@ module riscv_id_stage
     .test_en_i          ( test_en_i          ),
 
     .fregfile_disable_i ( fregfile_disable_i ),
+
+    .stack_base_i,
+    .stack_limit_i,
 
     // Read port a
     .raddr_a_i          ( regfile_addr_ra_id ),

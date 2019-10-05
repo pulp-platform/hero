@@ -559,6 +559,9 @@ module riscv_core
 
     .fregfile_disable_i           ( fregfile_disable_i   ),
 
+    .stack_base_i                 ( stack_base           ),
+    .stack_limit_i                ( stack_limit          ),
+
     // Processor Enable
     .fetch_enable_i               ( fetch_enable_i       ),
     .ctrl_busy_o                  ( ctrl_busy            ),
