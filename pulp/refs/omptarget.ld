@@ -279,7 +279,7 @@ SECTIONS
     . = ALIGN(4);
     . = ALIGN(16);
     stack_start = .;
-    . = . + 0x800;
+    . = . + __rt_stack_size;
     stack = .;
   } > L1
 
