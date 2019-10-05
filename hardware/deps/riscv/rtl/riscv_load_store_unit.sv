@@ -338,6 +338,6 @@ module riscv_load_store_unit (
 
     // Assert that the address does not contain X when request is sent.
     assert property (@(posedge clk_i) data_req_o |-> !$isunknown(data_addr_o))
-        else $warning("There has been a data request but the address is unknown!");
+        else $error("There has been a data request but the address is unknown!");
   `endif
 endmodule
