@@ -173,6 +173,9 @@ module riscv_id_stage
     output logic        csr_restore_uret_id_o,
     output logic        csr_save_cause_o,
 
+    // Stack protection
+    output logic        stack_access_o,
+
     // hwloop signals
     output logic [N_HWLP-1:0] [31:0] hwlp_start_o,
     output logic [N_HWLP-1:0] [31:0] hwlp_end_o,
@@ -442,6 +445,7 @@ module riscv_id_stage
   logic        reg_d_alu_is_reg_b_id;
   logic        reg_d_alu_is_reg_c_id;
 
+  logic        stack_access;
 
   assign instr = instr_rdata_i;
 
@@ -1058,6 +1062,9 @@ module riscv_id_stage
     .csr_op_o                        ( csr_op                    ),
     .current_priv_lvl_i              ( current_priv_lvl_i        ),
 
+    // Stack protection
+    .stack_access_o                  ( stack_access              ),
+
     // Data bus interface
     .data_req_o                      ( data_req_id               ),
     .data_we_o                       ( data_we_id                ),
@@ -1378,6 +1385,7 @@ module riscv_id_stage
       atop_ex_o                   <= 5'b0;
 
       data_misaligned_ex_o        <= 1'b0;
+      stack_access_o              <= 1'b0;
 
       pc_ex_o                     <= '0;
 
@@ -1402,6 +1410,7 @@ module riscv_id_stage
         prepost_useincr_ex_o        <= prepost_useincr;
 
         data_misaligned_ex_o        <= 1'b1;
+        stack_access_o              <= stack_access;
       end
     end else if (mult_multicycle_i) begin
       mult_operand_c_ex_o <= alu_operand_c;
@@ -1484,6 +1493,7 @@ module riscv_id_stage
         end
 
         data_misaligned_ex_o        <= 1'b0;
+        stack_access_o              <= stack_access;
 
         if ((jump_in_id == BRANCH_COND) || data_load_event_id) begin
           pc_ex_o                   <= pc_id_i;
@@ -1505,6 +1515,7 @@ module riscv_id_stage
         data_load_event_ex_o        <= 1'b0;
 
         data_misaligned_ex_o        <= 1'b0;
+        stack_access_o              <= stack_access;
 
         branch_in_ex_o              <= 1'b0;
 

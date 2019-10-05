@@ -114,6 +114,9 @@ module riscv_decoder
   output logic [1:0]  csr_op_o,                // operation to perform on CSR
   input  PrivLvl_t    current_priv_lvl_i,      // The current privilege level
 
+  // Stack protection
+  output logic        stack_access_o,          // memory access through the stack pointer
+
   // LD/ST unit signals
   output logic        data_req_o,              // start transaction to data memory
   output logic        data_we_o,               // data memory write enable
@@ -222,6 +225,8 @@ module riscv_decoder
     csr_op                      = CSR_OP_NONE;
     mret_insn_o                 = 1'b0;
     uret_insn_o                 = 1'b0;
+
+    stack_access_o              = 1'b0;
 
     data_we_o                   = 1'b0;
     data_type_o                 = 2'b00;
@@ -371,6 +376,8 @@ module riscv_decoder
             illegal_insn_o = 1'b1;
           end
         endcase
+
+        stack_access_o = (instr_rdata_i[19:15] == 5'd2);
       end
 
       OPCODE_LOAD,
@@ -433,6 +440,8 @@ module riscv_decoder
           // LD -> RV64 only
           illegal_insn_o = 1'b1;
         end
+
+        stack_access_o = (instr_rdata_i[19:15] == 5'd2);
       end
 
       OPCODE_AMO: begin
