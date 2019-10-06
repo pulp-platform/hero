@@ -39,6 +39,9 @@ module riscv_register_file
 
     input  logic         fregfile_disable_i,
 
+    input  logic [31:0]  stack_base_i,
+    input  logic [31:0]  stack_limit_i,
+
     //Read port R1
     input  logic [ADDR_WIDTH-1:0]  raddr_a_i,
     output logic [DATA_WIDTH-1:0]  rdata_a_o,
@@ -185,5 +188,16 @@ module riscv_register_file
     end
 
   endgenerate
+
+  `ifndef TARGET_SYNTHESIS
+    assert property (@(posedge clk) disable iff (!rst_n)
+        we_a_dec[2] |-> wdata_a_i > stack_limit_i && wdata_a_i <= stack_base_i)
+      else $error("Stack pointer set to 0x%08x outside stack (0x%08x, 0x%08x]!",
+          mem[2], stack_limit_i, stack_base_i);
+    assert property (@(posedge clk) disable iff (!rst_n)
+        we_b_dec[2] |-> wdata_b_i > stack_limit_i && wdata_b_i <= stack_base_i)
+      else $error("Stack pointer set to 0x%08x outside stack (0x%08x, 0x%08x]!",
+          mem[2], stack_limit_i, stack_base_i);
+  `endif
 
 endmodule

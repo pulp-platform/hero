@@ -255,6 +255,11 @@ module riscv_core
   logic [31:0] csr_wdata;
   PrivLvl_t    current_priv_lvl;
 
+  // Stack Protection
+  logic        stack_access;
+  logic [31:0] stack_base,
+               stack_limit;
+
   // Data Memory Control:  From ID stage (id-ex pipe) <--> load store unit
   logic        data_we_ex;
   logic [5:0]  data_atop_ex;
@@ -554,6 +559,9 @@ module riscv_core
 
     .fregfile_disable_i           ( fregfile_disable_i   ),
 
+    .stack_base_i                 ( stack_base           ),
+    .stack_limit_i                ( stack_limit          ),
+
     // Processor Enable
     .fetch_enable_i               ( fetch_enable_i       ),
     .ctrl_busy_o                  ( ctrl_busy            ),
@@ -662,6 +670,9 @@ module riscv_core
     .csr_restore_mret_id_o        ( csr_restore_mret_id  ), // control signal to restore pc
     .csr_restore_uret_id_o        ( csr_restore_uret_id  ), // control signal to restore pc
     .csr_save_cause_o             ( csr_save_cause       ),
+
+    // Stack protection
+    .stack_access_o               ( stack_access         ),
 
     // hardware loop signals to IF hwlp controller
     .hwlp_start_o                 ( hwlp_start           ),
@@ -910,6 +921,10 @@ module riscv_core
     .data_misaligned_ex_i  ( data_misaligned_ex ), // from ID/EX pipeline
     .data_misaligned_o     ( data_misaligned    ),
 
+    // stack protection
+    .stack_access_i        ( stack_access       ),
+    .stack_base_i          ( stack_base         ),
+    .stack_limit_i         ( stack_limit        ),
 
     // exception signals
     .load_err_o            ( lsu_load_err       ),
@@ -994,6 +1009,9 @@ module riscv_core
     .hwlp_regid_o            ( csr_hwlp_regid     ),
     .hwlp_we_o               ( csr_hwlp_we        ),
     .hwlp_data_o             ( csr_hwlp_data      ),
+
+    .stack_base_o            ( stack_base         ),
+    .stack_limit_o           ( stack_limit        ),
 
     // performance counter related signals
     .id_valid_i              ( id_valid           ),
