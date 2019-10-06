@@ -95,111 +95,79 @@ module axi2per_req_channel #(
 
   // COMPUTE NEXT STATE
   always_comb begin
-    axi_slave_aw_ready_o = '0;
-    axi_slave_ar_ready_o = '0;
-    axi_slave_w_ready_o  = '0;
+    axi_slave_aw_ready_o = 1'b0;
+    axi_slave_ar_ready_o = 1'b0;
+    axi_slave_w_ready_o  = 1'b0;
 
-    per_master_req_o     = '0;
-    per_master_add_o     = '0;
-    per_master_we_o      = '0;
-    per_master_wdata_o   = '0;
-    per_master_be_o      = '0;
+    per_master_req_o     = 1'b0;
+    per_master_add_o     =   '0;
+    per_master_we_o      = 1'b0;
+    per_master_wdata_o   =   '0;
+    per_master_be_o      =   '0;
 
-    trans_req_o          = '0;
-    trans_we_o           = '0;
-    trans_id_o           = '0;
-    trans_add_o          = '0;
+    trans_req_o          = 1'b0;
+    trans_id_o           =   '0;
+    trans_add_o          =   '0;
 
-    busy_o               = '0;
+    busy_o               = 1'b0;
 
-    state_d              = TransIdle;
+    state_d              = state_q;
 
     case (state_q)
       TransIdle: begin
-        if (axi_slave_ar_valid_i) begin // REQUEST FROM READ ADDRESS CHANNEL
-          per_master_req_o = 1'b1;                     // MAKE THE REQUEST TO THE PHERIPHERAL INTERCONNECT
-          per_master_we_o  = 1'b1;                     // READ OPERATION
-          per_master_add_o = axi_slave_ar_addr_i;      // ADDRESS COMES FROM ADDRESS READ CHANNEL
+        // Handle request on AR
+        if (axi_slave_ar_valid_i) begin
+          per_master_req_o = 1'b1;
+          per_master_we_o  = 1'b1; // write enable is active low
+          per_master_add_o = axi_slave_ar_addr_i;
 
-          if (per_master_gnt_i) begin// THE REQUEST IS ACKNOWLEDGED FROM THE PERIPHERAL INTERCONNECT
-            axi_slave_ar_ready_o = 1'b1; // POP DATA FROM THE ADDRESS READ BUFFER
+          if (per_master_gnt_i) begin
+            axi_slave_ar_ready_o = 1'b1;
 
-            trans_req_o          = 1'b1;                // NOTIFY THE RESPONSE CHANNEL THAT THERE IS A PENDING REQUEST
-            trans_we_o           = 1'b1;                // NOTIFY THE RESPONSE CHANNEL THE TYPE OF THE PENDING REQUEST
-            trans_id_o           = axi_slave_ar_id_i;   // NOTIFY THE RESPONSE CHANNEL THE ID OF THE PENDING REQUEST
-            trans_add_o          = axi_slave_ar_addr_i; // NOTIFY THE RESPONSE CHANNEL THE ADDRESS OF THE PENDING REQUEST
+            trans_req_o          = 1'b1;
+            trans_id_o           = axi_slave_ar_id_i;
+            trans_add_o          = axi_slave_ar_addr_i;
 
             state_d              = TransPending;
           end
-        end else begin
-          if (axi_slave_aw_valid_i &&     // REQUEST FROM WRITE ADDRESS CHANNEL
-               axi_slave_w_valid_i) begin // REQUEST FROM WRITE DATA CHANNEL
-            per_master_req_o = 1'b1;                     // MAKE THE REQUEST TO THE PHERIPHERAL INTERCONNECT
-            per_master_we_o  = 1'b0;                     // WRITE OPERATION
-            per_master_add_o = axi_slave_aw_addr_i;      // ADDRESS COMES FROM WRITE ADDRESS CHANNEL
+        // Handle request on AW and W
+        end else if (axi_slave_aw_valid_i && axi_slave_w_valid_i) begin
+          per_master_req_o = 1'b1;
+          per_master_we_o  = 1'b0; // write enable is active low
+          per_master_add_o = axi_slave_aw_addr_i;
 
-            if (!axi_slave_aw_addr_i[2]) begin // FORWARD THE RIGHT AXI DATA TO THE PERIPHERAL BYTE ENABLE
-              per_master_wdata_o  = axi_slave_w_data_i[31:0];
-            end else begin
-              per_master_wdata_o  = axi_slave_w_data_i[63:32];
-            end
+          // Multiplex 64-bit W channel to 32-bit peripheral data channel based on the address.
+          if (axi_slave_aw_addr_i[2]) begin
+            per_master_be_o     = axi_slave_w_strb_i[7:4];
+            per_master_wdata_o  = axi_slave_w_data_i[63:32];
+          end else begin
+            per_master_be_o     = axi_slave_w_strb_i[3:0];
+            per_master_wdata_o  = axi_slave_w_data_i[31:0];
+          end
 
-            if (!axi_slave_aw_addr_i[2]) begin // FORWARD THE RIGHT AXI STROBE TO THE PERIPHERAL BYTE ENABLE
-              per_master_be_o  = axi_slave_w_strb_i[3:0];
-            end else begin
-              per_master_be_o  = axi_slave_w_strb_i[7:4];
-            end
+          if (per_master_gnt_i) begin
+            axi_slave_aw_ready_o = 1'b1;
+            axi_slave_w_ready_o  = 1'b1;
 
-            if (per_master_gnt_i) begin // THE REQUEST IS ACKNOWLEDGED FROM THE PERIPHERAL INTERCONNECT
-              axi_slave_aw_ready_o = 1'b1; // POP DATA FROM THE WRITE ADDRESS BUFFER
-              axi_slave_w_ready_o  = 1'b1; // POP DATA FROM THE WRITE DATA BUFFER
+            trans_req_o          = 1'b1;
+            trans_id_o           = axi_slave_aw_id_i;
+            trans_add_o          = axi_slave_aw_addr_i;
 
-              trans_req_o          = 1'b1;                // NOTIFY THE RESPONSE CHANNEL THAT THERE IS A PENDING REQUEST
-              trans_we_o           = 1'b0;                // NOTIFY THE RESPONSE CHANNEL THE TYPE OF THE PENDING REQUEST
-              trans_id_o           = axi_slave_aw_id_i;   // NOTIFY THE RESPONSE CHANNEL THE ID OF THE PENDING REQUEST
-              trans_add_o          = axi_slave_aw_addr_i; // NOTIFY THE RESPONSE CHANNEL THE ADDRESS OF THE PENDING REQUEST
-
-              state_d              = TransPending;
-            end
+            state_d              = TransPending;
           end
         end
         per_master_add_o = per_master_add_o - (32'h0040_0000 * cluster_id_i);
       end
 
       TransPending: begin
-        axi_slave_aw_ready_o = '0;     // PENDING TRANSACTION WRITE ADDRESS CHANNEL NOT READY
-        axi_slave_ar_ready_o = '0;     // PENDING TRANSACTION READ ADDRESS CHANNEL NOT READY
-        axi_slave_w_ready_o  = '0;     // PENDING TRANSACTION WRITE DATA CHANNEL NOT READY
-
-        busy_o               = '1;
-
-        if (trans_r_valid_i) begin // RECEIVED NOTIFICATION FROM RESPONSE CHANNEL: TRANSACTION COMPLETED
+        busy_o = 1'b1;
+        if (trans_r_valid_i) begin
+          // Received notification from response channel -> transaction completed.
           state_d = TransIdle;
-        end else begin
-          state_d = TransPending;
         end
       end
     endcase
   end
-
-  // UNUSED SIGNALS
-  //axi_slave_aw_prot_i
-  //axi_slave_aw_region_i
-  //axi_slave_aw_len_i
-  //axi_slave_aw_lock_i
-  //axi_slave_aw_atop_i
-  //axi_slave_aw_cache_i
-  //axi_slave_aw_qos_i
-  //axi_slave_aw_user_i
-
-  //axi_slave_ar_prot_i
-  //axi_slave_ar_region_i
-  //axi_slave_ar_len_i
-  //axi_slave_ar_lock_i
-  //axi_slave_ar_cache_i
-  //axi_slave_ar_qos_i
-  //axi_slave_ar_user_i
-
-  //axi_slave_w_user_i
+  assign trans_we_o = per_master_we_o;
 
 endmodule
