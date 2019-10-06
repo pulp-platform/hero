@@ -103,7 +103,7 @@ module axi2per
    // BUSY SIGNAL
    output logic                      busy_o
 );
-   
+
    // SIGNAL DECLARATION
    logic                              s_aw_valid;
    logic [AXI_ADDR_WIDTH-1:0]         s_aw_addr;
@@ -119,7 +119,7 @@ module axi2per
    logic [AXI_ID_WIDTH-1:0]           s_aw_id;
    logic [AXI_USER_WIDTH-1:0]         s_aw_user;
    logic                              s_aw_ready;
-   
+
    logic                              s_ar_valid;
    logic [AXI_ADDR_WIDTH-1:0]         s_ar_addr;
    logic [2:0]                        s_ar_prot;
@@ -133,14 +133,14 @@ module axi2per
    logic [AXI_ID_WIDTH-1:0]           s_ar_id;
    logic [AXI_USER_WIDTH-1:0]         s_ar_user;
    logic                              s_ar_ready;
-   
+
    logic                              s_w_valid;
    logic [AXI_DATA_WIDTH-1:0]         s_w_data;
    logic [AXI_STRB_WIDTH-1:0]         s_w_strb;
    logic [AXI_USER_WIDTH-1:0]         s_w_user;
    logic                              s_w_last;
    logic                              s_w_ready;
-   
+
    logic                              s_r_valid;
    logic [AXI_DATA_WIDTH-1:0]         s_r_data;
    logic [1:0]                        s_r_resp;
@@ -148,19 +148,19 @@ module axi2per
    logic [AXI_ID_WIDTH-1:0]           s_r_id;
    logic [AXI_USER_WIDTH-1:0]         s_r_user;
    logic                              s_r_ready;
-   
+
    logic                              s_b_valid;
    logic [1:0]                        s_b_resp;
    logic [AXI_ID_WIDTH-1:0]           s_b_id;
    logic [AXI_USER_WIDTH-1:0]         s_b_user;
    logic                              s_b_ready;
-   
+
    logic                              s_trans_req;
    logic                              s_trans_we;
    logic [AXI_ID_WIDTH-1:0]           s_trans_id;
    logic [AXI_ADDR_WIDTH-1:0]         s_trans_add;
    logic                              s_trans_r_valid;
-     
+
    // AXI2PER REQUEST CHANNEL
    axi2per_req_channel
    #(
@@ -267,7 +267,7 @@ module axi2per
       .trans_add_i          ( s_trans_add          ),
       .trans_r_valid_o      ( s_trans_r_valid      )
    );
-   
+
 
 
 
@@ -315,7 +315,7 @@ module axi2per
       .master_user_o   ( s_aw_user              ),
       .master_ready_i  ( s_aw_ready             )
    );
-   
+
    // AXI READ ADDRESS CHANNEL BUFFER
    axi_ar_buffer
    #(
@@ -358,7 +358,7 @@ module axi2per
       .master_user_o    ( s_ar_user               ),
       .master_ready_i   ( s_ar_ready              )
    );
-   
+
    // WRITE DATA CHANNEL BUFFER
    axi_w_buffer
    #(
@@ -417,7 +417,7 @@ module axi2per
       .master_last_o   ( axi_slave_r_last_o   ),
       .master_ready_i  ( axi_slave_r_ready_i  )
    );
-   
+
    // WRITE RESPONSE CHANNEL BUFFER
    axi_b_buffer
    #(
@@ -443,5 +443,5 @@ module axi2per
       .master_user_o   ( axi_slave_b_user_o   ),
       .master_ready_i  ( axi_slave_b_ready_i  )
    );
-   
+
 endmodule
