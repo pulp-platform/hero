@@ -444,4 +444,19 @@ module axi2per
       .master_ready_i  ( axi_slave_b_ready_i  )
    );
 
+   `ifndef TARGET_SYNTHESIS
+      assert property (@(posedge clk_i) disable iff (!rst_ni)
+            axi_slave_aw_valid_i |-> axi_slave_aw_len_i == '0)
+         else $error("This module does not support bursts!");
+      assert property (@(posedge clk_i) disable iff (!rst_ni)
+            axi_slave_ar_valid_i |-> axi_slave_ar_len_i == '0)
+         else $error("This module does not support bursts!");
+      assert property (@(posedge clk_i) disable iff (!rst_ni)
+            axi_slave_aw_valid_i |-> axi_slave_aw_size_i <= 3'd2)
+         else $error("This module does not support beats wider than 32 bit!");
+      assert property (@(posedge clk_i) disable iff (!rst_ni)
+            axi_slave_ar_valid_i |-> axi_slave_ar_size_i <= 3'd2)
+         else $error("This module does not support beats wider than 32 bit!");
+   `endif
+
 endmodule
