@@ -63,7 +63,7 @@ module axi2per_res_channel #(
                               s_trans_we_buf;
   logic [AXI_ID_WIDTH-1:0]    s_trans_id_buf;
 
-  enum logic {TransIdle, TransPending} state_d, state_q;
+  enum logic {Idle, Pending} state_d, state_q;
 
   always_comb begin
     axi_slave_r_valid_o = 1'b0;
@@ -75,25 +75,25 @@ module axi2per_res_channel #(
     state_d             = state_q;
 
     unique case (state_q)
-      TransIdle: begin
+      Idle: begin
         if (per_master_r_valid_i) begin
-          state_d = TransPending;
+          state_d = Pending;
         end
       end
 
-      TransPending: begin
+      Pending: begin
         if (s_trans_we_buf && axi_slave_r_ready_i) begin // read and the R channel is ready
           axi_slave_r_valid_o = 1'b1;
           axi_slave_r_last_o  = 1'b1;
           axi_slave_r_data_o  = s_axi_slave_r_data;
-          state_d = TransIdle;
+          state_d = Idle;
         end else if (!s_trans_we_buf && axi_slave_b_ready_i) begin // write and the B channel is ready
           axi_slave_b_valid_o = 1'b1;
-          state_d = TransIdle;
+          state_d = Idle;
         end
       end
 
-      default: state_d = TransIdle;
+      default: state_d = Idle;
     endcase
   end
 
@@ -116,7 +116,7 @@ module axi2per_res_channel #(
       s_trans_add_alignment <= 1'b0;
       s_trans_id_buf        <=   '0;
       s_trans_we_buf        <= 1'b0;
-      state_q               <= TransIdle;
+      state_q               <= Idle;
     end else begin
       if (per_master_r_valid_i) begin
         s_per_master_r_data <= per_master_r_rdata_i;
@@ -138,7 +138,7 @@ module axi2per_res_channel #(
 
   `ifndef TARGET_SYNTHESIS
     assert property (@(posedge clk_i) disable iff (!rst_ni)
-        per_master_r_valid_i |-> state_q == TransIdle)
+        per_master_r_valid_i |-> state_q == Idle)
       else $error("Lost response on peripheral bus!");
   `endif
 
