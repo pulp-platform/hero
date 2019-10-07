@@ -23,9 +23,7 @@ endif
 # 3) with _PULP suffix, they apply only to the PULP part of compilation;
 # 4) with _COMMON suffix, they apply to both PULP and host compilation.
 CFLAGS_COMMON += -fopenmp=libomp -O1 # -O3
-ifeq ($(default-as),host)
-  CFLAGS_COMMON += -fhero-device-default-as=host
-else
+ifeq ($(default-as),pulp)
   CFLAGS_COMMON += -fhero-device-default-as=device
 endif
 CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -march=rv32imac
