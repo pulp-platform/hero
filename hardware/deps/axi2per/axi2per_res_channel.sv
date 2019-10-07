@@ -139,4 +139,10 @@ module axi2per_res_channel #(
   assign axi_slave_b_resp_o = '0;
   assign axi_slave_b_user_o = '0;
 
+  `ifndef TARGET_SYNTHESIS
+    assert property (@(posedge clk_i) disable iff (!rst_ni)
+        per_master_r_valid_i |-> state_q == TransIdle)
+      else $error("Lost response on peripheral bus!");
+  `endif
+
 endmodule
