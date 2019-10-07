@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <errno.h>        // for error codes
+#include <inttypes.h>
 #include "bench.h"
 #include <hero-target.h>
 
@@ -64,7 +65,7 @@ int main(int argc, char *argv[])
     printf("ERROR: malloc() failed!\n");
     return -ENOMEM;
   }
-  printf("width = %u, height = %u, a @ 0x%llx, b @ 0x%llx, c @ 0x%llx\n", width, height, (unsigned long long) a, (unsigned long long) b, (unsigned long long) c);
+  printf("width = %u, height = %u, a @ %#" PRIx64 ", b @ %#" PRIx64 ", c @ %#" PRIx64 "\n", width, height, (uint64_t) a, (uint64_t) b, (uint64_t) c);
 
   // Init matrices
   for (unsigned i=0; i<width; i++) {
