@@ -73,8 +73,8 @@ inline static __attribute__((used)) int       hero_store_uint8_noblock  (const u
 #include <stdio.h>
 #include <stdlib.h> // abort()
 
-#define ADDREXT_REG 0x10200BF8
-#define TRYX_RES_REG 0x10200BFC
+#define __ADDREXT_REG 0x10200BF8
+#define __TRYX_RES_REG 0x10200BFC
 
 inline static uint32_t __upper32(const uint64_t dw)
 {
@@ -116,7 +116,7 @@ inline static void __loop_forever()
   inline static int hero_load_uint ## bits ## _noblock(\
       const uint64_t addr, __device uint ## bits ## _t* const val) { \
     __hero_64_noblock_pre(uint ## bits ## _t) \
-    __device static volatile uint32_t* const addrext_reg = (__device uint32_t*)ADDREXT_REG; \
+    __device static volatile uint32_t* const addrext_reg = (__device uint32_t*)__ADDREXT_REG; \
     uint ## bits ## _t reg; \
     __asm__ volatile( \
         __hero_64_disable_mirq_asm "\n\t" \
@@ -136,7 +136,7 @@ inline static void __loop_forever()
   inline static int hero_store_uint ## bits ## _noblock(\
       const uint64_t addr, const uint ## bits ## _t val) { \
     __hero_64_noblock_pre(uint ## bits ## _t) \
-    __device static volatile uint32_t* const addrext_reg = (__device uint32_t*)ADDREXT_REG; \
+    __device static volatile uint32_t* const addrext_reg = (__device uint32_t*)__ADDREXT_REG; \
     __asm__ volatile( \
         __hero_64_disable_mirq_asm "\n\t" \
         "sw %[upper], 0(%[addrext_reg])\n\t" /* set address extension register */ \
