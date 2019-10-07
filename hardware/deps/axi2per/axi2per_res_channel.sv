@@ -50,6 +50,7 @@ module axi2per_res_channel #(
   // CONTROL SIGNALS
   input logic                       trans_req_i,
   input logic                       trans_we_i,
+  input logic                       trans_atop_r_i,
   input logic [AXI_ID_WIDTH-1:0]    trans_id_i,
   input logic [AXI_ADDR_WIDTH-1:0]  trans_add_i,
   output logic                      trans_r_valid_o
@@ -60,10 +61,11 @@ module axi2per_res_channel #(
   logic [31:0]                s_per_master_r_data;
 
   logic                       s_trans_add_alignment,  //0 --> aligned to 64bit, 1--> not aligned to 64bit
+                              s_trans_atop_r_buf,
                               s_trans_we_buf;
   logic [AXI_ID_WIDTH-1:0]    s_trans_id_buf;
 
-  enum logic {Idle, Pending} state_d, state_q;
+  enum logic [1:0] {Idle, Pending, HoldB, HoldR} state_d, state_q;
 
   always_comb begin
     axi_slave_r_valid_o = 1'b0;
@@ -82,13 +84,43 @@ module axi2per_res_channel #(
       end
 
       Pending: begin
-        if (s_trans_we_buf && axi_slave_r_ready_i) begin // read and the R channel is ready
-          axi_slave_r_valid_o = 1'b1;
-          axi_slave_r_last_o  = 1'b1;
+        if (s_trans_we_buf) begin // read
           axi_slave_r_data_o  = s_axi_slave_r_data;
-          state_d = Idle;
-        end else if (!s_trans_we_buf && axi_slave_b_ready_i) begin // write and the B channel is ready
+          axi_slave_r_last_o  = 1'b1;
+          axi_slave_r_valid_o = 1'b1;
+          if (axi_slave_r_ready_i) begin
+            state_d = Idle;
+          end
+        end else begin // write
           axi_slave_b_valid_o = 1'b1;
+          if (axi_slave_b_ready_i) begin
+            state_d = Idle;
+          end
+          if (s_trans_atop_r_buf) begin // ATOP with R response
+            axi_slave_r_data_o  = s_axi_slave_r_data;
+            axi_slave_r_last_o  = 1'b1;
+            axi_slave_r_valid_o = 1'b1;
+            case ({axi_slave_b_ready_i, axi_slave_r_ready_i})
+              2'b01: state_d = HoldB;
+              2'b10: state_d = HoldR;
+              2'b11: state_d = Idle;
+            endcase
+          end
+        end
+      end
+
+      HoldB: begin
+        axi_slave_b_valid_o = 1'b1;
+        if (axi_slave_b_ready_i) begin
+          state_d = Idle;
+        end
+      end
+
+      HoldR: begin
+        axi_slave_r_data_o  = s_axi_slave_r_data;
+        axi_slave_r_last_o  = 1'b1;
+        axi_slave_r_valid_o = 1'b1;
+        if (axi_slave_r_ready_i) begin
           state_d = Idle;
         end
       end
@@ -114,6 +146,7 @@ module axi2per_res_channel #(
     if (!rst_ni) begin
       s_per_master_r_data   <=   '0;
       s_trans_add_alignment <= 1'b0;
+      s_trans_atop_r_buf    <= 1'b0;
       s_trans_id_buf        <=   '0;
       s_trans_we_buf        <= 1'b0;
       state_q               <= Idle;
@@ -123,6 +156,7 @@ module axi2per_res_channel #(
       end
       if (trans_req_i) begin
         s_trans_add_alignment <= trans_add_i[2];
+        s_trans_atop_r_buf    <= trans_atop_r_i;
         s_trans_id_buf        <= trans_id_i;
         s_trans_we_buf        <= trans_we_i;
       end

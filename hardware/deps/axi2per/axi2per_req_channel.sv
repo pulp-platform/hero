@@ -68,6 +68,7 @@ module axi2per_req_channel #(
   output logic                      per_master_req_o,
   output logic [PER_ADDR_WIDTH-1:0] per_master_add_o,
   output logic                      per_master_we_o,
+  output logic [5:0]                per_master_atop_o,
   output logic [31:0]               per_master_wdata_o,
   output logic [3:0]                per_master_be_o,
   input  logic                      per_master_gnt_i,
@@ -75,6 +76,7 @@ module axi2per_req_channel #(
   // CONTROL SIGNALS
   output logic                      trans_req_o,
   output logic                      trans_we_o,
+  output logic                      trans_atop_r_o,
   output logic [AXI_ID_WIDTH-1:0]   trans_id_o,
   output logic [AXI_ADDR_WIDTH-1:0] trans_add_o,
   input  logic                      trans_r_valid_i,
@@ -84,6 +86,8 @@ module axi2per_req_channel #(
 );
 
   enum logic {TransIdle, TransPending} state_d, state_q;
+
+  logic inv_wdata;
 
   always_ff @(posedge clk_i, negedge rst_ni) begin
     if (!rst_ni) begin
@@ -145,6 +149,10 @@ module axi2per_req_channel #(
             per_master_wdata_o  = axi_slave_w_data_i[31:0];
           end
 
+          if (inv_wdata) begin
+            per_master_wdata_o = ~per_master_wdata_o;
+          end
+
           if (per_master_gnt_i) begin
             axi_slave_aw_ready_o = 1'b1;
             axi_slave_w_ready_o  = 1'b1;
@@ -169,5 +177,39 @@ module axi2per_req_channel #(
     endcase
   end
   assign trans_we_o = per_master_we_o;
+
+  always_comb begin
+    inv_wdata = 1'b0;
+    per_master_atop_o = '0;
+    trans_atop_r_o = 1'b0;
+    if (!per_master_we_o && axi_slave_aw_atop_i[5:4] != axi_pkg::ATOP_NONE) begin
+      if (axi_slave_aw_atop_i == axi_pkg::ATOP_ATOMICSWAP) begin
+        per_master_atop_o = riscv_defines::AMO_SWAP;
+      end else begin
+        case (axi_slave_aw_atop_i[2:0])
+          axi_pkg::ATOP_ADD:  per_master_atop_o = riscv_defines::AMO_ADD;
+          axi_pkg::ATOP_CLR: begin
+            inv_wdata = 1'b1;
+            per_master_atop_o = riscv_defines::AMO_AND;
+          end
+          axi_pkg::ATOP_EOR:  per_master_atop_o = riscv_defines::AMO_XOR;
+          axi_pkg::ATOP_SET:  per_master_atop_o = riscv_defines::AMO_OR;
+          axi_pkg::ATOP_SMAX: per_master_atop_o = riscv_defines::AMO_MAX;
+          axi_pkg::ATOP_SMIN: per_master_atop_o = riscv_defines::AMO_MIN;
+          axi_pkg::ATOP_UMAX: per_master_atop_o = riscv_defines::AMO_MAXU;
+          axi_pkg::ATOP_UMIN: per_master_atop_o = riscv_defines::AMO_MINU;
+        endcase
+        if (axi_slave_aw_atop_i[5:4] == axi_pkg::ATOP_ATOMICLOAD) begin
+          trans_atop_r_o = 1'b1;
+        end
+      end
+    end
+  end
+
+  `ifndef TARGET_SYNTHESIS
+    assert property (@(posedge clk_i) disable iff (!rst_ni)
+        axi_slave_aw_atop_i != axi_pkg::ATOP_ATOMICCMP)
+      else $error("Atomic compare-and-swap not supported!");
+  `endif
 
 endmodule

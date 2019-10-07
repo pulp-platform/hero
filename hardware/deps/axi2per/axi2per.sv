@@ -91,6 +91,7 @@ module axi2per
    output logic                      per_master_req_o,
    output logic [PER_ADDR_WIDTH-1:0] per_master_add_o,
    output logic                      per_master_we_no,
+   output logic [5:0]                per_master_atop_o,
    output logic [31:0]               per_master_wdata_o,
    output logic [3:0]                per_master_be_o,
    input  logic                      per_master_gnt_i,
@@ -156,7 +157,8 @@ module axi2per
    logic                              s_b_ready;
 
    logic                              s_trans_req;
-   logic                              s_trans_we;
+   logic                              s_trans_we,
+                                      s_trans_atop_r;
    logic [AXI_ID_WIDTH-1:0]           s_trans_id;
    logic [AXI_ADDR_WIDTH-1:0]         s_trans_add;
    logic                              s_trans_r_valid;
@@ -216,12 +218,14 @@ module axi2per
       .per_master_req_o      ( per_master_req_o    ),
       .per_master_add_o      ( per_master_add_o    ),
       .per_master_we_o       ( per_master_we_no    ),
+      .per_master_atop_o     ( per_master_atop_o   ),
       .per_master_wdata_o    ( per_master_wdata_o  ),
       .per_master_be_o       ( per_master_be_o     ),
       .per_master_gnt_i      ( per_master_gnt_i    ),
 
       .trans_req_o           ( s_trans_req         ),
       .trans_we_o            ( s_trans_we          ),
+      .trans_atop_r_o        ( s_trans_atop_r      ),
       .trans_id_o            ( s_trans_id          ),
       .trans_add_o           ( s_trans_add         ),
       .trans_r_valid_i       ( s_trans_r_valid     ),
@@ -263,6 +267,7 @@ module axi2per
 
       .trans_req_i          ( s_trans_req          ),
       .trans_we_i           ( s_trans_we           ),
+      .trans_atop_r_i       ( s_trans_atop_r       ),
       .trans_id_i           ( s_trans_id           ),
       .trans_add_i          ( s_trans_add          ),
       .trans_r_valid_o      ( s_trans_r_valid      )
