@@ -10,7 +10,7 @@
 
 /* General                                                */
 /**********************************************************/
-#define LOOPCOUNT 1000 /* Number of iterations to slit amongst threads */
+#define LOOPCOUNT  50 /* Number of iterations to slit amongst threads */
 #define REPETITIONS 1 /* Number of times to run each test */
 
 /* following times are in seconds */
@@ -21,5 +21,6 @@
 #define NUM_TASKS 25
 #define MAX_TASKS_PER_THREAD 5
 
+void fprintf(char *c, char *output)
 
 #endif
