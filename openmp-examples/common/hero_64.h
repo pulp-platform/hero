@@ -43,22 +43,33 @@
 // lower 32 bit has failed), and the return value is the bitwise OR of the two `uint32_noblock`
 // return values.
 inline static __attribute__((used)) uint64_t  hero_load_uint64          (const uint64_t addr);
-inline static __attribute__((used)) void      hero_store_uint64         (const uint64_t addr, const uint64_t val);
-inline static __attribute__((used)) int       hero_load_uint64_noblock  (const uint64_t addr, __device uint64_t* const val);
-inline static __attribute__((used)) int       hero_store_uint64_noblock (const uint64_t addr, const uint64_t val);
+inline static __attribute__((used)) void      hero_store_uint64         (const uint64_t addr,
+                                                                         const uint64_t val);
+inline static __attribute__((used)) int       hero_load_uint64_noblock  (const uint64_t addr,
+                                                                         __device uint64_t* const val);
+inline static __attribute__((used)) int       hero_store_uint64_noblock (const uint64_t addr,
+                                                                         const uint64_t val);
 inline static __attribute__((used)) uint32_t  hero_load_uint32          (const uint64_t addr);
-inline static __attribute__((used)) void      hero_store_uint32         (const uint64_t addr, const uint32_t val);
-inline static __attribute__((used)) int       hero_load_uint32_noblock  (const uint64_t addr, __device uint32_t* const val);
-inline static __attribute__((used)) int       hero_store_uint32_noblock (const uint64_t addr, const uint32_t val);
+inline static __attribute__((used)) void      hero_store_uint32         (const uint64_t addr,
+                                                                         const uint32_t val);
+inline static __attribute__((used)) int       hero_load_uint32_noblock  (const uint64_t addr,
+                                                                         __device uint32_t* const val);
+inline static __attribute__((used)) int       hero_store_uint32_noblock (const uint64_t addr,
+                                                                         const uint32_t val);
 inline static __attribute__((used)) uint16_t  hero_load_uint16          (const uint64_t addr);
-inline static __attribute__((used)) void      hero_store_uint16         (const uint64_t addr, const uint16_t val);
-inline static __attribute__((used)) int       hero_load_uint16_noblock  (const uint64_t addr, __device uint16_t* const val);
-inline static __attribute__((used)) int       hero_store_uint16_noblock (const uint64_t addr, const uint16_t val);
+inline static __attribute__((used)) void      hero_store_uint16         (const uint64_t addr,
+                                                                         const uint16_t val);
+inline static __attribute__((used)) int       hero_load_uint16_noblock  (const uint64_t addr,
+                                                                         __device uint16_t* const val);
+inline static __attribute__((used)) int       hero_store_uint16_noblock (const uint64_t addr,
+                                                                         const uint16_t val);
 inline static __attribute__((used)) uint8_t   hero_load_uint8           (const uint64_t addr);
-inline static __attribute__((used)) void      hero_store_uint8          (const uint64_t addr, const uint8_t val);
-inline static __attribute__((used)) int       hero_load_uint8_noblock   (const uint64_t addr, __device uint8_t* const val);
-inline static __attribute__((used)) int       hero_store_uint8_noblock  (const uint64_t addr, const uint8_t val);
-
+inline static __attribute__((used)) void      hero_store_uint8          (const uint64_t addr,
+                                                                         const uint8_t val);
+inline static __attribute__((used)) int       hero_load_uint8_noblock   (const uint64_t addr,
+                                                                         __device uint8_t* const val);
+inline static __attribute__((used)) int       hero_store_uint8_noblock  (const uint64_t addr,
+                                                                         const uint8_t val);
 
 /***************************************************************************************************
  * Implementation Internals
@@ -67,6 +78,7 @@ inline static __attribute__((used)) int       hero_store_uint8_noblock  (const u
 #ifdef __PULP__
 
 #pragma clang diagnostic push
+// NOTE: Clang currently incorrectly labels casts from integers to device pointers as being of different size
 #pragma clang diagnostic ignored "-Wint-to-pointer-cast"
 
 #include <stdbool.h>
