@@ -77,10 +77,7 @@ module axi2per_res_channel #(
     unique case (state_q)
       TransIdle: begin
         if (per_master_r_valid_i) begin
-          if ((s_trans_we_buf && axi_slave_r_ready_i) || // read and the R channel is ready
-              (!s_trans_we_buf && axi_slave_b_ready_i)) begin // write and the B channel is ready
-             state_d = TransPending;
-          end
+          state_d = TransPending;
         end
       end
 
