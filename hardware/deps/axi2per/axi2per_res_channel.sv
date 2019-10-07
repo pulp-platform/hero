@@ -90,7 +90,7 @@ module axi2per_res_channel #(
           axi_slave_r_last_o  = 1'b1;
           axi_slave_r_data_o  = s_axi_slave_r_data;
           state_d = TransIdle;
-        end else if (!trans_we_i && axi_slave_b_ready_i) begin // write and the B channel is ready
+        end else if (!s_trans_we_buf && axi_slave_b_ready_i) begin // write and the B channel is ready
           axi_slave_b_valid_o = 1'b1;
           state_d = TransIdle;
         end
