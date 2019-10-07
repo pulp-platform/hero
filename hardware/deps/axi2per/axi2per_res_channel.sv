@@ -65,59 +65,34 @@ module axi2per_res_channel #(
 
   enum logic {TransIdle, TransPending} state_d, state_q;
 
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (!rst_ni) begin
-      state_q <= TransIdle;
-    end else begin
-      state_q <= state_d;
-    end
-  end
-
   always_comb begin
-    axi_slave_r_valid_o = '0;
-    axi_slave_r_data_o  = '0;
-    axi_slave_r_last_o  = '0;
-    axi_slave_r_id_o    = '0;
+    axi_slave_r_valid_o = 1'b0;
+    axi_slave_r_data_o  =   '0;
+    axi_slave_r_last_o  = 1'b0;
 
-    axi_slave_b_valid_o = '0;
-    axi_slave_b_id_o    = '0;
+    axi_slave_b_valid_o = 1'b0;
 
-    trans_r_valid_o     = '0;
-
-    state_d             = TransIdle;
+    state_d             = state_q;
 
     unique case (state_q)
       TransIdle: begin
-        if (per_master_r_valid_i) begin // RESPONSE VALID FROM PERIPHERAL INTERCONNECT
-          if ((s_trans_we_buf &&             // READ OPERATION
-                 axi_slave_r_ready_i) ||     // THE AXI READ BUFFER IS ABLE TO ACCEPT A TRANSACTION
-               (!s_trans_we_buf &&
-                 axi_slave_b_ready_i)) begin // THE AXI WRITE RESPONSE BUFFER IS ABLE TO ACCEPT A TRANSACTION
+        if (per_master_r_valid_i) begin
+          if ((s_trans_we_buf && axi_slave_r_ready_i) || // read and the R channel is ready
+              (!s_trans_we_buf && axi_slave_b_ready_i)) begin // write and the B channel is ready
              state_d = TransPending;
           end
         end
       end
 
       TransPending: begin
-        if (s_trans_we_buf &&  // READ OPERATION
-            axi_slave_r_ready_i) begin  // THE AXI READ BUFFER IS ABLE TO ACCEPT A TRANSACTION
+        if (s_trans_we_buf && axi_slave_r_ready_i) begin // read and the R channel is ready
           axi_slave_r_valid_o = 1'b1;
           axi_slave_r_last_o  = 1'b1;
           axi_slave_r_data_o  = s_axi_slave_r_data;
-          axi_slave_r_id_o    = s_trans_id_buf;
-
-          trans_r_valid_o     = 1'b1;
-
           state_d = TransIdle;
-        end else if (!trans_we_i && axi_slave_b_ready_i) begin // THE AXI WRITE RESPONSE BUFFER IS ABLE TO ACCEPT A TRANSACTION
+        end else if (!trans_we_i && axi_slave_b_ready_i) begin // write and the B channel is ready
           axi_slave_b_valid_o = 1'b1;
-          axi_slave_b_id_o    = s_trans_id_buf;
-
-          trans_r_valid_o     = 1'b1;
-
           state_d = TransIdle;
-        end else begin
-          state_d = TransPending;
         end
       end
 
@@ -125,38 +100,36 @@ module axi2per_res_channel #(
     endcase
   end
 
-  // STORES REQUEST ADDRESS BIT 2 TRANSFER TYPE AND THE ID WHEN A REQUEST OCCURS ON THE REQ CHANNEL
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (!rst_ni) begin
-      s_trans_we_buf        <= 1'b0;
-      s_trans_add_alignment <= 1'b0;
-      s_trans_id_buf        <=   '0;
-    end else begin
-      if (trans_req_i) begin
-        s_trans_we_buf        <= trans_we_i;
-        s_trans_add_alignment <= trans_add_i[2];
-        s_trans_id_buf        <= trans_id_i;
-      end
-    end
-  end
+  assign trans_r_valid_o = axi_slave_b_valid_o | axi_slave_r_valid_o;
+  assign axi_slave_b_id_o = s_trans_id_buf;
+  assign axi_slave_r_id_o = s_trans_id_buf;
 
-  // STORES RDATA WHEN RVALID SIGNAL IS ASSERTED
-  always_ff @ (posedge clk_i, negedge rst_ni) begin
-    if (!rst_ni == 1'b0) begin
-      s_per_master_r_data <= '0;
-    end else begin
-      if (per_master_r_valid_i) begin
-        s_per_master_r_data <= per_master_r_rdata_i;
-      end
-    end
-  end
-
-  // SELECT MSB OR LSBS OF DATA
+  // Demultiplex the 32-bit data of the peripheral bus to the 64-bit AXI R channel.
   always_comb begin
     if (!s_trans_add_alignment) begin
       s_axi_slave_r_data = {32'b0, s_per_master_r_data};
     end else begin
       s_axi_slave_r_data = {s_per_master_r_data, 32'b0};
+    end
+  end
+
+  always_ff @(posedge clk_i, negedge rst_ni) begin
+    if (!rst_ni) begin
+      s_per_master_r_data   <=   '0;
+      s_trans_add_alignment <= 1'b0;
+      s_trans_id_buf        <=   '0;
+      s_trans_we_buf        <= 1'b0;
+      state_q               <= TransIdle;
+    end else begin
+      if (per_master_r_valid_i) begin
+        s_per_master_r_data <= per_master_r_rdata_i;
+      end
+      if (trans_req_i) begin
+        s_trans_add_alignment <= trans_add_i[2];
+        s_trans_id_buf        <= trans_id_i;
+        s_trans_we_buf        <= trans_we_i;
+      end
+      state_q <= state_d;
     end
   end
 
