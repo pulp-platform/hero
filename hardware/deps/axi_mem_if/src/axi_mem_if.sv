@@ -113,8 +113,8 @@ module axi_mem_if #(
         // write response channel
         slave.b_valid  = 1'b0;
         slave.b_resp   = 1'b0;
-        slave.b_id     = 1'b0;
-        slave.b_user   = 1'b0;
+        slave.b_id     =   '0;
+        slave.b_user   =   '0;
 
         case (state_q)
 
