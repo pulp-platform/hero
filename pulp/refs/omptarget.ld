@@ -39,6 +39,15 @@ __rt_sim = DEFINED(__rt_sim) ? __rt_sim : 0x0;
 
 __omp_64bit = DEFINED(__omp_64bit) ? __omp_64bit : 0x0;
 
+__pulp_l1_base        = ORIGIN(L1);
+__pulp_l1_end         = __pulp_l1_base + LENGTH(L1);
+__pulp_l1_alias_base  = ORIGIN(L1_aliased);
+__pulp_l1_alias_end   = __pulp_l1_alias_base + LENGTH(L1_aliased);
+__pulp_l2_base        = ORIGIN(L2);
+__pulp_l2_end         = __pulp_l2_base + LENGTH(L2);
+
+__pulp_cluster_size = 0x00400000;
+
 /*
  * This linker script try to put FC data in L2 private bank0 and FC code 
  * in L2 private bank1 to avoid contention between FC code and data
