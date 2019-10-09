@@ -10,6 +10,8 @@ TARGET_DEV = riscv32-hero-unknown-elf
 ARCH_HOST = host-$(TARGET_HOST)
 ARCH_DEV = openmp-$(TARGET_DEV)
 
+OBJDUMP := $(TARGET_DEV)-objdump
+
 ifeq ($(strip $(default-as)),)
 ifeq ($(only),pulp)
   default-as=pulp
@@ -38,10 +40,10 @@ CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
 # FIXME: we explicitly need to embed the correct linker
 LDFLAGS_COMMON +=
 LDFLAGS_PULP += $(LDFLAGS_COMMON)
-LDFLAGS += $(LDFLAGS_COMMON)  -lhero-target -Wl,-dynamic-linker,/lib/ld-linux-riscv64-lp64.so.1
+LDFLAGS += $(LDFLAGS_COMMON) -lhero-target -Wl,-dynamic-linker,/lib/ld-linux-riscv64-lp64.so.1
 
 INCPATHS += -I$(DEFMK_ROOT) -include hero_64.h
-LIBPATHS +=
+LIBPATHS ?=
 
 BENCHMARK = $(shell basename `pwd`)
 EXE = $(BENCHMARK)
@@ -53,12 +55,11 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 only ?= # can be set to `pulp` to compile a binary only for PULP
 
 .PHONY: all exe clean
+.PRECIOUS: %.ll
 
 ifeq ($(only),pulp)
-OBJDUMP := riscv32-hero-unknown-elf-objdump
 all : $(EXE) $(EXE).dis slm
 
-.PRECIOUS: %.ll
 %.ll: %.c $(DEPDIR)/%.d | $(DEPDIR)
 	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS_PULP) $(INCPATHS) $<
 
@@ -67,8 +68,8 @@ all : $(EXE) $(EXE).dis slm
 	hc-omp-pass $(<:.ll=.TMP.1.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(<:.ll=.TMP.2.ll)
 	mv $(<:.ll=.TMP.2.ll) $(<:.ll=.OMP.ll)
 
-$(EXE): $(DEPS) $(SRC:.c=.OMP.ll)
-	$(CC) $(LIBPATHS) $(CFLAGS_PULP) $(SRC:.c=.OMP.ll) $(LDFLAGS_PULP) -o $@
+$(EXE): $(SRC:.c=.OMP.ll)
+	$(CC) $(LIBPATHS) $(CFLAGS_PULP) $< $(LDFLAGS_PULP) -o $@
 
 slm: $(EXE)_l1.slm $(EXE)_l2.slm
 
@@ -86,21 +87,27 @@ $(EXE)_l1.slm: $(EXE)
 	$(DEFMK_ROOT)/one_word_per_line.py $@
 
 else
-OBJDUMP := riscv64-unknown-linux-gnu-objdump
 all: $(DEPS) $(EXE) $(EXE).dis
 
-$(EXE): $(SRC)
-	# generate llvm
-	$(CC) -c -emit-llvm -S $(CFLAGS) $(INCPATHS) $^
-	# unbundle
-	$(COB) -inputs="$(BENCHMARK).ll" -outputs="$(BENCHMARK)-host.ll,$(BENCHMARK)-dev.ll" -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)" -unbundle
-	# apply omp passes
-	hc-omp-pass "$(BENCHMARK)-host.ll" OmpKernelWrapper "HERCULES-omp-kernel-wrapper"
-	hc-omp-pass "$(BENCHMARK)-dev.ll" OmpKernelWrapper "HERCULES-omp-kernel-wrapper" "$(BENCHMARK)-dev.TMP.ll"
-	hc-omp-pass "$(BENCHMARK)-dev.TMP.ll" OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" "$(BENCHMARK)-dev.OMP.ll"
-	# rebundle and compile/link
-	$(COB) -inputs="$(BENCHMARK)-host.OMP.ll,$(BENCHMARK)-dev.OMP.ll" -outputs="$(BENCHMARK)-out.ll" -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)"
-	$(CC) $(LIBPATHS) $(CFLAGS) $(LDFLAGS) -o $(BENCHMARK) "$(BENCHMARK)-out.ll"
+%.ll: %.c $(DEPDIR)/%.d | $(DEPDIR)
+	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS) $(INCPATHS) $<
+	$(COB) -inputs=$@ -outputs="$(<:.c=-host.ll),$(<:.c=-dev.ll)" -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)" -unbundle
+
+%-dev.OMP.ll: %.ll
+	hc-omp-pass $(<:.ll=-dev.ll) OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(@:.OMP.ll=.TMP.1.ll)
+	hc-omp-pass $(@:.OMP.ll=.TMP.1.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(@:.OMP.ll=.TMP.2.ll)
+	cp $(@:.OMP.ll=.TMP.2.ll) $@
+
+%-host.OMP.ll: %.ll
+	hc-omp-pass $(<:.ll=-host.ll) OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(@:.OMP.ll=.TMP.1.ll)
+	cp $(@:.OMP.ll=.TMP.1.ll) $@
+
+%-out.ll: %-host.OMP.ll %-dev.OMP.ll
+	$(COB) -inputs="$(@:-out.ll=-host.OMP.ll),$(@:-out.ll=-dev.OMP.ll)" -outputs=$@ -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)"
+
+$(EXE): $(SRC:.c=-out.ll)
+	$(CC) $(LIBPATHS) $(CFLAGS) $< $(LDFLAGS) -o $@
+
 endif
 
 $(EXE).dis: $(EXE)
