@@ -33,7 +33,7 @@ package automatic pulp_cluster_cfg_pkg;
   localparam int unsigned N_TCDM_BANKS = 2*N_CORES; // must be a power of 2
   localparam int unsigned TCDM_SIZE = 256*1024; // [B], must be a power of 2
   // -- L2 Memory (not inside cluster)
-  localparam int unsigned L2_SIZE = 256*1024; // [B], must be a power of 2
+  localparam int unsigned L2_SIZE = 512*1024; // [B], must be a power of 2
 
   typedef logic      [AXI_AW-1:0] addr_t;
   typedef logic             [5:0] cluster_id_t;
