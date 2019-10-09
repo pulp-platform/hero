@@ -153,6 +153,21 @@ void *hero_l1malloc(int size);
  */
 void *hero_l2malloc(int size);
 
+/** Used by PULP for allocation in shared L3 memory. Useful for debugging / simulation.
+
+    Resolves to a malloc() on the host.
+
+    NOTE: Cannot be combined with usage of L3 memory from the host
+    NOTE: Every address can be allocated only once on the accelerator
+
+    \param   size The amount of memory to be allocated Bytes.
+
+    \return  A pointer to the allocated memory chunk; NULL is returned in case the memory chunk could
+    not be allocated.
+*/
+void *hero_l3malloc(int size);
+
+
 /** Used by PULP to free a chunk of memory inside the shared L1 scratchpad memory.
 
     Resolved to a free() for the host.
@@ -168,6 +183,15 @@ void hero_l1free(void * a);
   \param   a The start address of the chunk to be freed.
  */
 void hero_l2free(void * a);
+
+/** Frees memory in the shared L3 memory.
+
+    NOTE: This function is not required to aything at the moment
+
+    \param   a The start address of the chunk to be freed.
+*/
+void hero_l3free(void * a);
+
 
 //!@}
 

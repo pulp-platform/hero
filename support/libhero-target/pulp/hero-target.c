@@ -21,6 +21,7 @@
 #include <archi-host/pgtable_hwdef.h>
 #include <vmm/vmm.h>
 
+#define L3_MEM_BASE_ADDR 0x80000000
 #define PULP_DMA_MAX_XFER_SIZE_B 32768
 
 unsigned int
@@ -135,6 +136,14 @@ hero_l2malloc(int size)
 {
   return l2malloc(size);
 }
+static void *l3_ptr = (void*)L3_MEM_BASE_ADDR;
+void *
+hero_l3malloc(int size)
+{
+  void *ptr = l3_ptr;
+  l3_ptr += size;
+  return ptr;
+}
 
 void
 hero_l1free(void * a)
@@ -146,6 +155,12 @@ void
 hero_l2free(void * a)
 {
   l2free(a);
+}
+void
+hero_l3free(void *a)
+{
+  //FIXME: implement
+  return;
 }
 
 int
