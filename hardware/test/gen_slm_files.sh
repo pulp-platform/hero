@@ -16,9 +16,10 @@ if [ $# -ne 1 ]; then
     echo "Usage: $0 <app_name>"
     exit 1
 else
-    readonly app_name="$1"
+    readonly app_dir="$1"
 fi
-readonly app_path="$examples_path/$app_name"
+readonly app_path="$examples_path/$app_dir"
+readonly app_name=$(basename $app_dir)
 
 mkdir -p "$slm_path"
 cd "$slm_path"
