@@ -45,8 +45,8 @@ static inline double bench_stop(void);
 // FIXME: Implement benchmarking properly in standalone
 static inline void bench_start(const char* const format, ...) {
   __device const char *format_dev = (__device const char*)format;
-  hero_reset_clk_counter();
   printf("BENCH -- %s!\n", format_dev);
+  hero_reset_clk_counter();
 }
 
 static inline double bench_stop(void) {
