@@ -190,6 +190,7 @@ inline static void __loop_forever()
   __hero_64_define_store_noblock(size) \
   __hero_64_define_store(size)
 
+// FIXME: investigate error when this is put at start of the file
 #pragma omp declare target
 __hero_64_define(32)
 __hero_64_define(16)
