@@ -4,13 +4,13 @@ add wave -noupdate -group {tcdm_sram_master[1]} {/hero_tb/dut/gen_clusters[0]/ge
 add wave -noupdate -group {tcdm_sram_master[1]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/tcdm_sram_master[1]/add}
 add wave -noupdate -group {tcdm_sram_master[1]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/tcdm_sram_master[1]/req}
 add wave -noupdate -group {tcdm_sram_master[1]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/tcdm_sram_master[1]/wen}
-add wave -noupdate -group {tcdm_sram_master[1]} -expand {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/tcdm_sram_master[1]/be}
+add wave -noupdate -group {tcdm_sram_master[1]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/tcdm_sram_master[1]/be}
 add wave -noupdate -group {tcdm_sram_master[1]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/tcdm_sram_master[1]/rdata}
 add wave -noupdate -group {tcdm_sram_master[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/tcdm_sram_master[0]/add}
 add wave -noupdate -group {tcdm_sram_master[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/tcdm_sram_master[0]/wdata}
 add wave -noupdate -group {tcdm_sram_master[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/tcdm_sram_master[0]/req}
 add wave -noupdate -group {tcdm_sram_master[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/tcdm_sram_master[0]/wen}
-add wave -noupdate -group {tcdm_sram_master[0]} -expand {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/tcdm_sram_master[0]/be}
+add wave -noupdate -group {tcdm_sram_master[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/tcdm_sram_master[0]/be}
 add wave -noupdate -group {tcdm_sram_master[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/tcdm_sram_master[0]/rdata}
 add wave -noupdate -group {cl_inp[0]} {/hero_tb/dut/cl_inp[0]/aw_id}
 add wave -noupdate -group {cl_inp[0]} {/hero_tb/dut/cl_inp[0]/aw_addr}
@@ -60,7 +60,7 @@ add wave -noupdate -group {cl_inp[0]} {/hero_tb/dut/cl_inp[0]/r_ready}
 add wave -noupdate -group {cl_oup_predwc[0]} {/hero_tb/dut/cl_oup_predwc[0]/aw_id}
 add wave -noupdate -group {cl_oup_predwc[0]} {/hero_tb/dut/cl_oup_predwc[0]/aw_addr}
 add wave -noupdate -group {cl_oup_predwc[0]} {/hero_tb/dut/cl_oup_predwc[0]/aw_len}
-add wave -noupdate -group {cl_oup_predwc[0]} -expand {/hero_tb/dut/cl_oup_predwc[0]/aw_size}
+add wave -noupdate -group {cl_oup_predwc[0]} {/hero_tb/dut/cl_oup_predwc[0]/aw_size}
 add wave -noupdate -group {cl_oup_predwc[0]} {/hero_tb/dut/cl_oup_predwc[0]/aw_burst}
 add wave -noupdate -group {cl_oup_predwc[0]} {/hero_tb/dut/cl_oup_predwc[0]/aw_lock}
 add wave -noupdate -group {cl_oup_predwc[0]} {/hero_tb/dut/cl_oup_predwc[0]/aw_cache}
@@ -72,7 +72,7 @@ add wave -noupdate -group {cl_oup_predwc[0]} {/hero_tb/dut/cl_oup_predwc[0]/aw_u
 add wave -noupdate -group {cl_oup_predwc[0]} {/hero_tb/dut/cl_oup_predwc[0]/aw_valid}
 add wave -noupdate -group {cl_oup_predwc[0]} {/hero_tb/dut/cl_oup_predwc[0]/aw_ready}
 add wave -noupdate -group {cl_oup_predwc[0]} {/hero_tb/dut/cl_oup_predwc[0]/w_data}
-add wave -noupdate -group {cl_oup_predwc[0]} -expand {/hero_tb/dut/cl_oup_predwc[0]/w_strb}
+add wave -noupdate -group {cl_oup_predwc[0]} {/hero_tb/dut/cl_oup_predwc[0]/w_strb}
 add wave -noupdate -group {cl_oup_predwc[0]} {/hero_tb/dut/cl_oup_predwc[0]/w_last}
 add wave -noupdate -group {cl_oup_predwc[0]} {/hero_tb/dut/cl_oup_predwc[0]/w_user}
 add wave -noupdate -group {cl_oup_predwc[0]} {/hero_tb/dut/cl_oup_predwc[0]/w_valid}
