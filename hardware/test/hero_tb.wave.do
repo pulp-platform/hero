@@ -1,4 +1,11 @@
 onerror {resume}
+quietly virtual signal -install {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/decoder_i} { /hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/decoder_i/instr_rdata_i[24:20]} rs2
+quietly virtual signal -install {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/decoder_i} { /hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/decoder_i/instr_rdata_i[19:15]} rs1
+quietly virtual signal -install {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i} { /hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/instr_rdata_i[6:0]} opcode
+quietly virtual signal -install {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i} { /hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/instr_rdata_i[11:7]} rd
+quietly virtual signal -install {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i} { /hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/instr_rdata_i[14:12]} funct3
+quietly virtual signal -install {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i} { /hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/instr_rdata_i[19:15]} rs1
+quietly virtual signal -install {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i} { /hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/instr_rdata_i[24:20]} rs2
 quietly WaveActivateNextPane {} 0
 add wave -noupdate -group {tcdm_sram_master[1]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/tcdm_sram_master[1]/wdata}
 add wave -noupdate -group {tcdm_sram_master[1]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/tcdm_sram_master[1]/add}
@@ -467,6 +474,9 @@ add wave -noupdate -group {core[0][0]/lsu} {/hero_tb/dut/gen_clusters[0]/gen_clu
 add wave -noupdate -group {core[0][0]/lsu} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/load_store_unit_i/we_q}
 add wave -noupdate -group {core[0][0]/lsu} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/load_store_unit_i/rdata_d}
 add wave -noupdate -group {core[0][0]/lsu} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/load_store_unit_i/rdata_q}
+add wave -noupdate -group {core[0][0]/lsu} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/load_store_unit_i/stack_access_i}
+add wave -noupdate -group {core[0][0]/lsu} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/load_store_unit_i/stack_base_i}
+add wave -noupdate -group {core[0][0]/lsu} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/load_store_unit_i/stack_limit_i}
 add wave -noupdate -group {core_demux[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/core_demux_i/clk}
 add wave -noupdate -group {core_demux[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/core_demux_i/rst_ni}
 add wave -noupdate -group {core_demux[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/core_demux_i/test_en_i}
@@ -867,6 +877,12 @@ add wave -noupdate -group {core[0][0]/id_stage} {/hero_tb/dut/gen_clusters[0]/ge
 add wave -noupdate -group {core[0][0]/id_stage} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/reg_d_alu_is_reg_a_id}
 add wave -noupdate -group {core[0][0]/id_stage} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/reg_d_alu_is_reg_b_id}
 add wave -noupdate -group {core[0][0]/id_stage} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/reg_d_alu_is_reg_c_id}
+add wave -noupdate -group {core[0][0]/id_stage} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/opcode}
+add wave -noupdate -group {core[0][0]/id_stage} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/funct3}
+add wave -noupdate -group {core[0][0]/id_stage} -radix unsigned {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/rd}
+add wave -noupdate -group {core[0][0]/id_stage} -radix unsigned {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/rs1}
+add wave -noupdate -group {core[0][0]/id_stage} -radix unsigned {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/rs2}
+add wave -noupdate -group {core[0][0]/id_stage} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/stack_access_o}
 add wave -noupdate -group {core_instr_bus[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/s_core_instr_bus/aw_id}
 add wave -noupdate -group {core_instr_bus[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/s_core_instr_bus/aw_addr}
 add wave -noupdate -group {core_instr_bus[0]} {/hero_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/s_core_instr_bus/aw_len}
