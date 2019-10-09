@@ -35,4 +35,58 @@ static unsigned condition_or_printf(bool condition, const char* fmt, ...)
   }
 }
 
+inline static void* pulp_l1_base()
+{
+  extern void __pulp_l1_base;
+  return &__pulp_l1_base;
+}
+
+inline static void* pulp_l1_end()
+{
+  extern void __pulp_l1_end;
+  return &__pulp_l1_end;
+}
+
+inline static void* pulp_l1_alias_base()
+{
+  extern void __pulp_l1_alias_base;
+  return &__pulp_l1_alias_base;
+}
+
+inline static void* pulp_l1_alias_end()
+{
+  extern void __pulp_l1_alias_end;
+  return &__pulp_l1_alias_end;
+}
+
+inline static void* pulp_l2_base()
+{
+  extern void __pulp_l2_base;
+  return &__pulp_l2_base;
+}
+
+inline static void* pulp_l2_end()
+{
+  extern void __pulp_l2_end;
+  return &__pulp_l2_end;
+}
+
+inline static unsigned pulp_cluster_n_cores()
+{
+  extern void __rt_nb_pe;
+  return (unsigned)&__rt_nb_pe;
+}
+
+inline static size_t pulp_stack_size()
+{
+  extern void __rt_stack_size;
+  return (size_t)&__rt_stack_size;
+}
+
+inline static void* pulp_cluster_base(const unsigned cluster_id)
+{
+  extern void __pulp_cluster_size;
+  return pulp_l1_base() + cluster_id * (unsigned)&__pulp_cluster_size;
+}
+
 #endif
