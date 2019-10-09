@@ -137,11 +137,10 @@ module axi2per_res_channel #(
   assign axi_slave_b_user_o = '0;
 
   `ifndef TARGET_SYNTHESIS
-    assert property (@(posedge clk_i) disable iff (!rst_ni)
-        per_master_r_valid_i |-> state_q == Idle)
+    default disable iff (!rst_ni);
+    assert property (@(posedge clk_i) per_master_r_valid_i |-> state_q == Idle)
       else $error("Lost response on peripheral bus!");
-    assert property (@(posedge clk_i) disable iff (!rst_ni)
-        trans_req_i |-> state_q == Idle)
+    assert property (@(posedge clk_i) trans_req_i |-> state_q == Idle)
       else $error("Lost transfer request!");
   `endif
 
