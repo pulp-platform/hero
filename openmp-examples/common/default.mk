@@ -18,22 +18,30 @@ else
 endif
 endif
 
+ifeq ($(strip $(opt)),)
+  opt = 3
+endif
+
+.DEFAULT_GOAL = all
+DEFMK_ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
+
 # CFLAGS and LDFLAGS have three components/stages
 # 1) without suffix, they apply to heterogeneous compilation;
 # 3) with _PULP suffix, they apply only to the PULP part of compilation;
 # 4) with _COMMON suffix, they apply to both PULP and host compilation.
-CFLAGS_COMMON += -fopenmp=libomp -O1 # -O3
+CFLAGS_COMMON += -fopenmp=libomp -O$(opt)
 ifeq ($(default-as),pulp)
   CFLAGS_COMMON += -fhero-device-default-as=device
 endif
 CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -march=rv32imac
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
 # FIXME: we explicitly need to embed the correct linker
-LDFLAGS_COMMON += -lhero-target -Wl,-dynamic-linker,/lib/ld-linux-riscv64-lp64.so.1
+LDFLAGS_COMMON +=
 LDFLAGS_PULP += $(LDFLAGS_COMMON)
-LDFLAGS += $(LDFLAGS_COMMON)
+LDFLAGS += $(LDFLAGS_COMMON)  -lhero-target -Wl,-dynamic-linker,/lib/ld-linux-riscv64-lp64.so.1
 
-INCPATHS += -I../common -include ../common/hero_64.h
+INCPATHS += -I$(DEFMK_ROOT) -include hero_64.h
+LIBPATHS +=
 
 BENCHMARK = $(shell basename `pwd`)
 EXE = $(BENCHMARK)
@@ -56,35 +64,32 @@ all : $(EXE) $(EXE).dis slm
 
 %.OMP.ll: %.ll
 	hc-omp-pass $< OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(<:.ll=.TMP.1.ll)
-	# opt -O3 -S $(<:.ll=.TMP.1.ll) -o $(<:.ll=.TMP.2.ll)
-	mv $(<:.ll=.TMP.1.ll) $(<:.ll=.TMP.2.ll)
-	hc-omp-pass $(<:.ll=.TMP.2.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(<:.ll=.TMP.3.ll)
-	# opt -O3 -S $(<:.ll=.TMP.3.ll) -o $(<:.ll=.OMP.ll)
-	mv $(<:.ll=.TMP.3.ll) $(<:.ll=.OMP.ll)
+	hc-omp-pass $(<:.ll=.TMP.1.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(<:.ll=.TMP.2.ll)
+	mv $(<:.ll=.TMP.2.ll) $(<:.ll=.OMP.ll)
 
-$(EXE) : $(SRC:.c=.OMP.ll)
-	$(CC) $(CFLAGS_PULP) $(LDFLAGS_PULP) -o $@ $^
+$(EXE): $(DEPS) $(SRC:.c=.OMP.ll)
+	$(CC) $(LIBPATHS) $(CFLAGS_PULP) $(SRC:.c=.OMP.ll) $(LDFLAGS_PULP) -o $@
 
-slm : $(EXE)_l1.slm $(EXE)_l2.slm
+slm: $(EXE)_l1.slm $(EXE)_l2.slm
 
-$(EXE)_l2.slm : $(EXE)
+$(EXE)_l2.slm: $(EXE)
 	objdump -s --start-address=0x1c000000 --stop-address=0x1cffffff $^ | rg '^ ' | cut -c 2-45 \
       | sort \
       > $@
-	../common/one_word_per_line.py $@
+	$(DEFMK_ROOT)/one_word_per_line.py $@
 
-$(EXE)_l1.slm : $(EXE)
+$(EXE)_l1.slm: $(EXE)
 	objdump -s --start-address=0x10000000 --stop-address=0x1bffffff $^ | rg '^ ' | cut -c 2-45 \
       | perl -p -e 's/^1b/10/' \
       | sort \
       > $@
-	../common/one_word_per_line.py $@
+	$(DEFMK_ROOT)/one_word_per_line.py $@
 
 else
 OBJDUMP := riscv64-unknown-linux-gnu-objdump
-all : $(EXE) $(EXE).dis
+all: $(DEPS) $(EXE) $(EXE).dis
 
-$(EXE) : $(SRC)
+$(EXE): $(SRC)
 	# generate llvm
 	$(CC) -c -emit-llvm -S $(CFLAGS) $(INCPATHS) $^
 	# unbundle
@@ -95,10 +100,10 @@ $(EXE) : $(SRC)
 	hc-omp-pass "$(BENCHMARK)-dev.TMP.ll" OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" "$(BENCHMARK)-dev.OMP.ll"
 	# rebundle and compile/link
 	$(COB) -inputs="$(BENCHMARK)-host.OMP.ll,$(BENCHMARK)-dev.OMP.ll" -outputs="$(BENCHMARK)-out.ll" -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)"
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BENCHMARK) "$(BENCHMARK)-out.ll"
+	$(CC) $(LIBPATHS) $(CFLAGS) $(LDFLAGS) -o $(BENCHMARK) "$(BENCHMARK)-out.ll"
 endif
 
-$(EXE).dis : $(EXE)
+$(EXE).dis: $(EXE)
 	$(OBJDUMP) -d $^ > $@
 
 $(DEPDIR):
