@@ -28,6 +28,7 @@ module per2axi_req_channel
 )
 (
    input  logic                      clk_i,
+   input  logic                      rst_ni,
 
    // PERIPHERAL INTERCONNECT SLAVE
    //***************************************
@@ -253,6 +254,7 @@ module per2axi_req_channel
 
    // Assumptions
    `ifndef TARGET_SYNTHESIS
+      default disable iff (!rst_ni);
       assume property (@(posedge clk_i) per_slave_req_i |-> per_slave_be_i[per_slave_add_i[1:0]])
          else $error("Byte enable of addressed byte must be active");
       logic [1:0] be_trailing_zeros;
