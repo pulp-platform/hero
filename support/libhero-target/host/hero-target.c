@@ -72,11 +72,16 @@ hero_l1malloc(int size)
 {
 	return malloc(size);
 }
-
 void *
 hero_l2malloc(int size)
 {
 	return malloc(size);
+}
+void *
+hero_l3malloc(int size)
+{
+  // FIXME: use actual L3 memory
+  return malloc(size);
 }
 
 void
@@ -84,9 +89,13 @@ hero_l1free(void * a)
 {
   free(a);
 }
-
 void
 hero_l2free(void * a)
+{
+  free(a);
+}
+void
+hero_l3free(void * a)
 {
   free(a);
 }
@@ -95,4 +104,15 @@ int
 hero_rt_core_id(void)
 {
   return omp_get_thread_num();
+}
+
+// FIXME implement clock counters for host
+void
+hero_reset_clk_counter(void) {
+    return;
+}
+
+int
+hero_get_clk_counter(void) {
+    return 0;
 }

@@ -16,10 +16,12 @@
 
 #include <hero-target.h>
 #include <pulp.h>
+#include <bench/bench.h>
 #include <libgomp/pulp/memutils.h>
 #include <archi-host/pgtable_hwdef.h>
 #include <vmm/vmm.h>
 
+#define L3_MEM_BASE_ADDR 0x80000000
 #define PULP_DMA_MAX_XFER_SIZE_B 32768
 
 unsigned int
@@ -52,7 +54,7 @@ hero_handle_rab_misses(void)
   return handle_rab_misses();
 }
 
-hero_dma_job_t 
+hero_dma_job_t
 hero_dma_memcpy_async(void *dst, void *src, int size)
 {
   int ext2loc;
@@ -107,7 +109,7 @@ hero_dma_memcpy_async(void *dst, void *src, int size)
     ext_addr += size_tmp;
     loc_addr += size_tmp;
   }
-  
+
   return dma;
 }
 
@@ -134,6 +136,14 @@ hero_l2malloc(int size)
 {
   return l2malloc(size);
 }
+static void *l3_ptr = (void*)L3_MEM_BASE_ADDR;
+void *
+hero_l3malloc(int size)
+{
+  void *ptr = l3_ptr;
+  l3_ptr += size;
+  return ptr;
+}
 
 void
 hero_l1free(void * a)
@@ -146,9 +156,26 @@ hero_l2free(void * a)
 {
   l2free(a);
 }
+void
+hero_l3free(void *a)
+{
+  //FIXME: implement
+  return;
+}
 
 int
 hero_rt_core_id(void)
 {
   return rt_core_id();
+}
+
+void
+hero_reset_clk_counter(void) {
+    reset_timer();
+    start_timer();
+}
+
+int
+hero_get_clk_counter(void) {
+    return get_time();
 }
