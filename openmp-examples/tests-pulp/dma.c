@@ -15,6 +15,9 @@
  */
 
 #include "test.h"
+#include <assert.h>
+#include <hero-target.h>
+#include <string.h>       // memset()
 
 // Mirror definitions from PULP SDK, can be removed as soon as the PULP SDK is accessible through
 // Clang.
@@ -85,11 +88,54 @@ static bool regression_tcdm_counter_overflow()
   return timeout;
 }
 
+// Regression test for external to L1 transfer
+static unsigned check_ext_to_l1(uint32_t* const ext, uint32_t* const loc, const size_t n_elem)
+{
+  // Initialize external memory.
+  for (unsigned i = 0; i < n_elem; i++) {
+    ext[i] = i;
+  }
+  // Start DMA transfer and wait for its completion.
+  const size_t size = n_elem * sizeof(uint32_t);
+  hero_dma_job_t dma0 = hero_dma_memcpy_async(loc, ext, size);
+  hero_dma_wait(dma0);
+  // Assert that transferred local data matches external data.
+  unsigned n_errors = 0;
+  for (unsigned i = 0; i < n_elem; i++) {
+    n_errors += (loc[i] != i);
+  }
+  condition_or_printf(n_errors == 0, "%d local elements did not match!\n", n_errors);
+  // Reset local memory.
+  memset(loc, 0, size);
+  // Return error count.
+  return n_errors;
+}
+static unsigned regression_ext_to_l1()
+{
+  const size_t n_elem = 64;
+  const size_t size = n_elem * sizeof(uint32_t);
+  // Allocate local memory.
+  uint32_t* const loc = (uint32_t*)hero_l1malloc(size);
+  assert(loc);
+
+  unsigned n_errors = 0;
+  printf("DMA: L3 to L1 ..\n");
+  n_errors += check_ext_to_l1((uint32_t*)0x80000000, loc, n_elem);
+  printf("DMA: L2 to L1 ..\n");
+  n_errors += check_ext_to_l1((uint32_t*)pulp_l2_end() - 0x1000, loc, n_elem);
+  printf("DMA: Other L1 to L1 ..\n");
+  n_errors += check_ext_to_l1((uint32_t*)pulp_cluster_base(1) + 0x1000, loc, n_elem);
+
+  hero_l1free(loc);
+  return n_errors;
+}
+
 unsigned test_dma()
 {
   unsigned n_errors = 0;
 
   n_errors += regression_tcdm_counter_overflow();
+  n_errors += regression_ext_to_l1();
 
   return n_errors;
 }
