@@ -9,6 +9,7 @@ PBFLAGS = -DPOLYBENCH_USE_SCALAR_LB -DPOLYBENCH_TIME -DPOLYBENCH_CYCLE_ACCURATE_
 INCPATHS = -I$(PBMK_ROOT)/../common
 LIBPATHS = -L$(PBMK_ROOT)/../common
 LDFLAGS_PULP = $(PBMK_ROOT)/../common/libpolybench-pulp.a
+LDFLAGS = $(PBMK_ROOT)/../common/libpolybench-host.a
 CFLAGS_COMMON += $(PBFLAGS)
 
 DEPS += polybench
