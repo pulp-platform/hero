@@ -1,5 +1,4 @@
-/* Adapted from 
-/* Global headerfile of the OpenMP Testsuite */
+/* Adapted from OpenMP Testsuite */
 
 #ifndef OMP_TESTSUITE_H
 #define OMP_TESTSUITE_H
