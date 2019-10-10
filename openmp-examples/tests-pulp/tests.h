@@ -21,4 +21,8 @@ unsigned test_dma();
 unsigned test_hero_64();
 unsigned test_m_instrs();
 
+int test_omp_atomic();
+int test_omp_for_schedule_static();
+int test_omp_parallel_for_reduction();
+
 #endif
