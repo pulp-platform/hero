@@ -9,7 +9,7 @@
 
 /* General                                                */
 /**********************************************************/
-#define LOOPCOUNT 1000 /* Number of iterations to slit amongst threads */
+#define LOOPCOUNT 100 /* Number of iterations to slit amongst threads */
 #define REPETITIONS 1 /* Number of times to run each test */
 
 /* following times are in seconds */
