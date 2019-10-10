@@ -20,5 +20,7 @@
 #define NUM_TASKS 25
 #define MAX_TASKS_PER_THREAD 5
 
+#define fprintf(dev, fmt,  ...) \
+  printf(fmt, ##__VA_ARGS__);
 
 #endif
