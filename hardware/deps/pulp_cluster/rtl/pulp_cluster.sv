@@ -26,6 +26,7 @@ module pulp_cluster
   parameter int NB_CORES            = 8,
   parameter int NB_HWACC_PORTS      = 0,
   parameter int NB_DMAS             = 4,
+  parameter int NB_EXT2MEM          = 2,
   parameter int NB_MPERIPHS         = 1,
   parameter int NB_SPERIPHS         = 8,
   parameter bit CLUSTER_ALIAS       = 1'b1,
@@ -433,7 +434,7 @@ module pulp_cluster
 
   /* logarithmic and peripheral interconnect interfaces */
   // ext -> log interconnect 
-  XBAR_TCDM_BUS s_ext_xbar_bus[NB_DMAS-1:0]();
+  XBAR_TCDM_BUS s_ext_xbar_bus[NB_EXT2MEM-1:0]();
 
   // periph interconnect -> slave peripherals
   XBAR_PERIPH_BUS s_xbar_speriph_bus[NB_SPERIPHS-1:0]();
@@ -526,20 +527,45 @@ module pulp_cluster
     .ext_master    ( s_data_master     )
   );
 
+  logic [NB_EXT2MEM-1:0]        s_ext_xbar_bus_req, s_ext_xbar_bus_gnt,
+                            s_ext_xbar_bus_wen,
+                            s_ext_xbar_bus_rvalid;
+  logic [NB_EXT2MEM-1:0][31:0]  s_ext_xbar_bus_addr,
+                            s_ext_xbar_bus_rdata,
+                            s_ext_xbar_bus_wdata;
+  logic [NB_EXT2MEM-1:0][ 3:0]  s_ext_xbar_bus_be;
+  logic [NB_EXT2MEM-1:0][ 5:0]  s_ext_xbar_bus_atop;
   axi2mem_wrap #(
-    .NB_DMAS        ( NB_DMAS            ),
-    .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH     ),
-    .AXI_DATA_WIDTH ( AXI_DATA_C2S_WIDTH ),
-    .AXI_USER_WIDTH ( AXI_USER_WIDTH     ),
-    .AXI_ID_WIDTH   ( AXI_ID_OUT_WIDTH   )
-  ) axi2mem_wrap_i (
-    .clk_i       ( clk_cluster    ),
-    .rst_ni      ( rst_ni         ),
-    .test_en_i   ( test_mode_i    ),
-    .axi_slave   ( s_ext_tcdm_bus ),
-    .tcdm_master ( s_ext_xbar_bus ),
-    .busy_o      ( s_axi2mem_busy )
+    .AddrWidth  ( 32                  ),
+    .DataWidth  ( AXI_DATA_C2S_WIDTH  ),
+    .IdWidth    ( AXI_ID_OUT_WIDTH    ),
+    .UserWidth  ( AXI_USER_WIDTH      ),
+    .NumBanks   ( NB_EXT2MEM             )
+  ) i_axi2mem_wrap (
+    .clk_i        ( clk_cluster           ),
+    .rst_ni       ( rst_ni                ),
+    .busy_o       ( s_axi2mem_busy        ),
+    .slv          ( s_ext_tcdm_bus        ),
+    .mem_req_o    ( s_ext_xbar_bus_req    ),
+    .mem_gnt_i    ( s_ext_xbar_bus_gnt    ),
+    .mem_addr_o   ( s_ext_xbar_bus_addr   ),
+    .mem_wdata_o  ( s_ext_xbar_bus_wdata  ),
+    .mem_strb_o   ( s_ext_xbar_bus_be     ),
+    .mem_atop_o   ( s_ext_xbar_bus_atop   ),
+    .mem_we_o     ( s_ext_xbar_bus_wen    ),
+    .mem_rvalid_i ( s_ext_xbar_bus_rvalid ),
+    .mem_rdata_i  ( s_ext_xbar_bus_rdata  )
   );
+  for (genvar i = 0; i < NB_EXT2MEM; i++) begin : gen_ext_xbar_bus
+    assign s_ext_xbar_bus[i].req     = s_ext_xbar_bus_req[i];
+    assign s_ext_xbar_bus_gnt[i]     = s_ext_xbar_bus[i].gnt;
+    assign s_ext_xbar_bus[i].add     = s_ext_xbar_bus_addr[i];
+    assign s_ext_xbar_bus[i].wdata   = s_ext_xbar_bus_wdata[i];
+    assign s_ext_xbar_bus[i].be      = s_ext_xbar_bus_be[i];
+    assign s_ext_xbar_bus[i].wen     = ~s_ext_xbar_bus_wen[i]; // active low
+    assign s_ext_xbar_bus_rvalid[i]  = s_ext_xbar_bus[i].r_valid;
+    assign s_ext_xbar_bus_rdata[i]   = s_ext_xbar_bus[i].r_rdata;
+  end
 
   axi2per_wrap #(
     .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH     ),
@@ -635,6 +661,7 @@ module pulp_cluster
     .NB_CORES           ( NB_CORES           ),
     .NB_HWACC_PORTS     ( NB_HWACC_PORTS     ),
     .NB_DMAS            ( NB_DMAS            ),
+    .NB_EXT             ( NB_EXT2MEM         ),
     .NB_MPERIPHS        ( NB_MPERIPHS        ),
     .NB_TCDM_BANKS      ( NB_TCDM_BANKS      ),
     .NB_SPERIPHS        ( NB_SPERIPHS        ),

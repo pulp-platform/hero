@@ -15,12 +15,13 @@
  * Igor Loi <igor.loi@unibo.it>
  * Francesco Conti <fconti@iis.ee.ethz.ch>
  */
- 
+
 module cluster_interconnect_wrap
 #(
   parameter NB_CORES        = 8,
   parameter NB_HWACC_PORTS  = 4,
   parameter NB_DMAS         = 4,
+  parameter NB_EXT          = 4,
   parameter NB_MPERIPHS     = 1,
   parameter NB_TCDM_BANKS   = 16,
   parameter NB_SPERIPHS     = 3,
@@ -45,7 +46,7 @@ module cluster_interconnect_wrap
   XBAR_PERIPH_BUS.Slave                core_periph_slave[NB_CORES-1:0],
   input logic [NB_CORES-1:0][5:0]      core_periph_slave_atop,
   input logic [NB_CORES-1:0][31:0]     core_periph_slave_addrext,
-  XBAR_TCDM_BUS.Slave                  ext_slave[NB_DMAS-1:0],
+  XBAR_TCDM_BUS.Slave                  ext_slave[NB_EXT-1:0],
   XBAR_TCDM_BUS.Slave                  dma_slave[NB_DMAS-1:0],
   XBAR_TCDM_BUS.Slave                  mperiph_slave[NB_MPERIPHS-1:0],
   TCDM_BANK_MEM_BUS.Master             tcdm_sram_master[NB_TCDM_BANKS-1:0],
@@ -54,17 +55,17 @@ module cluster_interconnect_wrap
   input logic [1:0]                    TCDM_arb_policy_i
 );
 
-  localparam TCDM_ID_WIDTH = NB_CORES+NB_DMAS+4+NB_HWACC_PORTS;
+  localparam TCDM_ID_WIDTH = NB_CORES+NB_DMAS+NB_EXT+NB_HWACC_PORTS;
 
   // DMA --> LOGARITHMIC INTERCONNECT BUS SIGNALS
-  logic [4+NB_DMAS-1:0][DATA_WIDTH-1:0] s_dma_bus_wdata;
-  logic [4+NB_DMAS-1:0][ADDR_WIDTH-1:0] s_dma_bus_add;
-  logic [4+NB_DMAS-1:0]                 s_dma_bus_req;
-  logic [4+NB_DMAS-1:0]                 s_dma_bus_wen;
-  logic [4+NB_DMAS-1:0][BE_WIDTH-1:0]   s_dma_bus_be;
-  logic [4+NB_DMAS-1:0]                 s_dma_bus_gnt;
-  logic [4+NB_DMAS-1:0][DATA_WIDTH-1:0] s_dma_bus_r_rdata;
-  logic [4+NB_DMAS-1:0]                 s_dma_bus_r_valid;
+  logic [NB_EXT+NB_DMAS-1:0][DATA_WIDTH-1:0] s_dma_bus_wdata;
+  logic [NB_EXT+NB_DMAS-1:0][ADDR_WIDTH-1:0] s_dma_bus_add;
+  logic [NB_EXT+NB_DMAS-1:0]                 s_dma_bus_req;
+  logic [NB_EXT+NB_DMAS-1:0]                 s_dma_bus_wen;
+  logic [NB_EXT+NB_DMAS-1:0][BE_WIDTH-1:0]   s_dma_bus_be;
+  logic [NB_EXT+NB_DMAS-1:0]                 s_dma_bus_gnt;
+  logic [NB_EXT+NB_DMAS-1:0][DATA_WIDTH-1:0] s_dma_bus_r_rdata;
+  logic [NB_EXT+NB_DMAS-1:0]                 s_dma_bus_r_valid;
 
   // DEMUX --> LOGARITHMIC INTERCONNECT BUS SIGNALS
   logic [NB_CORES+NB_HWACC_PORTS-1:0][DATA_WIDTH-1:0] s_core_tcdm_bus_wdata;
@@ -98,7 +99,7 @@ module cluster_interconnect_wrap
   endgenerate
 
   generate
-    for (genvar i=0; i<NB_DMAS; i++) begin : AXI2MEM_BIND
+    for (genvar i=0; i<NB_EXT; i++) begin : AXI2MEM_BIND
       assign s_dma_bus_add[i]      = ext_slave[i].add;
       assign s_dma_bus_req[i]      = ext_slave[i].req;
       assign s_dma_bus_wdata[i]    = ext_slave[i].wdata;
@@ -113,26 +114,25 @@ module cluster_interconnect_wrap
 
   generate
     for (genvar i=0; i<NB_DMAS; i++) begin : DMAS_BIND
-      // +4 takes into account the 4 ports used in axi2mem
-      assign s_dma_bus_add[i+4]    = dma_slave[i].add;
-      assign s_dma_bus_req[i+4]    = dma_slave[i].req;
-      assign s_dma_bus_wdata[i+4]  = dma_slave[i].wdata;
-      assign s_dma_bus_wen[i+4]    = dma_slave[i].wen;
-      assign s_dma_bus_be[i+4]     = dma_slave[i].be;
+      assign s_dma_bus_add[NB_EXT+i]    = dma_slave[i].add;
+      assign s_dma_bus_req[NB_EXT+i]    = dma_slave[i].req;
+      assign s_dma_bus_wdata[NB_EXT+i]  = dma_slave[i].wdata;
+      assign s_dma_bus_wen[NB_EXT+i]    = dma_slave[i].wen;
+      assign s_dma_bus_be[NB_EXT+i]     = dma_slave[i].be;
 
-      assign dma_slave[i].gnt      = s_dma_bus_gnt[i+NB_DMAS];
-      assign dma_slave[i].r_valid  = s_dma_bus_r_valid[i+NB_DMAS];
-      assign dma_slave[i].r_rdata  = s_dma_bus_r_rdata[i+NB_DMAS];
+      assign dma_slave[i].gnt      = s_dma_bus_gnt[NB_EXT+i];
+      assign dma_slave[i].r_valid  = s_dma_bus_r_valid[NB_EXT+i];
+      assign dma_slave[i].r_rdata  = s_dma_bus_r_rdata[NB_EXT+i];
     end
   endgenerate
 
-  localparam NUM_TCDM_ICONN_IN = NB_CORES + NB_HWACC_PORTS + NB_DMAS + 4;
+  localparam NUM_TCDM_ICONN_IN = NB_CORES + NB_HWACC_PORTS + NB_DMAS + NB_EXT;
   typedef struct packed {
     logic [DATA_WIDTH-1:0]  data;
     logic [5:0]             atop;
   } tcdm_data_t;
-  tcdm_data_t [NUM_TCDM_ICONN_IN-1:0] iconn_inp_wdata, iconn_inp_rdata,
-                                      iconn_oup_wdata, iconn_oup_rdata;
+  tcdm_data_t [NUM_TCDM_ICONN_IN-1:0] iconn_inp_wdata, iconn_inp_rdata;
+  tcdm_data_t     [NB_TCDM_BANKS-1:0] iconn_oup_wdata, iconn_oup_rdata;
   tcdm_interconnect #(
     .NumIn        ( NUM_TCDM_ICONN_IN           ),
     .NumOut       ( NB_TCDM_BANKS               ),
