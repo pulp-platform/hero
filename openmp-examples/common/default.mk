@@ -65,8 +65,9 @@ all : $(EXE) $(EXE).dis slm
 
 %.OMP.ll: %.ll
 	hc-omp-pass $< OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(<:.ll=.TMP.1.ll)
-	hc-omp-pass $(<:.ll=.TMP.1.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(<:.ll=.TMP.2.ll)
-	mv $(<:.ll=.TMP.2.ll) $(<:.ll=.OMP.ll)
+	hc-omp-pass $(<:.ll=.TMP.1.ll) OmpAddressSpaceAnnotator "HERCULES-omp-address-space-annotator" $(<:.ll=.TMP.2.ll)
+	hc-omp-pass $(<:.ll=.TMP.2.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(<:.ll=.TMP.3.ll)
+	cp $(<:.ll=.TMP.3.ll) $(<:.ll=.OMP.ll)
 
 $(EXE): $(SRC:.c=.OMP.ll)
 	$(CC) $(LIBPATHS) $(CFLAGS_PULP) $< $(LDFLAGS_PULP) -o $@
@@ -95,8 +96,9 @@ all: $(DEPS) $(EXE) $(EXE).dis
 
 %-dev.OMP.ll: %.ll
 	hc-omp-pass $(<:.ll=-dev.ll) OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(@:.OMP.ll=.TMP.1.ll)
-	hc-omp-pass $(@:.OMP.ll=.TMP.1.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(@:.OMP.ll=.TMP.2.ll)
-	cp $(@:.OMP.ll=.TMP.2.ll) $@
+	#hc-omp-pass $(@:.OMP.ll=.TMP.1.ll) OmpAddressSpaceAnnotator "HERCULES-omp-address-space-annotator" $(@:.OMP.ll=.TMP.2.ll)
+	hc-omp-pass $(@:.OMP.ll=.TMP.1.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(@:.OMP.ll=.TMP.3.ll)
+	cp $(@:.OMP.ll=.TMP.3.ll) $@
 
 %-host.OMP.ll: %.ll
 	hc-omp-pass $(<:.ll=-host.ll) OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(@:.OMP.ll=.TMP.1.ll)
