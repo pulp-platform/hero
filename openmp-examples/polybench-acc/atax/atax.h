@@ -51,8 +51,8 @@
 # define _PB_NY POLYBENCH_LOOP_BOUND(NY,ny)
 
 # ifndef DATA_TYPE
-#  define DATA_TYPE float
-#  define DATA_PRINTF_MODIFIER "%0.2lf "
+#  define DATA_TYPE int
+#  define DATA_PRINTF_MODIFIER "%d "
 # endif
 
 

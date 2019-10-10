@@ -17,11 +17,11 @@
 # if !defined(NI) && !defined(NJ) && !defined(NK)
 /* Define the possible dataset sizes. */
 #  ifdef EXTRAMINI_DATASET
-#   define NI 4
-#   define NJ 4
-#   define NK 4
-#   define NL 4
-#   define NM 4
+#   define NI 8
+#   define NJ 8
+#   define NK 8
+#   define NL 8
+#   define NM 8
 #  endif
 
 #  ifdef MINI_DATASET
@@ -72,8 +72,8 @@
 # define _PB_NM POLYBENCH_LOOP_BOUND(NM,nm)
 
 # ifndef DATA_TYPE
-#  define DATA_TYPE float
-#  define DATA_PRINTF_MODIFIER "%0.2lf "
+#  define DATA_TYPE int
+#  define DATA_PRINTF_MODIFIER "%d "
 # endif
 
 
