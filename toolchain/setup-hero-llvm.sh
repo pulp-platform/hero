@@ -19,9 +19,13 @@ fi
 mkdir -p $RISCV
 chmod -R u+w $RISCV
 
-# setup llvm build
+# clean environment when running together with an env source script
 unset HERO_PULP_INC_DIR
 unset HERO_LIBPULP_DIR
+# remove RISCV from path to prevent incorrect sysroot to be located
+PATH=$(echo "$PATH" | sed -e "s~$RISCV~~")
+
+# setup llvm build
 mkdir -p llvm_build
 cd llvm_build
 
