@@ -22,8 +22,8 @@
 # include <omp.h>
 #endif
 #ifdef PULP
-extern void* hero_l1malloc(int num);
-extern void hero_l1free(void*);
+extern void* hero_l2malloc(int num);
+extern void hero_l2free(void*);
 extern int hero_get_clk_counter(void);
 extern void hero_reset_clk_counter(void);
 #endif
@@ -103,7 +103,7 @@ void polybench_flush_cache()
 {
   int cs = POLYBENCH_CACHE_SIZE_KB * 1024 / sizeof(double);
 #ifdef PULP
-  double* flush = (double*) hero_l1malloc (cs*sizeof(double));
+  double* flush = (double*) hero_l2malloc (cs*sizeof(double));
 #else
   double* flush = (double*) calloc (cs, sizeof(double));
 #endif
@@ -115,7 +115,7 @@ void polybench_flush_cache()
   for (i = 0; i < cs; i++)
     tmp += flush[i];
 #ifdef PULP
-  hero_l1free(flush);
+  hero_l2free(flush);
 #else
   assert (tmp <= 10.0);
   free (flush);
@@ -408,7 +408,7 @@ xmalloc (size_t num)
 {
   void* newA = NULL;
 #ifdef PULP
-  newA = hero_l1malloc(num);
+  newA = hero_l2malloc(num);
   int ret = 0;
 #else
   int ret = posix_memalign (&newA, 32, num);
