@@ -32,9 +32,9 @@ int main(int argc, char *argv[])
   n_errors += test_dma();
   n_errors += test_hero_64();
   
-  n_errors += test_omp_for_schedule_static();
-  n_errors += test_omp_parallel_for_reduction();
-  n_errors += test_omp_atomic();
+  n_errors += !test_omp_for_schedule_static();
+  n_errors += !test_omp_parallel_for_reduction();
+  n_errors += !test_omp_atomic();
 
   assert(n_errors == 0);
   return n_errors;
