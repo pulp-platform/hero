@@ -17,8 +17,8 @@
 # if !defined(NI) && ! defined(NJ)
 /* Define the possible dataset sizes. */
 #  ifdef EXTRAMINI_DATASET
-#   define NI 64
-#   define NJ 64
+#   define NI 8
+#   define NJ 8
 #  endif
 
 #  ifdef MINI_DATASET
