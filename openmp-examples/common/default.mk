@@ -70,7 +70,7 @@ all : $(DEPS) $(EXE) $(EXE).dis slm
 	cp $(<:.ll=.TMP.3.ll) $(<:.ll=.OMP.ll)
 
 $(EXE): $(SRC:.c=.OMP.ll)
-	$(CC) $(LIBPATHS) $(CFLAGS_PULP) $< $(LDFLAGS_PULP) -o $@
+	$(CC) $(LIBPATHS) $(CFLAGS_PULP) $^ $(LDFLAGS_PULP) -o $@
 
 slm: $(EXE)_l1.slm $(EXE)_l2.slm
 
