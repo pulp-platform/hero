@@ -4,18 +4,18 @@ ifeq ($(threads),)
 	threads = 8
 endif
 
-PBFLAGS = -DPOLYBENCH_USE_SCALAR_LB -DPOLYBENCH_TIME -DPOLYBENCH_CYCLE_ACCURATE_TIMER -DNUM_TEAMS=1 -DNUM_THREADS=8 -DPOLYBENCH_DUMP_ARRAYS
+PBFLAGS = -DPOLYBENCH_USE_SCALAR_LB -DPOLYBENCH_TIME -DPOLYBENCH_CYCLE_ACCURATE_TIMER -DNUM_TEAMS=1 -DNUM_THREADS=$(threads) -DPOLYBENCH_DUMP_ARRAYS
 
-ifneq ($(dma),)
+ifeq ($(dma),y)
 	PBFLAGS += -DPOLYBENCH_DMA
 endif
 
-INCPATHS = -I$(PBMK_ROOT)/../common
-LIBPATHS = -L$(PBMK_ROOT)/../common
-LDFLAGS_PULP = -lpolybench-pulp
-LDFLAGS = -lpolybench-host
-LDFLAGS_COMMON = -ldmatransfer
-CFLAGS_COMMON = $(PBFLAGS)
+INCPATHS += -I$(PBMK_ROOT)/../common
+LIBPATHS += -L$(PBMK_ROOT)/../common
+LDFLAGS_PULP += -lpolybench-pulp
+LDFLAGS += -lpolybench-host
+LDFLAGS_COMMON += -ldmatransfer
+CFLAGS_COMMON += $(PBFLAGS)
 
 DEPS += polybench
 
@@ -43,4 +43,4 @@ polybench-clean:
 
 dma-lib: $(PBMK_ROOT)/libdmatransfer.a libdmatransfer-pulp
 
-polybench: dma-lib $(PBMK_ROOT)/libpolybench-host.a $(PBMK_ROOT)/libpolybench-pulp.a 
+polybench: dma-lib $(PBMK_ROOT)/libpolybench-host.a $(PBMK_ROOT)/libpolybench-pulp.a
