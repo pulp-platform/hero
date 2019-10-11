@@ -4,7 +4,7 @@
  *
  * Contact:
  * William Killian <killian@udel.edu>
- * 
+ *
  * Copyright 2013, The University of Delaware
  */
 #include <stdio.h>
@@ -14,6 +14,9 @@
 
 /* Include polybench common header. */
 #include <polybench.h>
+
+/* Include dma lib. */
+#include <dmatransfer.h>
 
 /* Include benchmark-specific header. */
 /* Default data type is double, default size is 4000. */
@@ -55,10 +58,59 @@ void print_array(int ni, int nj,
 
   for (i = 0; i < ni; i++)
     for (j = 0; j < nj; j++) {
-	printf (DATA_PRINTF_MODIFIER, C[i][j]);
-	if ((i * ni + j) % 20 == 0) printf ("\n");
+      printf (DATA_PRINTF_MODIFIER, C[i][j]);
+      if ((i * ni + j) % 20 == 0) printf ("\n");
     }
   printf ("\n");
+}
+
+/* Main computational kernel with DMA. The whole function will be
+   timed, including the call and return. */
+static
+void kernel_gemm_dma(int ni, int nj, int nk,
+                     DATA_TYPE alpha,
+                     DATA_TYPE beta,
+                     DATA_TYPE POLYBENCH_2D(C,NI,NJ,ni,nj),
+                     DATA_TYPE POLYBENCH_2D(A,NI,NK,ni,nk),
+                     DATA_TYPE POLYBENCH_2D(B,NK,NJ,nk,nj))
+{
+  #pragma omp target data map(tofrom: C[0:NI][0:NJ]) map(to: A[0:NI][0:NK], B[0:NK][0:NJ])
+  {
+    #pragma omp target
+    {
+        int* spm = (int*) alloc_spm();
+        int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
+
+        int* B_spm = spm;
+        int* A_spm = spm + NJ*NK;
+        int* C_spm = spm + NJ*NK + NK*rows_per_chunk;
+
+        memcpy_to_spm(B_spm, ((int*) B), NJ*NK);
+
+        /* C := alpha*A*B + beta*C */
+        int row = 0;
+        while (row < NI) {
+            int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
+            memcpy_to_spm(A_spm, ((int*) A) + row*NK, chunk_rows*NK);
+            memcpy_to_spm(C_spm, ((int*) C) + row*NJ, chunk_rows*NJ);
+            dma_flush();
+
+            #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
+            for (int i = 0; i < chunk_rows; i++) {
+                for (int j = 0; j < NJ; j++) {
+                    C_spm[i*NJ+j] *= beta;
+                    for (int k = 0; k < NK; ++k) {
+                        C_spm[i*NJ+j] += alpha * A_spm[i*NK+k] * B_spm[k*NJ+j];
+                    }
+                }
+            }
+
+            memcpy_from_spm(((int*) C) + row*NJ, C_spm, chunk_rows*NJ);
+            dma_flush();
+            row += rows_per_chunk;
+        }
+    }
+  }
 }
 
 
@@ -66,25 +118,27 @@ void print_array(int ni, int nj,
    including the call and return. */
 static
 void kernel_gemm(int ni, int nj, int nk,
-		 DATA_TYPE alpha,
-		 DATA_TYPE beta,
-		 DATA_TYPE POLYBENCH_2D(C,NI,NJ,ni,nj),
-		 DATA_TYPE POLYBENCH_2D(A,NI,NK,ni,nk),
-		 DATA_TYPE POLYBENCH_2D(B,NK,NJ,nk,nj))
+                 DATA_TYPE alpha,
+                 DATA_TYPE beta,
+                 DATA_TYPE POLYBENCH_2D(C,NI,NJ,ni,nj),
+                 DATA_TYPE POLYBENCH_2D(A,NI,NK,ni,nk),
+                 DATA_TYPE POLYBENCH_2D(B,NK,NJ,nk,nj))
 {
-  int i, j, k;
   #pragma scop
-  #pragma omp parallel num_threads(NUM_THREADS)
+  #pragma omp target data map(tofrom: C[0:NI][0:NJ]) map(to: A[0:NI][0:NK], B[0:NK][0:NJ])
   {
-    /* C := alpha*A*B + beta*C */
-    #pragma omp for private (j, k)
-    for (i = 0; i < _PB_NI; i++)
-      for (j = 0; j < _PB_NJ; j++)
-	{
-	  C[i][j] *= beta;
-	  for (k = 0; k < _PB_NK; ++k)
-	    C[i][j] += alpha * A[i][k] * B[k][j];
-	}
+    #pragma omp target
+    {
+      /* C := alpha*A*B + beta*C */
+      #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
+      for (int i = 0; i < _PB_NI; i++)
+        for (int j = 0; j < _PB_NJ; j++)
+        {
+          C[i][j] *= beta;
+          for (int k = 0; k < _PB_NK; ++k)
+            C[i][j] += alpha * A[i][k] * B[k][j];
+        }
+    }
   }
   #pragma endscop
 }
@@ -114,11 +168,19 @@ int main(int argc, char** argv)
   polybench_start_instruments;
 
   /* Run kernel. */
+#ifdef POLYBENCH_DMA
+  kernel_gemm_dma (ni, nj, nk,
+                   alpha, beta,
+                   POLYBENCH_ARRAY(C),
+                   POLYBENCH_ARRAY(A),
+                   POLYBENCH_ARRAY(B));
+#else
   kernel_gemm (ni, nj, nk,
-	       alpha, beta,
-	       POLYBENCH_ARRAY(C),
-	       POLYBENCH_ARRAY(A),
-	       POLYBENCH_ARRAY(B));
+               alpha, beta,
+               POLYBENCH_ARRAY(C),
+               POLYBENCH_ARRAY(A),
+               POLYBENCH_ARRAY(B));
+#endif
 
   /* Stop and print timer. */
   polybench_stop_instruments;

@@ -4,7 +4,7 @@
  *
  * Contact:
  * William Killian <killian@udel.edu>
- * 
+ *
  * Copyright 2013, The University of Delaware
  */
 #include <stdio.h>
@@ -14,6 +14,9 @@
 
 /* Include polybench common header. */
 #include <polybench.h>
+
+/* Include dma lib. */
+#include <dmatransfer.h>
 
 /* Include benchmark-specific header. */
 /* Default data type is double, default size is 4000. */
@@ -52,6 +55,83 @@ void print_array(int nx,
   printf ("\n");
 }
 
+/* Main computational kernel with DMA. The whole function will be
+   timed, including the call and return. */
+static
+void kernel_atax_dma(int nx, int ny,
+                     DATA_TYPE POLYBENCH_2D(A,NX,NY,nx,ny),
+                     DATA_TYPE POLYBENCH_1D(x,NY,ny),
+                     DATA_TYPE POLYBENCH_1D(y,NY,ny),
+                     DATA_TYPE POLYBENCH_1D(tmp,NX,nx))
+{
+  int i, j;
+
+  #pragma omp target data \
+    map(to: A[0:NX][0:NY], x[0:NY]) \
+    map(alloc: tmp[0:NX]) \
+    map(from: y[0:NY])
+  {
+    #pragma omp target
+    {
+      int* spm = (int*) alloc_spm();
+      int rows_per_chunk = NX; // (SPM_SIZE - NY) / (NY + 1);
+
+      int* x_spm = spm;
+      int* tmp_spm = spm + NY;
+      int* A_spm = spm + NY + rows_per_chunk;
+
+      memcpy_to_spm(x_spm, ((int*) x), NY);
+
+      int row = 0;
+      while (row < NX) {
+        int chunk_rows = (row + rows_per_chunk < NX) ? rows_per_chunk : (NX - row);
+        memcpy_to_spm(A_spm, ((int*) A) + row*NY, chunk_rows*NY);
+        dma_flush();
+
+        #pragma omp parallel for num_threads(NUM_THREADS)
+        for (i = 0; i < chunk_rows; i++) {
+          tmp_spm[i] = 0;
+          for (j = 0; j < NY; j++){
+            tmp_spm[i] = tmp_spm[i] + A_spm[i*NY+j] * x_spm[j];
+          }
+        }
+
+        memcpy_from_spm(((int*) tmp) + row, tmp_spm, chunk_rows);
+        dma_flush();
+        row += rows_per_chunk;
+      }
+    }
+
+    #pragma omp target
+    {
+      int* spm = (int*) alloc_spm();
+      int rows_per_chunk = NX; // (SPM_SIZE - NY) / (NY + 1);
+
+      int* y_spm = spm;
+      int* tmp_spm = spm + NY;
+      int* A_spm = spm + NY + rows_per_chunk;
+
+      int row = 0;
+      while (row < NX) {
+        int chunk_rows = (row + rows_per_chunk < NX) ? rows_per_chunk : (NX - row);
+        memcpy_to_spm(A_spm, ((int*) A) + row*NY, chunk_rows*NY);
+        memcpy_to_spm(tmp_spm, ((int*) tmp) + row, chunk_rows);
+        dma_flush();
+
+        #pragma omp parallel for num_threads(NUM_THREADS)
+        for (i = 0; i < NY; i++) {
+          y_spm[i] = 0;
+          for (j = 0; j < chunk_rows; j++)
+            y_spm[i] = y_spm[i] + A_spm[j*NY+i] * tmp_spm[j];
+        }
+        row += rows_per_chunk;
+      }
+
+      memcpy_from_spm(((int*) y), y_spm, NY);
+      dma_flush();
+    }
+  }
+}
 
 /* Main computational kernel. The whole function will be timed,
    including the call and return. */
@@ -62,19 +142,18 @@ void kernel_atax(int nx, int ny,
                  DATA_TYPE POLYBENCH_1D(y,NY,ny),
                  DATA_TYPE POLYBENCH_1D(tmp,NX,nx))
 {
-  int i, j;
-
   #pragma omp target data \
     map(to: A[0:NX][0:NY], x[0:NY]) \
     map(alloc: tmp[0:NX]) \
-    map(from: y[0:NY]) 
+    map(from: y[0:NY])
   {
     /* tmp := A*x */
     #pragma omp target
     {
-      for (i = 0; i < NX; i++) {
+      #pragma omp parallel for num_threads(NUM_THREADS)
+      for (int i = 0; i < NX; i++) {
         tmp[i] = 0;
-        for (j = 0; j < NY; j++)
+        for (int j = 0; j < NY; j++)
           tmp[i] = tmp[i] + A[i][j] * x[j];
       }
     }
@@ -82,9 +161,9 @@ void kernel_atax(int nx, int ny,
     #pragma omp target
     {
       #pragma omp parallel for num_threads(NUM_THREADS)
-      for (i = 0; i < NY; i++) {
+      for (int i = 0; i < NY; i++) {
         y[i] = 0;
-        for (j = 0; j < NX; j++)
+        for (int j = 0; j < NX; j++)
           y[i] = y[i] + A[j][i] * tmp[j];
       }
     }
@@ -111,11 +190,20 @@ int main(int argc, char** argv)
   polybench_start_instruments;
 
   /* Run kernel. */
+#ifdef POLYBENCH_DMA
+  kernel_atax_dma (nx, ny,
+                   POLYBENCH_ARRAY(A),
+                   POLYBENCH_ARRAY(x),
+                   POLYBENCH_ARRAY(y),
+                   POLYBENCH_ARRAY(tmp));
+#else
   kernel_atax (nx, ny,
                POLYBENCH_ARRAY(A),
                POLYBENCH_ARRAY(x),
                POLYBENCH_ARRAY(y),
                POLYBENCH_ARRAY(tmp));
+#endif
+
 
   /* Stop and print timer. */
   polybench_stop_instruments;

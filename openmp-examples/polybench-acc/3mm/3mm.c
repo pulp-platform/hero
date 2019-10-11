@@ -15,10 +15,12 @@
 /* Include polybench common header. */
 #include <polybench.h>
 
+/* Include dma lib. */
+#include <dmatransfer.h>
+
 /* Include benchmark-specific header. */
 /* Default data type is double, default size is 4000. */
 #include "3mm.h"
-
 
 /* Array initialization. */
 static
@@ -61,6 +63,124 @@ void print_array(int ni, int nl,
   printf ("\n");
 }
 
+
+/* Main computational kernel with DMA. The whole function will be
+   timed, including the call and return. */
+static
+void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
+                    DATA_TYPE POLYBENCH_2D(E,NI,NJ,ni,nj),
+                    DATA_TYPE POLYBENCH_2D(A,NI,NK,ni,nk),
+                    DATA_TYPE POLYBENCH_2D(B,NK,NJ,nk,nj),
+                    DATA_TYPE POLYBENCH_2D(F,NJ,NL,nj,nl),
+                    DATA_TYPE POLYBENCH_2D(C,NJ,NM,nj,nm),
+                    DATA_TYPE POLYBENCH_2D(D,NM,NL,nm,nl),
+                    DATA_TYPE POLYBENCH_2D(G,NI,NL,ni,nl))
+{
+  #pragma omp target data \
+    map(to: A[0:NI][0:NK], B[0:NK][0:NJ], C[0:NJ][0:NM], D[0:NM][0:NL]) \
+    map(from: E[0:NI][0:NJ], F[0:NJ][0:NL], G[0:NI][0:NL])
+  {
+    /* E := A*B */
+    #pragma omp target
+    {
+      int* spm = (int*) alloc_spm();
+      int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
+
+      int* B_spm = spm;
+      int* A_spm = spm + NJ*NK;
+      int* E_spm = spm + NJ*NK + NK*rows_per_chunk;
+
+      memcpy_to_spm(B_spm, ((int*) B), NJ*NK);
+
+      int row = 0;
+      while (row < NI) {
+        int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
+
+        memcpy_to_spm(A_spm, ((int*) A) + row*NK, chunk_rows*NK);
+        dma_flush();
+
+        #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
+        for (int i = 0; i < chunk_rows; i++) {
+          for (int j = 0; j < NJ; j++) {
+            E_spm[i*NK+j] = 0;
+            for (int k = 0; k < NK; ++k)
+                E_spm[i*NK+j] += A_spm[i*NK+k] * B_spm[k*NK+j];
+          }
+        }
+
+        memcpy_from_spm(((int*) E) + row*NJ, E_spm, chunk_rows*NJ);
+        dma_flush();
+        row += rows_per_chunk;
+      }
+    }
+    /* F := C*D */
+    #pragma omp target
+    {
+      int* spm = (int*) alloc_spm();
+      int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
+
+      int* D_spm = spm;
+      int* C_spm = spm + NJ*NK;
+      int* F_spm = spm + NJ*NK + NK*rows_per_chunk;
+
+      memcpy_to_spm(D_spm, ((int*) D), NJ*NK);
+
+      int row = 0;
+      while (row < NI) {
+        int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
+
+        memcpy_to_spm(C_spm, ((int*) C) + row*NK, chunk_rows*NK);
+        dma_flush();
+
+        #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
+        for (int i = 0; i < chunk_rows; i++) {
+          for (int j = 0; j < NL; j++) {
+            F_spm[i*NK+j] = 0;
+            for (int k = 0; k < NM; ++k)
+              F_spm[i*NK+j] += C_spm[i*NK+k] * D_spm[k*NK+j];
+          }
+        }
+
+        memcpy_from_spm(((int*) F) + row*NJ, F_spm, chunk_rows*NJ);
+        dma_flush();
+        row += rows_per_chunk;
+      }
+    }
+    /* G := E*F */
+    #pragma omp target
+    {
+      int* spm = (int*) alloc_spm();
+      int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
+
+      int* F_spm = spm;
+      int* G_spm = spm + NJ*NK;
+      int* E_spm = spm + NJ*NK + NK*rows_per_chunk;
+
+      memcpy_to_spm(F_spm, ((int*) F), NJ*NK);
+
+      int row = 0;
+      while (row < NI) {
+        int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
+
+        memcpy_to_spm(E_spm, ((int*) E) + row*NK, chunk_rows*NK);
+        dma_flush();
+
+        #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
+        for (int i = 0; i < chunk_rows; i++) {
+          for (int j = 0; j < NL; j++) {
+            G_spm[i*NK+j] = 0;
+            for (int k = 0; k < NJ; ++k)
+              G_spm[i*NK+j] += E_spm[i*NK+k] * F_spm[k*NK+j];
+          }
+        }
+
+        memcpy_from_spm(((int*) G) + row*NJ, G_spm, chunk_rows*NJ);
+        dma_flush();
+        row += rows_per_chunk;
+      }
+    }
+  }
+}
 
 /* Main computational kernel. The whole function will be timed,
    including the call and return. */
@@ -148,6 +268,16 @@ int main(int argc, char** argv)
   polybench_start_instruments;
 
   /* Run kernel. */
+#ifdef POLYBENCH_DMA
+  kernel_3mm_dma (ni, nj, nk, nl, nm,
+                  POLYBENCH_ARRAY(E),
+                  POLYBENCH_ARRAY(A),
+                  POLYBENCH_ARRAY(B),
+                  POLYBENCH_ARRAY(F),
+                  POLYBENCH_ARRAY(C),
+                  POLYBENCH_ARRAY(D),
+                  POLYBENCH_ARRAY(G));
+#else
   kernel_3mm (ni, nj, nk, nl, nm,
               POLYBENCH_ARRAY(E),
               POLYBENCH_ARRAY(A),
@@ -156,6 +286,7 @@ int main(int argc, char** argv)
               POLYBENCH_ARRAY(C),
               POLYBENCH_ARRAY(D),
               POLYBENCH_ARRAY(G));
+#endif
 
   /* Stop and print timer. */
   polybench_stop_instruments;

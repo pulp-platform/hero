@@ -15,6 +15,9 @@
 /* Include polybench common header. */
 #include <polybench.h>
 
+/* Include dma lib. */
+#include <dmatransfer.h>
+
 /* Include benchmark-specific header. */
 /* Default data type is double, default size is 4000. */
 #include "2mm.h"
@@ -65,40 +68,130 @@ void print_array(int ni, int nl,
   printf ("\n");
 }
 
+/* Main computational kernel with DMA. The whole function will be
+   timed, including the call and return. */
+static
+void kernel_2mm_dma(int ni, int nj, int nk, int nl,
+                    DATA_TYPE alpha,
+                    DATA_TYPE beta,
+                    DATA_TYPE POLYBENCH_2D(tmp,NI,NJ,ni,nj),
+                    DATA_TYPE POLYBENCH_2D(A,NI,NK,ni,nk),
+                    DATA_TYPE POLYBENCH_2D(B,NK,NJ,nk,nj),
+                    DATA_TYPE POLYBENCH_2D(C,NL,NJ,nl,nj),
+                    DATA_TYPE POLYBENCH_2D(D,NI,NL,ni,nl))
+{
+  #pragma omp target data \
+    map(to: A[0:NI][0:NK], B[0:NK][0:NJ], C[0:NL][0:NJ]) \
+    map(alloc: tmp[0:NI][0:NJ]) \
+    map(tofrom: D[0:NI][0:NL])
+  {
+    #pragma omp target
+    {
+      int* spm = (int*) alloc_spm();
+      int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
+
+      int* B_spm = spm;
+      int* A_spm = spm + NJ*NK;
+      int* tmp_spm = spm + NJ*NK + NK*rows_per_chunk;
+
+      memcpy_to_spm(B_spm, ((int*) B), NJ*NK);
+
+      int row = 0;
+      while (row < NI) {
+        int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
+
+        memcpy_to_spm(A_spm, ((int*) A) + row*NK, chunk_rows*NK);
+        dma_flush();
+
+        #pragma omp parallel for collapse(2)
+        for (int i = 0; i < rows_per_chunk; i++) {
+          for (int j = 0; j < NJ; j++) {
+            tmp_spm[i*NJ+j] = 0;
+            for (int k = 0; k < NK; ++k)
+               tmp_spm[i*NJ+j] += alpha * A_spm[i*NK+k] * B_spm[k*NJ+j];
+          }
+        }
+
+        memcpy_from_spm(((int*) tmp) + row*NJ, tmp_spm, chunk_rows*NJ);
+        dma_flush();
+        row += rows_per_chunk;
+      }
+    }
+
+    #pragma omp target
+    {
+      int* spm = (int*) alloc_spm();
+      int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
+
+      int* C_spm = spm;
+      int* D_spm = spm + NJ*NK;
+      int* tmp_spm = spm + NJ*NK + NK*rows_per_chunk;
+
+      memcpy_to_spm(C_spm, ((int*) C), NJ*NK);
+
+      int row = 0;
+      while (row < NI) {
+        int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
+
+        memcpy_to_spm(tmp_spm, ((int*) tmp) + row*NK, chunk_rows*NK);
+        memcpy_to_spm(D_spm, ((int*) D) + row*NK, chunk_rows*NK);
+        dma_flush();
+
+        #pragma omp parallel for collapse(2)
+        for (int i = 0; i < chunk_rows; i++) {
+          for (int j = 0; j < NL; j++) {
+            D_spm[i*NL+j] *= beta;
+            for (int k = 0; k < NJ; ++k)
+              D_spm[i*NL+j] += tmp_spm[i*NJ+k] * C_spm[k*NJ+j];
+          }
+        }
+
+        memcpy_from_spm(((int*) D) + row*NJ, D_spm, chunk_rows*NJ);
+        dma_flush();
+        row += rows_per_chunk;
+      }
+    }
+  }
+}
 
 /* Main computational kernel. The whole function will be timed,
    including the call and return. */
 static
 void kernel_2mm(int ni, int nj, int nk, int nl,
-		DATA_TYPE alpha,
-		DATA_TYPE beta,
-		DATA_TYPE POLYBENCH_2D(tmp,NI,NJ,ni,nj),
-		DATA_TYPE POLYBENCH_2D(A,NI,NK,ni,nk),
-		DATA_TYPE POLYBENCH_2D(B,NK,NJ,nk,nj),
-		DATA_TYPE POLYBENCH_2D(C,NL,NJ,nl,nj),
-		DATA_TYPE POLYBENCH_2D(D,NI,NL,ni,nl))
+                DATA_TYPE alpha,
+                DATA_TYPE beta,
+                DATA_TYPE POLYBENCH_2D(tmp,NI,NJ,ni,nj),
+                DATA_TYPE POLYBENCH_2D(A,NI,NK,ni,nk),
+                DATA_TYPE POLYBENCH_2D(B,NK,NJ,nk,nj),
+                DATA_TYPE POLYBENCH_2D(C,NL,NJ,nl,nj),
+                DATA_TYPE POLYBENCH_2D(D,NI,NL,ni,nl))
 {
-  int i, j, k;
   #pragma scop
   /* D := alpha*A*B*C + beta*D */
-  #pragma omp parallel num_threads(NUM_THREADS)
+  #pragma omp target \
+    map(to: A[0:NI][0:NK], B[0:NK][0:NJ], C[0:NL][0:NJ]) \
+    map(alloc: tmp[0:NI][0:NJ]) \
+    map(tofrom: D[0:NI][0:NL])
   {
-    #pragma omp for private (j, k)
-    for (i = 0; i < _PB_NI; i++)
-      for (j = 0; j < _PB_NJ; j++)
-      {
-        tmp[i][j] = 0;
-        for (k = 0; k < _PB_NK; ++k)
-          tmp[i][j] += alpha * A[i][k] * B[k][j];
-      }
-    #pragma omp for private (j, k)
-    for (i = 0; i < _PB_NI; i++)
-      for (j = 0; j < _PB_NL; j++)
-      {
-        D[i][j] *= beta;
-        for (k = 0; k < _PB_NJ; ++k)
-          D[i][j] += tmp[i][k] * C[k][j];
-      }
+    #pragma omp parallel num_threads(NUM_THREADS)
+    {
+      #pragma omp for collapse(2)
+      for (int i = 0; i < _PB_NI; i++)
+        for (int j = 0; j < _PB_NJ; j++)
+        {
+          tmp[i][j] = 0;
+          for (int k = 0; k < _PB_NK; ++k)
+            tmp[i][j] += alpha * A[i][k] * B[k][j];
+        }
+      #pragma omp for collapse(2)
+      for (int i = 0; i < _PB_NI; i++)
+        for (int j = 0; j < _PB_NL; j++)
+        {
+          D[i][j] *= beta;
+          for (int k = 0; k < _PB_NJ; ++k)
+            D[i][j] += tmp[i][k] * C[k][j];
+        }
+    }
   }
   #pragma endscop
 }
@@ -132,6 +225,15 @@ int main(int argc, char** argv)
   polybench_start_instruments;
 
   /* Run kernel. */
+#ifdef POLYBENCH_DMA
+  kernel_2mm_dma (ni, nj, nk, nl,
+	      alpha, beta,
+	      POLYBENCH_ARRAY(tmp),
+	      POLYBENCH_ARRAY(A),
+	      POLYBENCH_ARRAY(B),
+	      POLYBENCH_ARRAY(C),
+	      POLYBENCH_ARRAY(D));
+#else
   kernel_2mm (ni, nj, nk, nl,
 	      alpha, beta,
 	      POLYBENCH_ARRAY(tmp),
@@ -139,6 +241,7 @@ int main(int argc, char** argv)
 	      POLYBENCH_ARRAY(B),
 	      POLYBENCH_ARRAY(C),
 	      POLYBENCH_ARRAY(D));
+#endif
 
   /* Stop and print timer. */
   polybench_stop_instruments;

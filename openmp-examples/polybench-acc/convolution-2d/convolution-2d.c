@@ -4,7 +4,7 @@
  *
  * Contact:
  * William Killian <killian@udel.edu>
- * 
+ *
  * Copyright 2013, The University of Delaware
  */
 #include <stdio.h>
@@ -14,6 +14,9 @@
 
 /* Include polybench common header. */
 #include <polybench.h>
+
+/* Include dma lib. */
+#include <dmatransfer.h>
 
 /* Include benchmark-specific header. */
 /* Default data type is double, default size is 4096x4096. */
@@ -52,6 +55,49 @@ void print_array(int ni, int nj,
 }
 
 
+/* Main computational kernel with DMA. The whole function will be
+   timed, including the call and return. */
+static
+void kernel_conv2d_dma(int ni,
+                       int nj,
+                       DATA_TYPE POLYBENCH_2D(A,NI,NJ,ni,nj),
+                       DATA_TYPE POLYBENCH_2D(B,NI,NJ,ni,nj))
+{
+  #pragma omp target data map(to: A[0:NI][0:NJ]) map(from: B[0:NI][0:NJ])
+  {
+    #pragma omp target
+    {
+      int* spm = (int*) alloc_spm();
+      // Divide SPM between A and B
+      int rows_per_chunk = NI; //(SPM_SIZE - 2*NJ) / (2*NJ);
+
+      int* A_spm = spm;
+      int* B_spm = spm + (rows_per_chunk+2) * NJ;
+
+      int row = 0;
+      while (row < NI - 2) {
+        int chunk_rows = rows_per_chunk < (NI - 2 - row) ? rows_per_chunk : (NI - 2 - row);
+        memcpy_to_spm(A_spm, ((int*) A) + row*NJ, (chunk_rows+2)*NJ);
+        dma_flush();
+
+        #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
+        for (int i = 0; i < chunk_rows; ++i) {
+          for (int j = 1; j < NJ - 1; ++j) {
+            B_spm[i*NJ+j]
+              =  2 * A_spm[( i )*NJ+j-1] + 5 * A_spm[( i )*NJ+j] + -8 * A_spm[( i )*NJ+j+1]
+              + -3 * A_spm[(i+1)*NJ+j-1] + 6 * A_spm[(i+1)*NJ+j] + -9 * A_spm[(i+1)*NJ+j+1]
+              +  4 * A_spm[(i+2)*NJ+j-1] + 7 * A_spm[(i+2)*NJ+j] +  1 * A_spm[(i+2)*NJ+j+1];
+          }
+        }
+
+        memcpy_from_spm(((int*) B) + (row+1)*NJ, B_spm, chunk_rows*NJ);
+        dma_flush();
+        row += rows_per_chunk;
+      }
+    }
+  }
+}
+
 /* Main computational kernel. The whole function will be timed,
    including the call and return. */
 static
@@ -60,16 +106,21 @@ void kernel_conv2d(int ni,
 		   DATA_TYPE POLYBENCH_2D(A,NI,NJ,ni,nj),
 		   DATA_TYPE POLYBENCH_2D(B,NI,NJ,ni,nj))
 {
-  int i, j;
   #pragma scop
-  #pragma omp parallel for private(j) collapse(2) schedule(static) num_threads(NUM_THREADS)
-  for (i = 1; i < _PB_NI - 1; ++i)
+  #pragma omp target data map(to: A[0:NI][0:NJ]) map(from: B[0:NI][0:NJ])
   {
-    for (j = 1; j < _PB_NJ - 1; ++j)
+    #pragma omp target
     {
-	    B[i][j] =  0.2 * A[i-1][j-1] + 0.5 * A[i-1][j] + -0.8 * A[i-1][j+1]
-              + -0.3 * A[ i ][j-1] + 0.6 * A[ i ][j] + -0.9 * A[ i ][j+1]
-              +  0.4 * A[i+1][j-1] + 0.7 * A[i+1][j] +  0.1 * A[i+1][j+1];
+      #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
+      for (int i = 1; i < _PB_NI - 1; ++i)
+      {
+        for (int j = 1; j < _PB_NJ - 1; ++j) {
+          B[i][j]
+            =  2 * A[i-1][j-1] + 5 * A[i-1][j] + -8 * A[i-1][j+1]
+            + -3 * A[ i ][j-1] + 6 * A[ i ][j] + -9 * A[ i ][j+1]
+            +  4 * A[i+1][j-1] + 7 * A[i+1][j] +  1 * A[i+1][j+1];
+        }
+      }
     }
   }
   #pragma endscop
@@ -88,17 +139,21 @@ int main(int argc, char** argv)
 
   /* Initialize array(s). */
   init_array (ni, nj, POLYBENCH_ARRAY(A));
-  
+
   /* Start timer. */
   polybench_start_instruments;
 
   /* Run kernel. */
+#ifdef POLYBENCH_DMA
+  kernel_conv2d_dma (ni, nj, POLYBENCH_ARRAY(A), POLYBENCH_ARRAY(B));
+#else
   kernel_conv2d (ni, nj, POLYBENCH_ARRAY(A), POLYBENCH_ARRAY(B));
+#endif
 
   /* Stop and print timer. */
   polybench_stop_instruments;
   polybench_print_instruments;
-  
+
   /* Prevent dead-code elimination. All live-out data must be printed
      by the function call in argument. */
   polybench_prevent_dce(print_array(ni, nj, POLYBENCH_ARRAY(B)));
@@ -106,6 +161,6 @@ int main(int argc, char** argv)
   /* Be clean. */
   POLYBENCH_FREE_ARRAY(A);
   POLYBENCH_FREE_ARRAY(B);
-  
+
   return 0;
 }
