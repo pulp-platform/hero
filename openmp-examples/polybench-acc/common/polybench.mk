@@ -6,23 +6,41 @@ endif
 
 PBFLAGS = -DPOLYBENCH_USE_SCALAR_LB -DPOLYBENCH_TIME -DPOLYBENCH_CYCLE_ACCURATE_TIMER -DNUM_TEAMS=1 -DNUM_THREADS=8 -DPOLYBENCH_DUMP_ARRAYS
 
+ifneq ($(dma),)
+	PBFLAGS += -DPOLYBENCH_DMA
+endif
+
 INCPATHS = -I$(PBMK_ROOT)/../common
 LIBPATHS = -L$(PBMK_ROOT)/../common
-LDFLAGS_PULP = $(PBMK_ROOT)/../common/libpolybench-pulp.a
-LDFLAGS = $(PBMK_ROOT)/../common/libpolybench-host.a
-CFLAGS_COMMON += $(PBFLAGS)
+LDFLAGS_PULP = -lpolybench-pulp
+LDFLAGS = -lpolybench-host
+LDFLAGS_COMMON = -ldmatransfer
+CFLAGS_COMMON = $(PBFLAGS)
 
 DEPS += polybench
 
-$(PBMK_ROOT)/libpolybench-host.a: $(PBMK_ROOT)/polybench.c
+CFLAGS_DMATRANSFER = -I$(PBMK_ROOT) -I$(HERO_PULP_INC_DIR)
+
+$(PBMK_ROOT)/libdmatransfer.a:
+	${HERO_TOOLCHAIN_HOST_TARGET}-gcc -O3 $(CFLAGS_DMATRANSFER) $(PBFLAGS) -fPIC -c $(PBMK_ROOT)/dma-lib/dmatransfer-host.c -o $(PBMK_ROOT)/dmatransfer.o
+	${HERO_TOOLCHAIN_HOST_TARGET}-ar rcs $(PBMK_ROOT)/libdmatransfer.a $(PBMK_ROOT)/dmatransfer.o
+
+libdmatransfer-pulp:
+	cd $(PBMK_ROOT) && $(MAKE) -f $(PBMK_ROOT)/dmatransfer-pulp.mk install
+
+$(PBMK_ROOT)/libpolybench-host.a:
 	${HERO_TOOLCHAIN_HOST_TARGET}-gcc -O3 $(PBFLAGS) -fPIC -c $(PBMK_ROOT)/polybench.c -o $(PBMK_ROOT)/polybench.o
 	${HERO_TOOLCHAIN_HOST_TARGET}-ar rcs $(PBMK_ROOT)/libpolybench-host.a $(PBMK_ROOT)/polybench.o
 
-$(PBMK_ROOT)/libpolybench-pulp.a: $(PBMK_ROOT)/polybench.c
+$(PBMK_ROOT)/libpolybench-pulp.a:
 	riscv32-hero-unknown-elf-gcc -O3 $(PBFLAGS) -fPIC -DPULP -c $(PBMK_ROOT)/polybench.c -o $(PBMK_ROOT)/polybench.o
 	riscv32-hero-unknown-elf-ar rcs $(PBMK_ROOT)/libpolybench-pulp.a $(PBMK_ROOT)/polybench.o
 
 polybench-clean:
 	rm -rf $(PBMK_ROOT)/libpolybench-host.a $(PBMK_ROOT)/libpolybench-pulp.a
+	rm -rf $(PBMK_ROOT)/libdmatransfer.a
+	rm -rf $(PBMK_ROOT)/build
 
-polybench: $(PBMK_ROOT)/libpolybench-host.a $(PBMK_ROOT)/libpolybench-pulp.a
+dma-lib: $(PBMK_ROOT)/libdmatransfer.a libdmatransfer-pulp
+
+polybench: dma-lib $(PBMK_ROOT)/libpolybench-host.a $(PBMK_ROOT)/libpolybench-pulp.a 
