@@ -31,15 +31,15 @@ DEFMK_ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 # 1) without suffix, they apply to heterogeneous compilation;
 # 3) with _PULP suffix, they apply only to the PULP part of compilation;
 # 4) with _COMMON suffix, they apply to both PULP and host compilation.
-CFLAGS_COMMON += -fopenmp=libomp -O$(opt)
+CFLAGS_COMMON += $(cflags) -fopenmp=libomp -O$(opt)
 ifeq ($(default-as),pulp)
   CFLAGS_COMMON += -fhero-device-default-as=device
 endif
 CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -march=rv32imac
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
-# FIXME: we explicitly need to embed the correct linker
-LDFLAGS_COMMON +=
+LDFLAGS_COMMON ?= $(ldflags)
 LDFLAGS_PULP += $(LDFLAGS_COMMON)
+# FIXME: we explicitly need to embed the correct linker
 LDFLAGS += $(LDFLAGS_COMMON) -lhero-target -Wl,-dynamic-linker,/lib/ld-linux-riscv64-lp64.so.1
 
 INCPATHS += -I$(DEFMK_ROOT) -include hero_64.h
