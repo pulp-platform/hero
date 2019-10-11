@@ -82,12 +82,12 @@ void kernel_bicg_dma(int nx, int ny,
   {
     #pragma omp target
     {
-      int* spm = (int*) alloc_spm();
+      DMA_DATA_TYPE spm = alloc_spm();
       int rows_per_chunk = NX; //(SPM_SIZE - NY) / (NY + 1);
 
-      int* p_spm = spm;
-      int* q_spm = spm + NY;
-      int* A_spm = spm + NY + rows_per_chunk;
+      DMA_DATA_TYPE p_spm = spm;
+      DMA_DATA_TYPE q_spm = spm + NY;
+      DMA_DATA_TYPE A_spm = spm + NY + rows_per_chunk;
 
       memcpy_to_spm(p_spm, ((int*) p), NY);
 
@@ -111,12 +111,12 @@ void kernel_bicg_dma(int nx, int ny,
     }
     #pragma omp target
     {
-      int* spm = (int*) alloc_spm();
+      DMA_DATA_TYPE spm = alloc_spm();
       int rows_per_chunk = NX; //(SPM_SIZE - NY) / (NY + 1);
 
-      int* s_spm = spm;
-      int* r_spm = spm + NY;
-      int* A_spm = spm + NY + rows_per_chunk;
+      DMA_DATA_TYPE s_spm = spm;
+      DMA_DATA_TYPE r_spm = spm + NY;
+      DMA_DATA_TYPE A_spm = spm + NY + rows_per_chunk;
 
       #pragma omp parallel for num_threads(NUM_THREADS)
       for (int i = 0; i < NY; i++)
@@ -147,11 +147,11 @@ void kernel_bicg_dma(int nx, int ny,
    including the call and return. */
 static
 void kernel_bicg(int nx, int ny,
-		 DATA_TYPE POLYBENCH_2D(A,NX,NY,nx,ny),
-		 DATA_TYPE POLYBENCH_1D(s,NY,ny),
-		 DATA_TYPE POLYBENCH_1D(q,NX,nx),
-		 DATA_TYPE POLYBENCH_1D(p,NY,ny),
-		 DATA_TYPE POLYBENCH_1D(r,NX,nx))
+                 DATA_TYPE POLYBENCH_2D(A,NX,NY,nx,ny),
+                 DATA_TYPE POLYBENCH_1D(s,NY,ny),
+                 DATA_TYPE POLYBENCH_1D(q,NX,nx),
+                 DATA_TYPE POLYBENCH_1D(p,NY,ny),
+                 DATA_TYPE POLYBENCH_1D(r,NX,nx))
 {
   #pragma scop
   #pragma omp target

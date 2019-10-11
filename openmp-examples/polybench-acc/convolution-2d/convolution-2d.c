@@ -67,12 +67,12 @@ void kernel_conv2d_dma(int ni,
   {
     #pragma omp target
     {
-      int* spm = (int*) alloc_spm();
+      DMA_DATA_TYPE spm = alloc_spm();
       // Divide SPM between A and B
       int rows_per_chunk = NI; //(SPM_SIZE - 2*NJ) / (2*NJ);
 
-      int* A_spm = spm;
-      int* B_spm = spm + (rows_per_chunk+2) * NJ;
+      DMA_DATA_TYPE A_spm = spm;
+      DMA_DATA_TYPE B_spm = spm + (rows_per_chunk+2) * NJ;
 
       int row = 0;
       while (row < NI - 2) {

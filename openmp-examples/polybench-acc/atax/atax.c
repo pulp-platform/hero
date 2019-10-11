@@ -73,12 +73,12 @@ void kernel_atax_dma(int nx, int ny,
   {
     #pragma omp target
     {
-      int* spm = (int*) alloc_spm();
+      DMA_DATA_TYPE spm = alloc_spm();
       int rows_per_chunk = NX; // (SPM_SIZE - NY) / (NY + 1);
 
-      int* x_spm = spm;
-      int* tmp_spm = spm + NY;
-      int* A_spm = spm + NY + rows_per_chunk;
+      DMA_DATA_TYPE x_spm = spm;
+      DMA_DATA_TYPE tmp_spm = spm + NY;
+      DMA_DATA_TYPE A_spm = spm + NY + rows_per_chunk;
 
       memcpy_to_spm(x_spm, ((int*) x), NY);
 
@@ -104,12 +104,12 @@ void kernel_atax_dma(int nx, int ny,
 
     #pragma omp target
     {
-      int* spm = (int*) alloc_spm();
+      DMA_DATA_TYPE spm = alloc_spm();
       int rows_per_chunk = NX; // (SPM_SIZE - NY) / (NY + 1);
 
-      int* y_spm = spm;
-      int* tmp_spm = spm + NY;
-      int* A_spm = spm + NY + rows_per_chunk;
+      DMA_DATA_TYPE y_spm = spm;
+      DMA_DATA_TYPE tmp_spm = spm + NY;
+      DMA_DATA_TYPE A_spm = spm + NY + rows_per_chunk;
 
       int row = 0;
       while (row < NX) {

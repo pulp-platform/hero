@@ -26,11 +26,11 @@
 /* Array initialization. */
 static
 void init_array(int ni, int nj, int nk,
-		DATA_TYPE *alpha,
-		DATA_TYPE *beta,
-		DATA_TYPE POLYBENCH_2D(C,NI,NJ,ni,nj),
-		DATA_TYPE POLYBENCH_2D(A,NI,NK,ni,nk),
-		DATA_TYPE POLYBENCH_2D(B,NK,NJ,nk,nj))
+                DATA_TYPE *alpha,
+                DATA_TYPE *beta,
+                DATA_TYPE POLYBENCH_2D(C,NI,NJ,ni,nj),
+                DATA_TYPE POLYBENCH_2D(A,NI,NK,ni,nk),
+                DATA_TYPE POLYBENCH_2D(B,NK,NJ,nk,nj))
 {
   int i, j;
 
@@ -78,37 +78,37 @@ void kernel_gemm_dma(int ni, int nj, int nk,
   {
     #pragma omp target
     {
-        int* spm = (int*) alloc_spm();
-        int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
+      DMA_DATA_TYPE spm = alloc_spm();
+      int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
 
-        int* B_spm = spm;
-        int* A_spm = spm + NJ*NK;
-        int* C_spm = spm + NJ*NK + NK*rows_per_chunk;
+      DMA_DATA_TYPE B_spm = spm;
+      DMA_DATA_TYPE A_spm = spm + NJ*NK;
+      DMA_DATA_TYPE C_spm = spm + NJ*NK + NK*rows_per_chunk;
 
-        memcpy_to_spm(B_spm, ((int*) B), NJ*NK);
+      memcpy_to_spm(B_spm, ((int*) B), NJ*NK);
 
-        /* C := alpha*A*B + beta*C */
-        int row = 0;
-        while (row < NI) {
-            int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
-            memcpy_to_spm(A_spm, ((int*) A) + row*NK, chunk_rows*NK);
-            memcpy_to_spm(C_spm, ((int*) C) + row*NJ, chunk_rows*NJ);
-            dma_flush();
+      /* C := alpha*A*B + beta*C */
+      int row = 0;
+      while (row < NI) {
+        int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
+        memcpy_to_spm(A_spm, ((int*) A) + row*NK, chunk_rows*NK);
+        memcpy_to_spm(C_spm, ((int*) C) + row*NJ, chunk_rows*NJ);
+        dma_flush();
 
-            #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
-            for (int i = 0; i < chunk_rows; i++) {
-                for (int j = 0; j < NJ; j++) {
-                    C_spm[i*NJ+j] *= beta;
-                    for (int k = 0; k < NK; ++k) {
-                        C_spm[i*NJ+j] += alpha * A_spm[i*NK+k] * B_spm[k*NJ+j];
-                    }
-                }
+        #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
+        for (int i = 0; i < chunk_rows; i++) {
+          for (int j = 0; j < NJ; j++) {
+            C_spm[i*NJ+j] *= beta;
+            for (int k = 0; k < NK; ++k) {
+              C_spm[i*NJ+j] += alpha * A_spm[i*NK+k] * B_spm[k*NJ+j];
             }
-
-            memcpy_from_spm(((int*) C) + row*NJ, C_spm, chunk_rows*NJ);
-            dma_flush();
-            row += rows_per_chunk;
+          }
         }
+
+        memcpy_from_spm(((int*) C) + row*NJ, C_spm, chunk_rows*NJ);
+        dma_flush();
+        row += rows_per_chunk;
+      }
     }
   }
 }

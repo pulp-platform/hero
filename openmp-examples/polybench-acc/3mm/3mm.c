@@ -83,12 +83,12 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
     /* E := A*B */
     #pragma omp target
     {
-      int* spm = (int*) alloc_spm();
+      DMA_DATA_TYPE spm = alloc_spm();
       int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
 
-      int* B_spm = spm;
-      int* A_spm = spm + NJ*NK;
-      int* E_spm = spm + NJ*NK + NK*rows_per_chunk;
+      DMA_DATA_TYPE B_spm = spm;
+      DMA_DATA_TYPE A_spm = spm + NJ*NK;
+      DMA_DATA_TYPE E_spm = spm + NJ*NK + NK*rows_per_chunk;
 
       memcpy_to_spm(B_spm, ((int*) B), NJ*NK);
 
@@ -116,12 +116,12 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
     /* F := C*D */
     #pragma omp target
     {
-      int* spm = (int*) alloc_spm();
+      DMA_DATA_TYPE spm = alloc_spm();
       int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
 
-      int* D_spm = spm;
-      int* C_spm = spm + NJ*NK;
-      int* F_spm = spm + NJ*NK + NK*rows_per_chunk;
+      DMA_DATA_TYPE D_spm = spm;
+      DMA_DATA_TYPE C_spm = spm + NJ*NK;
+      DMA_DATA_TYPE F_spm = spm + NJ*NK + NK*rows_per_chunk;
 
       memcpy_to_spm(D_spm, ((int*) D), NJ*NK);
 
@@ -149,12 +149,12 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
     /* G := E*F */
     #pragma omp target
     {
-      int* spm = (int*) alloc_spm();
+      DMA_DATA_TYPE spm = alloc_spm();
       int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
 
-      int* F_spm = spm;
-      int* G_spm = spm + NJ*NK;
-      int* E_spm = spm + NJ*NK + NK*rows_per_chunk;
+      DMA_DATA_TYPE F_spm = spm;
+      DMA_DATA_TYPE G_spm = spm + NJ*NK;
+      DMA_DATA_TYPE E_spm = spm + NJ*NK + NK*rows_per_chunk;
 
       memcpy_to_spm(F_spm, ((int*) F), NJ*NK);
 

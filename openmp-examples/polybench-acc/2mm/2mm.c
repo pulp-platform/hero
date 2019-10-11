@@ -26,12 +26,12 @@
 /* Array initialization. */
 static
 void init_array(int ni, int nj, int nk, int nl,
-		DATA_TYPE *alpha,
-		DATA_TYPE *beta,
-		DATA_TYPE POLYBENCH_2D(A,NI,NK,ni,nl),
-		DATA_TYPE POLYBENCH_2D(B,NK,NJ,nk,nj),
-		DATA_TYPE POLYBENCH_2D(C,NL,NJ,nl,nj),
-		DATA_TYPE POLYBENCH_2D(D,NI,NL,ni,nl))
+                DATA_TYPE *alpha,
+                DATA_TYPE *beta,
+                DATA_TYPE POLYBENCH_2D(A,NI,NK,ni,nl),
+                DATA_TYPE POLYBENCH_2D(B,NK,NJ,nk,nj),
+                DATA_TYPE POLYBENCH_2D(C,NL,NJ,nl,nj),
+                DATA_TYPE POLYBENCH_2D(D,NI,NL,ni,nl))
 {
   int i, j;
 
@@ -87,12 +87,12 @@ void kernel_2mm_dma(int ni, int nj, int nk, int nl,
   {
     #pragma omp target
     {
-      int* spm = (int*) alloc_spm();
+      DMA_DATA_TYPE spm = alloc_spm();
       int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
 
-      int* B_spm = spm;
-      int* A_spm = spm + NJ*NK;
-      int* tmp_spm = spm + NJ*NK + NK*rows_per_chunk;
+      DMA_DATA_TYPE B_spm = spm;
+      DMA_DATA_TYPE A_spm = spm + NJ*NK;
+      DMA_DATA_TYPE tmp_spm = spm + NJ*NK + NK*rows_per_chunk;
 
       memcpy_to_spm(B_spm, ((int*) B), NJ*NK);
 
@@ -120,12 +120,12 @@ void kernel_2mm_dma(int ni, int nj, int nk, int nl,
 
     #pragma omp target
     {
-      int* spm = (int*) alloc_spm();
+      DMA_DATA_TYPE spm = alloc_spm();
       int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
 
-      int* C_spm = spm;
-      int* D_spm = spm + NJ*NK;
-      int* tmp_spm = spm + NJ*NK + NK*rows_per_chunk;
+      DMA_DATA_TYPE C_spm = spm;
+      DMA_DATA_TYPE D_spm = spm + NJ*NK;
+      DMA_DATA_TYPE tmp_spm = spm + NJ*NK + NK*rows_per_chunk;
 
       memcpy_to_spm(C_spm, ((int*) C), NJ*NK);
 
