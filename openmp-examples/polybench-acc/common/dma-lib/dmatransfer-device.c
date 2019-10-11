@@ -8,7 +8,7 @@
 int pending_dma_jobs = 0;
 char partial_flush_low = 0;
 
-inline void try_flush_intermed() {
+inline void try_flush_intermed(void) {
     if (pending_dma_jobs >= DMA_MAX_JOBS) {
         DEBUG("max jobs reached, flushing\n");
         int low = partial_flush_low ? 0 : DMA_MAX_JOBS / 2;
@@ -22,7 +22,7 @@ inline void try_flush_intermed() {
     }
 }
 
-inline void __prem_dma_flush() {
+inline void __prem_dma_flush(void) {
     DEBUG("__prem_dma_flush()\n");
     for(int job = 0; job < DMA_MAX_JOBS; job++) {
         plp_dma_wait(job);
@@ -78,7 +78,7 @@ inline void __prem_dma_memcpy_from_spm_1d(void* ram, void* spm, size_t len) {
 /////////////////////////////////////////////////
 
 void* global_buffer = NULL;
-int* alloc_spm() {
+DMA_DATA_TYPE alloc_spm(void) {
     void* buffer;
     if (global_buffer == NULL) {
         rt_alloc_t* allocator = rt_alloc_l1(0);
@@ -90,16 +90,15 @@ int* alloc_spm() {
     return buffer;
 }
 
-void memcpy_to_spm(void* spm, void* ram, size_t len) {
+void memcpy_to_spm(DMA_DATA_TYPE spm, void* ram, size_t len) {
     __prem_dma_memcpy_to_spm_1d(spm, ram, len*4);
 }
 
 
-void memcpy_from_spm(void* ram, void* spm, size_t len) {
+void memcpy_from_spm(void* ram, DMA_DATA_TYPE spm, size_t len) {
     __prem_dma_memcpy_from_spm_1d(ram, spm, len*4);
 }
 
-void dma_flush() {
+void dma_flush(void) {
     __prem_dma_flush();
 }
-

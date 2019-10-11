@@ -2,7 +2,7 @@
 #include "dmatransfer.h"
 
 void* global_buffer = NULL;
-int* alloc_spm() {
+DMA_DATA_TYPE alloc_spm(void) {
     void* buffer;
     if (global_buffer == NULL) {
         rt_alloc_t* allocator = rt_alloc_l1(0);
@@ -14,7 +14,7 @@ int* alloc_spm() {
     return buffer;
 }
 
-void memcpy_to_spm(void* spm, void* ram, size_t len) {
+void memcpy_to_spm(DMA_DATA_TYPE spm, void* ram, size_t len) {
     int * dst = (int *) spm;
     int * src = (int *) ram;
 
@@ -30,10 +30,9 @@ void memcpy_to_spm(void* spm, void* ram, size_t len) {
 }
 
 
-void memcpy_from_spm(void* ram, void* spm, size_t len) {
+void memcpy_from_spm(void* ram, DMA_DATA_TYPE spm, size_t len) {
     memcpy_to_spm(ram, spm, len);
 }
 
-void dma_flush() {
+void dma_flush(void) {
 }
-
