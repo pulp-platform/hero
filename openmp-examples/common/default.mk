@@ -58,7 +58,7 @@ only ?= # can be set to `pulp` to compile a binary only for PULP
 .PRECIOUS: %.ll
 
 ifeq ($(only),pulp)
-all : $(EXE) $(EXE).dis slm
+all : $(DEPS) $(EXE) $(EXE).dis slm
 
 %.ll: %.c $(DEPDIR)/%.d | $(DEPDIR)
 	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS_PULP) $(INCPATHS) $<
