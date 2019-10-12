@@ -13,6 +13,12 @@ DMA_DATA_TYPE alloc_spm(void) {
     }
     return buffer;
 }
+void dealloc_spm(DMA_DATA_TYPE ptr) {
+    if(global_buffer == NULL) {
+        rt_alloc_t* allocator = rt_alloc_l1(0);
+        rt_user_free(allocator, ptr, SPM_SIZE * sizeof(int));
+    }
+}
 
 void memcpy_to_spm(DMA_DATA_TYPE spm, void* ram, size_t len) {
     int * dst = (int *) spm;

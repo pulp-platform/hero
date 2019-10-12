@@ -109,6 +109,8 @@ void kernel_gemm_dma(int ni, int nj, int nk,
         dma_flush();
         row += rows_per_chunk;
       }
+
+      dealloc_spm(spm);
     }
   }
 }

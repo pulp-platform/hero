@@ -99,7 +99,10 @@ void kernel_atax_dma(int nx, int ny,
         memcpy_from_spm(((int*) tmp) + row, tmp_spm, chunk_rows);
         dma_flush();
         row += rows_per_chunk;
+
       }
+
+      dealloc_spm(spm);
     }
 
     #pragma omp target
@@ -130,6 +133,8 @@ void kernel_atax_dma(int nx, int ny,
       memcpy_from_spm(((int*) y), y_spm, NY);
       dma_flush();
     }
+
+    dealloc_spm(spm);
   }
 }
 

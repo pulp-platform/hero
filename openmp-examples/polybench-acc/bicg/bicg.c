@@ -108,6 +108,8 @@ void kernel_bicg_dma(int nx, int ny,
         dma_flush();
         row += rows_per_chunk;
       }
+
+      dealloc_spm(spm);
     }
     #pragma omp target
     {
@@ -140,6 +142,8 @@ void kernel_bicg_dma(int nx, int ny,
       memcpy_from_spm(((int*) s), s_spm, NY);
       dma_flush();
     }
+
+    dealloc_spm(spm);
   }
 }
 

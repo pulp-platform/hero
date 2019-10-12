@@ -94,6 +94,8 @@ void kernel_conv2d_dma(int ni,
         dma_flush();
         row += rows_per_chunk;
       }
+
+      dealloc_spm(spm);
     }
   }
 }

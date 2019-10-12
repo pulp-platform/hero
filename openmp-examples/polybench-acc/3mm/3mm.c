@@ -112,6 +112,8 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
         dma_flush();
         row += rows_per_chunk;
       }
+
+      dealloc_spm(spm);
     }
     /* F := C*D */
     #pragma omp target
@@ -145,6 +147,8 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
         dma_flush();
         row += rows_per_chunk;
       }
+
+      dealloc_spm(spm);
     }
     /* G := E*F */
     #pragma omp target
@@ -178,6 +182,8 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
         dma_flush();
         row += rows_per_chunk;
       }
+
+      dealloc_spm(spm);
     }
   }
 }

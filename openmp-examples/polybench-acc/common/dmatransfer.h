@@ -12,6 +12,7 @@
 #endif
 
 DMA_DATA_TYPE alloc_spm(void);
+void dealloc_spm(DMA_DATA_TYPE);
 
 void memcpy_to_spm(DMA_DATA_TYPE spm, void* ram, size_t len);
 

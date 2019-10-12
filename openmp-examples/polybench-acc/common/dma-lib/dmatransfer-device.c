@@ -8,7 +8,7 @@
 int pending_dma_jobs = 0;
 char partial_flush_low = 0;
 
-inline void try_flush_intermed(void) {
+static inline void try_flush_intermed(void) {
     if (pending_dma_jobs >= DMA_MAX_JOBS) {
         DEBUG("max jobs reached, flushing\n");
         int low = partial_flush_low ? 0 : DMA_MAX_JOBS / 2;
@@ -22,7 +22,7 @@ inline void try_flush_intermed(void) {
     }
 }
 
-inline void __prem_dma_flush(void) {
+static inline void __prem_dma_flush(void) {
     DEBUG("__prem_dma_flush()\n");
     for(int job = 0; job < DMA_MAX_JOBS; job++) {
         plp_dma_wait(job);
@@ -31,7 +31,7 @@ inline void __prem_dma_flush(void) {
 }
 
 // Adapted code form libhero-target
-inline int pulp_dma_memcpy_1d(void* loc_addr, void* ext_addr, size_t len, int ext2loc) {
+static inline int pulp_dma_memcpy_1d(void* loc_addr, void* ext_addr, size_t len, int ext2loc) {
     uint32_t dma_job = plp_dma_counter_alloc();
     uint32_t dma_cmd;
 
@@ -46,7 +46,7 @@ inline int pulp_dma_memcpy_1d(void* loc_addr, void* ext_addr, size_t len, int ex
         dma_cmd = plp_dma_getCmd(ext2loc, len_tmp, PLP_DMA_1D, PLP_DMA_TRIG_EVT,
             PLP_DMA_NO_TRIG_IRQ, PLP_DMA_PRIV);
         __asm__ __volatile__ ("" : : : "memory");
-        plp_dma_cmd_push(dma_cmd, loc_addr, ext_addr);
+        plp_dma_cmd_push(dma_cmd, (unsigned int) loc_addr, (unsigned int) ext_addr);
 
         len     -= len_tmp;
         ext_addr += len_tmp;
@@ -56,7 +56,7 @@ inline int pulp_dma_memcpy_1d(void* loc_addr, void* ext_addr, size_t len, int ex
     return dma_job;
 }
 
-inline void __prem_dma_memcpy_to_spm_1d(void* spm, void* ram, size_t len) {
+static inline void __prem_dma_memcpy_to_spm_1d(void* spm, void* ram, size_t len) {
     DEBUG("__prem_dma_memcpy_to_spm_1d(0x%x, 0x%x, 0x%x)\n", spm, ram, len);
     try_flush_intermed();
     pulp_dma_memcpy_1d(spm, ram, len, 1);
@@ -64,7 +64,7 @@ inline void __prem_dma_memcpy_to_spm_1d(void* spm, void* ram, size_t len) {
     DEBUG("__prem_dma_memcpy_to_spm_1d post\n");
 }
 
-inline void __prem_dma_memcpy_from_spm_1d(void* ram, void* spm, size_t len) {
+static inline void __prem_dma_memcpy_from_spm_1d(void* ram, void* spm, size_t len) {
     DEBUG("__prem_dma_memcpy_from_spm_1d(0x%x, 0x%x, 0x%x)\n", ram, spm, len);
     try_flush_intermed();
     pulp_dma_memcpy_1d(spm, ram, len, 0);
@@ -88,6 +88,12 @@ DMA_DATA_TYPE alloc_spm(void) {
         buffer = global_buffer;
     }
     return buffer;
+}
+void dealloc_spm(DMA_DATA_TYPE ptr) {
+    if(global_buffer == NULL) {
+        rt_alloc_t* allocator = rt_alloc_l1(0);
+        rt_user_free(allocator, ptr, SPM_SIZE * sizeof(int));
+    }
 }
 
 void memcpy_to_spm(DMA_DATA_TYPE spm, void* ram, size_t len) {

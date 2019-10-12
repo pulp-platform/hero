@@ -116,6 +116,8 @@ void kernel_2mm_dma(int ni, int nj, int nk, int nl,
         dma_flush();
         row += rows_per_chunk;
       }
+
+      dealloc_spm(spm);
     }
 
     #pragma omp target
@@ -150,6 +152,8 @@ void kernel_2mm_dma(int ni, int nj, int nk, int nl,
         dma_flush();
         row += rows_per_chunk;
       }
+
+      dealloc_spm(spm);
     }
   }
 }
