@@ -149,7 +149,7 @@ void polybench_flush_cache()
 #endif
   for (i = 0; i < cs; i++)
     tmp += flush[i];
-  if(tmp <= 10) {
+  if(tmp > 10) {
     abort();
   }
 #ifdef PULP
