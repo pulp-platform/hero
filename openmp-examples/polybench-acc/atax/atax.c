@@ -22,7 +22,6 @@
 /* Default data type is double, default size is 4000. */
 #include "atax.h"
 
-
 /* Array initialization. */
 static
 void init_array (int nx, int ny,
@@ -64,8 +63,6 @@ void kernel_atax_dma(int nx, int ny,
                      DATA_TYPE POLYBENCH_1D(y,NY,ny),
                      DATA_TYPE POLYBENCH_1D(tmp,NX,nx))
 {
-  int i, j;
-
   #pragma omp target data \
     map(to: A[0:NX][0:NY], x[0:NY]) \
     map(alloc: tmp[0:NX]) \
@@ -89,9 +86,9 @@ void kernel_atax_dma(int nx, int ny,
         dma_flush();
 
         #pragma omp parallel for num_threads(NUM_THREADS)
-        for (i = 0; i < chunk_rows; i++) {
+        for (int i = 0; i < chunk_rows; i++) {
           tmp_spm[i] = 0;
-          for (j = 0; j < NY; j++){
+          for (int j = 0; j < NY; j++){
             tmp_spm[i] = tmp_spm[i] + A_spm[i*NY+j] * x_spm[j];
           }
         }
@@ -99,7 +96,6 @@ void kernel_atax_dma(int nx, int ny,
         memcpy_from_spm(((int*) tmp) + row, tmp_spm, chunk_rows);
         dma_flush();
         row += rows_per_chunk;
-
       }
 
       dealloc_spm(spm);
@@ -122,9 +118,9 @@ void kernel_atax_dma(int nx, int ny,
         dma_flush();
 
         #pragma omp parallel for num_threads(NUM_THREADS)
-        for (i = 0; i < NY; i++) {
+        for (int i = 0; i < NY; i++) {
           y_spm[i] = 0;
-          for (j = 0; j < chunk_rows; j++)
+          for (int j = 0; j < chunk_rows; j++)
             y_spm[i] = y_spm[i] + A_spm[j*NY+i] * tmp_spm[j];
         }
         row += rows_per_chunk;
