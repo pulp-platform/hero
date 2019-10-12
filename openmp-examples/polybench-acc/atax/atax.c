@@ -132,9 +132,9 @@ void kernel_atax_dma(int nx, int ny,
 
       memcpy_from_spm(((int*) y), y_spm, NY);
       dma_flush();
+    
+      dealloc_spm(spm);
     }
-
-    dealloc_spm(spm);
   }
 }
 

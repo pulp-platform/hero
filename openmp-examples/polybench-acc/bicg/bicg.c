@@ -141,9 +141,9 @@ void kernel_bicg_dma(int nx, int ny,
 
       memcpy_from_spm(((int*) s), s_spm, NY);
       dma_flush();
+    
+      dealloc_spm(spm);
     }
-
-    dealloc_spm(spm);
   }
 }
 
