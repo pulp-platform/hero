@@ -74,8 +74,6 @@ void kernel_bicg_dma(int nx, int ny,
                      DATA_TYPE POLYBENCH_1D(p,NY,ny),
                      DATA_TYPE POLYBENCH_1D(r,NX,nx))
 {
-  int i, j;
-  //#pragma acc data copyout(s,q) copyin(A,r,p)
   #pragma omp target data \
     map(to: A[0:NX][0:NY], r[0:NX], p[0:NY]) \
     map(from: s[0:NY], q[0:NX])
@@ -98,9 +96,9 @@ void kernel_bicg_dma(int nx, int ny,
         dma_flush();
 
         #pragma omp parallel for num_threads(NUM_THREADS)
-        for (i = 0; i < chunk_rows; i++) {
+        for (int i = 0; i < chunk_rows; i++) {
           q_spm[i] = 0;
-          for (j = 0; j < NY; j++)
+          for (int j = 0; j < NY; j++)
             q_spm[i] = q_spm[i] + A_spm[i*NY+j] * p_spm[j];
         }
 
@@ -132,8 +130,8 @@ void kernel_bicg_dma(int nx, int ny,
         dma_flush();
 
         #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
-        for (j = 0; j < NY; j++) {
-          for (i = 0; i < chunk_rows; i++)
+        for (int j = 0; j < NY; j++) {
+          for (int i = 0; i < chunk_rows; i++)
             s_spm[j] = s_spm[j] + r_spm[i] * A_spm[i*NY+j];
         }
         row += rows_per_chunk;
@@ -161,15 +159,21 @@ void kernel_bicg(int nx, int ny,
   #pragma omp target
   {
     #pragma omp parallel for num_threads(NUM_THREADS)
-    for (int i = 0; i < _PB_NY; i++)
-      s[i] = 0;
-    #pragma omp parallel for num_threads(NUM_THREADS)
     for (int i = 0; i < _PB_NX; i++)
     {
       q[i] = 0;
       for (int j = 0; j < _PB_NY; j++) {
-        s[j] = s[j] + r[i] * A[i][j];
         q[i] = q[i] + A[i][j] * p[j];
+      }
+    }
+    #pragma omp parallel for num_threads(NUM_THREADS)
+    for (int i = 0; i < _PB_NY; i++)
+      s[i] = 0;
+    #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
+    for (int j = 0; j < _PB_NY; j++)
+    {
+      for (int i = 0; i < _PB_NX; i++) {
+        s[j] = s[j] + r[i] * A[i][j];
       }
     }
   }
