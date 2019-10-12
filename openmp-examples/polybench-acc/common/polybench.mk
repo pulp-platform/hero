@@ -4,7 +4,11 @@ ifeq ($(threads),)
 	threads = 8
 endif
 
-PBFLAGS = -DPOLYBENCH_USE_SCALAR_LB -DPOLYBENCH_TIME -DPOLYBENCH_CYCLE_ACCURATE_TIMER -DNUM_TEAMS=1 -DNUM_THREADS=$(threads) -DPOLYBENCH_DUMP_ARRAYS
+ifeq ($(mem),)
+	mem = 2
+endif
+
+PBFLAGS = -DPOLYBENCH_USE_SCALAR_LB -DPOLYBENCH_TIME -DPOLYBENCH_CYCLE_ACCURATE_TIMER -DNUM_TEAMS=1 -DNUM_THREADS=$(threads) -DPOLYBENCH_HERO_MEM_LEVEL=$(mem) -DPOLYBENCH_DUMP_ARRAYS
 
 ifeq ($(dma),y)
 	PBFLAGS += -DPOLYBENCH_DMA
@@ -33,7 +37,7 @@ $(PBMK_ROOT)/libpolybench-host.a:
 	${HERO_TOOLCHAIN_HOST_TARGET}-ar rcs $(PBMK_ROOT)/libpolybench-host.a $(PBMK_ROOT)/polybench.o
 
 $(PBMK_ROOT)/libpolybench-pulp.a:
-	riscv32-hero-unknown-elf-gcc -O3 $(PBFLAGS) -fPIC -DPULP -c $(PBMK_ROOT)/polybench.c -o $(PBMK_ROOT)/polybench.o
+	riscv32-hero-unknown-elf-gcc -O3 $(PBFLAGS) -DPOLYBENCH_NO_FLUSH_CACHE -fPIC -DPULP -c $(PBMK_ROOT)/polybench.c -o $(PBMK_ROOT)/polybench.o
 	riscv32-hero-unknown-elf-ar rcs $(PBMK_ROOT)/libpolybench-pulp.a $(PBMK_ROOT)/polybench.o
 
 polybench-clean:

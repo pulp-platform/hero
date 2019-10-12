@@ -21,11 +21,44 @@
 #ifdef _OPENMP
 # include <omp.h>
 #endif
+
 #ifdef PULP
+extern void* hero_l1malloc(int num);
+extern void hero_l1free(void*);
 extern void* hero_l2malloc(int num);
 extern void hero_l2free(void*);
+extern void* hero_l3malloc(int num);
+extern void hero_l3free(void*);
 extern int hero_get_clk_counter(void);
 extern void hero_reset_clk_counter(void);
+extern int polybench_hero_mem_level;
+
+static void* hero_malloc(int num) {
+  printf("MALLOC %d\n", polybench_hero_mem_level);
+  if(polybench_hero_mem_level == 1) {
+    return hero_l1malloc(num);
+  } else if(polybench_hero_mem_level == 2) {
+    return hero_l2malloc(num);
+  } else if(polybench_hero_mem_level == 3) {
+    return hero_l3malloc(num);
+  }
+  abort();
+  return 0;
+}
+
+static void hero_free(void* ptr) {
+  if(polybench_hero_mem_level == 1) {
+    hero_l1free(ptr);
+    return;
+  } else if(polybench_hero_mem_level == 2) {
+    hero_l2free(ptr);
+    return;
+  } else if(polybench_hero_mem_level == 3) {
+    hero_l3free(ptr);
+    return;
+  }
+  abort();
+}
 #endif
 
 /* By default, collect PAPI counters on thread 0. */
@@ -101,23 +134,28 @@ unsigned long long int rdtsc()
 
 void polybench_flush_cache()
 {
-  int cs = POLYBENCH_CACHE_SIZE_KB * 1024 / sizeof(double);
+  int cs = POLYBENCH_CACHE_SIZE_KB * 1024 / sizeof(int);
 #ifdef PULP
-  double* flush = (double*) hero_l2malloc (cs*sizeof(double));
+  int* flush = (int*) hero_malloc (cs*sizeof(int));
+  for(int i=0; i<cs; ++i) {
+    flush[i] = 0;
+  }
 #else
-  double* flush = (double*) calloc (cs, sizeof(double));
+  int* flush = (int*) calloc (cs, sizeof(int));
 #endif
   int i;
-  double tmp = 0.0;
+  int tmp = 0;
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
   for (i = 0; i < cs; i++)
     tmp += flush[i];
+  if(tmp <= 10) {
+    abort();
+  }
 #ifdef PULP
-  hero_l2free(flush);
+  hero_free(flush);
 #else
-  assert (tmp <= 10.0);
   free (flush);
 #endif
 }
@@ -408,7 +446,7 @@ xmalloc (size_t num)
 {
   void* newA = NULL;
 #ifdef PULP
-  newA = hero_l2malloc(num);
+  newA = hero_malloc(num);
   int ret = 0;
 #else
   int ret = posix_memalign (&newA, 32, num);
@@ -430,4 +468,13 @@ void* polybench_alloc_data(unsigned long long int n, int elt_size)
   void* ret = xmalloc(val);
 
   return ret;
+}
+
+void polybench_dealloc_data(void* ptr)
+{
+#ifdef PULP
+    hero_free(ptr);
+#else
+    free(ptr);
+#endif
 }

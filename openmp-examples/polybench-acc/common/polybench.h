@@ -59,7 +59,7 @@
 */
 # ifndef POLYBENCH_STACK_ARRAYS
 #  define POLYBENCH_ARRAY(x) *x
-#  define POLYBENCH_FREE_ARRAY(x) free((void*)x);
+#  define POLYBENCH_FREE_ARRAY(x) polybench_dealloc_data((void*)x);
 #  define POLYBENCH_DECL_VAR(x) (*x)
 # else
 #  define POLYBENCH_ARRAY(x) x
@@ -197,6 +197,11 @@ extern void polybench_papi_print();
 
 /* Function prototypes. */
 extern void* polybench_alloc_data(unsigned long long int n, int elt_size);
+extern void polybench_dealloc_data(void*);
 
+#ifndef POLYBENCH_HERO_MEM_LEVEL
+    #define POLYBENCH_HERO_MEM_LEVEL 2
+#endif
+int polybench_hero_mem_level = POLYBENCH_HERO_MEM_LEVEL;
 
 #endif /* !POLYBENCH_H */
