@@ -33,7 +33,7 @@ void init_array (int ni, int nj,
   for (i = 0; i < ni; i++)
     for (j = 0; j < nj; j++)
     {
-      A[i][j] = ((DATA_TYPE) (i + j) / nj);
+      A[i][j] = ((DATA_TYPE) 10000 * i + j);
     }
 }
 
@@ -46,8 +46,8 @@ void print_array(int ni, int nj,
 {
   int i, j;
 
-  for (i = 0; i < ni; i++)
-    for (j = 0; j < nj; j++) {
+  for (i = 1; i < ni-1; i++)
+    for (j = 1; j < nj-1; j++) {
       printf(DATA_PRINTF_MODIFIER, B[i][j]);
       if ((i * NJ + j) % 20 == 0) printf("\n");
     }
