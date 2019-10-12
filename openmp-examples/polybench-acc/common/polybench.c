@@ -34,7 +34,6 @@ extern void hero_reset_clk_counter(void);
 extern int polybench_hero_mem_level;
 
 static void* hero_malloc(int num) {
-  printf("MALLOC %d\n", polybench_hero_mem_level);
   if(polybench_hero_mem_level == 1) {
     return hero_l1malloc(num);
   } else if(polybench_hero_mem_level == 2) {
