@@ -19,6 +19,9 @@
 import pulp_cluster_package::*;
 import apu_package::*;
 
+`include "axi/assign.svh"
+`include "axi/typedef.svh"
+
 module pulp_cluster
 #(
   // cluster parameters
@@ -535,17 +538,66 @@ module pulp_cluster
                             s_ext_xbar_bus_wdata;
   logic [NB_EXT2MEM-1:0][ 3:0]  s_ext_xbar_bus_be;
   logic [NB_EXT2MEM-1:0][ 5:0]  s_ext_xbar_bus_atop;
-  axi2mem_wrap #(
+  // Fall-through register on AW due to protocol violation by upstream (dependency on aw_ready for
+  // w_valid).
+  typedef logic [31:0] addr_t;
+  typedef logic [AXI_DATA_C2S_WIDTH-1:0] data_t;
+  typedef logic [AXI_ID_OUT_WIDTH-1:0] id_oup_t;
+  typedef logic [AXI_DATA_C2S_WIDTH/8-1:0] strb_t;
+  typedef logic [AXI_USER_WIDTH-1:0] user_t;
+  `AXI_TYPEDEF_AW_CHAN_T(aw_chan_t, addr_t, id_oup_t, user_t);
+  `AXI_TYPEDEF_W_CHAN_T (w_chan_t, data_t, strb_t, user_t);
+  `AXI_TYPEDEF_B_CHAN_T (b_chan_t, id_oup_t, user_t);
+  `AXI_TYPEDEF_AR_CHAN_T(ar_chan_t, addr_t, id_oup_t, user_t);
+  `AXI_TYPEDEF_R_CHAN_T (r_chan_t, data_t, id_oup_t, user_t);
+  `AXI_TYPEDEF_REQ_T    (axi_req_t, aw_chan_t, w_chan_t, ar_chan_t);
+  `AXI_TYPEDEF_RESP_T   (axi_resp_t, b_chan_t, r_chan_t);
+  axi_req_t   ext_tcdm_req,   ext_tcdm_req_buf;
+  axi_resp_t  ext_tcdm_resp,  ext_tcdm_resp_buf;
+  `AXI_ASSIGN_TO_REQ(ext_tcdm_req, s_ext_tcdm_bus);
+  `AXI_ASSIGN_FROM_RESP(s_ext_tcdm_bus, ext_tcdm_resp);
+  always_comb begin
+    `AXI_SET_W_CHAN(ext_tcdm_req_buf.w, ext_tcdm_req.w);
+    ext_tcdm_req_buf.w_valid = ext_tcdm_req.w_valid;
+    ext_tcdm_resp.w_ready = ext_tcdm_resp_buf.w_ready;
+    `AXI_SET_AR_CHAN(ext_tcdm_req_buf.ar, ext_tcdm_req.ar);
+    ext_tcdm_req_buf.ar_valid = ext_tcdm_req.ar_valid;
+    ext_tcdm_resp.ar_ready = ext_tcdm_resp_buf.ar_ready;
+    `AXI_SET_B_CHAN(ext_tcdm_resp.b, ext_tcdm_resp_buf.b);
+    ext_tcdm_resp.b_valid = ext_tcdm_resp_buf.b_valid;
+    ext_tcdm_req_buf.b_ready = ext_tcdm_req.b_ready;
+    `AXI_SET_R_CHAN(ext_tcdm_resp.r, ext_tcdm_resp_buf.r);
+    ext_tcdm_resp.r_valid = ext_tcdm_resp_buf.r_valid;
+    ext_tcdm_req_buf.r_ready = ext_tcdm_req.r_ready;
+  end
+  fall_through_register #(
+    .T  (aw_chan_t)
+  ) i_axi2mem_aw_ft_reg (
+    .clk_i  (clk_cluster),
+    .rst_ni,
+    .clr_i  (1'b0),
+    .testmode_i (1'b0),
+    .valid_i  (ext_tcdm_req.aw_valid),
+    .ready_o  (ext_tcdm_resp.aw_ready),
+    .data_i   (ext_tcdm_req.aw),
+    .valid_o  (ext_tcdm_req_buf.aw_valid),
+    .ready_i  (ext_tcdm_resp_buf.aw_ready),
+    .data_o   (ext_tcdm_req_buf.aw)
+  );
+
+  axi2mem #(
+    .axi_req_t  ( axi_req_t           ),
+    .axi_resp_t ( axi_resp_t          ),
     .AddrWidth  ( 32                  ),
     .DataWidth  ( AXI_DATA_C2S_WIDTH  ),
     .IdWidth    ( AXI_ID_OUT_WIDTH    ),
-    .UserWidth  ( AXI_USER_WIDTH      ),
     .NumBanks   ( NB_EXT2MEM             )
   ) i_axi2mem_wrap (
     .clk_i        ( clk_cluster           ),
     .rst_ni       ( rst_ni                ),
     .busy_o       ( s_axi2mem_busy        ),
-    .slv          ( s_ext_tcdm_bus        ),
+    .axi_req_i    ( ext_tcdm_req_buf      ),
+    .axi_resp_o   ( ext_tcdm_resp_buf     ),
     .mem_req_o    ( s_ext_xbar_bus_req    ),
     .mem_gnt_i    ( s_ext_xbar_bus_gnt    ),
     .mem_addr_o   ( s_ext_xbar_bus_addr   ),
