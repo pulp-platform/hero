@@ -103,7 +103,7 @@ void kernel_2mm_dma(int ni, int nj, int nk, int nl,
         memcpy_to_spm(A_spm, ((int*) A) + row*NK, chunk_rows*NK);
         dma_flush();
 
-        #pragma omp parallel for collapse(2)
+        #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
         for (int i = 0; i < rows_per_chunk; i++) {
           for (int j = 0; j < NJ; j++) {
             tmp_spm[i*NJ+j] = 0;
@@ -139,7 +139,7 @@ void kernel_2mm_dma(int ni, int nj, int nk, int nl,
         memcpy_to_spm(D_spm, ((int*) D) + row*NK, chunk_rows*NK);
         dma_flush();
 
-        #pragma omp parallel for collapse(2)
+        #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
         for (int i = 0; i < chunk_rows; i++) {
           for (int j = 0; j < NL; j++) {
             D_spm[i*NL+j] *= beta;
@@ -172,14 +172,14 @@ void kernel_2mm(int ni, int nj, int nk, int nl,
 {
   #pragma scop
   /* D := alpha*A*B*C + beta*D */
-  #pragma omp target \
-    map(to: A[0:NI][0:NK], B[0:NK][0:NJ], C[0:NL][0:NJ]) \
+  #pragma omp target data \
+    map(tofrom: A[0:NI][0:NK], B[0:NK][0:NJ], C[0:NL][0:NJ]) \
     map(alloc: tmp[0:NI][0:NJ]) \
-    map(tofrom: D[0:NI][0:NL])
+    map(from: D[0:NI][0:NL])
   {
-    #pragma omp parallel num_threads(NUM_THREADS)
+    #pragma omp target
     {
-      #pragma omp for collapse(2)
+      #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
       for (int i = 0; i < _PB_NI; i++)
         for (int j = 0; j < _PB_NJ; j++)
         {
@@ -187,7 +187,10 @@ void kernel_2mm(int ni, int nj, int nk, int nl,
           for (int k = 0; k < _PB_NK; ++k)
             tmp[i][j] += alpha * A[i][k] * B[k][j];
         }
-      #pragma omp for collapse(2)
+    }
+    #pragma omp target
+    {
+      #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
       for (int i = 0; i < _PB_NI; i++)
         for (int j = 0; j < _PB_NL; j++)
         {
