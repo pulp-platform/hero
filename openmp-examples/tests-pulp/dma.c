@@ -15,6 +15,9 @@
  */
 
 #include "test.h"
+#include <assert.h>
+#include <hero-target.h>
+#include <string.h>       // memset()
 
 // Mirror definitions from PULP SDK, can be removed as soon as the PULP SDK is accessible through
 // Clang.
@@ -85,11 +88,63 @@ static bool regression_tcdm_counter_overflow()
   return timeout;
 }
 
+// Verify transfers to or from L1
+static unsigned check_to_or_from_l1(uint32_t* const src, uint32_t* const dst, const size_t n_elem)
+{
+  // Initialize source memory.
+  for (unsigned i = 0; i < n_elem; i++) {
+    src[i] = i;
+  }
+  // Start DMA transfer and wait for its completion.
+  const size_t size = n_elem * sizeof(uint32_t);
+  hero_dma_job_t dma0 = hero_dma_memcpy_async(dst, src, size);
+  hero_dma_wait(dma0);
+  // Assert that destination data matches source data.
+  unsigned n_errors = 0;
+  for (unsigned i = 0; i < n_elem; i++) {
+    n_errors += (dst[i] != i);
+  }
+  condition_or_printf(n_errors == 0, "%d destination elements did not match!\n", n_errors);
+  // Reset destination memory.
+  memset(dst, 0, size);
+  // Return error count.
+  return n_errors;
+}
+static unsigned to_or_from_l1()
+{
+  const size_t n_elem = 64;
+  const size_t size = n_elem * sizeof(uint32_t);
+  // Allocate local memory.
+  uint32_t* const loc = (uint32_t*)hero_l1malloc(size);
+  assert(loc);
+
+  uint32_t* const l3 = (uint32_t*)0x80000000;
+  uint32_t* const l2 = (uint32_t*)pulp_l2_end() - 0x1000;
+  uint32_t* const other_l1 = (uint32_t*)pulp_cluster_base(1) + 0x1000;
+  unsigned n_errors = 0;
+  printf("DMA: L3 to L1 ..\n");
+  n_errors += check_to_or_from_l1(l3, loc, n_elem);
+  printf("DMA: L2 to L1 ..\n");
+  n_errors += check_to_or_from_l1(l2, loc, n_elem);
+  printf("DMA: Other L1 to L1 ..\n");
+  n_errors += check_to_or_from_l1(other_l1, loc, n_elem);
+  printf("DMA: L3 to L1..\n");
+  n_errors += check_to_or_from_l1(loc, l3, n_elem);
+  printf("DMA: L1 to L2..\n");
+  n_errors += check_to_or_from_l1(loc, l2, n_elem);
+  printf("DMA: L1 to other L1..\n");
+  n_errors += check_to_or_from_l1(loc, other_l1, n_elem);
+
+  hero_l1free(loc);
+  return n_errors;
+}
+
 unsigned test_dma()
 {
   unsigned n_errors = 0;
 
   n_errors += regression_tcdm_counter_overflow();
+  n_errors += to_or_from_l1();
 
   return n_errors;
 }
