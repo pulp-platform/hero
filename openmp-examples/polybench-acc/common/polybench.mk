@@ -24,13 +24,14 @@ endif
 
 INCPATHS += -I$(PBMK_ROOT)/../common
 LIBPATHS += -L$(PBMK_ROOT)/../common
-LDFLAGS_PULP += -lpolybench-pulp -DPOLYBENCH_CYCLE_ACCURATE_TIMER
+CFLAGS_COMMON += $(PBFLAGS)
+LDFLAGS_PULP += -lpolybench-pulp
 LDFLAGS += -lpolybench-host
 LDFLAGS_COMMON += -ldmatransfer
-CFLAGS_COMMON += $(PBFLAGS)
 
 DEPS += polybench
 
+PBFLAGS_PULP = -DPOLYBENCH_NO_FLUSH_CACHE -DPOLYBENCH_CYCLE_ACCURATE_TIMER
 CFLAGS_DMATRANSFER = -I$(PBMK_ROOT) -I$(HERO_PULP_INC_DIR)
 
 $(PBMK_ROOT)/libdmatransfer.a:
@@ -45,7 +46,7 @@ $(PBMK_ROOT)/libpolybench-host.a:
 	${HERO_TOOLCHAIN_HOST_TARGET}-ar rcs $(PBMK_ROOT)/libpolybench-host.a $(PBMK_ROOT)/polybench.o
 
 $(PBMK_ROOT)/libpolybench-pulp.a:
-	riscv32-hero-unknown-elf-gcc -O3 $(PBFLAGS) -DPOLYBENCH_NO_FLUSH_CACHE -fPIC -DPULP -c $(PBMK_ROOT)/polybench.c -o $(PBMK_ROOT)/polybench.o
+	riscv32-hero-unknown-elf-gcc -O3 $(PBFLAGS) $(PBFLAGS_PULP) -fPIC -DPULP -c $(PBMK_ROOT)/polybench.c -o $(PBMK_ROOT)/polybench.o
 	riscv32-hero-unknown-elf-ar rcs $(PBMK_ROOT)/libpolybench-pulp.a $(PBMK_ROOT)/polybench.o
 
 polybench-clean:
