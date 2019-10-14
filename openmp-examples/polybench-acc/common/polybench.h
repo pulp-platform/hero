@@ -199,9 +199,18 @@ extern void polybench_papi_print();
 extern void* polybench_alloc_data(unsigned long long int n, int elt_size);
 extern void polybench_dealloc_data(void*);
 
+/* HERO customizations */
+#include <hero-target.h>
 #ifndef POLYBENCH_HERO_MEM_LEVEL
     #define POLYBENCH_HERO_MEM_LEVEL 2
 #endif
 int polybench_hero_mem_level = POLYBENCH_HERO_MEM_LEVEL;
+
+#ifndef NUM_THREADS
+    #define NUM_THREADS 1
+#endif
+#ifndef TARGET_DEVICE
+    #define TARGET_DEVICE BIGPULP_SVM
+#endif
 
 #endif /* !POLYBENCH_H */
