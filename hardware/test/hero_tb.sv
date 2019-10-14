@@ -118,8 +118,8 @@ module hero_tb #(
         if (aw_queue.size() != 0) begin
           dram_resp.w_ready = 1'b1;
           if (dram_req.w_valid) begin
-            automatic axi_addr_t addr = aw_queue[0].addr;
             automatic axi_pkg::size_t size = aw_queue[0].size;
+            automatic axi_addr_t addr = axi_pkg::beat_addr(aw_queue[0].addr, size, w_cnt);
             for (shortint unsigned
                 i_byte = axi_pkg::beat_lower_byte(addr, size, AXI_SW, w_cnt);
                 i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, w_cnt);
@@ -171,8 +171,8 @@ module hero_tb #(
       // R
       forever begin
         if (ar_queue.size() != 0) begin
-          automatic axi_addr_t addr = ar_queue[0].addr;
           automatic axi_pkg::size_t size = ar_queue[0].size;
+          automatic axi_addr_t addr = axi_pkg::beat_addr(ar_queue[0].addr, size, r_cnt);
           automatic axi_r_t r_beat = '0;
           r_beat.data = 'x;
           r_beat.id = ar_queue[0].id;
