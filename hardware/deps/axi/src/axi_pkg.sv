@@ -108,7 +108,7 @@ package axi_pkg;
     if (i_beat == 0) begin
       return addr;
     end else begin
-      return aligned_addr(addr, size) + (i_beat - 1) * num_bytes(size);
+      return aligned_addr(addr, size) + i_beat * num_bytes(size);
     end
   endfunction
 
