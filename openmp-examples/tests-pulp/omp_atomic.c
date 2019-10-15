@@ -1,0 +1,1 @@
+../../toolchain/openmp/runtime/test/atomic/omp_atomic.c
