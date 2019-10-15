@@ -216,14 +216,14 @@ module hero #(
   ) periph_mst_dwced();
 
   for (genvar i = 0; i < N_CLUSTERS; i++) begin: gen_clusters
-    axi_id_remap #(
+    axi_id_resize #(
       .ADDR_WIDTH   (AXI_AW),
       .DATA_WIDTH   (AXI_DW),
       .USER_WIDTH   (AXI_UW),
       .ID_WIDTH_IN  (AXI_IW_SB_OUP),
       .ID_WIDTH_OUT (AXI_IW_CL_INP),
       .TABLE_SIZE   (4)
-    ) i_id_remap_cl_inp (
+    ) i_id_resize_cl_inp (
       .clk_i,
       .rst_ni,
       .in     (cl_inp[i]),
@@ -432,14 +432,14 @@ module hero #(
     .conf_resp_o            (rab_conf_resp_o)
   );
 
-  axi_id_remap #(
+  axi_id_resize #(
     .ADDR_WIDTH   (AXI_AW),
     .DATA_WIDTH   (AXI_DW),
     .USER_WIDTH   (AXI_UW),
     .ID_WIDTH_IN  (AXI_IW_SB_OUP),
     .ID_WIDTH_OUT (AXI_IW_SB_INP),
     .TABLE_SIZE   (4)
-  ) i_id_remap_rab_slv (
+  ) i_id_resize_rab_slv (
     .clk_i,
     .rst_ni,
     .in     (rab_slv),
