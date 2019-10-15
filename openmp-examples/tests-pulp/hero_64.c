@@ -57,6 +57,7 @@ unsigned test_hero_64()
 {
   const uint64_t l1_base        = (uint64_t)pulp_l1_end() - 8*pulp_stack_size();
   const uint64_t l1_alias_base  = (uint64_t)pulp_l1_alias_end() - 8*pulp_stack_size();
+  const uint64_t l1_other_base  = (uint64_t)pulp_cluster_base(1) + 0x1000;
   const uint64_t l2_base        = (uint64_t)pulp_l2_end() - 0x1000;
   const uint64_t dram           = 0x0123000000000000;
   for (uint32_t offset = 0; offset < 8; offset++) {
@@ -65,6 +66,7 @@ unsigned test_hero_64()
     {
       check_addr(l1_base + offset);
       check_addr(l1_alias_base + offset);
+      check_addr(l1_other_base + offset);
       check_addr(l2_base + offset);
       check_addr(dram + offset);
     }
