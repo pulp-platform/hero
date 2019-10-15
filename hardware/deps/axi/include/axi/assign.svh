@@ -389,10 +389,9 @@
 `define AXI_SET_AW_CHAN(aw_dst, aw_src) \
   aw_dst.id = aw_src.id;                \
   aw_dst.addr = aw_src.addr;            \
-  aw_dst.len = aw_src.addr;             \
+  aw_dst.len = aw_src.len;              \
   aw_dst.size = aw_src.size;            \
   aw_dst.burst = aw_src.burst;          \
-  aw_dst.lock = aw_src.lock;            \
   aw_dst.lock = aw_src.lock;            \
   aw_dst.cache = aw_src.cache;          \
   aw_dst.prot = aw_src.prot;            \
