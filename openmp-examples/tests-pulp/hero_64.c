@@ -53,13 +53,18 @@ inline static void check_fail(const uint64_t base)
   assert(hero_load_uint64_noblock(addr, (__device uint64_t*)&dummy) != 0);
 }
 
+uint64_t align_64(uint64_t addr)
+{
+  return (addr >> 3) << 3;
+}
+
 unsigned test_hero_64()
 {
-  const uint64_t l1_base        = (uint64_t)pulp_l1_end() - 8*pulp_stack_size();
-  const uint64_t l1_alias_base  = (uint64_t)pulp_l1_alias_end() - 8*pulp_stack_size();
-  const uint64_t l1_other_base  = (uint64_t)pulp_cluster_base(1) + 0x1000;
-  const uint64_t l2_base        = (uint64_t)pulp_l2_end() - 0x1000;
-  const uint64_t dram           = 0x0123000000000000;
+  const uint64_t l1_base        = align_64((uint64_t)pulp_l1_end() - 8*pulp_stack_size());
+  const uint64_t l1_alias_base  = align_64((uint64_t)pulp_l1_alias_end() - 8*pulp_stack_size());
+  const uint64_t l1_other_base  = align_64((uint64_t)pulp_cluster_base(1) + 0x1000);
+  const uint64_t l2_base        = align_64((uint64_t)pulp_l2_end() - 0x1000);
+  const uint64_t dram           = align_64(0x0123000000000000);
   for (uint32_t offset = 0; offset < 8; offset++) {
     printf("Testing accesses with offset %d...\n", offset);
     #pragma omp parallel
