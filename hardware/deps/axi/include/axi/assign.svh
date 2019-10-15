@@ -414,10 +414,9 @@
 `define AXI_SET_AR_CHAN(ar_dst, ar_src) \
   ar_dst.id = ar_src.id;                \
   ar_dst.addr = ar_src.addr;            \
-  ar_dst.len = ar_src.addr;             \
+  ar_dst.len = ar_src.len;              \
   ar_dst.size = ar_src.size;            \
   ar_dst.burst = ar_src.burst;          \
-  ar_dst.lock = ar_src.lock;            \
   ar_dst.lock = ar_src.lock;            \
   ar_dst.cache = ar_src.cache;          \
   ar_dst.prot = ar_src.prot;            \
