@@ -494,7 +494,7 @@ module axi_data_upsize #(
                     r_state_d       = R_INCR_UPSIZE;
                   end // case: BURST_INCR
                 endcase // case (int_slv_ar.burst)
-            end // if (int_slv_ar.valid && (idx_read_fsm == t))
+            end // if (int_slv_ar_req && (idx_read_fsm == t))
           end // case: R_IDLE
 
           R_PASSTHROUGH, R_INCR_UPSIZE:
