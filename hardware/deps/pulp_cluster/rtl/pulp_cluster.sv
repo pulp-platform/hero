@@ -737,6 +737,7 @@ module pulp_cluster
     .core_periph_slave_atop ( s_core_periph_bus_atop              ),
     .core_periph_slave_addrext ( s_core_periph_bus_addrext        ),
     .ext_slave              ( s_ext_xbar_bus                      ),
+    .ext_slave_atop         ( s_ext_xbar_bus_atop                 ),
     .dma_slave              ( s_dma_xbar_bus                      ),
     .mperiph_slave          ( s_mperiph_xbar_bus[NB_MPERIPHS-1:0] ),
     .tcdm_sram_master       ( s_tcdm_bus_sram                     ),

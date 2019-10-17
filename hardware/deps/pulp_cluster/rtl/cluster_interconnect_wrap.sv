@@ -47,6 +47,7 @@ module cluster_interconnect_wrap
   input logic [NB_CORES-1:0][5:0]      core_periph_slave_atop,
   input logic [NB_CORES-1:0][31:0]     core_periph_slave_addrext,
   XBAR_TCDM_BUS.Slave                  ext_slave[NB_EXT-1:0],
+  input logic [NB_EXT-1:0][5:0]        ext_slave_atop,
   XBAR_TCDM_BUS.Slave                  dma_slave[NB_DMAS-1:0],
   XBAR_TCDM_BUS.Slave                  mperiph_slave[NB_MPERIPHS-1:0],
   TCDM_BANK_MEM_BUS.Master             tcdm_sram_master[NB_TCDM_BANKS-1:0],
@@ -174,6 +175,8 @@ module cluster_interconnect_wrap
     end
     if (i < NB_CORES) begin
       assign iconn_inp_wdata[i].atop = core_tcdm_slave_atop[i];
+    end else if (i < NB_CORES + NB_EXT) begin
+      assign iconn_inp_wdata[i].atop = ext_slave_atop[i-NB_CORES];
     end else begin
       assign iconn_inp_wdata[i].atop = '0;
     end
