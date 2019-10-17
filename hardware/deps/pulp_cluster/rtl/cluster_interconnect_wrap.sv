@@ -188,20 +188,21 @@ module cluster_interconnect_wrap
     always_comb begin
       data = iconn_oup_wdata[i].data;
       if (atop[5]) begin
-        casex (atop[4:0])
-          5'b00000: amo = 4'h2; // AMOAdd
-          5'b00001: amo = 4'h1; // AMOSwap
-          5'b0001x: $error("Unsupported LR/SC on L1!");
+        unique casez (atop[4:0])
+          riscv_defines::AMO_ADD:   amo = 4'h2;
+          riscv_defines::AMO_SWAP:  amo = 4'h1;
+          riscv_defines::AMO_LR:    $error("Unsupported LR on L1!");
+          riscv_defines::AMO_SC:    $error("Unsupported SC on L1!");
           default: begin
             assert (atop[1:0] == '0) else $error("Illegal AMO!");
-            case (atop[4:2])
-              3'b001: amo = 4'h5; // AMOXor
-              3'b010: amo = 4'h4; // AMOOr
-              3'b011: amo = 4'h3; // AMOAnd
-              3'b100: amo = 4'h8; // AMOMin
-              3'b101: amo = 4'h6; // AMOMax
-              3'b110: amo = 4'h9; // AMOMinu
-              3'b111: amo = 4'h7; // AMOMaxu
+            unique case (atop[4:2])
+              riscv_defines::AMO_XOR[4:2]:  amo = 4'h5;
+              riscv_defines::AMO_OR[4:2]:   amo = 4'h4;
+              riscv_defines::AMO_AND[4:2]:  amo = 4'h3;
+              riscv_defines::AMO_MIN[4:2]:  amo = 4'h8;
+              riscv_defines::AMO_MAX[4:2]:  amo = 4'h6;
+              riscv_defines::AMO_MINU[4:2]: amo = 4'h9;
+              riscv_defines::AMO_MAXU[4:2]: amo = 4'h7;
             endcase
           end
         endcase
