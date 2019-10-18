@@ -25,5 +25,13 @@ unsigned test_m_instrs();
 int test_omp_atomic();
 int test_omp_for_schedule_static();
 int test_omp_parallel_for_reduction();
+int test_omp_barrier();
+int test_omp_for_schedule_dynamic();
+int test_omp_parallel_for_private();
+int test_omp_parallel_for_firstprivate();
+int test_omp_parallel_for_lastprivate();
+int test_omp_single();
+int test_omp_critical();
+int test_omp_master_3();
 
 #endif

@@ -35,11 +35,22 @@ int main(int argc, char *argv[])
 
   printf("Testing `omp for` with static schedule ..\n");
   n_errors += !test_omp_for_schedule_static();
+  printf("Testing `omp for` with dynamic schedule ..\n");
+  n_errors += !test_omp_for_schedule_dynamic();
   printf("Testing `omp parallel for reduction` ..\n");
   n_errors += !test_omp_parallel_for_reduction();
   printf("Testing `omp atomic` ..\n");
   n_errors += !test_omp_atomic();
+  n_errors += !test_omp_barrier();
+  n_errors += !test_omp_parallel_for_private();
+  n_errors += !test_omp_parallel_for_firstprivate();
+  n_errors += !test_omp_parallel_for_lastprivate();
+  n_errors += !test_omp_single();
+  n_errors += !test_omp_critical();
+  n_errors += !test_omp_master_3();
+
   printf("All OpenMP tests completed.\n");
+
 
   assert(n_errors == 0);
   return n_errors;
