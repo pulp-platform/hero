@@ -1,0 +1,1 @@
+../../toolchain/openmp/runtime/test/critical/omp_critical.c
