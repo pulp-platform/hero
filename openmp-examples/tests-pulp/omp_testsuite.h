@@ -13,7 +13,7 @@
 #define REPETITIONS 1 /* Number of times to run each test */
 
 /* following times are in seconds */
-#define SLEEPTIME 1
+#define SLEEPTIME 1000
 
 /* Definitions for tasks                                  */
 /**********************************************************/
