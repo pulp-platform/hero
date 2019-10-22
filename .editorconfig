@@ -31,3 +31,12 @@ indent_size = 2
 
 [GIT_COMMITMSG]
 max_line_length = 72
+
+# The format in diffs should be preserved, so disable all formatting options for them.
+[*.diff]
+end_of_line = unset
+indent_size = unset
+indent_style = unset
+insert_final_newline = false
+max_line_length = 0
+trim_trailing_whitespace = false
