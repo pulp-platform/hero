@@ -1,6 +1,5 @@
 *.bin
 *.mcs
-*.out
 /install/
 output/*
 local.mk
