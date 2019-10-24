@@ -55,18 +55,15 @@ inline static void check_fail(const uint64_t base)
 
 unsigned test_hero_64()
 {
-  const uint64_t l1_base        = (uint64_t)pulp_l1_end() - 8*pulp_stack_size();
-  const uint64_t l1_alias_base  = (uint64_t)pulp_l1_alias_end() - 8*pulp_stack_size();
-  const uint64_t l2_base        = (uint64_t)pulp_l2_end() - 0x1000;
-  const uint64_t dram           = 0x0123000000000000;
   for (uint32_t offset = 0; offset < 8; offset++) {
     printf("Testing accesses with offset %d...\n", offset);
     #pragma omp parallel
     {
-      check_addr(l1_base + offset);
-      check_addr(l1_alias_base + offset);
-      check_addr(l2_base + offset);
-      check_addr(dram + offset);
+      check_addr(test_l1_base() + offset);
+      check_addr(test_l1_alias_base() + offset);
+      check_addr(test_l1_other_base() + offset);
+      check_addr(test_l2_base() + offset);
+      check_addr(test_dram_base() + offset);
     }
     printf("Testing failure response to zero page with offset %d...\n", offset);
     #pragma omp parallel

@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
   n_errors += test_m_instrs();
   n_errors += test_dma();
   n_errors += test_hero_64();
+  n_errors += test_atomic();
 
   printf("Testing `omp for` with static schedule ..\n");
   n_errors += !test_omp_for_schedule_static();

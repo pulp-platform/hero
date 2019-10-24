@@ -15,12 +15,13 @@
  * Igor Loi <igor.loi@unibo.it>
  * Francesco Conti <fconti@iis.ee.ethz.ch>
  */
- 
+
 module cluster_interconnect_wrap
 #(
   parameter NB_CORES        = 8,
   parameter NB_HWACC_PORTS  = 4,
   parameter NB_DMAS         = 4,
+  parameter NB_EXT          = 4,
   parameter NB_MPERIPHS     = 1,
   parameter NB_TCDM_BANKS   = 16,
   parameter NB_SPERIPHS     = 3,
@@ -45,7 +46,8 @@ module cluster_interconnect_wrap
   XBAR_PERIPH_BUS.Slave                core_periph_slave[NB_CORES-1:0],
   input logic [NB_CORES-1:0][5:0]      core_periph_slave_atop,
   input logic [NB_CORES-1:0][31:0]     core_periph_slave_addrext,
-  XBAR_TCDM_BUS.Slave                  ext_slave[NB_DMAS-1:0],
+  XBAR_TCDM_BUS.Slave                  ext_slave[NB_EXT-1:0],
+  input logic [NB_EXT-1:0][5:0]        ext_slave_atop,
   XBAR_TCDM_BUS.Slave                  dma_slave[NB_DMAS-1:0],
   XBAR_TCDM_BUS.Slave                  mperiph_slave[NB_MPERIPHS-1:0],
   TCDM_BANK_MEM_BUS.Master             tcdm_sram_master[NB_TCDM_BANKS-1:0],
@@ -54,17 +56,17 @@ module cluster_interconnect_wrap
   input logic [1:0]                    TCDM_arb_policy_i
 );
 
-  localparam TCDM_ID_WIDTH = NB_CORES+NB_DMAS+4+NB_HWACC_PORTS;
+  localparam TCDM_ID_WIDTH = NB_CORES+NB_DMAS+NB_EXT+NB_HWACC_PORTS;
 
   // DMA --> LOGARITHMIC INTERCONNECT BUS SIGNALS
-  logic [4+NB_DMAS-1:0][DATA_WIDTH-1:0] s_dma_bus_wdata;
-  logic [4+NB_DMAS-1:0][ADDR_WIDTH-1:0] s_dma_bus_add;
-  logic [4+NB_DMAS-1:0]                 s_dma_bus_req;
-  logic [4+NB_DMAS-1:0]                 s_dma_bus_wen;
-  logic [4+NB_DMAS-1:0][BE_WIDTH-1:0]   s_dma_bus_be;
-  logic [4+NB_DMAS-1:0]                 s_dma_bus_gnt;
-  logic [4+NB_DMAS-1:0][DATA_WIDTH-1:0] s_dma_bus_r_rdata;
-  logic [4+NB_DMAS-1:0]                 s_dma_bus_r_valid;
+  logic [NB_EXT+NB_DMAS-1:0][DATA_WIDTH-1:0] s_dma_bus_wdata;
+  logic [NB_EXT+NB_DMAS-1:0][ADDR_WIDTH-1:0] s_dma_bus_add;
+  logic [NB_EXT+NB_DMAS-1:0]                 s_dma_bus_req;
+  logic [NB_EXT+NB_DMAS-1:0]                 s_dma_bus_wen;
+  logic [NB_EXT+NB_DMAS-1:0][BE_WIDTH-1:0]   s_dma_bus_be;
+  logic [NB_EXT+NB_DMAS-1:0]                 s_dma_bus_gnt;
+  logic [NB_EXT+NB_DMAS-1:0][DATA_WIDTH-1:0] s_dma_bus_r_rdata;
+  logic [NB_EXT+NB_DMAS-1:0]                 s_dma_bus_r_valid;
 
   // DEMUX --> LOGARITHMIC INTERCONNECT BUS SIGNALS
   logic [NB_CORES+NB_HWACC_PORTS-1:0][DATA_WIDTH-1:0] s_core_tcdm_bus_wdata;
@@ -98,7 +100,7 @@ module cluster_interconnect_wrap
   endgenerate
 
   generate
-    for (genvar i=0; i<NB_DMAS; i++) begin : AXI2MEM_BIND
+    for (genvar i=0; i<NB_EXT; i++) begin : AXI2MEM_BIND
       assign s_dma_bus_add[i]      = ext_slave[i].add;
       assign s_dma_bus_req[i]      = ext_slave[i].req;
       assign s_dma_bus_wdata[i]    = ext_slave[i].wdata;
@@ -113,26 +115,25 @@ module cluster_interconnect_wrap
 
   generate
     for (genvar i=0; i<NB_DMAS; i++) begin : DMAS_BIND
-      // +4 takes into account the 4 ports used in axi2mem
-      assign s_dma_bus_add[i+4]    = dma_slave[i].add;
-      assign s_dma_bus_req[i+4]    = dma_slave[i].req;
-      assign s_dma_bus_wdata[i+4]  = dma_slave[i].wdata;
-      assign s_dma_bus_wen[i+4]    = dma_slave[i].wen;
-      assign s_dma_bus_be[i+4]     = dma_slave[i].be;
+      assign s_dma_bus_add[NB_EXT+i]    = dma_slave[i].add;
+      assign s_dma_bus_req[NB_EXT+i]    = dma_slave[i].req;
+      assign s_dma_bus_wdata[NB_EXT+i]  = dma_slave[i].wdata;
+      assign s_dma_bus_wen[NB_EXT+i]    = dma_slave[i].wen;
+      assign s_dma_bus_be[NB_EXT+i]     = dma_slave[i].be;
 
-      assign dma_slave[i].gnt      = s_dma_bus_gnt[i+NB_DMAS];
-      assign dma_slave[i].r_valid  = s_dma_bus_r_valid[i+NB_DMAS];
-      assign dma_slave[i].r_rdata  = s_dma_bus_r_rdata[i+NB_DMAS];
+      assign dma_slave[i].gnt      = s_dma_bus_gnt[NB_EXT+i];
+      assign dma_slave[i].r_valid  = s_dma_bus_r_valid[NB_EXT+i];
+      assign dma_slave[i].r_rdata  = s_dma_bus_r_rdata[NB_EXT+i];
     end
   endgenerate
 
-  localparam NUM_TCDM_ICONN_IN = NB_CORES + NB_HWACC_PORTS + NB_DMAS + 4;
+  localparam NUM_TCDM_ICONN_IN = NB_CORES + NB_HWACC_PORTS + NB_DMAS + NB_EXT;
   typedef struct packed {
     logic [DATA_WIDTH-1:0]  data;
     logic [5:0]             atop;
   } tcdm_data_t;
-  tcdm_data_t [NUM_TCDM_ICONN_IN-1:0] iconn_inp_wdata, iconn_inp_rdata,
-                                      iconn_oup_wdata, iconn_oup_rdata;
+  tcdm_data_t [NUM_TCDM_ICONN_IN-1:0] iconn_inp_wdata, iconn_inp_rdata;
+  tcdm_data_t     [NB_TCDM_BANKS-1:0] iconn_oup_wdata, iconn_oup_rdata;
   tcdm_interconnect #(
     .NumIn        ( NUM_TCDM_ICONN_IN           ),
     .NumOut       ( NB_TCDM_BANKS               ),
@@ -174,6 +175,8 @@ module cluster_interconnect_wrap
     end
     if (i < NB_CORES) begin
       assign iconn_inp_wdata[i].atop = core_tcdm_slave_atop[i];
+    end else if (i < NB_CORES + NB_EXT) begin
+      assign iconn_inp_wdata[i].atop = ext_slave_atop[i-NB_CORES];
     end else begin
       assign iconn_inp_wdata[i].atop = '0;
     end
@@ -188,20 +191,21 @@ module cluster_interconnect_wrap
     always_comb begin
       data = iconn_oup_wdata[i].data;
       if (atop[5]) begin
-        casex (atop[4:0])
-          5'b00000: amo = 4'h2; // AMOAdd
-          5'b00001: amo = 4'h1; // AMOSwap
-          5'b0001x: $error("Unsupported LR/SC on L1!");
+        unique casez (atop[4:0])
+          riscv_defines::AMO_ADD:   amo = 4'h2;
+          riscv_defines::AMO_SWAP:  amo = 4'h1;
+          riscv_defines::AMO_LR:    $error("Unsupported LR on L1!");
+          riscv_defines::AMO_SC:    $error("Unsupported SC on L1!");
           default: begin
             assert (atop[1:0] == '0) else $error("Illegal AMO!");
-            case (atop[4:2])
-              3'b001: amo = 4'h5; // AMOXor
-              3'b010: amo = 4'h4; // AMOOr
-              3'b011: amo = 4'h3; // AMOAnd
-              3'b100: amo = 4'h8; // AMOMin
-              3'b101: amo = 4'h6; // AMOMax
-              3'b110: amo = 4'h9; // AMOMinu
-              3'b111: amo = 4'h7; // AMOMaxu
+            unique case (atop[4:2])
+              riscv_defines::AMO_XOR[4:2]:  amo = 4'h5;
+              riscv_defines::AMO_OR[4:2]:   amo = 4'h4;
+              riscv_defines::AMO_AND[4:2]:  amo = 4'h3;
+              riscv_defines::AMO_MIN[4:2]:  amo = 4'h8;
+              riscv_defines::AMO_MAX[4:2]:  amo = 4'h6;
+              riscv_defines::AMO_MINU[4:2]: amo = 4'h9;
+              riscv_defines::AMO_MAXU[4:2]: amo = 4'h7;
             endcase
           end
         endcase

@@ -219,10 +219,9 @@
 `define AXI_SET_AW_CHAN(aw_dst, aw_src) \
   aw_dst.id = aw_src.id;                \
   aw_dst.addr = aw_src.addr;            \
-  aw_dst.len = aw_src.addr;             \
+  aw_dst.len = aw_src.len;              \
   aw_dst.size = aw_src.size;            \
   aw_dst.burst = aw_src.burst;          \
-  aw_dst.lock = aw_src.lock;            \
   aw_dst.lock = aw_src.lock;            \
   aw_dst.cache = aw_src.cache;          \
   aw_dst.prot = aw_src.prot;            \
@@ -245,10 +244,9 @@
 `define AXI_SET_AR_CHAN(ar_dst, ar_src) \
   ar_dst.id = ar_src.id;                \
   ar_dst.addr = ar_src.addr;            \
-  ar_dst.len = ar_src.addr;             \
+  ar_dst.len = ar_src.len;              \
   ar_dst.size = ar_src.size;            \
   ar_dst.burst = ar_src.burst;          \
-  ar_dst.lock = ar_src.lock;            \
   ar_dst.lock = ar_src.lock;            \
   ar_dst.cache = ar_src.cache;          \
   ar_dst.prot = ar_src.prot;            \

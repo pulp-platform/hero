@@ -89,4 +89,33 @@ inline static void* pulp_cluster_base(const unsigned cluster_id)
   return pulp_l1_base() + cluster_id * (unsigned)&__pulp_cluster_size;
 }
 
+inline static uint64_t align_64(uint64_t addr)
+{
+  return (addr >> 3) << 3;
+}
+
+inline static uint64_t test_l1_base()
+{
+  return align_64((uint64_t)pulp_l1_end() - pulp_cluster_n_cores()*pulp_stack_size());
+}
+
+inline static uint64_t test_l1_alias_base()
+{
+  return align_64((uint64_t)pulp_l1_alias_end() - pulp_cluster_n_cores()*pulp_stack_size());
+}
+
+inline static uint64_t test_l1_other_base()
+{
+  return align_64((uint64_t)pulp_cluster_base(1) + 0x1000);
+}
+inline static uint64_t test_l2_base()
+{
+  return align_64((uint64_t)pulp_l2_end() - 0x1000);
+}
+
+inline static uint64_t test_dram_base()
+{
+  return align_64(0x0123000000000000);
+}
+
 #endif

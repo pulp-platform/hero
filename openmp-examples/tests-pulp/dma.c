@@ -126,14 +126,14 @@ static unsigned to_or_from_l1()
   n_errors += check_to_or_from_l1(l3, loc, n_elem);
   printf("DMA: L2 to L1 ..\n");
   n_errors += check_to_or_from_l1(l2, loc, n_elem);
-  printf("DMA: Other L1 to L1 ..\n");
-  n_errors += check_to_or_from_l1(other_l1, loc, n_elem);
-  printf("DMA: L3 to L1..\n");
+  //printf("DMA: Other L1 to L1 ..\n");
+  //n_errors += check_to_or_from_l1(other_l1, loc, n_elem);
+  printf("DMA: L1 to L3 ..\n");
   n_errors += check_to_or_from_l1(loc, l3, n_elem);
-  printf("DMA: L1 to L2..\n");
+  printf("DMA: L1 to L2 ..\n");
   n_errors += check_to_or_from_l1(loc, l2, n_elem);
-  printf("DMA: L1 to other L1..\n");
-  n_errors += check_to_or_from_l1(loc, other_l1, n_elem);
+  //printf("DMA: L1 to other L1 ..\n");
+  //n_errors += check_to_or_from_l1(loc, other_l1, n_elem);
 
   hero_l1free(loc);
   return n_errors;
