@@ -96,8 +96,8 @@ all: $(DEPS) $(EXE) $(EXE).dis
 
 %-dev.OMP.ll: %.ll
 	hc-omp-pass $(<:.ll=-dev.ll) OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(@:.OMP.ll=.TMP.1.ll)
-	#hc-omp-pass $(@:.OMP.ll=.TMP.1.ll) OmpAddressSpaceAnnotator "HERCULES-omp-address-space-annotator" $(@:.OMP.ll=.TMP.2.ll)
-	hc-omp-pass $(@:.OMP.ll=.TMP.1.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(@:.OMP.ll=.TMP.3.ll)
+	hc-omp-pass $(@:.OMP.ll=.TMP.1.ll) OmpAddressSpaceAnnotator "HERCULES-omp-address-space-annotator" $(@:.OMP.ll=.TMP.2.ll)
+	hc-omp-pass $(@:.OMP.ll=.TMP.2.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(@:.OMP.ll=.TMP.3.ll)
 	cp $(@:.OMP.ll=.TMP.3.ll) $@
 
 %-host.OMP.ll: %.ll
