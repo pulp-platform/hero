@@ -103,7 +103,7 @@ void kernel_2mm_dma(int ni, int nj, int nk, int nl,
         memcpy_to_spm(A_spm, ((int*) A) + row*NK, chunk_rows*NK);
         dma_flush();
 
-        #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
+        #pragma omp parallel for collapse(2) num_threads(NUM_THREADS) firstprivate(alpha)
         for (int i = 0; i < rows_per_chunk; i++) {
           for (int j = 0; j < NJ; j++) {
             tmp_spm[i*NJ+j] = 0;
@@ -139,7 +139,7 @@ void kernel_2mm_dma(int ni, int nj, int nk, int nl,
         memcpy_to_spm(D_spm, ((int*) D) + row*NK, chunk_rows*NK);
         dma_flush();
 
-        #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
+        #pragma omp parallel for collapse(2) num_threads(NUM_THREADS) firstprivate(beta)
         for (int i = 0; i < chunk_rows; i++) {
           for (int j = 0; j < NL; j++) {
             D_spm[i*NL+j] *= beta;

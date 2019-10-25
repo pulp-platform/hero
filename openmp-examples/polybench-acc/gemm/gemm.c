@@ -95,7 +95,7 @@ void kernel_gemm_dma(int ni, int nj, int nk,
         memcpy_to_spm(C_spm, ((int*) C) + row*NJ, chunk_rows*NJ);
         dma_flush();
 
-        #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
+        #pragma omp parallel for collapse(2) num_threads(NUM_THREADS) firstprivate(alpha, beta)
         for (int i = 0; i < chunk_rows; i++) {
           for (int j = 0; j < NJ; j++) {
             C_spm[i*NJ+j] *= beta;

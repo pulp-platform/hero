@@ -88,7 +88,7 @@ void kernel_atax_dma(int nx, int ny,
         #pragma omp parallel for num_threads(NUM_THREADS)
         for (int i = 0; i < chunk_rows; i++) {
           tmp_spm[i] = 0;
-          for (int j = 0; j < NY; j++){
+          for (int j = 0; j < NY; j++) {
             tmp_spm[i] = tmp_spm[i] + A_spm[i*NY+j] * x_spm[j];
           }
         }
@@ -117,7 +117,7 @@ void kernel_atax_dma(int nx, int ny,
         memcpy_to_spm(tmp_spm, ((int*) tmp) + row, chunk_rows);
         dma_flush();
 
-        #pragma omp parallel for num_threads(NUM_THREADS)
+        #pragma omp parallel for num_threads(NUM_THREADS) firstprivate(chunk_rows)
         for (int i = 0; i < NY; i++) {
           y_spm[i] = 0;
           for (int j = 0; j < chunk_rows; j++)
@@ -128,7 +128,7 @@ void kernel_atax_dma(int nx, int ny,
 
       memcpy_from_spm(((int*) y), y_spm, NY);
       dma_flush();
-    
+
       dealloc_spm(spm);
     }
   }
