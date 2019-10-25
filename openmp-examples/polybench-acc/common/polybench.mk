@@ -3,15 +3,20 @@ PBMK_ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 ifeq ($(threads),)
 	threads = 8
 endif
-
 ifeq ($(mem),)
 	mem = 2
+endif
+ifeq ($(dma),)
+  dma = n
 endif
 
 PBFLAGS = -DPOLYBENCH_USE_SCALAR_LB -DPOLYBENCH_TIME -DNUM_TEAMS=1 -DNUM_THREADS=$(threads) -DPOLYBENCH_HERO_MEM_LEVEL=$(mem)
 
-ifeq ($(dma),y)
+ifneq ($(dma),n)
 	PBFLAGS += -DPOLYBENCH_DMA
+endif
+ifeq ($(dma),device)
+	PBFLAGS += -DDMALIB_DEVICE_AS
 endif
 
 ifneq ($(dump),n)

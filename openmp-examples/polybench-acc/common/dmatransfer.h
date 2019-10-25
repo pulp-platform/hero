@@ -2,7 +2,7 @@
 #define SPM_SIZE (128*1024/4)
 
 #if defined(__PULP__) || defined(PULP)
-#ifdef __llvm__
+#if defined(__llvm__) && defined(DMALIB_DEVICE_AS)
 #define DMA_DATA_TYPE __device int*
 #else
 #define DMA_DATA_TYPE int*
