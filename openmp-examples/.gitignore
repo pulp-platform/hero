@@ -7,8 +7,11 @@ offload.bin
 imgs_out
 __pycache__
 testsuite
-hero-sdk
+*.ini
 *.dis
 *.ll
+*.s
+*.i
+*.bc
 *.slm
 .deps/
