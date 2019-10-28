@@ -83,20 +83,20 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
     /* E := A*B */
     #pragma omp target
     {
-      DMA_DATA_TYPE spm = alloc_spm();
+      DATA_TYPE* spm = alloc_spm();
       int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
 
-      DMA_DATA_TYPE B_spm = spm;
-      DMA_DATA_TYPE A_spm = spm + NJ*NK;
-      DMA_DATA_TYPE E_spm = spm + NJ*NK + NK*rows_per_chunk;
+      DATA_TYPE* B_spm = spm;
+      DATA_TYPE* A_spm = spm + NJ*NK;
+      DATA_TYPE* E_spm = spm + NJ*NK + NK*rows_per_chunk;
 
-      memcpy_to_spm(B_spm, ((int*) B), NJ*NK);
+      memcpy_to_spm(B_spm, ((DATA_TYPE*) B), NJ*NK);
 
       int row = 0;
       while (row < NI) {
         int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
 
-        memcpy_to_spm(A_spm, ((int*) A) + row*NK, chunk_rows*NK);
+        memcpy_to_spm(A_spm, ((DATA_TYPE*) A) + row*NK, chunk_rows*NK);
         dma_flush();
 
         #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
@@ -108,7 +108,7 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
           }
         }
 
-        memcpy_from_spm(((int*) E) + row*NJ, E_spm, chunk_rows*NJ);
+        memcpy_from_spm(((DATA_TYPE*) E) + row*NJ, E_spm, chunk_rows*NJ);
         dma_flush();
         row += rows_per_chunk;
       }
@@ -118,20 +118,20 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
     /* F := C*D */
     #pragma omp target
     {
-      DMA_DATA_TYPE spm = alloc_spm();
+      DATA_TYPE* spm = alloc_spm();
       int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
 
-      DMA_DATA_TYPE D_spm = spm;
-      DMA_DATA_TYPE C_spm = spm + NJ*NK;
-      DMA_DATA_TYPE F_spm = spm + NJ*NK + NK*rows_per_chunk;
+      DATA_TYPE* D_spm = spm;
+      DATA_TYPE* C_spm = spm + NJ*NK;
+      DATA_TYPE* F_spm = spm + NJ*NK + NK*rows_per_chunk;
 
-      memcpy_to_spm(D_spm, ((int*) D), NJ*NK);
+      memcpy_to_spm(D_spm, ((DATA_TYPE*) D), NJ*NK);
 
       int row = 0;
       while (row < NI) {
         int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
 
-        memcpy_to_spm(C_spm, ((int*) C) + row*NK, chunk_rows*NK);
+        memcpy_to_spm(C_spm, ((DATA_TYPE*) C) + row*NK, chunk_rows*NK);
         dma_flush();
 
         #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
@@ -143,7 +143,7 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
           }
         }
 
-        memcpy_from_spm(((int*) F) + row*NJ, F_spm, chunk_rows*NJ);
+        memcpy_from_spm(((DATA_TYPE*) F) + row*NJ, F_spm, chunk_rows*NJ);
         dma_flush();
         row += rows_per_chunk;
       }
@@ -153,20 +153,20 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
     /* G := E*F */
     #pragma omp target
     {
-      DMA_DATA_TYPE spm = alloc_spm();
+      DATA_TYPE* spm = alloc_spm();
       int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
 
-      DMA_DATA_TYPE F_spm = spm;
-      DMA_DATA_TYPE G_spm = spm + NJ*NK;
-      DMA_DATA_TYPE E_spm = spm + NJ*NK + NK*rows_per_chunk;
+      DATA_TYPE* F_spm = spm;
+      DATA_TYPE* G_spm = spm + NJ*NK;
+      DATA_TYPE* E_spm = spm + NJ*NK + NK*rows_per_chunk;
 
-      memcpy_to_spm(F_spm, ((int*) F), NJ*NK);
+      memcpy_to_spm(F_spm, ((DATA_TYPE*) F), NJ*NK);
 
       int row = 0;
       while (row < NI) {
         int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
 
-        memcpy_to_spm(E_spm, ((int*) E) + row*NK, chunk_rows*NK);
+        memcpy_to_spm(E_spm, ((DATA_TYPE*) E) + row*NK, chunk_rows*NK);
         dma_flush();
 
         #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
@@ -178,7 +178,7 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
           }
         }
 
-        memcpy_from_spm(((int*) G) + row*NJ, G_spm, chunk_rows*NJ);
+        memcpy_from_spm(((DATA_TYPE*) G) + row*NJ, G_spm, chunk_rows*NJ);
         dma_flush();
         row += rows_per_chunk;
       }

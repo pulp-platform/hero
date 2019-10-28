@@ -70,19 +70,19 @@ void kernel_atax_dma(int nx, int ny,
   {
     #pragma omp target
     {
-      DMA_DATA_TYPE spm = alloc_spm();
+      DATA_TYPE* spm = alloc_spm();
       int rows_per_chunk = NX; // (SPM_SIZE - NY) / (NY + 1);
 
-      DMA_DATA_TYPE x_spm = spm;
-      DMA_DATA_TYPE tmp_spm = spm + NY;
-      DMA_DATA_TYPE A_spm = spm + NY + rows_per_chunk;
+      DATA_TYPE* x_spm = spm;
+      DATA_TYPE* tmp_spm = spm + NY;
+      DATA_TYPE* A_spm = spm + NY + rows_per_chunk;
 
-      memcpy_to_spm(x_spm, ((int*) x), NY);
+      memcpy_to_spm(x_spm, ((DATA_TYPE*) x), NY);
 
       int row = 0;
       while (row < NX) {
         int chunk_rows = (row + rows_per_chunk < NX) ? rows_per_chunk : (NX - row);
-        memcpy_to_spm(A_spm, ((int*) A) + row*NY, chunk_rows*NY);
+        memcpy_to_spm(A_spm, ((DATA_TYPE*) A) + row*NY, chunk_rows*NY);
         dma_flush();
 
         #pragma omp parallel for num_threads(NUM_THREADS)
@@ -93,7 +93,7 @@ void kernel_atax_dma(int nx, int ny,
           }
         }
 
-        memcpy_from_spm(((int*) tmp) + row, tmp_spm, chunk_rows);
+        memcpy_from_spm(((DATA_TYPE*) tmp) + row, tmp_spm, chunk_rows);
         dma_flush();
         row += rows_per_chunk;
       }
@@ -103,18 +103,18 @@ void kernel_atax_dma(int nx, int ny,
 
     #pragma omp target
     {
-      DMA_DATA_TYPE spm = alloc_spm();
+      DATA_TYPE* spm = alloc_spm();
       int rows_per_chunk = NX; // (SPM_SIZE - NY) / (NY + 1);
 
-      DMA_DATA_TYPE y_spm = spm;
-      DMA_DATA_TYPE tmp_spm = spm + NY;
-      DMA_DATA_TYPE A_spm = spm + NY + rows_per_chunk;
+      DATA_TYPE* y_spm = spm;
+      DATA_TYPE* tmp_spm = spm + NY;
+      DATA_TYPE* A_spm = spm + NY + rows_per_chunk;
 
       int row = 0;
       while (row < NX) {
         int chunk_rows = (row + rows_per_chunk < NX) ? rows_per_chunk : (NX - row);
-        memcpy_to_spm(A_spm, ((int*) A) + row*NY, chunk_rows*NY);
-        memcpy_to_spm(tmp_spm, ((int*) tmp) + row, chunk_rows);
+        memcpy_to_spm(A_spm, ((DATA_TYPE*) A) + row*NY, chunk_rows*NY);
+        memcpy_to_spm(tmp_spm, ((DATA_TYPE*) tmp) + row, chunk_rows);
         dma_flush();
 
         #pragma omp parallel for num_threads(NUM_THREADS) firstprivate(chunk_rows)
@@ -126,7 +126,7 @@ void kernel_atax_dma(int nx, int ny,
         row += rows_per_chunk;
       }
 
-      memcpy_from_spm(((int*) y), y_spm, NY);
+      memcpy_from_spm(((DATA_TYPE*) y), y_spm, NY);
       dma_flush();
 
       dealloc_spm(spm);

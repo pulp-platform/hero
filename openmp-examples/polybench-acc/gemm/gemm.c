@@ -78,21 +78,21 @@ void kernel_gemm_dma(int ni, int nj, int nk,
   {
     #pragma omp target
     {
-      DMA_DATA_TYPE spm = alloc_spm();
+      DATA_TYPE* spm = alloc_spm();
       int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
 
-      DMA_DATA_TYPE B_spm = spm;
-      DMA_DATA_TYPE A_spm = spm + NJ*NK;
-      DMA_DATA_TYPE C_spm = spm + NJ*NK + NK*rows_per_chunk;
+      DATA_TYPE* B_spm = spm;
+      DATA_TYPE* A_spm = spm + NJ*NK;
+      DATA_TYPE* C_spm = spm + NJ*NK + NK*rows_per_chunk;
 
-      memcpy_to_spm(B_spm, ((int*) B), NJ*NK);
+      memcpy_to_spm(B_spm, ((DATA_TYPE*) B), NJ*NK);
 
       /* C := alpha*A*B + beta*C */
       int row = 0;
       while (row < NI) {
         int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
-        memcpy_to_spm(A_spm, ((int*) A) + row*NK, chunk_rows*NK);
-        memcpy_to_spm(C_spm, ((int*) C) + row*NJ, chunk_rows*NJ);
+        memcpy_to_spm(A_spm, ((DATA_TYPE*) A) + row*NK, chunk_rows*NK);
+        memcpy_to_spm(C_spm, ((DATA_TYPE*) C) + row*NJ, chunk_rows*NJ);
         dma_flush();
 
         #pragma omp parallel for collapse(2) num_threads(NUM_THREADS) firstprivate(alpha, beta)
@@ -105,7 +105,7 @@ void kernel_gemm_dma(int ni, int nj, int nk,
           }
         }
 
-        memcpy_from_spm(((int*) C) + row*NJ, C_spm, chunk_rows*NJ);
+        memcpy_from_spm(((DATA_TYPE*) C) + row*NJ, C_spm, chunk_rows*NJ);
         dma_flush();
         row += rows_per_chunk;
       }

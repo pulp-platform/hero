@@ -87,20 +87,20 @@ void kernel_2mm_dma(int ni, int nj, int nk, int nl,
   {
     #pragma omp target
     {
-      DMA_DATA_TYPE spm = alloc_spm();
-      int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
+      DATA_TYPE *spm = (DATA_TYPE*)alloc_spm();
+      int rows_per_chunk = NI;
 
-      DMA_DATA_TYPE B_spm = spm;
-      DMA_DATA_TYPE A_spm = spm + NJ*NK;
-      DMA_DATA_TYPE tmp_spm = spm + NJ*NK + NK*rows_per_chunk;
+      DATA_TYPE *B_spm = spm;
+      DATA_TYPE *A_spm = (spm + NJ*NK);
+      DATA_TYPE *tmp_spm = (spm + NJ*NK + NK*rows_per_chunk);
 
-      memcpy_to_spm(B_spm, ((int*) B), NJ*NK);
+      memcpy_to_spm(B_spm, ((DATA_TYPE*) B), NJ*NK);
 
       int row = 0;
       while (row < NI) {
         int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
 
-        memcpy_to_spm(A_spm, ((int*) A) + row*NK, chunk_rows*NK);
+        memcpy_to_spm(A_spm, ((DATA_TYPE*) A) + row*NK, chunk_rows*NK);
         dma_flush();
 
         #pragma omp parallel for collapse(2) num_threads(NUM_THREADS) firstprivate(alpha)
@@ -108,11 +108,11 @@ void kernel_2mm_dma(int ni, int nj, int nk, int nl,
           for (int j = 0; j < NJ; j++) {
             tmp_spm[i*NJ+j] = 0;
             for (int k = 0; k < NK; ++k)
-               tmp_spm[i*NJ+j] += alpha * A_spm[i*NK+k] * B_spm[k*NJ+j];
+              tmp_spm[i*NJ+j] += alpha * A_spm[i*NK+k] * B_spm[k*NJ+j];
           }
         }
 
-        memcpy_from_spm(((int*) tmp) + row*NJ, tmp_spm, chunk_rows*NJ);
+        memcpy_from_spm(((DATA_TYPE*) tmp) + row*NJ, tmp_spm, chunk_rows*NJ);
         dma_flush();
         row += rows_per_chunk;
       }
@@ -122,21 +122,21 @@ void kernel_2mm_dma(int ni, int nj, int nk, int nl,
 
     #pragma omp target
     {
-      DMA_DATA_TYPE spm = alloc_spm();
+      DATA_TYPE *spm = (DATA_TYPE*)alloc_spm();
       int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
 
-      DMA_DATA_TYPE C_spm = spm;
-      DMA_DATA_TYPE D_spm = spm + NJ*NK;
-      DMA_DATA_TYPE tmp_spm = spm + NJ*NK + NK*rows_per_chunk;
+      DATA_TYPE *C_spm = spm;
+      DATA_TYPE *D_spm = spm + NJ*NK;
+      DATA_TYPE *tmp_spm = spm + NJ*NK + NK*rows_per_chunk;
 
-      memcpy_to_spm(C_spm, ((int*) C), NJ*NK);
+      memcpy_to_spm(C_spm, ((DATA_TYPE*) C), NJ*NK);
 
       int row = 0;
       while (row < NI) {
         int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
 
-        memcpy_to_spm(tmp_spm, ((int*) tmp) + row*NK, chunk_rows*NK);
-        memcpy_to_spm(D_spm, ((int*) D) + row*NK, chunk_rows*NK);
+        memcpy_to_spm(tmp_spm, ((DATA_TYPE*) tmp) + row*NK, chunk_rows*NK);
+        memcpy_to_spm(D_spm, ((DATA_TYPE*) D) + row*NK, chunk_rows*NK);
         dma_flush();
 
         #pragma omp parallel for collapse(2) num_threads(NUM_THREADS) firstprivate(beta)
@@ -148,7 +148,7 @@ void kernel_2mm_dma(int ni, int nj, int nk, int nl,
           }
         }
 
-        memcpy_from_spm(((int*) D) + row*NJ, D_spm, chunk_rows*NJ);
+        memcpy_from_spm(((DATA_TYPE*) D) + row*NJ, D_spm, chunk_rows*NJ);
         dma_flush();
         row += rows_per_chunk;
       }
