@@ -17,6 +17,8 @@ ifneq ($(dma),n)
 endif
 ifeq ($(dma),device)
 	PBFLAGS += -DDMALIB_DEVICE_AS
+else
+	AS_ANNOTATE_ARGS += "-hero-disable-as-assign-opt"
 endif
 
 ifneq ($(dump),n)

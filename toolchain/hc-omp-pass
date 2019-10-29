@@ -45,6 +45,9 @@ PASS_OMP_PATH="$PASSROOT/lib$2.so"
 # LLVM pass names.
 PASS_OMP_NAME="-$3"
 
+# Extra arguments
+EXTRA_ARGS="$5"
+
 # Passes to run before each HERCULES pass.
 PASS_OMP_PREREQ=""
 
@@ -54,7 +57,7 @@ FINAL_OPTIMIZATIONS="-dce -gvn -instcombine -mergefunc -always-inline -simplifyc
 # =============================== EXECUTION ================================ #
 
 ${LLVM_BIN_DIR}opt "$BASENAME.ll" \
--load="$PASS_OMP_PATH"   $PASS_OMP_PREREQ   $PASS_OMP_NAME \
+-load="$PASS_OMP_PATH" $EXTRA_ARGS $PASS_OMP_PREREQ $PASS_OMP_NAME \
 $FINAL_OPTIMIZATIONS -o "$OUTPUT" -S
 
 # Check that the passes were successful before continuing.

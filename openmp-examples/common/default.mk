@@ -52,6 +52,8 @@ SRC = $(CSRCS)
 DEPDIR := .deps
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 
+AS_ANNOTATE_ARGS ?=
+
 only ?= # can be set to `pulp` to compile a binary only for PULP
 
 .PHONY: all exe clean
@@ -64,7 +66,7 @@ all : $(DEPS) $(EXE) $(EXE).dis slm
 	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS_PULP) $(INCPATHS) $<
 
 %.OMP.ll: %.ll
-	hc-omp-pass $< OmpAddressSpaceAnnotator "HERCULES-omp-address-space-annotator" $(<:.ll=.TMP.1.ll)
+	hc-omp-pass $< OmpAddressSpaceAnnotator "HERCULES-omp-address-space-annotator" $(<:.ll=.TMP.1.ll) $(AS_ANNOTATE_ARGS)
 	hc-omp-pass $(<:.ll=.TMP.1.ll) OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(<:.ll=.TMP.2.ll)
 	hc-omp-pass $(<:.ll=.TMP.2.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(<:.ll=.TMP.3.ll)
 	cp $(<:.ll=.TMP.3.ll) $(<:.ll=.OMP.ll)
