@@ -34,4 +34,6 @@ int test_omp_single();
 int test_omp_critical();
 int test_omp_master_3();
 
+int gcc_omp_parallel_for_schedule_static();
+int gcc_omp_parallel_for_schedule_dynamic();
 #endif

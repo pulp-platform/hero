@@ -74,6 +74,10 @@ int main(int argc, char *argv[])
   printf("Testing `omp sections reduction\n");
   n_errors += !test_omp_sections_reduction();
 
+  printf("Testing gcc `omp parallel for` with static schedule with pointers ..\n");
+  n_errors += !gcc_omp_parallel_for_schedule_static();
+  printf("Testing gcc `omp parallel for` with dynamic schedule with pointers ..\n");
+  n_errors += !gcc_omp_parallel_for_schedule_dynamic();
   printf("All OpenMP tests completed.\n");
 
   assert(n_errors == 0);
