@@ -49,6 +49,24 @@ int main(int argc, char *argv[])
   n_errors += !test_omp_critical();
   n_errors += !test_omp_master_3();
 
+  // tests for sections
+  printf("Testing `omp parallel sections firstprivate` ..\n");
+  n_errors += !test_omp_parallel_sections_firstprivate();
+  printf("Testing `omp parallel sections lastprivate` ..\n");
+  n_errors += !test_omp_parallel_sections_lastprivate();
+  printf("Testing `omp parallel sections private` ..\n");
+  n_errors += !test_omp_parallel_sections_private();
+  // printf("Testing `omp parallel sections reduction\n");
+  // n_errors += !test_omp_parallel_sections_reduction();
+  printf("Testing `omp sections firstprivate` ..\n");
+  n_errors += !test_omp_section_firstprivate();
+  printf("Testing `omp sections lastprivate` ..\n");
+  n_errors += !test_omp_section_lastprivate();
+  printf("Testing `omp sections private` ..\n");
+  n_errors += !test_omp_section_private();
+  // printf("Testing `omp sections reduction\n");
+  // n_errors += !test_omp_sections_reduction();
+
   printf("All OpenMP tests completed.\n");
 
   assert(n_errors == 0);
