@@ -12,7 +12,7 @@ int gcc_omp_parallel_for_schedule_dynamic (void)
     buf[i] = 5;
   for (i = 0; i < 64; i++)
     if (buf[i] != 5 * (i >= 10 && i < 54)){
-      printf("error 1 at loop-5\n");
+      printf("error 1 at gcc schedule dynamic\n");
       abort ();
     }
   printf("yeah\n");
@@ -23,7 +23,7 @@ int gcc_omp_parallel_for_schedule_dynamic (void)
     *p = 5;
   for (i = 0; i < 64; i++)
     if (buf[i] != 5 * (i >= 10 && i < 54)){
-      printf("error 31 at loop-5\n");
+      printf("error 1 at gcc schedule dynamic\n");
       abort ();
     }
   memset (buf, '\0', sizeof (buf));
@@ -32,7 +32,7 @@ int gcc_omp_parallel_for_schedule_dynamic (void)
     p[-2] = 6;
   for (i = 0; i < 64; i++)
     if (buf[i] != 6 * ((i & 1) && i <= 61)){
-      printf("error 32 at loop-5\n");
+      printf("error 2 at gcc schedule dynamic\n");
       abort ();
     }
   memset (buf, '\0', sizeof (buf));
@@ -41,7 +41,7 @@ int gcc_omp_parallel_for_schedule_dynamic (void)
     p[2] = 7;
   for (i = 0; i < 64; i++)
     if (buf[i] != 7 * ((i & 3) == 2 && i >= 18 && i < 53)){
-      printf("error 33 at loop-5\n");
+      printf("error 3 at gcc schedule dynamic\n");
       abort ();
     }
   memset (buf, '\0', sizeof (buf));
@@ -50,7 +50,7 @@ int gcc_omp_parallel_for_schedule_dynamic (void)
     p[2] = -7;
   for (i = 0; i < 64; i++)
     if (buf[i] != -7 * ((i & 3) == 2 && i >= 18 && i <= 42)){
-      printf("error 34 at loop-5\n");
+      printf("error 4 at gcc schedule dynamic\n");
       abort ();
     }
   memset (buf, '\0', sizeof (buf));
@@ -59,7 +59,7 @@ int gcc_omp_parallel_for_schedule_dynamic (void)
     *p = 5;
   for (i = 0; i < 64; i++)
     if (buf[i] != 5 * (i >= 10 && i < 54)){
-      printf("error 35 at loop-5\n");
+      printf("error 5 at gcc schedule dynamic\n");
       abort ();
     }
   memset (buf, '\0', sizeof (buf));
@@ -68,7 +68,7 @@ int gcc_omp_parallel_for_schedule_dynamic (void)
     p[-2] = 6;
   for (i = 0; i < 64; i++)
     if (buf[i] != 6 * ((i & 1) && i <= 61)){
-      printf("error 36 at loop-5\n");
+      printf("error 6 at gcc schedule dynamic\n");
       abort ();
     }
   memset (buf, '\0', sizeof (buf));
@@ -77,7 +77,7 @@ int gcc_omp_parallel_for_schedule_dynamic (void)
     p[2] = 7;
   for (i = 0; i < 64; i++)
     if (buf[i] != 7 * ((i & 3) == 2 && i >= 18 && i < 53)){
-      printf("error 37 at loop-5\n");
+      printf("error 7 at gcc schedule dynamic\n");
       abort ();
     }
   memset (buf, '\0', sizeof (buf));
@@ -86,7 +86,7 @@ int gcc_omp_parallel_for_schedule_dynamic (void)
     p[2] = -7;
   for (i = 0; i < 64; i++)
     if (buf[i] != -7 * ((i & 3) == 2 && i >= 18 && i <= 42)){
-      printf("error 38 at loop-5\n");
+      printf("error 8 at gcc schedule dynamic\n");
       abort ();
     }
   return 0;
