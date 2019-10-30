@@ -33,6 +33,14 @@ int test_omp_parallel_for_lastprivate();
 int test_omp_single();
 int test_omp_critical();
 int test_omp_master_3();
+int test_omp_parallel_sections_firstprivate();
+int test_omp_parallel_sections_lastprivate();
+int test_omp_parallel_sections_private();
+int test_omp_parallel_sections_reduction();
+int test_omp_section_firstprivate();
+int test_omp_section_lastprivate();
+int test_omp_section_private();
+int test_omp_sections_reduction();
 
 int gcc_omp_parallel_for_schedule_static();
 int gcc_omp_parallel_for_schedule_dynamic();
