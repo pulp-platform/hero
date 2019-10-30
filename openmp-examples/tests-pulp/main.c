@@ -51,7 +51,6 @@ int main(int argc, char *argv[])
 
   printf("All OpenMP tests completed.\n");
 
-
   assert(n_errors == 0);
   return n_errors;
 }
