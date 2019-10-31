@@ -1,6 +1,12 @@
+/**
+* Adapted from gcc test suit loop-5.c test2
+* https://github.com/gcc-mirror/gcc/blob/master/libgomp/testsuite/libgomp.c/loop-5.c
+*/
+
 #include <stdio.h>
 #include <omp.h>
 #include <stdlib.h>
+
 int gcc_omp_parallel_for_schedule_static (void)
 {
   int buf[64], *p;

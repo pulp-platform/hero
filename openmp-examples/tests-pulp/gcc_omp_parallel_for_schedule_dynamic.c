@@ -1,3 +1,8 @@
+/**
+* Adapted from gcc test suit loop-5.c test3
+* https://github.com/gcc-mirror/gcc/blob/master/libgomp/testsuite/libgomp.c/loop-5.c
+*/
+
 #include <omp.h>
 #include <stdlib.h>
 #include <string.h>
