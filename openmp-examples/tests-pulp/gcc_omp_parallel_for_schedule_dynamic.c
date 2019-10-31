@@ -13,18 +13,7 @@ int gcc_omp_parallel_for_schedule_dynamic (void)
   int i;
   memset (buf, '\0', sizeof (buf));
 #pragma omp parallel for schedule (dynamic, 3)
-  for (i = 10; i < 54; i++)
-    buf[i] = 5;
-  for (i = 0; i < 64; i++)
-    if (buf[i] != 5 * (i >= 10 && i < 54)){
-      printf("error 1 at gcc schedule dynamic\n");
-      abort ();
-    }
-  printf("yeah\n");
-
-#pragma omp parallel for schedule (dynamic, 3)
   for (p = &buf[10]; p < &buf[54]; p++)
-    printf("p=%p\n", p);
     *p = 5;
   for (i = 0; i < 64; i++)
     if (buf[i] != 5 * (i >= 10 && i < 54)){
