@@ -18,7 +18,7 @@ int gcc_omp_parallel_for_schedule_static (void)
   for (i = 0; i < omp_get_num_threads(); i++){
     if(omp_get_thread_num()!=i){
       printf("Error: for loop is not executed in parallel\n");
-      result = 1;
+      result += 1;
     }
   }
 #pragma omp parallel for schedule (static, 3) private(p)
