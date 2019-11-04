@@ -8,7 +8,6 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
-// Davide Rossi <davide.rossi@unibo.it>
 // Andreas Kurth <akurth@iis.ee.ethz.ch>
 
 module axi2mem #(
@@ -47,174 +46,177 @@ module axi2mem #(
   typedef logic [DataWidth/8-1:0] axi_strb_t;
   typedef logic [IdWidth-1:0]     axi_id_t;
 
-  logic       mem_req,    mem_gnt,
-              mem_we,
-              mem_rvalid;
-  addr_t      mem_addr;
-  axi_data_t  mem_rdata,  mem_wdata;
-  mem_atop_t  axi_atop,   mem_atop;
+  typedef struct packed {
+    addr_t      addr;
+    mem_atop_t  atop;
+    axi_strb_t  strb;
+    axi_data_t  wdata;
+    logic       we;
+  } mem_req_t;
 
-  axi_id_t                r_id;
-  logic       b_ready,    r_ready,
-              b_trigger,  r_trigger,
-                          r_last;
+  typedef struct packed {
+    addr_t          addr;
+    axi_pkg::atop_t atop;
+    axi_id_t        id;
+    logic           last;
+    logic           write;
+  } meta_t;
 
-  typedef enum logic [1:0] {
-    READ, WRITE, BOTH
-  } resp_arb_t;
-  resp_arb_t  resp_arb_fifo_inp,
-              resp_arb_fifo_oup;
-  logic       resp_arb_fifo_full,
-              resp_arb_fifo_push;
+  axi_data_t      mem_rdata,
+                  m2s_resp;
+  axi_pkg::len_t  r_cnt_d,        r_cnt_q,
+                  w_cnt_d,        w_cnt_q;
+  logic           arb_valid,      arb_ready,
+                  rd_valid,       rd_ready,
+                  wr_valid,       wr_ready,
+                  sel_b,
+                  sel_r,
+                  sel_valid,      sel_ready,
+                  meta_valid,     meta_ready,
+                  m2s_req_valid,  m2s_req_ready,
+                  m2s_resp_valid, m2s_resp_ready,
+                  mem_req_valid,  mem_req_ready,
+                  mem_rvalid;
+  mem_req_t       m2s_req,
+                  mem_req;
+  meta_t          ar_meta_d,      ar_meta_q,
+                  aw_meta_d,      aw_meta_q,
+                  meta;
 
-  assign busy_o = axi_req_i.aw_valid | axi_req_i.ar_valid | ~b_ready | ~r_ready;
+  assign busy_o = axi_req_i.aw_valid | axi_req_i.ar_valid | axi_req_i.w_valid |
+                    axi_resp_o.b_valid | axi_resp_o.r_valid |
+                    (r_cnt_q > 0) | (w_cnt_q > 0);
 
-  // Handle requests.
-  assign r_last = 1'b1;
+  // Handle reads.
   always_comb begin
+    // Default assignments
     axi_resp_o.ar_ready = 1'b0;
-    axi_resp_o.aw_ready = 1'b0;
-    axi_resp_o.w_ready = 1'b0;
-    b_trigger = 1'b0;
-    axi_atop = 'x;
-    mem_req = 1'b0;
-    mem_addr = 'x;
-    mem_we = 1'bx;
-    r_id = 'x;
-    r_trigger = 1'b0;
-    resp_arb_fifo_inp = resp_arb_t'('x);
-    resp_arb_fifo_push = 1'b0;
-    if (mem_gnt && !resp_arb_fifo_full) begin
-      // Memory is ready for new requests.
-      if (axi_req_i.aw_valid && axi_req_i.w_valid && b_ready) begin
-        // AW and W are valid and B is ready to process the response.
-        mem_addr = axi_req_i.aw.addr;
-        axi_atop = axi_req_i.aw.atop;
-        mem_we = 1'b1;
-        if (axi_req_i.aw.atop[5]) begin
-          // ATOP with R response
-          if (r_ready) begin
-            axi_resp_o.aw_ready = 1'b1;
-            axi_resp_o.w_ready = 1'b1;
-            mem_req = 1'b1;
-            b_trigger = 1'b1;
-            r_id = axi_req_i.aw.id;
-            r_trigger = 1'b1;
-            resp_arb_fifo_inp = BOTH;
-            resp_arb_fifo_push = 1'b1;
-          end
-        end else begin
-          // Regular write
-          axi_resp_o.aw_ready = 1'b1;
-          axi_resp_o.w_ready = 1'b1;
-          mem_req = 1'b1;
-          b_trigger = 1'b1;
-          resp_arb_fifo_inp = WRITE;
-          resp_arb_fifo_push = 1'b1;
-        end
-      end else if (axi_req_i.ar_valid && r_ready) begin
-        // AR is valid and R is ready to process the response.
-        axi_resp_o.ar_ready = 1'b1;
-        mem_addr = axi_req_i.ar.addr;
-        axi_atop = '0;
-        mem_we = 1'b0;
-        mem_req = 1'b1;
-        r_id = axi_req_i.ar.id;
-        r_trigger = 1'b1;
-        resp_arb_fifo_inp = READ;
-        resp_arb_fifo_push = 1'b1;
-      end
+    ar_meta_d = ar_meta_q;
+    r_cnt_d = r_cnt_q;
+    rd_valid = 1'b0;
+    // Handle R burst in progress.
+    if (r_cnt_q > '0) begin
+      $fatal("Read bursts are not implemented yet!");
+    // Handle new AR if there is one.
+    end else if (axi_req_i.ar_valid) begin
+      ar_meta_d = '{
+        addr:   axi_req_i.ar.addr,
+        atop:   '0,
+        id:     axi_req_i.ar.id,
+        last:   (axi_req_i.ar.len == '0),
+        write:  1'b0
+      };
+      r_cnt_d = axi_req_i.ar.len;
+      rd_valid = 1'b1;
+      axi_resp_o.ar_ready = rd_ready;
     end
   end
 
+  // Handle writes.
+  always_comb begin
+    // Default assignments
+    axi_resp_o.aw_ready = 1'b0;
+    axi_resp_o.w_ready = 1'b0;
+    aw_meta_d = aw_meta_q;
+    wr_valid = 1'b0;
+    w_cnt_d = w_cnt_q;
+    // Handle W bursts in progress.
+    if (w_cnt_q > '0) begin
+      $fatal("Write bursts are not implemented yet!");
+    // Handle new AW if there is one.
+    end else if (axi_req_i.aw_valid && axi_req_i.w_valid) begin
+      aw_meta_d = '{
+        addr:   axi_req_i.aw.addr,
+        atop:   axi_req_i.aw.atop,
+        id:     axi_req_i.aw.id,
+        last:   (axi_req_i.aw.len == '0),
+        write:  1'b1
+      };
+      w_cnt_d = axi_req_i.aw.len;
+      wr_valid = 1'b1;
+      axi_resp_o.aw_ready = wr_ready;
+      axi_resp_o.w_ready = wr_ready;
+    end
+  end
+
+  // Arbitrate between AR and AW.
+  stream_arbiter #(
+    .DATA_T (meta_t),
+    .N_INP  (2)
+  ) i_ax_arb (
+    .clk_i,
+    .rst_ni,
+    .inp_data_i   ({aw_meta_d, ar_meta_d}),
+    .inp_valid_i  ({wr_valid, rd_valid}),
+    .inp_ready_o  ({wr_ready, rd_ready}),
+    .oup_data_o   (meta),
+    .oup_valid_o  (arb_valid),
+    .oup_ready_i  (arb_ready)
+  );
+
+  // Fork arbitrated stream to meta data, memory requests, and R/B channel selection.
+  stream_fork #(
+    .N_OUP (3)
+  ) i_fork (
+    .clk_i,
+    .rst_ni,
+    .valid_i  (arb_valid),
+    .ready_o  (arb_ready),
+    .valid_o  ({sel_valid, meta_valid, m2s_req_valid}),
+    .ready_i  ({sel_ready, meta_ready, m2s_req_ready})
+  );
+
+  assign sel_b = meta.write & meta.last;
+  assign sel_r = ~meta.write | meta.atop[5];
+
   // Map AXI ATOPs to RI5CY AMOs.
   always_comb begin
-    mem_atop = '0;
-    mem_wdata = axi_req_i.w.data;
-    if (axi_atop[5:4] != axi_pkg::ATOP_NONE) begin
-      mem_atop[5] = 1'b1;
-      if (axi_atop == axi_pkg::ATOP_ATOMICSWAP) begin
-        mem_atop[4:0] = riscv_defines::AMO_SWAP;
+    m2s_req.atop = '0;
+    m2s_req.wdata = axi_req_i.w.data;
+    if (meta_valid && meta.atop[5:4] != axi_pkg::ATOP_NONE) begin
+      m2s_req.atop[5] = 1'b1;
+      if (meta.atop == axi_pkg::ATOP_ATOMICSWAP) begin
+        m2s_req.atop[4:0] = riscv_defines::AMO_SWAP;
       end else begin
-        case (axi_atop[2:0])
-          axi_pkg::ATOP_ADD:  mem_atop[4:0] = riscv_defines::AMO_ADD;
+        case (meta.atop[2:0])
+          axi_pkg::ATOP_ADD:  m2s_req.atop[4:0] = riscv_defines::AMO_ADD;
           axi_pkg::ATOP_CLR: begin
-            mem_atop[4:0] = riscv_defines::AMO_AND;
-            mem_wdata = ~axi_req_i.w.data;
+            m2s_req.atop[4:0] = riscv_defines::AMO_AND;
+            m2s_req.wdata = ~axi_req_i.w.data;
           end
-          axi_pkg::ATOP_EOR:  mem_atop[4:0] = riscv_defines::AMO_XOR;
-          axi_pkg::ATOP_SET:  mem_atop[4:0] = riscv_defines::AMO_OR;
-          axi_pkg::ATOP_SMAX: mem_atop[4:0] = riscv_defines::AMO_MAX;
-          axi_pkg::ATOP_SMIN: mem_atop[4:0] = riscv_defines::AMO_MIN;
-          axi_pkg::ATOP_UMAX: mem_atop[4:0] = riscv_defines::AMO_MAXU;
-          axi_pkg::ATOP_UMIN: mem_atop[4:0] = riscv_defines::AMO_MINU;
+          axi_pkg::ATOP_EOR:  m2s_req.atop[4:0] = riscv_defines::AMO_XOR;
+          axi_pkg::ATOP_SET:  m2s_req.atop[4:0] = riscv_defines::AMO_OR;
+          axi_pkg::ATOP_SMAX: m2s_req.atop[4:0] = riscv_defines::AMO_MAX;
+          axi_pkg::ATOP_SMIN: m2s_req.atop[4:0] = riscv_defines::AMO_MIN;
+          axi_pkg::ATOP_UMAX: m2s_req.atop[4:0] = riscv_defines::AMO_MAXU;
+          axi_pkg::ATOP_UMIN: m2s_req.atop[4:0] = riscv_defines::AMO_MINU;
         endcase
       end
     end
   end
+  assign m2s_req.addr = meta.addr;
+  assign m2s_req.strb = axi_req_i.w.strb;
+  assign m2s_req.we = meta.write;
 
-  // Arbitrate between B and R responses.
-  fifo_v3 #(
-    .FALL_THROUGH (1'b1),
-    .DATA_WIDTH   ($bits(resp_arb_t)),
-    .DEPTH        (8),
-    .dtype        (resp_arb_t)
-  ) i_resp_arb_fifo (
+  // Interface memory as stream.
+  mem_to_stream #(
+    .mem_req_t  (mem_req_t),
+    .mem_resp_t (axi_data_t)
+  ) i_mem2stream (
     .clk_i,
     .rst_ni,
-    .flush_i    (1'b0),
-    .testmode_i (1'b0),
-    .full_o     (resp_arb_fifo_full),
-    .empty_o    (/* unused */),
-    .data_i     (resp_arb_fifo_inp),
-    .push_i     (resp_arb_fifo_push),
-    .data_o     (resp_arb_fifo_oup),
-    .pop_i      (mem_rvalid)
+    .req_i            (m2s_req),
+    .req_valid_i      (m2s_req_valid),
+    .req_ready_o      (m2s_req_ready),
+    .resp_o           (m2s_resp),
+    .resp_valid_o     (m2s_resp_valid),
+    .resp_ready_i     (m2s_resp_ready),
+    .mem_req_o        (mem_req),
+    .mem_req_valid_o  (mem_req_valid),
+    .mem_req_ready_i  (mem_req_ready),
+    .mem_resp_i       (mem_rdata),
+    .mem_resp_valid_i (mem_rvalid)
   );
-
-  // Handle B responses.
-  axi2mem_resp #(
-    .data_t (axi_data_t),
-    .id_t   (axi_id_t)
-  ) i_b_resp (
-    .clk_i,
-    .rst_ni,
-    .trigger_i    (b_trigger),
-    .ready_o      (b_ready),
-    .id_i         (axi_req_i.aw.id),
-    .last_i       (/* unused */),
-    .mem_valid_i  (mem_rvalid & (resp_arb_fifo_oup != READ)),
-    .mem_data_i   (/* unused */),
-    .axi_data_o   (/* unused */),
-    .axi_id_o     (axi_resp_o.b.id),
-    .axi_last_o   (/* unused */),
-    .axi_resp_o   (axi_resp_o.b.resp),
-    .axi_valid_o  (axi_resp_o.b_valid),
-    .axi_ready_i  (axi_req_i.b_ready)
-  );
-  assign axi_resp_o.b.user = '0;
-
-  // Handle R responses.
-  axi2mem_resp #(
-    .data_t (axi_data_t),
-    .id_t   (axi_id_t)
-  ) i_r_resp (
-    .clk_i,
-    .rst_ni,
-    .trigger_i    (r_trigger),
-    .ready_o      (r_ready),
-    .id_i         (r_id),
-    .last_i       (r_last),
-    .mem_valid_i  (mem_rvalid & (resp_arb_fifo_oup != WRITE)),
-    .mem_data_i   (mem_rdata),
-    .axi_data_o   (axi_resp_o.r.data),
-    .axi_id_o     (axi_resp_o.r.id),
-    .axi_last_o   (axi_resp_o.r.last),
-    .axi_resp_o   (axi_resp_o.r.resp),
-    .axi_valid_o  (axi_resp_o.r_valid),
-    .axi_ready_i  (axi_req_i.r_ready)
-  );
-  assign axi_resp_o.r.user = '0;
 
   // Split single memory request to desired number of banks.
   mem2banks #(
@@ -224,13 +226,13 @@ module axi2mem #(
   ) i_mem2banks (
     .clk_i,
     .rst_ni,
-    .req_i          (mem_req),
-    .gnt_o          (mem_gnt),
-    .addr_i         (mem_addr),
-    .wdata_i        (mem_wdata),
-    .strb_i         (axi_req_i.w.strb),
-    .atop_i         (mem_atop),
-    .we_i           (mem_we),
+    .req_i          (mem_req_valid),
+    .gnt_o          (mem_req_ready),
+    .addr_i         (mem_req.addr),
+    .wdata_i        (mem_req.wdata),
+    .strb_i         (mem_req.strb),
+    .atop_i         (mem_req.atop),
+    .we_i           (mem_req.we),
     .rvalid_o       (mem_rvalid),
     .rdata_o        (mem_rdata),
     .bank_req_o     (mem_req_o),
@@ -243,6 +245,63 @@ module axi2mem #(
     .bank_rvalid_i  (mem_rvalid_i),
     .bank_rdata_i   (mem_rdata_i)
   );
+
+  // Join memory read data and meta data stream.
+  logic mem_join_valid, mem_join_ready;
+  stream_join #(
+    .N_INP (2)
+  ) i_join (
+    .inp_valid_i  ({m2s_resp_valid, meta_valid}),
+    .inp_ready_o  ({m2s_resp_ready, meta_ready}),
+    .oup_valid_o  (mem_join_valid),
+    .oup_ready_i  (mem_join_ready)
+  );
+
+  // Dynamically fork the joined stream to B and R channels.
+  stream_fork_dynamic #(
+    .N_OUP  (2)
+  ) i_fork_dynamic (
+    .clk_i,
+    .rst_ni,
+    .valid_i      (mem_join_valid),
+    .ready_o      (mem_join_ready),
+    .sel_i        ({sel_b, sel_r}),
+    .sel_valid_i  (sel_valid),
+    .sel_ready_o  (sel_ready),
+    .valid_o      ({axi_resp_o.b_valid, axi_resp_o.r_valid}),
+    .ready_i      ({axi_req_i.b_ready, axi_req_i.r_ready})
+  );
+
+  // Compose B responses.
+  assign axi_resp_o.b = '{
+    id: meta.id,
+    resp: axi_pkg::RESP_OKAY,
+    user: '0
+  };
+
+  // Compose R responses.
+  assign axi_resp_o.r = '{
+    data: m2s_resp,
+    id: meta.id,
+    last: meta.last,
+    resp: axi_pkg::RESP_OKAY,
+    user: '0
+  };
+
+  // Registers
+  always_ff @(posedge clk_i, negedge rst_ni) begin
+    if (!rst_ni) begin
+      ar_meta_q <= '{default: '0};
+      aw_meta_q <= '{default: '0};
+      r_cnt_q   <= '0;
+      w_cnt_q   <= '0;
+    end else begin
+      ar_meta_q <= ar_meta_d;
+      aw_meta_q <= aw_meta_d;
+      r_cnt_q   <= r_cnt_d;
+      w_cnt_q   <= w_cnt_d;
+    end
+  end
 
   // Assertions
   `ifndef VERILATOR
@@ -267,6 +326,8 @@ module axi2mem #(
       else $error("Bursts are not supported yet!");
     assert property (@(posedge clk_i) axi_req_i.aw_valid |-> axi_req_i.aw.len == '0)
       else $error("Bursts are not supported yet!");
+    assert property (@(posedge clk_i) meta_valid && meta.atop != '0 |-> meta.write)
+      else $warning("Unexpected atomic operation on read.");
   `endif
   `endif
 
@@ -343,106 +404,6 @@ module axi2mem_wrap #(
     .mem_rvalid_i,
     .mem_rdata_i
   );
-endmodule
-
-
-module axi2mem_resp #(
-  parameter type data_t = logic,
-  parameter type id_t = logic
-) (
-  input  logic            clk_i,
-  input  logic            rst_ni,
-  // Interface to request handler
-  input  logic            trigger_i,
-  output logic            ready_o,
-  input  id_t             id_i,
-  input  logic            last_i,
-  // Interface to memory
-  input  logic            mem_valid_i,
-  input  data_t           mem_data_i,
-  // Interface to AXI response channel
-  output data_t           axi_data_o,
-  output id_t             axi_id_o,
-  output logic            axi_last_o,
-  output axi_pkg::resp_t  axi_resp_o,
-  output logic            axi_valid_o,
-  input  logic            axi_ready_i
-);
-
-  enum logic [1:0] {
-    Ready, Wait, Hold
-  }       state_d,  state_q;
-  data_t  data_d,   data_q;
-  id_t    id_d,     id_q;
-  logic   last_d,   last_q;
-
-  always_comb begin
-    // Response is always valid in Hold state, otherwise it depends on valid from memory for
-    // feedthrough.
-    unique case (state_q)
-      Ready:    axi_valid_o = trigger_i & mem_valid_i;
-      Wait:     axi_valid_o = mem_valid_i;
-      Hold:     axi_valid_o = 1'b1;
-      default:  axi_valid_o = 1'b0;
-    endcase
-
-    // Latch data from memory if it is valid and we are waiting for it.
-    unique casez ({state_q, trigger_i, mem_valid_i})
-      {Ready, 1'b1, 1'b1},
-      {Wait,  1'b?, 1'b1}:  data_d = mem_data_i;
-      default:              data_d = data_q;
-    endcase
-
-    // Hold state by default.
-    state_d = state_q;
-    // If triggered but data from memory not valid, wait for it.
-    if (trigger_i && !mem_valid_i) begin
-      state_d = Wait;
-    end
-    // If response is valid and ready, go back to ready, otherwise hold.
-    if (axi_valid_o) begin
-      state_d = axi_ready_i ? Ready : Hold;
-    end
-
-    // Ready to accept triggers only in ready state.
-    ready_o = state_q == Ready;
-  end
-  always_comb begin
-    id_d = id_q;
-    last_d = last_q;
-    if (trigger_i && ready_o) begin
-      id_d = id_i;
-      last_d = last_i;
-    end
-  end
-  assign axi_data_o = data_d;
-  assign axi_id_o   = id_d;
-  assign axi_resp_o = axi_pkg::RESP_OKAY;
-  assign axi_last_o = last_d;
-
-  // Registers
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (!rst_ni) begin
-      data_q  <=   '0;
-      id_q    <=   '0;
-      last_q  <= 1'b0;
-      state_q <= Ready;
-    end else begin
-      data_q  <= data_d;
-      id_q    <= id_d;
-      last_q  <= last_d;
-      state_q <= state_d;
-    end
-  end
-
-  // Assertions
-  `ifndef VERILATOR
-  `ifndef TARGET_SYNTHESIS
-    default disable iff (!rst_ni);
-    assert property (@(posedge clk_i) trigger_i |-> ready_o) else $error("Lost trigger!");
-  `endif
-  `endif
-
 endmodule
 
 
