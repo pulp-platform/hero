@@ -14,11 +14,11 @@ PBFLAGS = -DPOLYBENCH_USE_SCALAR_LB -DPOLYBENCH_TIME -DNUM_TEAMS=1 -DNUM_THREADS
 
 ifneq ($(dma),n)
 	PBFLAGS += -DPOLYBENCH_DMA
-endif
-ifeq ($(dma),device)
+ifneq ($(dma),optnone)
 	PBFLAGS += -DDMALIB_DEVICE_AS
 else
 	AS_ANNOTATE_ARGS += "-hero-disable-as-assign-opt"
+endif
 endif
 
 ifneq ($(dump),n)
