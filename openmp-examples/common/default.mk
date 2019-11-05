@@ -52,6 +52,8 @@ SRC = $(CSRCS)
 DEPDIR := .deps
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 
+AS_ANNOTATE_ARGS ?=
+
 only ?= # can be set to `pulp` to compile a binary only for PULP
 
 .PHONY: all exe clean
@@ -64,8 +66,8 @@ all : $(DEPS) $(EXE) $(EXE).dis slm
 	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS_PULP) $(INCPATHS) $<
 
 %.OMP.ll: %.ll
-	hc-omp-pass $< OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(<:.ll=.TMP.1.ll)
-	hc-omp-pass $(<:.ll=.TMP.1.ll) OmpAddressSpaceAnnotator "HERCULES-omp-address-space-annotator" $(<:.ll=.TMP.2.ll)
+	hc-omp-pass $< OmpAddressSpaceAssigner "HERCULES-omp-address-space-assigner" $(<:.ll=.TMP.1.ll) $(AS_ANNOTATE_ARGS)
+	hc-omp-pass $(<:.ll=.TMP.1.ll) OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(<:.ll=.TMP.2.ll)
 	hc-omp-pass $(<:.ll=.TMP.2.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(<:.ll=.TMP.3.ll)
 	cp $(<:.ll=.TMP.3.ll) $(<:.ll=.OMP.ll)
 
@@ -95,8 +97,8 @@ all: $(DEPS) $(EXE) $(EXE).dis
 	$(COB) -inputs=$@ -outputs="$(<:.c=-host.ll),$(<:.c=-dev.ll)" -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)" -unbundle
 
 %-dev.OMP.ll: %.ll
-	hc-omp-pass $(<:.ll=-dev.ll) OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(@:.OMP.ll=.TMP.1.ll)
-	hc-omp-pass $(@:.OMP.ll=.TMP.1.ll) OmpAddressSpaceAnnotator "HERCULES-omp-address-space-annotator" $(@:.OMP.ll=.TMP.2.ll)
+	hc-omp-pass $(<:.ll=-dev.ll) OmpAddressSpaceAssigner "HERCULES-omp-address-space-assigner" $(@:.OMP.ll=.TMP.1.ll)
+	hc-omp-pass $(@:.OMP.ll=.TMP.1.ll) OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(@:.OMP.ll=.TMP.2.ll)
 	hc-omp-pass $(@:.OMP.ll=.TMP.2.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(@:.OMP.ll=.TMP.3.ll)
 	cp $(@:.OMP.ll=.TMP.3.ll) $@
 

@@ -67,17 +67,17 @@ void kernel_conv2d_dma(int ni,
   {
     #pragma omp target
     {
-      DMA_DATA_TYPE spm = alloc_spm();
+      DATA_TYPE* spm = alloc_spm();
       // Divide SPM between A and B
       int rows_per_chunk = NI; //(SPM_SIZE - 2*NJ) / (2*NJ);
 
-      DMA_DATA_TYPE A_spm = spm;
-      DMA_DATA_TYPE B_spm = spm + (rows_per_chunk+2) * NJ;
+      DATA_TYPE* A_spm = spm;
+      DATA_TYPE* B_spm = spm + (rows_per_chunk+2) * NJ;
 
       int row = 0;
       while (row < NI - 2) {
         int chunk_rows = rows_per_chunk < (NI - 2 - row) ? rows_per_chunk : (NI - 2 - row);
-        memcpy_to_spm(A_spm, ((int*) A) + row*NJ, (chunk_rows+2)*NJ);
+        memcpy_to_spm(A_spm, ((DATA_TYPE*) A) + row*NJ, (chunk_rows+2)*NJ);
         dma_flush();
 
         #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
@@ -90,7 +90,7 @@ void kernel_conv2d_dma(int ni,
           }
         }
 
-        memcpy_from_spm(((int*) B) + (row+1)*NJ, B_spm, chunk_rows*NJ);
+        memcpy_from_spm(((DATA_TYPE*) B) + (row+1)*NJ, B_spm, chunk_rows*NJ);
         dma_flush();
         row += rows_per_chunk;
       }
