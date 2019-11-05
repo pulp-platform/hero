@@ -1,6 +1,6 @@
 /**
-* Adapted from gcc test suit loop-5.c test2
-* https://github.com/gcc-mirror/gcc/blob/master/libgomp/testsuite/libgomp.c/loop-5.c
+* Adapted from gcc test suite loop-5.c test2
+* https://github.com/gcc-mirror/gcc/blob/3ca7adc0522d479513107e2300ad14cb1d44235f/libgomp/testsuite/libgomp.c/loop-5.c
 */
 
 #include <stdio.h>
