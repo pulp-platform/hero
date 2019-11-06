@@ -1,5 +1,9 @@
 ############################ OpenMP Sources ############################
-CC := clang
+ifeq ($(compiler),gcc)
+  CC := riscv32-hero-unknown-elf-gcc
+else
+  CC := clang
+endif
 LINK := llvm-link
 COB := clang-offload-bundler
 DIS := llvm-dis
@@ -32,14 +36,26 @@ DEFMK_ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 # 1) without suffix, they apply to heterogeneous compilation;
 # 3) with _PULP suffix, they apply only to the PULP part of compilation;
 # 4) with _COMMON suffix, they apply to both PULP and host compilation.
-CFLAGS_COMMON += $(cflags) -fopenmp=libomp -O$(opt)
-ifeq ($(default-as),pulp)
-  CFLAGS_COMMON += -fhero-device-default-as=device
-endif
-CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV)
-CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
+CFLAGS_COMMON += $(cflags) -O$(opt)
 LDFLAGS_COMMON ?= $(ldflags)
-LDFLAGS_PULP += $(LDFLAGS_COMMON)
+ifeq ($(default-as),pulp)
+	ifeq ($(compiler),gcc)
+		CFLAGS_COMMON += -D__device= -D__PULP__
+	else
+		CFLAGS_COMMON += -fhero-device-default-as=device
+	endif
+endif
+ifeq ($(compiler),gcc)
+	CFLAGS_COMMON += -fopenmp
+	CFLAGS_PULP += $(CFLAGS_COMMON) -march=rv32imafc
+	CFLAGS += $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
+	LDFLAGS_PULP += $(LDFLAGS_COMMON) -lgomp
+else
+	CFLAGS_COMMON += -fopenmp=libomp
+	CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV)
+	CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
+	LDFLAGS_PULP += $(LDFLAGS_COMMON)
+endif
 LDFLAGS += $(LDFLAGS_COMMON) -lhero-target
 ifeq ($(TARGET_HOST),riscv64-hero-linux-gnu)
   # FIXME: we explicitly need to embed the correct linker for riscv
@@ -47,6 +63,11 @@ ifeq ($(TARGET_HOST),riscv64-hero-linux-gnu)
 endif
 
 INCPATHS += -I$(DEFMK_ROOT) -include hero_64.h
+ifeq ($(compiler),gcc)
+	INCPATHS += -I$(DEFMK_ROOT)/../../support/libhero-target/inc
+	# FIXME: Supresses implicit declaration error but not omp.h include error
+	INCPATHS += -include $(DEFMK_ROOT)/../../install/lib/clang/8.0.0/include/omp.h
+endif
 LIBPATHS ?=
 
 BENCHMARK = $(shell basename `pwd`)
@@ -55,16 +76,20 @@ SRC = $(CSRCS)
 
 DEPDIR := .deps
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
+# DEPFLAGS = -MMD -MP -MF $(DEPDIR)/$*.d
 
 AS_ANNOTATE_ARGS ?=
 
 only ?= # can be set to `pulp` to compile a binary only for PULP
 
 .PHONY: all exe clean
-.PRECIOUS: %.ll
+.PRECIOUS: %.ll %.o
 
 ifeq ($(only),pulp)
 all : $(DEPS) $(EXE) $(EXE).dis slm
+
+%.o: %.c $(DEPDIR)/%.d | $(DEPDIR)
+	$(CC) -c $(DEPFLAGS) $(CFLAGS_PULP) $(INCPATHS) -mnativeomp $<
 
 %.ll: %.c $(DEPDIR)/%.d | $(DEPDIR)
 	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS_PULP) $(INCPATHS) $<
@@ -75,8 +100,14 @@ all : $(DEPS) $(EXE) $(EXE).dis slm
 	hc-omp-pass $(<:.ll=.TMP.2.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(<:.ll=.TMP.3.ll)
 	cp $(<:.ll=.TMP.3.ll) $(<:.ll=.OMP.ll)
 
+ifeq ($(compiler),gcc)
+$(EXE): $(SRC:.c=.o)
+# 	touch libgomp.spec
+	clang $(LIBPATHS) $(CFLAGS_PULP) -target $(TARGET_DEV) $^ $(LDFLAGS_PULP) -o $@
+else
 $(EXE): $(SRC:.c=.OMP.ll)
 	$(CC) $(LIBPATHS) $(CFLAGS_PULP) $^ $(LDFLAGS_PULP) -o $@
+endif
 
 slm: $(EXE)_l1.slm $(EXE)_l2.slm
 
@@ -133,7 +164,7 @@ $(DEPFILES):
 include $(wildcard $(DEPFILES))
 
 clean::
-	-rm -vf __hmpp* $(EXE) *~ *.dis *.ll *.slm
+	-rm -vf __hmpp* $(EXE) *~ *.dis *.ll *.slm *.o *.s
 	-rm -rvf $(DEPDIR)
 
 init-target-host:
