@@ -35,10 +35,49 @@ int main(int argc, char *argv[])
 
   printf("Testing `omp for` with static schedule ..\n");
   n_errors += !test_omp_for_schedule_static();
+  printf("Testing `omp for` with dynamic schedule ..\n");
+  n_errors += !test_omp_for_schedule_dynamic();
   printf("Testing `omp parallel for reduction` ..\n");
   n_errors += !test_omp_parallel_for_reduction();
   printf("Testing `omp atomic` ..\n");
   n_errors += !test_omp_atomic();
+  printf("Testing `omp parallel for` with private ..\n");
+  n_errors += !test_omp_parallel_for_private();
+  printf("Testing `omp parallel for` with firstprivate ..\n");
+  n_errors += !test_omp_parallel_for_firstprivate();
+  printf("Testing `omp parallel for` with lastprivate ..\n");
+  n_errors += !test_omp_parallel_for_lastprivate();
+  printf("Testing `omp single` ..\n");
+  n_errors += !test_omp_single();
+  printf("Testing `omp critical` ..\n");
+  n_errors += !test_omp_critical();
+  printf("Testing `omp master` ..\n");
+  n_errors += !test_omp_master_3();
+  printf("Testing `omp barrier` ..\n");
+  n_errors += !test_omp_barrier();
+
+  // tests for sections
+  printf("Testing `omp parallel sections firstprivate` ..\n");
+  n_errors += !test_omp_parallel_sections_firstprivate();
+  printf("Testing `omp parallel sections lastprivate` ..\n");
+  n_errors += !test_omp_parallel_sections_lastprivate();
+  printf("Testing `omp parallel sections private` ..\n");
+  n_errors += !test_omp_parallel_sections_private();
+  printf("Testing `omp parallel sections reduction\n");
+  n_errors += !test_omp_parallel_sections_reduction();
+  printf("Testing `omp sections firstprivate` ..\n");
+  n_errors += !test_omp_section_firstprivate();
+  printf("Testing `omp sections lastprivate` ..\n");
+  n_errors += !test_omp_section_lastprivate();
+  printf("Testing `omp sections private` ..\n");
+  n_errors += !test_omp_section_private();
+  printf("Testing `omp sections reduction\n");
+  n_errors += !test_omp_sections_reduction();
+
+  printf("Testing gcc `omp parallel for` with static schedule with pointers ..\n");
+  n_errors += !gcc_omp_parallel_for_schedule_static();
+  printf("Testing gcc `omp parallel for` with dynamic schedule with pointers ..\n");
+  n_errors += !gcc_omp_parallel_for_schedule_dynamic();
   printf("All OpenMP tests completed.\n");
 
   assert(n_errors == 0);

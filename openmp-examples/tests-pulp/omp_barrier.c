@@ -1,0 +1,1 @@
+../../toolchain/openmp/runtime/test/barrier/omp_barrier.c
