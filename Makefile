@@ -46,6 +46,14 @@ tc-ariane-linux:
 	mkdir -p $(CURDIR)/output/tc-ariane-linux/
 	cd $(CURDIR)/output/tc-ariane-linux/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/ariane-linux.config hero br_real
 
+tc-aarch64-bare:
+	mkdir -p $(CURDIR)/output/tc-aarch64-bare/
+	cd $(CURDIR)/output/tc-aarch64-bare/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/aarch64-bare.config
+
+tc-aarch64-linux:
+	mkdir -p $(CURDIR)/output/tc-aarch64-linux/
+	cd $(CURDIR)/output/tc-aarch64-linux/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/aarch64-linux.config hero br_real
+
 tc-pulp:
 	mkdir -p $(CURDIR)/output/tc-pulp/
 	cd $(CURDIR)/output/tc-pulp/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/pulp.config hero-unknown
