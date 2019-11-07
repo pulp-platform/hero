@@ -43,6 +43,12 @@ all:
         ../test/gen_slm_files.sh $d
         ./start_sim.sh
       done
+    - >
+      for d in tests-pulp; do
+      make -C ../../openmp-examples/$d compiler=gcc only=pulp clean all
+        ../test/gen_slm_files.sh $d
+        ./start_sim.sh
+      done
     - cd -
     ### test benchmarks
     - >
