@@ -64,7 +64,7 @@ pulp-sdk:
 	$(ROOT)/pulp/setup-sdk.sh hero-urania
 
 hero-sdk: br-hero
-	cd $(CURDIR)/output/br-hero && $(ROOT)/toolchain/install-sdk.sh
+	cd $(CURDIR)/output/br-hero-riscv64 && $(ROOT)/toolchain/install-sdk.sh
 
 # llvm
 hero-llvm:
