@@ -1,8 +1,2 @@
-echo "Adding required symlinks to library directories"
-# FIXME: those symlinks should be copied by buildroot from the toolchain
-abidir=$(find $1/lib -iname 'ld-linux-*' | sed -e "s|.*/ld-linux-||" -e "s|.so.*||" | cut -d '-' -f 2)
-ln -sf . $1/usr/lib/$abidir
-ln -sf . $1/lib/$abidir
-
 echo "Removing NFS init.d script"
 rm -f $1/etc/init.d/S60nfs

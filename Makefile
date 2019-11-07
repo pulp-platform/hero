@@ -1,28 +1,41 @@
 ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
-.PHONY: all br-ariane br-hero br-qemu tc-ariane-bare tc-ariane-linux tc-pulp pulp-sdk hero-sdk hero-llvm tools tools-isa-sim tools-openocd
+.PHONY: all br-genesys2-ariane br-zynqmp-zcu102 br-hero-riscv64 br-hero br-hero-aarch64 br-qemu-ariane tc-ariane-bare tc-ariane-linux tc-pulp pulp-sdk hero-sdk hero-llvm tools tools-isa-sim tools-openocd
 
 all: br-ariane br-hero
 
 # buildroot
-br-ariane:
-	mkdir -p $(CURDIR)/output/br-ariane
-	$(MAKE) O=$(CURDIR)/output/br-ariane BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot ariane_defconfig
-	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-ariane/.config; fi
-	$(MAKE) -C $(CURDIR)/output/br-ariane
+br-genesys2-ariane:
+	mkdir -p $(CURDIR)/output/br-genesys2-ariane
+	$(MAKE) O=$(CURDIR)/output/br-genesys2-ariane BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot genesys2_ariane_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-genesys2-ariane/.config; fi
+	$(MAKE) -C $(CURDIR)/output/br-genesys2-ariane
 	cp $(CURDIR)/output/br-ariane/images/bbl.bin $(CURDIR)
 
-br-hero:
-	mkdir -p $(CURDIR)/output/br-hero
-	$(MAKE) O=$(CURDIR)/output/br-hero BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hero_defconfig
-	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hero/.config; fi
-	$(MAKE) -C $(CURDIR)/output/br-hero
+br-zynqmp-zcu102:
+	mkdir -p $(CURDIR)/output/br-zynqmp-zcu102
+	$(MAKE) O=$(CURDIR)/output/br-zynqmp-zcu102 BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot zynqmp_zcu102_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-zynqmp-zcu102/.config; fi
+	$(MAKE) -C $(CURDIR)/output/br-zynqmp-zcu102
 
-br-qemu:
-	mkdir -p $(CURDIR)/output/br-qemu
-	$(MAKE) O=$(CURDIR)/output/br-qemu BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot qemu_defconfig
-	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-qemu/.config; fi
-	$(MAKE) -C $(CURDIR)/output/br-qemu
+br-hero-riscv64:
+	mkdir -p $(CURDIR)/output/br-hero-riscv64
+	$(MAKE) O=$(CURDIR)/output/br-hero-riscv64 BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hero_riscv64_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hero-riscv64/.config; fi
+	$(MAKE) -C $(CURDIR)/output/br-hero-riscv64
+br-hero: br-hero-riscv64
+
+br-hero-aarch64:
+	mkdir -p $(CURDIR)/output/br-hero-aarch64
+	$(MAKE) O=$(CURDIR)/output/br-hero-aarch64 BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hero_aarch64_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hero-aarch64/.config; fi
+	$(MAKE) -C $(CURDIR)/output/br-hero-aarch64
+
+br-qemu-ariane:
+	mkdir -p $(CURDIR)/output/br-qemu-ariane
+	$(MAKE) O=$(CURDIR)/output/br-qemu-ariane BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot qemu_ariane_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-qemu-ariane/.config; fi
+	$(MAKE) -C $(CURDIR)/output/br-qemu-ariane
 
 # toolchain
 tc-ariane-bare:
@@ -31,7 +44,6 @@ tc-ariane-bare:
 
 tc-ariane-linux:
 	mkdir -p $(CURDIR)/output/tc-ariane-linux/
-	# NOTE: we add br_real suffix here as buildroot will use that suffix later
 	cd $(CURDIR)/output/tc-ariane-linux/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/ariane-linux.config hero br_real
 
 tc-pulp:
