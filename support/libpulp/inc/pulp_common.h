@@ -385,7 +385,8 @@
 #if PLATFORM == ZEDBOARD || PLATFORM == MINI_ITX || PLATFORM == ZC706
   #define ARM_CLK_FREQ_MHZ 666
 #elif PLATFORM == TE0808
-  #define ARM_CLK_FREQ_MHZ 1200 #else // JUNO
+  #define ARM_CLK_FREQ_MHZ 1200
+#else // JUNO
   #define ARM_CLK_FREQ_MHZ 1100 // A57 overdrive
 #endif
 
