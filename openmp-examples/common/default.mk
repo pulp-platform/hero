@@ -65,8 +65,7 @@ endif
 INCPATHS += -I$(DEFMK_ROOT) -include hero_64.h
 ifeq ($(compiler),gcc)
 	INCPATHS += -I$(DEFMK_ROOT)/../../support/libhero-target/inc
-	# FIXME: Supresses implicit declaration error but not omp.h include error
-	INCPATHS += -include $(DEFMK_ROOT)/../../install/lib/clang/8.0.0/include/omp.h
+	INCPATHS += -I$(DEFMK_ROOT)/../common/gcc
 endif
 LIBPATHS ?=
 
