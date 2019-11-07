@@ -64,6 +64,7 @@ sources:
   - src/stream_fifo.sv
   # Level 2
   - src/fall_through_register.sv
+  - src/mem_to_stream.sv
   - src/stream_arbiter_flushable.sv
   - src/stream_register.sv
   # Level 3
