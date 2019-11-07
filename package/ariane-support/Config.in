@@ -15,13 +15,6 @@ config BR2_PACKAGE_ARIANE_SUPPORT_RANDOM_INIT
     randomized data is pre-generated on the build system and will be the same
     every boot, making this very INSECURE for production.
 
-config BR2_PACKAGE_ARIANE_SUPPORT_EXT_MOUNT
-  string "External mount point to switch after bootup"
-  help
-    Location to mount as external root, for example NFS partition. Binds system
-    to the filesystem. Options can be specified before (with -o) as the options
-    is completely forwarded to mount. Leave empty to not mount external partition.
-
 config BR2_PACKAGE_ARIANE_SUPPORT_ETH_MAC
   string "Alternative mac address for ethernet"
   help
