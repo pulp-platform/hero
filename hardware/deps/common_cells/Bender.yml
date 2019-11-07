@@ -58,6 +58,7 @@ sources:
   - src/stream_arbiter_flushable.sv
   - src/stream_register.sv
   # Level 3
+  - src/mem_to_stream.sv
   - src/stream_arbiter.sv
 
   - target: simulation
