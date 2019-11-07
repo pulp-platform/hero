@@ -1,3 +1,5 @@
+source "$BR2_EXTERNAL_HERO_PATH/package/Config.in"
+
 source "$BR2_EXTERNAL_HERO_PATH/package/ariane-support/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/libpulp/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/pulp-driver/Config.in"
