@@ -60,6 +60,7 @@ module axi2mem #(
     axi_pkg::atop_t atop;
     axi_id_t        id;
     logic           last;
+    axi_pkg::qos_t  qos;
     axi_pkg::size_t size;
     logic           write;
   } meta_t;
@@ -75,8 +76,10 @@ module axi2mem #(
                   sel_r,          sel_buf_r,
                   sel_valid,      sel_ready,
                   sel_buf_valid,  sel_buf_ready,
+                  sel_lock_d,     sel_lock_q,
                   meta_valid,     meta_ready,
                   meta_buf_valid, meta_buf_ready,
+                  meta_sel_d,     meta_sel_q,
                   m2s_req_valid,  m2s_req_ready,
                   m2s_resp_valid, m2s_resp_ready,
                   mem_req_valid,  mem_req_ready,
@@ -117,6 +120,7 @@ module axi2mem #(
         atop:   '0,
         id:     axi_req_i.ar.id,
         last:   (axi_req_i.ar.len == '0),
+        qos:    axi_req_i.ar.qos,
         size:   axi_req_i.ar.size,
         write:  1'b0
       };
@@ -158,6 +162,7 @@ module axi2mem #(
         atop:   axi_req_i.aw.atop,
         id:     axi_req_i.aw.id,
         last:   (axi_req_i.aw.len == '0),
+        qos:    axi_req_i.aw.qos,
         size:   axi_req_i.aw.size,
         write:  1'b1
       };
@@ -172,20 +177,62 @@ module axi2mem #(
     end
   end
 
-  // Arbitrate between AR and AW.
-  stream_arbiter #(
+  // Arbitrate between reads and writes.
+  stream_mux #(
     .DATA_T (meta_t),
     .N_INP  (2)
-  ) i_ax_arb (
-    .clk_i,
-    .rst_ni,
+  ) i_ax_mux (
     .inp_data_i   ({wr_meta, rd_meta}),
     .inp_valid_i  ({wr_valid, rd_valid}),
     .inp_ready_o  ({wr_ready, rd_ready}),
+    .inp_sel_i    (meta_sel_d),
     .oup_data_o   (meta),
     .oup_valid_o  (arb_valid),
     .oup_ready_i  (arb_ready)
   );
+  always_comb begin
+    meta_sel_d = meta_sel_q;
+    sel_lock_d = sel_lock_q;
+    if (sel_lock_q) begin
+      meta_sel_d = meta_sel_q;
+      if (arb_valid && arb_ready) begin
+        sel_lock_d = 1'b0;
+      end
+    end else begin
+      if (wr_valid ^ rd_valid) begin
+        // If either write or read is valid but not both, select the valid one.
+        meta_sel_d = wr_valid;
+      end else if (wr_valid && rd_valid) begin
+        // If both write and read are valid, decide according to QoS then burst properties.
+        // Priorize higher QoS.
+        if (wr_meta.qos > rd_meta.qos) begin
+          meta_sel_d = 1'b1;
+        end else if (rd_meta.qos > wr_meta.qos) begin
+          meta_sel_d = 1'b0;
+        // Decide requests with identical QoS.
+        end else if (wr_meta.qos == rd_meta.qos) begin
+          // 1. Priorize individual writes over read bursts.
+          // Rationale: Read bursts can be interleaved on AXI but write bursts cannot.
+          if (wr_meta.last && !rd_meta.last) begin
+            meta_sel_d = 1'b1;
+          // 2. Prioritize ongoing burst.
+          // Rationale: Stalled bursts create backpressure or require costly buffers.
+          end else if (w_cnt_q > '0) begin
+            meta_sel_d = 1'b1;
+          end else if (r_cnt_q > '0) begin
+            meta_sel_d = 1'b0;
+          // 3. Otherwise arbitrate round robin to prevent starvation.
+          end else begin
+            meta_sel_d = ~meta_sel_q;
+          end
+        end
+      end
+      // Lock arbitration if valid but not yet ready.
+      if (arb_valid && !arb_ready) begin
+        sel_lock_d = 1'b1;
+      end
+    end
+  end
 
   // Fork arbitrated stream to meta data, memory requests, and R/B channel selection.
   stream_fork #(
@@ -361,15 +408,19 @@ module axi2mem #(
   // Registers
   always_ff @(posedge clk_i, negedge rst_ni) begin
     if (!rst_ni) begin
-      rd_meta_q <= '{default: '0};
-      wr_meta_q <= '{default: '0};
-      r_cnt_q   <= '0;
-      w_cnt_q   <= '0;
+      meta_sel_q  <= 1'b0;
+      sel_lock_q  <= 1'b0;
+      rd_meta_q   <= '{default: '0};
+      wr_meta_q   <= '{default: '0};
+      r_cnt_q     <= '0;
+      w_cnt_q     <= '0;
     end else begin
-      rd_meta_q <= rd_meta_d;
-      wr_meta_q <= wr_meta_d;
-      r_cnt_q   <= r_cnt_d;
-      w_cnt_q   <= w_cnt_d;
+      meta_sel_q  <= meta_sel_d;
+      sel_lock_q  <= sel_lock_d;
+      rd_meta_q   <= rd_meta_d;
+      wr_meta_q   <= wr_meta_d;
+      r_cnt_q     <= r_cnt_d;
+      w_cnt_q     <= w_cnt_d;
     end
   end
 
