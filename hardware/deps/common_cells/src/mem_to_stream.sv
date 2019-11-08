@@ -12,7 +12,10 @@
 // control for output data to be used in streams.
 module mem_to_stream #(
   parameter type mem_req_t = logic,
-  parameter type mem_resp_t = logic
+  parameter type mem_resp_t = logic,
+  // Number of buffered responses (fall-through, thus no additional latency).  This defines the
+  // maximum number of outstanding requests on the memory interface and must be >= 1.
+  parameter int unsigned BufDepth = 1
 ) (
   input  logic      clk_i,
   input  logic      rst_ni,
@@ -35,24 +38,36 @@ module mem_to_stream #(
   input  logic      mem_resp_valid_i
 );
 
-  logic ft_reg_ready;
-  fall_through_register #(
-    .T  (mem_resp_t)
-  ) i_resp_ft_reg (
+  logic buf_ready;
+  stream_fifo #(
+    .FALL_THROUGH (1'b1),
+    .DEPTH        (BufDepth),
+    .T            (mem_resp_t)
+  ) i_resp_buf (
     .clk_i,
     .rst_ni,
-    .clr_i      (1'b0),
+    .flush_i    (1'b0),
     .testmode_i (1'b0),
-    .valid_i    (mem_resp_valid_i),
-    .ready_o    (ft_reg_ready),
     .data_i     (mem_resp_i),
+    .valid_i    (mem_resp_valid_i),
+    .ready_o    (buf_ready),
+    .data_o     (resp_o),
     .valid_o    (resp_valid_o),
     .ready_i    (resp_ready_i),
-    .data_o     (resp_o)
+    .usage_o    (/* unused */)
   );
 
   assign mem_req_o = req_i;
-  assign mem_req_valid_o = req_valid_i & ft_reg_ready;
-  assign req_ready_o = mem_req_ready_i & ft_reg_ready;
+  assign mem_req_valid_o = req_valid_i & buf_ready;
+  assign req_ready_o = mem_req_ready_i & buf_ready;
+
+  // Assertions
+  `ifndef VERILATOR
+  `ifndef TARGET_SYNTHESIS
+    initial begin
+      assert (BufDepth >= 1) else $fatal("Buffer depth must be at least 1!");
+    end
+  `endif
+  `endif
 
 endmodule

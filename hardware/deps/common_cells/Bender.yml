@@ -57,10 +57,10 @@ sources:
   - src/stream_fork_dynamic.sv
   # Level 2
   - src/fall_through_register.sv
+  - src/mem_to_stream.sv
   - src/stream_arbiter_flushable.sv
   - src/stream_register.sv
   # Level 3
-  - src/mem_to_stream.sv
   - src/stream_arbiter.sv
 
   - target: simulation
