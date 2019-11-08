@@ -17,6 +17,7 @@ module axi2mem #(
   parameter int unsigned DataWidth = 0, // AXI data width
   parameter int unsigned IdWidth = 0,   // AXI ID width
   parameter int unsigned NumBanks = 0,  // number of banks at output
+  parameter int unsigned BufDepth = 1,  // depth of memory response buffer
   // Dependent parameters, do not override.
   localparam type addr_t = logic [AddrWidth-1:0],
   localparam type mem_atop_t = logic [5:0],
@@ -203,7 +204,7 @@ module axi2mem #(
 
   stream_fifo #(
     .FALL_THROUGH (1'b1),
-    .DEPTH        (2),
+    .DEPTH        (1 + BufDepth),
     .T            (logic[1:0])
   ) i_sel_buf (
     .clk_i,
@@ -221,7 +222,7 @@ module axi2mem #(
 
   stream_fifo #(
     .FALL_THROUGH (1'b1),
-    .DEPTH        (2),
+    .DEPTH        (1 + BufDepth),
     .T            (meta_t)
   ) i_meta_buf (
     .clk_i,
@@ -269,7 +270,8 @@ module axi2mem #(
   // Interface memory as stream.
   mem_to_stream #(
     .mem_req_t  (mem_req_t),
-    .mem_resp_t (axi_data_t)
+    .mem_resp_t (axi_data_t),
+    .BufDepth   (BufDepth)
   ) i_mem2stream (
     .clk_i,
     .rst_ni,
@@ -413,6 +415,7 @@ module axi2mem_wrap #(
   parameter int unsigned IdWidth = 0,
   parameter int unsigned UserWidth = 0,
   parameter int unsigned NumBanks = 0,
+  parameter int unsigned BufDepth = 1,  // depth of memory response buffer
   // Dependent parameters, do not override.
   localparam type addr_t = logic [AddrWidth-1:0],
   localparam type mem_atop_t = logic [5:0],
@@ -457,7 +460,8 @@ module axi2mem_wrap #(
     .AddrWidth  (AddrWidth),
     .DataWidth  (DataWidth),
     .IdWidth    (IdWidth),
-    .NumBanks   (NumBanks)
+    .NumBanks   (NumBanks),
+    .BufDepth   (BufDepth)
   ) i_axi2mem (
     .clk_i,
     .rst_ni,
