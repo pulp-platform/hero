@@ -592,7 +592,7 @@ module pulp_cluster
     .DataWidth  ( AXI_DATA_C2S_WIDTH  ),
     .IdWidth    ( AXI_ID_OUT_WIDTH    ),
     .NumBanks   ( NB_EXT2MEM             )
-  ) i_axi2mem_wrap (
+  ) i_axi2mem (
     .clk_i        ( clk_cluster           ),
     .rst_ni       ( rst_ni                ),
     .busy_o       ( s_axi2mem_busy        ),
