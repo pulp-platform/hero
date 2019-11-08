@@ -59,6 +59,7 @@ module axi2mem #(
     axi_pkg::atop_t atop;
     axi_id_t        id;
     logic           last;
+    axi_pkg::size_t size;
     logic           write;
   } meta_t;
 
@@ -79,8 +80,10 @@ module axi2mem #(
                   mem_rvalid;
   mem_req_t       m2s_req,
                   mem_req;
-  meta_t          ar_meta_d,      ar_meta_q,
-                  aw_meta_d,      aw_meta_q,
+  meta_t          rd_meta,
+                  rd_meta_d,      rd_meta_q,
+                  wr_meta,
+                  wr_meta_d,      wr_meta_q,
                   meta;
 
   assign busy_o = axi_req_i.aw_valid | axi_req_i.ar_valid | axi_req_i.w_valid |
@@ -91,24 +94,36 @@ module axi2mem #(
   always_comb begin
     // Default assignments
     axi_resp_o.ar_ready = 1'b0;
-    ar_meta_d = ar_meta_q;
+    rd_meta_d = rd_meta_q;
     r_cnt_d = r_cnt_q;
     rd_valid = 1'b0;
     // Handle R burst in progress.
     if (r_cnt_q > '0) begin
-      $fatal("Read bursts are not implemented yet!");
+      rd_meta_d.last = (r_cnt_q == 8'd1);
+      rd_meta = rd_meta_d;
+      rd_meta.addr = rd_meta_q.addr + axi_pkg::num_bytes(rd_meta_q.size);
+      rd_valid = 1'b1;
+      if (rd_ready) begin
+        r_cnt_d--;
+        rd_meta_d.addr = rd_meta.addr;
+      end
     // Handle new AR if there is one.
     end else if (axi_req_i.ar_valid) begin
-      ar_meta_d = '{
-        addr:   axi_req_i.ar.addr,
+      rd_meta_d = '{
+        addr:   axi_pkg::aligned_addr(axi_req_i.ar.addr, axi_req_i.ar.size),
         atop:   '0,
         id:     axi_req_i.ar.id,
         last:   (axi_req_i.ar.len == '0),
+        size:   axi_req_i.ar.size,
         write:  1'b0
       };
-      r_cnt_d = axi_req_i.ar.len;
+      rd_meta = rd_meta_d;
+      rd_meta.addr = axi_req_i.ar.addr;
       rd_valid = 1'b1;
-      axi_resp_o.ar_ready = rd_ready;
+      if (rd_ready) begin
+        r_cnt_d = axi_req_i.ar.len;
+        axi_resp_o.ar_ready = 1'b1;
+      end
     end
   end
 
@@ -117,25 +132,40 @@ module axi2mem #(
     // Default assignments
     axi_resp_o.aw_ready = 1'b0;
     axi_resp_o.w_ready = 1'b0;
-    aw_meta_d = aw_meta_q;
+    wr_meta_d = wr_meta_q;
     wr_valid = 1'b0;
     w_cnt_d = w_cnt_q;
     // Handle W bursts in progress.
     if (w_cnt_q > '0) begin
-      $fatal("Write bursts are not implemented yet!");
+      wr_meta_d.last = (w_cnt_q == 8'd1);
+      wr_meta = wr_meta_d;
+      wr_meta.addr = wr_meta_q.addr + axi_pkg::num_bytes(wr_meta_q.size);
+      if (axi_req_i.w_valid) begin
+        wr_valid = 1'b1;
+        if (wr_ready) begin
+          axi_resp_o.w_ready = 1'b1;
+          w_cnt_d--;
+          wr_meta_d.addr = wr_meta.addr;
+        end
+      end
     // Handle new AW if there is one.
     end else if (axi_req_i.aw_valid && axi_req_i.w_valid) begin
-      aw_meta_d = '{
-        addr:   axi_req_i.aw.addr,
+      wr_meta_d = '{
+        addr:   axi_pkg::aligned_addr(axi_req_i.aw.addr, axi_req_i.aw.size),
         atop:   axi_req_i.aw.atop,
         id:     axi_req_i.aw.id,
         last:   (axi_req_i.aw.len == '0),
+        size:   axi_req_i.aw.size,
         write:  1'b1
       };
-      w_cnt_d = axi_req_i.aw.len;
+      wr_meta = wr_meta_d;
+      wr_meta.addr = axi_req_i.aw.addr;
       wr_valid = 1'b1;
-      axi_resp_o.aw_ready = wr_ready;
-      axi_resp_o.w_ready = wr_ready;
+      if (wr_ready) begin
+        w_cnt_d = axi_req_i.aw.len;
+        axi_resp_o.aw_ready = 1'b1;
+        axi_resp_o.w_ready = 1'b1;
+      end
     end
   end
 
@@ -146,7 +176,7 @@ module axi2mem #(
   ) i_ax_arb (
     .clk_i,
     .rst_ni,
-    .inp_data_i   ({aw_meta_d, ar_meta_d}),
+    .inp_data_i   ({wr_meta, rd_meta}),
     .inp_valid_i  ({wr_valid, rd_valid}),
     .inp_ready_o  ({wr_ready, rd_ready}),
     .oup_data_o   (meta),
@@ -291,13 +321,13 @@ module axi2mem #(
   // Registers
   always_ff @(posedge clk_i, negedge rst_ni) begin
     if (!rst_ni) begin
-      ar_meta_q <= '{default: '0};
-      aw_meta_q <= '{default: '0};
+      rd_meta_q <= '{default: '0};
+      wr_meta_q <= '{default: '0};
       r_cnt_q   <= '0;
       w_cnt_q   <= '0;
     end else begin
-      ar_meta_q <= ar_meta_d;
-      aw_meta_q <= aw_meta_d;
+      rd_meta_q <= rd_meta_d;
+      wr_meta_q <= wr_meta_d;
       r_cnt_q   <= r_cnt_d;
       w_cnt_q   <= w_cnt_d;
     end
@@ -322,10 +352,12 @@ module axi2mem #(
     assert property (@(posedge clk_i)
         axi_resp_o.b_valid && !axi_req_i.b_ready |=> $stable(axi_resp_o.b))
       else $error("B must remain stable until handshake has happened!");
-    assert property (@(posedge clk_i) axi_req_i.ar_valid |-> axi_req_i.ar.len == '0)
-      else $error("Bursts are not supported yet!");
-    assert property (@(posedge clk_i) axi_req_i.aw_valid |-> axi_req_i.aw.len == '0)
-      else $error("Bursts are not supported yet!");
+    assert property (@(posedge clk_i) axi_req_i.ar_valid && axi_req_i.ar.len > 0 |->
+        axi_req_i.ar.burst == axi_pkg::BURST_INCR)
+      else $error("Non-incrementing bursts are not supported!");
+    assert property (@(posedge clk_i) axi_req_i.aw_valid && axi_req_i.aw.len > 0 |->
+        axi_req_i.aw.burst == axi_pkg::BURST_INCR)
+      else $error("Non-incrementing bursts are not supported!");
     assert property (@(posedge clk_i) meta_valid && meta.atop != '0 |-> meta.write)
       else $warning("Unexpected atomic operation on read.");
   `endif
