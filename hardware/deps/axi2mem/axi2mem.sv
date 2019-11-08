@@ -70,10 +70,12 @@ module axi2mem #(
   logic           arb_valid,      arb_ready,
                   rd_valid,       rd_ready,
                   wr_valid,       wr_ready,
-                  sel_b,
-                  sel_r,
+                  sel_b,          sel_buf_b,
+                  sel_r,          sel_buf_r,
                   sel_valid,      sel_ready,
+                  sel_buf_valid,  sel_buf_ready,
                   meta_valid,     meta_ready,
+                  meta_buf_valid, meta_buf_ready,
                   m2s_req_valid,  m2s_req_ready,
                   m2s_resp_valid, m2s_resp_ready,
                   mem_req_valid,  mem_req_ready,
@@ -84,7 +86,7 @@ module axi2mem #(
                   rd_meta_d,      rd_meta_q,
                   wr_meta,
                   wr_meta_d,      wr_meta_q,
-                  meta;
+                  meta,           meta_buf;
 
   assign busy_o = axi_req_i.aw_valid | axi_req_i.ar_valid | axi_req_i.w_valid |
                     axi_resp_o.b_valid | axi_resp_o.r_valid |
@@ -199,6 +201,42 @@ module axi2mem #(
   assign sel_b = meta.write & meta.last;
   assign sel_r = ~meta.write | meta.atop[5];
 
+  stream_fifo #(
+    .FALL_THROUGH (1'b1),
+    .DEPTH        (2),
+    .T            (logic[1:0])
+  ) i_sel_buf (
+    .clk_i,
+    .rst_ni,
+    .flush_i    (1'b0),
+    .testmode_i (1'b0),
+    .data_i     ({sel_b, sel_r}),
+    .valid_i    (sel_valid),
+    .ready_o    (sel_ready),
+    .data_o     ({sel_buf_b, sel_buf_r}),
+    .valid_o    (sel_buf_valid),
+    .ready_i    (sel_buf_ready),
+    .usage_o    (/* unused */)
+  );
+
+  stream_fifo #(
+    .FALL_THROUGH (1'b1),
+    .DEPTH        (2),
+    .T            (meta_t)
+  ) i_meta_buf (
+    .clk_i,
+    .rst_ni,
+    .flush_i    (1'b0),
+    .testmode_i (1'b0),
+    .data_i     (meta),
+    .valid_i    (meta_valid),
+    .ready_o    (meta_ready),
+    .data_o     (meta_buf),
+    .valid_o    (meta_buf_valid),
+    .ready_i    (meta_buf_ready),
+    .usage_o    (/* unused */)
+  );
+
   // Map AXI ATOPs to RI5CY AMOs.
   always_comb begin
     m2s_req.atop = '0;
@@ -281,8 +319,8 @@ module axi2mem #(
   stream_join #(
     .N_INP (2)
   ) i_join (
-    .inp_valid_i  ({m2s_resp_valid, meta_valid}),
-    .inp_ready_o  ({m2s_resp_ready, meta_ready}),
+    .inp_valid_i  ({m2s_resp_valid, meta_buf_valid}),
+    .inp_ready_o  ({m2s_resp_ready, meta_buf_ready}),
     .oup_valid_o  (mem_join_valid),
     .oup_ready_i  (mem_join_ready)
   );
@@ -295,16 +333,16 @@ module axi2mem #(
     .rst_ni,
     .valid_i      (mem_join_valid),
     .ready_o      (mem_join_ready),
-    .sel_i        ({sel_b, sel_r}),
-    .sel_valid_i  (sel_valid),
-    .sel_ready_o  (sel_ready),
+    .sel_i        ({sel_buf_b, sel_buf_r}),
+    .sel_valid_i  (sel_buf_valid),
+    .sel_ready_o  (sel_buf_ready),
     .valid_o      ({axi_resp_o.b_valid, axi_resp_o.r_valid}),
     .ready_i      ({axi_req_i.b_ready, axi_req_i.r_ready})
   );
 
   // Compose B responses.
   assign axi_resp_o.b = '{
-    id: meta.id,
+    id: meta_buf.id,
     resp: axi_pkg::RESP_OKAY,
     user: '0
   };
@@ -312,8 +350,8 @@ module axi2mem #(
   // Compose R responses.
   assign axi_resp_o.r = '{
     data: m2s_resp,
-    id: meta.id,
-    last: meta.last,
+    id: meta_buf.id,
+    last: meta_buf.last,
     resp: axi_pkg::RESP_OKAY,
     user: '0
   };
