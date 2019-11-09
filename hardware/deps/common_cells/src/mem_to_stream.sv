@@ -38,7 +38,35 @@ module mem_to_stream #(
   input  logic      mem_resp_valid_i
 );
 
-  logic buf_ready;
+  typedef logic [$clog2(BufDepth+1):0] cnt_t;
+
+  cnt_t cnt_d, cnt_q;
+  logic buf_ready,
+        req_ready;
+
+  // Count number of outstanding requests.
+  always_comb begin
+    cnt_d = cnt_q;
+    if (req_valid_i && req_ready_o) begin
+      cnt_d++;
+    end
+    if (resp_valid_o && resp_ready_i) begin
+      cnt_d--;
+    end
+  end
+
+  // Can issue another request if the counter is not at its limit or a response is delivered in the
+  // current cycle.
+  assign req_ready = (cnt_q < BufDepth) | (resp_valid_o & resp_ready_i);
+
+  // Control request and memory request interface handshakes.
+  assign req_ready_o = mem_req_ready_i & req_ready;
+  assign mem_req_valid_o = req_valid_i & req_ready;
+
+  // Forward requests.
+  assign mem_req_o = req_i;
+
+  // Buffer responses.
   stream_fifo #(
     .FALL_THROUGH (1'b1),
     .DEPTH        (BufDepth),
@@ -57,9 +85,14 @@ module mem_to_stream #(
     .usage_o    (/* unused */)
   );
 
-  assign mem_req_o = req_i;
-  assign mem_req_valid_o = req_valid_i & buf_ready;
-  assign req_ready_o = mem_req_ready_i & buf_ready;
+  // Register
+  always_ff @(posedge clk_i, negedge rst_ni) begin
+    if (!rst_ni) begin
+      cnt_q <= '0;
+    end else begin
+      cnt_q <= cnt_d;
+    end
+  end
 
   // Assertions
   `ifndef VERILATOR
@@ -67,6 +100,12 @@ module mem_to_stream #(
     initial begin
       assert (BufDepth >= 1) else $fatal("Buffer depth must be at least 1!");
     end
+    assert property (@(posedge clk_i) mem_resp_valid_i |-> buf_ready)
+      else $error("Memory response lost!");
+    assert property (@(posedge clk_i) cnt_q == '0 |=> cnt_q != '1)
+      else $error("Counter underflowed!");
+    assert property (@(posedge clk_i) cnt_q == BufDepth |=> cnt_q != BufDepth + 1)
+      else $error("Counter overflowed!");
   `endif
   `endif
 
