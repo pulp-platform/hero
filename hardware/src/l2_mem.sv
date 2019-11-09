@@ -88,7 +88,7 @@ module l2_mem #(
       cut_req = '0;
       cut_req[row_idx_d] = req;
     end
-    assign rdata = cut_rdata[row_idx_d];
+    assign rdata = cut_rdata[row_idx_q];
     always_ff @(posedge clk_i, negedge rst_ni) begin
       if (!rst_ni) begin
         row_idx_q <= '0;
