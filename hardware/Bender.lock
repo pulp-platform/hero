@@ -53,7 +53,7 @@ packages:
     dependencies:
       - axi
   axi_riscv_atomics:
-    revision: e7c8cc93b2f6141366bb843995665c262784966c
+    revision: eafccfb892fd34cf6c89f766c2852cb52ea19b54
     version: ~
     source:
       Git: "https://github.com/pulp-platform/axi_riscv_atomics.git"
