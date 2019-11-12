@@ -37,13 +37,6 @@ packages:
       Git: "https://github.com/pulp-platform/axi2per.git"
     dependencies:
       - axi_slice
-  axi_mem_if:
-    revision: 0c7456caa29262cca278fd28a23ab1c99eff4a79
-    version: ~
-    source:
-      Git: "https://github.com/pulp-platform/axi_mem_if.git"
-    dependencies:
-      - axi
   axi_node:
     revision: dbf2610c95eeb43f0fbf9241618caafd36dc9d19
     version: ~
@@ -60,7 +53,7 @@ packages:
     dependencies:
       - axi
   axi_riscv_atomics:
-    revision: e7c8cc93b2f6141366bb843995665c262784966c
+    revision: eafccfb892fd34cf6c89f766c2852cb52ea19b54
     version: ~
     source:
       Git: "https://github.com/pulp-platform/axi_riscv_atomics.git"

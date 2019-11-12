@@ -41,26 +41,32 @@ module l2_mem #(
   typedef logic [CUT_DW/8-1:0]            cut_strb_t;
 
   // Interface from AXI to memory array
-  logic       req, we;
+  logic       req, req_q, we;
   arr_addr_t  addr;
   arr_data_t  wdata, rdata;
   arr_strb_t  be;
 
-  axi_mem_if #(
-    .AXI_ID_WIDTH   (AXI_IW),
-    .AXI_ADDR_WIDTH (AXI_AW),
-    .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_USER_WIDTH (AXI_UW)
-  ) i_axi_if (
+  axi2mem_wrap #(
+    .AddrWidth  (AXI_AW),
+    .DataWidth  (AXI_DW),
+    .IdWidth    (AXI_IW),
+    .UserWidth  (AXI_UW),
+    .NumBanks   (1),
+    .BufDepth   (1)
+  ) i_axi2mem (
     .clk_i,
     .rst_ni,
-    .slave  (slv),
-    .req_o  (req),
-    .we_o   (we),
-    .addr_o (addr),
-    .be_o   (be),
-    .data_o (wdata),
-    .data_i (rdata)
+    .busy_o       (/* unused */),
+    .slv          (slv),
+    .mem_req_o    (req),
+    .mem_gnt_i    (1'b1),
+    .mem_addr_o   (addr),
+    .mem_wdata_o  (wdata),
+    .mem_strb_o   (be),
+    .mem_atop_o   (/* unused */),
+    .mem_we_o     (we),
+    .mem_rvalid_i (req_q),
+    .mem_rdata_i  (rdata)
   );
 
   // Interface from memory array to memory cuts
@@ -82,7 +88,7 @@ module l2_mem #(
       cut_req = '0;
       cut_req[row_idx_d] = req;
     end
-    assign rdata = cut_rdata[row_idx_d];
+    assign rdata = cut_rdata[row_idx_q];
     always_ff @(posedge clk_i, negedge rst_ni) begin
       if (!rst_ni) begin
         row_idx_q <= '0;
@@ -118,8 +124,10 @@ module l2_mem #(
   always_ff @(posedge clk_i, negedge rst_ni) begin
     if (!rst_ni) begin
       cut_addr_q <= '0;
+      req_q      <= 1'b0;
     end else begin
       cut_addr_q <= cut_addr_d;
+      req_q      <= req;
     end
   end
 

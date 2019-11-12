@@ -4,8 +4,12 @@ package:
 
 dependencies:
   axi: { git: "https://github.com/pulp-platform/axi.git", version: 0.6.0 }
-  common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.11.0-rc.1 }
+  common_cells: { git: "https://github.com/pulp-platform/common_cells.git", rev: release-1.11 }
   common_verification: { git: "https://github.com/pulp-platform/common_verification.git", version: 0.1.1 }
+  axi_mem_if: { git: "https://github.com/pulp-platform/axi_mem_if.git", rev: 313d075cac65e960fddc8b93848aceda18eebeac }
+  axi_node: { git: "https://github.com/pulp-platform/axi_node.git", rev: a29a69a543e96d0c9f79ea9c7df20580b3da5002 }
+  axi_slice: { git: "https://github.com/pulp-platform/axi_slice.git", rev: aae8ca49dcfbfa8e44e1938a2e4a768db83006cb }
+  vip: { git: "git@iis-git.ee.ethz.ch:pulp-restricted/vip.git", rev: b130abb7d77af0e8febeebdf34517d836f61f153 }
 
 sources:
   # Source files grouped in levels.  Files in level 0 have no dependencies on files in this package.
@@ -21,10 +25,16 @@ sources:
   - src/axi_riscv_atomics.sv
   - src/axi_riscv_lrsc_wrap.sv
   # Level 3
+  - src/axi_riscv_amos_wrap.sv
   - src/axi_riscv_atomics_wrap.sv
 
   - target: test
     files:
+      - test/generic_memory.sv
+      - test/axi_memory.sv
+      - test/tb_axi_pkg.sv
+      - test/golden_memory.sv
+      - test/tb_top.sv
       - test/axi_riscv_lrsc_tb.sv
 
   - target: synth_test
