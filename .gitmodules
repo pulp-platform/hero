@@ -8,17 +8,9 @@
 	path = pulp/sdk
 	url = git@iis-git.ee.ethz.ch:hero/pulp-sdk.git
 	ignore = dirty
-[submodule "toolchain/clang"]
-	path = toolchain/clang
-	url = git@iis-git.ee.ethz.ch:hero/clang.git
-	branch = hero-v3
-[submodule "toolchain/llvm"]
-	path = toolchain/llvm
+[submodule "toolchain/llvm-project"]
+	path = toolchain/llvm-project
 	url = git@iis-git.ee.ethz.ch:hero/llvm.git
-	branch = hero-v3
-[submodule "toolchain/openmp"]
-	path = toolchain/openmp
-	url = git@iis-git.ee.ethz.ch:hero/openmp.git
 	branch = hero-v3
 [submodule "toolchain/hercules"]
 	path = toolchain/hercules

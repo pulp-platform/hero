@@ -42,7 +42,7 @@ $RISCV/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DLLVM_TARGETS_TO_BUILD="" -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="RISCV" \
       -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON \
       -DLLVM_ENABLE_PROJECTS="clang;openmp" \
-      $THIS_DIR/llvm
+      $THIS_DIR/llvm-project/llvm
 cmake --build . --target install
 cd ..
 
