@@ -247,6 +247,7 @@ static int pulp_probe(struct platform_device *pdev)
     if (irq <= 0) {
       printk(KERN_WARNING "PULP: Could not allocate IRQ resource for %s.\n", irq_names[i]);
       *irq_vars[i] = -1;
+      return -ENODEV;
     }
     *irq_vars[i] = irq;
     if (DEBUG_LEVEL_OF > 0) {
