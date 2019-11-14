@@ -1,1 +1,1 @@
-../../toolchain/openmp/runtime/test/worksharing/for/omp_for_schedule_static.c
+../../toolchain/llvm-project/openmp/runtime/test/worksharing/for/omp_for_schedule_static.c

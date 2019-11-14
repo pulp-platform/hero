@@ -1,1 +1,1 @@
-../../toolchain/openmp/runtime/test/master/omp_master_3.c
+../../toolchain/llvm-project/openmp/runtime/test/master/omp_master_3.c
