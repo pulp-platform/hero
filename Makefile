@@ -2,8 +2,6 @@ ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 .PHONY: all br-genesys2-ariane br-zynqmp-zcu102 br-hero-riscv64 br-hero br-hero-aarch64 br-qemu-ariane tc-ariane-bare tc-ariane-linux tc-pulp pulp-sdk hero-sdk hero-llvm tools tools-isa-sim tools-openocd
 
-all: br-ariane br-hero
-
 # buildroot
 br-genesys2-ariane:
 	mkdir -p $(CURDIR)/output/br-genesys2-ariane
