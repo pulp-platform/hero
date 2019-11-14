@@ -9,9 +9,17 @@ source "$BR2_EXTERNAL_HERO_PATH/package/vitetris/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/hero-openmp/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/hero-apps/Config.in"
 
+source "$BR2_EXTERNAL_HERO_PATH/package/zynq-mkbootimage/Config.in.host"
+
 config BR2_HERO_EXT_MOUNT
   string "External mount point to load for chrooting"
   help
     Location to mount as external root, for example NFS partition. Binds system
     to the filesystem. Options can be specified before (with -o) as the options
     are completely forwarded to mount. Leave empty to not mount external partition.
+
+config BR2_HERO_BITSTREAM
+  string "Bitstream to load for targeted FPGA"
+  help
+    Location of a bitstream to load for the FPGA device during boot. Leave empty
+    to not load any bitstream.
