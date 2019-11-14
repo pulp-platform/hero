@@ -1164,7 +1164,11 @@ irqreturn_t pulp_isr(int irq, void *ptr)
 
   // read and clear the interrupt register
 #if INTR_REG_BASE_ADDR
-  intr_reg_value = IOREAD_L((void *)(unsigned long)my_dev.intr_reg);
+  intr_reg_value = ioread32((void *)(unsigned long)my_dev.intr_reg);
+// FIXME: remove custom clearance of interrupt
+#if PLATFORM == ZYNQMP
+  iowrite32(intr_reg_value, (void *)(unsigned long)my_dev.intr_reg + 0xc);
+#endif
 #else
   if (irq == my_dev.irq_mbox) {
     BIT_SET(intr_reg_value, BF_MASK_GEN(INTR_MBOX, 1));

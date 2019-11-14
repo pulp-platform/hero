@@ -22,6 +22,6 @@
         reg = <0x0 0xb0000000 0x0 0x10000000
                0x0 0xa0030000 0x0 0x10000>;
         interrupt-parent = <&gic>;
-        interrupts = <0 89 4>;
+        interrupts = <0 89 1>;
     };
 };

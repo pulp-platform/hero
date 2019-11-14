@@ -115,7 +115,7 @@
 /*
  * Macros
  */
-#if PLATFORM == JUNO || PLATFORM == TE0808
+#if PLATFORM == JUNO || PLATFORM == TE0808 || PLATFORM == ZYNQMP
   #define IOWRITE_L(value, addr) (iowrite64(value, addr))
   #define IOREAD_L(addr) (ioread64(addr))
 #else
