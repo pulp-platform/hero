@@ -452,6 +452,8 @@ int pulp_boot(PulpDev *pulp, const TaskDesc *task)
 
 int pulp_load_bin(PulpDev *pulp, const char *name)
 {
+  printf("Starting load...\n");
+
   int i;
   char *bin_name_tcdm;
   char *bin_name_l2;

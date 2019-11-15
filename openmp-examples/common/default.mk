@@ -10,7 +10,8 @@ TARGET_DEV = riscv32-hero-unknown-elf
 ARCH_HOST = host-$(TARGET_HOST)
 ARCH_DEV = openmp-$(TARGET_DEV)
 
-OBJDUMP := $(TARGET_DEV)-objdump
+HOST_OBJDUMP := $(TARGET_HOST)-objdump
+DEV_OBJDUMP := $(TARGET_DEV)-objdump
 
 ifeq ($(strip $(default-as)),)
 ifeq ($(only),pulp)
@@ -39,8 +40,11 @@ CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -march=rv32imafc
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
 LDFLAGS_COMMON ?= $(ldflags)
 LDFLAGS_PULP += $(LDFLAGS_COMMON)
-# FIXME: we explicitly need to embed the correct linker
-LDFLAGS += $(LDFLAGS_COMMON) -lhero-target -Wl,-dynamic-linker,/lib/ld-linux-riscv64-lp64.so.1
+LDFLAGS += $(LDFLAGS_COMMON) -lhero-target
+ifeq ($(TARGET_HOST),riscv64-hero-linux-gnu)
+  # FIXME: we explicitly need to embed the correct linker for riscv
+  LDFLAGS += -Wl,-dynamic-linker,/lib/ld-linux-riscv64-lp64.so.1
+endif
 
 INCPATHS += -I$(DEFMK_ROOT) -include hero_64.h
 LIBPATHS ?=
@@ -77,17 +81,20 @@ $(EXE): $(SRC:.c=.OMP.ll)
 slm: $(EXE)_l1.slm $(EXE)_l2.slm
 
 $(EXE)_l2.slm: $(EXE)
-	objdump -s --start-address=0x1c000000 --stop-address=0x1cffffff $^ | rg '^ ' | cut -c 2-45 \
+	$(DEV_OBJDUMP) -s --start-address=0x1c000000 --stop-address=0x1cffffff $^ | rg '^ ' | cut -c 2-45 \
       | sort \
       > $@
 	$(DEFMK_ROOT)/one_word_per_line.py $@
 
 $(EXE)_l1.slm: $(EXE)
-	objdump -s --start-address=0x10000000 --stop-address=0x1bffffff $^ | rg '^ ' | cut -c 2-45 \
+	$(DEV_OBJDUMP) -s --start-address=0x10000000 --stop-address=0x1bffffff $^ | rg '^ ' | cut -c 2-45 \
       | perl -p -e 's/^1b/10/' \
       | sort \
       > $@
 	$(DEFMK_ROOT)/one_word_per_line.py $@
+
+$(EXE).dis: $(EXE)
+	$(DEV_OBJDUMP) -d $^ > $@
 
 else
 all: $(DEPS) $(EXE) $(EXE).dis
@@ -112,10 +119,10 @@ all: $(DEPS) $(EXE) $(EXE).dis
 $(EXE): $(SRC:.c=-out.ll)
 	$(CC) $(LIBPATHS) $(CFLAGS) $< $(LDFLAGS) -o $@
 
-endif
-
 $(EXE).dis: $(EXE)
-	$(OBJDUMP) -d $^ > $@
+	$(HOST_OBJDUMP) -d $^ > $@
+
+endif
 
 $(DEPDIR):
 	@mkdir -p $@

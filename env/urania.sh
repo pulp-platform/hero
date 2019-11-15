@@ -35,3 +35,6 @@ if [ -f ${HERO_PULP_SDK_DIR}/sourceme.sh ]; then
     export HERO_PULP_INC_DIR=${HERO_PULP_SDK_DIR}/pkg/sdk/dev/install/include
     source ${HERO_PULP_SDK_DIR}/sourceme.sh
 fi
+
+unset CFLAGS
+unset LDFLAGS
