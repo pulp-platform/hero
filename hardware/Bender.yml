@@ -46,3 +46,7 @@ sources:
       - src/apb/apb_stdout.sv
       # Level 1
       - test/hero_tb.sv
+
+  - target: zcu102
+    files:
+      - fpga/zcu102/src/hero_zcu102.v
