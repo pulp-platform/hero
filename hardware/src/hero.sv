@@ -61,6 +61,8 @@ module hero #(
 
   output axi_req_t              ext_req_o,
   input  axi_resp_t             ext_resp_i,
+  input  axi_req_t              ext_req_i,
+  output axi_resp_t             ext_resp_o,
   input  axi_lite_req_t         rab_conf_req_i,
   output axi_lite_resp_t        rab_conf_resp_o
 );
@@ -420,8 +422,8 @@ module hero #(
     .from_pulp_prot_irq_o   (/* TODO */),
     .to_host_req_o          (ext_req_o),
     .to_host_resp_i         (ext_resp_i),
-    .from_host_req_i        ('0/* TODO */),
-    .from_host_resp_o       (/* TODO */),
+    .from_host_req_i        (ext_req_i),
+    .from_host_resp_o       (ext_resp_o),
     .from_host_miss_irq_o   (/* TODO */),
     .from_host_multi_irq_o  (/* TODO */),
     .from_host_prot_irq_o   (/* TODO */),

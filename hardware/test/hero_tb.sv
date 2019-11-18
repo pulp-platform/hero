@@ -58,8 +58,10 @@ module hero_tb #(
                           cl_eoc,
                           cl_fetch_en;
 
-  axi_req_t   from_pulp_req;
-  axi_resp_t  from_pulp_resp;
+  axi_req_t   from_pulp_req,
+              to_pulp_req;
+  axi_resp_t  from_pulp_resp,
+              to_pulp_resp;
 
   axi_lite_req_t  rab_conf_req;
   axi_lite_resp_t rab_conf_resp;
@@ -90,6 +92,8 @@ module hero_tb #(
 
     .ext_req_o      (from_pulp_req),
     .ext_resp_i     (from_pulp_resp),
+    .ext_req_i      (to_pulp_req),
+    .ext_resp_o     (to_pulp_resp),
     .rab_conf_req_i (rab_conf_req),
     .rab_conf_resp_o(rab_conf_resp)
   );
@@ -276,6 +280,12 @@ module hero_tb #(
         end
       end
     end
+  end
+
+  // Drive requests into PULP.
+  initial begin
+    to_pulp_req = '0;
+    wait (rst_n);
   end
 
   // Observe SoC bus for errors.
