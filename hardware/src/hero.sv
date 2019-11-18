@@ -59,8 +59,8 @@ module hero #(
   output logic [N_CLUSTERS-1:0] cl_eoc_o,
   output logic [N_CLUSTERS-1:0] cl_busy_o,
 
-  output axi_req_t              dram_req_o,
-  input  axi_resp_t             dram_resp_i,
+  output axi_req_t              ext_req_o,
+  input  axi_resp_t             ext_resp_i,
   input  axi_lite_req_t         rab_conf_req_i,
   output axi_lite_resp_t        rab_conf_resp_o
 );
@@ -418,8 +418,8 @@ module hero #(
     .from_pulp_miss_irq_o   (/* TODO */),
     .from_pulp_multi_irq_o  (/* TODO */),
     .from_pulp_prot_irq_o   (/* TODO */),
-    .to_host_req_o          (dram_req_o),
-    .to_host_resp_i         (dram_resp_i),
+    .to_host_req_o          (ext_req_o),
+    .to_host_resp_i         (ext_resp_i),
     .from_host_req_i        ('0/* TODO */),
     .from_host_resp_o       (/* TODO */),
     .from_host_miss_irq_o   (/* TODO */),

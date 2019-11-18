@@ -58,8 +58,8 @@ module hero_tb #(
                           cl_eoc,
                           cl_fetch_en;
 
-  axi_req_t   dram_req;
-  axi_resp_t  dram_resp;
+  axi_req_t   from_pulp_req;
+  axi_resp_t  from_pulp_resp;
 
   axi_lite_req_t  rab_conf_req;
   axi_lite_resp_t rab_conf_resp;
@@ -88,8 +88,8 @@ module hero_tb #(
     .cl_eoc_o       (cl_eoc),
     .cl_busy_o      (cl_busy),
 
-    .dram_req_o     (dram_req),
-    .dram_resp_i    (dram_resp),
+    .ext_req_o      (from_pulp_req),
+    .ext_resp_i     (from_pulp_resp),
     .rab_conf_req_i (rab_conf_req),
     .rab_conf_resp_o(rab_conf_resp)
   );
@@ -101,70 +101,70 @@ module hero_tb #(
     automatic axi_aw_t aw_queue[$];
     automatic axi_b_t b_queue[$];
     automatic shortint unsigned r_cnt = 0, w_cnt = 0;
-    dram_resp = '0;
+    from_pulp_resp = '0;
     wait (rst_n);
     @(posedge clk);
     fork
       // AW
       forever begin
-        dram_resp.aw_ready = 1'b1;
-        if (dram_req.aw_valid) begin
-          aw_queue.push_back(dram_req.aw);
+        from_pulp_resp.aw_ready = 1'b1;
+        if (from_pulp_req.aw_valid) begin
+          aw_queue.push_back(from_pulp_req.aw);
         end
         @(posedge clk);
       end
       // W
       forever begin
         if (aw_queue.size() != 0) begin
-          dram_resp.w_ready = 1'b1;
-          if (dram_req.w_valid) begin
+          from_pulp_resp.w_ready = 1'b1;
+          if (from_pulp_req.w_valid) begin
             automatic axi_pkg::size_t size = aw_queue[0].size;
             automatic axi_addr_t addr = axi_pkg::beat_addr(aw_queue[0].addr, size, w_cnt);
             for (shortint unsigned
                 i_byte = axi_pkg::beat_lower_byte(addr, size, AXI_SW, w_cnt);
                 i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, w_cnt);
                 i_byte++) begin
-              if (dram_req.w.strb[i_byte]) begin
+              if (from_pulp_req.w.strb[i_byte]) begin
                 automatic axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
-                mem[byte_addr] = dram_req.w.data[i_byte*8+:8];
+                mem[byte_addr] = from_pulp_req.w.data[i_byte*8+:8];
               end
             end
             if (w_cnt == aw_queue[0].len) begin
               automatic axi_b_t b_beat = '0;
-              assert (dram_req.w.last) else $error("Expected last beat of W burst!");
+              assert (from_pulp_req.w.last) else $error("Expected last beat of W burst!");
               b_beat.id = aw_queue[0].id;
               b_beat.resp = axi_pkg::RESP_OKAY;
               b_queue.push_back(b_beat);
               w_cnt = 0;
               void'(aw_queue.pop_front());
             end else begin
-              assert (!dram_req.w.last) else $error("Did not expect last beat of W burst!");
+              assert (!from_pulp_req.w.last) else $error("Did not expect last beat of W burst!");
               w_cnt++;
             end
           end
         end else begin
-          dram_resp.w_ready = 1'b0;
+          from_pulp_resp.w_ready = 1'b0;
         end
         @(posedge clk);
       end
       // B
       forever begin
         if (b_queue.size() != 0) begin
-          dram_resp.b = b_queue[0];
-          dram_resp.b_valid = 1'b1;
-          if (dram_req.b_ready) begin
+          from_pulp_resp.b = b_queue[0];
+          from_pulp_resp.b_valid = 1'b1;
+          if (from_pulp_req.b_ready) begin
             void'(b_queue.pop_front());
           end
         end else begin
-          dram_resp.b_valid = 1'b0;
+          from_pulp_resp.b_valid = 1'b0;
         end
         @(posedge clk);
       end
       // AR
       forever begin
-        dram_resp.ar_ready = 1'b1;
-        if (dram_req.ar_valid) begin
-          ar_queue.push_back(dram_req.ar);
+        from_pulp_resp.ar_ready = 1'b1;
+        if (from_pulp_req.ar_valid) begin
+          ar_queue.push_back(from_pulp_req.ar);
         end
         @(posedge clk);
       end
@@ -187,9 +187,9 @@ module hero_tb #(
           if (r_cnt == ar_queue[0].len) begin
             r_beat.last = 1'b1;
           end
-          dram_resp.r = r_beat;
-          dram_resp.r_valid = 1'b1;
-          if (dram_req.r_ready) begin
+          from_pulp_resp.r = r_beat;
+          from_pulp_resp.r_valid = 1'b1;
+          if (from_pulp_req.r_ready) begin
             if (r_beat.last) begin
               r_cnt = 0;
               void'(ar_queue.pop_front());
@@ -198,7 +198,7 @@ module hero_tb #(
             end
           end
         end else begin
-          dram_resp.r_valid = 1'b0;
+          from_pulp_resp.r_valid = 1'b0;
         end
         @(posedge clk);
       end

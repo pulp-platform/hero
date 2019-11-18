@@ -1870,8 +1870,8 @@ add wave -noupdate -group {TB I/O} /hero_tb/dut/rst_ni
 add wave -noupdate -group {TB I/O} /hero_tb/dut/cl_fetch_en_i
 add wave -noupdate -group {TB I/O} /hero_tb/dut/cl_busy_o
 add wave -noupdate -group {TB I/O} /hero_tb/dut/cl_eoc_o
-add wave -noupdate -group {TB I/O} /hero_tb/dram_req
-add wave -noupdate -group {TB I/O} /hero_tb/dram_resp
+add wave -noupdate -group {TB I/O} /hero_tb/from_pulp_req
+add wave -noupdate -group {TB I/O} /hero_tb/from_pulp_resp
 add wave -noupdate -group {TB I/O} /hero_tb/rab_conf_req
 add wave -noupdate -group {TB I/O} /hero_tb/rab_conf_resp
 add wave -noupdate -group {cluster[1]/axi2mem} {/hero_tb/dut/gen_clusters[1]/gen_cluster_sync/i_cluster/i_ooc/i_bound/i_axi2mem/clk_i}
