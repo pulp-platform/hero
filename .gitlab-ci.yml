@@ -11,11 +11,14 @@ after_script:
 all:
   script:
     ### build_install_gcc
-    - make tc-pulp tc-ariane-linux
+    - make tc-pulp tc-ariane-linux tc-aarch64-linux
     ### build_install_pulp-sdk
     - make pulp-sdk
     ### build_install_hero-sdk
     - make hero-sdk
+    ### build system images
+    - make br-zynqmp-zcu102
+    - make br-genesys2-ariane
     ### build_install_llvm
     - make hero-llvm
     ### build_examples
