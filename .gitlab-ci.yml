@@ -37,6 +37,17 @@ all:
         ../test/gen_slm_files.sh $d
         ./start_sim.sh
       done
+    - cd -
+    ### test benchmarks
+    - >
+      for d in openmp-examples/polybench-acc/*/; do
+        if [ $(basename $d) = "common" ]; then
+          continue
+        fi
+        make -C $d only=pulp default-as=host clean all
+        make -C $d only=pulp clean all
+        .gitlab-ci.d/verify-bench.sh $(basename $d) 
+      done
   artifacts:
     paths:
       - install
