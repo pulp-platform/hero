@@ -8,7 +8,7 @@ br-genesys2-ariane:
 	$(MAKE) O=$(CURDIR)/output/br-genesys2-ariane BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot genesys2_ariane_defconfig
 	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-genesys2-ariane/.config; fi
 	$(MAKE) -C $(CURDIR)/output/br-genesys2-ariane
-	cp $(CURDIR)/output/br-ariane/images/bbl.bin $(CURDIR)
+	cp $(CURDIR)/output/br-genesys2-ariane/images/bbl.bin $(CURDIR)
 
 br-zynqmp-zcu102:
 	mkdir -p $(CURDIR)/output/br-zynqmp-zcu102
