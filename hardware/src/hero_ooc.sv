@@ -147,7 +147,16 @@ module hero_ooc #(
   // Cluster Control
   input  logic [N_CLUSTERS-1:0] cl_fetch_en_i,
   output logic [N_CLUSTERS-1:0] cl_eoc_o,
-  output logic [N_CLUSTERS-1:0] cl_busy_o
+  output logic [N_CLUSTERS-1:0] cl_busy_o,
+
+  // RAB IRQs
+  output logic  rab_from_pulp_miss_irq_o,
+  output logic  rab_from_pulp_multi_irq_o,
+  output logic  rab_from_pulp_prot_irq_o,
+  output logic  rab_from_host_miss_irq_o,
+  output logic  rab_from_host_multi_irq_o,
+  output logic  rab_from_host_prot_irq_o,
+  output logic  rab_miss_fifo_full_irq_o
 );
 
   `AXI_TYPEDEF_AW_CHAN_T(aw_t, addr_t, id_t, user_t)
@@ -309,6 +318,13 @@ module hero_ooc #(
     .cl_fetch_en_i,
     .cl_eoc_o,
     .cl_busy_o,
+    .rab_from_pulp_miss_irq_o,
+    .rab_from_pulp_multi_irq_o,
+    .rab_from_pulp_prot_irq_o,
+    .rab_from_host_miss_irq_o,
+    .rab_from_host_multi_irq_o,
+    .rab_from_host_prot_irq_o,
+    .rab_miss_fifo_full_irq_o,
     .ext_req_o        (from_pulp_req),
     .ext_resp_i       (from_pulp_resp),
     .ext_req_i        (to_pulp_req),

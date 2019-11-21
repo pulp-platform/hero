@@ -100,7 +100,14 @@ module hero_zcu102 (
   input           rab_conf_r_ready_i,
   input           cl_fetch_en_i,
   output          cl_busy_o,
-  output          cl_eoc_o
+  output          cl_eoc_o,
+  output          rab_from_pulp_miss_irq_o,
+  output          rab_from_pulp_multi_irq_o,
+  output          rab_from_pulp_prot_irq_o,
+  output          rab_from_host_miss_irq_o,
+  output          rab_from_host_multi_irq_o,
+  output          rab_from_host_prot_irq_o,
+  output          rab_miss_fifo_full_irq_o
 );
   wire [  6:0] slv_aw_id,     slv_b_id,                   slv_ar_id,        slv_r_id,
                mst_aw_id,     mst_b_id,                   mst_ar_id,        mst_r_id;
@@ -269,7 +276,14 @@ module hero_zcu102 (
     .rab_conf_r_ready_i   (rab_conf_r_ready_i),
     .cl_fetch_en_i  (cl_fetch_en_i),
     .cl_eoc_o       (cl_eoc_o),
-    .cl_busy_o      (cl_busy_o)
+    .cl_busy_o      (cl_busy_o),
+    .rab_from_pulp_miss_irq_o   (rab_from_pulp_miss_irq_o),
+    .rab_from_pulp_multi_irq_o  (rab_from_pulp_multi_irq_o),
+    .rab_from_pulp_prot_irq_o   (rab_from_pulp_prot_irq_o),
+    .rab_from_host_miss_irq_o   (rab_from_host_miss_irq_o),
+    .rab_from_host_multi_irq_o  (rab_from_host_multi_irq_o),
+    .rab_from_host_prot_irq_o   (rab_from_host_prot_irq_o),
+    .rab_miss_fifo_full_irq_o   (rab_miss_fifo_full_irq_o)
   );
   axi_id_resize_ports #(
     .ADDR_WIDTH   (64),
