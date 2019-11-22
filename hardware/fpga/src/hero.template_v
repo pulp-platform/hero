@@ -155,7 +155,7 @@ module hero_${board} (\
     .slv_r_ready_i    (slv_r_ready),
 
     .rab_conf_aw_id_i     (1'b0),
-    .rab_conf_aw_addr_i   (rab_conf_aw_addr_i[31:0]),
+    .rab_conf_aw_addr_i   ({{12{1'b0}}, rab_conf_aw_addr_i[19:0]}),
     .rab_conf_aw_size_i   (3'b010),
     .rab_conf_aw_prot_i   (rab_conf_aw_prot_i),
     .rab_conf_aw_user_i   (1'b0),
@@ -172,7 +172,7 @@ module hero_${board} (\
     .rab_conf_b_valid_o   (rab_conf_b_valid_o),
     .rab_conf_b_ready_i   (rab_conf_b_ready_i),
     .rab_conf_ar_id_i     (1'b0),
-    .rab_conf_ar_addr_i   (rab_conf_ar_addr_i[31:0]),
+    .rab_conf_ar_addr_i   ({{12{1'b0}}, rab_conf_ar_addr_i[19:0]}),
     .rab_conf_ar_size_i   (3'b010),
     .rab_conf_ar_prot_i   (rab_conf_ar_prot_i),
     .rab_conf_ar_user_i   (1'b0),
