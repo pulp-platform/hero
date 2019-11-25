@@ -193,8 +193,10 @@ module amo_shim #(
                     end else begin
                         amo_result =  upper_word_q ? out_rdata_i[63:32] : out_rdata_i[31:0];
                     end
+                `ifndef TARGET_SYNTHESIS
                 end else begin
                     $error("AMOCAS not supported for DataWidth = 32 bit");
+                `endif
                 end
             end
             default: amo_result = '0;
