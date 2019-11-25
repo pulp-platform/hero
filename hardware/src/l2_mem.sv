@@ -21,8 +21,8 @@ module l2_mem #(
 );
 
   // Properties of one memory cut, keep synchronized with instantiated macro.
-  localparam int unsigned CUT_DW = 64;          // [bit], must be a power of 2 and >=8
-  localparam int unsigned CUT_N_WORDS = 8192;   // must be a power of 2
+  localparam int unsigned CUT_DW = 32;          // [bit], must be a power of 2 and >=8
+  localparam int unsigned CUT_N_WORDS = 1024;   // must be a power of 2
   localparam int unsigned CUT_N_BITS = CUT_DW * CUT_N_WORDS;
 
   // Derived properties of memory array
