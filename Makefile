@@ -55,7 +55,7 @@ tc-aarch64-linux:
 tc-pulp:
 	mkdir -p $(CURDIR)/output/tc-pulp/
 	cd $(CURDIR)/output/tc-pulp/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/pulp.config hero-unknown
-	chmod -R u+w $(RISCV) && ln -sf $(RISCV)/riscv32-unknown-elf $(RISCV)/riscv32-hero-unknown-elf && chmod -R u-w $(RISCV)
+	chmod -R u+w $(HERO_INSTALL) && ln -sf $(HERO_INSTALL)/riscv32-unknown-elf $(HERO_INSTALL)/riscv32-hero-unknown-elf && chmod -R u-w $(HERO_INSTALL)
 
 # sdk
 pulp-sdk:
@@ -79,13 +79,13 @@ tools: tools-openocd
 tools-openocd:
 	mkdir -p $(CURDIR)/output/tools-openocd/
 	(export CCACHE=none; \
-		export PATH=$(RISCV)/bin:${PATH}; \
+		export PATH=$(HERO_INSTALL)/bin:${PATH}; \
 		cd $(ROOT)/tools/riscv-openocd/; \
 		./bootstrap; \
 		cd $(CURDIR)/output/tools-openocd/; \
-		$(ROOT)/tools/riscv-openocd/configure --prefix=$(RISCV); \
+		$(ROOT)/tools/riscv-openocd/configure --prefix=$(HERO_INSTALL); \
 		$(MAKE); \
-		chmod -R u+w $(RISCV); \
+		chmod -R u+w $(HERO_INSTALL); \
 		$(MAKE) install; \
-		chmod -R u-w $(RISCV); \
+		chmod -R u-w $(HERO_INSTALL); \
 	)

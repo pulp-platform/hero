@@ -7,14 +7,13 @@ set -e
 CROSSTOOL_VERSION=1.24.0
 HELP2MAN_VERSION=1.47.10
 TEXINFO_VERSION=6.6
-PKGCONFIG_VERSION=1.1.0
 
 if [ "$#" -lt 1 ] || [ ! -f "$1" ]; then
     echo "Fatal error: expects at least a single argument with crosstool config"
     exit
 fi
-if [ -z "$RISCV" ]; then
-    echo "Fatal error: set RISCV to install location of the toolchain"
+if [ -z "$HERO_INSTALL" ]; then
+    echo "Fatal error: set HERO_INSTALL to install location of the toolchain"
     exit
 fi
 
@@ -43,17 +42,17 @@ if ! command -v makeinfo >/dev/null 2>&1; then
     cd ..
 fi
 
-mkdir -p $RISCV
+mkdir -p $HERO_INSTALL
 # download and install crosstool-ng
-if [ ! -x "$RISCV/bin/ct-ng" ]; then
-    chmod -R u+w $RISCV
+if [ ! -x "$HERO_INSTALL/bin/ct-ng" ]; then
+    chmod -R u+w $HERO_INSTALL
     echo "No crosstool-ng found, installing..."
     curl http://crosstool-ng.org/download/crosstool-ng/crosstool-ng-$CROSSTOOL_VERSION.tar.xz | tar -xJp
     cd crosstool-ng-$CROSSTOOL_VERSION
     for f in $conf_dir/patches/crosstool-ng/*.patch; do
         patch -p1 < $f
     done
-    ./configure --prefix=$RISCV
+    ./configure --prefix=$HERO_INSTALL
     if [ ! $? -eq 0 ]; then
         echo "Fatal error: failed to configure crosstool-ng"
 	      exit
@@ -76,7 +75,7 @@ cp "$1" .config
 mkdir -p src
 echo >> .config
 if ! grep -q "^CT_PREFIX_DIR=" .config; then
-    echo 'CT_PREFIX_DIR="${RISCV}"' >> .config
+    echo 'CT_PREFIX_DIR="${HERO_INSTALL}"' >> .config
 fi
 if ! grep -q "^CT_LOCAL_TARBALLS_DIR=" .config; then
     echo "CT_LOCAL_TARBALLS_DIR=\"$(pwd)/src"\" >> .config
@@ -84,15 +83,15 @@ fi
 if [ -n "$CI" ]; then
     echo "CT_LOG_PROGRESS_BAR=n" >> .config
 fi
-$RISCV/bin/ct-ng upgradeconfig > /dev/null
+$HERO_INSTALL/bin/ct-ng upgradeconfig > /dev/null
 
 # deduce tuple, sysroot
-TUPLE=$($RISCV/bin/ct-ng -s show-tuple)
+TUPLE=$($HERO_INSTALL/bin/ct-ng -s show-tuple)
 ARCH=$(echo $TUPLE | cut -f1 -d'-')
-SYSROOT=$RISCV/$TUPLE/sysroot
+SYSROOT=$HERO_INSTALL/$TUPLE/sysroot
 
 # check previous install and clear sysroot between builds if exists
-if [ -x "$RISCV/bin/$TUPLE-gcc" ]; then
+if [ -x "$HERO_INSTALL/bin/$TUPLE-gcc" ]; then
     echo "Warning: RISCV directory already seems to contain a toolchain for $TUPLE";
     read -p "Are you sure you want replace it (N/y)? " -n 1 -r
     echo
@@ -109,17 +108,17 @@ if grep -q "^CT_COMP_TOOLS_FOR_HOST=y" .config && grep -q "^CT_COMP_TOOLS_MAKE=y
     # remove a symlink if it exists otherwise rebuild will break
     echo "Removing symlink to gnumake to prevent build failure..."
     set +e
-    chmod -f u+w $RISCV/bin/
-    chmod -f u+w $RISCV/bin/gnumake
-    rm -f $RISCV/bin/gnumake
-    chmod -f u-w $RISCV/bin/
+    chmod -f u+w $HERO_INSTALL/bin/
+    chmod -f u+w $HERO_INSTALL/bin/gnumake
+    rm -f $HERO_INSTALL/bin/gnumake
+    chmod -f u-w $HERO_INSTALL/bin/
     set -e
 fi
 
 # build the toolchain
 echo "Starting toolchain build..."
 unset LD_LIBRARY_PATH
-$RISCV/bin/ct-ng build
+$HERO_INSTALL/bin/ct-ng build
 
 if [ ! -d $SYSROOT ]; then
     SYSROOT=
@@ -131,13 +130,13 @@ fi
 # FIXME: this should be done properly by crosstool-ng
 if grep -q "^CT_COMP_TOOLS_FOR_HOST=y" .config; then
     echo "Fixing hardcoded paths pointing to build directory..."
-    chmod -R u+w $RISCV
+    chmod -R u+w $HERO_INSTALL
     builddir=$(readlink -f $(pwd)/.build)
-    replacedir=$(readlink -f $RISCV)
-    find $RISCV/bin -type f -exec sed -i "s|$builddir/tools/bin/||g" {} \;
-    find $RISCV/bin -type f -exec sed -i "s|NM=\".*\"|NM=\"nm\"|g" {} \;
-    find $RISCV/ -iname "*.la" -type f -exec sed -i "s|-L$builddir/.*/build/build-gdb-native/zlib ||" {} \;
-    chmod -R u-w $RISCV
+    replacedir=$(readlink -f $HERO_INSTALL)
+    find $HERO_INSTALL/bin -type f -exec sed -i "s|$builddir/tools/bin/||g" {} \;
+    find $HERO_INSTALL/bin -type f -exec sed -i "s|NM=\".*\"|NM=\"nm\"|g" {} \;
+    find $HERO_INSTALL/ -iname "*.la" -type f -exec sed -i "s|-L$builddir/.*/build/build-gdb-native/zlib ||" {} \;
+    chmod -R u-w $HERO_INSTALL
 fi
 
 # demultilib paths in riscv toolchain (needed for buildroot)
@@ -220,9 +219,9 @@ fi
 
 # alias the toolchain if requested ($2 = vendor alias, $3 = optional suffix useful for buildroot)
 if [ ! -z "$2" ] || [ ! -z "$3" ]; then
-    chmod -R u+w $RISCV/bin
+    chmod -R u+w $HERO_INSTALL/bin
     vendor=$(echo "$TUPLE" | sed -E 's/^\w*-(\w*)-.*/\1/')
-    cd "$RISCV/bin"
+    cd "$HERO_INSTALL/bin"
     for tf in $TUPLE*; do
         alias=$(echo "$tf" | sed -e "s/$vendor/$2/")
         ln -sf $tf $alias
@@ -232,5 +231,5 @@ if [ ! -z "$2" ] || [ ! -z "$3" ]; then
         fi
     done
     cd - > /dev/null
-    chmod -R u-w $RISCV/bin
+    chmod -R u-w $HERO_INSTALL/bin
 fi

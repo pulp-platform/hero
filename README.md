@@ -20,9 +20,9 @@ git submodule update --init --recursive
 ```
 
 ### Toolchain
-All toolchains are installed automatically to the location pointed to by the `RISCV` environment variable. Please set it to your preferred installatation location before continueing with the next step
+All toolchains are installed automatically to the location pointed to by the `HERO_INSTALL` environment variable. Please set it to your preferred installatation location before continueing with the next step
 ```
-export RISCV=<your_path>
+export HERO_INSTALL=<your_path>
 ```
 
 The project contains several toolchains for various configurations. The core Linux Ariane toolchain with recent version of several host tools included (necessary for building the tools) is required first and can be built with
@@ -36,7 +36,7 @@ make tc-pulp
 ```
 
 ### Tools
-For development with RISCV-V the Spike ISA simulator tool and the OpenOCD debugger are useful. These can be installed as follows (after the toolchain is built) and are installed automatically to the `RISCV` toolchain installation directory
+For development with RISC-V the Spike ISA simulator tool and the OpenOCD debugger are useful. These can be installed as follows (after the toolchain is built) and are installed automatically to the `HERO_INSTALL` toolchain installation directory
 ```
 make tools
 ```
@@ -113,13 +113,13 @@ to the command to run above. Afterwards you can execute `chroot /mnt` to change 
 On the Ariane hardware the environment can be chrooted via NFS instead. To automate the mounting of an NFS filesystem on boot, a configuration line with value `BR2_PACKAGE_ARIANE_SUPPORT_EXT_MOUNT="<mount-options> <ip>:<path>"` can be specified in `local.cfg`.
 
 ### HERO-SDK
-From the HERO buildroot image an external sdk can be generated and integrated in the `RISCV` toolchain installation. This SDK is required to compile heterogeneous applications with OpenMP. The SDK can be installed with
+From the HERO buildroot image an external sdk can be generated and integrated in the `HERO_INSTALL` toolchain installation. This SDK is required to compile heterogeneous applications with OpenMP. The SDK can be installed with
 ```
 make hero-sdk
 ```
 
 ### LLVM OpenMP RTE
-After the Ariane toolchain, the PULP toolchain, the PULP SDK and the HERO SDK are installed, the HERO LLVM RTE can be installed. This includes clang and OpenMP build support to create heterogeneous applications. It will be installed in the `RISCV` toolchain folder together with the other toolchain parts. To build and install the HERO LLVM setup, run:
+After the Ariane toolchain, the PULP toolchain, the PULP SDK and the HERO SDK are installed, the HERO LLVM RTE can be installed. This includes clang and OpenMP build support to create heterogeneous applications. It will be installed in the `HERO_INSTALL` toolchain folder together with the other toolchain parts. To build and install the HERO LLVM setup, run:
 ```
 make hero-llvm
 ```

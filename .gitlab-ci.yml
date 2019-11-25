@@ -1,12 +1,12 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  RISCV: '$CI_PROJECT_DIR/install'
+  HERO_INSTALL: '$CI_PROJECT_DIR/install'
 
 before_script:
-  - mkdir -p $RISCV
+  - mkdir -p $HERO_INSTALL
 
 after_script:
-  - chmod -R u+w $RISCV
+  - chmod -R u+w $HERO_INSTALL
 
 all:
   script:
