@@ -194,10 +194,12 @@ module cluster_interconnect_wrap
         unique casez (atop[4:0])
           riscv_defines::AMO_ADD:   amo = 4'h2;
           riscv_defines::AMO_SWAP:  amo = 4'h1;
-          riscv_defines::AMO_LR:    $error("Unsupported LR on L1!");
-          riscv_defines::AMO_SC:    $error("Unsupported SC on L1!");
+          riscv_defines::AMO_LR:    `ifndef TARGET_SYNTHESIS $error("Unsupported LR on L1!") `endif;
+          riscv_defines::AMO_SC:    `ifndef TARGET_SYNTHESIS $error("Unsupported SC on L1!") `endif;
           default: begin
-            assert (atop[1:0] == '0) else $error("Illegal AMO!");
+            `ifndef TARGET_SYNTHESIS
+              assert (atop[1:0] == '0) else $error("Illegal AMO!");
+            `endif
             unique case (atop[4:2])
               riscv_defines::AMO_XOR[4:2]:  amo = 4'h5;
               riscv_defines::AMO_OR[4:2]:   amo = 4'h4;
