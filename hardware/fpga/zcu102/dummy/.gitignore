@@ -1,1 +1,8 @@
 /project_1/
+.Xil
+/*.cache/
+/*.hw/
+/*.xpr
+/*.log
+/*.zip
+/proj/
