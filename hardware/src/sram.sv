@@ -29,14 +29,57 @@ module sram #(
 );
 
 `ifdef TARGET_SYNTHESIS
-  $fatal(1, "Unsupported synthesis target!");
+  `ifdef TARGET_XILINX
+    strb_t we;
+    for (genvar p = 0; p < STRB_WIDTH; p++) begin : gen_we
+      assign we[p] = we_i & be_i[p];
+    end
+    xpm_memory_spram #(
+      .ADDR_WIDTH_A         ($clog2(N_WORDS)),
+      .AUTO_SLEEP_TIME      (0),
+      .BYTE_WRITE_WIDTH_A   (8),
+      .CASCADE_HEIGHT       (0),
+      .ECC_MODE             ("no_ecc"),
+      .MEMORY_INIT_FILE     ("none"),
+      .MEMORY_INIT_PARAM    (""),
+      .MEMORY_OPTIMIZATION  ("true"),
+      .MEMORY_PRIMITIVE     ("block"),
+      .MEMORY_SIZE          (N_WORDS*DATA_WIDTH),
+      .MESSAGE_CONTROL      (0),
+      .READ_DATA_WIDTH_A    (DATA_WIDTH),
+      .READ_LATENCY_A       (1),
+      .READ_RESET_VALUE_A   ("0"),
+      .RST_MODE_A           ("SYNC"),
+      .SIM_ASSERT_CHK       (1),
+      .USE_MEM_INIT         (0),
+      .WAKEUP_TIME          ("disable_sleep"),
+      .WRITE_DATA_WIDTH_A   (DATA_WIDTH),
+      .WRITE_MODE_A         ("read_first")
+    ) i_xpm_memory_spram (
+      .addra          (addr_i),
+      .clka           (clk_i),
+      .dbiterra       (),
+      .dina           (wdata_i),
+      .douta          (rdata_o),
+      .ena            (req_i),
+      .injectdbiterra (1'b0),
+      .injectsbiterra (1'b0),
+      .regcea         (1'b1),
+      .rsta           (~rst_ni),
+      .sbiterra       (),
+      .sleep          (1'b0),
+      .wea            (we)
+    );
+  `else
+    $fatal(1, "Unsupported synthesis target!");
+  `endif
 
 `else // behavioral
   data_t mem [N_WORDS-1:0];
   always_ff @(posedge clk_i) begin
     if (req_i) begin
       if (we_i) begin
-        for (int unsigned i = 0; i < N_BYTES; i++) begin
+        for (int unsigned i = 0; i < STRB_WIDTH; i++) begin
           if (be_i[i]) begin
             mem[addr_i][i*8+:8] <= wdata_i[i*8+:8];
           end
