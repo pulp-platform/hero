@@ -1,14 +1,14 @@
 `include "axi/typedef.svh"
 
-module hero_ooc #(
+module pulp_ooc #(
   parameter int unsigned  N_CLUSTERS = 4,
   parameter int unsigned  AXI_DW = 256,         // [bit]
   parameter int unsigned  L2_N_AXI_PORTS = 1,
-  localparam type addr_t = logic [hero_pkg::AXI_AW-1:0],
+  localparam type addr_t = logic [pulp_pkg::AXI_AW-1:0],
   localparam type data_t = logic [AXI_DW-1:0],
-  localparam type id_t = logic [hero_pkg::axi_iw_sb_oup(N_CLUSTERS)-1:0],
+  localparam type id_t = logic [pulp_pkg::axi_iw_sb_oup(N_CLUSTERS)-1:0],
   localparam type strb_t = logic [AXI_DW/8-1:0],
-  localparam type user_t = logic [hero_pkg::AXI_UW-1:0],
+  localparam type user_t = logic [pulp_pkg::AXI_UW-1:0],
   localparam int unsigned AXI_AW_LITE = 32,
   localparam int unsigned AXI_DW_LITE = 32,
   localparam type lite_addr_t = logic [AXI_AW_LITE-1:0],
@@ -304,7 +304,7 @@ module hero_ooc #(
   assign rab_conf_r_valid_o     = rab_conf_resp.r_valid;
   assign rab_conf_req.r_ready   = rab_conf_r_ready_i;
 
-  hero #(
+  pulp #(
     .N_CLUSTERS       (N_CLUSTERS),
     .AXI_DW           (AXI_DW),
     .L2_N_AXI_PORTS   (L2_N_AXI_PORTS),

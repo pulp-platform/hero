@@ -14,7 +14,7 @@
     @(posedge clk); \
   while (!signal);
 
-module hero_tb #(
+module pulp_tb #(
   // TB Parameters
   parameter time          CLK_PERIOD = 1000ps,
   // SoC Parameters
@@ -26,13 +26,13 @@ module hero_tb #(
   timeunit 1ps;
   timeprecision 1ps;
 
-  localparam int unsigned AXI_IW = hero_pkg::axi_iw_sb_oup(N_CLUSTERS);
+  localparam int unsigned AXI_IW = pulp_pkg::axi_iw_sb_oup(N_CLUSTERS);
   localparam int unsigned AXI_SW = AXI_DW/8;  // width of strobe
-  typedef hero_pkg::addr_t      axi_addr_t;
+  typedef pulp_pkg::addr_t      axi_addr_t;
   typedef logic [AXI_DW-1:0]    axi_data_t;
   typedef logic [AXI_IW-1:0]    axi_id_t;
   typedef logic [AXI_SW-1:0]    axi_strb_t;
-  typedef hero_pkg::user_t      axi_user_t;
+  typedef pulp_pkg::user_t      axi_user_t;
   `AXI_TYPEDEF_AW_CHAN_T(       axi_aw_t,     axi_addr_t, axi_id_t, axi_user_t);
   `AXI_TYPEDEF_W_CHAN_T(        axi_w_t,      axi_data_t, axi_strb_t, axi_user_t);
   `AXI_TYPEDEF_B_CHAN_T(        axi_b_t,      axi_id_t, axi_user_t);
@@ -41,9 +41,9 @@ module hero_tb #(
   `AXI_TYPEDEF_REQ_T(           axi_req_t,    axi_aw_t, axi_w_t, axi_ar_t);
   `AXI_TYPEDEF_RESP_T(          axi_resp_t,   axi_b_t, axi_r_t);
 
-  typedef hero_pkg::lite_addr_t axi_lite_addr_t;
-  typedef hero_pkg::lite_data_t axi_lite_data_t;
-  typedef hero_pkg::lite_strb_t axi_lite_strb_t;
+  typedef pulp_pkg::lite_addr_t axi_lite_addr_t;
+  typedef pulp_pkg::lite_data_t axi_lite_data_t;
+  typedef pulp_pkg::lite_strb_t axi_lite_strb_t;
   `AXI_LITE_TYPEDEF_AX_CHAN_T(  axi_lite_ax_t,    axi_lite_addr_t, axi_id_t, axi_user_t);
   `AXI_LITE_TYPEDEF_W_CHAN_T(   axi_lite_w_t,     axi_lite_data_t, axi_lite_strb_t, axi_user_t);
   `AXI_LITE_TYPEDEF_B_CHAN_T(   axi_lite_b_t,     axi_id_t, axi_user_t);
@@ -74,7 +74,7 @@ module hero_tb #(
     .rst_no (rst_n)
   );
 
-  hero #(
+  pulp #(
     .N_CLUSTERS     (N_CLUSTERS),
     .AXI_DW         (AXI_DW),
     .L2_N_AXI_PORTS (L2_N_AXI_PORTS),

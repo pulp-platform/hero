@@ -8,8 +8,8 @@ def clog2(x):
     return math.ceil(math.log2(x))
 
 n_clusters = 1
-hero_template = Template(filename='hero.template_v')
-string = hero_template.render(
+pulp_template = Template(filename='pulp.template_v')
+string = pulp_template.render(
     board='zcu102', n_clusters=n_clusters,
     aw=64, dw=128, iw=6+clog2(n_clusters+1), uw=4,
     aw_pl2ps=49, iw_pl2ps=6, uw_pl2ps=1,

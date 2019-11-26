@@ -1,2 +1,2 @@
-zcu102/src/hero_zcu102.v: src/hero.py src/hero.template_v
-	cd src && ./hero.py > ../$@
+zcu102/src/pulp_zcu102.v: src/pulp.py src/pulp.template_v
+	cd src && ./pulp.py > ../$@

@@ -7,9 +7,9 @@
 // work. Any reuse/redistribution is strictly forbidden without written
 // permission from ETH Zurich.
 
-// This package makes internal constants of HERO accessible, e.g., in test environments.  Do not use
+// This package makes internal constants of PULP accessible, e.g., in test environments.  Do not use
 // these values to hierarchically design your system, though.
-package automatic hero_pkg;
+package automatic pulp_pkg;
   // Addressing
   localparam int unsigned AXI_AW = pulp_cluster_cfg_pkg::AXI_AW;
   // Clusters
@@ -36,11 +36,11 @@ package automatic hero_pkg;
   typedef logic [AXI_LITE_DW-1:0]   lite_data_t;
   typedef logic [AXI_LITE_DW/8-1:0] lite_strb_t;
 endpackage
-import hero_pkg::*;
+import pulp_pkg::*;
 
 `include "axi/assign.svh"
 
-module hero #(
+module pulp #(
   // SoC Parameters
   parameter int unsigned  N_CLUSTERS = 4,           // must be a power of 2
   parameter int unsigned  AXI_DW = 256,             // [bit]
