@@ -1,1 +1,1 @@
-../../toolchain/openmp/runtime/test/worksharing/for/omp_parallel_for_lastprivate.c
+../../toolchain/llvm-project/openmp/runtime/test/worksharing/for/omp_parallel_for_lastprivate.c

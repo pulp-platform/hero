@@ -1,1 +1,1 @@
-../../toolchain/openmp/runtime/test/critical/omp_critical.c
+../../toolchain/llvm-project/openmp/runtime/test/critical/omp_critical.c
