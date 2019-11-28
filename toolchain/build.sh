@@ -10,11 +10,11 @@ TEXINFO_VERSION=6.6
 
 if [ "$#" -lt 1 ] || [ ! -f "$1" ]; then
     echo "Fatal error: expects at least a single argument with crosstool config"
-    exit
+    exit 1
 fi
 if [ -z "$HERO_INSTALL" ]; then
     echo "Fatal error: set HERO_INSTALL to install location of the toolchain"
-    exit
+    exit 1
 fi
 
 conf_dir=$(readlink -f $(dirname "$1"))

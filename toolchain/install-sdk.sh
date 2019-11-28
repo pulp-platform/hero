@@ -2,7 +2,7 @@
 
 if [ -z "$HERO_INSTALL" ]; then
   echo "Fatal error: set HERO_INSTALL to location to install the SDK"
-  exit
+  exit 1
 fi
 
 # stop on all errors

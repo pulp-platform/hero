@@ -10,19 +10,20 @@ after_script:
 
 all:
   script:
-    ### build_install_gcc
-    - make tc-pulp tc-ariane-linux tc-aarch64-linux
-    ### build_install_pulp-sdk
-    - make pulp-sdk
-    ### build_install_hero-sdk
-    - make hero-sdk
+    ### build install base toolchains
+    - make tc-pulp tc-hrv-olinux tc-har-olinux
+    ### build accelerator sdk
+    - make sdk-pulp
+    ### build host sdks
+    - make sdk-har
+    - make sdk-hrv
     ### build system images
-    - make br-zynqmp-zcu102
-    - make br-genesys2-ariane
-    ### build_install_llvm
-    - make hero-llvm
+    - make br-hrv-ediggenesys2
+    - make br-har-exilzcu102
+    ### build llvm
+    - make tc-llvm
     ### build_examples
-    - source env/urania.sh
+    - source env/esim.sh
     - >
       for d in helloworld; do
         make -C openmp-examples/$d all
@@ -32,7 +33,6 @@ all:
     - ./compile.sh
     - cd -
     ### simulate_examples
-    - source env/sim.sh
     - cd hardware/vsim
     - >
       for d in tests-pulp helloworld; do
