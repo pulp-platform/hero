@@ -9,6 +9,9 @@ case "$1" in
     if [ ! -f /lib/firmware/fpga-default.bin ]; then
       exit
     fi
+    printf "Loading clock driver..."
+    insmod /lib/modules/*/extra/fclkcfg.ko
+    echo "done"
     [ "$VERBOSE" != no ] && printf "Loading bitstream... "
     echo fpga-default.bin > /sys/class/fpga_manager/fpga0/firmware || (echo "failed" && exit)
     echo "done"

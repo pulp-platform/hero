@@ -13,6 +13,16 @@
             reg = <0x0 0x78000000 0x0 0x8000000>;
         };
     };
+
+    fclk0 {
+        status = "okay";
+        compatible = "ikwzm,fclkcfg-0.10.a";
+        clocks = <&clk 71>;
+        insert-rate = "75000000";
+        insert-enable = <1>;
+        remove-rate = "1000000";
+        remove-enable = <0>;
+    };
 };
 
 &amba {
