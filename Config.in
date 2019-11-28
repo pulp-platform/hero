@@ -8,6 +8,7 @@ source "$BR2_EXTERNAL_HERO_PATH/package/riscv-pk-ariane/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/vitetris/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/hero-openmp/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/hero-apps/Config.in"
+source "$BR2_EXTERNAL_HERO_PATH/package/zynq-fclkcfg/Config.in"
 
 source "$BR2_EXTERNAL_HERO_PATH/package/zynq-mkbootimage/Config.in.host"
 
