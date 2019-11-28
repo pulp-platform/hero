@@ -364,13 +364,6 @@ int pulp_munmap(PulpDev *pulp)
   return 0;
 }
 
-int pulp_clking_set_freq(PulpDev *pulp, unsigned des_freq_mhz)
-{
-  int ret = ioctl(pulp->fd, PULP_IOCTL_CTRL_SET_FREQ, des_freq_mhz);
-  pulp->pulp_clk_freq_mhz = ret;
-  return ret;
-}
-
 static int64_t read_int_from_file(const char *file)
 {
   int64_t ret = 0;
@@ -383,9 +376,47 @@ static int64_t read_int_from_file(const char *file)
     return -EPERM;
   }
   if (fscanf(fp, "%" PRId64, &ret) == 0) {
+    fclose(fp);
     return -EIO;
   }
+  fclose(fp);
   return ret;
+}
+static int write_int_to_file(const char *file, int64_t val)
+{
+  if (access(file, F_OK) == -1) {
+    return -ENOENT;
+  }
+  FILE *fp;
+  fp = fopen(file, "w");
+  if (fp == NULL) {
+    return -EPERM;
+  }
+  if (fprintf(fp, "%" PRId64, val) == 0) {
+    fclose(fp);
+    return -EIO;
+  }
+  fclose(fp);
+  return 0;
+}
+
+
+int pulp_clking_set_freq(PulpDev *pulp, unsigned des_freq_mhz)
+{
+#if PLATFORM == ZYNQMP
+  // FIXME: PULP clocking on ZynqMP is implemented in a separate driver
+  int ret = write_int_to_file("/sys/class/fclkcfg/fclk0/rate", des_freq_mhz * 1000000ll);
+  if(ret) {
+    return ret;
+  }
+  ret = read_int_from_file("/sys/class/fclkcfg/fclk0/rate") / 1000000ll;
+  pulp->pulp_clk_freq_mhz = ret;
+  return ret;
+#else
+  int ret = ioctl(pulp->fd, PULP_IOCTL_CTRL_SET_FREQ, des_freq_mhz);
+  pulp->pulp_clk_freq_mhz = ret;
+  return ret;
+#endif
 }
 
 int pulp_clking_measure_freq(PulpDev *pulp)
