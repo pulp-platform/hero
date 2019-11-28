@@ -6,19 +6,18 @@ CC=$(CROSS_COMPILE)gcc
 AR=$(CROSS_COMPILE)ar
 OB=$(CROSS_COMPILE)objdump
 
-FLAGS=-Wall -O2 -DPLATFORM=${PLATFORM} ${CFLAGS}
+CFLAGS+=-Wall -O2 -DPLATFORM=${PLATFORM}
+ifneq ($(HERO_LIBPULP_DIR),)
+    CFLAGS+=-I$(HERO_LIBPULP_DIR)/inc -L$(HERO_LIBPULP_DIR)/lib
+endif
 
 .PHONY: all build clean deploy dis
 
 all: deploy
 
-$(NAME): $(NAME).c $(HERO_LIBPULP_DIR)/lib/libpulp.a
-	$(CC) $(FLAGS) $< -static -I$(HERO_LIBPULP_DIR)/inc -L$(HERO_LIBPULP_DIR)/lib \
-							  -I$(HERO_PULP_INC_DIR) \
+$(NAME): $(NAME).c
+	$(CC) $(CFLAGS) $< -static -idirafter $(HERO_PULP_INC_DIR) \
 							  -lpulp -lm -o $@
-
-$(HERO_LIBPULP_DIR)/lib/libpulp.a:
-	make -C $(HERO_LIBPULP_DIR) lib/libpulp.a
 
 build: $(NAME)
 

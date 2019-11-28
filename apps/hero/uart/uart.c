@@ -27,8 +27,6 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include <pulp.h>
-
 #if PLATFORM != ARIANE
   #define DEVICE_NAME "/dev/ttyPS1"
 #else
