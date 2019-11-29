@@ -13,10 +13,10 @@ module sram #(
   parameter int unsigned DATA_WIDTH = 0,   // [bit]
   parameter int unsigned N_WORDS    = 0,
   // Dependent parameters, do not override!
-  parameter int unsigned N_BYTES = DATA_WIDTH/8,
+  parameter int unsigned STRB_WIDTH = DATA_WIDTH/8,
   parameter type addr_t = logic[$clog2(N_WORDS)-1:0],
   parameter type data_t = logic[DATA_WIDTH-1:0],
-  parameter type strb_t = logic[N_BYTES-1:0]
+  parameter type strb_t = logic[STRB_WIDTH-1:0]
 ) (
   input  logic  clk_i,
   input  logic  rst_ni,
