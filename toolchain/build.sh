@@ -4,7 +4,7 @@
 set -e
 
 # configuration
-CROSSTOOL_VERSION=1.24.0-rc3
+CROSSTOOL_VERSION=1.24.0
 HELP2MAN_VERSION=1.47.10
 TEXINFO_VERSION=6.6
 PKGCONFIG_VERSION=1.1.0
@@ -17,6 +17,8 @@ if [ -z "$RISCV" ]; then
     echo "Fatal error: set RISCV to install location of the toolchain"
     exit
 fi
+
+conf_dir=$(readlink -f $(dirname "$1"))
 
 # FIXME: install dependencies for crosstool-ng if not found on host
 # help2man might be missing, install it temporary if it is missing
@@ -48,6 +50,9 @@ if [ ! -x "$RISCV/bin/ct-ng" ]; then
     echo "No crosstool-ng found, installing..."
     curl http://crosstool-ng.org/download/crosstool-ng/crosstool-ng-$CROSSTOOL_VERSION.tar.xz | tar -xJp
     cd crosstool-ng-$CROSSTOOL_VERSION
+    for f in $conf_dir/patches/crosstool-ng/*.patch; do
+        patch -p1 < $f
+    done
     ./configure --prefix=$RISCV
     if [ ! $? -eq 0 ]; then
         echo "Fatal error: failed to configure crosstool-ng"
@@ -62,7 +67,6 @@ fi
 # FIXME: currently only hardcoded patches directory will be used
 if [ ! -L "patches" ]; then
     echo "Symlinking patches directory to build directory"
-    conf_dir=$(readlink -f $(dirname "$1"))
     ln -s $conf_dir/patches $(pwd)/patches
 fi
 
