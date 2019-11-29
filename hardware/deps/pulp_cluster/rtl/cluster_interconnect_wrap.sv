@@ -305,7 +305,7 @@ module cluster_interconnect_wrap
     assign pe_inp_wdata[i].be   = core_periph_slave[i].be;
     assign pe_inp_wdata[i].atop = core_periph_slave_atop[i];
     assign core_periph_slave[i].gnt     = pe_inp_gnt[i];
-    assign core_periph_slave[i].r_id    = pe_inp_rdata[i+NB_CORES].id;
+    assign core_periph_slave[i].r_id    = pe_inp_rdata[i].id;
     assign core_periph_slave[i].r_rdata = pe_inp_rdata[i].data;
     assign core_periph_slave[i].r_opc   = pe_inp_rdata[i].opc;
     assign core_periph_slave[i].r_valid = pe_inp_rvalid[i];
