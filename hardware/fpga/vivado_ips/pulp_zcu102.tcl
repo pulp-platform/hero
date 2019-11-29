@@ -3,7 +3,9 @@ set_property board_part xilinx.com:zcu102:part0:3.3 [current_project]
 
 source ./define_srcs.tcl
 add_files -fileset [current_fileset] ./pulp_zcu102.v
-add_files -fileset constrs_1 ./pulp_zcu102.xdc
+add_files -fileset constrs_1 -norecurse {./pulp_zcu102_synth.xdc ./pulp_zcu102_impl.xdc}
+set_property used_in_implementation false [get_files ./pulp_zcu102_synth.xdc]
+set_property used_in_synthesis false [get_files ./pulp_zcu102_impl.xdc]
 set_property top pulp_zcu102 [current_fileset]
 
 synth_design -rtl -name rtl_1
