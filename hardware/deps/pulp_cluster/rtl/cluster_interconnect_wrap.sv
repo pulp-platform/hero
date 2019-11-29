@@ -189,6 +189,7 @@ module cluster_interconnect_wrap
     logic [3:0] amo;
     assign atop = iconn_oup_wdata[i].atop;
     always_comb begin
+      amo = '0;
       data = iconn_oup_wdata[i].data;
       if (atop[5]) begin
         unique casez (atop[4:0])
