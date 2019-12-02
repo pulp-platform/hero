@@ -31,19 +31,26 @@ br-hrv:
 	$(MAKE) O=$(CURDIR)/output/br-hrv BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hrv_defconfig
 	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hrv/.config; fi
 	$(MAKE) -C $(CURDIR)/output/br-hrv
+	cp $(CURDIR)/output/br-hrv/images/rootfs.ext4 $(CURDIR)/output/hrv-rootfs.ext4
+	cp $(CURDIR)/output/br-hrv/images/rootfs.tar $(CURDIR)/output/hrv-rootfs.tar
 
 br-har:
 	mkdir -p $(CURDIR)/output/br-har
 	$(MAKE) O=$(CURDIR)/output/br-har BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot har_defconfig
 	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-har/.config; fi
 	$(MAKE) -C $(CURDIR)/output/br-har
+	cp $(CURDIR)/output/br-har/images/rootfs.ext4 $(CURDIR)/output/har-rootfs.ext4
+	cp $(CURDIR)/output/br-har/images/rootfs.tar $(CURDIR)/output/har-rootfs.tar
 
 # simulation images
-br-hrv-eqemu:
+br-hrv-eqemu-base:
 	mkdir -p $(CURDIR)/output/br-hrv-eqemu
 	$(MAKE) O=$(CURDIR)/output/br-hrv-eqemu BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hrv_eqemu_defconfig
 	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hrv-eqemu/.config; fi
 	$(MAKE) -C $(CURDIR)/output/br-hrv-eqemu
+	cp $(CURDIR)/output/br-hrv-eqemu/images/bbl $(CURDIR)/output/hrv-eqemu-base-bbl
+	cp $(CURDIR)/output/br-hrv-eqemu/images/rootfs.ext2 $(CURDIR)/output/hrv-eqemu-base-rootfs.ext2
+br-hrv-eqemu: br-hrv-eqemu-base
 
 # TOOLCHAINS
 .PHONY: tc-hrv-obare tc-hrv-olinux tc-har-obare tc-har-olinux tc-pulp tc-llvm tc-llvm-debug
@@ -93,11 +100,9 @@ sdk-har: br-har
 	cd $(CURDIR)/output/br-har && $(ROOT)/toolchain/install-sdk.sh
 
 # TOOLS
-.PHONY: tools tools-openocd
+.PHONY: tools-hrv-openocd
 
-tools: tools-openocd
-
-tools-openocd:
+tools-hrv-openocd:
 	mkdir -p $(CURDIR)/output/tools-openocd/
 	(export CCACHE=none; \
 		export PATH=$(HERO_INSTALL)/bin:${PATH}; \

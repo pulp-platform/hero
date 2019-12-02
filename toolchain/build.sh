@@ -1,4 +1,4 @@
-### BUILDS A RISCV TOOLCHAIN USING CROSSTOOL-NG ###
+### BUILDS A TOOLCHAIN USING CROSSTOOL-NG ###
 
 # stop on errors
 set -e
@@ -85,14 +85,14 @@ if [ -n "$CI" ]; then
 fi
 $HERO_INSTALL/bin/ct-ng upgradeconfig > /dev/null
 
-# deduce tuple, sysroot
+# # deduce tuple, sysroot
 TUPLE=$($HERO_INSTALL/bin/ct-ng -s show-tuple)
 ARCH=$(echo $TUPLE | cut -f1 -d'-')
 SYSROOT=$HERO_INSTALL/$TUPLE/sysroot
 
 # check previous install and clear sysroot between builds if exists
 if [ -x "$HERO_INSTALL/bin/$TUPLE-gcc" ]; then
-    echo "Warning: RISCV directory already seems to contain a toolchain for $TUPLE";
+    echo "Warning: HERO_INSTALL directory already seems to contain a toolchain for $TUPLE";
     read -p "Are you sure you want replace it (N/y)? " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
