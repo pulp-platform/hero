@@ -42,8 +42,8 @@ import pulp_pkg::*;
 
 module pulp #(
   // SoC Parameters
-  parameter int unsigned  N_CLUSTERS = 4,           // must be a power of 2
-  parameter int unsigned  AXI_DW = 256,             // [bit]
+  parameter int unsigned  N_CLUSTERS = 1,           // must be a power of 2
+  parameter int unsigned  AXI_DW = 128,             // [bit]
   parameter int unsigned  L2_N_AXI_PORTS = 1,       // must be a power of 2
   parameter type          axi_req_t = logic,
   parameter type          axi_resp_t = logic,
