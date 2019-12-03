@@ -899,8 +899,8 @@ module riscv_core
 
   riscv_load_store_unit  load_store_unit_i
   (
-    .clk                   ( clk                ),
-    .rst_n                 ( rst_ni             ),
+    .clk_i                 ( clk                ),
+    .rst_ni                ( rst_ni             ),
 
     //output to data memory
     .data_req_o            ( data_req_pmp       ),
