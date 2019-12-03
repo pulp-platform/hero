@@ -1,3 +1,5 @@
+.Xil/
+/hero_zcu102/
 vivado*.jou
 vivado*.log
 vivado*.str
