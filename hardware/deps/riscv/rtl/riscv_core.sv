@@ -1196,4 +1196,17 @@ module riscv_core
   );
 `endif
 `endif
+
+  `ifdef PRINT_CORE_MEM_ACCESSES
+    always_comb begin
+      if (data_req_o && data_gnt_i) begin
+        if (data_we_o) begin
+          $display("Core %0d,%0d writes 0x%08x.", cluster_id_i, core_id_i, data_addr_o);
+        end else begin
+          $display("Core %0d,%0d reads  0x%08x.", cluster_id_i, core_id_i, data_addr_o);
+        end
+      end
+    end
+  `endif
+
 endmodule
