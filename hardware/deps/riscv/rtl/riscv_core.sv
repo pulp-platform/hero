@@ -90,6 +90,8 @@ module riscv_core
   output logic [31:0] data_wdata_o,
   input  logic [31:0] data_rdata_i,
 
+  output logic [5:0]  data_atop_o,
+
   // apu-interconnect
   // handshake signals
   output logic                           apu_master_req_o,
@@ -257,6 +259,7 @@ module riscv_core
 
   // Data Memory Control:  From ID stage (id-ex pipe) <--> load store unit
   logic        data_we_ex;
+  logic [5:0]  data_atop_ex;
   logic [1:0]  data_type_ex;
   logic [1:0]  data_sign_ext_ex;
   logic [1:0]  data_reg_offset_ex;
@@ -696,6 +699,7 @@ module riscv_core
     // LSU
     .data_req_ex_o                ( data_req_ex          ), // to load store unit
     .data_we_ex_o                 ( data_we_ex           ), // to load store unit
+    .atop_ex_o                    ( data_atop_ex         ),
     .data_type_ex_o               ( data_type_ex         ), // to load store unit
     .data_sign_ext_ex_o           ( data_sign_ext_ex     ), // to load store unit
     .data_reg_offset_ex_o         ( data_reg_offset_ex   ), // to load store unit
@@ -707,6 +711,8 @@ module riscv_core
     .data_misaligned_i            ( data_misaligned      ),
     .data_err_i                   ( data_err_pmp         ),
     .data_err_ack_o               ( data_err_ack         ),
+
+
     // Interrupt Signals
     .irq_i                        ( irq_i                ), // incoming interrupts
     .irq_sec_i                    ( (PULP_SECURE) ? irq_sec_i : 1'b0 ),
@@ -903,12 +909,14 @@ module riscv_core
 
     .data_addr_o           ( data_addr_pmp      ),
     .data_we_o             ( data_we_o          ),
+    .data_atop_o           ( data_atop_o        ),
     .data_be_o             ( data_be_o          ),
     .data_wdata_o          ( data_wdata_o       ),
     .data_rdata_i          ( data_rdata_i       ),
 
     // signal from ex stage
     .data_we_ex_i          ( data_we_ex         ),
+    .data_atop_ex_i        ( data_atop_ex       ),
     .data_type_ex_i        ( data_type_ex       ),
     .data_wdata_ex_i       ( alu_operand_c_ex   ),
     .data_reg_offset_ex_i  ( data_reg_offset_ex ),
