@@ -19,18 +19,18 @@ interface cpu_marx_if #(
 );
 
   // Downstream
-  logic                    req_ds_s;
-  logic                    ack_ds_s;
-  logic     [WAPUTYPE-1:0] type_ds_d;
-  logic         [WARG-1:0] operands_ds_d [NARGS_CPU-1:0];
-  logic      [WOP_CPU-1:0] op_ds_d;
-  logic [NDSFLAGS_CPU-1:0] flags_ds_d;
+  logic                           req_ds_s;
+  logic                           ack_ds_s;
+  logic     [WAPUTYPE-1:0]        type_ds_d;
+  logic [NARGS_CPU-1:0][WARG-1:0] operands_ds_d ;
+  logic      [WOP_CPU-1:0]        op_ds_d;
+  logic [NDSFLAGS_CPU-1:0]        flags_ds_d;
 
   // Upstream
-  logic                    valid_us_s;
-  logic                    ready_us_s;
-  logic      [WRESULT-1:0] result_us_d;
-  logic [NUSFLAGS_CPU-1:0] flags_us_d;
+  logic                           valid_us_s;
+  logic                           ready_us_s;
+  logic      [WRESULT-1:0]        result_us_d;
+  logic [NUSFLAGS_CPU-1:0]        flags_us_d;
 
   // The interface from the perspective of the core.
   modport cpu (
