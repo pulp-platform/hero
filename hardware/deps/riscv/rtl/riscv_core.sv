@@ -259,6 +259,7 @@ module riscv_core
   PrivLvl_t    current_priv_lvl;
 
   // Stack Protection
+  logic        stack_access;
   logic [31:0] stack_base,
                stack_limit;
 
@@ -690,6 +691,9 @@ module riscv_core
     .csr_restore_dret_id_o        ( csr_restore_dret_id  ), // control signal to restore pc
 
     .csr_save_cause_o             ( csr_save_cause       ),
+
+    // Stack protection
+    .stack_access_o               ( stack_access         ),
 
     // hardware loop signals to IF hwlp controller
     .hwlp_start_o                 ( hwlp_start           ),
