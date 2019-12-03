@@ -37,6 +37,7 @@ module core_region
   parameter int     REMAP_ADDRESS           = 0,
   parameter int     DEBUG_HALT_ADDR         = 32'h0000_0000,
   parameter bit     ADDREXT                 = 1'b0,
+  parameter bit     FPU                     = 1'b0,
   parameter bit     FP_DIVSQRT              = 1'b0,
   parameter bit     DEM_PER_BEFORE_TCDM_TS  = 1'b0
 `ifndef SYNTHESIS
