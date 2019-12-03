@@ -258,6 +258,10 @@ module riscv_core
   logic [31:0] csr_wdata;
   PrivLvl_t    current_priv_lvl;
 
+  // Stack Protection
+  logic [31:0] stack_base,
+               stack_limit;
+
   // Data Memory Control:  From ID stage (id-ex pipe) <--> load store unit
   logic        data_we_ex;
   logic [5:0]  data_atop_ex;
@@ -1032,6 +1036,9 @@ module riscv_core
     .hwlp_regid_o            ( csr_hwlp_regid     ),
     .hwlp_we_o               ( csr_hwlp_we        ),
     .hwlp_data_o             ( csr_hwlp_data      ),
+
+    .stack_base_o            ( stack_base         ),
+    .stack_limit_o           ( stack_limit        ),
 
     // performance counter related signals
     .id_valid_i              ( id_valid           ),

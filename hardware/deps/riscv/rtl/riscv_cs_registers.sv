@@ -121,6 +121,10 @@ module riscv_cs_registers
   output logic [N_HWLP_BITS-1:0]   hwlp_regid_o,
   output logic [2:0]               hwlp_we_o,
 
+  // Stack Protection
+  output logic [31:0]     stack_base_o,
+  output logic [31:0]     stack_limit_o,
+
   // Performance Counters
   input  logic                 id_valid_i,        // ID stage is done
   input  logic                 is_compressed_i,   // compressed instruction in ID
@@ -259,6 +263,8 @@ module riscv_cs_registers
   Status_t mstatus_q, mstatus_n;
   logic [ 5:0] mcause_q, mcause_n;
   logic [ 5:0] ucause_q, ucause_n;
+  logic [31:0] stack_base_q, stack_base_n,
+               stack_size_q, stack_size_n;
   //not implemented yet
   logic [23:0] mtvec_n, mtvec_q;
   logic [23:0] utvec_n, utvec_q;
@@ -337,6 +343,9 @@ if(PULP_SECURE==1) begin
       12'h341: csr_rdata_int = mepc_q;
       // mcause: exception cause
       12'h342: csr_rdata_int = {mcause_q[5], 26'b0, mcause_q[4:0]};
+      // stack base and size
+      12'h400: csr_rdata_int = stack_base_q;
+      12'h404: csr_rdata_int = stack_size_q;
       // mhartid: unique hardware thread id
       12'hF14: csr_rdata_int = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]};
 
@@ -422,6 +431,9 @@ end else begin //PULP_SECURE == 0
       12'h341: csr_rdata_int = mepc_q;
       // mcause: exception cause
       12'h342: csr_rdata_int = {mcause_q[5], 26'b0, mcause_q[4:0]};
+      // stack base and size
+      12'h400: csr_rdata_int = stack_base_q;
+      12'h404: csr_rdata_int = stack_size_q;
       // mhartid: unique hardware thread id
       12'hF14: csr_rdata_int = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]};
 
@@ -469,6 +481,8 @@ if(PULP_SECURE==1) begin
 
     mstatus_n                = mstatus_q;
     mcause_n                 = mcause_q;
+    stack_base_n             = stack_base_q;
+    stack_size_n             = stack_size_q;
     ucause_n                 = ucause_q;
     hwlp_we_o                = '0;
     hwlp_regid_o             = '0;
@@ -550,6 +564,10 @@ if(PULP_SECURE==1) begin
                begin
                     dscratch1_n = csr_wdata_int;
                end
+
+      // stack base and size
+      12'h400: if (csr_we_int) stack_base_n = csr_wdata_int;
+      12'h404: if (csr_we_int) stack_size_n = csr_wdata_int;
 
       // hardware loops
       HWLoop0_START:   if (csr_we_int) begin hwlp_we_o = 3'b001; hwlp_regid_o = 1'b0; end
@@ -729,6 +747,8 @@ end else begin //PULP_SECURE == 0
 
     mstatus_n                = mstatus_q;
     mcause_n                 = mcause_q;
+    stack_base_n             = stack_base_q;
+    stack_size_n             = stack_size_q;
     hwlp_we_o                = '0;
     hwlp_regid_o             = '0;
     exception_pc             = pc_id_i;
@@ -805,6 +825,10 @@ end else begin //PULP_SECURE == 0
                begin
                     dscratch1_n = csr_wdata_int;
                end
+
+      // stack base and size
+      12'h400: if (csr_we_int) stack_base_n = csr_wdata_int;
+      12'h404: if (csr_we_int) stack_size_n = csr_wdata_int;
 
       // hardware loops
       HWLoop0_START: if (csr_we_int) begin hwlp_we_o = 3'b001; hwlp_regid_o = 1'b0; end
@@ -1003,6 +1027,8 @@ end //PULP_SECURE
             };
       mepc_q      <= '0;
       mcause_q    <= '0;
+      stack_base_q <= '0;
+      stack_size_q <= '0;
 
       depc_q      <= '0;
       dcsr_q      <= '0;
@@ -1039,8 +1065,13 @@ end //PULP_SECURE
       dscratch0_q<= dscratch0_n;
       dscratch1_q<= dscratch1_n;
       mscratch_q <= mscratch_n;
+      stack_base_q <= stack_base_n;
+      stack_size_q <= stack_size_n;
     end
   end
+
+  assign stack_base_o = stack_base_q;
+  assign stack_limit_o = stack_base_q - stack_size_q;
 
   /////////////////////////////////////////////////////////////////
   //   ____            __     ____                  _            //
