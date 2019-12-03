@@ -124,6 +124,18 @@ make_wrapper -files [get_files \
 add_files -norecurse \
   ./hero_zcu102/hero_zcu102.srcs/sources_1/bd/hero_zcu102/hdl/hero_zcu102_wrapper.v
 
+# Create targets and runs for IPs.
+generate_target all \
+  [get_files ./hero_zcu102/hero_zcu102.srcs/sources_1/bd/hero_zcu102/hero_zcu102.bd]
+export_ip_user_files -of_objects \
+  [get_files ./hero_zcu102/hero_zcu102.srcs/sources_1/bd/hero_zcu102/hero_zcu102.bd] \
+  -no_script -sync -force -quiet
+create_ip_run [get_files -of_objects [get_fileset sources_1] \
+  ./hero_zcu102/hero_zcu102.srcs/sources_1/bd/hero_zcu102/hero_zcu102.bd \
+]
+export_ip_user_files -of_objects [get_ips hero_zcu102_i_pulp_0] \
+  -no_script -sync -force -quiet
+
 # Define include and defines again for PULP.
 # TODO: This needs to be taken from one file.
 set_property include_dirs [list \
