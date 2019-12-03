@@ -835,6 +835,7 @@ module pulp_cluster
         .CLUSTER_ALIAS             ( CLUSTER_ALIAS          ),
         .CLUSTER_ALIAS_BASE        ( CLUSTER_ALIAS_BASE     ),
         .REMAP_ADDRESS             ( REMAP_ADDRESS          ),
+        .DEBUG_HALT_ADDR           ( 0 /* TODO */           ),
         .ADDREXT                   ( TRYX_ADDREXT           ),
         .DEM_PER_BEFORE_TCDM_TS    ( DEM_PER_BEFORE_TCDM_TS )
       ) core_region_i (
@@ -859,10 +860,7 @@ module pulp_cluster
         .instr_addr_o             ( instr_addr[i]             ),
         .instr_r_rdata_i          ( instr_r_rdata[i]          ),
         .instr_r_valid_i          ( instr_r_valid[i]          ),
-        .debug_bus                ( s_debug_bus[i]            ),
-        .debug_core_halted_o      ( dbg_core_halted[i]        ),
-        .debug_core_halt_i        ( dbg_core_halt[i]          ),
-        .debug_core_resume_i      ( dbg_core_resume[i]        ),
+        .debug_req_i              ( 1'b0 /* TODO */           ),
         .unaligned_o              ( core_unaligned[i]         ),
         .addrext_i                ( tryx_req[i].addrext       ),
         .tcdm_data_master         ( s_core_xbar_bus[i]        ),
