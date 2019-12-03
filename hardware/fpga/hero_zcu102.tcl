@@ -137,24 +137,10 @@ export_ip_user_files -of_objects [get_ips hero_zcu102_i_pulp_0] \
   -no_script -sync -force -quiet
 
 # Define include and defines again for PULP.
-# TODO: This needs to be taken from one file.
-set_property include_dirs [list \
-    /scratch/andkurt/hero-v3/hardware/./deps/axi/include \
-    /scratch/andkurt/hero-v3/hardware/./deps/cluster_interconnect/rtl/low_latency_interco \
-    /scratch/andkurt/hero-v3/hardware/./deps/cluster_interconnect/rtl/peripheral_interco \
-    /scratch/andkurt/hero-v3/hardware/./deps/cluster_peripherals/event_unit/include \
-    /scratch/andkurt/hero-v3/hardware/./deps/common_cells/include \
-    /scratch/andkurt/hero-v3/hardware/./deps/event_unit_flex \
-    /scratch/andkurt/hero-v3/hardware/./deps/mchan/include \
-    /scratch/andkurt/hero-v3/hardware/./deps/riscv/include \
-    /scratch/andkurt/hero-v3/hardware/src/apb/include \
-] [get_filesets hero_zcu102_pulp_zcu102_0_1]
-set_property verilog_define [list \
-    TARGET_FPGA \
-    TARGET_SYNTHESIS \
-    TARGET_VIVADO \
-    TARGET_XILINX \
-] [get_filesets hero_zcu102_pulp_zcu102_0_1]
+eval [exec sed {s/current_fileset/get_filesets hero_zcu102_i_pulp_0/} \
+  vivado_ips/define_includes.tcl]
+eval [exec sed {s/current_fileset/get_filesets hero_zcu102_i_pulp_0/} \
+  vivado_ips/define_defines.tcl]
 
 # Synthesize
 launch_runs synth_1 -jobs 12
