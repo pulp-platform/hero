@@ -837,7 +837,7 @@ module pulp_cluster
         .REMAP_ADDRESS             ( REMAP_ADDRESS          ),
         .DEBUG_HALT_ADDR           ( 0 /* TODO */           ),
         .ADDREXT                   ( TRYX_ADDREXT           ),
-        .FPU                       ( 1'b0                   ),
+        .FPU                       ( 1'b1                   ),
         .DEM_PER_BEFORE_TCDM_TS    ( DEM_PER_BEFORE_TCDM_TS )
       ) core_region_i (
         .clk_i                    ( clk_cluster               ),
