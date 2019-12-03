@@ -20,25 +20,10 @@ module l2_mem #(
   AXI_BUS.Slave slv
 );
 
-  // Properties of one memory cut, keep synchronized with instantiated macro.
-  localparam int unsigned CUT_DW = 32;          // [bit], must be a power of 2 and >=8
-  localparam int unsigned CUT_N_WORDS = 1024;   // must be a power of 2
-  localparam int unsigned CUT_N_BITS = CUT_DW * CUT_N_WORDS;
-
-  // Derived properties of memory array
-  localparam int unsigned N_PAR_CUTS = AXI_DW / CUT_DW;
-  localparam int unsigned PAR_CUTS_N_BYTES = N_PAR_CUTS * CUT_N_BITS / 8;
-  localparam int unsigned N_SER_CUTS = N_BYTES / PAR_CUTS_N_BYTES;
-
   // Types for entire memory array
   typedef logic   [AXI_AW-1:0] arr_addr_t;
   typedef logic   [AXI_DW-1:0] arr_data_t;
   typedef logic [AXI_DW/8-1:0] arr_strb_t;
-
-  // Types for one memory cut
-  typedef logic [$clog2(CUT_N_WORDS)-1:0] cut_addr_t;
-  typedef logic [CUT_DW-1:0]              cut_data_t;
-  typedef logic [CUT_DW/8-1:0]            cut_strb_t;
 
   // Interface from AXI to memory array
   logic       req, req_q, we;
@@ -69,67 +54,102 @@ module l2_mem #(
     .mem_rdata_i  (rdata)
   );
 
-  // Interface from memory array to memory cuts
-  localparam int unsigned WORD_IDX_OFF = $clog2(AXI_DW/8);
-  localparam int unsigned WORD_IDX_WIDTH = $clog2(CUT_N_WORDS);
-  localparam int unsigned ROW_IDX_OFF = WORD_IDX_OFF + WORD_IDX_WIDTH;
-  localparam int unsigned ROW_IDX_WIDTH = $clog2(N_SER_CUTS);
-  logic       [N_SER_CUTS-1:0]                  cut_req;
-  cut_addr_t                                    cut_addr_d, cut_addr_q;
-  cut_data_t  [N_SER_CUTS-1:0][N_PAR_CUTS-1:0]  cut_rdata;
-  cut_data_t                  [N_PAR_CUTS-1:0]  cut_wdata;
-  cut_strb_t                  [N_PAR_CUTS-1:0]  cut_be;
+  `ifdef TARGET_XILINX
+    // Synthesis for Xilinx FPGAs can optimize SRAM tiling itself.
+    localparam N_WORDS = N_BYTES / (AXI_DW/8);
+    localparam LINE_OFF = $clog2(AXI_DW/8);
+    sram #(
+      .DATA_WIDTH (AXI_DW),
+      .N_WORDS    (N_WORDS)
+    ) i_mem (
+      .clk_i,
+      .rst_ni,
+      .req_i    (req),
+      .we_i     (we),
+      .addr_i   (addr[LINE_OFF+:$clog2(N_WORDS)]), // SRAM is row-addressed
+      .wdata_i  (wdata),
+      .be_i     (be),
+      .rdata_o  (rdata)
+    );
 
-  assign cut_addr_d = req ? addr[ROW_IDX_OFF-1:WORD_IDX_OFF] : cut_addr_q;
-  if (ROW_IDX_WIDTH > 0) begin: gen_row_idx
-    logic [ROW_IDX_WIDTH-1:0]row_idx_d, row_idx_q;
-    assign row_idx_d = req ? addr[ROW_IDX_OFF+:ROW_IDX_WIDTH] : row_idx_q;
-    always_comb begin
-      cut_req = '0;
-      cut_req[row_idx_d] = req;
+  `else
+    // Properties of one memory cut, keep synchronized with instantiated macro.
+    localparam int unsigned CUT_DW = 32;          // [bit], must be a power of 2 and >=8
+    localparam int unsigned CUT_N_WORDS = 1024;   // must be a power of 2
+    localparam int unsigned CUT_N_BITS = CUT_DW * CUT_N_WORDS;
+
+    // Derived properties of memory array
+    localparam int unsigned N_PAR_CUTS = AXI_DW / CUT_DW;
+    localparam int unsigned PAR_CUTS_N_BYTES = N_PAR_CUTS * CUT_N_BITS / 8;
+    localparam int unsigned N_SER_CUTS = N_BYTES / PAR_CUTS_N_BYTES;
+
+    // Types for one memory cut
+    typedef logic [$clog2(CUT_N_WORDS)-1:0] cut_addr_t;
+    typedef logic [CUT_DW-1:0]              cut_data_t;
+    typedef logic [CUT_DW/8-1:0]            cut_strb_t;
+
+    // Interface from memory array to memory cuts
+    localparam int unsigned WORD_IDX_OFF = $clog2(AXI_DW/8);
+    localparam int unsigned WORD_IDX_WIDTH = $clog2(CUT_N_WORDS);
+    localparam int unsigned ROW_IDX_OFF = WORD_IDX_OFF + WORD_IDX_WIDTH;
+    localparam int unsigned ROW_IDX_WIDTH = $clog2(N_SER_CUTS);
+    logic       [N_SER_CUTS-1:0]                  cut_req;
+    cut_addr_t                                    cut_addr_d, cut_addr_q;
+    cut_data_t  [N_SER_CUTS-1:0][N_PAR_CUTS-1:0]  cut_rdata;
+    cut_data_t                  [N_PAR_CUTS-1:0]  cut_wdata;
+    cut_strb_t                  [N_PAR_CUTS-1:0]  cut_be;
+
+    assign cut_addr_d = req ? addr[ROW_IDX_OFF-1:WORD_IDX_OFF] : cut_addr_q;
+    if (ROW_IDX_WIDTH > 0) begin: gen_row_idx
+      logic [ROW_IDX_WIDTH-1:0]row_idx_d, row_idx_q;
+      assign row_idx_d = req ? addr[ROW_IDX_OFF+:ROW_IDX_WIDTH] : row_idx_q;
+      always_comb begin
+        cut_req = '0;
+        cut_req[row_idx_d] = req;
+      end
+      assign rdata = cut_rdata[row_idx_q];
+      always_ff @(posedge clk_i, negedge rst_ni) begin
+        if (!rst_ni) begin
+          row_idx_q <= '0;
+        end else begin
+          row_idx_q <= row_idx_d;
+        end
+      end
+    end else begin: gen_no_row_idx
+      assign cut_req = req;
+      assign rdata = cut_rdata;
     end
-    assign rdata = cut_rdata[row_idx_q];
-    always_ff @(posedge clk_i, negedge rst_ni) begin
-      if (!rst_ni) begin
-        row_idx_q <= '0;
-      end else begin
-        row_idx_q <= row_idx_d;
+    assign cut_wdata = wdata;
+    assign cut_be = be;
+
+    for (genvar iRow = 0; iRow < N_SER_CUTS; iRow++) begin: gen_rows
+      for (genvar iCol = 0; iCol < N_PAR_CUTS; iCol++) begin: gen_cols
+        sram #(
+          .DATA_WIDTH (CUT_DW),
+          .N_WORDS    (CUT_N_WORDS)
+        ) i_mem_cut (
+          .clk_i,
+          .rst_ni,
+          .req_i    (cut_req[iRow]),
+          .we_i     (we),
+          .addr_i   (cut_addr_d),
+          .wdata_i  (cut_wdata[iCol]),
+          .be_i     (cut_be[iCol]),
+          .rdata_o  (cut_rdata[iRow][iCol])
+        );
       end
     end
-  end else begin: gen_no_row_idx
-    assign cut_req = req;
-    assign rdata = cut_rdata;
-  end
-  assign cut_wdata = wdata;
-  assign cut_be = be;
 
-  for (genvar iRow = 0; iRow < N_SER_CUTS; iRow++) begin: gen_rows
-    for (genvar iCol = 0; iCol < N_PAR_CUTS; iCol++) begin: gen_cols
-      sram #(
-        .DATA_WIDTH (CUT_DW),
-        .N_WORDS    (CUT_N_WORDS)
-      ) i_mem_cut (
-        .clk_i,
-        .rst_ni,
-        .req_i    (cut_req[iRow]),
-        .we_i     (we),
-        .addr_i   (cut_addr_d),
-        .wdata_i  (cut_wdata[iCol]),
-        .be_i     (cut_be[iCol]),
-        .rdata_o  (cut_rdata[iRow][iCol])
-      );
+    always_ff @(posedge clk_i, negedge rst_ni) begin
+      if (!rst_ni) begin
+        cut_addr_q <= '0;
+        req_q      <= 1'b0;
+      end else begin
+        cut_addr_q <= cut_addr_d;
+        req_q      <= req;
+      end
     end
-  end
-
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (!rst_ni) begin
-      cut_addr_q <= '0;
-      req_q      <= 1'b0;
-    end else begin
-      cut_addr_q <= cut_addr_d;
-      req_q      <= req;
-    end
-  end
+  `endif
 
   // Validate parameters and properties.
   // pragma translate_off
