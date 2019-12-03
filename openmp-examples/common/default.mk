@@ -35,7 +35,7 @@ CFLAGS_COMMON += $(cflags) -fopenmp=libomp -O$(opt)
 ifeq ($(default-as),pulp)
   CFLAGS_COMMON += -fhero-device-default-as=device
 endif
-CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -march=rv32imac
+CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -march=rv32imafc
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
 LDFLAGS_COMMON ?= $(ldflags)
 LDFLAGS_PULP += $(LDFLAGS_COMMON)
