@@ -1,8 +1,10 @@
 create_project pulp_zcu102 ./pulp_zcu102 -part xczu9eg-ffvb1156-2-e
 set_property part xczu9eg-ffvb1156-2-e [current_project]
 
-source ./define_srcs.tcl
+source ./define_sources.tcl
 add_files -norecurse -fileset [current_fileset] ./pulp_zcu102.v
+source ./define_includes.tcl
+source ./define_defines.tcl
 add_files -norecurse -fileset constrs_1 {./pulp_zcu102_synth.xdc ./pulp_zcu102_impl.xdc}
 set_property used_in_implementation false [get_files ./pulp_zcu102_synth.xdc]
 set_property used_in_synthesis false [get_files ./pulp_zcu102_impl.xdc]
