@@ -43,6 +43,11 @@ module riscv_load_store_unit (
   input  logic  [5:0] data_atop_ex_i,       // atomic instructions signal        -> from ex stage
   output logic  [5:0] data_atop_o,          // atomic instruction signal         -> core output
 
+  // stack protection
+  input  logic        stack_access_i,
+  input  logic [31:0] stack_base_i,
+  input  logic [31:0] stack_limit_i,
+
   // stall signal
   output logic        lsu_ready_ex_o, // LSU ready for new data in EX stage
   output logic        lsu_ready_wb_o, // LSU ready for new data in WB stage
@@ -279,6 +284,16 @@ module riscv_load_store_unit (
       end
     end
   end
+
+  `ifndef TARGET_SYNTHESIS
+    always_comb begin
+      if (rst_ni && data_req_o && stack_access_i) begin
+        assert final (data_addr_o > stack_limit_i && data_addr_o <= stack_base_i)
+          else $error("Stack pointer used to access 0x%08x outside stack (0x%08x, 0x%08x]!",
+              data_addr_o, stack_limit_i, stack_base_i);
+      end
+    end
+  `endif
 
   assign busy_o = (state_q == WaitRValid) || (state_q == WaitRValidExStall)
       || (state_q == IdleExStall) || (data_req_o);
