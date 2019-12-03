@@ -103,6 +103,12 @@ set_property range 1M [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_pulp_Reg1}]
 assign_bd_address [get_bd_addr_segs {i_gpio/S_AXI/Reg }]
 set_property offset 0x00A9000000 [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_gpio_Reg}]
 set_property range 4K [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_gpio_Reg}]
+assign_bd_address [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_LOW }]
+set_property range 2G [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_LOW }]
+set_property offset 0x0000000000 [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_LOW }]
+assign_bd_address [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_HIGH }]
+set_property range 32G [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_HIGH }]
+set_property offset 0x0800000000 [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_HIGH }]
 
 # Validate and save Top-Level Block Design
 save_bd_design
