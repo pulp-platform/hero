@@ -34,6 +34,7 @@ module axi2per_wrap
   input logic [5:0]    cluster_id_i,
   AXI_BUS.Slave        axi_slave,
   XBAR_TCDM_BUS.Master periph_master,
+  output logic [5:0]   periph_master_atop_o,
   output logic         busy_o
 );
   
@@ -106,6 +107,7 @@ module axi2per_wrap
     .per_master_add_o      ( periph_master.add     ),
     .per_master_we_no      ( periph_master.wen     ),
     .per_master_wdata_o    ( periph_master.wdata   ),
+    .per_master_atop_o     ( periph_master_atop_o  ),
     .per_master_be_o       ( periph_master.be      ),
     .per_master_gnt_i      ( periph_master.gnt     ),
 

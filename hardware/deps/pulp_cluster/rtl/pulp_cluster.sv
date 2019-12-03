@@ -626,13 +626,14 @@ module pulp_cluster
     .AXI_ID_WIDTH   ( AXI_ID_OUT_WIDTH   ),
     .AXI_USER_WIDTH ( AXI_USER_WIDTH     )
   ) axi2per_wrap_i (
-    .clk_i         ( clk_cluster       ),
-    .rst_ni        ( rst_ni            ),
-    .test_en_i     ( test_mode_i       ),
-    .cluster_id_i  ( cluster_id_i      ),
-    .axi_slave     ( s_ext_mperiph_bus ),
-    .periph_master ( s_mperiph_bus     ),
-    .busy_o        ( s_axi2per_busy    )
+    .clk_i                ( clk_cluster       ),
+    .rst_ni               ( rst_ni            ),
+    .test_en_i            ( test_mode_i       ),
+    .cluster_id_i         ( cluster_id_i      ),
+    .axi_slave            ( s_ext_mperiph_bus ),
+    .periph_master        ( s_mperiph_bus     ),
+    .periph_master_atop_o ( /* unconnected */ ),
+    .busy_o               ( s_axi2per_busy    )
   );
 
   per_demux_wrap #(
