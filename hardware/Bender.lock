@@ -170,11 +170,12 @@ packages:
       - riscv
       - timer_unit
   riscv:
-    revision: 72c5a0de0598392b599f6e0ccc1f0c4469a84850
+    revision: d84cd23a66fef580f0ee980e554432a1d2ecbea3
     version: ~
     source:
       Git: "https://github.com/pulp-platform/riscv.git"
     dependencies:
+      - fpnew
       - tech_cells_generic
   scm:
     revision: afd32402ac4636ca141fc0de1ae03d7b9078c527
@@ -194,3 +195,18 @@ packages:
     source:
       Git: "https://github.com/pulp-platform/timer_unit.git"
     dependencies: []
+  fpnew:
+    revision: 4a241d48e7e16ebd146423769828fdcd7e90de61
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/fpnew.git"
+    dependencies:
+      - common_cells
+      - fpu_div_sqrt_mvp
+  fpu_div_sqrt_mvp:
+    revision: 83a601f97934ed5e06d737b9c80d98b08867c5fa
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/fpu_div_sqrt_mvp.git"
+    dependencies:
+      - common_cells
