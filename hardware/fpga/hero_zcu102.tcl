@@ -94,18 +94,23 @@ connect_bd_net [get_bd_pins i_pulp/cl_busy_o] [get_bd_pins i_irq1_concat/In0]
 connect_bd_net [get_bd_pins i_pulp/cl_eoc_o] [get_bd_pins i_irq1_concat/In1]
 
 # Address Map
+## PULP Slave
 assign_bd_address [get_bd_addr_segs {i_pulp/slv/Reg }]
-set_property offset 0x00A0000000 [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_pulp_Reg}]
 set_property range 128M [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_pulp_Reg}]
+set_property offset 0x00A0000000 [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_pulp_Reg}]
+## PULP RAB Conf
 assign_bd_address [get_bd_addr_segs {i_pulp/rab_conf/Reg }]
-set_property offset 0x00A8000000 [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_pulp_Reg}]
 set_property range 1M [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_pulp_Reg1}]
+set_property offset 0x00A8000000 [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_pulp_Reg1}]
+## GPIO Register
 assign_bd_address [get_bd_addr_segs {i_gpio/S_AXI/Reg }]
-set_property offset 0x00A9000000 [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_gpio_Reg}]
 set_property range 4K [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_gpio_Reg}]
+set_property offset 0x00A9000000 [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_gpio_Reg}]
+## DDR Low
 assign_bd_address [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_LOW }]
 set_property range 2G [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_LOW }]
 set_property offset 0x0000000000 [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_LOW }]
+## DDR High
 assign_bd_address [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_HIGH }]
 set_property range 32G [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_HIGH }]
 set_property offset 0x0800000000 [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_HIGH }]
