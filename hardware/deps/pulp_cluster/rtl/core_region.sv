@@ -35,7 +35,10 @@ module core_region
   parameter bit     CLUSTER_ALIAS           = 1'b1,
   parameter int     CLUSTER_ALIAS_BASE      = 12'h000,
   parameter int     REMAP_ADDRESS           = 0,
+  parameter int     DEBUG_HALT_ADDR         = 32'h0000_0000,
   parameter bit     ADDREXT                 = 1'b0,
+  parameter bit     FPU                     = 1'b0,
+  parameter bit     FP_DIVSQRT              = 1'b0,
   parameter bit     DEM_PER_BEFORE_TCDM_TS  = 1'b0
 `ifndef SYNTHESIS
   ,
@@ -73,11 +76,8 @@ module core_region
   output logic [31:0] 		      instr_addr_o,
   input logic [INSTR_RDATA_WIDTH-1:0] instr_r_rdata_i,
   input logic 			      instr_r_valid_i,
-				      
-				      XBAR_TCDM_BUS.Slave debug_bus,
-  output logic 			      debug_core_halted_o,
-  input logic 			      debug_core_halt_i,
-  input logic 			      debug_core_resume_i,
+
+  input logic             debug_req_i,
 
   output logic                  unaligned_o,
   input logic [31:0]            addrext_i,
@@ -111,12 +111,15 @@ module core_region
   riscv_core #(
     .INSTR_RDATA_WIDTH   ( INSTR_RDATA_WIDTH ),
     .N_EXT_PERF_COUNTERS ( 5                 ),
+    .PULP_SECURE         ( 0                 ),
     .FPU                 ( FPU               ),
+    .FP_DIVSQRT          ( FP_DIVSQRT        ),
     .SHARED_FP           ( SHARED_FP         ),
-    .SHARED_DSP_MULT     ( SHARED_DSP_MULT   ),
-    .SHARED_INT_DIV      ( SHARED_INT_DIV    ),
+    .SHARED_DSP_MULT     ( 0                 ),
+    .SHARED_INT_DIV      ( 0                 ),
     .SHARED_FP_DIVSQRT   ( SHARED_FP_DIVSQRT ),
-    .WAPUTYPE            ( WAPUTYPE          )
+    .WAPUTYPE            ( WAPUTYPE          ),
+    .DM_HaltAddress      ( DEBUG_HALT_ADDR   )
   ) RISCV_CORE (
     .clk_i                 ( clk_i                    ),
     .rst_ni                ( rst_ni                   ),
@@ -143,7 +146,6 @@ module core_region
     .data_rdata_i          ( s_core_bus.r_rdata       ),
     .data_gnt_i            ( s_core_bus.gnt           ),
     .data_rvalid_i         ( s_core_bus.r_valid       ),
-    .data_err_i            ( 1'b0                     ),
     .data_unaligned_o      ( unaligned_o              ),
 
     .irq_i                 ( irq_req_i                ),
@@ -152,18 +154,9 @@ module core_region
     .irq_ack_o             ( irq_ack_o                ),
 
     .sec_lvl_o             (                          ),
-    .irq_sec_i             (                          ),
+    .irq_sec_i             (      1'b0                ),
 
-    .debug_req_i           ( debug_bus.req            ),
-    .debug_gnt_o           ( debug_bus.gnt            ),
-    .debug_rvalid_o        ( debug_bus.r_valid        ),
-    .debug_addr_i          ( debug_bus.add[14:0]      ),
-    .debug_we_i            ( ~debug_bus.wen           ),
-    .debug_wdata_i         ( debug_bus.wdata          ),
-    .debug_rdata_o         ( debug_bus.r_rdata        ),
-    .debug_halted_o        ( debug_core_halted_o      ),
-    .debug_halt_i          ( debug_core_halt_i        ),
-    .debug_resume_i        ( debug_core_resume_i      ),
+    .debug_req_i           ( debug_req_i              ),
 
     .fetch_enable_i        ( fetch_en_i               ),
     .core_busy_o           ( core_busy_o              ),
@@ -185,8 +178,6 @@ module core_region
     .ext_perf_counters_i   ( perf_counters            ),
     .fregfile_disable_i    ( fregfile_disable_i       )
   );
-
-  assign debug_bus.r_opc = 1'b0;
 
   // Bind to 0 Unused Signals in CORE interface
   assign s_core_bus.r_gnt       = 1'b0;
