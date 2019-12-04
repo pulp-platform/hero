@@ -22,7 +22,7 @@ chmod -R u+w $HERO_INSTALL
 # clean environment when running together with an env source script
 unset HERO_PULP_INC_DIR
 unset HERO_LIBPULP_DIR
-# remove RISCV from path to prevent incorrect sysroot to be located
+# remove HERO_INSTALL from path to prevent incorrect sysroot to be located
 PATH=$(echo "$PATH" | sed -e "s~$HERO_INSTALL~~")
 
 # setup llvm build
