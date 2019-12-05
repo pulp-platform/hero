@@ -10,6 +10,8 @@ after_script:
 
 all:
   script:
+    ### build fpga hardware
+    - make -C hardware/fpga all
     ### build base toolchains
     - make tc-pulp tc-hrv-olinux tc-har-olinux
     ### build accelerator sdk
