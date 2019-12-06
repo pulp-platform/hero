@@ -4,7 +4,7 @@
  *
  * Contact:
  * William Killian <killian@udel.edu>
- * 
+ *
  * Copyright 2013, The University of Delaware
  */
 #include <stdio.h>
@@ -23,8 +23,8 @@
 /* Array initialization. */
 static
 void init_array (int m, int n,
-		 DATA_TYPE *float_n,
-		 DATA_TYPE POLYBENCH_2D(data,M,N,m,n))
+    DATA_TYPE *float_n,
+    DATA_TYPE POLYBENCH_2D(data,M,N,m,n))
 {
   int i, j;
 
@@ -40,7 +40,7 @@ void init_array (int m, int n,
    Can be used also to check the correctness of the output. */
 static
 void print_array(int m,
-		 DATA_TYPE POLYBENCH_2D(symmat,M,M,m,m))
+    DATA_TYPE POLYBENCH_2D(symmat,M,M,m,m))
 
 {
   int i, j;
@@ -58,42 +58,40 @@ void print_array(int m,
    including the call and return. */
 static
 void kernel_covariance(int m, int n,
-		       DATA_TYPE float_n,
-		       DATA_TYPE POLYBENCH_2D(data,M,N,m,n),
-		       DATA_TYPE POLYBENCH_2D(symmat,M,M,m,m),
-		       DATA_TYPE POLYBENCH_1D(mean,M,m))
+    DATA_TYPE float_n,
+    DATA_TYPE POLYBENCH_2D(data,M,N,m,n),
+    DATA_TYPE POLYBENCH_2D(symmat,M,M,m,m),
+    DATA_TYPE POLYBENCH_1D(mean,M,m))
 {
   int i, j, j1, j2;
-  
+
   #pragma scop
   /* Determine mean of column vectors of input data matrix */
   #pragma omp parallel
   {
     #pragma omp for private (i)
-    for (j = 0; j < _PB_M; j++)
-      {
-        mean[j] = 0.0;
-	for (i = 0; i < _PB_N; i++)
-	  mean[j] += data[i][j];
-	mean[j] /= float_n;
-      }
-      
+    for (j = 0; j < _PB_M; j++) {
+      mean[j] = 0.0;
+      for (i = 0; i < _PB_N; i++)
+        mean[j] += data[i][j];
+      mean[j] /= float_n;
+    }
+
     /* Center the column vectors. */
     #pragma omp for private (j)
     for (i = 0; i < _PB_N; i++)
       for (j = 0; j < _PB_M; j++)
-	data[i][j] -= mean[j];
-      
+        data[i][j] -= mean[j];
+
     /* Calculate the m * m covariance matrix. */
     #pragma omp for private (j2, i)
     for (j1 = 0; j1 < _PB_M; j1++)
-      for (j2 = j1; j2 < _PB_M; j2++)
-	{
-          symmat[j1][j2] = 0.0;
-	  for (i = 0; i < _PB_N; i++)
-	    symmat[j1][j2] += data[i][j1] * data[i][j2];
-	  symmat[j2][j1] = symmat[j1][j2];
-        }
+      for (j2 = j1; j2 < _PB_M; j2++) {
+        symmat[j1][j2] = 0.0;
+        for (i = 0; i < _PB_N; i++)
+          symmat[j1][j2] += data[i][j1] * data[i][j2];
+        symmat[j2][j1] = symmat[j1][j2];
+      }
   }
   #pragma endscop
 }
@@ -109,18 +107,18 @@ int main(int argc, char** argv)
   POLYBENCH_2D_ARRAY_DECL(data,DATA_TYPE,M,N,m,n);
   POLYBENCH_2D_ARRAY_DECL(symmat,DATA_TYPE,M,M,m,m);
   POLYBENCH_1D_ARRAY_DECL(mean,DATA_TYPE,M,m);
-  
+
   /* Initialize array(s). */
   init_array (m, n, &float_n, POLYBENCH_ARRAY(data));
-  
+
   /* Start timer. */
   polybench_start_instruments;
 
   /* Run kernel. */
   kernel_covariance (m, n, float_n,
-		     POLYBENCH_ARRAY(data),
-		     POLYBENCH_ARRAY(symmat),
-		     POLYBENCH_ARRAY(mean));
+      POLYBENCH_ARRAY(data),
+      POLYBENCH_ARRAY(symmat),
+      POLYBENCH_ARRAY(mean));
 
   /* Stop and print timer. */
   polybench_stop_instruments;
