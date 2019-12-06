@@ -22,6 +22,7 @@ unsigned test_dma();
 unsigned test_floats();
 unsigned test_hero_64();
 unsigned test_m_instrs();
+unsigned test_intrinsics();
 
 int test_omp_atomic();
 int test_omp_for_schedule_static();
