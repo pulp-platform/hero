@@ -75,28 +75,32 @@ void kernel_durbin(int n,
 		   DATA_TYPE POLYBENCH_1D(r,N,n),
 		   DATA_TYPE POLYBENCH_1D(out,N,n))
 {
-  int i, k;
   #pragma scop
-  y[0][0] = r[0];
-  beta[0] = 1;
-  alpha[0] = r[0];
-  #pragma omp parallel
+  #pragma omp target \
+    map(to: alpha[0:N], beta[0:N], r[0:N], sum[0:N][0:N], y[0:N][0:N]) \
+    map(from: out[0:N])
   {
-    #pragma omp for private (i)
-    for (k = 1; k < _PB_N; k++)
+    y[0][0] = r[0];
+    beta[0] = 1;
+    alpha[0] = r[0];
+    #pragma omp parallel num_threads(NUM_THREADS)
     {
-      beta[k] = beta[k-1] - alpha[k-1] * alpha[k-1] * beta[k-1];
-      sum[0][k] = r[k];
-      for (i = 0; i <= k - 1; i++)
-        sum[i+1][k] = sum[i][k] + r[k-i-1] * y[i][k-1];
-      alpha[k] = -sum[k][k] * beta[k];
-      for (i = 0; i <= k-1; i++)
-        y[i][k] = y[i][k-1] + alpha[k] * y[k-i-1][k-1];
-      y[k][k] = alpha[k];
+      #pragma omp for
+      for (int k = 1; k < _PB_N; k++)
+      {
+        beta[k] = beta[k-1] - alpha[k-1] * alpha[k-1] * beta[k-1];
+        sum[0][k] = r[k];
+        for (int i = 0; i <= k - 1; i++)
+          sum[i+1][k] = sum[i][k] + r[k-i-1] * y[i][k-1];
+        alpha[k] = -sum[k][k] * beta[k];
+        for (int i = 0; i <= k-1; i++)
+          y[i][k] = y[i][k-1] + alpha[k] * y[k-i-1][k-1];
+        y[k][k] = alpha[k];
+      }
+      #pragma omp for
+      for (int i = 0; i < _PB_N; i++)
+        out[i] = y[i][_PB_N-1];
     }
-    #pragma omp for
-    for (i = 0; i < _PB_N; i++)
-      out[i] = y[i][_PB_N-1];
   }
   #pragma endscop
 }
