@@ -26,11 +26,11 @@
 /* Array initialization. */
 static
 void init_array (int n,
-		 DATA_TYPE POLYBENCH_2D(y,N,N,n,n),
-		 DATA_TYPE POLYBENCH_2D(sum,N,N,n,n),
-		 DATA_TYPE POLYBENCH_1D(alpha,N,n),
-		 DATA_TYPE POLYBENCH_1D(beta,N,n),
-		 DATA_TYPE POLYBENCH_1D(r,N,n))
+    DATA_TYPE POLYBENCH_2D(y,N,N,n,n),
+    DATA_TYPE POLYBENCH_2D(sum,N,N,n,n),
+    DATA_TYPE POLYBENCH_1D(alpha,N,n),
+    DATA_TYPE POLYBENCH_1D(beta,N,n),
+    DATA_TYPE POLYBENCH_1D(r,N,n))
 {
   int i, j;
 
@@ -40,8 +40,8 @@ void init_array (int n,
       beta[i] = (i+1);
       r[i] = (i+1);
       for (j = 0; j < n; j++) {
-	y[i][j] = ((DATA_TYPE) i*j);
-	sum[i][j] = ((DATA_TYPE) i*j);
+        y[i][j] = ((DATA_TYPE) i*j);
+        sum[i][j] = ((DATA_TYPE) i*j);
       }
     }
 }
@@ -51,7 +51,7 @@ void init_array (int n,
    Can be used also to check the correctness of the output. */
 static
 void print_array(int n,
-		 DATA_TYPE POLYBENCH_1D(out,N,n))
+    DATA_TYPE POLYBENCH_1D(out,N,n))
 
 {
   int i;
@@ -69,12 +69,12 @@ void print_array(int n,
 // the acceleartor.  FIXME: Tile this benchmark.
 static
 void kernel_durbin_dma(int n,
-		   DATA_TYPE POLYBENCH_2D(y,N,N,n,n),
-		   DATA_TYPE POLYBENCH_2D(sum,N,N,n,n),
-		   DATA_TYPE POLYBENCH_1D(alpha,N,n),
-		   DATA_TYPE POLYBENCH_1D(beta,N,n),
-		   DATA_TYPE POLYBENCH_1D(r,N,n),
-		   DATA_TYPE POLYBENCH_1D(out,N,n))
+    DATA_TYPE POLYBENCH_2D(y,N,N,n,n),
+    DATA_TYPE POLYBENCH_2D(sum,N,N,n,n),
+    DATA_TYPE POLYBENCH_1D(alpha,N,n),
+    DATA_TYPE POLYBENCH_1D(beta,N,n),
+    DATA_TYPE POLYBENCH_1D(r,N,n),
+    DATA_TYPE POLYBENCH_1D(out,N,n))
 {
   #pragma omp target \
     map(to: alpha[0:N], beta[0:N], r[0:N], sum[0:N][0:N], y[0:N][0:N]) \
@@ -129,12 +129,12 @@ void kernel_durbin_dma(int n,
    including the call and return. */
 static
 void kernel_durbin(int n,
-		   DATA_TYPE POLYBENCH_2D(y,N,N,n,n),
-		   DATA_TYPE POLYBENCH_2D(sum,N,N,n,n),
-		   DATA_TYPE POLYBENCH_1D(alpha,N,n),
-		   DATA_TYPE POLYBENCH_1D(beta,N,n),
-		   DATA_TYPE POLYBENCH_1D(r,N,n),
-		   DATA_TYPE POLYBENCH_1D(out,N,n))
+    DATA_TYPE POLYBENCH_2D(y,N,N,n,n),
+    DATA_TYPE POLYBENCH_2D(sum,N,N,n,n),
+    DATA_TYPE POLYBENCH_1D(alpha,N,n),
+    DATA_TYPE POLYBENCH_1D(beta,N,n),
+    DATA_TYPE POLYBENCH_1D(r,N,n),
+    DATA_TYPE POLYBENCH_1D(out,N,n))
 {
   #pragma scop
   #pragma omp target \
@@ -183,11 +183,11 @@ int main(int argc, char** argv)
 
   /* Initialize array(s). */
   init_array (n,
-	      POLYBENCH_ARRAY(y),
-	      POLYBENCH_ARRAY(sum),
-	      POLYBENCH_ARRAY(alpha),
-	      POLYBENCH_ARRAY(beta),
-	      POLYBENCH_ARRAY(r));
+    POLYBENCH_ARRAY(y),
+    POLYBENCH_ARRAY(sum),
+    POLYBENCH_ARRAY(alpha),
+    POLYBENCH_ARRAY(beta),
+    POLYBENCH_ARRAY(r));
 
   /* Start timer. */
   polybench_start_instruments;
@@ -198,13 +198,13 @@ int main(int argc, char** argv)
 #else
   kernel_durbin
 #endif
-		 (n,
-		 POLYBENCH_ARRAY(y),
-		 POLYBENCH_ARRAY(sum),
-		 POLYBENCH_ARRAY(alpha),
-		 POLYBENCH_ARRAY(beta),
-		 POLYBENCH_ARRAY(r),
-		 POLYBENCH_ARRAY(out));
+    (n,
+    POLYBENCH_ARRAY(y),
+    POLYBENCH_ARRAY(sum),
+    POLYBENCH_ARRAY(alpha),
+    POLYBENCH_ARRAY(beta),
+    POLYBENCH_ARRAY(r),
+    POLYBENCH_ARRAY(out));
 
   /* Stop and print timer. */
   polybench_stop_instruments;
