@@ -181,7 +181,16 @@ foreach pair $portmap {
 }
 ipx::associate_bus_interfaces -busif rab_conf -clock clk [ipx::current_core]
 
-set_property core_revision 3 [ipx::current_core]
+# Address Space
+ipx::add_address_space Data [ipx::current_core]
+set_property master_address_space_ref Data \
+  [ipx::get_bus_interfaces mst -of_objects [ipx::current_core] \
+]
+set_property width 64 [ipx::get_address_spaces Data -of_objects [ipx::current_core]]
+set_property range_format string [ipx::get_address_spaces Data -of_objects [ipx::current_core]]
+set_property range 16E [ipx::get_address_spaces Data -of_objects [ipx::current_core]]
+
+set_property core_revision 4 [ipx::current_core]
 ipx::update_source_project_archive -component [ipx::current_core]
 ipx::create_xgui_files [ipx::current_core]
 ipx::update_checksums [ipx::current_core]
