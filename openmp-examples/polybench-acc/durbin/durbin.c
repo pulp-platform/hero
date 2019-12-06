@@ -4,7 +4,7 @@
  *
  * Contact:
  * William Killian <killian@udel.edu>
- * 
+ *
  * Copyright 2013, The University of Delaware
  */
 #include <stdio.h>
