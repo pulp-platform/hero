@@ -1,4 +1,4 @@
-comment "riscv-pk-ariane needs a Linux kernel to be built"
+comment "riscv-pk-ariane needs a RISC-V Linux kernel to be built"
 	depends on BR2_riscv
 	depends on !BR2_LINUX_KERNEL
 

@@ -28,6 +28,7 @@
 #define JUNO 4
 #define TE0808 5
 #define ARIANE 6
+#define ZYNQMP 7
 
 #ifndef PLATFORM
   #error "Define PLATFORM!"
@@ -46,7 +47,7 @@
 #define PULP_CHIP_FAMILY CHIP_BIGPULP
 #if PLATFORM == ZEDBOARD
   #define PULP_CHIP CHIP_BIGPULP_Z_7045
-#elif PLATFORM == ZC706 || PLATFORM == MINI_ITX || PLATFORM == TE0808
+#elif PLATFORM == ZC706 || PLATFORM == MINI_ITX || PLATFORM == TE0808 || PLATFORM == ZYNQMP
   #define PULP_CHIP CHIP_BIGPULP_Z_7045
 #elif PLATFORM == ARIANE
   #define PULP_CHIP CHIP_HERO_URANIA
@@ -114,7 +115,7 @@
 
   #define L3_MEM_SIZE_MB 128
 
-#else // TE0808
+#elif PLATFORM == TE0808
 
   #define H_GPIO_BASE_ADDR 0xAE000000
   #define CLKING_BASE_ADDR 0xAE010000
@@ -128,6 +129,17 @@
   #define RAB_AX_LOG_SIZE_B 0xC0000 // size of BRAM, 786 KiB = 64 Ki entries
   #define RAB_CFG_LOG_SIZE_B 0x30000 // size of BRAM, 196 KiB = 16 Ki entries
   #define RAB_AX_LOG_BUF_SIZE_B 0x6000000 // size of buffer in driver, 96 MiB = 8 Mi entries
+
+  #define L3_MEM_SIZE_MB 128
+
+#else // PLATFORM == ZYNQMP
+
+  #define H_GPIO_BASE_ADDR 0xA8100000
+  #define CLKING_BASE_ADDR 0x00000000 // not supported
+  #define RAB_CONFIG_BASE_ADDR 0xA8000000
+  #define INTR_REG_BASE_ADDR 0xB1000000
+
+  #define RAB_AX_LOG_EN 0
 
   #define L3_MEM_SIZE_MB 128
 
@@ -162,12 +174,19 @@
   #define L3_MEM_H_BASE_ADDR (0xC0000000 - L3_MEM_SIZE_B)
   #define MBOX_H_BASE_ADDR 0x5A120000
   #define SOC_PERIPHERALS_H_BASE_ADDR 0x5A100000
-#else // PLATFORM == TE0808
+#elif PLATFORM == TE0808
   #define PULP_H_BASE_ADDR 0xA0000000 // Address at which the host sees PULP
   #define L1_MEM_H_BASE_ADDR PULP_H_BASE_ADDR
   #define L2_MEM_H_BASE_ADDR 0xA7000000
   #define L3_MEM_H_BASE_ADDR (0x80000000 - L3_MEM_SIZE_B)
   #define MBOX_H_BASE_ADDR 0xA5120000 // Interface 0
+  #define SOC_PERIPHERALS_H_BASE_ADDR 0xA5100000
+#else // PLATFORM == ZYNQMP
+  #define PULP_H_BASE_ADDR 0xA0000000 // Address at which the host sees PULP
+  #define L1_MEM_H_BASE_ADDR PULP_H_BASE_ADDR
+  #define L2_MEM_H_BASE_ADDR 0xA7000000
+  #define L3_MEM_H_BASE_ADDR (0x80000000 - L3_MEM_SIZE_B)
+  #define MBOX_H_BASE_ADDR 0xB3000000 // FIXME
   #define SOC_PERIPHERALS_H_BASE_ADDR 0xA5100000
 #endif // PLATFORM
 
@@ -225,13 +244,20 @@
   #define L1_MEM_SIZE_KB 256
   #define PULP_DEFAULT_FREQ_MHZ 50
   #define CLKING_INPUT_FREQ_MHZ 100
-#else // JUNO
+#elif PLATFORM == JUNO
   #define N_CLUSTERS 4
   #define N_CORES 8
   #define L2_MEM_SIZE_KB 256
   #define L1_MEM_SIZE_KB 256
   #define PULP_DEFAULT_FREQ_MHZ 25
   #define CLKING_INPUT_FREQ_MHZ 100
+#else // PLATFORM == ZYNQMP
+  #define N_CLUSTERS 1
+  #define N_CORES 2
+  #define L2_MEM_SIZE_KB 64
+  #define L1_MEM_SIZE_KB 128
+  #define PULP_DEFAULT_FREQ_MHZ 75
+  #define CLKING_INPUT_FREQ_MHZ 50
 #endif
 
 #if N_CLUSTERS > MAX_CLUSTERS
@@ -385,7 +411,8 @@
 #if PLATFORM == ZEDBOARD || PLATFORM == MINI_ITX || PLATFORM == ZC706
   #define ARM_CLK_FREQ_MHZ 666
 #elif PLATFORM == TE0808
-  #define ARM_CLK_FREQ_MHZ 1200 #else // JUNO
+  #define ARM_CLK_FREQ_MHZ 1200
+#else // JUNO
   #define ARM_CLK_FREQ_MHZ 1100 // A57 overdrive
 #endif
 

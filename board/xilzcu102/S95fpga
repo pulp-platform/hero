@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Load the bitstream for the FPGA
+#
+
+case "$1" in
+  start|restart|"")
+    echo 0 > /sys/class/fpga_manager/fpga0/flags
+    if [ ! -f /lib/firmware/fpga-default.bin ]; then
+      exit
+    fi
+    printf "Loading clock driver..."
+    insmod /lib/modules/*/extra/fclkcfg.ko
+    echo "done"
+    [ "$VERBOSE" != no ] && printf "Loading bitstream... "
+    echo fpga-default.bin > /sys/class/fpga_manager/fpga0/firmware || (echo "failed" && exit)
+    echo "done"
+    ;;
+  *)
+    echo "Usage: fpga {start|restart}" >&2
+    exit 1
+    ;;
+esac

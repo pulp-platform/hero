@@ -18,8 +18,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <linux/spinlock.h>
 #include <linux/delay.h> /* msleep */
+#include <linux/version.h>
 #include <asm/io.h> /* ioremap, iounmap, iowrite32 */
 #include <linux/platform_device.h> /* for device tree stuff*/
 
@@ -698,7 +700,11 @@ void pulp_smmu_handle_fault(void)
 
   // get pointer to user-space buffer and lock it into memory, get a single page
   down_read(&user_task->mm->mmap_sem);
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(4, 13, 0)
   ret = get_user_pages_remote(user_task, user_task->mm, vaddr, 1, write ? FOLL_WRITE : 0, &smmu_page_ptr->page_ptr, NULL);
+#else
+  ret = get_user_pages_remote(user_task, user_task->mm, vaddr, 1, write ? FOLL_WRITE : 0, &smmu_page_ptr->page_ptr, NULL, NULL);
+#endif
   up_read(&user_task->mm->mmap_sem);
   if (ret != 1) {
     printk(KERN_WARNING "PULP - SMMU: Could not get requested user-space virtual address %#lx.\n", iova);

@@ -1,0 +1,81 @@
+From 1babbad0e6ea92e7c0ed7e736f395481645fc7d0 Mon Sep 17 00:00:00 2001
+From: Koen Wolters <kwolters@student.ethz.ch>
+Date: Thu, 28 Nov 2019 10:02:50 +0100
+Subject: [PATCH] clk_is_enabled not working cleanly, replace by manual flag
+
+---
+ fclkcfg.c | 23 +++++++++++++++++------
+ 1 file changed, 17 insertions(+), 6 deletions(-)
+
+diff --git a/fclkcfg.c b/fclkcfg.c
+index 50c6aa3..52613c4 100644
+--- a/fclkcfg.c
++++ b/fclkcfg.c
+@@ -75,6 +75,14 @@ struct fclk_driver_data {
+ };
+ 
+ /**
++ * __fclk_is_enabled
++ */
++static int fclkcfg_enabled = false;
++static int __fclk_is_enabled(struct clk* clk) {
++    return fclkcfg_enabled;
++}
++
++/**
+  * __fclk_set_enable()
+  */
+ static int __fclk_set_enable(struct fclk_driver_data* this, bool enable)
+@@ -82,16 +90,19 @@ static int __fclk_set_enable(struct fclk_driver_data* this, bool enable)
+     int status = 0;
+ 
+     if (enable == true) {
+-        if (__clk_is_enabled(this->clk) == false) {
++        if (__fclk_is_enabled(this->clk) == 0) {
+             status = clk_prepare_enable(this->clk);
+             if (status) 
+                 dev_err(this->device, "enable failed.");
+-            else 
++            else  {
++                fclkcfg_enabled = true;
+                 dev_dbg(this->device, "enable success.");
++            }
+         }
+     } else {
+-        if (__clk_is_enabled(this->clk) == true) {
++        if (__fclk_is_enabled(this->clk) != 0) {
+             clk_disable_unprepare(this->clk);
++            fclkcfg_enabled = false;
+             dev_dbg(this->device, "disable done.");
+         }
+     }
+@@ -123,7 +134,7 @@ static int __fclk_set_rate(struct fclk_driver_data* this, unsigned long rate)
+ static int __fclk_change_status(struct fclk_driver_data* this, bool enable_valid, bool enable, bool rate_valid, unsigned long rate)
+ {
+     int  status      = 0;
+-    bool prev_enable = __clk_is_enabled(this->clk);
++    bool prev_enable = __fclk_is_enabled(this->clk);
+     bool next_enable = (enable_valid == true) ? enable : prev_enable;
+ 
+     if ((rate_valid == true) && (prev_enable == true)) {
+@@ -148,7 +159,7 @@ static int __fclk_change_status(struct fclk_driver_data* this, bool enable_valid
+ static ssize_t fclk_show_enable(struct device *dev, struct device_attribute *attr, char *buf)
+ {
+     struct fclk_driver_data* this = dev_get_drvdata(dev);
+-    return sprintf(buf, "%d\n", __clk_is_enabled(this->clk));
++    return sprintf(buf, "%d\n", __fclk_is_enabled(this->clk));
+ }
+ 
+ /**
+@@ -479,7 +490,7 @@ static int fclkcfg_platform_driver_probe(struct platform_device *pdev)
+         clk_put(resource_clk);
+     }
+     dev_info(&pdev->dev, "clock  rate    : %lu\n", clk_get_rate(this->clk));
+-    dev_info(&pdev->dev, "clock  enabled : %d\n" , __clk_is_enabled(this->clk));
++    dev_info(&pdev->dev, "clock  enabled : %d\n" , __fclk_is_enabled(this->clk) != 0);
+     if (this->remove_rate_valid == true)
+         dev_info(&pdev->dev, "remove rate    : %lu\n", this->remove_rate);
+     if (this->remove_enable_valid == true)
+-- 
+2.4.8
+

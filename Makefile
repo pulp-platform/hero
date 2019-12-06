@@ -1,73 +1,117 @@
 ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
-.PHONY: all br-ariane br-hero br-qemu tc-ariane-bare tc-ariane-linux tc-pulp pulp-sdk hero-sdk hero-llvm tools tools-isa-sim tools-openocd
+# GLOBAL TARGETS
+.PHONY: har-exilzcu102 hrv-ediggenesys2
+har-exilzcu102: tc-har-olinux tc-pulp br-har-exilzcu102 sdk-pulp sdk-har tc-llvm
+hrv-ediggenesys2: tc-hrv-olinux tc-pulp br-hrv-ediggenesys2 sdk-pulp sdk-hrv tc-llvm
 
-all: br-ariane br-hero
+# BUILDROOT
+.PHONY: br-hrv-ediggenesys2-base br-har-exilzcu102-base br-hrv br-har br-hrv-eqemu
 
-# buildroot
-br-ariane:
-	mkdir -p $(CURDIR)/output/br-ariane
-	$(MAKE) O=$(CURDIR)/output/br-ariane BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot ariane_defconfig
-	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-ariane/.config; fi
-	$(MAKE) -C $(CURDIR)/output/br-ariane
-	cp $(CURDIR)/output/br-ariane/images/bbl.bin $(CURDIR)
+# environment
+br-hrv-ediggenesys2-base:
+	mkdir -p $(CURDIR)/output/br-hrv-ediggenesys2
+	$(MAKE) O=$(CURDIR)/output/br-hrv-ediggenesys2 BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hrv_ediggenesys2_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hrv-ediggenesys2/.config; fi
+	$(MAKE) -C $(CURDIR)/output/br-hrv-ediggenesys2
+	cp $(CURDIR)/output/br-hrv-ediggenesys2/images/bbl.bin $(CURDIR)/output/hrv-ediggenesys-base-bbl.bin
+br-hrv-ediggenesys2: br-hrv-ediggenesys2-base
 
-br-hero:
-	mkdir -p $(CURDIR)/output/br-hero
-	$(MAKE) O=$(CURDIR)/output/br-hero BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hero_defconfig
-	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hero/.config; fi
-	$(MAKE) -C $(CURDIR)/output/br-hero
+br-har-exilzcu102-base:
+	mkdir -p $(CURDIR)/output/br-har-exilzcu102
+	$(MAKE) O=$(CURDIR)/output/br-har-exilzcu102 BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot har_exilzcu102_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-har-exilzcu102/.config; fi
+	$(MAKE) -C $(CURDIR)/output/br-har-exilzcu102
+	cp $(CURDIR)/output/br-har-exilzcu102/images/sdcard.img $(CURDIR)/output/har-exilzcu102-base-sdcard.img
+br-har-exilzcu102: br-har-exilzcu102-base
 
-br-qemu:
-	mkdir -p $(CURDIR)/output/br-qemu
-	$(MAKE) O=$(CURDIR)/output/br-qemu BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot qemu_defconfig
-	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-qemu/.config; fi
-	$(MAKE) -C $(CURDIR)/output/br-qemu
+# sdk images
+br-hrv:
+	mkdir -p $(CURDIR)/output/br-hrv
+	$(MAKE) O=$(CURDIR)/output/br-hrv BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hrv_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hrv/.config; fi
+	$(MAKE) -C $(CURDIR)/output/br-hrv
+	cp $(CURDIR)/output/br-hrv/images/rootfs.ext4 $(CURDIR)/output/hrv-rootfs.ext4
+	cp $(CURDIR)/output/br-hrv/images/rootfs.tar $(CURDIR)/output/hrv-rootfs.tar
 
-# toolchain
-tc-ariane-bare:
-	mkdir -p $(CURDIR)/output/tc-ariane-bare/
-	cd $(CURDIR)/output/tc-ariane-bare/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/ariane-bare.config ariane
+br-har:
+	mkdir -p $(CURDIR)/output/br-har
+	$(MAKE) O=$(CURDIR)/output/br-har BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot har_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-har/.config; fi
+	$(MAKE) -C $(CURDIR)/output/br-har
+	cp $(CURDIR)/output/br-har/images/rootfs.ext4 $(CURDIR)/output/har-rootfs.ext4
+	cp $(CURDIR)/output/br-har/images/rootfs.tar $(CURDIR)/output/har-rootfs.tar
 
-tc-ariane-linux:
-	mkdir -p $(CURDIR)/output/tc-ariane-linux/
-	# NOTE: we add br_real suffix here as buildroot will use that suffix later
-	cd $(CURDIR)/output/tc-ariane-linux/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/ariane-linux.config hero br_real
+# simulation images
+br-hrv-eqemu-base:
+	mkdir -p $(CURDIR)/output/br-hrv-eqemu
+	$(MAKE) O=$(CURDIR)/output/br-hrv-eqemu BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hrv_eqemu_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hrv-eqemu/.config; fi
+	$(MAKE) -C $(CURDIR)/output/br-hrv-eqemu
+	cp $(CURDIR)/output/br-hrv-eqemu/images/bbl $(CURDIR)/output/hrv-eqemu-base-bbl
+	cp $(CURDIR)/output/br-hrv-eqemu/images/rootfs.ext2 $(CURDIR)/output/hrv-eqemu-base-rootfs.ext2
+br-hrv-eqemu: br-hrv-eqemu-base
 
+# TOOLCHAINS
+.PHONY: tc-hrv-obare tc-hrv-olinux tc-har-obare tc-har-olinux tc-pulp tc-llvm tc-llvm-debug
+
+# host
+tc-hrv-obare:
+	mkdir -p $(CURDIR)/output/tc-hrv-obare/
+	cd $(CURDIR)/output/tc-hrv-obare/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/hrv-obare.config ariane
+
+tc-hrv-olinux:
+	mkdir -p $(CURDIR)/output/tc-hrv-olinux/
+	cd $(CURDIR)/output/tc-hrv-olinux/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/hrv-olinux.config hero br_real
+
+tc-har-obare:
+	mkdir -p $(CURDIR)/output/tc-har-obare/
+	cd $(CURDIR)/output/tc-har-obare/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/har-obare.config
+
+tc-har-olinux:
+	mkdir -p $(CURDIR)/output/tc-har-olinux/
+	cd $(CURDIR)/output/tc-har-olinux/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/har-olinux.config hero br_real
+
+# accelerator
 tc-pulp:
 	mkdir -p $(CURDIR)/output/tc-pulp/
 	cd $(CURDIR)/output/tc-pulp/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/pulp.config hero-unknown
-	chmod -R u+w $(RISCV) && ln -sf $(RISCV)/riscv32-unknown-elf $(RISCV)/riscv32-hero-unknown-elf && chmod -R u-w $(RISCV)
-
-# sdk
-pulp-sdk:
-	$(ROOT)/pulp/setup-sdk.sh hero-urania
-
-hero-sdk: br-hero
-	cd $(CURDIR)/output/br-hero && $(ROOT)/toolchain/install-sdk.sh
+	chmod -R u+w $(HERO_INSTALL) && ln -sf $(HERO_INSTALL)/riscv32-unknown-elf $(HERO_INSTALL)/riscv32-hero-unknown-elf && chmod -R u-w $(HERO_INSTALL)
 
 # llvm
-hero-llvm:
-	mkdir -p $(CURDIR)/output/hero-llvm/
-	cd $(CURDIR)/output/hero-llvm/ && $(ROOT)/toolchain/setup-hero-llvm.sh Release
+tc-llvm:
+	mkdir -p $(CURDIR)/output/tc-llvm/
+	cd $(CURDIR)/output/tc-llvm/ && $(ROOT)/toolchain/setup-llvm.sh Release
 
-hero-llvm-debug:
-	mkdir -p $(CURDIR)/output/hero-llvm-debug/
-	cd $(CURDIR)/output/hero-llvm-debug/ && $(ROOT)/toolchain/setup-hero-llvm.sh Debug
+tc-llvm-debug:
+	mkdir -p $(CURDIR)/output/tc-llvm-debug/
+	cd $(CURDIR)/output/tc-llvm-debug/ && $(ROOT)/toolchain/setup-llvm.sh Debug
 
-# tools
-tools: tools-openocd
+# SDK
+.PHONY: sdk-pulp sdk-hrv sdk-har
 
-tools-openocd:
+sdk-pulp:
+	$(ROOT)/pulp/setup-sdk.sh hero-urania
+
+sdk-hrv: br-hrv
+	cd $(CURDIR)/output/br-hrv && $(ROOT)/toolchain/install-sdk.sh
+
+sdk-har: br-har
+	cd $(CURDIR)/output/br-har && $(ROOT)/toolchain/install-sdk.sh
+
+# TOOLS
+.PHONY: tools-hrv-openocd
+
+tools-hrv-openocd:
 	mkdir -p $(CURDIR)/output/tools-openocd/
 	(export CCACHE=none; \
-		export PATH=$(RISCV)/bin:${PATH}; \
+		export PATH=$(HERO_INSTALL)/bin:${PATH}; \
 		cd $(ROOT)/tools/riscv-openocd/; \
 		./bootstrap; \
 		cd $(CURDIR)/output/tools-openocd/; \
-		$(ROOT)/tools/riscv-openocd/configure --prefix=$(RISCV); \
+		$(ROOT)/tools/riscv-openocd/configure --prefix=$(HERO_INSTALL); \
 		$(MAKE); \
-		chmod -R u+w $(RISCV); \
+		chmod -R u+w $(HERO_INSTALL); \
 		$(MAKE) install; \
-		chmod -R u-w $(RISCV); \
+		chmod -R u-w $(HERO_INSTALL); \
 	)

@@ -7,13 +7,13 @@ ccflags-y += -DPLATFORM=${PLATFORM} ${CFLAGS} -O2 -I${HERO_LIBPULP_DIR}/inc -I${
 pulp-objs := pulp_module.o pulp_ctrl.o pulp_mem.o pulp_rab.o pulp_dma.o pulp_mbox.o pulp_profile.o
 
 # JUNO and ZynqMP require the stripped down pulp_cache.S
-ifeq ($(KERNEL_ARCH),arm64)
-	pulp-objs += pulp_cache.o
-endif
+# ifeq ($(KERNEL_ARCH),arm64)
+# 	pulp-objs += pulp_cache.o
+# endif
 
 # ZynqMP requires pulp_smmu.*
-ifeq ($(PLATFORM),5)
-	pulp-objs += pulp_smmu.o
+ifeq ($(PLATFORM),TE0808)
+    pulp-objs += pulp_smmu.o
 endif
 
 .PHONY: all build deploy dis

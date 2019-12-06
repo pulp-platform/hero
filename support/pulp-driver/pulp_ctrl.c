@@ -94,7 +94,7 @@ int pulp_clking_set_freq(void *clking_config, unsigned des_freq_mhz)
     // Bring the input clock to 1000 MHz
 #if CLKING_INPUT_FREQ_MHZ == 50
   divclk_divide = 1;
-  int clkfbout_mult = 20;
+  clkfbout_mult = 20;
 #elif CLKING_INPUT_FREQ_MHZ == 100
   divclk_divide = 1;
   clkfbout_mult = 10;

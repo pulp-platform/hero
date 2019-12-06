@@ -3,11 +3,11 @@
 # ======================== CONFIGURATION OPTIONS =========================== #
 
 # HERCULES passes build directory.
-PASSROOT="$RISCV/lib/hercules"
+PASSROOT="$HERO_INSTALL/lib/hercules"
 
 # LLVM bin directory (empty for standard PATH).
 # Note: Must end with slash character ("/") unless empty.
-LLVM_BIN_DIR="$RISCV/bin/"
+LLVM_BIN_DIR="$HERO_INSTALL/bin/"
 
 # Additional compilation flag for the final step (IR -> bin)
 CFLAGS=""

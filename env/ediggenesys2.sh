@@ -1,10 +1,10 @@
 THIS_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 
-if [[ -z "${RISCV}" ]]; then
-    echo "Error: RISCV variable is not set (set it to toolchain installation path)"
+if [[ -z "${HERO_INSTALL}" ]]; then
+    echo "Error: HERO_INSTALL variable is not set (set it to toolchain installation path)"
     return
 fi
-export PATH=${RISCV}/bin:$PATH
+export PATH=${HERO_INSTALL}/bin:$PATH
 
 if [[ -z "${HERO_TARGET_HOST}" ]]; then
   export HERO_TARGET_PATH="/mnt/root/"
@@ -26,7 +26,7 @@ export KERNEL_CROSS_COMPILE=${CROSS_COMPILE}
 
 export HERCULES_ARCH=URANIA
 
-export PULP_RISCV_GCC_TOOLCHAIN=${RISCV}
+export PULP_RISCV_GCC_TOOLCHAIN=${HERO_INSTALL}
 
 export HERO_PULP_SDK_DIR=$(readlink -f "$THIS_DIR/../pulp/sdk")
 
@@ -35,3 +35,6 @@ if [ -f ${HERO_PULP_SDK_DIR}/sourceme.sh ]; then
     export HERO_PULP_INC_DIR=${HERO_PULP_SDK_DIR}/pkg/sdk/dev/install/include
     source ${HERO_PULP_SDK_DIR}/sourceme.sh
 fi
+
+unset CFLAGS
+unset LDFLAGS

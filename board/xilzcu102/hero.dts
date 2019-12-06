@@ -1,0 +1,37 @@
+#include "xilinx/zynqmp-zcu102-rev1.0.dts"
+
+/ {
+    reserved-memory {
+        #address-cells = <2>;
+        #size-cells = <2>;
+        ranges;
+
+        /* contiguous L3 memory for PULP: last 128MiB of DRAM */
+        pulp_reserved: pulp_l3_mem@78000000 {
+            compatible = "pulp,bigpulp";
+            no-map;
+            reg = <0x0 0x78000000 0x0 0x8000000>;
+        };
+    };
+
+    fclk0 {
+        status = "okay";
+        compatible = "ikwzm,fclkcfg-0.10.a";
+        clocks = <&clk 71>;
+        insert-rate = "75000000";
+        insert-enable = <1>;
+        remove-rate = "1000000";
+        remove-enable = <0>;
+    };
+};
+
+&amba {
+    pulp: pulp@b0000000 {
+        memory-region = <&pulp_reserved>;
+        compatible = "pulp,bigpulp";
+        reg = <0x0 0xb0000000 0x0 0x10000000
+               0x0 0xa0030000 0x0 0x10000>;
+        interrupt-parent = <&gic>;
+        interrupts = <0 89 1>;
+    };
+};

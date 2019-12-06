@@ -1,8 +1,11 @@
-echo "Adding required symlinks to library directories"
-# FIXME: those symlinks should be copied by buildroot from the toolchain
-abidir=$(find $1/lib -iname 'ld-linux-*' | sed -e "s|.*/ld-linux-||" -e "s|.so.*||" | cut -d '-' -f 2)
-ln -sf . $1/usr/lib/$abidir
-ln -sf . $1/lib/$abidir
-
 echo "Removing NFS init.d script"
 rm -f $1/etc/init.d/S60nfs
+
+echo "Installing custom mount script"
+EXT_MOUNT=$(grep BR2_HERO_EXT_MOUNT ${BR2_CONFIG} | sed -e 's/.*=//' -e 's/^"//' -e 's/"$//')
+echo $EXTMOUNT
+if [ -z "$EXT_MOUNT" ]; then
+  rm $1/etc/init.d/S99extroot
+else
+  sed -i "s|EXTERNAL_MOUNT_POINT|${EXT_MOUNT}|" $1/etc/init.d/S99extroot
+fi

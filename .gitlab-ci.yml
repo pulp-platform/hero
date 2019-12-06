@@ -1,35 +1,41 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  RISCV: '$CI_PROJECT_DIR/install'
+  HERO_INSTALL: '$CI_PROJECT_DIR/install'
 
 before_script:
-  - mkdir -p $RISCV
+  - mkdir -p $HERO_INSTALL
 
 after_script:
-  - chmod -R u+w $RISCV
+  - chmod -R u+w $HERO_INSTALL
 
 all:
   script:
-    ### build_install_gcc
-    - make tc-pulp tc-ariane-linux
-    ### build_install_pulp-sdk
-    - make pulp-sdk
-    ### build_install_hero-sdk
-    - make hero-sdk
-    ### build_install_llvm
-    - make hero-llvm
-    ### build_examples
-    - source env/urania.sh
+    ### build base toolchains
+    - make tc-pulp tc-hrv-olinux tc-har-olinux
+    ### build accelerator sdk
+    - make sdk-pulp
+    ### build host sdks
+    - make sdk-har
+    - make sdk-hrv
+    ### build other images
+    - make br-hrv-ediggenesys2
+    - make br-har-exilzcu102
+    - make br-hrv-eqemu
+    ### build llvm
+    - make tc-llvm
+    ### build tools
+    - make tools-hrv-openocd
+    ### build examples
+    - source env/esim.sh
     - >
       for d in helloworld; do
         make -C openmp-examples/$d all
       done
-    ### compile_testbench
+    ### compile testbench
     - cd hardware/vsim
     - ./compile.sh
     - cd -
-    ### simulate_examples
-    - source env/sim.sh
+    ### simulate examples
     - cd hardware/vsim
     - >
       for d in tests-pulp helloworld; do
@@ -46,7 +52,7 @@ all:
         fi
         make -C $d only=pulp default-as=host clean all
         make -C $d only=pulp clean all
-        .gitlab-ci.d/verify-bench.sh $(basename $d) 
+        .gitlab-ci.d/verify-bench.sh $(basename $d)
       done
   artifacts:
     paths:

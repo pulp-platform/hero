@@ -6,14 +6,14 @@ CC=$(CROSS_COMPILE)gcc
 AR=$(CROSS_COMPILE)ar
 OB=$(CROSS_COMPILE)objdump
 
-FLAGS=-Wall -O2 ${CFLAGS} -DPLATFORM=${PLATFORM} -I$(HERO_LIBPULP_DIR)/inc -I$(HERO_PULP_INC_DIR)
+CFLAGS+=-Wall -O2 -DPLATFORM=${PLATFORM}
 
 .PHONY: all build clean deploy dis
 
 all: deploy
 
 $(NAME): $(NAME).c
-	$(CC) $(FLAGS) $< -o $@
+	$(CC) $(CFLAGS) $< -o $@
 
 build: $(NAME)
 
