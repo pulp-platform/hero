@@ -31,11 +31,11 @@ void init_array (int m, int n,
 {
   int i, j;
 
-  *float_n = 1.2;
+  *float_n = 2;
 
   for (i = 0; i < M; i++)
     for (j = 0; j < N; j++)
-      data[i][j] = ((DATA_TYPE) i*j) / M;
+      data[i][j] = ((DATA_TYPE) i*j);
 }
 
 
