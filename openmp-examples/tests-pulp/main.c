@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
   n_errors += test_hero_64();
   n_errors += test_atomic();
 
-   printf("Testing `omp for` with static schedule ..\n");
+  printf("Testing `omp for` with static schedule ..\n");
   n_errors += test(test_omp_for_schedule_static);
   printf("Testing `omp for` with dynamic schedule ..\n");
   n_errors += test(test_omp_for_schedule_dynamic);
@@ -79,15 +79,17 @@ int main(int argc, char *argv[])
   n_errors += test(test_omp_section_firstprivate);
   printf("Testing `omp sections lastprivate` ..\n");
   n_errors += test(test_omp_section_lastprivate);
-  printf("Testing `omp sections private` ..\n"); 
+  printf("Testing `omp sections private` ..\n");
   n_errors += test(test_omp_section_private);
   printf("Testing `omp sections reduction\n");
   n_errors += test(test_omp_sections_reduction);
-
+  
+  // gcc tests
   printf("Testing gcc `omp parallel for` with static schedule with pointers ..\n");
   n_errors += test(gcc_omp_parallel_for_schedule_static);
   printf("Testing gcc `omp parallel for` with dynamic schedule with pointers ..\n");
   n_errors += test(gcc_omp_parallel_for_schedule_dynamic);
+  
   printf("All OpenMP tests completed.\n");
 
   assert(n_errors == 0);
