@@ -57,9 +57,10 @@ void print_array(int n,
   int i;
 
   for (i = 0; i < n; i++) {
-    fprintf (stderr, DATA_PRINTF_MODIFIER, out[i]);
-    if (i % 20 == 0) fprintf (stderr, "\n");
+    printf (DATA_PRINTF_MODIFIER, out[i]);
+    if (i % 20 == 0) printf ("\n");
   }
+  printf ("\n");
 }
 
 
