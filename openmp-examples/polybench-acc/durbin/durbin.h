@@ -9,13 +9,17 @@
 # define DURBIN_H
 
 /* Default to STANDARD_DATASET. */
-# if !defined(MINI_DATASET) && !defined(SMALL_DATASET) && !defined(LARGE_DATASET) && !defined(EXTRALARGE_DATASET)
-#  define STANDARD_DATASET
+# if !defined(MINI_DATASET) && !defined(SMALL_DATASET) && !defined(STANDARD_DATASET) && !defined(LARGE_DATASET) && !defined(EXTRALARGE_DATASET)
+#  define EXTRAMINI_DATASET
 # endif
 
 /* Do not define anything if the user manually defines the size. */
 # ifndef N
 /* Define the possible dataset sizes. */
+#  ifdef EXTRAMINI_DATASET
+#   define N 8
+#  endif
+
 #  ifdef MINI_DATASET
 #   define N 32
 #  endif
@@ -40,8 +44,8 @@
 # define _PB_N POLYBENCH_LOOP_BOUND(N,n)
 
 # ifndef DATA_TYPE
-#  define DATA_TYPE double
-#  define DATA_PRINTF_MODIFIER "%0.2lf "
+#  define DATA_TYPE int
+#  define DATA_PRINTF_MODIFIER "%d "
 # endif
 
 
