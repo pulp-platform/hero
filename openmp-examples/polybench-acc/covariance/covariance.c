@@ -56,6 +56,63 @@ void print_array(int m,
   printf ("\n");
 }
 
+/* Main computational kernel with DMA. The whole function will be
+   timed, including the call and return. */
+// This kernel only works if the all data fit into the memory of
+// the acceleartor.  FIXME: Tile this benchmark.
+static
+void kernel_covariance_dma(int m, int n,
+    DATA_TYPE float_n,
+    DATA_TYPE POLYBENCH_2D(data,M,N,m,n),
+    DATA_TYPE POLYBENCH_2D(symmat,M,M,m,m),
+    DATA_TYPE POLYBENCH_1D(mean,M,m))
+{
+  #pragma omp target \
+    map(to: data[0:M][0:N], float_n) \
+    map(alloc: mean[0:M]) \
+    map(from: symmat[0:M][0:M])
+  {
+    DATA_TYPE* const spm = (DATA_TYPE*)alloc_spm();
+    DATA_TYPE* const data_spm = spm;
+    DATA_TYPE* const symmat_spm = data_spm + M*N;
+    DATA_TYPE* const mean_spm = symmat_spm + M*M;
+
+    DATA_TYPE float_n_spm = float_n;
+    memcpy_to_spm(data_spm, (DATA_TYPE*)data, M*N);
+    dma_flush();
+
+    /* Determine mean of column vectors of input data matrix */
+    #pragma omp parallel num_threads (NUM_THREADS)
+    {
+      #pragma omp for
+      for (int j = 0; j < _PB_M; j++) {
+        mean_spm[j] = 0.0;
+        for (int i = 0; i < _PB_N; i++)
+          mean_spm[j] += data_spm[i*N+j];
+        mean_spm[j] /= float_n_spm;
+      }
+
+      /* Center the column vectors. */
+      #pragma omp for
+      for (int i = 0; i < _PB_N; i++)
+        for (int j = 0; j < _PB_M; j++)
+          data_spm[i*N+j] -= mean_spm[j];
+
+      /* Calculate the m * m covariance matrix. */
+      #pragma omp for
+      for (int j1 = 0; j1 < _PB_M; j1++)
+        for (int j2 = j1; j2 < _PB_M; j2++) {
+          symmat_spm[j1*M+j2] = 0.0;
+          for (int i = 0; i < _PB_N; i++)
+            symmat_spm[j1*M+j2] += data_spm[i*N+j1] * data_spm[i*N+j2];
+          symmat_spm[j2*M+j1] = symmat_spm[j1*M+j2];
+        }
+    }
+
+    memcpy_from_spm((DATA_TYPE*)symmat, symmat_spm, M*M);
+    dma_flush();
+  }
+}
 
 /* Main computational kernel. The whole function will be timed,
    including the call and return. */
@@ -122,7 +179,12 @@ int main(int argc, char** argv)
   polybench_start_instruments;
 
   /* Run kernel. */
-  kernel_covariance (m, n, float_n,
+#ifdef POLYBENCH_DMA
+  kernel_covariance_dma
+#else
+  kernel_covariance
+#endif
+      (m, n, float_n,
       POLYBENCH_ARRAY(data),
       POLYBENCH_ARRAY(symmat),
       POLYBENCH_ARRAY(mean));
