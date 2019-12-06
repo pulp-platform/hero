@@ -15,6 +15,9 @@
 /* Include polybench common header. */
 #include <polybench.h>
 
+/* Include dma lib. */
+#include <dmatransfer.h>
+
 /* Include benchmark-specific header. */
 /* Default data type is double, default size is 4000. */
 #include "durbin.h"
