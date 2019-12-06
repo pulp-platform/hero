@@ -37,11 +37,11 @@ void init_array (int n,
   for (i = 0; i < n; i++)
     {
       alpha[i] = i;
-      beta[i] = (i+1)/n/2.0;
-      r[i] = (i+1)/n/4.0;
+      beta[i] = (i+1);
+      r[i] = (i+1);
       for (j = 0; j < n; j++) {
-	y[i][j] = ((DATA_TYPE) i*j) / n;
-	sum[i][j] = ((DATA_TYPE) i*j) / n;
+	y[i][j] = ((DATA_TYPE) i*j);
+	sum[i][j] = ((DATA_TYPE) i*j);
       }
     }
 }
