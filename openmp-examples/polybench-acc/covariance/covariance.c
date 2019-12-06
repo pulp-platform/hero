@@ -50,10 +50,10 @@ void print_array(int m,
 
   for (i = 0; i < m; i++)
     for (j = 0; j < m; j++) {
-      fprintf (stderr, DATA_PRINTF_MODIFIER, symmat[i][j]);
-      if ((i * m + j) % 20 == 0) fprintf (stderr, "\n");
+      printf (DATA_PRINTF_MODIFIER, symmat[i][j]);
+      if ((i * m + j) % 20 == 0) printf ("\n");
     }
-  fprintf (stderr, "\n");
+  printf ("\n");
 }
 
 
