@@ -74,7 +74,7 @@ set_property -dict [list CONFIG.NUM_PORTS {2}] [get_bd_cells i_irq1_concat]
 connect_bd_net [get_bd_pins i_irq1_concat/dout] [get_bd_pins i_zynq_ps/pl_ps_irq1]
 
 # PULP
-create_bd_cell -type ip -vlnv ethz.ch:user:pulp_zcu102:1.0 i_pulp
+create_bd_cell -type ip -vlnv ethz.ch:user:pulp_txilzu9eg:1.0 i_pulp
 connect_bd_net [get_bd_pins i_pulp/clk_i] [get_bd_pins i_zynq_ps/pl_clk0]
 connect_bd_net [get_bd_pins i_pulp/rst_ni] [get_bd_pins i_sys_reset/peripheral_aresetn]
 connect_bd_intf_net [get_bd_intf_pins i_pulp/mst] [get_bd_intf_pins i_zynq_ps/S_AXI_HP0_FPD]

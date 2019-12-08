@@ -1,4 +1,4 @@
-module pulp_zcu102 (
+module pulp_txilzu9eg (
   input           clk_i,
   input           rst_ni,
   output [  5:0]  mst_aw_id_o,

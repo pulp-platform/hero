@@ -1,4 +1,4 @@
-module pulp_${board} (\
+module pulp_t${target} (\
   ${port('clk', 1, False)},\
   ${port('rst', 1, False, True)},
   ${axi_ports('mst', True, aw_pl2ps, dw, iw_pl2ps, uw_pl2ps)},
