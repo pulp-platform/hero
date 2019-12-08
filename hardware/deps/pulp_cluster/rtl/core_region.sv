@@ -254,6 +254,10 @@ module core_region
     .perf_l2_st_cyc_o   (  perf_counters[3]           ),
     .CLUSTER_ID         (  cluster_id_i               )
   );
+  always_comb begin
+    periph_data_master.id = '0;
+    periph_data_master.id[CORE_ID] = 1'b1;
+  end
 
   periph_demux #(
     .DEM_PER_BEFORE_TCDM_TS (DEM_PER_BEFORE_TCDM_TS)
