@@ -49,6 +49,7 @@ module tryx_ctrl #(
     always_comb begin
       periph_data_master[i].req = 1'b0;
       periph_data_master[i].wen = 1'b0;
+      periph_data_slave[i].gnt = 1'b0;
       rd_en_d = 1'b0;
       wr_en_d = 1'b0;
 
