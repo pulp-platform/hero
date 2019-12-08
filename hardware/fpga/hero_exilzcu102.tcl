@@ -1,9 +1,9 @@
-create_project hero_zcu102 ./hero_zcu102 -part xczu9eg-ffvb1156-2-e
+create_project hero_exilzcu102 ./hero_exilzcu102 -part xczu9eg-ffvb1156-2-e
 set_property board_part xilinx.com:zcu102:part0:3.3 [current_project]
 set_property ip_repo_paths ./vivado_ips [current_project]
 update_ip_catalog
 
-create_bd_design "hero_zcu102"
+create_bd_design "hero_exilzcu102"
 update_compile_order -fileset sources_1
 
 # Zynq UltraScale+ Processor System
@@ -119,27 +119,27 @@ set_property offset 0x0800000000 [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_HI
 save_bd_design
 validate_bd_design
 make_wrapper -files [get_files \
-  ./hero_zcu102/hero_zcu102.srcs/sources_1/bd/hero_zcu102/hero_zcu102.bd \
+  ./hero_exilzcu102/hero_exilzcu102.srcs/sources_1/bd/hero_exilzcu102/hero_exilzcu102.bd \
 ] -top
 add_files -norecurse \
-  ./hero_zcu102/hero_zcu102.srcs/sources_1/bd/hero_zcu102/hdl/hero_zcu102_wrapper.v
+  ./hero_exilzcu102/hero_exilzcu102.srcs/sources_1/bd/hero_exilzcu102/hdl/hero_exilzcu102_wrapper.v
 
 # Create targets and runs for IPs.
 generate_target all \
-  [get_files ./hero_zcu102/hero_zcu102.srcs/sources_1/bd/hero_zcu102/hero_zcu102.bd]
+  [get_files ./hero_exilzcu102/hero_exilzcu102.srcs/sources_1/bd/hero_exilzcu102/hero_exilzcu102.bd]
 export_ip_user_files -of_objects \
-  [get_files ./hero_zcu102/hero_zcu102.srcs/sources_1/bd/hero_zcu102/hero_zcu102.bd] \
+  [get_files ./hero_exilzcu102/hero_exilzcu102.srcs/sources_1/bd/hero_exilzcu102/hero_exilzcu102.bd] \
   -no_script -sync -force -quiet
 create_ip_run [get_files -of_objects [get_fileset sources_1] \
-  ./hero_zcu102/hero_zcu102.srcs/sources_1/bd/hero_zcu102/hero_zcu102.bd \
+  ./hero_exilzcu102/hero_exilzcu102.srcs/sources_1/bd/hero_exilzcu102/hero_exilzcu102.bd \
 ]
-export_ip_user_files -of_objects [get_ips hero_zcu102_i_pulp_0] \
+export_ip_user_files -of_objects [get_ips hero_exilzcu102_i_pulp_0] \
   -no_script -sync -force -quiet
 
 # Define include and defines again for PULP.
-eval [exec sed {s/current_fileset/get_filesets hero_zcu102_i_pulp_0/} \
+eval [exec sed {s/current_fileset/get_filesets hero_exilzcu102_i_pulp_0/} \
   vivado_ips/define_includes.tcl]
-eval [exec sed {s/current_fileset/get_filesets hero_zcu102_i_pulp_0/} \
+eval [exec sed {s/current_fileset/get_filesets hero_exilzcu102_i_pulp_0/} \
   vivado_ips/define_defines.tcl]
 
 # Synthesize

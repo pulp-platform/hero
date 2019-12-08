@@ -7,10 +7,10 @@ DEFINE_TCLS := \
 VIVADO := vivado-2019.1.1 vivado -mode batch
 
 .PHONY: all
-all: hero_zcu102
+all: hero_exilzcu102
 
-hero_zcu102: vivado_ips/pulp_txilzu9eg ${DEFINE_TCLS}
-	${VIVADO} -source hero_zcu102.tcl
+hero_exilzcu102: vivado_ips/pulp_txilzu9eg ${DEFINE_TCLS}
+	${VIVADO} -source hero_exilzcu102.tcl
 
 vivado_ips/pulp_txilzu9eg: ${DEFINE_TCLS}
 	cd vivado_ips && ${VIVADO} -source pulp_txilzu9eg.tcl
@@ -32,7 +32,7 @@ vivado_ips/define_sources.tcl: $(BENDER_FILES)
 
 .PHONY: clean
 clean:
-	rm -rf hero_zcu102
+	rm -rf hero_exilzcu102
 	rm -f vivado_ips/{component.xml,define_*.tcl}
 	rm -rf vivado_ips/{pulp_txilzu9eg,xgui}
 	rm -f {,vivado_ips/}vivado*.{jou,log,str}
