@@ -15,7 +15,7 @@ hero_zcu102: vivado_ips/pulp_zcu102 ${DEFINE_TCLS}
 vivado_ips/pulp_zcu102: ${DEFINE_TCLS}
 	cd vivado_ips && ${VIVADO} -source pulp_zcu102.tcl
 
-zcu102/src/pulp_zcu102.v: src/pulp.py src/pulp.template_v
+vivado_ips/pulp_zcu102.v: src/pulp.py src/pulp.template_v
 	cd src && ./pulp.py > ../$@
 
 vivado_ips/define_defines.tcl: $(BENDER_FILES)
