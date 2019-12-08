@@ -18,6 +18,7 @@
 
 import pulp_cluster_package::*;
 import apu_package::*;
+import apu_core_package::*;
 
 `include "axi/assign.svh"
 `include "axi/typedef.svh"
