@@ -146,6 +146,17 @@ eval [exec sed {s/current_fileset/get_filesets hero_exilzcu102_i_pulp_0/} \
 launch_runs synth_1 -jobs 12
 wait_on_run synth_1
 
-# Implement and Generate Bitstream
-launch_runs impl_1 -to_step write_bitstream -jobs 12
+# Implement
+launch_runs impl_1 -jobs 12
 wait_on_run impl_1
+
+# Check timing constraints.
+open_run impl_1
+set timingrep [report_timing_summary -no_header -no_detailed_paths -return_string]
+if {! [string match -nocase {*timing constraints are met*} $timingrep]} {
+  send_msg_id {USER 1-1} ERROR {Timing constraints were not met.}
+  return -code error
+}
+
+# Generate Bitstream
+launch_runs impl_1 -to_step write_bitstream -jobs 12
