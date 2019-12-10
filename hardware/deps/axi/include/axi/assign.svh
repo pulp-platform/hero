@@ -75,22 +75,39 @@
   `AXI_ASSIGN_AR(slv, mst)    \
   `AXI_ASSIGN_R(mst, slv)
 
-`define AXI_ASSIGN_TO_AW(aw_struct, axi_if) \
-  assign aw_struct = '{                     \
-    id:      axi_if.aw_id,                  \
-    addr:    axi_if.aw_addr,                \
-    len:     axi_if.aw_len,                 \
-    size:    axi_if.aw_size,                \
-    burst:   axi_if.aw_burst,               \
-    lock:    axi_if.aw_lock,                \
-    cache:   axi_if.aw_cache,               \
-    prot:    axi_if.aw_prot,                \
-    qos:     axi_if.aw_qos,                 \
-    region:  axi_if.aw_region,              \
-    atop:    axi_if.aw_atop,                \
-    user:    axi_if.aw_user,                \
-    default: '0                             \
+`define AXI_SET_TO_AW(aw_struct, axi_if) \
+  aw_struct = '{                         \
+    id:      axi_if.aw_id,               \
+    addr:    axi_if.aw_addr,             \
+    len:     axi_if.aw_len,              \
+    size:    axi_if.aw_size,             \
+    burst:   axi_if.aw_burst,            \
+    lock:    axi_if.aw_lock,             \
+    cache:   axi_if.aw_cache,            \
+    prot:    axi_if.aw_prot,             \
+    qos:     axi_if.aw_qos,              \
+    region:  axi_if.aw_region,           \
+    atop:    axi_if.aw_atop,             \
+    user:    axi_if.aw_user,             \
+    default: '0                          \
   };
+
+`define AXI_ASSIGN_TO_AW(aw_struct, axi_if) \
+  assign `AXI_SET_TO_AW(aw_struct, axi_if)
+
+`define AXI_SET_FROM_AW(axi_if, aw_struct) \
+  axi_if.aw_id     = aw_struct.id;         \
+  axi_if.aw_addr   = aw_struct.addr;       \
+  axi_if.aw_len    = aw_struct.len;        \
+  axi_if.aw_size   = aw_struct.size;       \
+  axi_if.aw_burst  = aw_struct.burst;      \
+  axi_if.aw_lock   = aw_struct.lock;       \
+  axi_if.aw_cache  = aw_struct.cache;      \
+  axi_if.aw_prot   = aw_struct.prot;       \
+  axi_if.aw_qos    = aw_struct.qos;        \
+  axi_if.aw_region = aw_struct.region;     \
+  axi_if.aw_atop   = aw_struct.atop;       \
+  axi_if.aw_user   = aw_struct.user;
 
 `define AXI_ASSIGN_FROM_AW(axi_if, aw_struct) \
   assign axi_if.aw_id     = aw_struct.id;     \
@@ -106,13 +123,22 @@
   assign axi_if.aw_atop   = aw_struct.atop;   \
   assign axi_if.aw_user   = aw_struct.user;
 
-`define AXI_ASSIGN_TO_W(w_struct, axi_if) \
-  assign w_struct = '{                    \
-    data: axi_if.w_data,                  \
-    strb: axi_if.w_strb,                  \
-    last: axi_if.w_last,                  \
-    user: axi_if.w_user                   \
+`define AXI_SET_TO_W(w_struct, axi_if) \
+  w_struct = '{                        \
+    data: axi_if.w_data,               \
+    strb: axi_if.w_strb,               \
+    last: axi_if.w_last,               \
+    user: axi_if.w_user                \
   };
+
+`define AXI_ASSIGN_TO_W(w_struct, axi_if) \
+  assign `AXI_SET_TO_W(w_struct, axi_if)
+
+`define AXI_SET_FROM_W(axi_if, w_struct) \
+  axi_if.w_data  = w_struct.data;        \
+  axi_if.w_strb  = w_struct.strb;        \
+  axi_if.w_last  = w_struct.last;        \
+  axi_if.w_user  = w_struct.user;
 
 `define AXI_ASSIGN_FROM_W(axi_if, w_struct) \
   assign axi_if.w_data  = w_struct.data;    \
@@ -120,33 +146,57 @@
   assign axi_if.w_last  = w_struct.last;    \
   assign axi_if.w_user  = w_struct.user;
 
-`define AXI_ASSIGN_TO_B(b_struct, axi_if) \
-  assign b_struct = '{                    \
-    id:   axi_if.b_id,                    \
-    resp: axi_if.b_resp,                  \
-    user: axi_if.b_user                   \
+`define AXI_SET_TO_B(b_struct, axi_if) \
+  b_struct = '{                        \
+    id:   axi_if.b_id,                 \
+    resp: axi_if.b_resp,               \
+    user: axi_if.b_user                \
   };
+
+`define AXI_ASSIGN_TO_B(b_struct, axi_if) \
+  assign `AXI_SET_TO_B(b_struct, axi_if)
+
+`define AXI_SET_FROM_B(axi_if, b_struct) \
+  axi_if.b_id    = b_struct.id;          \
+  axi_if.b_resp  = b_struct.resp;        \
+  axi_if.b_user  = b_struct.user;
 
 `define AXI_ASSIGN_FROM_B(axi_if, b_struct) \
   assign axi_if.b_id    = b_struct.id;      \
   assign axi_if.b_resp  = b_struct.resp;    \
   assign axi_if.b_user  = b_struct.user;
 
-`define AXI_ASSIGN_TO_AR(ar_struct, axi_if) \
-  assign ar_struct = '{                     \
-    id:      axi_if.ar_id,                  \
-    addr:    axi_if.ar_addr,                \
-    len:     axi_if.ar_len,                 \
-    size:    axi_if.ar_size,                \
-    burst:   axi_if.ar_burst,               \
-    lock:    axi_if.ar_lock,                \
-    cache:   axi_if.ar_cache,               \
-    prot:    axi_if.ar_prot,                \
-    qos:     axi_if.ar_qos,                 \
-    region:  axi_if.ar_region,              \
-    user:    axi_if.ar_user,                \
-    default: '0                             \
+`define AXI_SET_TO_AR(ar_struct, axi_if) \
+  ar_struct = '{                         \
+    id:      axi_if.ar_id,               \
+    addr:    axi_if.ar_addr,             \
+    len:     axi_if.ar_len,              \
+    size:    axi_if.ar_size,             \
+    burst:   axi_if.ar_burst,            \
+    lock:    axi_if.ar_lock,             \
+    cache:   axi_if.ar_cache,            \
+    prot:    axi_if.ar_prot,             \
+    qos:     axi_if.ar_qos,              \
+    region:  axi_if.ar_region,           \
+    user:    axi_if.ar_user,             \
+    default: '0                          \
   };
+
+`define AXI_ASSIGN_TO_AR(ar_struct, axi_if) \
+  assign `AXI_SET_TO_AR(ar_struct, axi_if)
+
+`define AXI_SET_FROM_AR(axi_if, ar_struct) \
+  axi_if.ar_id     = ar_struct.id;         \
+  axi_if.ar_addr   = ar_struct.addr;       \
+  axi_if.ar_len    = ar_struct.len;        \
+  axi_if.ar_size   = ar_struct.size;       \
+  axi_if.ar_burst  = ar_struct.burst;      \
+  axi_if.ar_lock   = ar_struct.lock;       \
+  axi_if.ar_cache  = ar_struct.cache;      \
+  axi_if.ar_prot   = ar_struct.prot;       \
+  axi_if.ar_qos    = ar_struct.qos;        \
+  axi_if.ar_region = ar_struct.region;     \
+  axi_if.ar_user   = ar_struct.user;
 
 `define AXI_ASSIGN_FROM_AR(axi_if, ar_struct) \
   assign axi_if.ar_id     = ar_struct.id;     \
@@ -161,14 +211,23 @@
   assign axi_if.ar_region = ar_struct.region; \
   assign axi_if.ar_user   = ar_struct.user;
 
-`define AXI_ASSIGN_TO_R(r_struct, axi_if) \
-  assign r_struct = '{                    \
-    id:   axi_if.r_id,                    \
-    data: axi_if.r_data,                  \
-    resp: axi_if.r_resp,                  \
-    last: axi_if.r_last,                  \
-    user: axi_if.r_user                   \
+`define AXI_SET_TO_R(r_struct, axi_if) \
+  r_struct = '{                        \
+    id:   axi_if.r_id,                 \
+    data: axi_if.r_data,               \
+    resp: axi_if.r_resp,               \
+    last: axi_if.r_last,               \
+    user: axi_if.r_user                \
   };
+`define AXI_ASSIGN_TO_R(r_struct, axi_if) \
+  assign `AXI_SET_TO_R(r_struct, axi_if)
+
+`define AXI_SET_FROM_R(axi_if, r_struct) \
+  axi_if.r_id    = r_struct.id;          \
+  axi_if.r_data  = r_struct.data;        \
+  axi_if.r_resp  = r_struct.resp;        \
+  axi_if.r_last  = r_struct.last;        \
+  axi_if.r_user  = r_struct.user;
 
 `define AXI_ASSIGN_FROM_R(axi_if, r_struct) \
   assign axi_if.r_id    = r_struct.id;      \
