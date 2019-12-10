@@ -143,8 +143,9 @@ module l2_mem #(
     end
 
     `FFARN(cut_addr_q, cut_addr_d, '0, clk_i, rst_ni);
-    `FFARN(req_q, req, 1'b0, clk_i, rst_ni);
   `endif
+
+  `FFARN(req_q, req, 1'b0, clk_i, rst_ni);
 
   // Validate parameters and properties.
   // pragma translate_off
