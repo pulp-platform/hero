@@ -13,7 +13,6 @@ apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_boar
 set_property -dict [list \
   CONFIG.PSU__USE__M_AXI_GP1 {0} \
   CONFIG.PSU__USE__S_AXI_GP2 {1} \
-  CONFIG.PSU__USE__IRQ1 {1} \
   CONFIG.PSU__CRL_APB__PL0_REF_CTRL__FREQMHZ {50} \
 ] [get_bd_cells i_zynq_ps]
 connect_bd_net [get_bd_pins i_zynq_ps/pl_clk0] \
@@ -30,7 +29,7 @@ connect_bd_net [get_bd_pins i_zynq_ps/pl_clk0] \
 
 # Interconnect from Zynq PS
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 i_iconn_ps
-set_property -dict [list CONFIG.NUM_MI {3}] [get_bd_cells i_iconn_ps]
+set_property -dict [list CONFIG.NUM_MI {4}] [get_bd_cells i_iconn_ps]
 connect_bd_net [get_bd_pins i_iconn_ps/ACLK] \
   [get_bd_pins i_zynq_ps/pl_clk0]
 connect_bd_net [get_bd_pins i_iconn_ps/ARESETN] \
@@ -40,7 +39,7 @@ connect_bd_intf_net -boundary_type upper [get_bd_intf_pins i_iconn_ps/S00_AXI] \
 connect_bd_net [get_bd_pins i_iconn_ps/S00_ACLK] [get_bd_pins i_zynq_ps/pl_clk0]
 connect_bd_net [get_bd_pins i_iconn_ps/S00_ARESETN] \
   [get_bd_pins i_sys_reset/peripheral_aresetn]
-for {set i 0} {$i < 3} {incr i} {
+for {set i 0} {$i < 4} {incr i} {
   set clk [format "M%02d_ACLK" $i]
   set rst [format "M%02d_ARESETN" $i]
   connect_bd_net [get_bd_pins i_iconn_ps/$clk] [get_bd_pins i_zynq_ps/pl_clk0]
@@ -65,13 +64,34 @@ connect_bd_net [get_bd_pins i_gpio/s_axi_aresetn] [get_bd_pins i_sys_reset/perip
 connect_bd_intf_net [get_bd_intf_pins i_gpio/S_AXI] -boundary_type upper \
   [get_bd_intf_pins i_iconn_ps/M02_AXI]
 
+# Protocol Converter for PULP->Host Interrupt Controller
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 i_prot_conv_intc
+set_property -dict [list \
+  CONFIG.SI_PROTOCOL.VALUE_SRC USER \
+  CONFIG.MI_PROTOCOL.VALUE_SRC USER \
+  CONFIG.READ_WRITE_MODE.VALUE_SRC USER \
+] [get_bd_cells i_prot_conv_intc]
+connect_bd_net [get_bd_pins i_prot_conv_intc/aclk] [get_bd_pins i_zynq_ps/pl_clk0]
+connect_bd_net [get_bd_pins i_prot_conv_intc/aresetn] [get_bd_pins i_sys_reset/peripheral_aresetn]
+connect_bd_intf_net [get_bd_intf_pins i_prot_conv_intc/S_AXI] -boundary_type upper \
+  [get_bd_intf_pins i_iconn_ps/M03_AXI]
+
+# Interrupt Controller for the PULP->Host IRQs
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_intc:4.1 i_intc
+set_property -dict [list \
+  CONFIG.C_IRQ_CONNECTION {1} \
+  CONFIG.C_KIND_OF_INTR.VALUE_SRC USER \
+  CONFIG.C_KIND_OF_INTR {0x00000000} \
+] [get_bd_cells i_intc]
+connect_bd_net [get_bd_pins i_intc/s_axi_aclk] [get_bd_pins i_zynq_ps/pl_clk0]
+connect_bd_net [get_bd_pins i_intc/s_axi_aresetn] [get_bd_pins i_sys_reset/peripheral_aresetn]
+connect_bd_net [get_bd_pins i_intc/irq] [get_bd_pins i_zynq_ps/pl_ps_irq0]
+
 # Concat for the PULP->Host IRQs
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 i_irq0_concat
-set_property -dict [list CONFIG.NUM_PORTS {7}] [get_bd_cells i_irq0_concat]
-connect_bd_net [get_bd_pins i_irq0_concat/dout] [get_bd_pins i_zynq_ps/pl_ps_irq0]
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 i_irq1_concat
-set_property -dict [list CONFIG.NUM_PORTS {2}] [get_bd_cells i_irq1_concat]
-connect_bd_net [get_bd_pins i_irq1_concat/dout] [get_bd_pins i_zynq_ps/pl_ps_irq1]
+create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 i_irq_concat
+set_property -dict [list CONFIG.NUM_PORTS {9}] [get_bd_cells i_irq_concat]
+connect_bd_net [get_bd_pins i_irq_concat/dout] [get_bd_pins i_intc/intr]
+connect_bd_intf_net [get_bd_intf_pins i_intc/s_axi] [get_bd_intf_pins i_prot_conv_intc/M_AXI]
 
 # PULP
 create_bd_cell -type ip -vlnv ethz.ch:user:pulp_txilzu9eg:1.0 i_pulp
@@ -83,15 +103,15 @@ connect_bd_intf_net -boundary_type upper [get_bd_intf_pins i_iconn_ps/M00_AXI] \
 connect_bd_intf_net [get_bd_intf_pins i_prot_conv_rab_conf/M_AXI] \
   [get_bd_intf_pins i_pulp/rab_conf]
 connect_bd_net [get_bd_pins i_gpio/gpio_io_o] [get_bd_pins i_pulp/cl_fetch_en_i]
-connect_bd_net [get_bd_pins i_pulp/rab_miss_fifo_full_irq_o] [get_bd_pins i_irq0_concat/In0]
-connect_bd_net [get_bd_pins i_pulp/rab_from_host_miss_irq_o] [get_bd_pins i_irq0_concat/In1]
-connect_bd_net [get_bd_pins i_pulp/rab_from_host_multi_irq_o] [get_bd_pins i_irq0_concat/In2]
-connect_bd_net [get_bd_pins i_pulp/rab_from_host_prot_irq_o] [get_bd_pins i_irq0_concat/In3]
-connect_bd_net [get_bd_pins i_pulp/rab_from_pulp_miss_irq_o] [get_bd_pins i_irq0_concat/In4]
-connect_bd_net [get_bd_pins i_pulp/rab_from_pulp_multi_irq_o] [get_bd_pins i_irq0_concat/In5]
-connect_bd_net [get_bd_pins i_pulp/rab_from_pulp_prot_irq_o] [get_bd_pins i_irq0_concat/In6]
-connect_bd_net [get_bd_pins i_pulp/cl_busy_o] [get_bd_pins i_irq1_concat/In0]
-connect_bd_net [get_bd_pins i_pulp/cl_eoc_o] [get_bd_pins i_irq1_concat/In1]
+connect_bd_net [get_bd_pins i_pulp/rab_miss_fifo_full_irq_o] [get_bd_pins i_irq_concat/In0]
+connect_bd_net [get_bd_pins i_pulp/rab_from_host_miss_irq_o] [get_bd_pins i_irq_concat/In1]
+connect_bd_net [get_bd_pins i_pulp/rab_from_host_multi_irq_o] [get_bd_pins i_irq_concat/In2]
+connect_bd_net [get_bd_pins i_pulp/rab_from_host_prot_irq_o] [get_bd_pins i_irq_concat/In3]
+connect_bd_net [get_bd_pins i_pulp/rab_from_pulp_miss_irq_o] [get_bd_pins i_irq_concat/In4]
+connect_bd_net [get_bd_pins i_pulp/rab_from_pulp_multi_irq_o] [get_bd_pins i_irq_concat/In5]
+connect_bd_net [get_bd_pins i_pulp/rab_from_pulp_prot_irq_o] [get_bd_pins i_irq_concat/In6]
+connect_bd_net [get_bd_pins i_pulp/cl_busy_o] [get_bd_pins i_irq_concat/In7]
+connect_bd_net [get_bd_pins i_pulp/cl_eoc_o] [get_bd_pins i_irq_concat/In8]
 
 # Address Map
 ## PULP Slave
@@ -106,6 +126,10 @@ set_property offset 0x00A8000000 [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_pulp_Re
 assign_bd_address [get_bd_addr_segs {i_gpio/S_AXI/Reg }]
 set_property range 4K [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_gpio_Reg}]
 set_property offset 0x00A9000000 [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_gpio_Reg}]
+## PULP Interrupt Controller
+assign_bd_address [get_bd_addr_segs {i_intc/S_AXI/Reg }]
+set_property range 4K [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_intc_Reg}]
+set_property offset 0x00A9100000 [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_intc_Reg}]
 ## DDR Low
 assign_bd_address [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_LOW }]
 set_property range 2G [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_LOW }]
