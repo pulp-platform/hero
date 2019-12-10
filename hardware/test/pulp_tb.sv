@@ -7,6 +7,7 @@
 // work. Any reuse/redistribution is strictly forbidden without written
 // permission from ETH Zurich.
 
+`include "axi/assign.svh"
 `include "axi/typedef.svh"
 
 `define wait_for(signal) \
@@ -98,6 +99,58 @@ module pulp_tb #(
     .rab_conf_resp_o(rab_conf_resp)
   );
 
+  // AXI Node for Memory (slave 0) and Stdout (slave 1)
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW),
+    .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
+  ) from_pulp[1:0] ();
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW+1),
+    .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
+  ) from_xbar[1:0] ();
+  `AXI_ASSIGN_FROM_REQ(from_pulp[0], from_pulp_req);
+  `AXI_ASSIGN_TO_RESP (from_pulp_resp, from_pulp[0]);
+  localparam int unsigned NODE_REGIONS = 2;
+  logic [NODE_REGIONS-1:0][1:0][pulp_pkg::AXI_AW-1:0] node_start, node_end;
+  logic [NODE_REGIONS-1:0][1:0]                       node_valid;
+  always_comb begin
+    node_start = '0;
+    node_end = '0;
+    node_valid = '0;
+
+    node_start[0][1] = 64'h0000_0000_1a10_0000;
+    node_end  [0][1] = 64'h0000_0000_1a10_ffff;
+    node_valid[0][1] = 1'b1;
+    node_start[0][0] = 64'h0000_0000_0000_0000;
+    node_end  [0][0] = node_start[0][1] - 1;
+    node_valid[0][0] = 1'b1;
+    node_start[1][0] = node_end[0][1] + 1;
+    node_end  [1][0] = 64'hffff_ffff_ffff_ffff;
+    node_valid[1][0] = 1'b1;
+  end
+  axi_node_intf_wrap #(
+    .NB_MASTER      (2),
+    .NB_SLAVE       (2), // actually only 1 but then vsim cannot handle axi_node
+    .NB_REGION      (2),
+    .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW),
+    .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
+  ) i_xbar (
+    .clk          (clk),
+    .rst_n        (rst_n),
+    .test_en_i    (1'b0),
+    .slave        (from_pulp),
+    .master       (from_xbar),
+    .start_addr_i (node_start),
+    .end_addr_i   (node_end),
+    .valid_rule_i (node_valid)
+  );
+
   // Emulate infinite memory with AXI slave port.
   initial begin
     automatic logic [7:0] mem[axi_addr_t];
@@ -105,70 +158,86 @@ module pulp_tb #(
     automatic axi_aw_t aw_queue[$];
     automatic axi_b_t b_queue[$];
     automatic shortint unsigned r_cnt = 0, w_cnt = 0;
-    from_pulp_resp = '0;
+    from_xbar[0].aw_ready = 1'b0;
+    from_xbar[0].w_ready = 1'b0;
+    from_xbar[0].b_id = '0;
+    from_xbar[0].b_resp = '0;
+    from_xbar[0].b_user = '0;
+    from_xbar[0].b_valid = 1'b0;
+    from_xbar[0].ar_ready = 1'b0;
+    from_xbar[0].r_id = '0;
+    from_xbar[0].r_data = '0;
+    from_xbar[0].r_resp = '0;
+    from_xbar[0].r_last = 1'b0;
+    from_xbar[0].r_user = '0;
+    from_xbar[0].r_valid = 1'b0;
     wait (rst_n);
     @(posedge clk);
     fork
       // AW
       forever begin
-        from_pulp_resp.aw_ready = 1'b1;
-        if (from_pulp_req.aw_valid) begin
-          aw_queue.push_back(from_pulp_req.aw);
+        from_xbar[0].aw_ready = 1'b1;
+        if (from_xbar[0].aw_valid) begin
+          automatic axi_aw_t aw;
+          `AXI_SET_TO_AW(aw, from_xbar[0]);
+          aw_queue.push_back(aw);
         end
         @(posedge clk);
       end
       // W
       forever begin
         if (aw_queue.size() != 0) begin
-          from_pulp_resp.w_ready = 1'b1;
-          if (from_pulp_req.w_valid) begin
+          from_xbar[0].w_ready = 1'b1;
+          if (from_xbar[0].w_valid) begin
             automatic axi_pkg::size_t size = aw_queue[0].size;
             automatic axi_addr_t addr = axi_pkg::beat_addr(aw_queue[0].addr, size, w_cnt);
             for (shortint unsigned
                 i_byte = axi_pkg::beat_lower_byte(addr, size, AXI_SW, w_cnt);
                 i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, w_cnt);
                 i_byte++) begin
-              if (from_pulp_req.w.strb[i_byte]) begin
+              if (from_xbar[0].w_strb[i_byte]) begin
                 automatic axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
-                mem[byte_addr] = from_pulp_req.w.data[i_byte*8+:8];
+                mem[byte_addr] = from_xbar[0].w_data[i_byte*8+:8];
               end
             end
             if (w_cnt == aw_queue[0].len) begin
               automatic axi_b_t b_beat = '0;
-              assert (from_pulp_req.w.last) else $error("Expected last beat of W burst!");
+              assert (from_xbar[0].w_last) else $error("Expected last beat of W burst!");
               b_beat.id = aw_queue[0].id;
               b_beat.resp = axi_pkg::RESP_OKAY;
               b_queue.push_back(b_beat);
               w_cnt = 0;
               void'(aw_queue.pop_front());
             end else begin
-              assert (!from_pulp_req.w.last) else $error("Did not expect last beat of W burst!");
+              assert (!from_xbar[0].w_last) else $error("Did not expect last beat of W burst!");
               w_cnt++;
             end
           end
         end else begin
-          from_pulp_resp.w_ready = 1'b0;
+          from_xbar[0].w_ready = 1'b0;
         end
         @(posedge clk);
       end
       // B
       forever begin
         if (b_queue.size() != 0) begin
-          from_pulp_resp.b = b_queue[0];
-          from_pulp_resp.b_valid = 1'b1;
-          if (from_pulp_req.b_ready) begin
+          `AXI_SET_FROM_B(from_xbar[0], b_queue[0]);
+          from_xbar[0].b_valid = 1'b1;
+          if (from_xbar[0].b_ready) begin
             void'(b_queue.pop_front());
           end
         end else begin
-          from_pulp_resp.b_valid = 1'b0;
+          from_xbar[0].b_valid = 1'b0;
         end
         @(posedge clk);
       end
       // AR
       forever begin
-        from_pulp_resp.ar_ready = 1'b1;
-        if (from_pulp_req.ar_valid) begin
-          ar_queue.push_back(from_pulp_req.ar);
+        from_xbar[0].ar_ready = 1'b1;
+        if (from_xbar[0].ar_valid) begin
+          automatic axi_ar_t ar;
+          `AXI_SET_TO_AR(ar, from_xbar[0]);
+          ar_queue.push_back(ar);
         end
         @(posedge clk);
       end
@@ -191,9 +260,9 @@ module pulp_tb #(
           if (r_cnt == ar_queue[0].len) begin
             r_beat.last = 1'b1;
           end
-          from_pulp_resp.r = r_beat;
-          from_pulp_resp.r_valid = 1'b1;
-          if (from_pulp_req.r_ready) begin
+          `AXI_SET_FROM_R(from_xbar[0], r_beat);
+          from_xbar[0].r_valid = 1'b1;
+          if (from_xbar[0].r_ready) begin
             if (r_beat.last) begin
               r_cnt = 0;
               void'(ar_queue.pop_front());
@@ -202,7 +271,7 @@ module pulp_tb #(
             end
           end
         end else begin
-          from_pulp_resp.r_valid = 1'b0;
+          from_xbar[0].r_valid = 1'b0;
         end
         @(posedge clk);
       end
