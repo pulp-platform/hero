@@ -7,6 +7,8 @@
 // work. Any reuse/redistribution is strictly forbidden without written
 // permission from ETH Zurich.
 
+`include "common_cells/registers.svh"
+
 module l2_mem #(
   parameter int unsigned  AXI_AW = 0,   // [bit], must be a power of 2
   parameter int unsigned  AXI_DW = 0,   // [bit], must be a power of 2
@@ -140,15 +142,8 @@ module l2_mem #(
       end
     end
 
-    always_ff @(posedge clk_i, negedge rst_ni) begin
-      if (!rst_ni) begin
-        cut_addr_q <= '0;
-        req_q      <= 1'b0;
-      end else begin
-        cut_addr_q <= cut_addr_d;
-        req_q      <= req;
-      end
-    end
+    `FFARN(cut_addr_q, cut_addr_d, '0, clk_i, rst_ni);
+    `FFARN(req_q, req, 1'b0, clk_i, rst_ni);
   `endif
 
   // Validate parameters and properties.
