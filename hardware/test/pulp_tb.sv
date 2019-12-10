@@ -99,7 +99,7 @@ module pulp_tb #(
     .rab_conf_resp_o(rab_conf_resp)
   );
 
-  // AXI Node for Memory (slave 0) and Stdout (slave 1)
+  // AXI Node for Memory (slave 0) and Peripherals (slave 1)
   AXI_BUS #(
     .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
@@ -112,6 +112,12 @@ module pulp_tb #(
     .AXI_ID_WIDTH   (AXI_IW+1),
     .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
   ) from_xbar[1:0] ();
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
+    .AXI_DATA_WIDTH (64),
+    .AXI_ID_WIDTH   (AXI_IW+1),
+    .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
+  ) to_periphs ();
   `AXI_ASSIGN_FROM_REQ(from_pulp[0], from_pulp_req);
   `AXI_ASSIGN_TO_RESP (from_pulp_resp, from_pulp[0]);
   localparam int unsigned NODE_REGIONS = 2;
@@ -149,6 +155,32 @@ module pulp_tb #(
     .start_addr_i (node_start),
     .end_addr_i   (node_end),
     .valid_rule_i (node_valid)
+  );
+
+  // Peripherals
+  axi_data_width_converter #(
+    .ADDR_WIDTH     (pulp_pkg::AXI_AW),
+    .SI_DATA_WIDTH  (AXI_DW),
+    .MI_DATA_WIDTH  (64),
+    .ID_WIDTH       (AXI_IW+1),
+    .USER_WIDTH     (pulp_pkg::AXI_UW)
+  ) i_dwc_peripherals (
+    .clk_i  (clk),
+    .rst_ni (rst_n),
+    .slv    (from_xbar[1]),
+    .mst    (to_periphs)
+  );
+  soc_peripherals #(
+    .AXI_AW     (pulp_pkg::AXI_AW),
+    .AXI_IW     (AXI_IW+1),
+    .AXI_UW     (pulp_pkg::AXI_UW),
+    .N_CORES    (8),
+    .N_CLUSTERS (N_CLUSTERS)
+  ) i_peripherals (
+    .clk_i      (clk),
+    .rst_ni     (rst_n),
+    .test_en_i  (1'b0),
+    .axi        (to_periphs)
   );
 
   // Emulate infinite memory with AXI slave port.
