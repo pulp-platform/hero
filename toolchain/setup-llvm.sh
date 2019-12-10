@@ -39,9 +39,10 @@ $HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DLLVM_OPTIMIZED_TABLEGEN=True -DLLVM_BUILD_TESTS=False \
       -DDEFAULT_SYSROOT=$HERO_INSTALL/riscv64-hero-linux-gnu \
       -DLLVM_DEFAULT_TARGET_TRIPLE=riscv64-hero-linux-gnu \
-      -DLLVM_TARGETS_TO_BUILD="AArch64" -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="RISCV" \
+      -DLLVM_TARGETS_TO_BUILD="AArch64;RISCV" \
       -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON \
       -DLLVM_ENABLE_PROJECTS="clang;openmp" \
+      -DLIBOMPTARGET_NVPTX_BUILD=OFF \
       $THIS_DIR/llvm-project/llvm
 cmake --build . --target install
 cd ..
