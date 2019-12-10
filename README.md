@@ -9,7 +9,8 @@ This repository contains the top-level logic and is the entry point to the HERO 
 ## Getting Started
 
 ### Prerequisites
-All build steps should work on any sufficiently recent Linux version (we have automated tests on CentOS 7). Most of the core dependencies are installed automatically as part of the toolchain. Required is at least GCC 4.8 / Clang 3.3 to bootstrap the toolchain installation.
+All build steps should work on any sufficiently recent Linux distribution (we have automated tests on CentOS 7). Most of the core dependencies are installed automatically as part of the toolchain. Required is at least GCC 4.8 / Clang 3.3 to bootstrap the toolchain installation.
+More details can be found [here](PREREQUISITES.md).
 
 ### External sources
 HERO uses Git submodules that have to be initialized. Either clone the repository recursively using
