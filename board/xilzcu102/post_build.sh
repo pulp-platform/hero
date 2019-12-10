@@ -7,7 +7,7 @@ fi
 # Write optional bitstream in firmware directory
 cd ${BINARIES_DIR}
 cp $BR2_HERO_BITSTREAM fpga.bit
-${HOST_DIR}/bin/mkbootimage --zynqmp ${BR2_EXTERNAL_HERO_PATH}/board/zynqmp/bitstream.bif ${TARGET_DIR}/lib/firmware/fpga-default.bin
+${HOST_DIR}/bin/mkbootimage --zynqmp ${BR2_EXTERNAL_HERO_PATH}/board/xilzcu102/bitstream.bif ${TARGET_DIR}/lib/firmware/fpga-default.bin
 
 # Install init.d load script
 cp ${BR2_EXTERNAL_HERO_PATH}/board/xilzcu102/S95fpga ${TARGET_DIR}/etc/init.d/
