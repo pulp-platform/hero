@@ -3,9 +3,9 @@ OUTPUT_ARCH(riscv)
 ENTRY( _start )
 MEMORY
 {
-  L2           : ORIGIN = 0x1c000000, LENGTH = 0x00080000
-  L1                 : ORIGIN = 0x10000004, LENGTH = 0x0003fffc
-  L1_aliased         : ORIGIN = 0x1b000004, LENGTH = 0x0003fffc
+  L2           : ORIGIN = 0x1c000000, LENGTH = 0x00010000
+  L1                 : ORIGIN = 0x10000004, LENGTH = 0x0001fffc
+  L1_aliased         : ORIGIN = 0x1b000004, LENGTH = 0x0001fffc
 }
 
 /*
@@ -15,7 +15,7 @@ __ZERO = DEFINED(__ZERO) ? __ZERO  : 0;
 __USE_UART = DEFINED(__USE_UART) ? __USE_UART : 0;
 __RT_DEBUG_CONFIG = DEFINED(__RT_DEBUG_CONFIG) ? __RT_DEBUG_CONFIG   : (0 << 8) | 0;
 __FC = DEFINED(__FC) ? __FC   : 1;
-__L2 = DEFINED(__L2) ? __L2   : 0x80000;
+__L2 = DEFINED(__L2) ? __L2   : 0x10000;
 __L1Cl = DEFINED(__L1Cl) ? __L1Cl : 0x10000;
 __FETCH_ALL = DEFINED(__FETCH_ALL) ? __FETCH_ALL : 0x0;
 __ACTIVE_FC = DEFINED(__ACTIVE_FC) ? __ACTIVE_FC : 0x1;
