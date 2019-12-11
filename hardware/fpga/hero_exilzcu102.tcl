@@ -86,12 +86,12 @@ set_property -dict [list \
 connect_bd_net [get_bd_pins i_intc/s_axi_aclk] [get_bd_pins i_zynq_ps/pl_clk0]
 connect_bd_net [get_bd_pins i_intc/s_axi_aresetn] [get_bd_pins i_sys_reset/peripheral_aresetn]
 connect_bd_net [get_bd_pins i_intc/irq] [get_bd_pins i_zynq_ps/pl_ps_irq0]
+connect_bd_intf_net [get_bd_intf_pins i_intc/s_axi] [get_bd_intf_pins i_prot_conv_intc/M_AXI]
 
 # Concat for the PULP->Host IRQs
 create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 i_irq_concat
 set_property -dict [list CONFIG.NUM_PORTS {9}] [get_bd_cells i_irq_concat]
 connect_bd_net [get_bd_pins i_irq_concat/dout] [get_bd_pins i_intc/intr]
-connect_bd_intf_net [get_bd_intf_pins i_intc/s_axi] [get_bd_intf_pins i_prot_conv_intc/M_AXI]
 
 # PULP
 create_bd_cell -type ip -vlnv ethz.ch:user:pulp_txilzu9eg:1.0 i_pulp
