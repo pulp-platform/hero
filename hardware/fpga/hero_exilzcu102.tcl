@@ -178,3 +178,4 @@ if {! [string match -nocase {*timing constraints are met*} $timingrep]} {
 
 # Generate Bitstream
 launch_runs impl_1 -to_step write_bitstream -jobs 12
+wait_on_run impl_1
