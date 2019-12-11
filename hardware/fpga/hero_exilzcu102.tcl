@@ -167,6 +167,10 @@ eval [exec sed {s/current_fileset/get_filesets hero_exilzcu102_i_pulp_0/} \
   vivado_ips/define_defines.tcl]
 
 # Synthesize
+foreach run [list synth_1 hero_exilzcu102_i_pulp_0_synth_1] {
+  set_property strategy Flow_AlternateRoutability [get_runs $run]
+  set_property STEPS.SYNTH_DESIGN.ARGS.RETIMING true [get_runs $run]
+}
 launch_runs synth_1 -jobs 12
 wait_on_run synth_1
 
