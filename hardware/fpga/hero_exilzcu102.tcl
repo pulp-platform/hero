@@ -171,6 +171,7 @@ launch_runs synth_1 -jobs 12
 wait_on_run synth_1
 
 # Implement
+set_property strategy Congestion_SpreadLogic_low [get_runs impl_1]
 launch_runs impl_1 -jobs 12
 wait_on_run impl_1
 
