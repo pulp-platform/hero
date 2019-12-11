@@ -64,18 +64,6 @@ connect_bd_net [get_bd_pins i_gpio/s_axi_aresetn] [get_bd_pins i_sys_reset/perip
 connect_bd_intf_net [get_bd_intf_pins i_gpio/S_AXI] -boundary_type upper \
   [get_bd_intf_pins i_iconn_ps/M02_AXI]
 
-# Protocol Converter for PULP->Host Interrupt Controller
-create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 i_prot_conv_intc
-set_property -dict [list \
-  CONFIG.SI_PROTOCOL.VALUE_SRC USER \
-  CONFIG.MI_PROTOCOL.VALUE_SRC USER \
-  CONFIG.READ_WRITE_MODE.VALUE_SRC USER \
-] [get_bd_cells i_prot_conv_intc]
-connect_bd_net [get_bd_pins i_prot_conv_intc/aclk] [get_bd_pins i_zynq_ps/pl_clk0]
-connect_bd_net [get_bd_pins i_prot_conv_intc/aresetn] [get_bd_pins i_sys_reset/peripheral_aresetn]
-connect_bd_intf_net [get_bd_intf_pins i_prot_conv_intc/S_AXI] -boundary_type upper \
-  [get_bd_intf_pins i_iconn_ps/M03_AXI]
-
 # Interrupt Controller for the PULP->Host IRQs
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_intc:4.1 i_intc
 set_property -dict [list \
@@ -86,7 +74,8 @@ set_property -dict [list \
 connect_bd_net [get_bd_pins i_intc/s_axi_aclk] [get_bd_pins i_zynq_ps/pl_clk0]
 connect_bd_net [get_bd_pins i_intc/s_axi_aresetn] [get_bd_pins i_sys_reset/peripheral_aresetn]
 connect_bd_net [get_bd_pins i_intc/irq] [get_bd_pins i_zynq_ps/pl_ps_irq0]
-connect_bd_intf_net [get_bd_intf_pins i_intc/s_axi] [get_bd_intf_pins i_prot_conv_intc/M_AXI]
+connect_bd_intf_net [get_bd_intf_pins i_intc/s_axi] -boundary_type upper \
+  [get_bd_intf_pins i_iconn_ps/M03_AXI]
 
 # Concat for the PULP->Host IRQs
 create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 i_irq_concat
