@@ -155,6 +155,10 @@ eval [exec sed {s/current_fileset/get_filesets hero_exilzcu102_i_pulp_0/} \
 eval [exec sed {s/current_fileset/get_filesets hero_exilzcu102_i_pulp_0/} \
   vivado_ips/define_defines.tcl]
 
+# Include debug settings.
+add_files -fileset constrs_1 ./hero_exilzcu102_debug.xdc
+set_property target_constrs_file ./hero_exilzcu102_debug.xdc [current_fileset -constrset]
+
 # Synthesize
 foreach run [list synth_1 hero_exilzcu102_i_pulp_0_synth_1] {
   set_property strategy Flow_AlternateRoutability [get_runs $run]
