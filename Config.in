@@ -20,7 +20,13 @@ config BR2_HERO_EXT_MOUNT
     are completely forwarded to mount. Leave empty to not mount external partition.
 
 config BR2_HERO_BITSTREAM
-  string "Bitstream to load for targeted FPGA"
+  string "Optional bitstream to load for targeted FPGA"
   help
     Location of a bitstream to load for the FPGA device during boot. Leave empty
     to not load any bitstream.
+
+config BR2_HERO_AUTHORIZED_KEYS
+  string "Optional authorized keys file to install"
+  help
+    Authorized keys file to install for automatic SSH access. Leave empty to not
+    install any authorized keys.
