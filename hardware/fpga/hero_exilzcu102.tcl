@@ -12,11 +12,12 @@ apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_boar
   [get_bd_cells i_zynq_ps]
 set_property -dict [list \
   CONFIG.PSU__USE__M_AXI_GP1 {0} \
-  CONFIG.PSU__USE__S_AXI_GP2 {1} \
+  CONFIG.PSU__USE__S_AXI_GP2 {0} \
+  CONFIG.PSU__USE__S_AXI_GP3 {1} \
   CONFIG.PSU__CRL_APB__PL0_REF_CTRL__FREQMHZ {50} \
 ] [get_bd_cells i_zynq_ps]
 connect_bd_net [get_bd_pins i_zynq_ps/pl_clk0] \
-  [get_bd_pins i_zynq_ps/saxihp0_fpd_aclk]
+  [get_bd_pins i_zynq_ps/saxihp1_fpd_aclk]
 connect_bd_net [get_bd_pins i_zynq_ps/pl_clk0] \
   [get_bd_pins i_zynq_ps/maxihpm0_fpd_aclk]
 
@@ -86,7 +87,7 @@ connect_bd_net [get_bd_pins i_irq_concat/dout] [get_bd_pins i_intc/intr]
 create_bd_cell -type ip -vlnv ethz.ch:user:pulp_txilzu9eg:1.0 i_pulp
 connect_bd_net [get_bd_pins i_pulp/clk_i] [get_bd_pins i_zynq_ps/pl_clk0]
 connect_bd_net [get_bd_pins i_pulp/rst_ni] [get_bd_pins i_sys_reset/peripheral_aresetn]
-connect_bd_intf_net [get_bd_intf_pins i_pulp/mst] [get_bd_intf_pins i_zynq_ps/S_AXI_HP0_FPD]
+connect_bd_intf_net [get_bd_intf_pins i_pulp/mst] [get_bd_intf_pins i_zynq_ps/S_AXI_HP1_FPD]
 connect_bd_intf_net -boundary_type upper [get_bd_intf_pins i_iconn_ps/M00_AXI] \
   [get_bd_intf_pins i_pulp/slv]
 connect_bd_intf_net [get_bd_intf_pins i_prot_conv_rab_conf/M_AXI] \
@@ -120,13 +121,13 @@ assign_bd_address [get_bd_addr_segs {i_intc/S_AXI/Reg }]
 set_property range 4K [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_intc_Reg}]
 set_property offset 0x00A9100000 [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_intc_Reg}]
 ## DDR Low
-assign_bd_address [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_LOW }]
-set_property range 2G [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_LOW }]
-set_property offset 0x0000000000 [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_LOW }]
+assign_bd_address [get_bd_addr_segs {i_zynq_ps/SAXIGP3/HP1_DDR_LOW }]
+set_property range 2G [get_bd_addr_segs {i_zynq_ps/SAXIGP3/HP1_DDR_LOW }]
+set_property offset 0x0000000000 [get_bd_addr_segs {i_zynq_ps/SAXIGP3/HP1_DDR_LOW }]
 ## DDR High
-assign_bd_address [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_HIGH }]
-set_property range 32G [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_HIGH }]
-set_property offset 0x0800000000 [get_bd_addr_segs {i_zynq_ps/SAXIGP2/HP0_DDR_HIGH }]
+assign_bd_address [get_bd_addr_segs {i_zynq_ps/SAXIGP3/HP1_DDR_HIGH }]
+set_property range 32G [get_bd_addr_segs {i_zynq_ps/SAXIGP3/HP1_DDR_HIGH }]
+set_property offset 0x0800000000 [get_bd_addr_segs {i_zynq_ps/SAXIGP3/HP1_DDR_HIGH }]
 
 # Validate and save Top-Level Block Design
 save_bd_design
