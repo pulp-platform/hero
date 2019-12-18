@@ -347,7 +347,7 @@ module pulp_txilzu9eg (
     .out_aw_burst_o   (mst_aw_burst_o),
     .out_aw_lock_o    (mst_aw_lock_o),
     .out_aw_cache_o   (mst_aw_cache_o),
-    .out_aw_prot_o    (mst_aw_prot_o),
+    .out_aw_prot_o    (/* overridden */),
     .out_aw_qos_o     (mst_aw_qos_o),
     .out_aw_region_o  (/* unused */),
     .out_aw_atop_o    (/* unused */),
@@ -372,7 +372,7 @@ module pulp_txilzu9eg (
     .out_ar_burst_o   (mst_ar_burst_o),
     .out_ar_lock_o    (mst_ar_lock_o),
     .out_ar_cache_o   (mst_ar_cache_o),
-    .out_ar_prot_o    (mst_ar_prot_o),
+    .out_ar_prot_o    (/* overridden */),
     .out_ar_qos_o     (mst_ar_qos_o),
     .out_ar_region_o  (/* unused */),
     .out_ar_user_o    (mst_ar_user_idr),
@@ -390,6 +390,8 @@ module pulp_txilzu9eg (
   assign mst_ar_addr_o = mst_ar_addr_idr[48:0];
   assign mst_aw_user_o = mst_aw_user_idr[0];
   assign mst_ar_user_o = mst_ar_user_idr[0];
+  assign mst_aw_prot_o = 3'b010;
+  assign mst_ar_prot_o = 3'b010;
   axi_id_resize_ports #(
     .ADDR_WIDTH   (64),
     .DATA_WIDTH   (128),
