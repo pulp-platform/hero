@@ -74,6 +74,10 @@ void rt_time_wait_cycles(const unsigned cycles)
 // Regression test for counter overflow in TCDM unit
 static bool regression_tcdm_counter_overflow()
 {
+  if ((uint32_t)0x1c02a7d4 >= (uint32_t)pulp_l2_end()) {
+   printf("Warning: TCDM counter overflow regression skipped due to L2 size.\n");
+   return false;
+  }
   const int dma = plp_dma_memcpy(0x1c02a7d4, 0x100fbea0, 2144, true);
   const short unsigned timeout_delta = 256;
   unsigned counter = 256 * timeout_delta;
