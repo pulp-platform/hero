@@ -255,13 +255,14 @@ module pulp_tb #(
         if (b_queue.size() != 0) begin
           `AXI_SET_FROM_B(from_xbar[0], b_queue[0]);
           from_xbar[0].b_valid = 1'b1;
+          @(posedge clk);
           if (from_xbar[0].b_ready) begin
             void'(b_queue.pop_front());
           end
         end else begin
-          from_xbar[0].b_valid = 1'b0;
+          @(posedge clk);
         end
-        @(posedge clk);
+        from_xbar[0].b_valid = 1'b0;
       end
       // AR
       forever begin
@@ -294,6 +295,7 @@ module pulp_tb #(
           end
           `AXI_SET_FROM_R(from_xbar[0], r_beat);
           from_xbar[0].r_valid = 1'b1;
+          @(posedge clk);
           if (from_xbar[0].r_ready) begin
             if (r_beat.last) begin
               r_cnt = 0;
@@ -303,9 +305,9 @@ module pulp_tb #(
             end
           end
         end else begin
-          from_xbar[0].r_valid = 1'b0;
+          @(posedge clk);
         end
-        @(posedge clk);
+        from_xbar[0].r_valid = 1'b0;
       end
     join
   end
