@@ -130,14 +130,22 @@ static unsigned to_or_from_l1()
   n_errors += check_to_or_from_l1(l3, loc, n_elem);
   printf("DMA: L2 to L1 ..\n");
   n_errors += check_to_or_from_l1(l2, loc, n_elem);
-  printf("DMA: Other L1 to L1 ..\n");
-  n_errors += check_to_or_from_l1(other_l1, loc, n_elem);
+  if (pulp_n_clusters() > 1) {
+    printf("DMA: Other L1 to L1 ..\n");
+    n_errors += check_to_or_from_l1(other_l1, loc, n_elem);
+  } else {
+    printf("Warning: DMA from other L1 skipped because only one cluster.\n");
+  }
   printf("DMA: L1 to L3 ..\n");
   n_errors += check_to_or_from_l1(loc, l3, n_elem);
   printf("DMA: L1 to L2 ..\n");
   n_errors += check_to_or_from_l1(loc, l2, n_elem);
-  printf("DMA: L1 to other L1 ..\n");
-  n_errors += check_to_or_from_l1(loc, other_l1, n_elem);
+  if (pulp_n_clusters() > 1) {
+    printf("DMA: L1 to other L1 ..\n");
+    n_errors += check_to_or_from_l1(loc, other_l1, n_elem);
+  } else {
+    printf("Warning: DMA to other L1 skipped because only one cluster.\n");
+  }
 
   hero_l1free(loc);
   return n_errors;
