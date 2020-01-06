@@ -9,22 +9,7 @@ after_script:
   - chmod -R u+w $HERO_INSTALL
 
 stages:
-  - build_fpga
   - build_test_rest
-
-build_fpga:
-  stage: build_fpga
-  rules:
-    - changes:
-      - hardware/deps/**/*
-      - hardware/fpga/**/*
-      - hardware/src/**/*
-      when: always
-    - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME'
-      when: always
-    - if: $CI_EVERYTHING
-      when: always
-  script: make -C hardware/fpga all
 
 build_test_rest:
   stage: build_test_rest
