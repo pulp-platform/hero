@@ -64,9 +64,6 @@ module pulp_tb #(
   axi_resp_t  from_pulp_resp,
               to_pulp_resp;
 
-  axi_lite_req_t  rab_conf_req;
-  axi_lite_resp_t rab_conf_resp;
-
   clk_rst_gen #(
     .CLK_PERIOD     (CLK_PERIOD),
     .RST_CLK_CYCLES (10)
@@ -94,9 +91,7 @@ module pulp_tb #(
     .ext_req_o      (from_pulp_req),
     .ext_resp_i     (from_pulp_resp),
     .ext_req_i      (to_pulp_req),
-    .ext_resp_o     (to_pulp_resp),
-    .rab_conf_req_i (rab_conf_req),
-    .rab_conf_resp_o(rab_conf_resp)
+    .ext_resp_o     (to_pulp_resp)
   );
 
   // AXI Node for Memory (slave 0) and Peripherals (slave 1)
@@ -318,42 +313,12 @@ module pulp_tb #(
     join
   end
 
-  task write_rab(input axi_lite_addr_t addr, input axi_lite_data_t data);
-    rab_conf_req.aw.addr = addr;
-    rab_conf_req.aw.size = 3'h3;
-    rab_conf_req.aw_valid = 1'b1;
-    `wait_for(rab_conf_resp.aw_ready)
-    rab_conf_req.aw_valid = 1'b0;
-    rab_conf_req.w.data = data;
-    rab_conf_req.w.strb = '1;
-    rab_conf_req.w_valid = 1'b1;
-    `wait_for(rab_conf_resp.w_ready)
-    rab_conf_req.w_valid = 1'b0;
-    rab_conf_req.b_ready = 1'b1;
-    `wait_for(rab_conf_resp.b_valid)
-    rab_conf_req.b_ready = 1'b0;
-  endtask
-
-  task write_rab_slice(input axi_lite_addr_t slice_addr, input axi_addr_t first,
-      input axi_addr_t last, input axi_addr_t phys_addr);
-    write_rab(slice_addr+8'h00, first);
-    write_rab(slice_addr+8'h08, last);
-    write_rab(slice_addr+8'h10, phys_addr);
-    write_rab(slice_addr+8'h18, 64'h7);
-  endtask
-
   // Simulation control
   initial begin
     cl_fetch_en = '0;
-    rab_conf_req = '{default: '0};
     // Wait for reset.
     wait (rst_n);
     @(posedge clk);
-
-    // Set up RAB slice from PULP to external devices: all addresses (that the interconnect routes
-    // through the RAB) except zero page.
-    write_rab_slice(32'hA0, 64'h0000_0000_0000_1000, 64'hFFFF_FFFF_FFFF_FFFF,
-        64'h0000_0000_0000_1000);
 
     // Start cluster 0.
     cl_fetch_en[0] = 1'b1;

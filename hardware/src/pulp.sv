@@ -59,21 +59,10 @@ module pulp #(
   output logic [N_CLUSTERS-1:0] cl_eoc_o,
   output logic [N_CLUSTERS-1:0] cl_busy_o,
 
-  // RAB IRQs
-  output logic                  rab_from_pulp_miss_irq_o,
-  output logic                  rab_from_pulp_multi_irq_o,
-  output logic                  rab_from_pulp_prot_irq_o,
-  output logic                  rab_from_host_miss_irq_o,
-  output logic                  rab_from_host_multi_irq_o,
-  output logic                  rab_from_host_prot_irq_o,
-  output logic                  rab_miss_fifo_full_irq_o,
-
   output axi_req_t              ext_req_o,
   input  axi_resp_t             ext_resp_i,
   input  axi_req_t              ext_req_i,
-  output axi_resp_t             ext_resp_o,
-  input  axi_lite_req_t         rab_conf_req_i,
-  output axi_lite_resp_t        rab_conf_resp_o
+  output axi_resp_t             ext_resp_o
 );
 
   // Derived Constants
@@ -170,43 +159,35 @@ module pulp #(
     .AXI_USER_WIDTH (AXI_UW)
   ) l2_mst_wo_atomics[L2_N_AXI_PORTS-1:0]();
 
-  // Interfaces from PULP through RAB to Host
-  // i_soc_bus.rab_mst -> [rab_mst] -> [rab_mst_{req,resp}]
-  // -> i_rab.from_pulp_{req_i,resp_o}
-  // -> i_rab.to_host_{req_o,resp_i}
-  // -> [ext_{req_o,resp_i}]
+  // Interfaces from PULP to Host
+  // i_soc_bus.ext_mst -> [ext_mst] -> [ext_{req_o,resp_i}]
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
     .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
     .AXI_USER_WIDTH (AXI_UW)
-  ) rab_mst();
-  axi_req_t   rab_mst_req;
-  axi_resp_t  rab_mst_resp;
-  `AXI_ASSIGN_TO_REQ(rab_mst_req, rab_mst);
-  `AXI_ASSIGN_FROM_RESP(rab_mst, rab_mst_resp);
+  ) ext_mst();
+  `AXI_ASSIGN_TO_REQ(ext_req_o, ext_mst);
+  `AXI_ASSIGN_FROM_RESP(ext_mst, ext_resp_i);
 
-  // Interfaces from Host through RAB to PULP
-  // [ext_{req_i,resp_o}] -> i_rab.from_host_{req_i,resp_o}
-  // -> i_rab.to_pulp_{req_o,resp_i} -> [rab_slv_{req,resp}] -> [rab_slv]
-  // -> i_id_remap_rab_slv -> [rab_slv_remapped]
-  // -> i_soc_bus.rab_slv
-  axi_req_t   rab_slv_req;
-  axi_resp_t  rab_slv_resp;
+  // Interfaces from Host to PULP
+  // [ext_{req_i,resp_o}] -> [ext_slv]
+  // -> i_id_remap_ext_slv -> [ext_slv_remapped]
+  // -> i_soc_bus.ext_slv
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
     .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
     .AXI_USER_WIDTH (AXI_UW)
-  ) rab_slv();
-  `AXI_ASSIGN_FROM_REQ(rab_slv, rab_slv_req);
-  `AXI_ASSIGN_TO_RESP(rab_slv_resp, rab_slv);
+  ) ext_slv();
+  `AXI_ASSIGN_FROM_REQ(ext_slv, ext_req_i);
+  `AXI_ASSIGN_TO_RESP(ext_resp_o, ext_slv);
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
     .AXI_ID_WIDTH   (AXI_IW_SB_INP),
     .AXI_USER_WIDTH (AXI_UW)
-  ) rab_slv_remapped();
+  ) ext_slv_remapped();
 
   // Interfaces to Peripherals
   // i_soc_bus.periph_mst -> [periph_mst]
@@ -372,8 +353,8 @@ module pulp #(
     .cl_slv     (cl_oup),
     .cl_mst     (cl_inp),
     .l2_mst     (l2_mst),
-    .rab_mst    (rab_mst),
-    .rab_slv    (rab_slv_remapped)
+    .ext_mst    (ext_mst),
+    .ext_slv    (ext_slv_remapped)
   );
 
   for (genvar i = 0; i < L2_N_AXI_PORTS; i++) begin: gen_l2_ports
@@ -405,44 +386,6 @@ module pulp #(
     );
   end
 
-  axi_rab_wrap #(
-    .L1NumSlicesPulp  (           32  ),
-    .L1NumSlicesHost  (            4  ),
-    .L2Enable         (         1'b1  ),
-    .L2NumSets        (           32  ),
-    .L2NumSetEntries  (           32  ),
-    .L2NumParVaRams   (            4  ),
-    .MhFifoDepth      (           16  ),
-    .AxiAddrWidth     (AXI_AW         ),
-    .AxiDataWidth     (AXI_DW         ),
-    .AxiIdWidth       (AXI_IW_SB_OUP  ),
-    .AxiUserWidth     (AXI_UW         ),
-    .axi_req_t        (axi_req_t      ),
-    .axi_resp_t       (axi_resp_t     ),
-    .axi_lite_req_t   (axi_lite_req_t ),
-    .axi_lite_resp_t  (axi_lite_resp_t)
-  ) i_rab (
-    .clk_i,
-    .rst_ni,
-    .from_pulp_req_i        (rab_mst_req),
-    .from_pulp_resp_o       (rab_mst_resp),
-    .from_pulp_miss_irq_o   (rab_from_pulp_miss_irq_o),
-    .from_pulp_multi_irq_o  (rab_from_pulp_multi_irq_o),
-    .from_pulp_prot_irq_o   (rab_from_pulp_prot_irq_o),
-    .to_host_req_o          (ext_req_o),
-    .to_host_resp_i         (ext_resp_i),
-    .from_host_req_i        (ext_req_i),
-    .from_host_resp_o       (ext_resp_o),
-    .from_host_miss_irq_o   (rab_from_host_miss_irq_o),
-    .from_host_multi_irq_o  (rab_from_host_multi_irq_o),
-    .from_host_prot_irq_o   (rab_from_host_prot_irq_o),
-    .to_pulp_req_o          (rab_slv_req),
-    .to_pulp_resp_i         (rab_slv_resp),
-    .mh_fifo_full_irq_o     (rab_miss_fifo_full_irq_o),
-    .conf_req_i             (rab_conf_req_i),
-    .conf_resp_o            (rab_conf_resp_o)
-  );
-
   axi_id_resize #(
     .ADDR_WIDTH   (AXI_AW),
     .DATA_WIDTH   (AXI_DW),
@@ -450,11 +393,11 @@ module pulp #(
     .ID_WIDTH_IN  (AXI_IW_SB_OUP),
     .ID_WIDTH_OUT (AXI_IW_SB_INP),
     .TABLE_SIZE   (4)
-  ) i_id_resize_rab_slv (
+  ) i_id_resize_ext_slv (
     .clk_i,
     .rst_ni,
-    .in     (rab_slv),
-    .out    (rab_slv_remapped)
+    .in     (ext_slv),
+    .out    (ext_slv_remapped)
   );
 
   axi_data_width_converter #(
