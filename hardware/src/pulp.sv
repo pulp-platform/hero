@@ -174,7 +174,7 @@ module pulp #(
   // i_soc_bus.rab_mst -> [rab_mst] -> [rab_mst_{req,resp}]
   // -> i_rab.from_pulp_{req_i,resp_o}
   // -> i_rab.to_host_{req_o,resp_i}
-  // -> [dram_{req_o,resp_i}]
+  // -> [ext_{req_o,resp_i}]
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
@@ -187,7 +187,7 @@ module pulp #(
   `AXI_ASSIGN_FROM_RESP(rab_mst, rab_mst_resp);
 
   // Interfaces from Host through RAB to PULP
-  // TODO -> i_rab.from_host_{req_i,resp_o}
+  // [ext_{req_i,resp_o}] -> i_rab.from_host_{req_i,resp_o}
   // -> i_rab.to_pulp_{req_o,resp_i} -> [rab_slv_{req,resp}] -> [rab_slv]
   // -> i_id_remap_rab_slv -> [rab_slv_remapped]
   // -> i_soc_bus.rab_slv
