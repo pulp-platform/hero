@@ -288,7 +288,13 @@ module pulp_tb #(
               i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, r_cnt);
               i_byte++) begin
             automatic axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
-            r_beat.data[i_byte*8+:8] = mem[byte_addr];
+            if (!mem.exists(byte_addr)) begin
+              $warning("Access to non-initialized byte at address 0x%016x by ID 0x%x.", byte_addr,
+                  r_beat.id);
+              r_beat.data[i_byte*8+:8] = 'x;
+            end else begin
+              r_beat.data[i_byte*8+:8] = mem[byte_addr];
+            end
           end
           if (r_cnt == ar_queue[0].len) begin
             r_beat.last = 1'b1;
