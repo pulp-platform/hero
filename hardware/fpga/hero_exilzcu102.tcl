@@ -184,3 +184,7 @@ if {! [string match -nocase {*timing constraints are met*} $timingrep]} {
 # Generate Bitstream
 launch_runs impl_1 -to_step write_bitstream -jobs 12
 wait_on_run impl_1
+
+# Export Hardware Definition file.
+file mkdir ./hero_exilzcu102/hero_exilzcu102.sdk
+write_hwdef -force  -file ./hero_exilzcu102/hero_exilzcu102.sdk/hero_exilzcu102_wrapper.hdf
