@@ -15,20 +15,9 @@ build_test_rest:
   stage: build_test_rest
   script:
     ### build base toolchains
-    - make tc-pulp tc-hrv-olinux tc-har-olinux
+    - make tc-pulp
     ### build accelerator sdk
     - make sdk-pulp
-    ### build host sdks
-    - make sdk-har
-    - make sdk-hrv
-    ### build other images
-    - make br-hrv-ediggenesys2
-    - make br-har-exilzcu102
-    - make br-hrv-eqemu
-    ### build llvm
-    - make tc-llvm
-    ### build tools
-    - make tools-hrv-openocd
     ### build examples
     - source env/esim.sh
     - >

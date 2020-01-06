@@ -1,6 +1,3 @@
-[submodule "buildroot"]
-	path = buildroot
-	url = git://git.buildroot.net/buildroot
 [submodule "tools/riscv-openocd"]
 	path = tools/riscv-openocd
 	url = https://github.com/riscv/riscv-openocd
@@ -8,11 +5,3 @@
 	path = pulp/sdk
 	url = git@iis-git.ee.ethz.ch:hero/pulp-sdk.git
 	ignore = dirty
-[submodule "toolchain/llvm-project"]
-	path = toolchain/llvm-project
-	url = git@iis-git.ee.ethz.ch:hero/llvm-project.git
-	branch = hero
-[submodule "toolchain/hercules"]
-	path = toolchain/hercules
-	url = git@iis-git.ee.ethz.ch:hero/HerculesCompiler-public.git
-	branch = hero
