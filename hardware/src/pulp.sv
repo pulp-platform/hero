@@ -103,8 +103,7 @@ module pulp #(
   // Interfaces from Clusters
   // if async:  i_cluster.data_master.* -> [cl_oup_async] -> i_dc_slice_cl_oup -> [cl_oup_predwc]
   // else:      i_cluster.data_master.* -> [cl_oup_predwc]
-  // -> i_dwc_cl_oup -> [cl_oup_prepacker]
-  // -> i_packer_cl_oup -> [cl_oup_prebuf]
+  // -> i_dwc_cl_oup -> [cl_oup_prebuf]
   // -> i_r_buf_cl_oup -> [cl_oup]
   // -> i_soc_bus.cl_slv
   AXI_BUS_ASYNC #(
@@ -123,12 +122,6 @@ module pulp #(
     .AXI_ID_WIDTH   (AXI_IW_SB_INP),
     .AXI_USER_WIDTH (AXI_UW)
   ) cl_oup_predwc[N_CLUSTERS-1:0]();
-  AXI_BUS #(
-    .AXI_ADDR_WIDTH (AXI_AW),
-    .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (AXI_IW_SB_INP),
-    .AXI_USER_WIDTH (AXI_UW)
-  ) cl_oup_prepacker[N_CLUSTERS-1:0]();
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
@@ -306,21 +299,8 @@ module pulp #(
       .clk_i,
       .rst_ni,
       .slv    (cl_oup_predwc[i]),
-      .mst    (cl_oup_prepacker[i])
+      .mst    (cl_oup_prebuf[i])
     );
-
-    //axi_write_burst_packer_wrap #(
-    //  .ADDR_WIDTH   (AXI_AW),
-    //  .DATA_WIDTH   (AXI_DW),
-    //  .ID_WIDTH     (AXI_IW_CL_OUP),
-    //  .USER_WIDTH   (AXI_UW),
-    //  .BUF_DEPTH    (pulp_cluster_cfg_pkg::DMA_MAX_BURST_LEN)
-    //) i_packer_cl_oup (
-    //  .clk_i,
-    //  .rst_ni,
-    //  .slv    (cl_oup_prepacker[i]),
-    //  .mst    (cl_oup_prebuf[i])
-    //);
 
     axi_read_burst_buffer_wrap #(
       .ADDR_WIDTH   (AXI_AW),
@@ -331,7 +311,7 @@ module pulp #(
     ) i_r_buf_cl_oup (
       .clk_i,
       .rst_ni,
-      .slv    (cl_oup_prepacker[i]),
+      .slv    (cl_oup_prebuf[i]),
       .mst    (cl_oup[i])
     );
   end
