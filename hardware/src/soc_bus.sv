@@ -36,15 +36,15 @@ module soc_bus #(
   AXI_BUS.Slave   cl_slv[N_CLUSTERS-1:0],
   AXI_BUS.Master  cl_mst[N_CLUSTERS-1:0],
   AXI_BUS.Master  l2_mst[L2_N_PORTS-1:0],
-  AXI_BUS.Master  rab_mst,
-  AXI_BUS.Slave   rab_slv
+  AXI_BUS.Master  ext_mst,
+  AXI_BUS.Slave   ext_slv
 );
 
   localparam int unsigned N_REGIONS = 3;
   localparam int unsigned N_MASTERS = N_CLUSTERS + L2_N_PORTS + 1;
   localparam int unsigned N_SLAVES = soc_bus_pkg::n_slaves(N_CLUSTERS);
   localparam int unsigned IDX_L2_MEM = N_CLUSTERS;
-  localparam int unsigned IDX_RAB = IDX_L2_MEM + 1;
+  localparam int unsigned IDX_EXT = IDX_L2_MEM + 1;
 
   typedef logic [AXI_AW-1:0] addr_t;
 
@@ -61,7 +61,7 @@ module soc_bus #(
   for (genvar i = 0; i < N_CLUSTERS; i++) begin: gen_bind_cluster_slv
     `AXI_ASSIGN(slaves[i], cl_slv[i]);
   end
-  `AXI_ASSIGN(slaves[N_CLUSTERS], rab_slv);
+  `AXI_ASSIGN(slaves[N_CLUSTERS], ext_slv);
 
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
@@ -75,7 +75,7 @@ module soc_bus #(
   for (genvar i = 0; i < L2_N_PORTS; i++) begin: gen_bind_l2
     `AXI_ASSIGN(l2_mst[i], masters[IDX_L2_MEM+i]);
   end
-  `AXI_ASSIGN(rab_mst, masters[IDX_RAB]);
+  `AXI_ASSIGN(ext_mst, masters[IDX_EXT]);
 
   // Address Map
   always_comb begin
@@ -83,10 +83,10 @@ module soc_bus #(
     end_addr    = '0;
     valid_rule  = '0;
 
-    // Everything below Cluster 0 to RAB
-    start_addr[0][IDX_RAB]  = 64'h0000_0000_0000_0000;
-    end_addr[0][IDX_RAB]    = 64'h0000_0000_0FFF_FFFF;
-    valid_rule[0][IDX_RAB]  = 1'b1;
+    // Everything below Cluster 0 to EXT
+    start_addr[0][IDX_EXT]  = 64'h0000_0000_0000_0000;
+    end_addr[0][IDX_EXT]    = 64'h0000_0000_0FFF_FFFF;
+    valid_rule[0][IDX_EXT]  = 1'b1;
 
     // Clusters
     for (int i = 0; i < N_CLUSTERS; i++) begin
@@ -95,10 +95,10 @@ module soc_bus #(
       valid_rule[0][i]  = 1'b1;
     end
 
-    // Everthing in `0x1A..` to RAB
-    start_addr[1][IDX_RAB]  = 64'h0000_0000_1A00_0000;
-    end_addr[1][IDX_RAB]    = 64'h0000_0000_1AFF_FFFF;
-    valid_rule[1][IDX_RAB]  = 1'b1;
+    // Everthing in `0x1A..` to EXT
+    start_addr[1][IDX_EXT]  = 64'h0000_0000_1A00_0000;
+    end_addr[1][IDX_EXT]    = 64'h0000_0000_1AFF_FFFF;
+    valid_rule[1][IDX_EXT]  = 1'b1;
 
     // L2 Memory
     for (int i = 0; i < L2_N_PORTS; i++) begin
@@ -108,10 +108,10 @@ module soc_bus #(
       valid_rule[0][idx]  = 1'b1;
     end
 
-    // Everything above L2 Memory to RAB
-    start_addr[2][IDX_RAB]  = end_addr[0][IDX_L2_MEM+L2_N_PORTS-1] + 1;
-    end_addr[2][IDX_RAB]    = 64'hFFFF_FFFF_FFFF_FFFF;
-    valid_rule[2][IDX_RAB]  = 1'b1;
+    // Everything above L2 Memory to EXT
+    start_addr[2][IDX_EXT]  = end_addr[0][IDX_L2_MEM+L2_N_PORTS-1] + 1;
+    end_addr[2][IDX_EXT]    = 64'hFFFF_FFFF_FFFF_FFFF;
+    valid_rule[2][IDX_EXT]  = 1'b1;
   end
 
   axi_node_wrap_with_slices #(
