@@ -58,6 +58,9 @@ $VIVADO petalinux-package --image
 cp "../../hardware/fpga/hero_exil$TARGET/hero_exil${TARGET}.runs/impl_1/hero_exil${TARGET}_wrapper.bit" \
   images/linux/
 cd images/linux
+if [ ! -f regs.init ]; then
+  echo ".set. 0xFF41A040 = 0x3;" > regs.init
+fi
 echo "
 the_ROM_image:
 {
