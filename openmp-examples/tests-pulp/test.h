@@ -71,10 +71,21 @@ inline static void* pulp_l2_end()
   return &__pulp_l2_end;
 }
 
+inline static unsigned pulp_l2_size()
+{
+  return (unsigned)pulp_l2_end() - (unsigned)pulp_l2_base();
+}
+
 inline static unsigned pulp_cluster_n_cores()
 {
   extern void __rt_nb_pe;
   return (unsigned)&__rt_nb_pe;
+}
+
+inline static unsigned pulp_n_clusters()
+{
+  extern void __rt_nb_cluster;
+  return (unsigned)&__rt_nb_cluster;
 }
 
 inline static size_t pulp_stack_size()
