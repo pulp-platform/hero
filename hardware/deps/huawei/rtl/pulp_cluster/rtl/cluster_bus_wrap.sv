@@ -14,10 +14,8 @@
  * Antonio Pullini <pullinia@iis.ee.ethz.ch>
  * Igor Loi <igor.loi@unibo.it>
  * Francesco Conti <fconti@iis.ee.ethz.ch>
+ * Andreas Kurth <akurth@iis.ee.ethz.ch>
  */
-
-`include "pulp_soc_defines.sv"
-`include "cluster_bus_defines.sv"
 
 module cluster_bus_wrap
 #(
@@ -33,20 +31,21 @@ module cluster_bus_wrap
   input logic       rst_ni,
   input logic       test_en_i,
   input logic [5:0] cluster_id_i,
+
   AXI_BUS.Slave     data_slave,
   AXI_BUS.Slave     instr_slave,
   AXI_BUS.Slave     dma_slave,
   AXI_BUS.Slave     ext_slave,
-  //INITIATOR
+
   AXI_BUS.Master    tcdm_master,
   AXI_BUS.Master    periph_master,
   AXI_BUS.Master    ext_master
 );
 
   localparam AXI_STRB_WIDTH = AXI_DATA_WIDTH/8;
-  localparam NB_MASTER      = `NB_MASTER;
-  localparam NB_SLAVE       = `NB_SLAVE;
-  localparam NB_REGION      = `NB_REGION;
+  localparam NB_MASTER      = 3;
+  localparam NB_SLAVE       = 4;
+  localparam NB_REGION      = 2;
 
   logic [NB_MASTER-1:0][AXI_ID_OUT_WIDTH-1:0] s_master_aw_id;
   logic [NB_MASTER-1:0][AXI_ADDR_WIDTH-1:0]   s_master_aw_addr;
@@ -373,17 +372,28 @@ module cluster_bus_wrap
     .cfg_connectivity_map_i   ( s_connectivity_map )
   );
 
-  assign s_start_addr[0][0] = `MASTER_0_START_ADDR + ( cluster_id_i << 22);
-  assign s_end_addr[0][0]   = `MASTER_0_END_ADDR   + ( cluster_id_i << 22);
+  always_comb begin
+    s_start_addr = '0;
+    s_end_addr   = '0;
+    s_valid_rule = '0;
 
-  assign s_start_addr[0][1] = `MASTER_1_START_ADDR + ( cluster_id_i << 22);
-  assign s_end_addr[0][1]   = `MASTER_1_END_ADDR   + ( cluster_id_i << 22);
+    s_start_addr[0][0] = 64'h0000_0000_1000_0000 + ( cluster_id_i << 22);
+    s_end_addr  [0][0] = 64'h0000_0000_100F_FFFF + ( cluster_id_i << 22);
+    s_valid_rule[0][0] = 1;
 
-  assign s_start_addr[0][2] = `MASTER_2_START_ADDR;
-  assign s_end_addr[0][2]   = `MASTER_2_END_ADDR;
+    s_start_addr[0][1] = 64'h0000_0000_1020_0000 + ( cluster_id_i << 22);
+    s_end_addr  [0][1] = 64'h0000_0000_103F_FFFF + ( cluster_id_i << 22);
+    s_valid_rule[0][1] = 1;
 
-  assign s_valid_rule       = '1;
+    s_start_addr[0][2] = 64'h0000_0000_0000_0000;
+    s_end_addr  [0][2] = s_start_addr[0][0] - 1;
+    s_valid_rule[0][2] = 1;
 
-  assign s_connectivity_map = '1;
+    s_start_addr[1][2] = s_end_addr[0][1] + 1;
+    s_end_addr  [1][2] = 64'hFFFF_FFFF_FFFF_FFFF;
+    s_valid_rule[1][2] = 1;
+
+    s_connectivity_map = {NB_MASTER*NB_SLAVE{1'b1}};
+  end
 
 endmodule
