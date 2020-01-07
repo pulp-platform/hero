@@ -1,0 +1,4 @@
+rbe_dummy:
+  commit: master
+  group: marsellus
+  server: git@iis-git.ee.ethz.ch

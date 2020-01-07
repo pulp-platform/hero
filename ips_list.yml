@@ -1,0 +1,149 @@
+#
+# List of IPs and relative branch/commit-hash/tag.
+# Uses the YAML syntax.
+#
+# Examples:
+#
+#   or10n:
+#     commit: tags/PULP3_final
+#     domain: [cluster]
+#   udma:
+#     commit: 62b10440
+#     domain: [soc]
+#   axi_slice:
+#     commit: master
+#     domain: [soc,cluster]
+# If a *tag* or *commit* is referenced, the IP will be in a
+#  state of DETACHED HEAD. Before committing any additional
+#  work, make sure to checkout a branch.
+#
+
+
+tbtools:
+  commit: master
+  server: https://github.com
+  group:  pulp-platform
+L2_tcdm_hybrid_interco:
+  commit: tags/pulpissimo-v1.0
+adv_dbg_if:
+  commit: v0.0.1
+apb/apb2per:
+  commit: v0.0.1
+apb/apb_adv_timer:
+  commit: v1.0.2
+apb/apb_fll_if:
+  commit: tags/pulpissimo-v1.0
+apb/apb_gpio:
+  commit: v0.2.0
+apb/apb_node:
+  commit: v0.1.1
+apb_interrupt_cntrl:
+  commit: v0.0.1
+axi/axi:
+  commit: v0.7.1
+axi/axi_node:
+  commit: v1.1.4
+axi/axi_slice:
+  commit: v1.1.4
+axi/axi_slice_dc:
+  commit: v1.1.3
+timer_unit:
+  commit: v1.0.2
+common_cells:
+  commit: v1.13.1
+fpnew:
+  commit: v0.6.1
+jtag_pulp:
+  commit: v0.1
+riscv:
+  commit: marsellus_1.0.1
+ibex:
+  commit: 13313952cd50ff04489f6cf3dba9ba05c2011a8b
+  group: lowRISC
+scm:
+  commit: v1.0.1
+generic_FLL:
+  commit: v0.1
+tech_cells_generic:
+  commit: v0.1.6
+udma/udma_core:
+  commit: v1.0.0
+udma/udma_uart:
+  commit: v1.0.0
+udma/udma_i2c:
+  commit: vega_v1.0.0
+udma/udma_i2s:
+  commit: v1.0.0
+udma/udma_qspi:
+  commit: v1.0.0
+udma/udma_sdio:
+  commit: vega_v1.0.5
+udma/udma_camera:
+  commit: v1.0.0
+udma/udma_filter:
+  commit: v1.0.0
+udma/udma_external_per:
+  commit: v1.0.0
+riscv-dbg:
+  commit: v0.2
+axi/axi2mem:
+  commit: d704c8beff729476d1dbfd7b60679afa796947d2
+axi/axi2per:
+  commit: v1.0.1
+  group:  pulp-platform
+axi/per2axi:
+  commit: v1.0.3
+  group:  pulp-platform
+axi/axi_size_conv:
+  commit: pulp-v1.0
+  group: pulp-platform
+cluster_interconnect:
+  commit: v1.0.3
+  group: pulp-platform
+event_unit_flex:
+  commit: v1.0.1
+  group: pulp-platform
+mchan:
+  commit: v1.1.0
+  group: pulp-platform
+hier-icache:
+  commit: v1.0.1
+  group:  pulp-platform
+icache-intc:
+  commit: v1.0.1
+  group: pulp-platform
+icache_mp_128_pf:
+  commit: v1.0.0
+  group: pulp-platform
+icache_private:
+  commit: b14de95b0f70e2edb54ccc7076d5737b41249411
+  group: pulp-platform
+cluster_peripherals:
+  commit: v1.0.1
+  group:  pulp-platform
+fpu_div_sqrt_mvp:
+  commit: 83a601f
+  group: pulp-platform
+fpu_interco:
+  commit: marsellus_1.0.0
+  group: pulp-platform
+hwpe-ctrl:
+  commit: v1.3
+  group: pulp-platform
+hwpe-stream:
+  commit: tags/v1.3
+  group: pulp-platform
+#technology dependent IPs
+#gf22_FLL:
+#  commit: master
+#  server: git@iis-git.ee.ethz.ch
+#  group : marsellus
+#tech_cells_GF22FDX:
+#  commit: master
+#  server: git@iis-git.ee.ethz.ch
+#  group : marsellus
+#marsellus_essentials:
+#  commit: master
+#  server: git@iis-git.ee.ethz.ch
+#  group : marsellus
+

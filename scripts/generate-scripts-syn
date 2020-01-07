@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+# Francesco Conti <f.conti@unibo.it>
+#
+# Copyright (C) 2016-2018 ETH Zurich, University of Bologna.
+# All rights reserved.
+
+from ipstools_cfg import *
+import fileinput
+
+# using Vega's IP repository for GF22 tech cells
+os.environ['SITE_DEPENDENT_PATH'] = '/usr/pack/gf-22-kgf/vega'
+
+# creates an IPApproX database
+ipdb = ipstools.IPDatabase(rtl_dir='rtl', ips_dir='ips', vsim_dir='sim', load_cache=True)
+
+## for new genbus scripts generated from Genus templates
+execute("mkdir -p gf22fdx/pulp_soc/syn_eth/scripts/analyze_auto/ips")
+execute("mkdir -p gf22fdx/pulp_soc/syn_eth/scripts/analyze_auto/rtl")
+execute("mkdir -p gf22fdx/pulp_soc/syn_eth/scripts/analyze_auto/ips")
+execute("mkdir -p gf22fdx/pulp_soc/syn_eth/scripts/analyze_auto/rtl")
+
+execute("mkdir -p gf22fdx/pulp_cluster/syn_eth/scripts/analyze_auto/ips")
+execute("mkdir -p gf22fdx/pulp_cluster/syn_eth/scripts/analyze_auto/rtl")
+execute("mkdir -p gf22fdx/pulp_cluster/syn_eth/scripts/analyze_auto/ips")
+execute("mkdir -p gf22fdx/pulp_cluster/syn_eth/scripts/analyze_auto/rtl")
+
+
+ipdb.export_synopsys(script_path="gf22fdx/pulp_soc/syn_eth/scripts/analyze_auto/ips", target_tech='gf22', domain='soc',    source='ips')
+ipdb.export_synopsys(script_path="gf22fdx/pulp_soc/syn_eth/scripts/analyze_auto/rtl", target_tech='gf22', domain='soc',    source='rtl')
+ipdb.generate_synopsys_list("gf22fdx/pulp_soc/syn_eth/scripts/analyze_auto/ips_add_files.tcl", source='ips', analyze_path='scripts/analyze_auto/ips', domain='soc')
+ipdb.generate_synopsys_list("gf22fdx/pulp_soc/syn_eth/scripts/analyze_auto/rtl_add_files.tcl", source='rtl', analyze_path='scripts/analyze_auto/rtl', domain='soc')
+
+ipdb.export_synopsys(script_path="gf22fdx/pulp_cluster/syn_eth/scripts/analyze_auto/ips", target_tech='gf22', domain='cluster',    source='ips')
+ipdb.export_synopsys(script_path="gf22fdx/pulp_cluster/syn_eth/scripts/analyze_auto/rtl", target_tech='gf22', domain='cluster',    source='rtl')
+ipdb.generate_synopsys_list("gf22fdx/pulp_cluster/syn_eth/scripts/analyze_auto/ips_add_files.tcl", source='ips', analyze_path='scripts/analyze_auto/ips', domain='cluster')
+ipdb.generate_synopsys_list("gf22fdx/pulp_cluster/syn_eth/scripts/analyze_auto/rtl_add_files.tcl", source='rtl', analyze_path='scripts/analyze_auto/rtl', domain='cluster')
+
+print(tcolors.OK + "Generated new scripts for IPs!" + tcolors.ENDC)
+

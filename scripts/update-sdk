@@ -1,0 +1,46 @@
+#!/bin/bash -e
+
+unset PULP_CONFIGS
+
+export PULP_ARTIFACTORY_USER=pulp:SFaMjrsckj3DRjjT7rKt
+export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/pulpsdk-1.0-kgf/artifactory/pulp-sdk-release/pkg/pulp_riscv_gcc/1.0.13
+
+if [ ! -e sdk ]; then
+    mkdir sdk
+fi
+
+pushd sdk
+
+if [ ! -e pulp-sdk ]; then
+    git clone git@github.com:pulp-platform/pulp-sdk.git -b integration
+    pushd pulp-sdk
+else
+   pushd pulp-sdk
+   git checkout integration
+   git pull
+fi
+
+source ./configs/pulp.sh
+source ./configs/platform-rtl.sh
+make distclean
+make deps
+make all
+popd
+
+
+if [ ! -e pulp-builder ]; then
+    git clone https://github.com/pulp-platform/pulp-builder.git
+    pushd pulp-builder
+else
+   pushd pulp-builder
+   git checkout master
+   git pull
+fi
+git checkout 0b3c60a9db3917ef8b0db04a98e5a317518cd7d5
+./scripts/update-runner
+popd
+
+popd
+#./scripts/build-sdk
+
+git submodule update --init --recursive
