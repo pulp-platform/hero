@@ -18,7 +18,7 @@
 #define __PULP__
 #define __ri5cy__ 1
 #define PULP_CHIP CHIP_HERO_URANIA
-#define PULP_CHIP_STR hero_urania
+#define PULP_CHIP_STR hero_huawei
 #define PULP_CHIP_FAMILY CHIP_BIGPULP
 #define PULP_CHIP_FAMILY_STR bigpulp
 #define PULP_CHIP_VERSION 0
