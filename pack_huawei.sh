@@ -6,7 +6,7 @@ readonly SRC="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
 # Helper function to copy git-indexed files.
 copy_git_files() {
-  git ls-files -z -- $@ | rsync -av --files-from=- -0 . "$TMP_DST/"
+  git ls-files -z --recurse-submodules -- $@ | rsync -av --files-from=- -0 . "$TMP_DST/"
 }
 
 # Create temporary destination directory.
