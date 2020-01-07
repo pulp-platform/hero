@@ -64,6 +64,11 @@ module per2axi_wrap
     .per_slave_r_id_o       ( periph_slave.r_id[PER_ID_WIDTH-1:0] ),
     .per_slave_r_rdata_o    ( periph_slave.r_rdata                ),
 
+    .tryx_req_i             ( '0                                  ),
+    .axi_xresp_decerr_o     ( /* unused */                        ),
+    .axi_xresp_slverr_o     ( /* unused */                        ),
+    .axi_xresp_valid_o      ( /* unused */                        ),
+
     .axi_master_aw_valid_o  ( axi_master.aw_valid                 ),
     .axi_master_aw_addr_o   ( axi_master.aw_addr                  ),
     .axi_master_aw_prot_o   ( axi_master.aw_prot                  ),
