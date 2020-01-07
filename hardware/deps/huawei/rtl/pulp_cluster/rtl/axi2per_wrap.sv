@@ -25,8 +25,7 @@ module axi2per_wrap
   parameter AXI_USER_WIDTH = 6,
   parameter AXI_ID_WIDTH   = 6,
   parameter BUFFER_DEPTH   = 2,
-  parameter AXI_STRB_WIDTH = AXI_DATA_WIDTH/8,
-  parameter ID_WIDTH       = PER_ID_WIDTH
+  parameter AXI_STRB_WIDTH = AXI_DATA_WIDTH/8
 )
 (
   input logic          clk_i,
