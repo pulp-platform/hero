@@ -32,6 +32,10 @@ cp ~andkurt/bin/slm_conv-0.3 "$TMP_DST/install/bin/slm_conv"
 cd "$SRC"
 copy_git_files toolchain Makefile
 
+# PULP software: copy to destination.
+cd "$SRC"
+copy_git_files pulp
+
 # Setup script: copy to destination.
 rsync -av setup.sh "$TMP_DST/"
 
