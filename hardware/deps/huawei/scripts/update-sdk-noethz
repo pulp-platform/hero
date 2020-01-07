@@ -1,0 +1,44 @@
+#!/bin/bash -e
+
+unset PULP_CONFIGS
+
+export PULP_ARTIFACTORY_USER=pulp:SFaMjrsckj3DRjjT7rKt
+
+if [ ! -e sdk ]; then
+    mkdir sdk
+fi
+
+pushd sdk
+
+if [ ! -e pulp-sdk-release ]; then
+    git clone git@github.com:pulp-platform/pulp-sdk-release.git pulp-sdk-release
+    pushd pulp-sdk-release
+else
+   pushd pulp-sdk-release
+   
+fi
+
+make version=2019.11.03 get
+source env/env-sdk-2019.11.03.sh
+source pkg/sdk/2019.11.03/configs/pulp.sh
+source pkg/sdk/2019.11.03/configs/platform-rtl.sh
+
+popd
+
+
+if [ ! -e pulp-builder ]; then
+    git clone https://github.com/pulp-platform/pulp-builder.git
+    pushd pulp-builder
+else
+   pushd pulp-builder
+   git checkout master
+   git pull
+fi
+git checkout 0b3c60a9db3917ef8b0db04a98e5a317518cd7d5
+./scripts/update-runner
+popd
+
+popd
+#./scripts/build-sdk
+
+git submodule update --init --recursive

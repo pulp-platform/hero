@@ -1,0 +1,9 @@
+rbe:
+  commit: marsellus
+  group: pulp-restricted
+  server: git@iis-git.ee.ethz.ch
+xne:
+  commit: tags/v2.0.2
+  group: pulp-restricted
+  server: git@iis-git.ee.ethz.ch
+

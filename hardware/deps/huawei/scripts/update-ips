@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+# Francesco Conti <f.conti@unibo.it>
+#
+# Copyright (C) 2016-2018 ETH Zurich, University of Bologna.
+# All rights reserved.
+
+from ipstools_cfg import *
+import argparse
+import sys
+
+parser = argparse.ArgumentParser(
+    prog='PULP update script',
+    description="""Fetch IPs and resolve dependencies for PULPissimo""")
+
+parser.add_argument('--rt-dpi', action='store_true',
+                    help='Use the PULP Runtime DPI to emulate peripherals')
+parser.add_argument('--i2c-vip', action='store_true',
+                    help="""Use the i2c model (24FC1025).
+                    Needs to be installed.""")
+parser.add_argument('--flash-vip', action='store_true',
+                    help="""Use the flash model (S25FS256).
+                    Needs to be installed.""")
+parser.add_argument('--i2s-vip', action='store_true',
+                    help="""Use the i2s model (24FC1025).
+                    Needs to be installed.""")
+parser.add_argument('--verbose', action='store_true',
+                    help='Show more information about commands')
+
+args = parser.parse_args()
+
+try:
+    os.mkdir("ips")
+except OSError:
+    pass
+
+# select ips_list.yml depending on site
+PULP_SITES = [
+  "*.ee.ethz.ch",
+  "*.dei.unibo.it",
+  "uhura"
+]
+import socket; host = socket.gethostname()
+import fnmatch
+pulp_site = False
+for s in PULP_SITES:
+    h = fnmatch.filter([host,], s)
+    if len(h) > 0:
+        pulp_site = True
+if pulp_site:
+    execute("scripts/switch_site_to_pulp.sh")
+else:
+    execute("scripts/switch_site_to_default_no_tech.sh")
+
+# creates an IPApproX database
+ipdb = ipstools.IPDatabase(
+    skip_scripts=True,
+    build_deps_tree=False,
+    resolve_deps_conflicts=False,
+    rtl_dir='rtl',
+    ips_dir='ips',
+    vsim_dir='sim',
+    default_server=DEFAULT_SERVER,
+    default_site_dependent_path=DEFAULT_SITE_DEPENDENT_PATH,
+    ips_list_yml_name='.ips_list.local.yml',
+    verbose=args.verbose
+)
+# updates the IPs from the git repo
+ipdb.update_ips()
+
+# launch generate-ips.py
+ipdb.save_database()
+execute("./scripts/generate-scripts" + (' '.join(sys.argv[1:])))
+
+
