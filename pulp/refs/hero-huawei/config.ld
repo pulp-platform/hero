@@ -1,1 +1,1 @@
-__NB_ACTIVE_PE = 2;
+__NB_ACTIVE_PE = 8;
