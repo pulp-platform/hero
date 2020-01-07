@@ -11,6 +11,16 @@ after_script:
 stages:
   - build_test_rest
 
+build_test_archive:
+  stage: build_test_rest
+  script:
+    - ./pack_huawei.sh
+    - cd "$(mktemp -d)"
+    - cp "$CI_PROJECT_DIR/hero_huawei.tar.gz" .
+    - tar xf hero_huawei.tar.gz && rm hero_huawei.tar.gz
+    - export HERO_INSTALL="$(pwd)/install"
+    - ./setup.sh
+
 build_test_rest:
   stage: build_test_rest
   script:
