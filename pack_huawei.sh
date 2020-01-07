@@ -32,6 +32,9 @@ cp ~andkurt/bin/slm_conv-0.3 "$TMP_DST/install/bin/slm_conv"
 cd "$SRC"
 copy_git_files toolchain Makefile
 
+# Setup script: copy to destination.
+rsync -av setup.sh "$TMP_DST/"
+
 # Create archive from temporary destination directory.
 tar -C "$TMP_DST" -czf "$SRC/hero_huawei.tar.gz" .
 
