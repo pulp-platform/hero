@@ -13,4 +13,4 @@ tc-pulp:
 .PHONY: sdk-pulp
 
 sdk-pulp:
-	$(ROOT)/pulp/setup-sdk.sh hero-urania
+	$(ROOT)/pulp/setup-sdk.sh hero-huawei
