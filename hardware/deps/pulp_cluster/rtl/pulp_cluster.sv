@@ -40,6 +40,7 @@ module pulp_cluster
   parameter int TCDM_BANK_SIZE      = TCDM_SIZE/NB_TCDM_BANKS, // [B]
   parameter int TCDM_NUM_ROWS       = TCDM_BANK_SIZE/4,        // [words]
   parameter bit XNE_PRESENT         = 0,                       // set to 1 if XNE is present in the cluster
+  parameter bit SHARED_FPU          = 1'b0,
 
   // I$ parameters
   parameter int SET_ASSOCIATIVE           = 4,
@@ -894,35 +895,61 @@ module pulp_cluster
     end
   endgenerate
 
-  generate
-    if(APU_CLUSTER) begin : apu_cluster_gen
-      apu_cluster #(
-        .C_NB_CORES         ( NB_CORES          ),
-        .NDSFLAGS_CPU       ( NDSFLAGS_CPU      ),
-        .NUSFLAGS_CPU       ( NUSFLAGS_CPU      ),
-        .WOP_CPU            ( WOP_CPU           ),
-        .NARGS_CPU          ( NARGS_CPU         ),
-        .WAPUTYPE           ( WAPUTYPE          ),
-        .SHARED_FP          ( SHARED_FP         ),
-        .SHARED_DSP_MULT    ( SHARED_DSP_MULT   ),
-        .SHARED_INT_MULT    ( SHARED_INT_MULT   ),
-        .SHARED_INT_DIV     ( SHARED_INT_DIV    ),
-        .SHARED_FP_DIVSQRT  ( SHARED_FP_DIVSQRT )
-      ) apu_cluster_i (
-        .clk_i  ( clk_cluster     ),
-        .rst_ni ( s_rst_n         ),
-        .cpus   ( apu_cluster_bus )
-      );
-    end
-    else begin : no_apu_cluster_gen
-      for(genvar i=0; i<NB_CORES; i++) begin
-        assign apu_cluster_bus[i].ack_ds_s    = '1;
-        assign apu_cluster_bus[i].valid_us_s  = '0;
-        assign apu_cluster_bus[i].result_us_d = '0;
-        assign apu_cluster_bus[i].flags_us_d  = '0;
-      end
-    end
-  endgenerate
+  if (SHARED_FPU) begin : gen_shared_fpu
+    shared_fpu_cluster #(
+      .NB_CORES             ( NB_CORES                  ),
+      .NB_APUS              ( 1                         ),
+      .NB_FPNEW             ( 4                         ),
+      .FP_TYPE_WIDTH        ( 3                         ),
+
+      .NB_CORE_ARGS         ( NARGS_CPU                 ),
+      .CORE_DATA_WIDTH      ( 32                        ),
+      .CORE_OPCODE_WIDTH    ( WOP_CPU                   ),
+      .CORE_DSFLAGS_CPU     ( NDSFLAGS_CPU              ),
+      .CORE_USFLAGS_CPU     ( NUSFLAGS_CPU              ),
+
+      .NB_APU_ARGS          ( 2                         ),
+      .APU_OPCODE_WIDTH     ( WOP_CPU                   ),
+      .APU_DSFLAGS_CPU      ( NDSFLAGS_CPU              ),
+      .APU_USFLAGS_CPU      ( NUSFLAGS_CPU              ),
+
+      .NB_FPNEW_ARGS        ( NARGS_CPU                 ),
+      .FPNEW_OPCODE_WIDTH   ( WOP_CPU                   ),
+      .FPNEW_DSFLAGS_CPU    ( NDSFLAGS_CPU              ),
+      .FPNEW_USFLAGS_CPU    ( NUSFLAGS_CPU              ),
+
+      .APUTYPE_ID           ( 1                         ),
+      .FPNEWTYPE_ID         ( 0                         ),
+
+      .C_FPNEW_FMTBITS      (fpnew_pkg::FP_FORMAT_BITS  ),
+      .C_FPNEW_IFMTBITS     (fpnew_pkg::INT_FORMAT_BITS ),
+      .C_ROUND_BITS         (3                          ),
+      .C_FPNEW_OPBITS       (fpnew_pkg::OP_BITS         ),
+      .USE_FPU_OPT_ALLOC    ("FALSE"                    ),
+      .USE_FPNEW_OPT_ALLOC  ("TRUE"                     ),
+      .FPNEW_INTECO_TYPE    ("SINGLE_INTERCO"           )
+    ) i_shared_fpu_cluster (
+      .clk                   ( clk_cluster              ),
+      .rst_n                 ( s_rst_n                  ),
+      .test_mode_i           ( test_mode_i              ),
+      .core_slave_req_i      ( s_apu_master_req         ),
+      .core_slave_gnt_o      ( s_apu_master_gnt         ),
+      .core_slave_type_i     ( s_apu_master_type        ),
+      .core_slave_operands_i ( s_apu_master_operands    ),
+      .core_slave_op_i       ( s_apu_master_op          ),
+      .core_slave_flags_i    ( s_apu_master_flags       ),
+      .core_slave_rready_i   ( s_apu_master_rready      ),
+      .core_slave_rvalid_o   ( s_apu_master_rvalid      ),
+      .core_slave_rdata_o    ( s_apu_master_rdata       ),
+      .core_slave_rflags_o   ( s_apu_master_rflags      )
+    );
+
+  end else begin : gen_no_shared_fpu
+    assign s_apu_master_gnt     = '0;
+    assign s_apu_master_rvalid  = '0;
+    assign s_apu_master_rdata   = '0;
+    assign s_apu_master_rflags  = '0;
+  end
 
   /* cluster-coupled accelerators / HW processing engines */
   generate
