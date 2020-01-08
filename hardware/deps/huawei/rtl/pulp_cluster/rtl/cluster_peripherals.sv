@@ -30,9 +30,7 @@ module cluster_peripherals
   parameter ROM_BOOT_ADDR  = 32'h1A000000,
   parameter BOOT_ADDR      = 32'h1C000000,
   parameter EVNT_WIDTH     = 8,
-  parameter FEATURE_DEMUX_MAPPED = 1,
-  parameter int unsigned  NB_L1_CUTS      = 16,
-  parameter int unsigned  RW_MARGIN_WIDTH = 4
+  parameter FEATURE_DEMUX_MAPPED = 1
 )
 (
   input  logic                        clk_i,
@@ -55,16 +53,9 @@ module cluster_peripherals
   XBAR_PERIPH_BUS.Slave               speriph_slave[NB_SPERIPHS-2:0],
   XBAR_PERIPH_BUS.Slave               core_eu_direct_link[NB_CORES-1:0],
 
-  //input  logic [NB_CORES-1:0]         dma_events_i,
-  //input  logic [NB_CORES-1:0]         dma_irq_i,
-
   XBAR_PERIPH_BUS.Master              dma_cfg_master[1:0],
   input logic                         dma_cl_event_i,
   input logic                         dma_cl_irq_i,
-  //input  logic                        dma_pe_irq_i,
-  //output logic                        pf_event_o,
-  
-  //input logic                         decompr_done_evt_i,
 
   output logic                        soc_periph_evt_ready_o,
   input  logic                        soc_periph_evt_valid_i,
@@ -93,8 +84,6 @@ module cluster_peripherals
   input logic [NB_CORES-1:0][3:0]     hwpe_events_i,
   output logic                        hwpe_sel_o,
   output logic                        hwpe_en_o,
-
-  //output logic [NB_L1_CUTS-1:0][RW_MARGIN_WIDTH-1:0] rw_margin_L1_o,
 
   // Control ports
 `ifdef PRIVATE_ICACHE
