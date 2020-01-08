@@ -18,8 +18,6 @@
 
 import pulp_cluster_package::*;
 
-`include "pulp_soc_defines.sv"
-
 module cluster_peripherals
 #(
   parameter NB_CORES       = 8,
@@ -30,6 +28,9 @@ module cluster_peripherals
   parameter ROM_BOOT_ADDR  = 32'h1A000000,
   parameter BOOT_ADDR      = 32'h1C000000,
   parameter EVNT_WIDTH     = 8,
+  parameter SP_ICACHE      = 1'b0,
+  parameter MP_ICACHE      = 1'b0,
+  parameter PRI_ICACHE     = 1'b0,
   parameter FEATURE_DEMUX_MAPPED = 1
 )
 (
@@ -85,24 +86,18 @@ module cluster_peripherals
   output logic                        hwpe_sel_o,
   output logic                        hwpe_en_o,
 
-  // Control ports
-`ifdef PRIVATE_ICACHE
-     SP_ICACHE_CTRL_UNIT_BUS.Master       IC_ctrl_unit_bus_main[NB_CACHE_BANKS],
-     PRI_ICACHE_CTRL_UNIT_BUS.Master      IC_ctrl_unit_bus_pri[NB_CORES],
-     output logic                         special_core_icache_cfg_o,
-     output logic [NB_CORES-1:0]          enable_l1_l15_prefetch_o
-`else
-  `ifdef SP_ICACHE
-      // Control ports
-      SP_ICACHE_CTRL_UNIT_BUS.Master      IC_ctrl_unit_bus[NB_CACHE_BANKS],
-      L0_CTRL_UNIT_BUS.Master             L0_ctrl_unit_bus[NB_CORES]
-  `else
-      `ifdef MP_ICACHE
-          MP_PF_ICACHE_CTRL_UNIT_BUS.Master      IC_ctrl_unit_bus
-      `endif
-  `endif
-`endif
- 
+  // for private I$
+  SP_ICACHE_CTRL_UNIT_BUS.Master      IC_ctrl_unit_bus_main[NB_CACHE_BANKS],
+  PRI_ICACHE_CTRL_UNIT_BUS.Master     IC_ctrl_unit_bus_pri[NB_CORES],
+  output logic                        special_core_icache_cfg_o,
+  output logic [NB_CORES-1:0]         enable_l1_l15_prefetch_o,
+
+  // for SP I$
+  SP_ICACHE_CTRL_UNIT_BUS.Master      IC_ctrl_unit_bus_sp[NB_CACHE_BANKS],
+  L0_CTRL_UNIT_BUS.Master             L0_ctrl_unit_bus_sp[NB_CORES],
+
+  // for MP I$
+  MP_PF_ICACHE_CTRL_UNIT_BUS.Master   IC_ctrl_unit_bus_mp
 );
    
   logic                      s_timer_out_lo_event;
@@ -265,73 +260,6 @@ module cluster_peripherals
     .message_master         ( eu_message_master      )
   );
 
-  
-  //********************************************************
-  //******************** icache_ctrl_unit ******************
-  //********************************************************
-  
-   
-
-`ifdef PRIVATE_ICACHE   //to be integrated hier_icache
-
-
-    hier_icache_ctrl_unit_wrap
-    #(
-        .NB_CACHE_BANKS(NB_CACHE_BANKS),
-        .NB_CORES(NB_CORES),
-        .ID_WIDTH(NB_CORES+NB_MPERIPHS)
-    )
-    icache_ctrl_unit_i
-    (
-        .clk_i                       (  clk_i                            ),
-        .rst_ni                      (  rst_ni                           ),
-
-        .speriph_slave               (  speriph_slave[SPER_ICACHE_CTRL] ),
-        .IC_ctrl_unit_bus_pri        (  IC_ctrl_unit_bus_pri             ),
-        .IC_ctrl_unit_bus_main       (  IC_ctrl_unit_bus_main            ),
-        .special_core_icache_cfg_o   (  special_core_icache_cfg_o      ),   //special_core_icache_cfg_o
-        .enable_l1_l15_prefetch_o    (  enable_l1_l15_prefetch_o       )
-);
-
-
-`else
-  `ifdef MP_ICACHE
-      mp_pf_icache_ctrl_unit
-      #(
-          .NB_CACHE_BANKS(NB_CACHE_BANKS),
-          .NB_CORES(NB_CORES),
-          .ID_WIDTH(NB_CORES+NB_MPERIPHS)
-      )
-      icache_ctrl_unit_i
-      (
-          .clk_i                       (  clk_i                            ),
-          .rst_ni                      (  rst_ni                           ),
-
-          .speriph_slave               (  speriph_slave[SPER_ICACHE_CTRL] ),
-          .IC_ctrl_unit_master_if      (  IC_ctrl_unit_bus                 ),
-          .pf_event_o                  (                                   )
-      );
-  `else
-      `ifdef SP_ICACHE
-          sp_icache_ctrl_unit
-          #(
-              .NB_CACHE_BANKS(NB_CACHE_BANKS),
-              .NB_CORES(NB_CORES),
-              .ID_WIDTH(NB_CORES+NB_MPERIPHS)
-          )
-          icache_ctrl_unit_i
-          (
-              .clk_i                       (  clk_i                            ),
-              .rst_ni                      (  rst_ni                           ),
-
-              .speriph_slave               (  speriph_slave[SPER_ICACHE_CTRL] ),
-              .IC_ctrl_unit_master_if      (  IC_ctrl_unit_bus                 ),
-              .L0_ctrl_unit_master_if      (  L0_ctrl_unit_bus                 )
-          );
-      `endif
-  `endif
-`endif
-   
   //********************************************************
     //******************** DMA CL CONFIG PORT ****************
     //********************************************************
@@ -384,4 +312,93 @@ module cluster_peripherals
     end
   endgenerate
    
+  //********************************************************
+  //******************** icache_ctrl_unit ******************
+  //********************************************************
+
+  if (PRIVATE_ICACHE) begin : gen_pri_icache_ctrl
+    hier_icache_ctrl_unit_wrap #(
+      .NB_CACHE_BANKS(NB_CACHE_BANKS),
+      .NB_CORES(NB_CORES),
+      .ID_WIDTH(NB_CORES+NB_MPERIPHS)
+    ) icache_ctrl_unit_i (
+      .clk_i                      ( clk_i                           ),
+      .rst_ni                     ( rst_ni                          ),
+
+      .speriph_slave              ( speriph_slave[SPER_ICACHE_CTRL] ),
+      .IC_ctrl_unit_bus_pri       ( IC_ctrl_unit_bus_pri            ),
+      .IC_ctrl_unit_bus_main      ( IC_ctrl_unit_bus_main           ),
+      .special_core_icache_cfg_o  ( special_core_icache_cfg_o       ),
+      .enable_l1_l15_prefetch_o   ( enable_l1_l15_prefetch_o        )
+    );
+
+  end else begin : gen_no_pri_icache_ctrl
+    for (genvar i = 0; i < NB_CACHE_BANKS; i++) begin : gen_banks
+      assign IC_ctrl_unit_bus_main[i].ctrl_req_enable = 1'b0;
+      assign IC_ctrl_unit_bus_main[i].ctrl_req_disable = 1'b0;
+      assign IC_ctrl_unit_bus_main[i].flush_req = 1'b0;
+      assign IC_ctrl_unit_bus_main[i].icache_is_private = 1'b0;
+      assign IC_ctrl_unit_bus_main[i].ctrl_clear_regs = 1'b0;
+      assign IC_ctrl_unit_bus_main[i].ctrl_enable_regs = 1'b0;
+    end
+    for (genvar i = 0; i < NB_CORES; i++) begin : gen_cores
+      assign IC_ctrl_unit_bus_pri[i].bypass_req = 1'b0;
+      assign IC_ctrl_unit_bus_pri[i].flush_req = 1'b0;
+      assign IC_ctrl_unit_bus_pri[i].ctrl_clear_regs = 1'b0;
+      assign IC_ctrl_unit_bus_pri[i].ctrl_enable_regs = 1'b0;
+    end
+    assign special_core_icache_cfg_o = 1'b0;
+    assign enable_l1_l15_prefetch_o = '0;
+  end
+
+  if (MP_ICACHE) begin : gen_mp_icache_ctrl
+    mp_pf_icache_ctrl_unit #(
+      .NB_CACHE_BANKS ( NB_CACHE_BANKS       ),
+      .NB_CORES       ( NB_CORES             ),
+      .ID_WIDTH       ( NB_CORES+NB_MPERIPHS )
+    ) icache_ctrl_unit_i (
+      .clk_i                  ( clk_i                           ),
+      .rst_ni                 ( rst_ni                          ),
+      .speriph_slave          ( speriph_slave[SPER_ICACHE_CTRL] ),
+      .IC_ctrl_unit_master_if ( IC_ctrl_unit_bus_mp             ),
+      .pf_event_o             (                                 )
+    );
+
+  end else begin : gen_no_mp_icache_ctrl
+    assign IC_ctrl_unit_bus_mp.bypass_req = 1'b0;
+    assign IC_ctrl_unit_bus_mp.flush_req = 1'b0;
+    assign IC_ctrl_unit_bus_mp.sel_flush_req = 1'b0;
+    assign IC_ctrl_unit_bus_mp.sel_flush_addr = '0;
+    assign IC_ctrl_unit_bus_mp.ctrl_clear_regs = 1'b0;
+    assign IC_ctrl_unit_bus_mp.ctrl_enable_regs = 1'b0;
+  end
+
+  if (SP_ICACHE) begin : gen_sp_icache_ctrl
+    sp_icache_ctrl_unit #(
+      .NB_CACHE_BANKS (NB_CACHE_BANKS),
+      .NB_CORES       (NB_CORES),
+      .ID_WIDTH       (NB_CORES+NB_MPERIPHS)
+    ) icache_ctrl_unit_i (
+      .clk_i                  ( clk_i                           ),
+      .rst_ni                 ( rst_ni                          ),
+
+      .speriph_slave          ( speriph_slave[SPER_ICACHE_CTRL] ),
+      .IC_ctrl_unit_master_if ( IC_ctrl_unit_bus_sp             ),
+      .L0_ctrl_unit_master_if ( L0_ctrl_unit_bus_sp             )
+    );
+
+  end else begin : gen_no_sp_icache_ctrl
+    for (genvar i = 0; i < NB_CACHE_BANKS; i++) begin : gen_banks
+      assign IC_ctrl_unit_bus_sp[i].ctrl_req_enable = 1'b0;
+      assign IC_ctrl_unit_bus_sp[i].ctrl_req_disable = 1'b0;
+      assign IC_ctrl_unit_bus_sp[i].flush_req = 1'b0;
+      assign IC_ctrl_unit_bus_sp[i].icache_is_private = 1'b0;
+      assign IC_ctrl_unit_bus_sp[i].ctrl_clear_regs = 1'b0;
+      assign IC_ctrl_unit_bus_sp[i].ctrl_enable_regs = 1'b0;
+    end
+    for (genvar i = 0; i < NB_CORES; i++) begin : gen_cores
+      assign L0_ctrl_unit_bus_sp[i].flush_FetchBuffer = 1'b0;
+    end
+  end
+
 endmodule // cluster_peripherals
