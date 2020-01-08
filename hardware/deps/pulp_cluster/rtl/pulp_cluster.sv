@@ -487,13 +487,16 @@ module pulp_cluster
   TCDM_BANK_MEM_BUS s_tcdm_bus_sram[NB_TCDM_BANKS-1:0]();
 
   // cores -> APU
-  cpu_marx_if #(
-    .WOP_CPU      ( WOP_CPU      ),
-    .WAPUTYPE     ( WAPUTYPE     ),
-    .NUSFLAGS_CPU ( NUSFLAGS_CPU ),
-    .NDSFLAGS_CPU ( NDSFLAGS_CPU ),
-    .NARGS_CPU    ( NARGS_CPU    )
-  ) apu_cluster_bus [NB_CORES-1:0] ();
+  logic [NB_CORES-1:0]                        s_apu_master_req,
+                                              s_apu_master_gnt,
+                                              s_apu_master_rready,
+                                              s_apu_master_rvalid;
+  logic [NB_CORES-1:0][NARGS_CPU-1:0][31:0]   s_apu_master_operands;
+  logic [NB_CORES-1:0][WOP_CPU-1:0]           s_apu_master_op;
+  logic [NB_CORES-1:0][WAPUTYPE-1:0]          s_apu_master_type;
+  logic [NB_CORES-1:0][NDSFLAGS_CPU-1:0]      s_apu_master_flags;
+  logic [NB_CORES-1:0][31:0]                  s_apu_master_rdata;
+  logic [NB_CORES-1:0][NUSFLAGS_CPU-1:0]      s_apu_master_rflags;
 
   /* reset generator */
   rstgen rstgen_i (
@@ -838,6 +841,11 @@ module pulp_cluster
         .CLUSTER_ALIAS_BASE        ( CLUSTER_ALIAS_BASE     ),
         .REMAP_ADDRESS             ( REMAP_ADDRESS          ),
         .DEBUG_HALT_ADDR           ( 0 /* TODO */           ),
+        .APU_NARGS_CPU             ( NARGS_CPU              ),
+        .APU_WOP_CPU               ( WOP_CPU                ),
+        .WAPUTYPE                  ( WAPUTYPE               ),
+        .APU_NDSFLAGS_CPU          ( NDSFLAGS_CPU           ),
+        .APU_NUSFLAGS_CPU          ( NUSFLAGS_CPU           ),
         .ADDREXT                   ( TRYX_ADDREXT           ),
         .FPU                       ( 1'b1                   ),
         .DEM_PER_BEFORE_TCDM_TS    ( DEM_PER_BEFORE_TCDM_TS )
@@ -872,7 +880,16 @@ module pulp_cluster
         .eu_ctrl_master           ( s_core_euctrl_bus[i]      ),
         .periph_data_master       ( s_core_periph_bus[i]      ),
         .periph_data_master_atop  ( s_core_periph_bus_atop[i] ),
-        .apu_master               ( apu_cluster_bus[i]        )
+        .apu_master_req_o         ( s_apu_master_req     [i]  ),
+        .apu_master_gnt_i         ( s_apu_master_gnt     [i]  ),
+        .apu_master_type_o        ( s_apu_master_type    [i]  ),
+        .apu_master_operands_o    ( s_apu_master_operands[i]  ),
+        .apu_master_op_o          ( s_apu_master_op      [i]  ),
+        .apu_master_flags_o       ( s_apu_master_flags   [i]  ),
+        .apu_master_valid_i       ( s_apu_master_rvalid  [i]  ),
+        .apu_master_ready_o       ( s_apu_master_rready  [i]  ),
+        .apu_master_result_i      ( s_apu_master_rdata   [i]  ),
+        .apu_master_flags_i       ( s_apu_master_rflags  [i]  )
       );
     end
   endgenerate

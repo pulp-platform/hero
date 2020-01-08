@@ -36,6 +36,11 @@ module core_region
   parameter int     CLUSTER_ALIAS_BASE      = 12'h000,
   parameter int     REMAP_ADDRESS           = 0,
   parameter int     DEBUG_HALT_ADDR         = 32'h0000_0000,
+  parameter int     APU_NARGS_CPU           = 2,
+  parameter int     APU_WOP_CPU             = 1,
+  parameter int     WAPUTYPE                = 3,
+  parameter int     APU_NDSFLAGS_CPU        = 3,
+  parameter int     APU_NUSFLAGS_CPU        = 5,
   parameter bit     ADDREXT                 = 1'b0,
   parameter bit     FPU                     = 1'b0,
   parameter bit     FP_DIVSQRT              = 1'b0,
@@ -89,9 +94,20 @@ module core_region
 				      XBAR_PERIPH_BUS.Master eu_ctrl_master,
 				      XBAR_PERIPH_BUS.Master periph_data_master,
 				      output logic [5:0]     periph_data_master_atop,
-				      
-				      // APU interconnect interface
-				      cpu_marx_if.cpu apu_master
+
+  // only used if SHARED_FPU_CLUSTER or APU_CLUSTER
+  output logic                           apu_master_req_o,
+  input logic                            apu_master_gnt_i,
+  // request channel
+  output logic [WAPUTYPE-1:0]            apu_master_type_o,
+  output logic [APU_NARGS_CPU-1:0][31:0] apu_master_operands_o,
+  output logic [APU_WOP_CPU-1:0]         apu_master_op_o,
+  output logic [APU_NDSFLAGS_CPU-1:0]    apu_master_flags_o,
+  // response channel
+  output logic                           apu_master_ready_o,
+  input logic                            apu_master_valid_i,
+  input logic [31:0]                     apu_master_result_i,
+  input logic [APU_NUSFLAGS_CPU-1:0]     apu_master_flags_i
 );
 
   XBAR_DEMUX_BUS    s_core_bus();         // Internal interface between CORE       <--> DEMUX
@@ -161,19 +177,17 @@ module core_region
     .fetch_enable_i        ( fetch_en_i               ),
     .core_busy_o           ( core_busy_o              ),
     // apu-interconnect
-    // handshake signals
-    .apu_master_req_o      ( apu_master.req_ds_s      ),
-    .apu_master_ready_o    ( apu_master.ready_us_s    ),
-    .apu_master_gnt_i      ( apu_master.ack_ds_s      ),
-     // request channel
-    .apu_master_operands_o ( apu_master.operands_ds_d ),
-    .apu_master_op_o       ( apu_master.op_ds_d       ),
-    .apu_master_type_o     ( apu_master.type_ds_d     ),
-    .apu_master_flags_o    ( apu_master.flags_ds_d    ),
-    // response channel
-    .apu_master_valid_i    ( apu_master.valid_us_s    ),
-    .apu_master_result_i   ( apu_master.result_us_d   ),
-    .apu_master_flags_i    ( apu_master.flags_us_d    ),
+    .apu_master_req_o      ( apu_master_req_o         ),
+    .apu_master_gnt_i      ( apu_master_gnt_i         ),
+    .apu_master_type_o     ( apu_master_type_o        ),
+    .apu_master_operands_o ( apu_master_operands_o    ),
+    .apu_master_op_o       ( apu_master_op_o          ),
+    .apu_master_flags_o    ( apu_master_flags_o       ),
+
+    .apu_master_valid_i    ( apu_master_valid_i       ),
+    .apu_master_ready_o    ( apu_master_ready_o       ),
+    .apu_master_result_i   ( apu_master_result_i      ),
+    .apu_master_flags_i    ( apu_master_flags_i       ),
 
     .ext_perf_counters_i   ( perf_counters            ),
     .fregfile_disable_i    ( fregfile_disable_i       )
