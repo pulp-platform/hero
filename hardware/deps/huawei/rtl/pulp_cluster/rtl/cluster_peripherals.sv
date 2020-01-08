@@ -300,18 +300,15 @@ module cluster_peripherals
     assign speriph_slave[SPER_DECOMP_ID].r_id    = '0;
     assign speriph_slave[SPER_DECOMP_ID].r_valid = '0;
 
-
-    generate
-    if(FEATURE_DEMUX_MAPPED == 0) begin : eu_not_demux_mapped_gen
-      for(genvar i=0;i< NB_CORES; i++) begin
-        assign core_eu_direct_link[i].gnt     = 1'b0;
-        assign core_eu_direct_link[i].r_rdata = 32'h0000_0000;
-        assign core_eu_direct_link[i].r_valid = 1'b0;
-        assign core_eu_direct_link[i].r_opc   = 1'b0;
-      end
+  if (!FEATURE_DEMUX_MAPPED) begin : gen_eu_not_demux_mapped
+    for (genvar i=0;i< NB_CORES; i++) begin : gen_eu_not_demux_mapped_cores
+      assign core_eu_direct_link[i].gnt     = 1'b0;
+      assign core_eu_direct_link[i].r_rdata = 32'h0000_0000;
+      assign core_eu_direct_link[i].r_valid = 1'b0;
+      assign core_eu_direct_link[i].r_opc   = 1'b0;
     end
-  endgenerate
-   
+  end
+
   //********************************************************
   //******************** icache_ctrl_unit ******************
   //********************************************************
