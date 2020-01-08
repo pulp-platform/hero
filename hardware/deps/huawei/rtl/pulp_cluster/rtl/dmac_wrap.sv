@@ -102,10 +102,10 @@ module dmac_wrap
     .NB_TRANSFERS             ( 16                    ),
     .GLOBAL_TRANS_QUEUE_DEPTH ( 16                    ),    // DEPTH OF GLOBAL COMMAND QUEUE (CTRL_UNIT)
     .TCDM_ADD_WIDTH           ( TCDM_ADD_WIDTH        ),    // WIDTH OF TCDM ADDRESS
-    .EXT_ADD_WIDTH            ( AXI_ADDR_WIDTH        ),    // WIDTH OF GLOBAL EXTERNAL ADDRESS
+    .EXT_ADD_WIDTH            ( 32                    ),    // WIDTH OF GLOBAL EXTERNAL ADDRESS
     .NB_OUTSND_TRANS          ( NB_OUTSND_BURSTS      ),    // NUMBER OF OUTSTANDING TRANSACTIONS
     .MCHAN_BURST_LENGTH       ( MCHAN_BURST_LENGTH    ),    // ANY POWER OF 2 VALUE FROM 32 TO 2048
-    .AXI_ADDR_WIDTH           ( AXI_ADDR_WIDTH        ),
+    .AXI_ADDR_WIDTH           ( 32                    ),
     .AXI_DATA_WIDTH           ( AXI_DATA_WIDTH        ),
     .AXI_USER_WIDTH           ( AXI_USER_WIDTH        ),
     .AXI_ID_WIDTH             ( AXI_ID_WIDTH          ),
@@ -198,5 +198,9 @@ module dmac_wrap
 
     .busy_o                    ( busy_o                             )
   );
+  if (AXI_ADDR_WIDTH > 32) begin : gen_zero_extend_axi_addr
+    assign ext_master.aw_addr[AXI_ADDR_WIDTH-1:32] = '0;
+    assign ext_master.ar_addr[AXI_ADDR_WIDTH-1:32] = '0;
+  end
 
 endmodule
