@@ -28,7 +28,7 @@ module pulp_cluster
   // cluster parameters
   parameter bit ASYNC_INTF          = 1'b1,
   parameter int NB_CORES            = 8,
-  parameter int NB_HWACC_PORTS      = 0,
+  parameter int NB_HWPE_PORTS       = 0,
   parameter int NB_DMAS             = 4,
   parameter int NB_EXT2MEM          = 2,
   parameter int NB_MPERIPHS         = 1,
@@ -458,7 +458,7 @@ module pulp_cluster
   XBAR_TCDM_BUS s_mperiph_demux_bus[1:0]();
 
   // cores & accelerators -> log interconnect
-  XBAR_TCDM_BUS s_core_xbar_bus[NB_CORES+NB_HWACC_PORTS-1:0]();
+  XBAR_TCDM_BUS s_core_xbar_bus[NB_CORES+NB_HWPE_PORTS-1:0]();
 
   // cores -> periph interconnect
   XBAR_PERIPH_BUS s_core_periph_bus[NB_CORES-1:0]();
@@ -713,7 +713,7 @@ module pulp_cluster
   end
   cluster_interconnect_wrap #(
     .NB_CORES           ( NB_CORES           ),
-    .NB_HWACC_PORTS     ( NB_HWACC_PORTS     ),
+    .NB_HWPE_PORTS      ( NB_HWPE_PORTS      ),
     .NB_DMAS            ( NB_DMAS            ),
     .NB_EXT             ( NB_EXT2MEM         ),
     .NB_MPERIPHS        ( NB_MPERIPHS        ),
@@ -918,7 +918,7 @@ module pulp_cluster
         .clk               ( clk_cluster                                         ),
         .rst_n             ( s_rst_n                                             ),
         .test_mode         ( test_mode_i                                         ),
-        .hwacc_xbar_master ( s_core_xbar_bus[NB_CORES+NB_HWACC_PORTS-1:NB_CORES] ),
+        .hwacc_xbar_master ( s_core_xbar_bus[NB_CORES+NB_HWPE_PORTS-1:NB_CORES]  ),
         .hwacc_cfg_slave   ( s_xne_cfg_bus                                       ),
         .evt_o             ( s_xne_evt                                           ),
         .busy_o            ( s_xne_busy                                          )
@@ -929,7 +929,7 @@ module pulp_cluster
       assign s_xne_cfg_bus.gnt = '1;
       assign s_xne_cfg_bus.r_rdata = 32'hdeadbeef;
       assign s_xne_cfg_bus.r_id = '0;
-      for (genvar i=NB_CORES; i<NB_CORES+NB_HWACC_PORTS; i++) begin : no_xne_bias
+      for (genvar i=NB_CORES; i<NB_CORES+NB_HWPE_PORTS; i++) begin : no_xne_bias
         assign s_core_xbar_bus[i].req = '0;
         assign s_core_xbar_bus[i].wen = '0;
         assign s_core_xbar_bus[i].be  = '0;

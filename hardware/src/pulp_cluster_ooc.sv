@@ -171,7 +171,7 @@ module pulp_cluster_ooc (
   pulp_cluster #(
     .ASYNC_INTF               (ASYNC),
     .NB_CORES                 (N_CORES),
-    .NB_HWACC_PORTS           (0),
+    .NB_HWPE_PORTS            (0),
     .NB_DMAS                  (N_DMAS),
     .CLUSTER_ALIAS            (1'b1),
     .CLUSTER_ALIAS_BASE       (12'h1B0),
