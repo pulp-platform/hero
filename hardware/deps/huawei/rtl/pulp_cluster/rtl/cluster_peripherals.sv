@@ -162,47 +162,30 @@ module cluster_peripherals
   //********************************************************
    //************ END OF COMPUTATION UNIT *******************
    //********************************************************
-   cluster_control_unit
-   #(
-        .PER_ID_WIDTH  ( NB_CORES+NB_MPERIPHS         ),
-        .NB_CORES      ( NB_CORES                     ),
-        .ROM_BOOT_ADDR ( ROM_BOOT_ADDR                ),
-        .BOOT_ADDR     ( BOOT_ADDR                    )
-        //.NB_L1_CUTS      ( NB_L1_CUTS                 ),
-        //.RW_MARGIN_WIDTH ( RW_MARGIN_WIDTH            )
-   )
-   cluster_control_unit_i
-   (
-        .clk_i          ( clk_i                        ),
-        .rst_ni         ( rst_ni                       ),
-
-        .en_sa_boot_i   ( en_sa_boot_i                 ),
-        .fetch_en_i     ( fetch_en_i                   ),
-        .speriph_slave  ( speriph_slave[SPER_EOC_ID]  ),
-
-        .event_o        (                              ),
-        .eoc_o          ( eoc_o                        ),
-
-        .cluster_cg_en_o( cluster_cg_en_o              ),
-        .boot_addr_o    ( boot_addr_o                  ),
-
-        // SRAM SPEED REGULATION --> TCDM
-        .hwpe_sel_o     ( hwpe_sel_o                   ),
-        .hwpe_en_o      ( hwpe_en_o                    ),
-
-        .fregfile_disable_o ( fregfile_disable_o       ),
-
-
-        .core_halted_i  ( dbg_core_halted_i            ),
-        .core_halt_o    ( dbg_core_halt_o              ),
-        .core_resume_o  ( dbg_core_resume_o            ),
-
-        .fetch_enable_o ( s_fetch_en_cc                ),
-        .TCDM_arb_policy_o (TCDM_arb_policy_o          )
-        //.rw_margin_L1_o    ( rw_margin_L1_o            )
-   );
-  
-
+  cluster_control_unit #(
+    .PER_ID_WIDTH  ( NB_CORES+NB_MPERIPHS        ),
+    .NB_CORES      ( NB_CORES                    ),
+    .ROM_BOOT_ADDR ( ROM_BOOT_ADDR               ),
+    .BOOT_ADDR     ( BOOT_ADDR                   )
+  ) cluster_control_unit_i (
+    .clk_i              ( clk_i                      ),
+    .rst_ni             ( rst_ni                     ),
+    .en_sa_boot_i       ( en_sa_boot_i               ),
+    .fetch_en_i         ( fetch_en_i                 ),
+    .cluster_cg_en_o    ( cluster_cg_en_o            ),
+    .boot_addr_o        ( boot_addr_o                ),
+    .speriph_slave      ( speriph_slave[SPER_EOC_ID] ),
+    .eoc_o              ( eoc_o                      ),
+    .event_o            (                            ),
+    .hwpe_sel_o         ( hwpe_sel_o                 ),
+    .hwpe_en_o          ( hwpe_en_o                  ),
+    .core_halted_i      ( dbg_core_halted_i          ),
+    .core_halt_o        ( dbg_core_halt_o            ),
+    .core_resume_o      ( dbg_core_resume_o          ),
+    .fetch_enable_o     ( s_fetch_en_cc              ),
+    .TCDM_arb_policy_o  ( TCDM_arb_policy_o          ),
+    .fregfile_disable_o ( fregfile_disable_o         )
+  );
 
   //********************************************************
   //******************** TIMER *****************************
