@@ -66,9 +66,6 @@ module cluster_peripherals
   
   //input logic                         decompr_done_evt_i,
 
-  input logic                         dma_fc_event_i,
-  input logic                         dma_fc_irq_i,
-  
   output logic                        soc_periph_evt_ready_o,
   input  logic                        soc_periph_evt_valid_i,
   input  logic [EVNT_WIDTH-1:0]       soc_periph_evt_data_i,
@@ -363,23 +360,6 @@ module cluster_peripherals
     assign dma_cfg_master[0].be    = speriph_slave[SPER_DMA_CL_ID].be;
     assign dma_cfg_master[0].id    = speriph_slave[SPER_DMA_CL_ID].id;
 
-    //********************************************************
-    //******************** DMA FC CONFIG PORT ****************
-    //********************************************************
-
-    assign speriph_slave[SPER_DMA_FC_ID].gnt     = dma_cfg_master[1].gnt;
-    assign speriph_slave[SPER_DMA_FC_ID].r_rdata = dma_cfg_master[1].r_rdata;
-    assign speriph_slave[SPER_DMA_FC_ID].r_opc   = dma_cfg_master[1].r_opc;
-    assign speriph_slave[SPER_DMA_FC_ID].r_id    = dma_cfg_master[1].r_id;
-    assign speriph_slave[SPER_DMA_FC_ID].r_valid = dma_cfg_master[1].r_valid;
-
-    assign dma_cfg_master[1].req   = speriph_slave[SPER_DMA_FC_ID].req;
-    assign dma_cfg_master[1].add   = speriph_slave[SPER_DMA_FC_ID].add;
-    assign dma_cfg_master[1].wen   = speriph_slave[SPER_DMA_FC_ID].wen;
-    assign dma_cfg_master[1].wdata = speriph_slave[SPER_DMA_FC_ID].wdata;
-    assign dma_cfg_master[1].be    = speriph_slave[SPER_DMA_FC_ID].be;
-    assign dma_cfg_master[1].id    = speriph_slave[SPER_DMA_FC_ID].id;
-    
     //********************************************************
     //******************** HW ACC  ***************************
     //********************************************************
