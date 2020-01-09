@@ -707,10 +707,6 @@ module pulp_cluster
     .test_en_i            ( test_mode_i                       ),
     .periph_slave         ( s_xbar_speriph_bus[SPER_EXT_ID]   ),
     .periph_slave_atop_i  ( s_xbar_speriph_atop[SPER_EXT_ID]  ),
-    .tryx_req_i           ( '0 /* unused */                   ),
-    .axi_xresp_decerr_o   ( /* unused */                      ),
-    .axi_xresp_slverr_o   ( /* unused */                      ),
-    .axi_xresp_valid_o    ( /* unused */                      ),
     .axi_master           ( s_core_ext_bus                    ),
     .busy_o               ( s_per2axi_busy                    )
   );
