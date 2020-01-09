@@ -780,7 +780,10 @@ module pulp_cluster
     .NB_TCDM_BANKS  ( NB_TCDM_BANKS  ),
     .ROM_BOOT_ADDR  ( ROM_BOOT_ADDR  ),
     .BOOT_ADDR      ( BOOT_ADDR      ),
-    .EVNT_WIDTH     ( EVNT_WIDTH     )
+    .EVNT_WIDTH     ( EVNT_WIDTH     ),
+    .PRI_ICACHE     ( PRIV_ICACHE    ),
+    .MP_ICACHE      ( MP_ICACHE      ),
+    .SP_ICACHE      ( SP_ICACHE      )
   ) cluster_peripherals_i (
     .clk_i                  ( clk_cluster                        ),
     .rst_ni                 ( rst_ni                             ),
