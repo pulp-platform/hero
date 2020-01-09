@@ -49,7 +49,12 @@ cd "$SRC"
 copy_git_files example-apps
 
 # Setup script: copy to destination.
+cd "$SRC"
 rsync -av setup.sh "$TMP_DST/"
+
+# ReadMe and Prerequisites: copy to destination.
+cd "$SRC"
+copy_git_files README.md PREREQUISITES.md
 
 # Create archive from temporary destination directory.
 sleep 1 # give Git time to settle
