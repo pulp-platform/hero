@@ -858,7 +858,6 @@ module pulp_cluster
         .APU_NDSFLAGS_CPU          ( NDSFLAGS_CPU             ),
         .APU_NUSFLAGS_CPU          ( NUSFLAGS_CPU             ),
         .ADDREXT                   ( 1'b0                     ),
-        .FPU                       ( 1'b1                     ),
         .DEM_PER_BEFORE_TCDM_TS    ( DEM_PER_BEFORE_TCDM_TS   ),
         .FPU                       ( CLUST_FPU                ),
         .FP_DIVSQRT                ( CLUST_FP_DIVSQRT         ),
