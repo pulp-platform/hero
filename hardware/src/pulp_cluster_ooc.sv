@@ -22,6 +22,7 @@ module pulp_cluster_ooc (
   input  logic          fetch_en_i,
   output logic          eoc_o,
   output logic          busy_o,
+  input  logic [N_CORES-1:0] dbg_irq_i,
 
   // Slave Port
   // AW
@@ -227,6 +228,8 @@ module pulp_cluster_ooc (
     .pf_evt_ack_i                 ('0),
     .pf_evt_valid_o               (),
 
+    .dbg_irq_valid_i              (dbg_irq_i),
+
     .data_slave_aw_addr_i         (slv_aw_addr_i),
     .data_slave_aw_prot_i         (slv_aw_prot_i),
     .data_slave_aw_region_i       (slv_aw_region_i),
@@ -356,6 +359,7 @@ module pulp_cluster_sync (
   input  logic        fetch_en_i,
   output logic        eoc_o,
   output logic        busy_o,
+  input  logic [N_CORES-1:0] dbg_irq_i,
   AXI_BUS.Slave       slv,
   AXI_BUS.Master      mst
 );
@@ -368,6 +372,7 @@ module pulp_cluster_sync (
     .fetch_en_i,
     .eoc_o,
     .busy_o,
+    .dbg_irq_i,
 
     .slv_aw_addr_i        (slv.aw_addr),
     .slv_aw_prot_i        (slv.aw_prot),
@@ -492,6 +497,7 @@ module pulp_cluster_async (
   input  logic          fetch_en_i,
   output logic          eoc_o,
   output logic          busy_o,
+  input  logic [N_CORES-1:0] dbg_irq_i,
   AXI_BUS_ASYNC.Slave   slv,
   AXI_BUS_ASYNC.Master  mst
 );
@@ -504,6 +510,7 @@ module pulp_cluster_async (
     .fetch_en_i,
     .eoc_o,
     .busy_o,
+    .dbg_irq_i,
 
     .slv_aw_addr_i        (slv.aw_addr),
     .slv_aw_prot_i        (slv.aw_prot),

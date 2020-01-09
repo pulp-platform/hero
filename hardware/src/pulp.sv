@@ -254,6 +254,7 @@ module pulp #(
         .fetch_en_i   (cl_fetch_en_i[i]),
         .eoc_o        (cl_eoc_o[i]),
         .busy_o       (cl_busy_o[i]),
+        .dbg_irq_i    (/* TODO */),
         .slv          (cl_inp_async[i]),
         .mst          (cl_oup_async[i])
       );
