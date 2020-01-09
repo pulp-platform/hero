@@ -61,9 +61,9 @@ int main(int argc, char *argv[])
   n_errors += report_pass_fail(
       gcc_omp_parallel_for_schedule_static,
       "GCC `omp parallel for` with static schedule with pointers");
-  n_errors += report_pass_fail(
-      gcc_omp_parallel_for_schedule_dynamic,
-      "GCC `omp parallel for` with dynamic schedule with pointers");
+  //n_errors += report_pass_fail(
+  //    gcc_omp_parallel_for_schedule_dynamic,
+  //    "GCC `omp parallel for` with dynamic schedule with pointers");
 
   assert(n_errors == 0);
   return n_errors;
