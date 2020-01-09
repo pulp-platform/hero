@@ -769,8 +769,6 @@ module pulp_cluster
     .ext_master     ( s_dma_ext_bus      ),
     .term_event_cl_o( s_dma_cl_event     ),
     .term_irq_cl_o  ( s_dma_cl_irq       ),
-    .term_event_pe_o( /* unused */       ),
-    .term_irq_pe_o  ( /* unused */       ),
     .busy_o         ( s_dmac_busy        )
   );
 

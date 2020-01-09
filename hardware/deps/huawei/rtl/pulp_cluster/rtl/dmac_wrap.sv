@@ -41,8 +41,6 @@ module dmac_wrap
   AXI_BUS.Master                   ext_master,
   output logic                     term_event_cl_o,
   output logic                     term_irq_cl_o,
-  output logic                     term_event_pe_o,
-  output logic                     term_irq_pe_o,
   output logic                     busy_o
 );
   
@@ -193,8 +191,8 @@ module dmac_wrap
     .axi_master_b_user_i       ( ext_master.b_user                  ),
     .axi_master_b_ready_o      ( ext_master.b_ready                 ),
 
-    .term_evt_o                ( {term_event_pe_o,term_event_cl_o}     ),
-    .term_int_o                ( {term_irq_pe_o,term_irq_cl_o    }     ),
+    .term_evt_o                ( term_event_cl_o                    ),
+    .term_int_o                ( term_irq_cl_o                      ),
 
     .busy_o                    ( busy_o                             )
   );
