@@ -38,6 +38,7 @@ module ext_unit
     output logic [AXI_ADDR_WIDTH-1:0]   axi_master_aw_addr_o,
     output logic [2:0]                  axi_master_aw_prot_o,
     output logic [3:0]                  axi_master_aw_region_o,
+    output logic [5:0]                  axi_master_aw_atop_o,
     output logic [7:0]                  axi_master_aw_len_o,
     output logic [2:0]                  axi_master_aw_size_o,
     output logic [1:0]                  axi_master_aw_burst_o,
@@ -575,7 +576,8 @@ module ext_unit
       .master_user_o(axi_master_aw_user_o),
       .master_ready_i(axi_master_aw_ready_i)
       );
-   
+    assign axi_master_aw_atop_o = '0;
+
    // AXI READ ADDRESS CHANNEL BUFFER
    ext_ar_buffer
      #(
