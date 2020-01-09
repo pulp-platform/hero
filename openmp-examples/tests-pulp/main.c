@@ -59,44 +59,6 @@ int main(int argc, char *argv[])
   n_errors += report_n_errors(test_intrinsics, "PULP intrinsics");
 
   n_errors += report_pass_fail(
-      test_omp_for_schedule_static, "`omp for` with static schedule");
-  n_errors += report_pass_fail(
-      test_omp_for_schedule_dynamic, "`omp for` with dynamic schedule");
-  n_errors += report_pass_fail(
-      test_omp_parallel_for_reduction, "`omp parallel for reduction`");
-  n_errors += report_pass_fail(
-      test_omp_atomic, "`omp atomic`");
-  n_errors += report_pass_fail(
-      test_omp_parallel_for_private, "`omp parallel for` with private");
-  n_errors += report_pass_fail(
-      test_omp_parallel_for_firstprivate, "`omp parallel for` with firstprivate");
-  n_errors += report_pass_fail(
-      test_omp_parallel_for_lastprivate, "`omp parallel for` with lastprivate");
-  n_errors += report_pass_fail(
-      test_omp_single, "`omp single`");
-  n_errors += report_pass_fail(
-      test_omp_critical, "`omp critical`");
-  n_errors += report_pass_fail(
-      test_omp_master_3, "`omp master`");
-  n_errors += report_pass_fail(
-      test_omp_barrier, "`omp barrier`");
-  n_errors += report_pass_fail(
-      test_omp_parallel_sections_firstprivate, "`omp parallel sections firstprivate`");
-  n_errors += report_pass_fail(
-      test_omp_parallel_sections_lastprivate, "`omp parallel sections lastprivate`");
-  n_errors += report_pass_fail(
-      test_omp_parallel_sections_private, "`omp parallel sections private`");
-  n_errors += report_pass_fail(
-      test_omp_parallel_sections_reduction, "`omp parallel sections reduction`");
-  n_errors += report_pass_fail(
-      test_omp_section_firstprivate, "`omp sections firstprivate`");
-  n_errors += report_pass_fail(
-      test_omp_section_lastprivate, "`omp sections lastprivate`");
-  n_errors += report_pass_fail(
-      test_omp_section_private, "`omp sections private`");
-  n_errors += report_pass_fail(
-      test_omp_sections_reduction, "`omp sections reduction`");
-  n_errors += report_pass_fail(
       gcc_omp_parallel_for_schedule_static,
       "GCC `omp parallel for` with static schedule with pointers");
   n_errors += report_pass_fail(
