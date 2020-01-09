@@ -1263,7 +1263,7 @@ module pulp_cluster
 
   end else begin : gen_no_sp_icache
     for (genvar i = 0; i < NB_CACHE_BANKS; i++) begin : gen_banks
-      assign IC_ctrl_unit_bus_sp[i].flush_ack = 1'b0;
+      assign IC_ctrl_unit_bus_sp[i].ctrl_flush_ack = 1'b0;
       assign IC_ctrl_unit_bus_sp[i].ctrl_ack_enable = 1'b0;
       assign IC_ctrl_unit_bus_sp[i].ctrl_pending_trans = 1'b0;
       assign IC_ctrl_unit_bus_sp[i].ctrl_hit_count = '0;
