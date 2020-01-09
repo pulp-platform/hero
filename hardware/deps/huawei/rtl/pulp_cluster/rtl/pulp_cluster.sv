@@ -312,18 +312,6 @@ module pulp_cluster
   logic                               s_hwpe_sel;
   logic                               s_hwpe_en;
 
-  localparam TRYX_ADDREXT_WIDTH = AXI_ADDR_WIDTH - 32;
-  localparam TRYX_ADDREXT = (AXI_ADDR_WIDTH > 32);
-  typedef struct packed {
-    logic [AXI_USER_WIDTH-1:0]      user;
-    logic [TRYX_ADDREXT_WIDTH-1:0]  addrext;
-  } tryx_req_t;
-
-  tryx_req_t  [NB_CORES-1:0]  tryx_req;
-  logic       [NB_CORES-1:0]  tryx_xresp_decerr;
-  logic       [NB_CORES-1:0]  tryx_xresp_slverr;
-  logic       [NB_CORES-1:0]  tryx_xresp_valid;
-
   logic                s_cluster_periphs_busy;
   logic                s_axi2mem_busy;
   logic                s_per2axi_busy;
@@ -492,9 +480,6 @@ module pulp_cluster
   // cores -> periph interconnect
   XBAR_PERIPH_BUS s_core_periph_bus[NB_CORES-1:0]();
   logic [NB_CORES-1:0][5:0] s_core_periph_bus_atop, s_core_xbar_bus_atop;
-
-  // cores -> tryx control
-  XBAR_PERIPH_BUS s_core_periph_tryx[NB_CORES-1:0]();
 
   // periph interconnect -> DMA
   XBAR_PERIPH_BUS s_periph_dma_bus();
@@ -716,43 +701,22 @@ module pulp_cluster
     .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH       ),
     .AXI_DATA_WIDTH ( AXI_DATA_C2S_WIDTH   ),
     .AXI_USER_WIDTH ( AXI_USER_WIDTH       ),
-    .AXI_ID_WIDTH   ( AXI_ID_IN_WIDTH      ),
-    .tryx_req_t     ( tryx_req_t           )
+    .AXI_ID_WIDTH   ( AXI_ID_IN_WIDTH      )
   ) per2axi_wrap_i (
     .clk_i                ( clk_cluster                       ),
     .rst_ni               ( rst_ni                            ),
     .test_en_i            ( test_mode_i                       ),
     .periph_slave         ( s_xbar_speriph_bus[SPER_EXT_ID]   ),
     .periph_slave_atop_i  ( s_xbar_speriph_atop[SPER_EXT_ID]  ),
-    .tryx_req_i           ( tryx_req                          ),
-    .axi_xresp_decerr_o   ( tryx_xresp_decerr                 ),
-    .axi_xresp_slverr_o   ( tryx_xresp_slverr                 ),
-    .axi_xresp_valid_o    ( tryx_xresp_valid                  ),
+    .tryx_req_i           ( '0 /* unused */                   ),
+    .axi_xresp_decerr_o   ( /* unused */                      ),
+    .axi_xresp_slverr_o   ( /* unused */                      ),
+    .axi_xresp_valid_o    ( /* unused */                      ),
     .axi_master           ( s_core_ext_bus                    ),
     .busy_o               ( s_per2axi_busy                    )
   );
 
-  tryx_ctrl #(
-    .NB_CORES           ( NB_CORES       ),
-    .AXI_USER_WIDTH     ( AXI_USER_WIDTH ),
-    .tryx_req_t         ( tryx_req_t     )
-  ) tryx_ctrl_i (
-    .clk_i              ( clk_cluster        ),
-    .rst_ni             ( rst_ni             ),
-    .tryx_req_o         ( tryx_req           ),
-    .axi_xresp_decerr_i ( tryx_xresp_decerr  ),
-    .axi_xresp_slverr_i ( tryx_xresp_slverr  ),
-    .axi_xresp_valid_i  ( tryx_xresp_valid   ),
-    .unaligned_i        ( core_unaligned     ),
-    .periph_data_slave  ( s_core_periph_bus  ),
-    .periph_data_master ( s_core_periph_tryx )
-  );
-
   /* cluster (log + periph) interconnect and attached peripherals */
-  logic [NB_CORES-1:0][TRYX_ADDREXT_WIDTH-1:0] s_core_periph_bus_addrext;
-  for (genvar i = 0; i < NB_CORES; i++) begin : gen_core_periph_slave_addrext
-    assign s_core_periph_bus_addrext[i] = tryx_req[i].addrext;
-  end
   cluster_interconnect_wrap #(
     .NB_CORES           ( NB_CORES           ),
     .NB_HWPE_PORTS      ( NB_HWPE_PORTS      ),
@@ -769,7 +733,7 @@ module pulp_cluster
     .LOG_CLUSTER        ( LOG_CLUSTER        ),
     .PE_ROUTING_LSB     ( PE_ROUTING_LSB     ),
     .PE_ROUTING_MSB     ( PE_ROUTING_MSB     ),
-    .ADDREXT            ( TRYX_ADDREXT       ),
+    .ADDREXT            ( 1'b0               ),
     .CLUSTER_ALIAS      ( CLUSTER_ALIAS      ),
     .CLUSTER_ALIAS_BASE ( CLUSTER_ALIAS_BASE )
   ) cluster_interconnect_wrap_i (
@@ -777,9 +741,9 @@ module pulp_cluster
     .rst_ni                 ( rst_ni                              ),
     .core_tcdm_slave        ( s_core_xbar_bus                     ),
     .core_tcdm_slave_atop   ( s_core_xbar_bus_atop                ),
-    .core_periph_slave      ( s_core_periph_tryx                  ),
+    .core_periph_slave      ( s_core_periph_bus                   ),
     .core_periph_slave_atop ( s_core_periph_bus_atop              ),
-    .core_periph_slave_addrext ( s_core_periph_bus_addrext        ),
+    .core_periph_slave_addrext ( '0 /* unused */                  ),
     .ext_slave              ( s_ext_xbar_bus                      ),
     .ext_slave_atop         ( s_ext_xbar_bus_atop                 ),
     .dma_slave              ( s_dma_xbar_bus                      ),
@@ -900,7 +864,7 @@ module pulp_cluster
         .WAPUTYPE                  ( WAPUTYPE                 ),
         .APU_NDSFLAGS_CPU          ( NDSFLAGS_CPU             ),
         .APU_NUSFLAGS_CPU          ( NUSFLAGS_CPU             ),
-        .ADDREXT                   ( TRYX_ADDREXT             ),
+        .ADDREXT                   ( 1'b0                     ),
         .FPU                       ( 1'b1                     ),
         .DEM_PER_BEFORE_TCDM_TS    ( DEM_PER_BEFORE_TCDM_TS   ),
         .FPU                       ( CLUST_FPU                ),
@@ -930,7 +894,7 @@ module pulp_cluster
         .instr_r_valid_i          ( instr_r_valid[i]          ),
         .debug_req_i              ( s_core_dbg_irq[i]         ),
         .unaligned_o              ( core_unaligned[i]         ),
-        .addrext_i                ( tryx_req[i].addrext       ),
+        .addrext_i                ( '0 /* unused */           ),
         .tcdm_data_master         ( s_core_xbar_bus[i]        ),
         .tcdm_data_master_atop    ( s_core_xbar_bus_atop[i]   ),
         .dma_ctrl_master          ( s_core_dmactrl_bus[i]     ),
