@@ -796,7 +796,7 @@ module pulp_cluster
     .boot_addr_o            ( boot_addr                          ),
     .core_busy_i            ( core_busy                          ),
     .core_clk_en_o          ( clk_core_en                        ),
-    .speriph_slave          ( s_xbar_speriph_bus[NB_SPERIPHS-2:0]),
+    .speriph_slave          ( s_xbar_speriph_bus[NB_SPERIPHS-1:0]),
     .core_eu_direct_link    ( s_core_euctrl_bus                  ),
     .dma_cfg_master         ( s_periph_dma_bus                   ),
     .dma_cl_event_i         ( s_dma_cl_event                     ),
