@@ -1,0 +1,18 @@
+package:
+  name: hier-icache
+
+sources:
+  - RTL/TOP/icache_hier_top.sv
+  - RTL/L1_CACHE/pri_icache_controller.sv
+  - RTL/L1_CACHE/pri_icache.sv
+  - RTL/L1.5_CACHE/AXI4_REFILL_Resp_Deserializer.sv
+  - RTL/L1.5_CACHE/share_icache.sv
+  - RTL/L1.5_CACHE/icache_controller.sv
+  - RTL/L1.5_CACHE/RefillTracker_4.sv
+  - RTL/L1.5_CACHE/REP_buffer_4.sv
+  - RTL/L1.5_CACHE/ram_ws_rs_data_scm.sv
+  - RTL/L1.5_CACHE/ram_ws_rs_tag_scm.sv
+  - CTRL_UNIT/hier_icache_ctrl_unit.sv
+  - CTRL_UNIT/hier_icache_ctrl_unit_wrap.sv
+  - RTL/TOP/hier_icache_demux.sv
+  - RTL/TOP/icache128_2_axi64.sv
