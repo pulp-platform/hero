@@ -323,8 +323,10 @@ module cluster_peripherals
     for (genvar i = 0; i < NB_CACHE_BANKS; i++) begin : gen_banks
       assign IC_ctrl_unit_bus_main[i].ctrl_req_enable = 1'b0;
       assign IC_ctrl_unit_bus_main[i].ctrl_req_disable = 1'b0;
-      assign IC_ctrl_unit_bus_main[i].flush_req = 1'b0;
+      assign IC_ctrl_unit_bus_main[i].ctrl_flush_req = 1'b0;
       assign IC_ctrl_unit_bus_main[i].icache_is_private = 1'b0;
+      assign IC_ctrl_unit_bus_main[i].sel_flush_req = 1'b0;
+      assign IC_ctrl_unit_bus_main[i].sel_flush_addr = '0;
       assign IC_ctrl_unit_bus_main[i].ctrl_clear_regs = 1'b0;
       assign IC_ctrl_unit_bus_main[i].ctrl_enable_regs = 1'b0;
     end
@@ -333,6 +335,7 @@ module cluster_peripherals
       assign IC_ctrl_unit_bus_pri[i].flush_req = 1'b0;
       assign IC_ctrl_unit_bus_pri[i].ctrl_clear_regs = 1'b0;
       assign IC_ctrl_unit_bus_pri[i].ctrl_enable_regs = 1'b0;
+      assign IC_ctrl_unit_bus_pri[i].sel_flush_req = 1'b0;
     end
     assign special_core_icache_cfg_o = 1'b0;
     assign enable_l1_l15_prefetch_o = '0;
@@ -378,8 +381,10 @@ module cluster_peripherals
     for (genvar i = 0; i < NB_CACHE_BANKS; i++) begin : gen_banks
       assign IC_ctrl_unit_bus_sp[i].ctrl_req_enable = 1'b0;
       assign IC_ctrl_unit_bus_sp[i].ctrl_req_disable = 1'b0;
-      assign IC_ctrl_unit_bus_sp[i].flush_req = 1'b0;
+      assign IC_ctrl_unit_bus_sp[i].ctrl_flush_req = 1'b0;
       assign IC_ctrl_unit_bus_sp[i].icache_is_private = 1'b0;
+      assign IC_ctrl_unit_bus_sp[i].sel_flush_req = 1'b0;
+      assign IC_ctrl_unit_bus_sp[i].sel_flush_addr = '0;
       assign IC_ctrl_unit_bus_sp[i].ctrl_clear_regs = 1'b0;
       assign IC_ctrl_unit_bus_sp[i].ctrl_enable_regs = 1'b0;
     end
