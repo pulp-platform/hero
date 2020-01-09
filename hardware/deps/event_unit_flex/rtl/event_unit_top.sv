@@ -29,6 +29,7 @@ module event_unit_top
   // all kinds of cluster internal events, split into different signals for readability
   input  logic [NB_CORES-1:0][3:0]  acc_events_i,
   input  logic [NB_CORES-1:0][1:0]  dma_events_i,
+  input  logic decompr_done_evt_i,
   input  logic [NB_CORES-1:0][1:0]  timer_events_i,
   // usually much less than 32 bit, only for flexibility for different chips
   input  logic [NB_CORES-1:0][31:0] cluster_events_i,
@@ -40,6 +41,9 @@ module event_unit_top
 
   input  logic [NB_CORES-1:0]       core_busy_i,
   output logic [NB_CORES-1:0]       core_clock_en_o,
+
+  input  logic [NB_CORES-1:0]       dbg_req_i,
+  output logic [NB_CORES-1:0]       core_dbg_req_o,
 
   // bus slave connections - periph bus and eu_direct_link
   XBAR_PERIPH_BUS.Slave     speriph_slave,
@@ -106,11 +110,11 @@ module event_unit_top
     logic [NB_CORES-1:0][1:0]  disp_reg_sel;
 
     // periph bus links to all subcomponents
-    XBAR_PERIPH_BUS periph_int_bus[NB_CORES+NB_BARR+2:0]();
+    XBAR_PERIPH_BUS#(NB_CORES+1) periph_int_bus[NB_CORES+NB_BARR+2:0]();
 
     // demux periph bus to eu_core and barrier units
-    XBAR_PERIPH_BUS demux_int_bus_core[NB_CORES-1:0]();
-    XBAR_PERIPH_BUS demux_int_bus_barrier[NB_CORES*NB_BARR-1:0]();
+    XBAR_PERIPH_BUS#(NB_CORES+1) demux_int_bus_core[NB_CORES-1:0]();
+    XBAR_PERIPH_BUS#(NB_CORES+1) demux_int_bus_barrier[NB_BARR-1:0]();
 
     genvar I,J,K;
 
@@ -137,6 +141,7 @@ module event_unit_top
       .dma_events_i        ( dma_events_i       ),
       .timer_events_i      ( timer_events_i     ),
       .cluster_events_i    ( cluster_events_i   ),
+      .decompr_done_evt_i  ( decompr_done_evt_i ),
 
       .events_mapped_o     ( cluster_int_events )
     );
@@ -182,14 +187,15 @@ module event_unit_top
       end
     endgenerate
 
-    // dummy assignments
+    // TODO dummy assignments
+    // was the external event mux. probably no longer needed
     assign periph_int_bus[NB_CORES+NB_BARR+2].gnt     = 1'b0;
     assign periph_int_bus[NB_CORES+NB_BARR+2].r_opc   = 1'b0;
     assign periph_int_bus[NB_CORES+NB_BARR+2].r_valid = 1'b0;
     assign periph_int_bus[NB_CORES+NB_BARR+2].r_rdata = '0;
     assign periph_int_bus[NB_CORES+NB_BARR+2].r_id    = '0;
 
-    // will become the master port for cluster messages
+    // will probably become the master port for cluster messages
     assign message_master.wdata = '0;
     assign message_master.req   = 1'b0;
     assign message_master.wen   = 1'b1;
@@ -253,40 +259,43 @@ module event_unit_top
           .NB_HW_MUT   ( NB_HW_MUT   ), 
           .MUTEX_MSG_W ( MUTEX_MSG_W ) )
         event_unit_core_i (
-          .clk_i                 ( clk_i                                         ),
-          .rst_ni                ( rst_ni                                        ),
-          .test_mode_i           ( test_mode_i                                   ),
+          .clk_i                 ( clk_i                          ),
+          .rst_ni                ( rst_ni                         ),
+          .test_mode_i           ( test_mode_i                    ),
   
-          .master_event_lines_i  ( cluster_int_events[I]                         ),
+          .master_event_lines_i  ( cluster_int_events[I]          ),
   
-          .core_sw_events_o      ( core_sw_events_transp[I][NB_SW_EVT-1:0]       ),
-          .core_sw_events_mask_o ( core_sw_events_mask_transp[I][NB_CORES-1:0]   ),
+          .core_sw_events_o      ( core_sw_events_transp[I]       ),
+          .core_sw_events_mask_o ( core_sw_events_mask_transp[I]  ),
   
-          .hw_barr_id_o          ( hw_barr_trigger[I][NB_BARR-1:0]               ),
+          .hw_barr_id_o          ( hw_barr_trigger[I]             ),
 
-          .mutex_rd_req_o        ( mutex_lock_req[I]                             ),
-          .mutex_wr_req_o        ( mutex_unlock_req[I]                           ),
-          .mutex_msg_wdata_o     ( mutex_msg_wdata[I]                            ),
-          .mutex_msg_rdata_i     ( mutex_msg_rdata                               ),
+          .mutex_rd_req_o        ( mutex_lock_req[I]              ),
+          .mutex_wr_req_o        ( mutex_unlock_req[I]            ),
+          .mutex_msg_wdata_o     ( mutex_msg_wdata[I]             ),
+          .mutex_msg_rdata_i     ( mutex_msg_rdata                ),
 
-          .dispatch_pop_req_o    ( disp_pop_req[I]                               ),
-          .dispatch_pop_ack_o    ( disp_pop_ack[I]                               ),
-          .dispatch_value_i      ( disp_value[I]                                 ),
+          .dispatch_pop_req_o    ( disp_pop_req[I]                ),
+          .dispatch_pop_ack_o    ( disp_pop_ack[I]                ),
+          .dispatch_value_i      ( disp_value[I]                  ),
 
-          .dispatch_w_req_o      ( disp_w_req[I]                                 ),
-          .dispatch_w_data_o     ( disp_w_data[I]                                ),
-          .dispatch_reg_sel_o    ( disp_reg_sel[I]                               ),
+          .dispatch_w_req_o      ( disp_w_req[I]                  ),
+          .dispatch_w_data_o     ( disp_w_data[I]                 ),
+          .dispatch_reg_sel_o    ( disp_reg_sel[I]                ),
 
-          .core_irq_req_o        ( core_irq_req_o[I]                             ),
-          .core_irq_id_o         ( core_irq_id_o[I]                              ),
-          .core_irq_ack_i        ( core_irq_ack_i[I]                             ),
-          .core_irq_ack_id_i     ( core_irq_ack_id_i[I]                          ),
+          .core_irq_req_o        ( core_irq_req_o[I]              ),
+          .core_irq_id_o         ( core_irq_id_o[I]               ),
+          .core_irq_ack_i        ( core_irq_ack_i[I]              ),
+          .core_irq_ack_id_i     ( core_irq_ack_id_i[I]           ),
 
-          .core_busy_i           ( core_busy_i[I]                                ),
-          .core_clock_en_o       ( core_clock_en_o[I]                            ),
+          .core_busy_i           ( core_busy_i[I]                 ),
+          .core_clock_en_o       ( core_clock_en_o[I]             ),
+
+          .dbg_req_i             ( dbg_req_i[I]                   ),
+          .core_dbg_req_o        ( core_dbg_req_o[I]              ),
   
-          .periph_int_bus_slave  ( periph_int_bus[I]                             ),
-          .eu_direct_link_slave  ( demux_int_bus_core[I]                         )
+          .periph_int_bus_slave  ( periph_int_bus[I]              ),
+          .eu_direct_link_slave  ( demux_int_bus_core[I]          )
         );
       end
     endgenerate
@@ -298,15 +307,15 @@ module event_unit_top
         hw_barrier_unit #(
           .NB_CORES ( NB_CORES ) )
         hw_barrier_unit_i (
-          .clk_i                  ( clk_i                                              ),
-          .rst_ni                 ( rst_ni                                             ),
+          .clk_i                  ( clk_i                             ),
+          .rst_ni                 ( rst_ni                            ),
 
-          .barrier_trigger_core_i ( hw_barr_trigger_transp[I]                          ),
-          .barrier_status_o       (                                                    ),
-          .barrier_events_o       ( cluster_int_events_barr_transp[I]                  ),
+          .barrier_trigger_core_i ( hw_barr_trigger_transp[I]         ),
+          .barrier_status_o       (                                   ),
+          .barrier_events_o       ( cluster_int_events_barr_transp[I] ),
 
-          .demux_bus_slaves       ( demux_int_bus_barrier[(I+1)*NB_CORES-1:I*NB_CORES] ),
-          .periph_bus_slave       ( periph_int_bus[NB_CORES+I]                         )
+          .demux_bus_slave        ( demux_int_bus_barrier[I]          ),
+          .periph_bus_slave       ( periph_int_bus[NB_CORES+I]        )
         );
       end
     endgenerate

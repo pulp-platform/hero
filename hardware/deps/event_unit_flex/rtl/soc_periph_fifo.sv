@@ -88,7 +88,7 @@ module soc_periph_fifo
     end
   end
 
-`ifdef SIM
+  `ifdef SIM
 
   // synopsys translate_off
   // generate random data to initialize FIFO for functional rtl verification
@@ -102,7 +102,7 @@ module soc_periph_fifo
   endgenerate
   // synopsys translate_on
 
-`endif
+  `endif
 
   // register setup
   always_ff @(posedge clk_i, negedge rst_ni)

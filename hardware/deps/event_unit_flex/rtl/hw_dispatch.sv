@@ -39,7 +39,7 @@ module hw_dispatch
 
   logic [NB_CORES-1:0] core_set_conf_DP, core_set_conf_DN;
   logic [NB_CORES-1:0] req_in_progr_SP, req_in_progr_SN;
-  logic [NB_CORES-1:0] incr_rptr_del_SP, incr_rptr_del_SN;
+  logic [NB_CORES-1:0] incr_rptr_del_SP;
 
   logic [FIFO_DEPTH-1:0][NB_CORES-1:0] core_set_stat_DP, core_set_stat_DN;
 
@@ -89,7 +89,6 @@ module hw_dispatch
 
         req_in_progr_SN[I]  = req_in_progr_SP[I];
         read_ptr_DN[I]      = read_ptr_DP[I];
-        incr_rptr_del_SN[I] = 1'b0;
 
         // check for and register incoming requests
         if ( pop_req_i[I] | req_in_progr_SP[I] ) begin
@@ -108,7 +107,6 @@ module hw_dispatch
         // handle the case where a dispatch value has been successfully read
         if ( req_in_progr_SP[I] &  pop_ack_i[I] ) begin
           req_in_progr_SN[I]  = 1'b0;
-          incr_rptr_del_SN[I] = 1'b1;
 
           clr_core_stat[I][read_ptr_DP[I]] = 1'b1;
         end
@@ -161,19 +159,25 @@ module hw_dispatch
       if ( |w_req_int[1] ) 
         core_set_conf_DP <= w_data_int_red[1][NB_CORES-1:0];
 
-      for (int unsigned index=0; index<NB_CORES; index++) begin
-        if ( req_in_progr_SP[index] &  pop_ack_i[index] )
-          incr_rptr_del_SP[index] <= 1'b1;
+      for (int i=0; i<NB_CORES; i++) begin
+        if ( req_in_progr_SP[i] &  pop_ack_i[i] )
+          incr_rptr_del_SP[i] <= 1'b1;
         else
-          incr_rptr_del_SP[index] <= 1'b0;
+          incr_rptr_del_SP[i] <= 1'b0;
       end
 
       req_in_progr_SP  <= req_in_progr_SN;
 
-      core_set_stat_DP <= core_set_stat_DN;
+      for (int i=0; i<FIFO_DEPTH; i++) begin
+        if (|w_req_int[0] | |clr_core_stat_transp[i])
+          core_set_stat_DP[i] <= core_set_stat_DN[i];
+      end
+
       read_ptr_DP      <= read_ptr_DN;
       write_ptr_DP     <= write_ptr_DN;
     end
   end
+
+
 
 endmodule // hw_dispatch

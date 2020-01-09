@@ -114,7 +114,7 @@ module hw_mutex_unit
     end
   end
 
-`ifdef SIM
+  `ifdef SIM
 
   // synopsys translate_off
   // check illegal locks and unlocks
@@ -147,7 +147,7 @@ module hw_mutex_unit
   
   // synopsys translate_on
 
-`endif
+  `endif
 
 endmodule // hw_mutex_unit
 
