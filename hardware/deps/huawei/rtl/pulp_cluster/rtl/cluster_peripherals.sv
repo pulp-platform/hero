@@ -313,7 +313,7 @@ module cluster_peripherals
   //******************** icache_ctrl_unit ******************
   //********************************************************
 
-  if (PRIVATE_ICACHE) begin : gen_pri_icache_ctrl
+  if (PRI_ICACHE) begin : gen_pri_icache_ctrl
     hier_icache_ctrl_unit_wrap #(
       .NB_CACHE_BANKS(NB_CACHE_BANKS),
       .NB_CORES(NB_CORES),
