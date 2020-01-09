@@ -54,7 +54,7 @@ module cluster_peripherals
   XBAR_PERIPH_BUS.Slave               speriph_slave[NB_SPERIPHS-2:0],
   XBAR_PERIPH_BUS.Slave               core_eu_direct_link[NB_CORES-1:0],
 
-  XBAR_PERIPH_BUS.Master              dma_cfg_master[1:0],
+  XBAR_PERIPH_BUS.Master              dma_cfg_master,
   input logic                         dma_cl_event_i,
   input logic                         dma_cl_irq_i,
 
@@ -254,18 +254,18 @@ module cluster_peripherals
     //******************** DMA CL CONFIG PORT ****************
     //********************************************************
 
-    assign speriph_slave[SPER_DMA_CL_ID].gnt     = dma_cfg_master[0].gnt;
-    assign speriph_slave[SPER_DMA_CL_ID].r_rdata = dma_cfg_master[0].r_rdata;
-    assign speriph_slave[SPER_DMA_CL_ID].r_opc   = dma_cfg_master[0].r_opc;
-    assign speriph_slave[SPER_DMA_CL_ID].r_id    = dma_cfg_master[0].r_id;
-    assign speriph_slave[SPER_DMA_CL_ID].r_valid = dma_cfg_master[0].r_valid;
+    assign speriph_slave[SPER_DMA_CL_ID].gnt     = dma_cfg_master.gnt;
+    assign speriph_slave[SPER_DMA_CL_ID].r_rdata = dma_cfg_master.r_rdata;
+    assign speriph_slave[SPER_DMA_CL_ID].r_opc   = dma_cfg_master.r_opc;
+    assign speriph_slave[SPER_DMA_CL_ID].r_id    = dma_cfg_master.r_id;
+    assign speriph_slave[SPER_DMA_CL_ID].r_valid = dma_cfg_master.r_valid;
 
-    assign dma_cfg_master[0].req   = speriph_slave[SPER_DMA_CL_ID].req;
-    assign dma_cfg_master[0].add   = speriph_slave[SPER_DMA_CL_ID].add;
-    assign dma_cfg_master[0].wen   = speriph_slave[SPER_DMA_CL_ID].wen;
-    assign dma_cfg_master[0].wdata = speriph_slave[SPER_DMA_CL_ID].wdata;
-    assign dma_cfg_master[0].be    = speriph_slave[SPER_DMA_CL_ID].be;
-    assign dma_cfg_master[0].id    = speriph_slave[SPER_DMA_CL_ID].id;
+    assign dma_cfg_master.req   = speriph_slave[SPER_DMA_CL_ID].req;
+    assign dma_cfg_master.add   = speriph_slave[SPER_DMA_CL_ID].add;
+    assign dma_cfg_master.wen   = speriph_slave[SPER_DMA_CL_ID].wen;
+    assign dma_cfg_master.wdata = speriph_slave[SPER_DMA_CL_ID].wdata;
+    assign dma_cfg_master.be    = speriph_slave[SPER_DMA_CL_ID].be;
+    assign dma_cfg_master.id    = speriph_slave[SPER_DMA_CL_ID].id;
 
     //********************************************************
     //******************** HW ACC  ***************************
