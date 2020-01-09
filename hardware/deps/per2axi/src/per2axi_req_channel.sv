@@ -22,6 +22,7 @@ module per2axi_req_channel
    parameter AXI_DATA_WIDTH = 64,
    parameter AXI_USER_WIDTH = 6,
    parameter AXI_ID_WIDTH   = 3,
+   parameter bit EN_TRYX = 1'b0,
    parameter type tryx_req_t = logic,
    // LOCAL PARAMETERS --> DO NOT OVERRIDE
    parameter AXI_STRB_WIDTH = AXI_DATA_WIDTH/8 // DO NOT OVERRIDE
@@ -285,8 +286,13 @@ module per2axi_req_channel
    assign atop_add_o  = axi_master_aw_addr_o;
 
    // AXI ADDRESS GENERATION
-   assign axi_master_aw_addr_o = {tryx_req_i[axi_master_aw_id_o].addrext, per_slave_add_i};
-   assign axi_master_ar_addr_o = {tryx_req_i[axi_master_ar_id_o].addrext, per_slave_add_i};
+   if (EN_TRYX) begin : gen_tryx_addr
+      assign axi_master_aw_addr_o = {tryx_req_i[axi_master_aw_id_o].addrext, per_slave_add_i};
+      assign axi_master_ar_addr_o = {tryx_req_i[axi_master_ar_id_o].addrext, per_slave_add_i};
+   end else begin : gen_no_tryx_addr
+      assign axi_master_aw_addr_o = per_slave_add_i;
+      assign axi_master_ar_addr_o = per_slave_add_i;
+   end
 
    // UNUSED SIGNALS
    assign axi_master_aw_prot_o   = '0;
@@ -294,15 +300,23 @@ module per2axi_req_channel
    assign axi_master_aw_len_o    = '0;
    assign axi_master_aw_cache_o  = '0;
    assign axi_master_aw_qos_o    = '0;
-   assign axi_master_aw_user_o   = tryx_req_i[axi_master_aw_id_o].user;
+   if (EN_TRYX) begin : gen_tryx_aw_user
+      assign axi_master_aw_user_o = tryx_req_i[axi_master_aw_id_o].user;
+   end else begin : gen_no_tryx_aw_user
+      assign axi_master_aw_user_o = '0;
+   end
 
    assign axi_master_ar_prot_o   = '0;
    assign axi_master_ar_region_o = '0;
    assign axi_master_ar_len_o    = '0;
    assign axi_master_ar_cache_o  = '0;
    assign axi_master_ar_qos_o    = '0;
-   assign axi_master_ar_user_o   = tryx_req_i[axi_master_ar_id_o].user;
-   
+   if (EN_TRYX) begin : gen_tryx_ar_user
+      assign axi_master_ar_user_o = tryx_req_i[axi_master_ar_id_o].user;
+   end else begin : gen_no_tryx_ar_user
+      assign axi_master_ar_user_o = '0;
+   end
+
    assign axi_master_w_user_o    = '0;
    
 endmodule

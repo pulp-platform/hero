@@ -20,6 +20,7 @@ module per2axi
    parameter AXI_USER_WIDTH = 6,
    parameter AXI_ID_WIDTH   = 3,
    parameter AXI_STRB_WIDTH = AXI_DATA_WIDTH/8,
+   parameter bit EN_TRYX    = 1'b0,
    parameter type tryx_req_t = logic
 )
 (
@@ -182,6 +183,7 @@ module per2axi
       .AXI_DATA_WIDTH   ( AXI_DATA_WIDTH  ),
       .AXI_USER_WIDTH   ( AXI_USER_WIDTH  ),
       .AXI_ID_WIDTH     ( AXI_ID_WIDTH    ),
+      .EN_TRYX          ( EN_TRYX         ),
       .tryx_req_t       ( tryx_req_t      )
    )
    req_channel_i
