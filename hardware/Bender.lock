@@ -116,6 +116,12 @@ packages:
       Git: "https://github.com/pulp-platform/fpga-support.git"
     dependencies:
       - common_cells
+  hier-icache:
+    revision: e2739360df1170fe200dab54b7393286ae51ace5
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/hier-icache.git"
+    dependencies: []
   icache-intc:
     revision: 42aee659c80b682ceb7a74ec3f8fd9ba054fea59
     version: 1.0.0
@@ -164,6 +170,7 @@ packages:
       - cluster_peripherals
       - event_unit_flex
       - fpga-support
+      - hier-icache
       - icache_mp_128_pf
       - mchan
       - per2axi
