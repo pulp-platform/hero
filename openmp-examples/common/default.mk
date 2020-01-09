@@ -25,7 +25,6 @@ CFLAGS_PULP += $(CFLAGS_COMMON) -march=rv32imafcXpulpv2
 LDFLAGS_PULP += $(LDFLAGS_COMMON) -lgomp -L$(PULP_SDK_INSTALL)/lib/hero-huawei
 LDFLAGS_PULP += -T $(PULP_SDK_INSTALL)/hero/omptarget.ld
 
-INCPATHS += -I$(DEFMK_ROOT) -include hero_64.h
 INCPATHS += -I$(DEFMK_ROOT)/../../support/libhero-target/inc
 INCPATHS += -I$(DEFMK_ROOT)/../common/gcc
 LIBPATHS ?=

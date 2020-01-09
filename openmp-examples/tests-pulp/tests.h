@@ -20,7 +20,6 @@
 unsigned test_atomic();
 unsigned test_dma();
 unsigned test_floats();
-unsigned test_hero_64();
 unsigned test_m_instrs();
 unsigned test_intrinsics();
 
