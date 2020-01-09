@@ -43,7 +43,7 @@ module pulp_cluster
 
   // I$ parameters
   parameter int SET_ASSOCIATIVE           = 4,
-  parameter bit PRIV_ICACHE               = 1'b0,
+  parameter bit PRIV_ICACHE               = 1'b1,
   parameter bit MP_ICACHE                 = 1'b0,
   parameter bit SP_ICACHE                 = 1'b0,
   parameter int NB_CACHE_BANKS            = PRIV_ICACHE ? 2 : 8,
