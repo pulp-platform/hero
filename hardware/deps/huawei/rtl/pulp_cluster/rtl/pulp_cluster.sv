@@ -801,8 +801,6 @@ module pulp_cluster
     .dma_cfg_master         ( s_periph_dma_bus                   ),
     .dma_cl_event_i         ( s_dma_cl_event                     ),
     .dma_cl_irq_i           ( s_dma_cl_irq                       ),
-    .dma_fc_event_i         ( '0                                 ),
-    .dma_fc_irq_i           ( '0                                 ),
 
     .soc_periph_evt_ready_o ( s_events_ready                     ),
     .soc_periph_evt_valid_i ( s_events_valid                     ),
