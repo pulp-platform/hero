@@ -52,11 +52,7 @@ module event_unit_top
   // soc periph events
   input  logic                  soc_periph_evt_valid_i,
   output logic                  soc_periph_evt_ready_o,
-  input  logic [EVNT_WIDTH-1:0] soc_periph_evt_data_i,
-
-  // message bus connections - dummy implementation
-  MESSAGE_BUS.Master        message_master
-
+  input  logic [EVNT_WIDTH-1:0] soc_periph_evt_data_i
  );
 
     // event lines from soc periph fifo and inter-cluster event dispatch
@@ -194,15 +190,6 @@ module event_unit_top
     assign periph_int_bus[NB_CORES+NB_BARR+2].r_valid = 1'b0;
     assign periph_int_bus[NB_CORES+NB_BARR+2].r_rdata = '0;
     assign periph_int_bus[NB_CORES+NB_BARR+2].r_id    = '0;
-
-    // will probably become the master port for cluster messages
-    assign message_master.wdata = '0;
-    assign message_master.req   = 1'b0;
-    assign message_master.wen   = 1'b1;
-    assign message_master.add   = '0;
-    assign message_master.be    = '0;
-    assign message_master.id    = '0;
-
 
     event_unit_interface_mux #(
       .NB_CORES ( NB_CORES ),
