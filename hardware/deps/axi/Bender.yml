@@ -43,7 +43,6 @@ sources:
   - src/axi_modify_address.sv
   - src/axi_read_burst_buffer.sv
   - src/axi_to_axi_lite.sv
-  - src/axi_write_burst_packer.sv
   # Level 3
   - src/axi_bypass_wrap.sv
   - src/axi_data_width_converter.sv
