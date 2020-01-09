@@ -1010,19 +1010,7 @@ module pulp_cluster
   /* cluster-coupled accelerators / HW processing engines */
   generate
     if(HWPE_PRESENT == 1) begin : hwpe_gen
-      hwpe_subsystem #(
-        .N_CORES       ( NB_CORES             ),
-        .N_MASTER_PORT ( 4                    ),
-        .ID_WIDTH      ( NB_CORES+NB_MPERIPHS )
-      ) hwpe_subsystem_i (
-        .clk               ( clk_cluster                                        ),
-        .rst_n             ( s_rst_n                                            ),
-        .test_mode         ( test_mode_i                                        ),
-        .hwpe_xbar_master  ( s_core_xbar_bus[NB_CORES+NB_HWPE_PORTS-1:NB_CORES] ),
-        .hwpe_cfg_slave    ( s_hwpe_cfg_bus                                     ),
-        .evt_o             ( s_hwpe_evt                                         ),
-        .busy_o            ( s_hwpe_busy                                        )
-      );
+      // insert HWPE subsystem here
     end
     else begin : no_hwpe_gen
       assign s_hwpe_cfg_bus.r_valid = '1;
