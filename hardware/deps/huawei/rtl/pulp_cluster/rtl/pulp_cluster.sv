@@ -32,8 +32,6 @@ module pulp_cluster
   parameter int NB_HWPE_PORTS       = 0,
   parameter int NB_DMAS             = 4,
   parameter int NB_EXT2MEM          = 2,
-  parameter int NB_MPERIPHS         = 1,
-  parameter int NB_SPERIPHS         = 8,
   parameter bit CLUSTER_ALIAS       = 1'b1,
   parameter int CLUSTER_ALIAS_BASE  = 12'h1B0,
   parameter int TCDM_SIZE           = 64*1024,                 // [B], must be 2**N
@@ -860,9 +858,7 @@ module pulp_cluster
         .ADDREXT                   ( 1'b0                     ),
         .DEM_PER_BEFORE_TCDM_TS    ( DEM_PER_BEFORE_TCDM_TS   ),
         .FPU                       ( CLUST_FPU                ),
-        .FP_DIVSQRT                ( CLUST_FP_DIVSQRT         ),
-        .SHARED_FP                 ( CLUST_SHARED_FP          ),
-        .SHARED_FP_DIVSQRT         ( CLUST_SHARED_FP_DIVSQRT  )
+        .FP_DIVSQRT                ( CLUST_FP_DIVSQRT         )
       ) core_region_i (
         .clk_i                    ( clk_cluster               ),
         .rst_ni                   ( s_rst_n                   ),
