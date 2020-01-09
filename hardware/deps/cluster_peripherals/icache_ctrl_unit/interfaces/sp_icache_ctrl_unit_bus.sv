@@ -15,9 +15,12 @@ interface SP_ICACHE_CTRL_UNIT_BUS;
   logic        ctrl_req_disable;
   logic        ctrl_ack_disable;
   logic        ctrl_pending_trans;
-  logic        flush_req;
-  logic        flush_ack;
+  logic        ctrl_flush_req;
+  logic        ctrl_flush_ack;
   logic        icache_is_private;
+  logic        sel_flush_req;
+  logic [31:0] sel_flush_addr;
+  logic        sel_flush_ack;
   logic [31:0] ctrl_hit_count;
   logic [31:0] ctrl_trans_count;
   logic [31:0] ctrl_miss_count;
@@ -25,17 +28,17 @@ interface SP_ICACHE_CTRL_UNIT_BUS;
   logic        ctrl_enable_regs;
 
   modport Master (
-    output  ctrl_req_enable, ctrl_req_disable, flush_req, icache_is_private, ctrl_clear_regs,
-            ctrl_enable_regs,
-    input   flush_ack, ctrl_ack_enable, ctrl_ack_disable, ctrl_pending_trans, ctrl_hit_count,
-            ctrl_trans_count, ctrl_miss_count
+    output  ctrl_req_enable, ctrl_req_disable, ctrl_flush_req, icache_is_private, sel_flush_req,
+            sel_flush_addr, ctrl_clear_regs, ctrl_enable_regs,
+    input   ctrl_flush_ack, ctrl_ack_enable, ctrl_ack_disable, ctrl_pending_trans, sel_flush_ack,
+            ctrl_hit_count, ctrl_trans_count, ctrl_miss_count
   );
 
   modport Slave (
-    input   ctrl_req_enable, ctrl_req_disable, flush_req, icache_is_private, ctrl_clear_regs,
-            ctrl_enable_regs,
-    output  flush_ack, ctrl_ack_enable, ctrl_ack_disable, ctrl_pending_trans, ctrl_hit_count,
-            ctrl_trans_count, ctrl_miss_count
+    input   ctrl_req_enable, ctrl_req_disable, ctrl_flush_req, icache_is_private, sel_flush_req,
+            sel_flush_addr, ctrl_clear_regs, ctrl_enable_regs,
+    output  ctrl_flush_ack, ctrl_ack_enable, ctrl_ack_disable, ctrl_pending_trans, sel_flush_ack,
+            ctrl_hit_count, ctrl_trans_count, ctrl_miss_count
   );
 
 endinterface
