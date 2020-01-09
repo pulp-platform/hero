@@ -36,10 +36,20 @@ copy_git_files toolchain Makefile
 cd "$SRC"
 copy_git_files pulp
 
+# PULP software: Git-init SDK
+cd "$TMP_DST/pulp/sdk"
+git init
+git config --local user.name 'Packager'
+git config --local user.email 'packager@localhost'
+git add -A
+git commit -m 'initial commit'
+cd "$SRC"
+
 # Setup script: copy to destination.
 rsync -av setup.sh "$TMP_DST/"
 
 # Create archive from temporary destination directory.
+sleep 1 # give Git time to settle
 tar -C "$TMP_DST" -czf "$SRC/hero_huawei.tar.gz" .
 
 # Remove temporary directories.
