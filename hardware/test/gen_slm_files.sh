@@ -4,7 +4,7 @@ set -e
 
 readonly script_path="$( cd "$(dirname "$0")" ; pwd -P )"
 readonly slm_path="$script_path/slm_files"
-readonly examples_path="$script_path/../../openmp-examples"
+readonly examples_path="$script_path/../../example-apps"
 
 slm_conv='slm_conv-0.3'
 if ! which $slm_conv &>/dev/null; then
