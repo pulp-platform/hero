@@ -15,6 +15,11 @@
 #define EU_SW_EVENTS_DEMUX_OFFSET 0x0100
 #define EU_CORE_TRIGG_SW_EVENT 0x00
 
+#if defined(__GNUC__)
+  #define __builtin_bitinsert(dst, src, size, off) \
+    __builtin_pulp_binsert((dst), ~(((1<<(size))-1)<<(off)), (src), (((1<<(size))-1)<<(off)), (off))
+#endif
+
 // test bit extensions
 unsigned check_bitext()
 {
