@@ -13,12 +13,11 @@
 `include "mchan_defines.sv"
 
 module mchan
-  #(
-    
-    parameter NB_CORES                 = 4,  // NUMBER OF CORES
+#( 
+    parameter NB_CTRLS                 = 4,  // NUMBER OF CTRLS
     parameter NB_TRANSFERS             = 8,  // NUMBER OF TRANSFERS
     
-    parameter CORE_TRANS_QUEUE_DEPTH   = 2,  // DEPTH OF PRIVATE PER-CORE COMMAND QUEUE (CTRL_UNIT)
+    parameter CTRL_TRANS_QUEUE_DEPTH   = 2,  // DEPTH OF PRIVATE PER-CTRL COMMAND QUEUE (CTRL_UNIT)
     parameter GLOBAL_TRANS_QUEUE_DEPTH = 2,  // DEPTH OF GLOBAL COMMAND QUEUE (CTRL_UNIT)
     parameter TWD_QUEUE_DEPTH          = 4,  // DEPTH OF GLOBAL 2D COMMAND QUEUE (CTRL_UNIT)
     
@@ -34,54 +33,43 @@ module mchan
     parameter AXI_ID_WIDTH             = 4,
     parameter AXI_STRB_WIDTH           = AXI_DATA_WIDTH/8,
 
-    parameter PE_ID_WIDTH              = 1
-    
-    )
-   (
+    parameter PE_ID_WIDTH              = 1,
+    parameter TRANS_SID_WIDTH          = (NB_TRANSFERS == 1) ? 1 : $clog2(NB_TRANSFERS)
+)
+(
     
     input  logic                      clk_i,
     input  logic                      rst_ni,
     
     input logic                       test_mode_i,
-
-    // PE CONTROL TARGET
-    //***************************************
-    input  logic                      ctrl_pe_targ_req_i,
-    input  logic                      ctrl_pe_targ_type_i,
-    input  logic [3:0]                ctrl_pe_targ_be_i,
-    input  logic [31:0]               ctrl_pe_targ_add_i,
-    input  logic [31:0]               ctrl_pe_targ_data_i,
-    input  logic [PE_ID_WIDTH-1:0]    ctrl_pe_targ_id_i,
-    output logic                      ctrl_pe_targ_gnt_o,
-    
-    output logic                      ctrl_pe_targ_r_valid_o,
-    output logic [31:0]               ctrl_pe_targ_r_data_o,
-    output logic                      ctrl_pe_targ_r_opc_o,
-    output logic [PE_ID_WIDTH-1:0]    ctrl_pe_targ_r_id_o,
     
     // CONTROL TARGET
     //***************************************
-    input  logic [NB_CORES-1:0]       ctrl_targ_req_i,
-    input  logic [NB_CORES-1:0]       ctrl_targ_type_i,
-    input  logic [NB_CORES-1:0][3:0]  ctrl_targ_be_i,
-    input  logic [NB_CORES-1:0][31:0] ctrl_targ_add_i,
-    input  logic [NB_CORES-1:0][31:0] ctrl_targ_data_i,
-    output logic [NB_CORES-1:0]       ctrl_targ_gnt_o,
+    input  logic [NB_CTRLS-1:0]       ctrl_targ_req_i,
+    input  logic [NB_CTRLS-1:0]       ctrl_targ_type_i,
+    input  logic [NB_CTRLS-1:0][3:0]  ctrl_targ_be_i,
+    input  logic [NB_CTRLS-1:0][31:0] ctrl_targ_add_i,
+    input  logic [NB_CTRLS-1:0][31:0] ctrl_targ_data_i,
+    input  logic [NB_CTRLS-1:0][PE_ID_WIDTH-1:0] ctrl_targ_id_i,
+    output logic [NB_CTRLS-1:0]       ctrl_targ_gnt_o,
     
-    output logic [NB_CORES-1:0]       ctrl_targ_r_valid_o,
-    output logic [NB_CORES-1:0][31:0] ctrl_targ_r_data_o,
+    output logic [NB_CTRLS-1:0]       ctrl_targ_r_valid_o,
+    output logic [NB_CTRLS-1:0][31:0] ctrl_targ_r_data_o,
+    output logic [NB_CTRLS-1:0]       ctrl_targ_r_opc_o,
+    output logic [NB_CTRLS-1:0][PE_ID_WIDTH-1:0] ctrl_targ_r_id_o,
     
     // TCDM INITIATOR
     //***************************************
-    output logic [3:0]                tcdm_init_req_o,
-    output logic [3:0][31:0]          tcdm_init_add_o,
-    output logic [3:0]                tcdm_init_type_o,
-    output logic [3:0][3:0]           tcdm_init_be_o,
-    output logic [3:0][31:0]          tcdm_init_data_o,
-    input  logic [3:0]                tcdm_init_gnt_i,
+    output logic [3:0]                      tcdm_init_req_o,
+    output logic [3:0][31:0]                tcdm_init_add_o,
+    output logic [3:0]                      tcdm_init_type_o,
+    output logic [3:0][3:0]                 tcdm_init_be_o,
+    output logic [3:0][31:0]                tcdm_init_data_o,
+    output logic [3:0][TRANS_SID_WIDTH-1:0] tcdm_init_sid_o,
+    input  logic [3:0]                      tcdm_init_gnt_i,
     
-    input  logic [3:0]                tcdm_init_r_valid_i,
-    input  logic [3:0][31:0]          tcdm_init_r_data_i,
+    input  logic [3:0]                      tcdm_init_r_valid_i,
+    input  logic [3:0][31:0]                tcdm_init_r_data_i,
     
     // AXI4 MASTER
     //***************************************
@@ -90,7 +78,6 @@ module mchan
     output logic [AXI_ADDR_WIDTH-1:0] axi_master_aw_addr_o,
     output logic [2:0]                axi_master_aw_prot_o,
     output logic [3:0]                axi_master_aw_region_o,
-    output logic [5:0]                axi_master_aw_atop_o,
     output logic [7:0]                axi_master_aw_len_o,
     output logic [2:0]                axi_master_aw_size_o,
     output logic [1:0]                axi_master_aw_burst_o,
@@ -142,8 +129,8 @@ module mchan
     
     // TERMINATION EVENTS
     //***************************************
-    output logic [NB_CORES:0]         term_evt_o,
-    output logic [NB_CORES:0]         term_int_o,
+    output logic [NB_CTRLS-1:0]       term_evt_o,
+    output logic [NB_CTRLS-1:0]       term_int_o,
     
     // BUSY SIGNAL
     //***************************************
@@ -152,11 +139,11 @@ module mchan
     );
    
    // LOCAL PARAMETERS
-   localparam TRANS_SID_WIDTH = $clog2(NB_TRANSFERS);
+   
    localparam TCDM_OPC_WIDTH  = `TCDM_OPC_WIDTH;
    localparam EXT_OPC_WIDTH   = `EXT_OPC_WIDTH;
    localparam MCHAN_LEN_WIDTH = `MCHAN_LEN_WIDTH;
-   localparam EXT_TID_WIDTH   = $clog2(NB_OUTSND_TRANS);
+   localparam EXT_TID_WIDTH   = (NB_OUTSND_TRANS ==1) ? 1 : $clog2(NB_OUTSND_TRANS);
    
    // SIGNALS
    logic                              s_clk_gated;
@@ -195,16 +182,16 @@ module mchan
    
    ctrl_unit
      #(
-       .NB_CORES(NB_CORES),
-       .NB_TRANSFERS(NB_TRANSFERS),
-       .CORE_TRANS_QUEUE_DEPTH(CORE_TRANS_QUEUE_DEPTH),
-       .GLOBAL_TRANS_QUEUE_DEPTH(GLOBAL_TRANS_QUEUE_DEPTH),
-       .TWD_QUEUE_DEPTH(TWD_QUEUE_DEPTH),
-       .TCDM_ADD_WIDTH(TCDM_ADD_WIDTH),
-       .EXT_ADD_WIDTH(EXT_ADD_WIDTH),
-       .TRANS_SID_WIDTH(TRANS_SID_WIDTH),
-       .MCHAN_BURST_LENGTH(MCHAN_BURST_LENGTH),
-       .PE_ID_WIDTH(PE_ID_WIDTH)
+       .NB_CTRLS                 ( NB_CTRLS                 ),
+       .NB_TRANSFERS             ( NB_TRANSFERS             ),
+       .CTRL_TRANS_QUEUE_DEPTH   ( CTRL_TRANS_QUEUE_DEPTH   ),
+       .GLOBAL_TRANS_QUEUE_DEPTH ( GLOBAL_TRANS_QUEUE_DEPTH ),
+       .TWD_QUEUE_DEPTH          ( TWD_QUEUE_DEPTH          ),
+       .TCDM_ADD_WIDTH           ( TCDM_ADD_WIDTH           ),
+       .EXT_ADD_WIDTH            ( EXT_ADD_WIDTH            ),
+       .TRANS_SID_WIDTH          ( TRANS_SID_WIDTH          ),
+       .MCHAN_BURST_LENGTH       ( MCHAN_BURST_LENGTH       ),
+       .PE_ID_WIDTH              ( PE_ID_WIDTH              )
        )
    ctrl_unit_i
      (
@@ -216,28 +203,18 @@ module mchan
       
       .clk_gated_o(s_clk_gated),
       
-      .ctrl_pe_targ_req_i(ctrl_pe_targ_req_i),
-      .ctrl_pe_targ_type_i(ctrl_pe_targ_type_i),
-      .ctrl_pe_targ_be_i(ctrl_pe_targ_be_i),
-      .ctrl_pe_targ_add_i(ctrl_pe_targ_add_i),
-      .ctrl_pe_targ_data_i(ctrl_pe_targ_data_i),
-      .ctrl_pe_targ_id_i(ctrl_pe_targ_id_i),
-      .ctrl_pe_targ_gnt_o(ctrl_pe_targ_gnt_o),
-      
-      .ctrl_pe_targ_r_valid_o(ctrl_pe_targ_r_valid_o),
-      .ctrl_pe_targ_r_data_o(ctrl_pe_targ_r_data_o),
-      .ctrl_pe_targ_r_opc_o(ctrl_pe_targ_r_opc_o),
-      .ctrl_pe_targ_r_id_o(ctrl_pe_targ_r_id_o),
-      
       .ctrl_targ_req_i(ctrl_targ_req_i),
       .ctrl_targ_add_i(ctrl_targ_add_i),
       .ctrl_targ_type_i(ctrl_targ_type_i),
       .ctrl_targ_be_i (ctrl_targ_be_i),
       .ctrl_targ_data_i(ctrl_targ_data_i),
+      .ctrl_targ_id_i(ctrl_targ_id_i),
       .ctrl_targ_gnt_o(ctrl_targ_gnt_o),
       
       .ctrl_targ_r_valid_o(ctrl_targ_r_valid_o),
       .ctrl_targ_r_data_o(ctrl_targ_r_data_o),
+      .ctrl_targ_r_opc_o(ctrl_targ_r_opc_o),
+      .ctrl_targ_r_id_o(ctrl_targ_r_id_o),
       
       .tcdm_tx_sid_o(s_tcdm_tx_sid),
       .tcdm_tx_add_o(s_tcdm_tx_add),
@@ -304,19 +281,21 @@ module mchan
        .EXT_OPC_WIDTH(EXT_OPC_WIDTH),
        .EXT_TID_WIDTH(EXT_TID_WIDTH),
        .TCDM_ADD_WIDTH(TCDM_ADD_WIDTH),
-       .TCDM_OPC_WIDTH(TCDM_OPC_WIDTH)
+       .TCDM_OPC_WIDTH(TCDM_OPC_WIDTH),
+       .MCHAN_LEN_WIDTH(MCHAN_LEN_WIDTH)
        )
    ext_unit_i
      (
       
       .clk_i(s_clk_gated),
       .rst_ni(rst_ni),
+
+      .test_mode_i(test_mode_i),
       
       .axi_master_aw_valid_o(axi_master_aw_valid_o),
       .axi_master_aw_addr_o(axi_master_aw_addr_o),
       .axi_master_aw_prot_o(axi_master_aw_prot_o),
       .axi_master_aw_region_o(axi_master_aw_region_o),
-      .axi_master_aw_atop_o(axi_master_aw_atop_o),
       .axi_master_aw_len_o(axi_master_aw_len_o),
       .axi_master_aw_size_o(axi_master_aw_size_o),
       .axi_master_aw_burst_o(axi_master_aw_burst_o),
@@ -414,22 +393,26 @@ module mchan
    //**********************************************************
    
    tcdm_unit
-     #(
+   #(
        .TRANS_SID_WIDTH(TRANS_SID_WIDTH),
        .TCDM_ADD_WIDTH(TCDM_ADD_WIDTH),
-       .TCDM_OPC_WIDTH(TCDM_OPC_WIDTH)
-       )
+       .TCDM_OPC_WIDTH(TCDM_OPC_WIDTH),
+       .MCHAN_LEN_WIDTH(MCHAN_LEN_WIDTH)
+   )
    tcdm_unit_i
-     (
+   (
       
       .clk_i(s_clk_gated),
       .rst_ni(rst_ni),
+
+      .test_mode_i(test_mode_i),
       
       .tcdm_req_o(tcdm_init_req_o),
       .tcdm_add_o(tcdm_init_add_o),
       .tcdm_we_o(tcdm_init_type_o),
       .tcdm_be_o(tcdm_init_be_o),
       .tcdm_wdata_o(tcdm_init_data_o),
+      .tcdm_sid_o(tcdm_init_sid_o),
       .tcdm_gnt_i(tcdm_init_gnt_i),
       .tcdm_r_valid_i(tcdm_init_r_valid_i),
       .tcdm_r_rdata_i(tcdm_init_r_data_i),
@@ -463,7 +446,7 @@ module mchan
       .rx_synch_req_o(s_rx_tcdm_synch_req),
       .rx_synch_sid_o(s_rx_tcdm_synch_sid)
       
-      );
+    );
    
    //**********************************************************
    //*************** TRANSACTIONS BUFFER **********************
@@ -479,6 +462,8 @@ module mchan
       .clk_i(s_clk_gated),
       .rst_ni(rst_ni),
       
+      .test_mode_i(test_mode_i),
+
       .tx_trans_ext_addr_i(s_trans_tx_ext_add),
       .tx_trans_tcdm_addr_i(s_trans_tx_tcdm_add),
       .tx_trans_len_i(s_trans_tx_len),

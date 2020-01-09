@@ -47,11 +47,12 @@ module tcdm_rx_if
    output logic [31:0]                 tcdm_add_o,
    output logic                        tcdm_we_o,
    output logic [31:0]                 tcdm_wdata_o,
+   output logic [TRANS_SID_WIDTH-1:0]  tcdm_sid_o,
    output logic [3:0]                  tcdm_be_o,
    input  logic                        tcdm_gnt_i,
    
    input  logic [31:0]                 tcdm_r_rdata_i,
-   input  logic	                       tcdm_r_valid_i
+   input  logic                        tcdm_r_valid_i
    
    );
    
@@ -62,27 +63,38 @@ module tcdm_rx_if
    // COMPUTE NEXT STATE
    always_comb
      begin
-	
-	rx_data_req_o    = '0;
-	tcdm_req_o       = '0;
-	beat_gnt_o       = '0;
-	synch_req_o      = '0;
-	synch_sid_o      = '0;
-	
-	begin
-	   if ( beat_req_i == 1'b1 && beat_we_ni == 1'b0  && rx_data_gnt_i == 1'b1 ) // RX OPERATION && REQUEST FROM COMMAND QUEUE && RX BUFFER AVAILABLE
-	     begin
-		tcdm_req_o = 1'b1;
-		if ( tcdm_gnt_i == 1'b1 ) // THE TRANSACTION IS GRANTED FROM THE TCDM
+        
+        rx_data_req_o    = '0;
+        tcdm_req_o       = '0;
+        beat_gnt_o       = '0;
+        synch_req_o      = '0;
+        synch_sid_o      = '0;
+        
+        begin
+           if ( beat_req_i == 1'b1 && beat_we_ni == 1'b0  && rx_data_gnt_i == 1'b1 ) // RX OPERATION && REQUEST FROM COMMAND QUEUE && RX BUFFER AVAILABLE
+             begin
+		if ( rx_data_strb_i == 4'b0000 ) // INHIBIT WRITE OPERATION WHEN STROBE IS HIGH (NOT ACTIVE)
 		  begin
+		     tcdm_req_o    = 1'b0;
 		     synch_req_o   = beat_eop_i;
-		     synch_sid_o   = beat_sid_i;
-		     beat_gnt_o    = 1'b1;
-		     rx_data_req_o = 1'b1;
+                     synch_sid_o   = beat_sid_i;
+                     beat_gnt_o    = 1'b1;
+                     rx_data_req_o = 1'b1;
 		  end
-	     end
-	end
-     end
+		else
+		  begin
+                     tcdm_req_o = 1'b1;
+                     if ( tcdm_gnt_i == 1'b1 ) // THE TRANSACTION IS GRANTED FROM THE TCDM
+                       begin
+			  synch_req_o   = beat_eop_i;
+			  synch_sid_o   = beat_sid_i;
+			  beat_gnt_o    = 1'b1;
+			  rx_data_req_o = 1'b1;
+                       end
+		  end
+             end
+        end
+   end
    
    //**********************************************************
    //********** BINDING OF INPUT/OUTPUT SIGNALS ***************
@@ -92,5 +104,6 @@ module tcdm_rx_if
    assign tcdm_be_o    = rx_data_strb_i;
    assign tcdm_we_o    = beat_we_ni;
    assign tcdm_wdata_o = rx_data_dat_i;
+   assign tcdm_sid_o   = beat_sid_i;
    
 endmodule

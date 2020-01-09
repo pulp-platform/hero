@@ -12,7 +12,7 @@
 
 module trans_allocator
   #(
-    parameter NB_CORES           = 1,
+    parameter NB_CTRLS           = 1,
     parameter NB_TRANSFERS       = 1,
     parameter TRANS_SID_WIDTH    = 1,
     parameter TRANS_CID_WIDTH    = 1
@@ -22,13 +22,13 @@ module trans_allocator
     input  logic                                     rst_ni,
     
     // REQUEST ENTRY
-    input  logic [NB_CORES:0]                        trans_req_i,
-    output logic [NB_CORES:0]                        trans_gnt_o,
-    output logic [NB_CORES:0][TRANS_SID_WIDTH-1:0]   trans_sid_o,
+    input  logic [NB_CTRLS-1:0]                      trans_req_i,
+    output logic [NB_CTRLS-1:0]                      trans_gnt_o,
+    output logic [NB_CTRLS-1:0][TRANS_SID_WIDTH-1:0] trans_sid_o,
     // CELEAR TABLE
-    input  logic [NB_CORES:0][NB_TRANSFERS-1:0]      trans_sid_i,
+    input  logic [NB_CTRLS-1:0][NB_TRANSFERS-1:0]    trans_sid_i,
     
-    output logic [NB_CORES:0][NB_TRANSFERS-1:0]      trans_status_o,
+    output logic [NB_CTRLS-1:0][NB_TRANSFERS-1:0]    trans_status_o,
     
     input  logic                                     cmd_req_i,
     input  logic                                     cmd_gnt_i,
@@ -39,8 +39,8 @@ module trans_allocator
     input  logic                                     cmd_ble_i,
     
     input  logic [NB_TRANSFERS-1:0]                  term_sig_i,
-    output logic [NB_CORES:0]                        term_evt_o,
-    output logic [NB_CORES:0]                        term_int_o
+    output logic [NB_CTRLS-1:0]                      term_evt_o,
+    output logic [NB_CTRLS-1:0]                      term_int_o
     );
    
    logic                                             s_trans_req_arb;
@@ -60,20 +60,22 @@ module trans_allocator
    logic [NB_TRANSFERS-1:0]                          s_term_sig_buf;
    logic [NB_TRANSFERS-1:0]                          s_term_sig_ser;
    
-   logic [NB_TRANSFERS-1:0][NB_CORES:0]              s_term_int;
-   logic [NB_TRANSFERS-1:0][NB_CORES:0]              s_term_evt;
+   logic [NB_TRANSFERS-1:0][NB_CTRLS-1:0]              s_term_int;
+   logic [NB_TRANSFERS-1:0][NB_CTRLS-1:0]              s_term_evt;
    
    integer                                           s_loop1,s_loop2,s_loop3,s_loop5,s_loop6,s_loop7,s_loop8,s_loop9,s_loop10,s_loop11,s_loop12;
    genvar                                            i,j;
    
-   logic [(2**($clog2(NB_CORES)+1))-1:0] 	     s_trans_req;
-   logic [(2**($clog2(NB_CORES)+1))-1:0] 	     s_trans_gnt;
+   
+   
+   logic [(2**(TRANS_CID_WIDTH))-1:0] 		     s_trans_req;
+   logic [(2**(TRANS_CID_WIDTH))-1:0] 		     s_trans_gnt;
    
    //**********************************************************
    //*** TRANSACTION ARBITER **********************************
    //**********************************************************
    generate
-      for (i =0; i<NB_CORES+1; i++)
+      for (i=0; i<NB_CTRLS; i++)
 	begin
 	   assign s_trans_req[i] = trans_req_i[i];
 	   assign trans_gnt_o[i] = s_trans_gnt[i];
@@ -81,7 +83,7 @@ module trans_allocator
    endgenerate
    
    generate
-      for (i =NB_CORES+1; i<2**($clog2(NB_CORES)+1); i++)
+      for (i = NB_CTRLS; i<2**(TRANS_CID_WIDTH); i++)
 	begin
 	   assign s_trans_req[i] = '0;
 	end
@@ -90,7 +92,7 @@ module trans_allocator
    mchan_arbiter
      #(
        .DATA_WIDTH(0),
-       .N_MASTER((2**($clog2(NB_CORES)+1))),
+       .N_MASTER((2**(TRANS_CID_WIDTH))),
        .LOG_MASTER(TRANS_CID_WIDTH)
        )
    trans_manager_arbiter_i
@@ -106,7 +108,7 @@ module trans_allocator
       .req_o   ( s_trans_req_arb ),
       .gnt_i   ( s_trans_gnt_arb ),
       .id_o    ( s_trans_cid_arb ),
-      .data_o  (             )
+      .data_o  (                 )
       
       );
    
@@ -128,7 +130,7 @@ module trans_allocator
    // COMPUTE THE OUTPUT TRANS ID
    always_comb
      begin
-        for (s_loop2 = 0 ; s_loop2 < NB_CORES+1 ; s_loop2++ )
+        for (s_loop2 = 0 ; s_loop2 < NB_CTRLS ; s_loop2++ )
           begin
              if ( &s_busy != 1'b1 ) // IF AT LEAST ONE ID IS AVAILABLE
                begin
@@ -143,7 +145,7 @@ module trans_allocator
           end
      end
    
-   // MERGE TRANS SID COMING FROM CORES INTO A SINGLE VECTOR WITH OR REDUCTION
+   // MERGE TRANS SID COMING FROM CTRLS INTO A SINGLE VECTOR WITH OR REDUCTION
    always_comb
      begin
         for (s_loop11 = 0 ; s_loop11 < NB_TRANSFERS ; s_loop11++ )
@@ -151,7 +153,7 @@ module trans_allocator
              
              s_clear_sid[s_loop11] = 0;
              
-             for (s_loop12 = 0 ; s_loop12 < NB_CORES + 1 ; s_loop12++ )
+             for (s_loop12 = 0 ; s_loop12 < NB_CTRLS ; s_loop12++ )
                begin
                   s_clear_sid[s_loop11] = s_clear_sid[s_loop11] | trans_sid_i[s_loop12][s_loop11];
                end
@@ -294,7 +296,7 @@ module trans_allocator
         term_evt_o = '0;
         for ( s_loop7=0; s_loop7 < NB_TRANSFERS; s_loop7++ )
           begin
-             for ( s_loop8=0; s_loop8 < NB_CORES + 1; s_loop8++ )
+             for ( s_loop8=0; s_loop8 < NB_CTRLS; s_loop8++ )
                begin
                   if ( s_term_sig_ser[s_loop7] == 1'b1 ) // TERMINATION SIGNAL
                     begin
@@ -324,7 +326,7 @@ module trans_allocator
                end
           end
         
-        for ( s_loop9=0; s_loop9 < NB_CORES + 1; s_loop9++ )
+        for ( s_loop9=0; s_loop9 < NB_CTRLS; s_loop9++ )
           begin
              for ( s_loop10=0; s_loop10 < NB_TRANSFERS; s_loop10++ )
                begin
@@ -343,7 +345,7 @@ module trans_allocator
    
    generate
       
-      for (i = 0; i< NB_CORES + 1; i++)
+      for (i = 0; i< NB_CTRLS; i++)
         begin
            for (j = 0; j<NB_TRANSFERS; j++)
              begin

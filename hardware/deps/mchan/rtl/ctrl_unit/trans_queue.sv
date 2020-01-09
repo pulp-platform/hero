@@ -19,7 +19,7 @@ module trans_queue
     parameter TCDM_ADD_WIDTH        = 16,
     parameter EXT_ADD_WIDTH         = 16,
     parameter MCHAN_LEN_WIDTH       = 16,
-    parameter LOG_TRANS_QUEUE_DEPTH = $clog2(TRANS_QUEUE_DEPTH)
+    parameter LOG_TRANS_QUEUE_DEPTH = (TRANS_QUEUE_DEPTH == 1) ? 1 : $clog2(TRANS_QUEUE_DEPTH)
     )
    (
     

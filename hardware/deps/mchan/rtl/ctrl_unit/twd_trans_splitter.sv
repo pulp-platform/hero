@@ -30,29 +30,32 @@ module twd_trans_splitter
     )
    (
     
-    input  logic                          clk_i,
-    input  logic                          rst_ni,
+    input logic 		       clk_i,
+    input logic 		       rst_ni,
     
-    input  logic                          mchan_req_i,
-    output logic                          mchan_gnt_o,
-    input  logic [TRANS_SID_WIDTH-1:0]    mchan_sid_i,
-    input  logic [MCHAN_OPC_WIDTH-1:0]    mchan_opc_i,
-    input  logic [MCHAN_LEN_WIDTH-1:0]    mchan_len_i,
-    input  logic                          mchan_inc_i,
-    input  logic                          mchan_twd_i,
-    input  logic [TWD_COUNT_WIDTH-1:0]    mchan_count_i,
-    input  logic [TWD_STRIDE_WIDTH-1:0]   mchan_stride_i,
-    input  logic [TCDM_ADD_WIDTH-1:0]     mchan_tcdm_add_i,
-    input  logic [EXT_ADD_WIDTH-1:0]      mchan_ext_add_i,
+    input logic 		       mchan_req_i,
+    output logic 		       mchan_gnt_o,
+    input logic [TRANS_SID_WIDTH-1:0]  mchan_sid_i,
+    input logic [MCHAN_OPC_WIDTH-1:0]  mchan_opc_i,
+    input logic [MCHAN_LEN_WIDTH-1:0]  mchan_len_i,
+    input logic 		       mchan_inc_i,
+    input logic 		       mchan_twd_ext_i,
+    input logic 		       mchan_twd_tcdm_i,
+    input logic [TWD_COUNT_WIDTH-1:0]  mchan_ext_count_i,
+    input logic [TWD_STRIDE_WIDTH-1:0] mchan_ext_stride_i,
+    input logic [TWD_COUNT_WIDTH-1:0]  mchan_tcdm_count_i,
+    input logic [TWD_STRIDE_WIDTH-1:0] mchan_tcdm_stride_i,
+    input logic [TCDM_ADD_WIDTH-1:0]   mchan_tcdm_add_i,
+    input logic [EXT_ADD_WIDTH-1:0]    mchan_ext_add_i,
     
-    output logic                          mchan_req_o,
-    input  logic                          mchan_gnt_i,
-    output logic [TRANS_SID_WIDTH-1:0]    mchan_sid_o,
-    output logic [MCHAN_OPC_WIDTH-1:0]    mchan_opc_o,
-    output logic [MCHAN_LEN_WIDTH-1:0]    mchan_len_o,
-    output logic                          mchan_inc_o,
-    output logic [TCDM_ADD_WIDTH-1:0]     mchan_tcdm_add_o,
-    output logic [EXT_ADD_WIDTH-1:0]      mchan_ext_add_o
+    output logic 		       mchan_req_o,
+    input logic 		       mchan_gnt_i,
+    output logic [TRANS_SID_WIDTH-1:0] mchan_sid_o,
+    output logic [MCHAN_OPC_WIDTH-1:0] mchan_opc_o,
+    output logic [MCHAN_LEN_WIDTH-1:0] mchan_len_o,
+    output logic 		       mchan_inc_o,
+    output logic [TCDM_ADD_WIDTH-1:0]  mchan_tcdm_add_o,
+    output logic [EXT_ADD_WIDTH-1:0]   mchan_ext_add_o
     
     );
    
@@ -61,14 +64,19 @@ module twd_trans_splitter
    logic [MCHAN_OPC_WIDTH-1:0] 		  s_mchan_opc;
    logic [MCHAN_LEN_WIDTH-1:0] 		  s_mchan_len;
    logic                                  s_mchan_inc;
-   logic                                  s_mchan_twd;
-   logic [TWD_COUNT_WIDTH-1:0] 		  s_mchan_count,s_mchan_count_inc;
-   logic [TWD_STRIDE_WIDTH-1:0] 	  s_mchan_stride,s_mchan_stride_inc;
-   logic [TCDM_ADD_WIDTH-1:0] 		  s_mchan_tcdm_add;
-   logic [EXT_ADD_WIDTH-1:0] 		  s_mchan_ext_add;
+   logic                                  s_mchan_twd_ext;
+   logic                                  s_mchan_twd_tcdm;
+   logic [TWD_COUNT_WIDTH-1:0] 		  s_mchan_ext_count;
+   logic [TWD_STRIDE_WIDTH-1:0] 	  s_mchan_ext_stride;
+   logic [TWD_COUNT_WIDTH-1:0] 		  s_mchan_tcdm_count;
+   logic [TWD_STRIDE_WIDTH-1:0] 	  s_mchan_tcdm_stride;
+   logic [TCDM_ADD_WIDTH-1:0] 		  s_mchan_tcdm_add, s_mchan_tcdm_base_add;
+   logic [EXT_ADD_WIDTH-1:0] 		  s_mchan_ext_add, s_mchan_ext_base_add;
    
-   logic [MCHAN_LEN_WIDTH-1:0] 		  s_mchan_rem_len;
+   logic [MCHAN_LEN_WIDTH-1:0] 		  s_mchan_rem_len, s_ext_rem_len, s_tcdm_rem_len;
    logic [MCHAN_LEN_WIDTH-1:0] 		  s_mchan_cur_len;
+   
+   logic 				  s_ext_len_smaller, s_tcdm_len_smaller;
    
    logic 				  s_trans_complete;
    
@@ -83,25 +91,23 @@ module twd_trans_splitter
      begin
 	if (rst_ni == 1'b0)
 	  begin
-	     s_mchan_count  <= 0;
-	     s_mchan_stride <= 0;
-	     s_mchan_opc    <= 0;
-	     s_mchan_sid    <= 0;
-	     s_mchan_inc    <= 0;
-	     s_mchan_len    <= 0;
-	     s_mchan_twd    <= 0;
+	     s_mchan_opc         <= 0;
+	     s_mchan_sid         <= 0;
+	     s_mchan_inc         <= 0;
+	     s_mchan_len         <= 0;
+	     s_mchan_twd_ext     <= 0;
+	     s_mchan_twd_tcdm    <= 0;
 	  end
 	else
 	  begin
 	     if ( mchan_req_i == 1'b1 && mchan_gnt_o == 1'b1 ) // SAMPLES DATA AT THE BEGINNING OF EACH MCHAN TRANSFER
 	       begin
-		  s_mchan_opc    <= mchan_opc_i;    // MCHAN OPCODE (TX/RX)
-		  s_mchan_sid    <= mchan_sid_i;    // SID OF CURRENT MCHAN TRANSFER
-		  s_mchan_inc    <= mchan_inc_i;    // INCREMENTAL TRANSFER
-		  s_mchan_len    <= mchan_len_i;    // TRANSFER LENGTH
-		  s_mchan_count  <= mchan_count_i;  // 2D COUNT
-		  s_mchan_stride <= mchan_stride_i; // 2D STRIDE
-		  s_mchan_twd    <= mchan_twd_i;
+		  s_mchan_opc      <= mchan_opc_i;      // MCHAN OPCODE (TX/RX)
+		  s_mchan_sid      <= mchan_sid_i;      // SID OF CURRENT MCHAN TRANSFER
+		  s_mchan_inc      <= mchan_inc_i;      // INCREMENTAL TRANSFER
+		  s_mchan_len      <= mchan_len_i;      // TRANSFER LENGTH
+		  s_mchan_twd_ext  <= mchan_twd_ext_i;  // 2D EXT
+		  s_mchan_twd_tcdm <= mchan_twd_tcdm_i; // 2D TCDM
 	       end
 	  end
      end
@@ -114,43 +120,99 @@ module twd_trans_splitter
      begin
 	if (rst_ni == 1'b0)
 	  begin
-	     s_mchan_cur_len  <= 0;  // LENGTH OF CURRENT TWD TRANSACTION
-	     s_mchan_rem_len  <= 0;  // REMAINING LENGHT OF CURRENT TWD TRANS
+	     s_mchan_rem_len        <= 0;
+	     s_ext_rem_len          <= 0;
+	     s_tcdm_rem_len         <= 0;
+	     s_mchan_ext_add        <= 0;
+	     s_mchan_ext_base_add   <= 0;
+	     s_mchan_tcdm_add       <= 0;
+	     s_mchan_tcdm_base_add  <= 0;
+	     s_mchan_ext_count      <= 0;
+	     s_mchan_ext_stride     <= 0;
+	     s_mchan_tcdm_count     <= 0;
+	     s_mchan_tcdm_stride    <= 0;
 	  end
 	else
 	  begin
 	     if ( mchan_req_i == 1 && mchan_gnt_o == 1 )
 	       begin
-		  if ( mchan_len_i <=  mchan_count_i )
+		  
+		  // EXT ADD COMPUTATION
+		  s_mchan_ext_add       <= mchan_ext_add_i;
+		  s_mchan_ext_base_add  <= mchan_ext_add_i;
+		  
+		  s_mchan_tcdm_add      <= mchan_tcdm_add_i;
+		  s_mchan_tcdm_base_add <= mchan_tcdm_add_i;
+		  
+		  // EXT STRIDE AND COUNT COMPUTATION
+		  if ( mchan_twd_ext_i == 1)
 		    begin
-		       s_mchan_rem_len  <= mchan_len_i;
-		       s_mchan_cur_len  <= mchan_len_i;
+		       s_mchan_ext_count    <= mchan_ext_count_i + 1;
+		       s_mchan_ext_stride   <= mchan_ext_stride_i + 1;
 		    end
 		  else
 		    begin
-		       s_mchan_rem_len  <= mchan_len_i;
-		       s_mchan_cur_len  <= mchan_count_i;
+		       s_mchan_ext_count    <= mchan_len_i + 1;
+		       s_mchan_ext_stride   <= 0;
 		    end
+		  
+		  // TCDM STRIDE AND COUNT COMPUTATION
+		  if ( mchan_twd_tcdm_i == 1)
+		    begin
+		       s_mchan_tcdm_count   <= mchan_tcdm_count_i + 1;
+		       s_mchan_tcdm_stride  <= mchan_tcdm_stride_i + 1;
+		    end
+		  else
+		    begin
+		       s_mchan_tcdm_count   <= mchan_len_i + 1;
+		       s_mchan_tcdm_stride  <= 0;
+		    end
+		  
+		  // INITIAL REM LEN COMPUTATION
+		  s_mchan_rem_len <= mchan_len_i + 1;
+		  
+		  if ( ( mchan_tcdm_count_i < mchan_len_i )  &&  ( mchan_twd_tcdm_i == 1 ) )
+		    s_tcdm_rem_len      <= mchan_tcdm_count_i + 1;
+		  else
+		    s_tcdm_rem_len      <= mchan_len_i + 1;
+		  
+		  if ( ( mchan_ext_count_i <= mchan_len_i ) && ( mchan_twd_ext_i == 1) )
+		    s_ext_rem_len       <= mchan_ext_count_i + 1;
+		  else
+		    s_ext_rem_len       <= mchan_len_i + 1;
+		  
 	       end
 	     else
 	       begin
 		  if ( mchan_req_o == 1'b1 && mchan_gnt_i == 1'b1 )
 		    begin
-		       if ( (s_mchan_rem_len <= s_mchan_count) )
+		       
+		       s_mchan_rem_len <= s_mchan_rem_len - s_mchan_cur_len;
+		       
+		       if ( s_ext_rem_len > s_mchan_cur_len )
 			 begin
-			    s_mchan_cur_len  <= s_mchan_rem_len;
-			    s_mchan_rem_len  <= s_mchan_rem_len;
+			    s_ext_rem_len         <= s_ext_rem_len   - s_mchan_cur_len;
+			    s_mchan_ext_add       <= s_mchan_ext_add + s_mchan_cur_len;
 			 end
 		       else
 			 begin
-			    s_mchan_cur_len <= s_mchan_count;
-			    s_mchan_rem_len <= s_mchan_rem_len - s_mchan_count_inc;
+			    s_ext_rem_len         <= s_mchan_ext_count;
+			    s_mchan_ext_add       <= s_mchan_ext_base_add + s_mchan_ext_stride;
+			    s_mchan_ext_base_add  <= s_mchan_ext_base_add + s_mchan_ext_stride;
 			 end
-		    end
-		  else
-		    begin
-		       s_mchan_cur_len  <= s_mchan_cur_len;
-		       s_mchan_rem_len  <= s_mchan_rem_len;
+		       
+		       if ( s_tcdm_rem_len > s_mchan_cur_len )
+			 begin
+			    s_tcdm_rem_len        <= s_tcdm_rem_len - s_mchan_cur_len;
+			    s_mchan_tcdm_add      <= s_mchan_tcdm_add + s_mchan_cur_len;
+			 end
+		       else
+			 begin
+			    s_tcdm_rem_len        <= s_mchan_tcdm_count;
+			    s_mchan_tcdm_add      <= s_mchan_tcdm_base_add + s_mchan_tcdm_stride;
+			    s_mchan_tcdm_base_add <= s_mchan_tcdm_base_add + s_mchan_tcdm_stride;
+			 end
+		       
 		    end
 	       end
 	  end
@@ -158,73 +220,29 @@ module twd_trans_splitter
    
    always_comb
      begin
-	if ( ( s_mchan_rem_len <= s_mchan_count ) )
+	
+	// CUR LEN COMPUTATION
+	s_ext_len_smaller  =  ( s_ext_rem_len  <= s_tcdm_rem_len ) && ( s_ext_rem_len  <= s_mchan_rem_len );
+	s_tcdm_len_smaller =  ( s_tcdm_rem_len <= s_ext_rem_len  ) && ( s_tcdm_rem_len <= s_mchan_rem_len );
+	
+	if ( s_ext_len_smaller ==  1)
+	  s_mchan_cur_len     = s_ext_rem_len;
+	else
+	  if ( s_tcdm_len_smaller ==  1)
+	    s_mchan_cur_len   = s_tcdm_rem_len;
+	  else
+	    s_mchan_cur_len   = s_mchan_rem_len;
+     end
+   
+   always_comb
+     begin
+	if ( ( s_mchan_rem_len <= s_mchan_cur_len ) )
 	  begin
 	     s_trans_complete = 1;
 	  end
 	else
 	  begin
 	     s_trans_complete = 0;
-	  end
-     end
-   
-   //**********************************************************
-   //****** COMPUTES THE TCDM ADDRESS OF CURRENT TRANSACTION **
-   //**********************************************************
-   
-   always_ff @ (posedge clk_i, negedge rst_ni)
-     begin
-	if (rst_ni == 1'b0)
-	  begin
-	     s_mchan_tcdm_add <= '0;
-	  end
-	else
-	  begin
-	     if ( mchan_req_i == 1'b1 && mchan_gnt_o == 1'b1 ) // FIRST 2D TRANSFER
-	       begin
-		  s_mchan_tcdm_add <= mchan_tcdm_add_i;
-	       end
-	     else
-	       begin
-		  if ( mchan_req_o == 1'b1 && mchan_gnt_i == 1'b1 ) // ON GOING 2D TRANSFRER
-		    begin
-		       s_mchan_tcdm_add <= s_mchan_tcdm_add + s_mchan_cur_len + 1;
-		    end
-		  else
-		    begin
-		       s_mchan_tcdm_add <= s_mchan_tcdm_add;
-		    end
-	       end
-	  end
-     end
-   
-   //**********************************************************
-   //****** COMPUTES THE EXT ADDRESS OF CURRENT TRANSACTION ***
-   //**********************************************************
-   
-   always_ff @ (posedge clk_i, negedge rst_ni)
-     begin
-	if (rst_ni == 1'b0)
-	  begin
-	     s_mchan_ext_add <= '0;
-	  end
-	else
-	  begin
-	     if ( mchan_req_i == 1'b1 && mchan_gnt_o == 1'b1 ) // FIRST 2D TRANSFER
-	       begin
-		  s_mchan_ext_add <= mchan_ext_add_i;
-	       end
-	     else
-	       begin
-		  if ( mchan_req_o == 1'b1 && mchan_gnt_i == 1'b1 ) // ON GOING 2D TRANSFRER
-		    begin
-		       s_mchan_ext_add <= s_mchan_ext_add + s_mchan_stride_inc;
-		    end
-		  else
-		    begin
-		       s_mchan_ext_add <= s_mchan_ext_add;
-		    end
-	       end
 	  end
      end
    
@@ -248,7 +266,6 @@ module twd_trans_splitter
 	mchan_gnt_o      = 1;
 	mchan_req_o      = 0;
 	mchan_opc_o      = 0;
-	mchan_len_o      = 0;
 	mchan_sid_o      = 0;
 	mchan_inc_o      = 0;
 	mchan_tcdm_add_o = 0;
@@ -273,7 +290,6 @@ module twd_trans_splitter
 	    begin
 	       mchan_gnt_o      = 0;
 	       mchan_opc_o      = s_mchan_opc;
-	       mchan_len_o      = s_mchan_cur_len;
 	       mchan_sid_o      = s_mchan_sid;
 	       mchan_inc_o      = s_mchan_inc;
 	       mchan_tcdm_add_o = s_mchan_tcdm_add;
@@ -282,9 +298,8 @@ module twd_trans_splitter
 	       if ( mchan_gnt_i == 1'b1 )
 		 begin
 		    mchan_req_o = 1'b1;
-		    if ( s_trans_complete == 1'b1 || s_mchan_twd == 1'b0 )
+		    if ( s_trans_complete == 1'b1 || ( ( s_mchan_twd_ext == 1'b0 ) && ( s_mchan_twd_tcdm == 1'b0 ) ) )
 		      begin
-			 mchan_len_o = s_mchan_rem_len;
 			 NS          = TRANS_IDLE;
 		      end
 		    else
@@ -303,12 +318,7 @@ module twd_trans_splitter
 	  
 	endcase
      end
-   
-   //**********************************************************
-   //********** STRIDE AND COUNT NORMALIZATION ****************
-   //**********************************************************
-   
-   assign s_mchan_count_inc  = s_mchan_count + 1;
-   assign s_mchan_stride_inc = s_mchan_stride + 1;
+
+   assign mchan_len_o = s_mchan_cur_len - 1;
    
 endmodule

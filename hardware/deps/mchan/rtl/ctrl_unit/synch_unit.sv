@@ -15,113 +15,79 @@
 module synch_unit
   #(
     // OVERRIDDEN FROM TOP
-    parameter NB_CORES           = 1,
+    parameter NB_CTRLS           = 1,
     parameter TRANS_SID          = 1,
     parameter TRANS_SID_WIDTH    = 1,
-    parameter TRANS_CID_WIDTH    = 1,
-    parameter CORE_SID_WIDTH     = 1,
     parameter EXT_ADD_WIDTH      = 29,
+    parameter TCDM_ADD_WIDTH     = 29,
     parameter MCHAN_BURST_LENGTH = 64,
     parameter TWD_COUNT_WIDTH    = 16,
     parameter TWD_STRIDE_WIDTH   = 16,
-    parameter TWD_QUEUE_WIDTH    = TWD_COUNT_WIDTH+TWD_STRIDE_WIDTH,
     // DEFINED IN MCHAN_DEFINES
-    parameter MCHAN_LEN_WIDTH    = `MCHAN_LEN_WIDTH
+    parameter MCHAN_LEN_WIDTH    = `MCHAN_LEN_WIDTH,
+    // DERIVED
+    parameter TWD_QUEUE_WIDTH    = TWD_COUNT_WIDTH+TWD_STRIDE_WIDTH,
+    parameter MCHAN_CMD_WIDTH    = MCHAN_LEN_WIDTH - $clog2(MCHAN_BURST_LENGTH) + 1
     )
    (
     
-    input  logic                                      clk_i,
-    input  logic                                      rst_ni,
+    input logic 		      clk_i,
+    input logic 		      rst_ni,
     
     // REQUEST INTERFACE
-    input  logic                                      cmd_req_i,
-    input  logic                                      cmd_gnt_i,
-    input  logic [TRANS_SID_WIDTH-1:0]                cmd_sid_i,
-    input  logic [MCHAN_LEN_WIDTH-1:0]                cmd_len_i,
-    input  logic                                      cmd_twd_i,
+    input logic 		      mchan_tx_req_i,
+    input logic 		      mchan_tx_gnt_i,
+    input logic [TRANS_SID_WIDTH-1:0] mchan_tx_sid_i,
+    input logic [MCHAN_CMD_WIDTH-1:0] mchan_tx_cmd_nb_i,
     
-    input  logic [NB_CORES:0]	                      twd_req_i,
-    input  logic [NB_CORES:0][TWD_QUEUE_WIDTH-1:0]    twd_dat_i,
-    input  logic [NB_CORES:0][TRANS_SID_WIDTH-1:0]    twd_sid_i,
-    
-    input  logic [EXT_ADD_WIDTH-1:0]                  ext_add_i,
+    input logic 		      mchan_rx_req_i,
+    input logic 		      mchan_rx_gnt_i,
+    input logic [TRANS_SID_WIDTH-1:0] mchan_rx_sid_i,
+    input logic [MCHAN_CMD_WIDTH-1:0] mchan_rx_cmd_nb_i,
     
     // RELEASE INTERFACE
-    input  logic                                      ext_tx_synch_req_i,
-    input  logic [TRANS_SID_WIDTH-1:0]                ext_tx_synch_sid_i,
+    input logic 		      ext_tx_synch_req_i,
+    input logic [TRANS_SID_WIDTH-1:0] ext_tx_synch_sid_i,
     
-    input  logic                                      ext_rx_synch_req_i,
-    input  logic [TRANS_SID_WIDTH-1:0]                ext_rx_synch_sid_i,
+    input logic 		      ext_rx_synch_req_i,
+    input logic [TRANS_SID_WIDTH-1:0] ext_rx_synch_sid_i,
     
-    input  logic                                      tcdm_tx_synch_req_i,
-    input  logic [TRANS_SID_WIDTH-1:0]                tcdm_tx_synch_sid_i,
+    input logic 		      tcdm_tx_synch_req_i,
+    input logic [TRANS_SID_WIDTH-1:0] tcdm_tx_synch_sid_i,
     
-    input  logic                                      tcdm_rx_synch_req_i,
-    input  logic [TRANS_SID_WIDTH-1:0]                tcdm_rx_synch_sid_i,
+    input logic 		      tcdm_rx_synch_req_i,
+    input logic [TRANS_SID_WIDTH-1:0] tcdm_rx_synch_sid_i,
     
     // SYNCHRONIZATION CONTOL
-    output logic                                      trans_status_o,
+    output logic 		      trans_status_o,
     
     // TERMINATION EVENT
-    output logic                                      term_sig_o
+    output logic 		      term_sig_o
     );
+      
+   logic [MCHAN_CMD_WIDTH-1:0] 			    s_tcdm_cmd_nb, s_ext_cmd_nb;
+   logic 					    s_cmd_req, s_tcdm_tx_synch_req, s_tcdm_rx_synch_req, s_ext_tx_synch_req, s_ext_rx_synch_req;
+   logic 					    s_pending_transfer,s_pending_transfer_reg;
+   logic 					    s_trans_status, s_trans_status_reg;
    
-   logic [TWD_COUNT_WIDTH-1:0] 			      s_twd_count;
-   logic [TWD_STRIDE_WIDTH-1:0] 		      s_twd_stride;
-   
-   logic [MCHAN_LEN_WIDTH-1:0] 			      s_cmd_nb, s_tcdm_cmd_nb, s_ext_cmd_nb;
-   logic 					      s_cmd_req, s_tcdm_tx_synch_req, s_tcdm_rx_synch_req, s_ext_tx_synch_req, s_ext_rx_synch_req;
-   logic 					      s_pending_transfer,s_pending_transfer_reg;
-   logic 					      s_trans_status, s_trans_status_reg;
-   
-   logic [MCHAN_LEN_WIDTH+4-1:0] 		      s_trans_cells_nb;
-   
-   integer 					      s_loop1;
+   logic [MCHAN_CMD_WIDTH+4-1:0] 		    s_trans_cells_nb;
+   logic 					    s_mchan_rx_req,s_mchan_tx_req;
    
    always_comb
      begin
-	
-	s_twd_count  = 0;
-	s_twd_stride = 0;
-	
-	for ( s_loop1 = 0; s_loop1 < NB_CORES + 1; s_loop1++ )
-	  begin
-	     if ( ( twd_req_i[s_loop1] == 1'b1  ) && ( twd_sid_i[s_loop1] ==  TRANS_SID ) )
-	       begin
-		  s_twd_count  = twd_dat_i[s_loop1][TWD_COUNT_WIDTH-1:0];
-		  s_twd_stride = twd_dat_i[s_loop1][TWD_STRIDE_WIDTH+TWD_COUNT_WIDTH-1:TWD_COUNT_WIDTH];
-	       end
-	  end
+	if ( ( mchan_rx_req_i && mchan_rx_gnt_i && (mchan_rx_sid_i == TRANS_SID) ) )
+	  s_mchan_rx_req = 1'b1;
+	else
+	  s_mchan_rx_req = 1'b0;
      end
    
-   //**********************************************************
-   //*** CMD COUNTER ******************************************
-   //**********************************************************
-   
-   cmd_counter
-     #(
-       .MCHAN_LEN_WIDTH(MCHAN_LEN_WIDTH),
-       .TWD_COUNT_WIDTH(TWD_COUNT_WIDTH),
-       .TWD_STRIDE_WIDTH(TWD_STRIDE_WIDTH),
-       .EXT_ADD_WIDTH(EXT_ADD_WIDTH),
-       .MCHAN_BURST_LENGTH(MCHAN_BURST_LENGTH)
-       )
-   cmd_counter_i
-     (
-      .clk_i(clk_i),
-      .rst_ni(rst_ni),
-      
-      .cmd_req_i(cmd_req_i && cmd_gnt_i && (cmd_sid_i == TRANS_SID) ),
-      .cmd_len_i(cmd_len_i),
-      .cmd_twd_i(cmd_twd_i),
-      .cmd_count_i(s_twd_count),
-      .cmd_stride_i(s_twd_stride),
-      
-      .ext_add_i(ext_add_i),
-      
-      .cmd_req_o(s_cmd_req),
-      .cmd_nb_o(s_cmd_nb)
-      );
+   always_comb
+     begin
+	if ( ( mchan_tx_req_i && mchan_tx_gnt_i && (mchan_tx_sid_i == TRANS_SID) ) )
+	  s_mchan_tx_req = 1'b1;
+	else
+	  s_mchan_tx_req = 1'b0;
+     end
    
    //**********************************************************
    //*** SIGNALS TO HANDLE CMD AND TX/RX SYNCH REQUESTS *******
@@ -149,46 +115,86 @@ module synch_unit
 	  
 	  begin
 	     
-	     case({s_cmd_req,s_tcdm_tx_synch_req,s_tcdm_rx_synch_req})
+	     case({s_mchan_tx_req,s_mchan_rx_req,s_tcdm_tx_synch_req,s_tcdm_rx_synch_req})
 	       
-	       3'b000 :
+	       4'b0000 :
 		 begin
 		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb;
 		 end
 	       
-	       3'b001 :
+	       4'b0001 :
 		 begin
 		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb - 1;
 		 end
 	       
-	       3'b010 :
+	       4'b0010 :
 		 begin
 		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb - 1;
 		 end
 	       
-	       3'b011 :
+	       4'b0011 :
 		 begin
 		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb - 2;
 		 end
 	       
-	       3'b100 :
+	       4'b0100 :
 		 begin
-		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + s_cmd_nb;
+		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + mchan_rx_cmd_nb_i;
 		 end
 	       
-	       3'b101 :
+	       4'b0101 :
 		 begin
-		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + s_cmd_nb - 1;
+		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + mchan_rx_cmd_nb_i - 1;
 		 end
 	       
-	       3'b110 :
+	       4'b0110 :
 		 begin
-		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + s_cmd_nb - 1;
+		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + mchan_rx_cmd_nb_i - 1;
 		 end
 	       
-	       3'b111 :
+	       4'b0111 :
 		 begin
-		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + s_cmd_nb - 2;
+		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + mchan_rx_cmd_nb_i - 2;
+		 end
+	       
+	       4'b1000 :
+		 begin
+		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + mchan_tx_cmd_nb_i;
+		 end
+	       
+	       4'b1001 :
+		 begin
+		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + mchan_tx_cmd_nb_i - 1;
+		 end
+	       
+	       4'b1010 :
+		 begin
+		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + mchan_tx_cmd_nb_i - 1;
+		 end
+	       
+	       4'b1011 :
+		 begin
+		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + mchan_tx_cmd_nb_i - 2;
+		 end
+	       
+	       4'b1100 :
+		 begin
+		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + mchan_rx_cmd_nb_i + mchan_tx_cmd_nb_i;
+		 end
+	       
+	       4'b1101 :
+		 begin
+		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + mchan_rx_cmd_nb_i + mchan_tx_cmd_nb_i - 1;
+		 end
+	       
+	       4'b1110 :
+		 begin
+		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + mchan_rx_cmd_nb_i + mchan_tx_cmd_nb_i - 1;
+		 end
+	       
+	       4'b1111 :
+		 begin
+		    s_tcdm_cmd_nb <= s_tcdm_cmd_nb + mchan_rx_cmd_nb_i + mchan_tx_cmd_nb_i - 2;
 		 end
 	       
 	     endcase
@@ -213,46 +219,86 @@ module synch_unit
 	  
 	  begin
 	     
-	     case({s_cmd_req,s_ext_tx_synch_req,s_ext_rx_synch_req})
+	     case({s_mchan_tx_req,s_mchan_rx_req,s_ext_tx_synch_req,s_ext_rx_synch_req})
 	       
-	       3'b000 :
+	       4'b0000 :
 		 begin
 		    s_ext_cmd_nb <= s_ext_cmd_nb;
 		 end
 	       
-	       3'b001 :
+	       4'b0001 :
 		 begin
 		    s_ext_cmd_nb <= s_ext_cmd_nb - 1;
 		 end
 	       
-	       3'b010 :
+	       4'b0010 :
 		 begin
 		    s_ext_cmd_nb <= s_ext_cmd_nb - 1;
 		 end
 	       
-	       3'b011 :
+	       4'b0011 :
 		 begin
 		    s_ext_cmd_nb <= s_ext_cmd_nb - 2;
 		 end
 	       
-	       3'b100 :
+	       4'b0100 :
 		 begin
-		    s_ext_cmd_nb <= s_ext_cmd_nb + s_cmd_nb;
+		    s_ext_cmd_nb <= s_ext_cmd_nb + mchan_rx_cmd_nb_i;
 		 end
 	       
-	       3'b101 :
+	       4'b0101 :
 		 begin
-		    s_ext_cmd_nb <= s_ext_cmd_nb + s_cmd_nb - 1;
+		    s_ext_cmd_nb <= s_ext_cmd_nb + mchan_rx_cmd_nb_i - 1;
 		 end
 	       
-	       3'b110 :
+	       4'b0110 :
 		 begin
-		    s_ext_cmd_nb <= s_ext_cmd_nb + s_cmd_nb - 1;
+		    s_ext_cmd_nb <= s_ext_cmd_nb + mchan_rx_cmd_nb_i - 1;
 		 end
 	       
-	       3'b111 :
+	       4'b0111 :
 		 begin
-		    s_ext_cmd_nb <= s_ext_cmd_nb + s_cmd_nb - 2;
+		    s_ext_cmd_nb <= s_ext_cmd_nb + mchan_rx_cmd_nb_i - 2;
+		 end
+	       
+	       4'b1000 :
+		 begin
+		    s_ext_cmd_nb <= s_ext_cmd_nb + mchan_tx_cmd_nb_i;
+		 end
+	       
+	       4'b1001 :
+		 begin
+		    s_ext_cmd_nb <= s_ext_cmd_nb + mchan_tx_cmd_nb_i - 1;
+		 end
+	       
+	       4'b1010 :
+		 begin
+		    s_ext_cmd_nb <= s_ext_cmd_nb + mchan_tx_cmd_nb_i - 1;
+		 end
+	       
+	       4'b1011 :
+		 begin
+		    s_ext_cmd_nb <= s_ext_cmd_nb + mchan_tx_cmd_nb_i - 2;
+		 end
+	       
+	       4'b1100 :
+		 begin
+		    s_ext_cmd_nb <= s_ext_cmd_nb + mchan_rx_cmd_nb_i + mchan_tx_cmd_nb_i;
+		 end
+	       
+	       4'b1101 :
+		 begin
+		    s_ext_cmd_nb <= s_ext_cmd_nb + mchan_rx_cmd_nb_i + mchan_tx_cmd_nb_i - 1;
+		 end
+	       
+	       4'b1110 :
+		 begin
+		    s_ext_cmd_nb <= s_ext_cmd_nb + mchan_rx_cmd_nb_i + mchan_tx_cmd_nb_i - 1;
+		 end
+	       
+	       4'b1111 :
+		 begin
+		    s_ext_cmd_nb <= s_ext_cmd_nb + mchan_rx_cmd_nb_i + mchan_tx_cmd_nb_i - 2;
 		 end
 	       
 	     endcase
@@ -272,9 +318,9 @@ module synch_unit
 	  s_trans_cells_nb = {s_tcdm_cmd_nb,4'b0};
      end
    
-   //**********************************************************
-   //*** GENERATE AN EVENT WHEN THE TRANSFER IS COMPLETE ******
-   //**********************************************************
+   //***********************************************************
+   //*** GENERATES AN EVENT WHEN THE TRANSFER IS COMPLETE ******
+   //***********************************************************
    
    always_comb 
      begin
@@ -311,7 +357,7 @@ module synch_unit
 	else
 	  s_trans_status = 1'b1;
      end
-     
+   
    always_ff @ (posedge clk_i, negedge rst_ni)
      begin
 	if (rst_ni == 1'b0)
@@ -319,7 +365,7 @@ module synch_unit
 	else
 	  s_trans_status_reg <= s_trans_status;
      end
-
+   
    always_comb
      begin
 	if ( s_trans_status == 1'b1 || s_trans_status_reg == 1'b1 )

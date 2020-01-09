@@ -14,7 +14,7 @@ module ext_buffer
   #(
     parameter DATA_WIDTH = 32,
     parameter BUFFER_DEPTH = 2,
-    parameter LOG_BUFFER_DEPTH = $clog2(BUFFER_DEPTH)
+    parameter LOG_BUFFER_DEPTH = (BUFFER_DEPTH == 1) ? 1: $clog2(BUFFER_DEPTH)
     )
    (
     input  logic	            clk_i,

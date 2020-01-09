@@ -2,7 +2,7 @@ package:
   name: mchan
 
 dependencies:
-  common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.10.0 }
+  common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.13.1 }
 
 sources:
   include_dirs:
@@ -10,13 +10,9 @@ sources:
   files:
     - rtl/misc/mchan_arbiter.sv
     - rtl/misc/mchan_arb_primitive.sv
-    - rtl/misc/mchan_fifo.sv
     - rtl/misc/mchan_rr_flag_req.sv
-    - rtl/ctrl_unit/address_decoder.sv
-    - rtl/ctrl_unit/address_decoder_pe.sv
-    - rtl/ctrl_unit/cmd_counter.sv
-    - rtl/ctrl_unit/core_if.sv
-    - rtl/ctrl_unit/core_if_pe.sv
+    - rtl/ctrl_unit/ctrl_fsm.sv
+    - rtl/ctrl_unit/ctrl_if.sv
     - rtl/ctrl_unit/ctrl_unit.sv
     - rtl/ctrl_unit/synch_unit.sv
     - rtl/ctrl_unit/trans_allocator.sv

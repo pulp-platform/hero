@@ -11,28 +11,31 @@
 // Davide Rossi <davide.rossi@unibo.it>
 
 module tcdm_unit
-  #(
+#(
     parameter TRANS_SID_WIDTH = 1,
     parameter TCDM_ADD_WIDTH  = 12,
     parameter TCDM_OPC_WIDTH  = 12,
     parameter MCHAN_LEN_WIDTH  = 15
-    )
-   (
+)
+(
     
     input  logic                       clk_i,
     input  logic                       rst_ni,
+
+    input  logic                       test_mode_i,
     
     // EXTERNAL INITIATOR
     //***************************************
-    output logic [3:0]                 tcdm_req_o,
-    output logic [3:0][31:0]           tcdm_add_o,
-    output logic [3:0]                 tcdm_we_o,
-    output logic [3:0][31:0]           tcdm_wdata_o,
-    output logic [3:0][3:0]            tcdm_be_o,
-    input  logic [3:0]                 tcdm_gnt_i,
+    output logic [3:0]                      tcdm_req_o,
+    output logic [3:0][31:0]                tcdm_add_o,
+    output logic [3:0]                      tcdm_we_o,
+    output logic [3:0][31:0]                tcdm_wdata_o,
+    output logic [3:0][TRANS_SID_WIDTH-1:0] tcdm_sid_o,
+    output logic [3:0][3:0]                 tcdm_be_o,
+    input  logic [3:0]                      tcdm_gnt_i,
     
-    input  logic [3:0][31:0]           tcdm_r_rdata_i,
-    input  logic [3:0]                 tcdm_r_valid_i,
+    input  logic [3:0][31:0]                tcdm_r_rdata_i,
+    input  logic [3:0]                      tcdm_r_valid_i,
     
     // TX CMD INTERFACE
     //***************************************
@@ -71,9 +74,8 @@ module tcdm_unit
     input  logic [1:0][31:0]           rx_data_dat_i,
     input  logic [1:0][3:0]            rx_data_strb_i,
     output logic [1:0]                 rx_data_req_o,
-    input  logic [1:0]                 rx_data_gnt_i
-    
-    );
+    input  logic [1:0]                 rx_data_gnt_i 
+);
    
    localparam TCDM_CMD_QUEUE_WIDTH  = TCDM_OPC_WIDTH + MCHAN_LEN_WIDTH + TCDM_ADD_WIDTH + TRANS_SID_WIDTH;
    localparam TCDM_BEAT_QUEUE_WIDTH = TCDM_OPC_WIDTH + TCDM_ADD_WIDTH + TRANS_SID_WIDTH + 1;
@@ -83,25 +85,25 @@ module tcdm_unit
    logic [TCDM_OPC_WIDTH-1:0]         s_tcdm_rx_opc,s_tcdm_tx_opc;
    logic [MCHAN_LEN_WIDTH-1:0]        s_tcdm_rx_len,s_tcdm_tx_len;
    logic                              s_tcdm_rx_req,s_tcdm_tx_req;
-   logic 			      s_tcdm_rx_gnt,s_tcdm_tx_gnt;
+   logic            s_tcdm_rx_gnt,s_tcdm_tx_gnt;
    
    logic [1:0][TCDM_ADD_WIDTH-1:0]    s_beat_tx_add,s_beat_rx_add,s_beat_tx_add_s,s_beat_rx_add_s;
    logic [1:0][TCDM_OPC_WIDTH-1:0]    s_beat_tx_opc,s_beat_rx_opc,s_beat_tx_opc_s,s_beat_rx_opc_s;
    logic [1:0][TRANS_SID_WIDTH-1:0]   s_beat_tx_sid,s_beat_rx_sid,s_beat_tx_sid_s,s_beat_rx_sid_s;
-   logic [1:0] 			      s_beat_tx_req,s_beat_rx_req,s_beat_tx_req_s,s_beat_rx_req_s;
-   logic [1:0] 			      s_beat_tx_gnt,s_beat_rx_gnt,s_beat_tx_gnt_s,s_beat_rx_gnt_s;
-   logic [1:0] 			      s_beat_tx_eop,s_beat_rx_eop,s_beat_tx_eop_s,s_beat_rx_eop_s;
+   logic [1:0]            s_beat_tx_req,s_beat_rx_req,s_beat_tx_req_s,s_beat_rx_req_s;
+   logic [1:0]            s_beat_tx_gnt,s_beat_rx_gnt,s_beat_tx_gnt_s,s_beat_rx_gnt_s;
+   logic [1:0]            s_beat_tx_eop,s_beat_rx_eop,s_beat_tx_eop_s,s_beat_rx_eop_s;
    
-   logic [1:0] 			      s_tx_synch_req,s_rx_synch_req;
+   logic [1:0]            s_tx_synch_req,s_rx_synch_req;
    logic [1:0][TRANS_SID_WIDTH-1:0]   s_tx_synch_sid,s_rx_synch_sid;
    
-   genvar 			      i;
+   genvar             i;
    
    //**********************************************************
    //*************** TCDM TX COMMAND QUEUE ********************
    //**********************************************************
    
-   mchan_fifo
+   generic_fifo
      #(
        .DATA_WIDTH(TCDM_CMD_QUEUE_WIDTH),
        .DATA_DEPTH(2)
@@ -109,16 +111,18 @@ module tcdm_unit
    tcdm_tx_cmd_queue_i
      (
       
-      .clk_i(clk_i),
-      .rst_ni(rst_ni),
+      .clk         (clk_i),
+      .rst_n       (rst_ni),
       
-      .push_dat_i({tcdm_tx_opc_i,tcdm_tx_len_i,tcdm_tx_add_i,tcdm_tx_sid_i}),
-      .push_req_i(tcdm_tx_req_i),
-      .push_gnt_o(tcdm_tx_gnt_o),
+      .data_i      ({tcdm_tx_opc_i,tcdm_tx_len_i,tcdm_tx_add_i,tcdm_tx_sid_i}),
+      .valid_i     (tcdm_tx_req_i),
+      .grant_o     (tcdm_tx_gnt_o),
       
-      .pop_dat_o({s_tcdm_tx_opc,s_tcdm_tx_len,s_tcdm_tx_add,s_tcdm_tx_sid}),
-      .pop_req_i(s_tcdm_tx_gnt),
-      .pop_gnt_o(s_tcdm_tx_req)
+      .data_o      ({s_tcdm_tx_opc,s_tcdm_tx_len,s_tcdm_tx_add,s_tcdm_tx_sid}),
+      .grant_i     (s_tcdm_tx_gnt),
+      .valid_o     (s_tcdm_tx_req),
+
+      .test_mode_i (test_mode_i)
       
       );
    
@@ -126,7 +130,7 @@ module tcdm_unit
    //*************** TCDM RX COMMAND QUEUE ********************
    //**********************************************************
    
-   mchan_fifo
+   generic_fifo
      #(
        .DATA_WIDTH(TCDM_CMD_QUEUE_WIDTH),
        .DATA_DEPTH(2)
@@ -134,16 +138,18 @@ module tcdm_unit
    tcdm_rx_cmd_queue_i
      (
       
-      .clk_i(clk_i),
-      .rst_ni(rst_ni),
+      .clk         (clk_i),
+      .rst_n       (rst_ni),
       
-      .push_dat_i({tcdm_rx_opc_i,tcdm_rx_len_i,tcdm_rx_add_i,tcdm_rx_sid_i}),
-      .push_req_i(tcdm_rx_req_i),
-      .push_gnt_o(tcdm_rx_gnt_o),
+      .data_i      ({tcdm_rx_opc_i,tcdm_rx_len_i,tcdm_rx_add_i,tcdm_rx_sid_i}),
+      .valid_i     (tcdm_rx_req_i),
+      .grant_o     (tcdm_rx_gnt_o),
       
-      .pop_dat_o({s_tcdm_rx_opc,s_tcdm_rx_len,s_tcdm_rx_add,s_tcdm_rx_sid}),
-      .pop_req_i(s_tcdm_rx_gnt),
-      .pop_gnt_o(s_tcdm_rx_req)
+      .data_o      ({s_tcdm_rx_opc,s_tcdm_rx_len,s_tcdm_rx_add,s_tcdm_rx_sid}),
+      .grant_i     (s_tcdm_rx_gnt),
+      .valid_o     (s_tcdm_rx_req),
+
+      .test_mode_i (test_mode_i)
       
       );
    
@@ -155,7 +161,8 @@ module tcdm_unit
      #(
        .TRANS_SID_WIDTH(TRANS_SID_WIDTH),
        .TCDM_ADD_WIDTH(TCDM_ADD_WIDTH),
-       .TCDM_OPC_WIDTH(TCDM_OPC_WIDTH)
+       .TCDM_OPC_WIDTH(TCDM_OPC_WIDTH),
+       .MCHAN_LEN_WIDTH(MCHAN_LEN_WIDTH)
        )
    tcdm_tx_cmd_unpack_i
      (
@@ -187,7 +194,8 @@ module tcdm_unit
      #(
        .TRANS_SID_WIDTH(TRANS_SID_WIDTH),
        .TCDM_ADD_WIDTH(TCDM_ADD_WIDTH),
-       .TCDM_OPC_WIDTH(TCDM_OPC_WIDTH)
+       .TCDM_OPC_WIDTH(TCDM_OPC_WIDTH),
+       .MCHAN_LEN_WIDTH(MCHAN_LEN_WIDTH)
        )
    tcdm_rx_cmd_unpack_i
      (
@@ -218,27 +226,29 @@ module tcdm_unit
    generate
       
       for (i=0; i<2; i++)
-	
+  
         begin : beat_queue_tx
-           mchan_fifo
+           generic_fifo
              #(
                .DATA_WIDTH(TCDM_BEAT_QUEUE_WIDTH),
                .DATA_DEPTH(2)
                )
            tcdm_beat_queue_tx_i
              (
-	      
-              .clk_i(clk_i),
-              .rst_ni(rst_ni),
-	      
-              .push_dat_i({s_beat_tx_sid[i],s_beat_tx_eop[i],s_beat_tx_opc[i],s_beat_tx_add[i]}),
-              .push_req_i(s_beat_tx_req[i]),
-              .push_gnt_o(s_beat_tx_gnt[i]),
-	      
-              .pop_dat_o({s_beat_tx_sid_s[i],s_beat_tx_eop_s[i],s_beat_tx_opc_s[i],s_beat_tx_add_s[i]}),
-              .pop_req_i(s_beat_tx_gnt_s[i]),
-              .pop_gnt_o(s_beat_tx_req_s[i])
-	      
+        
+              .clk         (clk_i),
+              .rst_n       (rst_ni),
+        
+              .data_i      ({s_beat_tx_sid[i],s_beat_tx_eop[i],s_beat_tx_opc[i],s_beat_tx_add[i]}),
+              .valid_i     (s_beat_tx_req[i]),
+              .grant_o     (s_beat_tx_gnt[i]),
+        
+              .data_o      ({s_beat_tx_sid_s[i],s_beat_tx_eop_s[i],s_beat_tx_opc_s[i],s_beat_tx_add_s[i]}),
+              .grant_i     (s_beat_tx_gnt_s[i]),
+              .valid_o     (s_beat_tx_req_s[i]),
+
+              .test_mode_i (test_mode_i)
+        
               );
         end
       
@@ -251,31 +261,33 @@ module tcdm_unit
    generate
       
       for (i=0; i<2; i++)
-	
-	begin : beat_queue_rx
-	   
-	   mchan_fifo
-	     #(
+  
+  begin : beat_queue_rx
+     
+     generic_fifo
+       #(
                .DATA_WIDTH(TCDM_BEAT_QUEUE_WIDTH),
                .DATA_DEPTH(2)
                )
-	   tcdm_beat_queue_rx_i
-	     (
+     tcdm_beat_queue_rx_i
+       (
               
-              .clk_i(clk_i),
-              .rst_ni(rst_ni),
+              .clk         (clk_i),
+              .rst_n       (rst_ni),
               
-              .push_dat_i({s_beat_rx_sid[i],s_beat_rx_eop[i],s_beat_rx_opc[i],s_beat_rx_add[i]}),
-              .push_req_i(s_beat_rx_req[i]),
-              .push_gnt_o(s_beat_rx_gnt[i]),
+              .data_i      ({s_beat_rx_sid[i],s_beat_rx_eop[i],s_beat_rx_opc[i],s_beat_rx_add[i]}),
+              .valid_i     (s_beat_rx_req[i]),
+              .grant_o     (s_beat_rx_gnt[i]),
               
-              .pop_dat_o({s_beat_rx_sid_s[i],s_beat_rx_eop_s[i],s_beat_rx_opc_s[i],s_beat_rx_add_s[i]}),
-              .pop_req_i(s_beat_rx_gnt_s[i]),
-              .pop_gnt_o(s_beat_rx_req_s[i])
-              
+              .data_o      ({s_beat_rx_sid_s[i],s_beat_rx_eop_s[i],s_beat_rx_opc_s[i],s_beat_rx_add_s[i]}),
+              .grant_i     (s_beat_rx_gnt_s[i]),
+              .valid_o     (s_beat_rx_req_s[i]),
+
+              .test_mode_i (test_mode_i)
+
               );
-	   
-	end
+     
+  end
       
    endgenerate
    
@@ -286,19 +298,21 @@ module tcdm_unit
    generate
       
       for (i=0; i<2; i++)
-	
-	begin : tcdm_if_tx
-	   
-	   tcdm_tx_if
-	     #(
+  
+  begin : tcdm_if_tx
+     
+     tcdm_tx_if
+     #(
                .TRANS_SID_WIDTH(TRANS_SID_WIDTH),
                .TCDM_ADD_WIDTH(TCDM_ADD_WIDTH)
-               )
-	   tcdm_if_tx_i
-	     (
+     )
+     tcdm_if_tx_i
+     (
               
               .clk_i(clk_i),
               .rst_ni(rst_ni),
+
+              .test_mode_i(test_mode_i),
               
               .beat_sid_i(s_beat_tx_sid_s[i]),
               .beat_eop_i(s_beat_tx_eop_s[i]),
@@ -318,15 +332,16 @@ module tcdm_unit
               .tcdm_add_o(tcdm_add_o[i]),
               .tcdm_we_o(tcdm_we_o[i]),
               .tcdm_wdata_o(tcdm_wdata_o[i]),
+              .tcdm_sid_o(tcdm_sid_o[i]),
               .tcdm_be_o(tcdm_be_o[i]),
               .tcdm_gnt_i(tcdm_gnt_i[i]),
               
               .tcdm_r_rdata_i(tcdm_r_rdata_i[i]),
               .tcdm_r_valid_i(tcdm_r_valid_i[i])
               
-              );
-	   
-	end
+     );
+     
+  end
       
    endgenerate
    
@@ -337,48 +352,48 @@ module tcdm_unit
    generate
       
       for (i=0; i<2; i++)
-	
-	begin : tcdm_if_rx
-	   
-	   tcdm_rx_if
-	     #(
+  
+  begin : tcdm_if_rx
+     
+     tcdm_rx_if
+     #(
                .TRANS_SID_WIDTH(TRANS_SID_WIDTH),
                .TCDM_ADD_WIDTH(TCDM_ADD_WIDTH)
-               )
-	   tcdm_if_rx_i
-	     (
+      )
+     tcdm_if_rx_i
+     (
               
-              .clk_i(clk_i),
-              .rst_ni(rst_ni),
+              .clk_i          ( clk_i),
+              .rst_ni         ( rst_ni),
               
-              .beat_sid_i(s_beat_rx_sid_s[i]),
-              .beat_eop_i(s_beat_rx_eop_s[i]),
-              .beat_add_i(s_beat_rx_add_s[i]),
-              .beat_we_ni(s_beat_rx_opc_s[i][0]),
-              .beat_req_i(s_beat_rx_req_s[i]),
-              .beat_gnt_o(s_beat_rx_gnt_s[i]),
+              .beat_sid_i     ( s_beat_rx_sid_s [i]   ),
+              .beat_eop_i     ( s_beat_rx_eop_s [i]   ),
+              .beat_add_i     ( s_beat_rx_add_s [i]   ),
+              .beat_we_ni     ( s_beat_rx_opc_s [i][0]),
+              .beat_req_i     ( s_beat_rx_req_s [i]   ),
+              .beat_gnt_o     ( s_beat_rx_gnt_s [i]   ),
               
-              .synch_req_o(s_rx_synch_req[i]),
-              .synch_sid_o(s_rx_synch_sid[i]),
+              .synch_req_o    ( s_rx_synch_req  [i]   ),
+              .synch_sid_o    ( s_rx_synch_sid  [i]   ),
               
-              .rx_data_dat_i(rx_data_dat_i[i]),
-              .rx_data_strb_i(rx_data_strb_i[i]),
-              .rx_data_req_o(rx_data_req_o[i]),
-              .rx_data_gnt_i(rx_data_gnt_i[i]),
+              .rx_data_dat_i  ( rx_data_dat_i   [i]   ),
+              .rx_data_strb_i ( rx_data_strb_i  [i]   ),
+              .rx_data_req_o  ( rx_data_req_o   [i]   ),
+              .rx_data_gnt_i  ( rx_data_gnt_i   [i]   ),
               
-              .tcdm_req_o(tcdm_req_o[i+2]),
-              .tcdm_add_o(tcdm_add_o[i+2]),
-              .tcdm_we_o(tcdm_we_o[i+2]),
-              .tcdm_wdata_o(tcdm_wdata_o[i+2]),
-              .tcdm_be_o(tcdm_be_o[i+2]),
-              .tcdm_gnt_i(tcdm_gnt_i[i+2]),
+              .tcdm_req_o     ( tcdm_req_o      [i+2] ),
+              .tcdm_add_o     ( tcdm_add_o      [i+2] ),
+              .tcdm_we_o      ( tcdm_we_o       [i+2] ),
+              .tcdm_wdata_o   ( tcdm_wdata_o    [i+2] ),
+              .tcdm_sid_o     ( tcdm_sid_o      [i+2] ),
+              .tcdm_be_o      ( tcdm_be_o       [i+2] ),
+              .tcdm_gnt_i     ( tcdm_gnt_i      [i+2] ),
               
-              .tcdm_r_rdata_i(tcdm_r_rdata_i[i+2]),
-              .tcdm_r_valid_i(tcdm_r_valid_i[i+2])
-              
-              );
-	   
-	end
+              .tcdm_r_rdata_i ( tcdm_r_rdata_i  [i+2] ),
+              .tcdm_r_valid_i ( tcdm_r_valid_i  [i+2] )         
+     );
+     
+  end
       
    endgenerate
    
@@ -395,6 +410,8 @@ module tcdm_unit
       
       .clk_i(clk_i),
       .rst_ni(rst_ni),
+
+      .test_mode_i(test_mode_i),
       
       .synch_req_i(s_tx_synch_req),
       .synch_sid_i(s_tx_synch_sid),
@@ -418,6 +435,8 @@ module tcdm_unit
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       
+      .test_mode_i(test_mode_i),
+
       .synch_req_i(s_rx_synch_req),
       .synch_sid_i(s_rx_synch_sid),
       

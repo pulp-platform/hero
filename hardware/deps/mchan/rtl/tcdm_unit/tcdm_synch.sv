@@ -19,6 +19,8 @@ module tcdm_synch
       input  logic                            clk_i,
       input  logic                            rst_ni,
 
+      input  logic                            test_mode_i,
+
       input  logic [1:0]                      synch_req_i,
       input  logic [1:0][TRANS_SID_WIDTH-1:0] synch_sid_i,
 
@@ -36,7 +38,7 @@ module tcdm_synch
    generate
       for (i=0; i<2; i++)
       begin : synch
-            mchan_fifo
+            generic_fifo
             #(
                .DATA_WIDTH(TRANS_SID_WIDTH),
                .DATA_DEPTH(2) // IMPORTANT: DATA DEPTH MUST BE THE SAME AS CMD QUEUE DATA DEPTH
@@ -44,16 +46,18 @@ module tcdm_synch
             synch_i
             (
 
-               .clk_i       ( clk_i           ),
-               .rst_ni      ( rst_ni          ),
+               .clk         ( clk_i           ),
+               .rst_n       ( rst_ni          ),
 
-               .push_dat_i  ( synch_sid_i[i]  ),
-               .push_req_i  ( synch_req_i[i]  ),
-               .push_gnt_o  (                 ),
+               .data_i      ( synch_sid_i[i]  ),
+               .valid_i     ( synch_req_i[i]  ),
+               .grant_o     (                 ),
 
-               .pop_dat_o   ( s_synch_sid[i]  ),
-               .pop_req_i   ( s_synch_gnt     ),
-               .pop_gnt_o   ( s_synch_req[i]  )
+               .data_o      ( s_synch_sid[i]  ),
+               .grant_i     ( s_synch_gnt     ),
+               .valid_o     ( s_synch_req[i]  ),
+
+               .test_mode_i ( test_mode_i     )
 
             );
       end

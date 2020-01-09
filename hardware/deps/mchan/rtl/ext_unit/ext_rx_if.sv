@@ -175,7 +175,9 @@ module ext_rx_if
 	  
 	  TRANS_RUN:
 	    begin
-	       if ( rx_data_gnt_i        == 1'b1 && // TRANSACTION FINISHES WHAN LAST BEAT ON DATA CHANNEL IS DETECTED
+	       if ( trans_rx_gnt_i       == 1'b1 &&
+		    tcdm_gnt_i           == 1'b1 &&
+		    rx_data_gnt_i        == 1'b1 && // TRANSACTION FINISHES WHAN LAST BEAT ON DATA CHANNEL IS DETECTED
 		    axi_master_r_last_i  == 1'b1 &&
 		    axi_master_r_valid_i == 1'b1 ) // RUNNING
 		 NS = TRANS_IDLE;
@@ -197,7 +199,9 @@ module ext_rx_if
    always_comb
      begin
 	if ( axi_master_r_valid_i == 1'b1 &&
-	     rx_data_gnt_i        == 1'b1 )
+	     rx_data_gnt_i        == 1'b1 &&
+	     tcdm_gnt_i           == 1'b1 &&
+	     trans_rx_gnt_i       == 1'b1 )
 	  begin
 	     if ( axi_master_r_last_i == 1'b1 )
 	       begin

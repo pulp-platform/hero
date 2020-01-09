@@ -17,7 +17,7 @@ module mchan_arbiter
 #(
     parameter DATA_WIDTH = 32,
     parameter N_MASTER   = 2,
-    parameter LOG_MASTER = $clog2(N_MASTER)
+    parameter LOG_MASTER = (N_MASTER == 1) ? 1 : $clog2(N_MASTER)
 )
 (
     input  logic                                clk,

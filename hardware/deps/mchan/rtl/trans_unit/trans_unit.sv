@@ -18,6 +18,8 @@ module trans_unit
     
     input  logic                       clk_i,
     input  logic                       rst_ni,
+
+    input  logic                       test_mode_i,
     
     // TX CTRL INTERFACE
     input  logic                       tx_trans_req_i,
@@ -81,6 +83,8 @@ module trans_unit
      (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
+
+      .test_mode_i(test_mode_i),
       
       .tx_data_push_dat_i(tx_data_push_dat_i),
       .tx_data_push_req_i(tx_data_push_req_i),
@@ -105,84 +109,92 @@ module trans_unit
    //** TRANS BUFFERS EXT SIDE: DECOUPLE AXI IF AND TRANS ALIGNERS **
    //****************************************************************
    
-   mchan_fifo
+   generic_fifo
      #(
        .DATA_WIDTH(72),
        .DATA_DEPTH(2)
        )
    trans_buffer_ext_tx_i
      (
-      .clk_i(clk_i),
-      .rst_ni(rst_ni),
+      .clk         (clk_i),
+      .rst_n       (rst_ni),
       
-      .push_dat_i({s_tx_data_ext_strb,s_tx_data_ext_dat}),
-      .push_req_i(s_tx_data_ext_gnt),
-      .push_gnt_o(s_tx_data_ext_req),
+      .data_i      ({s_tx_data_ext_strb,s_tx_data_ext_dat}),
+      .valid_i     (s_tx_data_ext_gnt),
+      .grant_o     (s_tx_data_ext_req),
       
-      .pop_dat_o({tx_data_pop_strb_o,tx_data_pop_dat_o}),
-      .pop_req_i(tx_data_pop_req_i),
-      .pop_gnt_o(tx_data_pop_gnt_o)
+      .data_o      ({tx_data_pop_strb_o,tx_data_pop_dat_o}),
+      .grant_i     (tx_data_pop_req_i),
+      .valid_o     (tx_data_pop_gnt_o),
+
+      .test_mode_i (test_mode_i)
       );
    
-   mchan_fifo
+   generic_fifo
      #(
        .DATA_WIDTH(64),
        .DATA_DEPTH(2)
        )
    trans_buffer_ext_rx_i
      (
-      .clk_i(clk_i),
-      .rst_ni(rst_ni),
+      .clk         (clk_i),
+      .rst_n       (rst_ni),
       
-      .push_dat_i(rx_data_push_dat_i),
-      .push_req_i(rx_data_push_req_i),
-      .push_gnt_o(rx_data_push_gnt_o),
+      .data_i      (rx_data_push_dat_i),
+      .valid_i     (rx_data_push_req_i),
+      .grant_o     (rx_data_push_gnt_o),
       
-      .pop_dat_o(s_rx_data_ext_dat),
-      .pop_req_i(s_rx_data_ext_gnt),
-      .pop_gnt_o(s_rx_data_ext_req)
+      .data_o      (s_rx_data_ext_dat),
+      .grant_i     (s_rx_data_ext_gnt),
+      .valid_o     (s_rx_data_ext_req),
+
+      .test_mode_i (test_mode_i)
       );
    
    //**********************************************************
    //** TRANS QUEUES: DECOUPLE CMD UNPACK AND TRANS ALIGNERS **
    //**********************************************************
    
-   mchan_fifo
+   generic_fifo
      #(
        .DATA_WIDTH(MCHAN_LEN_WIDTH+6),
        .DATA_DEPTH(2)
        )
    trans_queue_tx_i
      (
-      .clk_i(clk_i),
-      .rst_ni(rst_ni),
+      .clk         (clk_i),
+      .rst_n       (rst_ni),
       
-      .push_dat_i({tx_trans_len_i,tx_trans_tcdm_addr_i,tx_trans_ext_addr_i}),
-      .push_req_i(tx_trans_req_i),
-      .push_gnt_o(tx_trans_gnt_o),
+      .data_i      ({tx_trans_len_i,tx_trans_tcdm_addr_i,tx_trans_ext_addr_i}),
+      .valid_i     (tx_trans_req_i),
+      .grant_o     (tx_trans_gnt_o),
       
-      .pop_dat_o({s_tx_trans_len,s_tx_trans_tcdm_addr,s_tx_trans_ext_addr}),
-      .pop_req_i(s_tx_trans_gnt),
-      .pop_gnt_o(s_tx_trans_req)
+      .data_o      ({s_tx_trans_len,s_tx_trans_tcdm_addr,s_tx_trans_ext_addr}),
+      .grant_i     (s_tx_trans_gnt),
+      .valid_o     (s_tx_trans_req),
+
+      .test_mode_i (test_mode_i)
       );
    
-   mchan_fifo
+   generic_fifo
      #(
        .DATA_WIDTH(MCHAN_LEN_WIDTH+6),
        .DATA_DEPTH(2)
        )
    trans_queue_rx_i
      (
-      .clk_i(clk_i),
-      .rst_ni(rst_ni),
+      .clk         (clk_i),
+      .rst_n       (rst_ni),
       
-      .push_dat_i({rx_trans_len_i,rx_trans_tcdm_addr_i,rx_trans_ext_addr_i}),
-      .push_req_i(rx_trans_req_i),
-      .push_gnt_o(rx_trans_gnt_o),
+      .data_i      ({rx_trans_len_i,rx_trans_tcdm_addr_i,rx_trans_ext_addr_i}),
+      .valid_i     (rx_trans_req_i),
+      .grant_o     (rx_trans_gnt_o),
       
-      .pop_dat_o({s_rx_trans_len,s_rx_trans_tcdm_addr,s_rx_trans_ext_addr}),
-      .pop_req_i(s_rx_trans_gnt),
-      .pop_gnt_o(s_rx_trans_req)
+      .data_o      ({s_rx_trans_len,s_rx_trans_tcdm_addr,s_rx_trans_ext_addr}),
+      .grant_i     (s_rx_trans_gnt),
+      .valid_o     (s_rx_trans_req),
+
+      .test_mode_i (test_mode_i)
       );
    
    //********************************************************************

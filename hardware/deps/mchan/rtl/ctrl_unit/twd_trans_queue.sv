@@ -12,31 +12,31 @@
 
 module twd_trans_queue
   #(
-    parameter NB_CORES            = 4,
+    parameter NB_CTRLS            = 4,
     parameter TWD_QUEUE_WIDTH     = 2,
     parameter TWD_QUEUE_DEPTH     = 4,
     parameter TWD_QUEUE_ADD_WIDTH = $clog2(TWD_QUEUE_DEPTH)
     )
    (
     
-    input  logic                                       clk_i,
-    input  logic                                       rst_ni,
+    input  logic                                         clk_i,
+    input  logic                                         rst_ni,
     
-    input  logic [NB_CORES:0]                          alloc_req_i,
-    output logic [NB_CORES:0]                          alloc_gnt_o,
-    output logic [NB_CORES:0][TWD_QUEUE_ADD_WIDTH-1:0] alloc_add_o,
+    input  logic [NB_CTRLS-1:0]                          alloc_req_i,
+    output logic [NB_CTRLS-1:0]                          alloc_gnt_o,
+    output logic [NB_CTRLS-1:0][TWD_QUEUE_ADD_WIDTH-1:0] alloc_add_o,
     
-    input  logic [NB_CORES:0]                          wr_req_i,
-    input  logic [NB_CORES:0][TWD_QUEUE_ADD_WIDTH-1:0] wr_add_i,
-    input  logic [NB_CORES:0][TWD_QUEUE_WIDTH-1:0]     wr_dat_i,
+    input  logic [NB_CTRLS-1:0]                          wr_req_i,
+    input  logic [NB_CTRLS-1:0][TWD_QUEUE_ADD_WIDTH-1:0] wr_add_i,
+    input  logic [NB_CTRLS-1:0][TWD_QUEUE_WIDTH-1:0]     wr_dat_i,
     
-    input  logic                                       tx_rd_req_i,
-    input  logic [TWD_QUEUE_ADD_WIDTH-1:0]             tx_rd_add_i,
-    output logic [TWD_QUEUE_WIDTH-1:0]                 tx_rd_dat_o,
+    input  logic                                         tx_rd_req_i,
+    input  logic [TWD_QUEUE_ADD_WIDTH-1:0]               tx_rd_add_i,
+    output logic [TWD_QUEUE_WIDTH-1:0]                   tx_rd_dat_o,
     
-    input  logic                                       rx_rd_req_i,
-    input  logic [TWD_QUEUE_ADD_WIDTH-1:0]             rx_rd_add_i,
-    output logic [TWD_QUEUE_WIDTH-1:0]                 rx_rd_dat_o
+    input  logic                                         rx_rd_req_i,
+    input  logic [TWD_QUEUE_ADD_WIDTH-1:0]               rx_rd_add_i,
+    output logic [TWD_QUEUE_WIDTH-1:0]                   rx_rd_dat_o
     
     );
    
@@ -49,8 +49,8 @@ module twd_trans_queue
    
    logic 						 s_alloc_req_arb, s_alloc_gnt_arb;
    
-   logic [(2**($clog2(NB_CORES)+1))-1:0] 		 s_alloc_req;
-   logic [(2**($clog2(NB_CORES)+1))-1:0] 		 s_alloc_gnt;
+   logic [(2**($clog2(NB_CTRLS)))-1:0] 			 s_alloc_req;
+   logic [(2**($clog2(NB_CTRLS)))-1:0] 			 s_alloc_gnt;
    
    integer 						 s_loop1,s_loop2,s_loop3;
    genvar 						 i;
@@ -59,7 +59,7 @@ module twd_trans_queue
    //*** TRANSACTION ARBITER **********************************
    //**********************************************************
    generate
-      for (i =0; i<NB_CORES+1; i++)
+      for (i =0; i<NB_CTRLS; i++)
 	begin
 	   assign s_alloc_req[i] = alloc_req_i[i];
 	   assign alloc_gnt_o[i] = s_alloc_gnt[i];
@@ -67,7 +67,7 @@ module twd_trans_queue
    endgenerate
    
    generate
-      for (i =NB_CORES+1; i<2**($clog2(NB_CORES)+1); i++)
+      for (i =NB_CTRLS; i<2**($clog2(NB_CTRLS)); i++)
 	begin
 	   assign s_alloc_req[i] = '0;
 	end
@@ -76,7 +76,7 @@ module twd_trans_queue
    mchan_arbiter
      #(
        .DATA_WIDTH(1),
-       .N_MASTER(2**($clog2(NB_CORES)+1))
+       .N_MASTER(2**($clog2(NB_CTRLS)))
        )
    twd_queue_arbiter_i
      (
@@ -118,7 +118,7 @@ module twd_trans_queue
           end
         else
           begin
-	     for (s_loop3 = 0 ; s_loop3 < NB_CORES+1 ; s_loop3 = s_loop3 + 1)
+	     for (s_loop3 = 0 ; s_loop3 < NB_CTRLS; s_loop3 = s_loop3 + 1)
                begin
                   if (wr_req_i[s_loop3] == 1)
 		    begin
@@ -157,7 +157,7 @@ module twd_trans_queue
    // UPDATE OUTPUT PORTS
    generate
       
-      for (i=0; i<NB_CORES + 1; i++)
+      for (i=0; i<NB_CTRLS; i++)
 	begin
 	   assign alloc_add_o[i] =  s_pointer;
 	end

@@ -13,13 +13,14 @@
 module tcdm_tx_if
 #(
     parameter TRANS_SID_WIDTH = 2,
-    parameter TCDM_ADD_WIDTH  = 12,
-    parameter DEBUG = 0
+    parameter TCDM_ADD_WIDTH  = 12
 )
 (
    
     input  logic                       clk_i,
     input  logic                       rst_ni,
+
+    input  logic                       test_mode_i,
     
     // CMD LD INTERFACE
     //***************************************
@@ -47,6 +48,7 @@ module tcdm_tx_if
     output logic [31:0]                tcdm_add_o,
     output logic                       tcdm_we_o,
     output logic [31:0]                tcdm_wdata_o,
+    output logic [TRANS_SID_WIDTH-1:0] tcdm_sid_o,
     output logic [3:0]                 tcdm_be_o,
     input  logic                       tcdm_gnt_i,
     
@@ -121,32 +123,26 @@ module tcdm_tx_if
     //**********************************************************
     //********** DECOUPLE REQUEST AND RESPONE CHANNEL **********
     //**********************************************************
-   //synopsys translate_off
-   if (DEBUG) begin
-      initial begin
-         $display("%s[MCHAN - TCDM_UNIT] %s%t - %s%m tcdm_tx_cmd_queue_i.DATA_WIDTH = %d%s", "\x1B[1;34m", "\x1B[0;37m", $time, "\x1B[0;35m", TRANS_SID_WIDTH+1, "\x1B[0m");
-         $display("%s[MCHAN - TCDM_UNIT] %s%t - %s%m tcdm_tx_cmd_queue_i.DATA_DEPTH = %d%s", "\x1B[1;34m", "\x1B[0;37m", $time, "\x1B[0;35m", 2, "\x1B[0m");
-      end
-   end
-   //synopsys translate_on 
 
-    mchan_fifo
+    generic_fifo
     #(
       .DATA_WIDTH    ( TRANS_SID_WIDTH+1         ),
       .DATA_DEPTH    ( 2                         )
     )
     tcdm_tx_cmd_queue_i
     (
-        .clk_i       ( clk_i                    ),
-        .rst_ni      ( rst_ni                   ),
+        .clk         ( clk_i                    ),
+        .rst_n       ( rst_ni                   ),
 
-        .push_dat_i  ( {beat_sid_i,beat_eop_i}  ),
-        .push_req_i  ( s_push_req               ),
-        .push_gnt_o  (                          ),
+        .data_i      ( {beat_sid_i,beat_eop_i}  ),
+        .valid_i     ( s_push_req               ),
+        .grant_o     (                          ),
 
-        .pop_dat_o   ( {s_beat_sid,s_beat_eop}  ),
-        .pop_req_i   ( s_pop_req                ),
-        .pop_gnt_o   (                          )
+        .data_o      ( {s_beat_sid,s_beat_eop}  ),
+        .grant_i     ( s_pop_req                ),
+        .valid_o     (                          ),
+
+        .test_mode_i ( test_mode_i              )
     );
 
    //**********************************************************
@@ -240,5 +236,6 @@ module tcdm_tx_if
    assign tcdm_be_o    = 4'b1111;
    assign tcdm_we_o    = beat_we_ni;
    assign tcdm_wdata_o = '0;
+   assign tcdm_sid_o   = beat_sid_i;
    
 endmodule
