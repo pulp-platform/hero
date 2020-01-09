@@ -110,9 +110,8 @@ module cluster_peripherals
   logic [NB_CORES-1:0][1:0]  s_timer_events;
   logic [NB_CORES-1:0][1:0]  s_dma_events;
   
-  logic [NB_CORES-1:0]  s_fetch_en_cc;
 
-  MESSAGE_BUS eu_message_master(); 
+  logic [NB_CORES-1:0]  s_fetch_en_cc;
 
   logic [NB_SPERIPH_PLUGS_EU-1:0]             eu_speriph_plug_req;
   logic [NB_SPERIPH_PLUGS_EU-1:0][31:0]       eu_speriph_plug_add;
@@ -190,13 +189,6 @@ module cluster_peripherals
   //******************** NEW EVENT UNIT ********************
   //********************************************************
 
-  // event unit binding
-  assign eu_message_master.r_valid = 1'b1;
-  assign eu_message_master.r_id    = '0;
-  assign eu_message_master.r_rdata = 32'b0;
-  assign eu_message_master.r_opc   = 1'b0;
-  assign eu_message_master.gnt     = 1'b1;
-
   // combine number of required slave ports for event unit
   generate
     for (genvar I = 0; I < NB_SPERIPH_PLUGS_EU; I++ ) begin
@@ -255,9 +247,7 @@ module cluster_peripherals
     
     .soc_periph_evt_valid_i ( soc_periph_evt_valid_i ),
     .soc_periph_evt_ready_o ( soc_periph_evt_ready_o ),
-    .soc_periph_evt_data_i  ( soc_periph_evt_data_i  ),  
-    
-    .message_master         ( eu_message_master      )
+    .soc_periph_evt_data_i  ( soc_periph_evt_data_i  )
   );
 
   //********************************************************
