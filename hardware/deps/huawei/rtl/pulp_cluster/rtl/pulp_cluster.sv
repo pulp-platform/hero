@@ -1161,7 +1161,6 @@ module pulp_cluster
     assign IC_ctrl_unit_bus_mp.bypass_ack = 1'b0;
     assign IC_ctrl_unit_bus_mp.flush_ack = 1'b0;
     assign IC_ctrl_unit_bus_mp.sel_flush_ack = 1'b0;
-    assign IC_ctrl_unit_bus_mp.sel_flush_addr = '0;
     assign IC_ctrl_unit_bus_mp.pf_ack = 1'b0;
     assign IC_ctrl_unit_bus_mp.pf_done = 1'b0;
     assign IC_ctrl_unit_bus_mp.global_hit_count = '0;
