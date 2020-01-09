@@ -43,7 +43,10 @@ git config --local user.name 'Packager'
 git config --local user.email 'packager@localhost'
 git add -A
 git commit -m 'initial commit'
+
+# OpenMP examples: copy to destination.
 cd "$SRC"
+copy_git_files openmp-examples
 
 # Setup script: copy to destination.
 rsync -av setup.sh "$TMP_DST/"
