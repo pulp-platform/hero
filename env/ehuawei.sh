@@ -6,25 +6,10 @@ if [[ -z "${HERO_INSTALL}" ]]; then
 fi
 export PATH=${HERO_INSTALL}/bin:$PATH
 
-if [[ -z "${HERO_TARGET_HOST}" ]]; then
-  export HERO_TARGET_PATH="/mnt/root/"
-fi
-export HERO_TARGET_PATH_APPS="${HERO_TARGET_PATH}/apps"
-export HERO_TARGET_PATH_DRIVER="${HERO_TARGET_PATH}/drivers"
-export HERO_TARGET_PATH_LIB="${HERO_TARGET_PATH}/libs"
+export PLATFORM=ARM
+export BOARD=HUAWEI
 
-export PLATFORM=ARIANE
-export BOARD=URANIA
-
-export ARCH="riscv64"
-export HERO_TOOLCHAIN_HOST_TARGET="${ARCH}-hero-linux-gnu"
-export CROSS_COMPILE="${HERO_TOOLCHAIN_HOST_TARGET}-"
-
-export HERO_TOOLCHAIN_HOST_LINUX_ARCH="${ARCH}"
-export KERNEL_ARCH=${ARCH}
-export KERNEL_CROSS_COMPILE=${CROSS_COMPILE}
-
-export HERCULES_ARCH=URANIA
+export ARCH="arm"
 
 export PULP_RISCV_GCC_TOOLCHAIN=${HERO_INSTALL}
 
