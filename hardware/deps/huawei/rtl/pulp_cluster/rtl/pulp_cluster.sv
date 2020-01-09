@@ -58,7 +58,6 @@ module pulp_cluster
   parameter string MULTICAST_FEATURE      = "DISABLED",
   parameter string SHARED_ICACHE          = "ENABLED",
   parameter string DIRECT_MAPPED_FEATURE  = "DISABLED",
-  parameter string USE_REDUCED_TAG        = "TRUE",
 
   // core parameters
   parameter bit DEM_PER_BEFORE_TCDM_TS  = 1'b0,
@@ -1019,7 +1018,7 @@ module pulp_cluster
       .AXI_ADDR               ( AXI_ADDR_WIDTH      ),
       .AXI_USER               ( AXI_USER_WIDTH      ),
       .AXI_DATA               ( AXI_DATA_C2S_WIDTH  ),
-      .USE_REDUCED_TAG        ( USE_REDUCED_TAG     ), // TRUE | FALSE
+      .USE_REDUCED_TAG        ( USE_REDUCED_TAG     ),
       .L2_SIZE                ( L2_SIZE             )  // Size of max(L2 ,ROM) program memory in Byte
     ) icache_top_i (
       .clk                       ( clk_cluster               ),
