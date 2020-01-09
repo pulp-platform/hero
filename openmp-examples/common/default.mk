@@ -47,7 +47,7 @@ ifeq ($(default-as),pulp)
 endif
 ifeq ($(compiler),gcc)
 	CFLAGS_COMMON += -fopenmp
-	CFLAGS_PULP += $(CFLAGS_COMMON) -march=rv32imafc
+	CFLAGS_PULP += $(CFLAGS_COMMON) -march=rv32imafcXpulpv2
 	CFLAGS += $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
 	LDFLAGS_PULP += $(LDFLAGS_COMMON) -lgomp
 else
