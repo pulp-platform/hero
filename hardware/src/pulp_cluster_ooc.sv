@@ -177,7 +177,7 @@ module pulp_cluster_ooc (
     .CLUSTER_ALIAS_BASE       (12'h1B0),
     .TCDM_SIZE                (TCDM_SIZE),
     .NB_TCDM_BANKS            (N_TCDM_BANKS),
-    .XNE_PRESENT              (1'b0),
+    .HWPE_PRESENT             (1'b0),
     // I$ Parameters
     .NB_CACHE_BANKS           (4),
     .CACHE_SIZE               (ICACHE_SIZE),
