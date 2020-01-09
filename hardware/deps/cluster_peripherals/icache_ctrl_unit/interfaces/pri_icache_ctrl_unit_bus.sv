@@ -14,6 +14,9 @@ interface PRI_ICACHE_CTRL_UNIT_BUS;
   logic        bypass_ack;
   logic        flush_req;
   logic        flush_ack;
+  logic        sel_flush_req;
+  logic [31:0] sel_flush_addr;
+  logic        sel_flush_ack;
   logic [31:0] ctrl_hit_count;
   logic [31:0] ctrl_trans_count;
   logic [31:0] ctrl_miss_count;
@@ -22,15 +25,15 @@ interface PRI_ICACHE_CTRL_UNIT_BUS;
   logic        ctrl_enable_regs;
 
   modport Master (
-    output bypass_req, flush_req, ctrl_clear_regs, ctrl_enable_regs,
+    output bypass_req, flush_req, ctrl_clear_regs, ctrl_enable_regs, sel_flush_req, sel_flush_addr,
     input  bypass_ack, flush_ack, ctrl_hit_count, ctrl_trans_count, ctrl_miss_count,
-           ctrl_cong_count
+           ctrl_cong_count, sel_flush_ack
   );
 
   modport Slave (
-    input  bypass_req, flush_req, ctrl_clear_regs, ctrl_enable_regs,
+    input  bypass_req, flush_req, ctrl_clear_regs, ctrl_enable_regs, sel_flush_req, sel_flush_addr,
     output bypass_ack, flush_ack, ctrl_hit_count, ctrl_trans_count, ctrl_miss_count,
-           ctrl_cong_count
+           ctrl_cong_count, sel_flush_ack
   );
 
 endinterface
