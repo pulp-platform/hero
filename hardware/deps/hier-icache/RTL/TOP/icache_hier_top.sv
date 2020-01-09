@@ -39,7 +39,8 @@
 //                                                                            //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-`include "pulp_soc_defines.sv"
+
+`define FEATURE_ICACHE_STAT
 
 module icache_hier_top
 #(

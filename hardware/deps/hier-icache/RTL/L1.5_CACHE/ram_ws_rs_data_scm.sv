@@ -9,7 +9,6 @@
 // specific language governing permissions and limitations under the License.
 
 
-`include "pulp_soc_defines.sv"
 // `define  USE_SRAM
 
 module ram_ws_rs_data_scm

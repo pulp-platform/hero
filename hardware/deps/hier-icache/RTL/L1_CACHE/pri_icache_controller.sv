@@ -34,7 +34,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-`include "pulp_soc_defines.sv"
+`define FEATURE_ICACHE_STAT
 
 module pri_icache_controller
 #(

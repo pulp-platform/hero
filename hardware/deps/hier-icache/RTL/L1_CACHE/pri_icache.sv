@@ -37,7 +37,7 @@
 
 // `define USE_REQ_BUFF
 `define USE_RESP_BUFF
-`include "pulp_soc_defines.sv"
+`define FEATURE_ICACHE_STAT
 
 module pri_icache
 #(

@@ -9,7 +9,7 @@
 // specific language governing permissions and limitations under the License.
 
 
-`include "pulp_soc_defines.sv"
+`define FEATURE_ICACHE_STAT
 
 module hier_icache_ctrl_unit_wrap
 #(

@@ -42,7 +42,7 @@
 //                                                                               //
 // ============================================================================= //
 
-`include "pulp_soc_defines.sv"
+`define FEATURE_ICACHE_STAT
 
     `define ENABLE_ICACHE             6'b00_0000 //0x00
     `define FLUSH_ICACHE              6'b00_0001 //0x04

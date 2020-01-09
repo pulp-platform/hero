@@ -10,7 +10,7 @@
 
 
 `define log2_size(VALUE)    ((VALUE) <= ( 1 ) ? 1 : (VALUE) < ( 2 ) ? 1 : (VALUE) < ( 4 ) ? 2 : (VALUE)< (8) ? 3:(VALUE) < ( 16 )  ? 4 : 5 )
-`include "pulp_soc_defines.sv"
+`define FEATURE_ICACHE_STAT
 
 `define FROM_PIPE         1'b0
 `define FROM_FIFO         1'b1
