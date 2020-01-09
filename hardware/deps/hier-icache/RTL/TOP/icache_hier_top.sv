@@ -65,7 +65,7 @@ module icache_hier_top
    parameter AXI_USER          = 6,
    parameter AXI_DATA          = 64,
 
-   parameter USE_REDUCED_TAG   = "TRUE",   // TRUE | FALSE
+   parameter bit USE_REDUCED_TAG = 1'b1,
    parameter L2_SIZE           = 512*1024    // Size of max(L2 ,ROM) program memory in Byte
 )
 (
@@ -339,7 +339,7 @@ module icache_hier_top
             .CACHE_SIZE           ( (USE_SPECIAL_CORE == "TRUE") ? (( i == SPECIAL_CORE_ID ) ? SPECIAL_PRI_CACHE_SIZE : PRI_CACHE_SIZE) :  PRI_CACHE_SIZE  ), //= 4096,     // Ccache capacity in Byte
             .CACHE_LINE           ( PRI_CACHE_LINE   ), //= 1,        // in word of [FETCH_DATA_WIDTH]
 
-            .USE_REDUCED_TAG      ( USE_REDUCED_TAG  ), //= "TRUE",   // TRUE | FALSE
+            .USE_REDUCED_TAG      ( USE_REDUCED_TAG  ),
             .L2_SIZE              ( L2_SIZE          ) //= 512*1024  // Size of max(L2 ,ROM) program memory in Byte
          )
          i_pri_icache
