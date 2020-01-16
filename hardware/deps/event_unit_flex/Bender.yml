@@ -12,3 +12,4 @@ sources:
     - rtl/hw_barrier_unit.sv
     - rtl/hw_mutex_unit.sv
     - rtl/hw_dispatch.sv
+    - rtl/periph_FIFO_id.sv
