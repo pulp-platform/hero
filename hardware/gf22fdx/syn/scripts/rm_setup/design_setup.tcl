@@ -1,7 +1,7 @@
 set NUM_CORES 8
 
-set IPS_PATH        "../../../ips"
-set RTL_PATH        "../../../rtl"
+set IPS_PATH        "../../deps"
+set RTL_PATH        "../../deps"
 set DESIGN_PATH     "../../../"
 
 set reAnalyzeRTL   "TRUE"
