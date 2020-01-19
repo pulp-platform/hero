@@ -1,0 +1,10 @@
+WORK
+alib
+DDC
+reports
+default.svf
+filenames*.log
+command.log
+view_command.log
+.synopsys_dc.setup
+*.20[0-9]*-[0-9]*-[0-9]*-[0-9]*:[0-9]*:[0-9]*
