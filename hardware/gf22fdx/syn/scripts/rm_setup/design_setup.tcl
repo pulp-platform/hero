@@ -1,7 +1,7 @@
 set NUM_CORES 8
 
 set IPS_PATH        "../../deps"
-set RTL_PATH        "../../deps"
+set RTL_PATH        "../../src"
 set DESIGN_PATH     "../../../"
 
 set reAnalyzeRTL   "TRUE"
@@ -57,7 +57,8 @@ set search_path [ join "$IPS_PATH/axi/per2axi
                         $IPS_PATH/hwpe-stream/rtl
                         $IPS_PATH/xne/rtl
                         $FLL/DB
-                        $DESIGN_PATH/rtl/includes
+                        $RTL_PATH/include
+                        $RTL_PATH/apb/include
                         $search_path"]
 
 define_design_lib work -path ./work
