@@ -1,0 +1,5 @@
+rtl/*.tcl
+ips/*.tcl
+
+ips_add_files.tcl
+rtl_add_files.tcl
