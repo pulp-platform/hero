@@ -6,7 +6,7 @@ set DESIGN_PATH     "../../../"
 
 set reAnalyzeRTL   "TRUE"
 set doDFT          "FALSE"
-set OUT_FILENAME   "pulp_soc"
+set OUT_FILENAME   "pulp"
 
 set std_cell_path  "/usr/pack/gf-22-kgf/invecas/std/V05R00"
 set pwr_cell_path  "/usr/pack/gf-22-kgf/invecas/std/V02R00"
@@ -45,7 +45,7 @@ set search_path [ join "$IPS_PATH/axi/per2axi
                         $IPS_PATH/axi/axi2mem
                         $IPS_PATH/axi/axi_node
                         $IPS_PATH/axi/axi/src
-                        $IPS_PATH/axi/axi/src
+                        $IPS_PATH/axi/include
                         $IPS_PATH/apb_periph/apb_i2c
                         $IPS_PATH/mchan/rtl/include
                         $IPS_PATH/cluster_peripherals/include
@@ -59,6 +59,7 @@ set search_path [ join "$IPS_PATH/axi/per2axi
                         $FLL/DB
                         $RTL_PATH/include
                         $RTL_PATH/apb/include
+ 			$RTL_PATH
                         $search_path"]
 
 define_design_lib work -path ./work

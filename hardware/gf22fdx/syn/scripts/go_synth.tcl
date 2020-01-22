@@ -23,7 +23,7 @@ set compile_timing_high_effort true
 
 set reAnalyzeRTL "TRUE"
 
-set DESIGN_NAME  "pulp_cluster"
+set DESIGN_NAME  "pulp"
 
 # Set VERILOG defines
 set DEFINES "SYNTHESIS=1"
@@ -36,15 +36,15 @@ if { $reAnalyzeRTL == "TRUE" } {
     file delete -force -- ./work
     source -echo -verbose ./scripts/analyze_auto/ips_add_files.tcl
     source -echo -verbose ./scripts/analyze_auto/rtl_add_files.tcl
-    elaborate pulp_cluster
+    elaborate pulp
 
-    write -format verilog -hier -o ./unmapped/pulp_cluster_unmapped.v
-    write -format ddc -hier -o ./unmapped/pulp_cluster_unmapped.ddc pulp_cluster
+    write -format verilog -hier -o ./unmapped/pulp_unmapped.v
+    write -format ddc -hier -o ./unmapped/pulp_unmapped.ddc pulp
 } else {
-     read_file  -format ddc  ./unmapped/pulp_cluster_unmapped.ddc
+     read_file  -format ddc  ./unmapped/pulp_unmapped.ddc
 }
 
-current_design pulp_cluster
+current_design pulp
 link
 after 10000
 set uniquify_naming_style "soc_%s_%d"

@@ -9,7 +9,13 @@
 
 // This package makes internal constants of PULP accessible, e.g., in test environments.  Do not use
 // these values to hierarchically design your system, though.
+
+
+`include "axi/assign.svh"
+`include "axi/typedef.svh"
+
 package automatic pulp_pkg;
+  
   // Addressing
   localparam int unsigned AXI_AW = pulp_cluster_cfg_pkg::AXI_AW;
   // Clusters
@@ -19,6 +25,7 @@ package automatic pulp_pkg;
   // SoC Bus
   localparam int unsigned AXI_IW_SB_INP = AXI_IW_CL_OUP;
   localparam int unsigned AXI_UW = pulp_cluster_cfg_pkg::AXI_UW;
+  localparam int unsigned AXI_DW = 128;
   function int unsigned axi_iw_sb_oup(input int unsigned n_clusters);
     return soc_bus_pkg::oup_id_w(n_clusters, AXI_IW_SB_INP);
   endfunction
@@ -35,18 +42,32 @@ package automatic pulp_pkg;
   typedef logic [AXI_LITE_AW-1:0]   lite_addr_t;
   typedef logic [AXI_LITE_DW-1:0]   lite_data_t;
   typedef logic [AXI_LITE_DW/8-1:0] lite_strb_t;
+  
+  localparam int unsigned AXI_IW = axi_iw_sb_oup(1);
+  localparam int unsigned AXI_SW = 128/8;  // width of strobe
+  typedef addr_t                axi_addr_t;
+  typedef logic [AXI_DW-1:0]    axi_data_t;
+  typedef logic [AXI_IW-1:0]    axi_id_t;
+  typedef logic [AXI_SW-1:0]    axi_strb_t;
+  typedef user_t                axi_user_t;
+  `AXI_TYPEDEF_AW_CHAN_T(       axi_aw_t,     axi_addr_t, axi_id_t, axi_user_t);
+  `AXI_TYPEDEF_W_CHAN_T(        axi_w_t,      axi_data_t, axi_strb_t, axi_user_t);
+  `AXI_TYPEDEF_B_CHAN_T(        axi_b_t,      axi_id_t, axi_user_t);
+  `AXI_TYPEDEF_AR_CHAN_T(       axi_ar_t,     axi_addr_t, axi_id_t, axi_user_t);
+  `AXI_TYPEDEF_R_CHAN_T(        axi_r_t,      axi_data_t, axi_id_t, axi_user_t);
+  `AXI_TYPEDEF_REQ_T(           axi_req_t,    axi_aw_t, axi_w_t, axi_ar_t);
+  `AXI_TYPEDEF_RESP_T(          axi_resp_t,   axi_b_t, axi_r_t);
 endpackage
-import pulp_pkg::*;
 
-`include "axi/assign.svh"
+import pulp_pkg::*;
 
 module pulp #(
   // SoC Parameters
   parameter int unsigned  N_CLUSTERS = 1,           // must be a power of 2
   parameter int unsigned  AXI_DW = 128,             // [bit]
   parameter int unsigned  L2_N_AXI_PORTS = 1,       // must be a power of 2
-  parameter type          axi_req_t = logic,
-  parameter type          axi_resp_t = logic,
+  parameter type          axi_req_t = axi_req_t,
+  parameter type          axi_resp_t = axi_resp_t,
   parameter type          axi_lite_req_t = logic,
   parameter type          axi_lite_resp_t = logic
 ) (
