@@ -131,6 +131,8 @@ void kernel_conv2d(int ni,
 
 int main(int argc, char** argv)
 {
+  omp_set_default_device(BIGPULP_MEMCPY);
+
   /* Retrieve problem size. */
   int ni = NI;
   int nj = NJ;

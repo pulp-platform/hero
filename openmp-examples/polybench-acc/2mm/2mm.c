@@ -206,6 +206,8 @@ void kernel_2mm(int ni, int nj, int nk, int nl,
 
 int main(int argc, char** argv)
 {
+  omp_set_default_device(BIGPULP_MEMCPY);
+
   /* Retrieve problem size. */
   int ni = NI;
   int nj = NJ;

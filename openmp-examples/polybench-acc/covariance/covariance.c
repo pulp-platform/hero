@@ -162,6 +162,8 @@ void kernel_covariance(int m, int n,
 
 int main(int argc, char** argv)
 {
+  omp_set_default_device(BIGPULP_MEMCPY);
+
   /* Retrieve problem size. */
   int n = N;
   int m = M;

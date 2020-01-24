@@ -27,7 +27,7 @@ struct timespec start, stop;
 double start_ns, stop_ns, exe_time;
 
 #pragma omp declare target
-void helloworld ()
+void helloworld (void)
 {
 	#pragma omp parallel
 	printf("Hello World, I am thread %d of %d\n", omp_get_thread_num(), omp_get_num_threads());

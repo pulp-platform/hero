@@ -183,6 +183,8 @@ void kernel_bicg(int nx, int ny,
 
 int main(int argc, char** argv)
 {
+  omp_set_default_device(BIGPULP_MEMCPY);
+
   /* Retrieve problem size. */
   int nx = NX;
   int ny = NY;
