@@ -134,10 +134,10 @@
 
 #else // PLATFORM == ZYNQMP
 
-  #define H_GPIO_BASE_ADDR 0xA8100000
+  #define H_GPIO_BASE_ADDR 0xA9000000
   #define CLKING_BASE_ADDR 0x00000000 // not supported
   #define RAB_CONFIG_BASE_ADDR 0xA8000000
-  #define INTR_REG_BASE_ADDR 0xB1000000
+  #define INTR_REG_BASE_ADDR 0xA9100000
 
   #define RAB_AX_LOG_EN 0
 
@@ -186,7 +186,7 @@
   #define L1_MEM_H_BASE_ADDR PULP_H_BASE_ADDR
   #define L2_MEM_H_BASE_ADDR 0xA7000000
   #define L3_MEM_H_BASE_ADDR (0x80000000 - L3_MEM_SIZE_B)
-  #define MBOX_H_BASE_ADDR 0xB3000000 // FIXME
+  #define MBOX_H_BASE_ADDR   0xA6000000 // FIXME
   #define SOC_PERIPHERALS_H_BASE_ADDR 0xA5100000
 #endif // PLATFORM
 
@@ -194,7 +194,7 @@
  * PULP memory map -- see PULP SDK and PULP HW
  */
 #define PULP_BASE_ADDR 0x10000000
-#define MBOX_BASE_ADDR 0x1A121000
+#define MBOX_BASE_ADDR 0x1c00f100
 #define L2_MEM_BASE_ADDR 0x1C000000
 #define L3_MEM_BASE_ADDR 0x80000000 // address of the contiguous L3
 #define PGD_BASE_ADDR 0x20000000 // address of the top-level page table of user-space process
@@ -255,7 +255,7 @@
   #define N_CLUSTERS 1
   #define N_CORES 2
   #define L2_MEM_SIZE_KB 64
-  #define L1_MEM_SIZE_KB 128
+  #define L1_MEM_SIZE_KB 64
   #define PULP_DEFAULT_FREQ_MHZ 75
   #define CLKING_INPUT_FREQ_MHZ 50
 #endif
@@ -286,6 +286,20 @@
 /*
  * Interrupts -- see bigpulp*_top.sv
  */
+
+#if PLATFORM == ZYNQMP
+#define INTR_EOC_0 7
+#define INTR_EOC_N 7 + (N_CLUSTERS - 1) // max 15
+
+#define INTR_MBOX 16
+#define INTR_RAB_MISS 17
+#define INTR_RAB_MULTI 18
+#define INTR_RAB_PROT 19
+#define INTR_RAB_MHR_FULL 20
+#define INTR_RAB_AR_LOG_FULL 21
+#define INTR_RAB_AW_LOG_FULL 22
+#define INTR_RAB_CFG_LOG_FULL 23
+#else
 #define INTR_EOC_0 0
 #define INTR_EOC_N (N_CLUSTERS - 1) // max 15
 
@@ -297,6 +311,7 @@
 #define INTR_RAB_AR_LOG_FULL 21
 #define INTR_RAB_AW_LOG_FULL 22
 #define INTR_RAB_CFG_LOG_FULL 23
+#endif
 
 /*
  * PULP GPIOs -- see bigpulp*_top.sv
@@ -313,6 +328,18 @@
   #define GPIO_RAB_AX_LOG_EN 3 // NOTE: not used
 
   #define GPIO_RST_N 1
+  #define GPIO_CLK_EN -1
+#elif PLATFORM == ZYNQMP
+  #define GPIO_HOST2PULP_OFFSET 0
+  #define GPIO_PULP2HOST_OFFSET -1
+
+  #define GPIO_INTR_RAB_MISS_DIS 2 // NOTE: not used
+  #define GPIO_RAB_AX_LOG_EN 3 // NOTE: not used
+
+  #define GPIO_EXT_RESET_ADDR 0xFF0A0054
+  #define GPIO_EXT_RESET_SIZE_B 8
+
+  #define GPIO_RST_N 31
   #define GPIO_CLK_EN -1
 #else
   #define GPIO_HOST2PULP_OFFSET 8
