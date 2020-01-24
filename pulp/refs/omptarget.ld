@@ -3,7 +3,7 @@ OUTPUT_ARCH(riscv)
 ENTRY( _start )
 MEMORY
 {
-  L2           : ORIGIN = 0x1c000000, LENGTH = 0x00020000
+  L2                 : ORIGIN = 0x1c000000, LENGTH = 0x0000f000
   L1                 : ORIGIN = 0x10000004, LENGTH = 0x0001fffc
   L1_aliased         : ORIGIN = 0x1b000004, LENGTH = 0x0001fffc
 }
@@ -49,7 +49,7 @@ __pulp_l2_end         = __pulp_l2_base + LENGTH(L2);
 __pulp_cluster_size = 0x00400000;
 
 /*
- * This linker script try to put FC data in L2 private bank0 and FC code 
+ * This linker script try to put FC data in L2 private bank0 and FC code
  * in L2 private bank1 to avoid contention between FC code and data
  * as FC has no instruction cache and is so often accessing L2 to
  * get instructions. Everything can be shifted in case one bank is full.
