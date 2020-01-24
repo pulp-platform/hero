@@ -146,6 +146,9 @@ typedef struct {
   void *mbox;
   void *rab_config;
   void *gpio;
+#ifdef GPIO_EXT_RESET_ADDR
+  void *gpio_reset;
+#endif
   void *soc_periph;
   void *clusters;
   void *l3_mem;

@@ -25,8 +25,12 @@
 #include <linux/delay.h>
 #include <asm/io.h>
 
-int pulp_reset(void *gpio_config, void *slcr_config, unsigned *gpio_value, bool full)
+int pulp_reset(void *gpio_config, void*gpio_ext_reset, void *slcr_config, unsigned *gpio_value, bool full)
 {
+#ifdef GPIO_EXT_RESET_ADDR
+  unsigned gpio_reset_value;
+#endif
+
 #if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX
   unsigned slcr_value;
 
@@ -58,12 +62,22 @@ int pulp_reset(void *gpio_config, void *slcr_config, unsigned *gpio_value, bool 
 
     // trigger reset using GPIO register
 #if GPIO_RST_N >= 0
+#ifdef GPIO_EXT_RESET_ADDR
+    gpio_reset_value = ioread32((void *)((unsigned long)gpio_ext_reset));
+    BIT_CLEAR(gpio_reset_value, BF_MASK_GEN(GPIO_RST_N, 1));
+    iowrite32(gpio_reset_value, (void *)((unsigned long)gpio_ext_reset));
+    msleep(100);
+    BIT_SET(gpio_reset_value, BF_MASK_GEN(GPIO_RST_N, 1));
+    iowrite32(gpio_reset_value, (void *)((unsigned long)gpio_ext_reset));
+    msleep(100);
+#else
     BIT_CLEAR(*gpio_value, BF_MASK_GEN(GPIO_RST_N, 1));
     iowrite32(*gpio_value, (void *)((unsigned long)gpio_config + GPIO_HOST2PULP_OFFSET));
     msleep(100);
     BIT_SET(*gpio_value, BF_MASK_GEN(GPIO_RST_N, 1));
     iowrite32(*gpio_value, (void *)((unsigned long)gpio_config + GPIO_HOST2PULP_OFFSET));
     msleep(100);
+#endif
 #endif
 
 #if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX
