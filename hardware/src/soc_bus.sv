@@ -25,7 +25,7 @@ module soc_bus #(
   parameter int unsigned  AXI_UW = 0,               // [bit]
   parameter int unsigned  AXI_IW_INP = 0,           // [bit]
   parameter int unsigned  N_CLUSTERS = 0,
-  parameter int unsigned  L2_N_PORTS = 0,
+  parameter int unsigned  L2_N_PORTS = 1,
   parameter int unsigned  L2_N_BYTES_PER_PORT = 0,  // [B]
   parameter int unsigned  PERIPH_N_BYTES = 0,       // [B]
   parameter int unsigned  MST_SLICE_DEPTH = 0,
