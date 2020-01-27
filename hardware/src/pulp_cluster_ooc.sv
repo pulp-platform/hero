@@ -186,7 +186,7 @@ module pulp_cluster_ooc (
     // Core Parameters
     .DEM_PER_BEFORE_TCDM_TS   (1'b0),
     .ROM_BOOT_ADDR            (32'h1A00_0000),
-    .BOOT_ADDR                (32'h1C00_0080),
+    .BOOT_ADDR                (32'h1C00_8080),
     // AXI Parameters
     .AXI_ADDR_WIDTH           (AXI_AW),
     .AXI_DATA_C2S_WIDTH       (AXI_DW),
