@@ -20,6 +20,3 @@ analyze -format sverilog  -work work ${IPS_PATH}/axi_node/src/axi_node_wrap_with
 analyze -format sverilog  -work work ${IPS_PATH}/axi_node/src/axi_regs_top.sv
 analyze -format sverilog  -work work ${IPS_PATH}/axi_node/src/axi_request_block.sv
 analyze -format sverilog  -work work ${IPS_PATH}/axi_node/src/axi_response_block.sv
-
-
-
