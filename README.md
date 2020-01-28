@@ -1,3 +1,4 @@
+
 # HERO for Huawei 2020 Tapeout
 
 This variant of HERO provides the hardware and software to integrate PULP with a simple microcontroller host processor.
@@ -54,3 +55,4 @@ Finally, start the simulation with
 ```
 ./start_sim.sh
 ```
+
