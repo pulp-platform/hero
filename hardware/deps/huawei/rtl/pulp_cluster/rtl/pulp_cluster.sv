@@ -1061,7 +1061,7 @@ module pulp_cluster
       .SPECIAL_PRI_CACHE_SIZE ( 0                   ), // in Byte
       .AXI_ID                 ( AXI_ID_OUT_WIDTH    ),
       .AXI_ADDR               ( AXI_ADDR_WIDTH      ),
-      .AXI_USER               ( 6      ), //AXI_USER_WIDTH
+      .AXI_USER               ( AXI_USER_WIDTH      ), //AXI_USER_WIDTH
       .AXI_DATA               ( AXI_DATA_C2S_WIDTH  ),
       .USE_REDUCED_TAG        (   USE_RED_TAG   ), //USE_REDUCED_TAG
       .L2_SIZE                ( 32'h00080000         )  //L2_SIZE // Size of max(L2 ,ROM) program memory in Byte
