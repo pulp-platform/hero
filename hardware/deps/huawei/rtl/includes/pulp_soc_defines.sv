@@ -41,7 +41,7 @@
 //`define NO_SCM
 
 //`define APU_CLUSTER
-//`define SHARED_FPU_CLUSTER
+`define SHARED_FPU_CLUSTER
 
 // uncomment if you want to place the DEMUX peripherals (EU, MCHAN) rigth before the Test and set region.
 // This will steal 16KB from the 1MB TCDM reegion.
@@ -76,7 +76,7 @@
 `define CLUST_FPU 1
 `define CLUST_FP_DIVSQRT 0
 // set to 2 when APU is connected
-`define CLUST_SHARED_FP 0
+`define CLUST_SHARED_FP 2
 // set to 2 to have divsqrt in one unit
 `define CLUST_SHARED_FP_DIVSQRT 0
 
