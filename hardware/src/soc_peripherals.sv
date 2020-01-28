@@ -55,8 +55,8 @@ module soc_peripherals #(
     .ADDR_WIDTH (APB_AW),
     .DATA_WIDTH (APB_DW),
     .N_SLV      (2),
-    .ADDR_BEGIN ({32'h1A10_4000, 32'h1A10_3000}),
-    .ADDR_END   ({32'h1A10_4FFF, 32'h1A10_3FFF})
+    .ADDR_BEGIN ({32'h1A10_F000, 32'h1A10_3000}),
+    .ADDR_END   ({32'h1A10_FFFF, 32'h1A10_3FFF})
   ) i_bus (
     .inp  (apb),
     .oup  (apb_periphs)
