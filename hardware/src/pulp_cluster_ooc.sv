@@ -179,6 +179,7 @@ module pulp_cluster_ooc (
     .TCDM_SIZE                (TCDM_SIZE),
     .NB_TCDM_BANKS            (N_TCDM_BANKS),
     .HWPE_PRESENT             (1'b0),
+    .SHARED_FPU               (1'b1),
     // I$ Parameters
     .NB_CACHE_BANKS           (4),
     .CACHE_SIZE               (ICACHE_SIZE),
