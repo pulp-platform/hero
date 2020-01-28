@@ -56,7 +56,7 @@ fpnew:
 jtag_pulp:
   commit: v0.1
 riscv:
-  commit: marsellus_1.0.1
+  commit: huawei
 ibex:
   commit: 13313952cd50ff04489f6cf3dba9ba05c2011a8b
   group: lowRISC
@@ -101,13 +101,13 @@ cluster_interconnect:
   commit: v1.0.3
   group: pulp-platform
 event_unit_flex:
-  commit: v1.0.1
+  commit: periph_pipe
   group: pulp-platform
 mchan:
   commit: v1.1.0
   group: pulp-platform
 hier-icache:
-  commit: v1.0.1
+  commit: huawei
   group:  pulp-platform
 icache-intc:
   commit: v1.0.1

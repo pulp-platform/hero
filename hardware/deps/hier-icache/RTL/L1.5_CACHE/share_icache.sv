@@ -33,7 +33,7 @@ module share_icache
    parameter AXI_DATA               = 64,
    parameter AXI_USER               = 6,
 
-   parameter bit USE_REDUCED_TAG    = 1'b1,
+   parameter USE_REDUCED_TAG    = "TRUE",
    parameter L2_SIZE                = 262144    // Size of max(L2 ,ROM) program memory in Byte
 )
 (
@@ -161,7 +161,7 @@ localparam TAGRAM_ADDR_NROWS  = CACHE_SIZE*8/(SET_ASSOCIATIVE*DATARAM_DATA_WIDTH
 localparam TAGRAM_ADDR_WIDTH  = $clog2(TAGRAM_ADDR_NROWS);
 
 
-localparam TAGRAM_DATA_WIDTH  = USE_REDUCED_TAG ?  (REDUCE_TAG_WIDTH + 1)  :   (ICACHE_ADDR_WIDTH - OFFSET_BIT - $clog2(CACHE_LINE) -$clog2(N_BANKS) - TAGRAM_ADDR_WIDTH + 1);
+localparam TAGRAM_DATA_WIDTH  = (USE_REDUCED_TAG == "TRUE") ?  (REDUCE_TAG_WIDTH + 1)  :   (ICACHE_ADDR_WIDTH - OFFSET_BIT - $clog2(CACHE_LINE) -$clog2(N_BANKS) - TAGRAM_ADDR_WIDTH + 1);
 
 
 `ifdef  DEBUG_INFO

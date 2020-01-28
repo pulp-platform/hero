@@ -363,7 +363,7 @@ module cluster_control_unit
       TCDM_arb_policy_o <= TCDM_arb_policy_n;
 
       if (start_fetch)
-        fetch_en_q <= '1;
+        fetch_en_q <= 8'b00000001;
       else
         fetch_en_q <= fetch_en_n;
 

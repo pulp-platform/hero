@@ -10,22 +10,6 @@ event_unit_flex:
     ./rtl/interc_sw_evt_trig.sv,
     ./rtl/hw_barrier_unit.sv,
     ./rtl/hw_mutex_unit.sv,
-    ./rtl/hw_dispatch.sv
-  ]
-  jg_slint_top_name: [
-    event_unit_top
-  ]
-  jg_slint_elab_opt: [
-    "-parameter NB_CORES 9",
-    "-parameter NB_BARR 9",
-    "-parameter PER_ID_WIDTH 10",
-    "-parameter EVNT_WIDTH 8",
-  ]
-  jg_slint_postelab_cmds: [
-  ]
-  jg_slint_clocks: [
-    clk_i,
-  ]
-  jg_slint_resets: [
-    ~rst_ni,
+    ./rtl/hw_dispatch.sv,
+    ./rtl/periph_FIFO_id.sv
   ]

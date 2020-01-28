@@ -18,6 +18,7 @@ dependencies:
   per2axi: { git: "https://github.com/pulp-platform/per2axi.git", rev: atomics }
   riscv: { git: "https://github.com/pulp-platform/riscv.git", rev: atomics }
   timer_unit: { git: "https://github.com/pulp-platform/timer_unit.git", version: 1.0.0 }
+  fpu_interco: { git: "https://github.com/pulp-platform/fpu_interco.git", rev: huawei }
 
 sources:
   # Level 0

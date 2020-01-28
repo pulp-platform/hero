@@ -1,0 +1,25 @@
+package:
+  name: fpu_interco
+
+sources:
+  include_dirs: ["../riscv/rtl/include"]
+  files:
+    - ../riscv/rtl/include/riscv_defines.sv
+    - FP_WRAP/fp_iter_divsqrt_msv_wrapper_2_STAGE.sv
+    - FP_WRAP/fpnew_wrapper.sv
+    - RTL/AddressDecoder_Req_FPU.sv
+    - RTL/AddressDecoder_Resp_FPU.sv
+    - RTL/ArbitrationTree_FPU.sv
+    - RTL/FanInPrimitive_Req_FPU.sv
+    - RTL/FanInPrimitive_Resp_FPU.sv
+    - RTL/optimal_alloc.sv
+    - RTL/FPU_clock_gating.sv
+    - RTL/LFSR_FPU.sv
+    - RTL/RequestBlock_FPU.sv
+    - RTL/ResponseBlock_FPU.sv
+    - RTL/ResponseTree_FPU.sv
+    - RTL/RR_Flag_Req_FPU.sv
+    - RTL/shared_fpu_cluster.sv
+    - RTL/fpu_demux.sv
+    - RTL/XBAR_FPU.sv
+
