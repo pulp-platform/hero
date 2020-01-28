@@ -27,84 +27,85 @@ import apu_core_package::*;
 module pulp_cluster
 #(
   // cluster parameters
-  parameter bit    ASYNC_INTF              = 1'b1,
-  parameter int    NB_CORES                = 8,
-  parameter int    NB_HWPE_PORTS           = 0,
-  parameter int    NB_DMAS                 = 4,
-  parameter int    NB_EXT2MEM              = 2,
-  parameter bit    CLUSTER_ALIAS           = 1'b1,
-  parameter int    CLUSTER_ALIAS_BASE      = 12'h1B0,
-  parameter int    TCDM_SIZE               = 64*1024,                 // [B], must be 2**N
-  parameter int    NB_TCDM_BANKS           = 16,                      // must be 2**N
-  parameter int    TCDM_BANK_SIZE          = TCDM_SIZE/NB_TCDM_BANKS, // [B]
-  parameter int    TCDM_NUM_ROWS           = TCDM_BANK_SIZE/4,        // [words]
-  parameter bit    HWPE_PRESENT            = 1'b0,                    // set to 1 if HW Processing Engines are present in the cluster
-  parameter bit    SHARED_FPU              = 1'b0,
+  parameter bit    ASYNC_INTF = 1'b1,
+  parameter int    NB_CORES = 8,
+  parameter int    NB_HWPE_PORTS = 0,
+  parameter int    NB_DMAS = 4,
+  parameter int    NB_EXT2MEM = 2,
+  parameter bit    CLUSTER_ALIAS = 1'b1,
+  parameter int    CLUSTER_ALIAS_BASE = 12'h1B0,
+  parameter int    TCDM_SIZE = 64*1024, // [B], must be 2**N
+  parameter int    NB_TCDM_BANKS = 16, // must be 2**N
+  parameter int    TCDM_BANK_SIZE = TCDM_SIZE/NB_TCDM_BANKS, // [B]
+  parameter int    TCDM_NUM_ROWS = TCDM_BANK_SIZE/4, // [words]
+  parameter bit    HWPE_PRESENT = 1'b0, // set to 1 if HW Processing Engines are present in the cluster
+  parameter bit    SHARED_FPU = 1'b0,
 
   // I$ parameters
-  parameter int    SET_ASSOCIATIVE         = 4,
-  parameter bit    PRIV_ICACHE             = 1'b1,
-  parameter bit    MP_ICACHE               = 1'b0,
-  parameter bit    SP_ICACHE               = 1'b0,
-  parameter int    NB_CACHE_BANKS          = PRIV_ICACHE ? 8 : 8,
-  parameter int    CACHE_LINE              = 1,
-  parameter int    CACHE_SIZE              = 4096,
-  parameter int    ICACHE_DATA_WIDTH       = 128,
-  parameter int    L2_SIZE                 = 256*1024,
-  parameter bit    USE_REDUCED_TAG         = 1'b1,
-  parameter        USE_RED_TAG             = "TRUE",
-  parameter string L0_BUFFER_FEATURE       = "DISABLED",
-  parameter string MULTICAST_FEATURE       = "DISABLED",
-  parameter string SHARED_ICACHE           = "ENABLED",
-  parameter string DIRECT_MAPPED_FEATURE   = "DISABLED",
+  parameter int    SET_ASSOCIATIVE = 4,
+  parameter bit    PRIV_ICACHE = 1'b1,
+  parameter bit    MP_ICACHE = 1'b0,
+  parameter bit    SP_ICACHE = 1'b0,
+  parameter int    NB_CACHE_BANKS = PRIV_ICACHE ? 8 : 8,
+  parameter int    CACHE_LINE = 1,
+  parameter int    CACHE_SIZE = 4096,
+  parameter int    ICACHE_DATA_WIDTH = 128,
+  parameter int    L2_SIZE = 256*1024,
+  parameter bit    USE_REDUCED_TAG = 1'b1,
+  parameter        USE_RED_TAG = "TRUE",
+  parameter string L0_BUFFER_FEATURE = "DISABLED",
+  parameter string MULTICAST_FEATURE = "DISABLED",
+  parameter string SHARED_ICACHE = "ENABLED",
+  parameter string DIRECT_MAPPED_FEATURE = "DISABLED",
 
   // core parameters
-  parameter bit    DEM_PER_BEFORE_TCDM_TS  = 1'b0,
-  parameter int    ROM_BOOT_ADDR           = 32'h1A000000,
-  parameter int    BOOT_ADDR               = 32'h1C000000,
-  parameter int    INSTR_RDATA_WIDTH       = 128,
-  parameter int    DEBUG_HALT_ADDR         = 32'h0,
-  parameter bit    CLUST_FPU               = 1'b1,
-  parameter bit    CLUST_FP_DIVSQRT        = 1'b0,
-  parameter bit    CLUST_SHARED_FP         = 1'b0,
-  parameter bit    CLUST_SHARED_FP_DIVSQRT = 1'b0,
+  parameter bit    DEM_PER_BEFORE_TCDM_TS = 1'b0,
+  parameter int    ROM_BOOT_ADDR = 32'h1A000000,
+  parameter int    BOOT_ADDR = 32'h1C000000,
+  parameter int    INSTR_RDATA_WIDTH = 128,
+  parameter int    DEBUG_HALT_ADDR = 32'h0,
+
+  parameter bit    CLUST_FPU = 1,
+  parameter bit    CLUST_FP_DIVSQRT = 0,
+  parameter bit    CLUST_SHARED_FP = 2,
+  parameter bit    CLUST_SHARED_FP_DIVSQRT = 0,
 
   // AXI parameters
-  parameter int    AXI_ADDR_WIDTH          = 32,
-  parameter int    AXI_DATA_C2S_WIDTH      = 64,
-  parameter int    AXI_DATA_S2C_WIDTH      = 64,
-  parameter int    AXI_USER_WIDTH          = 6,
-  parameter int    AXI_ID_IN_WIDTH         = 4,
-  parameter int    AXI_ID_OUT_WIDTH        = 6,
-  parameter int    AXI_STRB_C2S_WIDTH      = AXI_DATA_C2S_WIDTH/8,
-  parameter int    AXI_STRB_S2C_WIDTH      = AXI_DATA_S2C_WIDTH/8,
-  parameter int    DC_SLICE_BUFFER_WIDTH   = 8,
+  parameter int    AXI_ADDR_WIDTH = 32,
+  parameter int    AXI_DATA_C2S_WIDTH = 64,
+  parameter int    AXI_DATA_S2C_WIDTH = 64,
+  parameter int    AXI_USER_WIDTH = 6,
+  parameter int    AXI_ID_IN_WIDTH = 4,
+  parameter int    AXI_ID_OUT_WIDTH = 6,
+  parameter int    AXI_STRB_C2S_WIDTH = AXI_DATA_C2S_WIDTH/8,
+  parameter int    AXI_STRB_S2C_WIDTH = AXI_DATA_S2C_WIDTH/8,
+  parameter int    DC_SLICE_BUFFER_WIDTH = 8,
 
   // TCDM and log interconnect parameters
-  parameter int    DATA_WIDTH              = 32,
-  parameter int    ADDR_WIDTH              = 32,
-  parameter int    BE_WIDTH                = DATA_WIDTH/8,
-  parameter int    TEST_SET_BIT            = 20,                       // bit used to indicate a test-and-set operation during a load in TCDM
-  parameter int    ADDR_MEM_WIDTH          = $clog2(TCDM_BANK_SIZE/4), // WORD address width per TCDM bank (the word width is 32 bits)
+  parameter int    DATA_WIDTH = 32,
+  parameter int    ADDR_WIDTH = 32,
+  parameter int    BE_WIDTH = DATA_WIDTH/8,
+  parameter int    TEST_SET_BIT = 20, // bit used to indicate a test-and-set operation during a load in TCDM
+  parameter int    ADDR_MEM_WIDTH = $clog2(TCDM_BANK_SIZE/4), // WORD address width per TCDM bank (the word width is 32 bits)
 
   // DMA parameters
-  parameter int    TCDM_ADD_WIDTH          = ADDR_MEM_WIDTH + $clog2(NB_TCDM_BANKS) + 2, // BYTE address width TCDM
-  parameter int    NB_OUTSND_BURSTS        = 8,
-  parameter int    MCHAN_BURST_LENGTH      = 256,
+  parameter int    TCDM_ADD_WIDTH = ADDR_MEM_WIDTH + $clog2(NB_TCDM_BANKS) + 2, // BYTE address width TCDM
+  parameter int    NB_OUTSND_BURSTS = 8,
+  parameter int    MCHAN_BURST_LENGTH = 256,
 
   // peripheral and periph interconnect parameters
-  parameter int    LOG_CLUSTER             = 5,  // unused
-  parameter int    PE_ROUTING_LSB          = 10, // LSB used as routing BIT in periph interco
-  parameter int    PE_ROUTING_MSB          = 13, // MSB used as routing BIT in periph interco
-  parameter int    EVNT_WIDTH              = 8,  // size of the event bus
-  parameter int    REMAP_ADDRESS           = 0,  // for cluster virtualization
-
-  // FPU PARAMETERS
-  parameter        APU_NARGS_CPU           = 3,
-  parameter        APU_WOP_CPU             = 6,
-  parameter        WAPUTYPE                = 3,
-  parameter        APU_NDSFLAGS_CPU        = 15,
-  parameter        APU_NUSFLAGS_CPU        = 5
+  parameter int    LOG_CLUSTER = 5, // unused
+  parameter int    PE_ROUTING_LSB = 10, // LSB used as routing BIT in periph interco
+  parameter int    PE_ROUTING_MSB = 13, // MSB used as routing BIT in periph interco
+  parameter int    EVNT_WIDTH = 8, // size of the event bus
+  parameter int    REMAP_ADDRESS = 0, // for cluster virtualization
+                   
+                   // FPU PARAMETERS
+                   parameter APU_NARGS_CPU = 3,
+                   parameter APU_WOP_CPU = 6,
+                   parameter WAPUTYPE = 3,
+                   parameter APU_NDSFLAGS_CPU = 15,
+                   parameter APU_NUSFLAGS_CPU = 5
 )
 (
   input  logic                             clk_i,
@@ -1048,7 +1049,7 @@ module pulp_cluster
       .FETCH_ADDR_WIDTH       ( 32                  ),
       .FETCH_DATA_WIDTH       ( 128                 ),
       .NB_CORES               ( NB_CORES            ),
-      .SH_NB_BANKS            ( NB_CACHE_BANKS      ),
+      .SH_NB_BANKS            ( NB_CACHE_BANKS      ), // NB_CACHE_BANKS
       .SH_NB_WAYS             ( 4                   ),
       .SH_CACHE_SIZE          ( 4*1024              ), // in Byte
       .SH_CACHE_LINE          ( 1                   ), // in word of [FETCH_DATA_WIDTH]
@@ -1060,10 +1061,10 @@ module pulp_cluster
       .SPECIAL_PRI_CACHE_SIZE ( 0                   ), // in Byte
       .AXI_ID                 ( AXI_ID_OUT_WIDTH    ),
       .AXI_ADDR               ( AXI_ADDR_WIDTH      ),
-      .AXI_USER               ( 6                   ), //AXI_USER_WIDTH
+      .AXI_USER               ( 6      ), //AXI_USER_WIDTH
       .AXI_DATA               ( AXI_DATA_C2S_WIDTH  ),
-      .USE_REDUCED_TAG        ( USE_RED_TAG         ), //USE_REDUCED_TAG
-      .L2_SIZE                ( 32'h00080000        )  //L2_SIZE // Size of max(L2 ,ROM) program memory in Byte
+      .USE_REDUCED_TAG        (   USE_RED_TAG   ), //USE_REDUCED_TAG
+      .L2_SIZE                ( 32'h00080000         )  //L2_SIZE // Size of max(L2 ,ROM) program memory in Byte
     ) icache_top_i (
       .clk                       ( clk_cluster               ),
       .rst_n                     ( s_rst_n                   ),
