@@ -13,6 +13,6 @@ analyze -format sverilog  -work work ${IPS_PATH}/hier-icache/RTL/L1.5_CACHE/ram_
 analyze -format sverilog  -work work ${IPS_PATH}/hier-icache/RTL/L1.5_CACHE/ram_ws_rs_tag_scm.sv
 analyze -format sverilog  -work work ${IPS_PATH}/hier-icache/CTRL_UNIT/hier_icache_ctrl_unit.sv
 analyze -format sverilog  -work work ${IPS_PATH}/hier-icache/CTRL_UNIT/hier_icache_ctrl_unit_wrap.sv
-analyze -format sverilog  -work work ${IPS_PATH}/huawei/rtl/pulp_soc/rtl/components/pulp_interfaces.sv
+#analyze -format sverilog  -work work ${IPS_PATH}/huawei/rtl/pulp_soc/rtl/components/pulp_interfaces.sv
 analyze -format sverilog  -work work ${IPS_PATH}/hier-icache/RTL/TOP/hier_icache_demux.sv
 analyze -format sverilog  -work work ${IPS_PATH}/hier-icache/RTL/TOP/icache128_2_axi64.sv

@@ -43,7 +43,7 @@ source scripts/analyze_auto/ips/icache-intc.tcl
 #source scripts/analyze_auto/ips/icache_private.tcl
 source scripts/analyze_auto/ips/cluster_peripherals.tcl
 source scripts/analyze_auto/ips/fpu_div_sqrt_mvp.tcl
-source scripts/analyze_auto/ips/fpu_interco.tcl
+#source scripts/analyze_auto/ips/fpu_interco.tcl
 #source scripts/analyze_auto/ips/hwpe-ctrl.tcl
 #source scripts/analyze_auto/ips/hwpe-stream.tcl
 #source scripts/analyze_auto/ips/rbe.tcl

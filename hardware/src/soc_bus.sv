@@ -69,13 +69,14 @@ module soc_bus #(
     .AXI_ID_WIDTH   (soc_bus_pkg::oup_id_w(N_CLUSTERS, AXI_IW_INP)),
     .AXI_USER_WIDTH (AXI_UW)
   ) masters [N_MASTERS-1:0]();
-  for (genvar i = 0; i < N_CLUSTERS; i++) begin: gen_bind_clusters
-    `AXI_ASSIGN(cl_mst[i], masters[i]);
-  end
-  for (genvar i = 0; i < L2_N_PORTS; i++) begin: gen_bind_l2
-    `AXI_ASSIGN(l2_mst[i], masters[IDX_L2_MEM+i]);
-  end
-  `AXI_ASSIGN(ext_mst, masters[IDX_EXT]);
+//  FIXING ISSUE IN SYNTHESIS
+//  for (genvar i = 0; i < N_CLUSTERS; i++) begin: gen_bind_clusters
+    `AXI_ASSIGN(cl_mst[0], masters[0]);
+//  end
+//  for (genvar i = 0; i < L2_N_PORTS; i++) begin: gen_bind_l2
+    `AXI_ASSIGN(l2_mst[0], masters[1]);
+//  end
+  `AXI_ASSIGN(ext_mst, masters[2]);
 
   // Address Map
   always_comb begin
