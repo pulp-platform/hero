@@ -78,7 +78,7 @@
  * CLUSTER
  */
 
-#define ARCHI_CLUSTER_ADDR              0x00000000
+#define ARCHI_CLUSTER_ADDR              0x1B000000
 #define ARCHI_CLUSTER_SIZE              0x00400000
 #define ARCHI_CLUSTER_GLOBAL_ADDR(cid)  (0x10000000 + (cid)*ARCHI_CLUSTER_SIZE)
 
