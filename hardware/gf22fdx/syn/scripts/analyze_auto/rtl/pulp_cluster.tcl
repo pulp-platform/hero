@@ -5,7 +5,7 @@ analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/pa
 analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/packages/apu_package.sv
 analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/rtl/core_region.sv
 analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/rtl/core_demux.sv
-#analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/rtl/cluster_interconnect_wrap.sv
+analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/rtl/cluster_interconnect_wrap.sv
 #analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/rtl/tcdm_banks_wrap.sv
 analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/rtl/periph_demux.sv
 analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/rtl/per_demux_wrap.sv
