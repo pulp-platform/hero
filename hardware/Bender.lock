@@ -175,6 +175,7 @@ packages:
       - mchan
       - per2axi
       - riscv
+      - fpu_interco
       - timer_unit
   riscv:
     revision: d84cd23a66fef580f0ee980e554432a1d2ecbea3
@@ -217,3 +218,9 @@ packages:
       Git: "https://github.com/pulp-platform/fpu_div_sqrt_mvp.git"
     dependencies:
       - common_cells
+  fpu_interco:
+    revision: 28996e9ed7c3f2edcdc13bd113dc99f33099cbee
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/fpu_interco.git"
+    dependencies: []
