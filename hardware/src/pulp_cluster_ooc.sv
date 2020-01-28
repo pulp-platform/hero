@@ -181,7 +181,7 @@ module pulp_cluster_ooc (
     .HWPE_PRESENT             (1'b0),
     .SHARED_FPU               (1'b1),
     // I$ Parameters
-    .NB_CACHE_BANKS           (4),
+    .NB_CACHE_BANKS           (8),
     .CACHE_SIZE               (ICACHE_SIZE),
     .L2_SIZE                  (L2_SIZE),
     // Core Parameters

@@ -1063,8 +1063,8 @@ end //PULP_SECURE
     end
   end
 
-  assign stack_base_o = stack_base_q;
-  assign stack_limit_o = stack_base_q - stack_size_q;
+  assign stack_base_o  = 32'h1cffffff;//stack_base_q;
+  assign stack_limit_o = 32'h10000000; //stack_base_q - stack_size_q;
 
   /////////////////////////////////////////////////////////////////
   //   ____            __     ____                  _            //

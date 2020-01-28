@@ -48,7 +48,7 @@ module pri_icache
    parameter CACHE_SIZE       = 4096,     // Ccache capacity in Byte
    parameter CACHE_LINE       = 1,        // in word of [FETCH_DATA_WIDTH]
 
-   parameter bit USE_REDUCED_TAG = 1'b1,
+   parameter USE_REDUCED_TAG  = "TRUE",   // TRUE | FALSE
    parameter L2_SIZE          = 512*1024  // Size of max(L2 ,ROM) program memory in Byte
 )
 (
@@ -97,7 +97,7 @@ module pri_icache
    localparam SCM_NUM_ROWS       = WAY_SIZE/(CACHE_LINE*FETCH_DATA_WIDTH/8); // TAG
    localparam SCM_TAG_ADDR_WIDTH = $clog2(SCM_NUM_ROWS);
 
-   localparam TAG_WIDTH          = USE_REDUCED_TAG ? REDUCE_TAG_WIDTH : (FETCH_ADDR_WIDTH - SCM_TAG_ADDR_WIDTH - $clog2(CACHE_LINE) - OFFSET + 1);
+   localparam TAG_WIDTH          = (USE_REDUCED_TAG == "TRUE") ? REDUCE_TAG_WIDTH : (FETCH_ADDR_WIDTH - SCM_TAG_ADDR_WIDTH - $clog2(CACHE_LINE) - OFFSET + 1);
 
    localparam DATA_WIDTH          = FETCH_DATA_WIDTH;
    localparam SCM_DATA_ADDR_WIDTH = $clog2(SCM_NUM_ROWS)+$clog2(CACHE_LINE);  // Because of 32 Access
