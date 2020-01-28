@@ -6,7 +6,7 @@ analyze -format sverilog -work work ${RTL_PATH}/apb/apb_bus.sv
 analyze -format sverilog -work work ${RTL_PATH}/apb/apb_bus_wrap.sv
 analyze -format sverilog -work work ${RTL_PATH}/apb/apb_ro_regs.sv
 analyze -format sverilog -work work ${RTL_PATH}/apb/apb_rw_regs.sv
-analyze -format sverilog -work work ${RTL_PATH}/apb/apb_stdout.sv
+#analyze -format sverilog -work work ${RTL_PATH}/apb/apb_stdout.sv
 analyze -format sverilog -work work ${RTL_PATH}/axi_rab_wrap.sv
 analyze -format sverilog -work work ${RTL_PATH}/pulp_cluster_cfg_pkg.sv
 
