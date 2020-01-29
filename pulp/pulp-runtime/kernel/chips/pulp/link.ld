@@ -8,7 +8,7 @@ MEMORY
 }
 
 /*
- * This linker script try to put FC data in L2 private bank0 and FC code
+ * This linker script try to put FC data in L2 private bank0 and FC code 
  * in L2 private bank1 to avoid contention between FC code and data
  * as FC has no instruction cache and is so often accessing L2 to
  * get instructions. Everything can be shifted in case one bank is full.
@@ -18,7 +18,6 @@ MEMORY
  * cluster cache refill and FC.
  */
 
-__rt_stack_size = DEFINED(__rt_stack_size) ? __rt_stack_size : 0x800;
 
 SECTIONS
 {
@@ -129,7 +128,7 @@ SECTIONS
     . = ALIGN(4);
     . = ALIGN(16);
     stack_start = .;
-    . = . + __rt_stack_size;
+    . = . + 0x800;
     stack = .;
   } > L2
 
