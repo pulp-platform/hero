@@ -70,6 +70,7 @@
 #define CHIP_VIVOSOC4              48
 #define CHIP_WOLFE_16              49
 #define CHIP_MARSELLUS             50
+#define CHIP_HERO                  51
 
 #define CORE_OR1K_V1  0
 #define CORE_OR1K_V2  1
