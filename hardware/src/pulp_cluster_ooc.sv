@@ -180,6 +180,11 @@ module pulp_cluster_ooc (
     .NB_TCDM_BANKS            (N_TCDM_BANKS),
     .HWPE_PRESENT             (1'b0),
     .SHARED_FPU               (1'b1),
+    // FPU params
+    .CLUST_FPU                (32'h00000001),
+    .CLUST_FP_DIVSQRT         (32'h0       ),
+    .CLUST_SHARED_FP          (32'h00000002),
+    .CLUST_SHARED_FP_DIVSQRT  (32'h0       ),
     // I$ Parameters
     .NB_CACHE_BANKS           (8),
     .CACHE_SIZE               (ICACHE_SIZE),

@@ -42,8 +42,8 @@ module core_region
   parameter int     APU_NDSFLAGS_CPU        = 3,
   parameter int     APU_NUSFLAGS_CPU        = 5,
   parameter bit     ADDREXT                 = 1'b0,
-  parameter bit     FPU                     = 1'b0,
-  parameter bit     FP_DIVSQRT              = 1'b0,
+  parameter         FPU                     =    0,
+  parameter         FP_DIVSQRT              =   0,
   parameter bit     DEM_PER_BEFORE_TCDM_TS  = 1'b0
 `ifndef SYNTHESIS
   ,
@@ -172,7 +172,7 @@ module core_region
     .sec_lvl_o             (                          ),
     .irq_sec_i             (      1'b0                ),
 
-    .debug_req_i           ( debug_req_i              ),
+    .debug_req_i           ( 1'b0              ), //debug_req_i
 
     .fetch_enable_i        ( fetch_en_i               ),
     .core_busy_o           ( core_busy_o              ),

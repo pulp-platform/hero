@@ -59,15 +59,17 @@ module pulp_cluster
   parameter        DIRECT_MAPPED_FEATURE   = "DISABLED",
 
   // core parameters
-  parameter bit    DEM_PER_BEFORE_TCDM_TS  = 1'b0,
-  parameter int    ROM_BOOT_ADDR           = 32'h1A000000,
-  parameter int    BOOT_ADDR               = 32'h1C000000,
-  parameter int    INSTR_RDATA_WIDTH       = 128,
-  parameter int    DEBUG_HALT_ADDR         = 32'h0,
-  parameter bit    CLUST_FPU               = 1'b1,
-  parameter bit    CLUST_FP_DIVSQRT        = 1'b1,
-  parameter bit    CLUST_SHARED_FP         = 1'b2,
-  parameter bit    CLUST_SHARED_FP_DIVSQRT = 1'b0,
+
+  parameter bit    DEM_PER_BEFORE_TCDM_TS = 1'b0,
+  parameter int    ROM_BOOT_ADDR = 32'h1A000000,
+  parameter int    BOOT_ADDR = 32'h1C000000,
+  parameter int    INSTR_RDATA_WIDTH = 128,
+  parameter int    DEBUG_HALT_ADDR = 32'h0,
+
+  parameter        CLUST_FPU = 1,
+  parameter        CLUST_FP_DIVSQRT = 0,
+  parameter        CLUST_SHARED_FP = 2,
+  parameter        CLUST_SHARED_FP_DIVSQRT = 0,
 
   // AXI parameters
   parameter int    AXI_ADDR_WIDTH = 32,
@@ -99,12 +101,12 @@ module pulp_cluster
   parameter int    EVNT_WIDTH = 8, // size of the event bus
   parameter int    REMAP_ADDRESS = 0, // for cluster virtualization
                    
-                   // FPU PARAMETERS
-                   parameter APU_NARGS_CPU = 3,
-                   parameter APU_WOP_CPU = 6,
-                   parameter WAPUTYPE = 3,
-                   parameter APU_NDSFLAGS_CPU = 15,
-                   parameter APU_NUSFLAGS_CPU = 5
+  // FPU PARAMETERS
+  parameter APU_NARGS_CPU = 3,
+  parameter APU_WOP_CPU = 6,
+  parameter WAPUTYPE = 3,
+  parameter APU_NDSFLAGS_CPU = 15,
+  parameter APU_NUSFLAGS_CPU = 5
 )
 (
   input  logic                             clk_i,
