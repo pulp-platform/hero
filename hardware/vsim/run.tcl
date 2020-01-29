@@ -7,6 +7,8 @@ if { ! [batch_mode] } {
     source ../test/pulp_tb.wave.do
 }
 
+log -r /*
+
 onfinish stop
 run -a
 
