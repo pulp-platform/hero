@@ -346,7 +346,7 @@ static void __attribute__((noreturn)) pos_wait_forever()
         eu_evt_maskClr(0xffffffff);
         eu_evt_wait();
 #endif
-    }   
+    }
 #elif defined(EU_VERSION) && EU_VERSION >=3
     eu_evt_maskClr(0xffffffff);
     eu_evt_wait();
@@ -357,8 +357,11 @@ static void __attribute__((noreturn)) pos_wait_forever()
 
 void exit(int status)
 {
+#ifdef ARCHI_HAS_FC
     apb_soc_status_set(status);
-
+#else
+    hal_cluster_ctrl_eoc_set(1);
+#endif
     pos_wait_forever();
 }
 
