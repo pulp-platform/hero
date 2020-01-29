@@ -54,10 +54,7 @@ pos_init_entry:
 
 
     # Stack initialization
-    la    x2, stack
-    csrw  0x400, x2
-    la    t0, __rt_stack_size
-    csrw  0x404, t0
+    la   x2, stack
 
 
 
@@ -157,7 +154,5 @@ pe_start:
     addi a1, a1, 1
     mul  x1, x3, a1
     add  x2, x2, x1
-    csrw  0x400, x2
-    csrw  0x404, x3
     j    cluster_entry_stub
 #endif
