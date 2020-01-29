@@ -15,7 +15,7 @@
 `include "axi/typedef.svh"
 
 package automatic pulp_pkg;
-  
+
   // Addressing
   localparam int unsigned AXI_AW = pulp_cluster_cfg_pkg::AXI_AW;
   // Clusters
@@ -42,7 +42,7 @@ package automatic pulp_pkg;
   typedef logic [AXI_LITE_AW-1:0]   lite_addr_t;
   typedef logic [AXI_LITE_DW-1:0]   lite_data_t;
   typedef logic [AXI_LITE_DW/8-1:0] lite_strb_t;
-  
+
   localparam int unsigned AXI_IW = axi_iw_sb_oup(1);
   localparam int unsigned AXI_SW = 128/8;  // width of strobe
   typedef addr_t                axi_addr_t;
@@ -275,7 +275,7 @@ module pulp #(
         .fetch_en_i   (cl_fetch_en_i[i]),
         .eoc_o        (cl_eoc_o[i]),
         .busy_o       (cl_busy_o[i]),
-        .dbg_irq_i    (/* TODO */),
+        .dbg_irq_i    ('0/* TODO */),
         .slv          (cl_inp_async[i]),
         .mst          (cl_oup_async[i])
       );
@@ -305,6 +305,7 @@ module pulp #(
         .fetch_en_i   (cl_fetch_en_i[i]),
         .eoc_o        (cl_eoc_o[i]),
         .busy_o       (cl_busy_o[i]),
+        .dbg_irq_i    ('0),
         .slv          (cl_inp_dwced[i]),
         .mst          (cl_oup_predwc[i])
       );
