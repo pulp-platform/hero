@@ -313,15 +313,41 @@ module pulp_tb #(
     join
   end
 
+  // AXI Write
+  task write_axi(input axi_addr_t addr, input axi_data_t data);
+    @(posedge clk);
+    to_pulp_req.aw.addr  = addr;
+    to_pulp_req.aw.size  = 3'h2;
+    to_pulp_req.aw_valid = 1'b1;
+    `wait_for(to_pulp_resp.aw_ready)
+    to_pulp_req.aw_valid = 1'b0;
+    to_pulp_req.aw       = '0;
+    to_pulp_req.w.data   = data;
+    to_pulp_req.w.strb   = '1;
+    to_pulp_req.w_valid  = 1'b1;
+    `wait_for(to_pulp_resp.w_ready)
+    to_pulp_req.w_valid  = 1'b0;
+    to_pulp_req.w        = '0;
+    to_pulp_req.b_ready  = 1'b1;
+    `wait_for(to_pulp_resp.b_valid)
+    to_pulp_req.b_ready  = 1'b0;
+  endtask
+
+
+
   // Simulation control
   initial begin
     cl_fetch_en = '0;
+    to_pulp_req = '0;
     // Wait for reset.
     wait (rst_n);
     @(posedge clk);
 
     // Start cluster 0.
-    cl_fetch_en[0] = 1'b1;
+    // cl_fetch_en[0] = 1'b1;
+    // Only start core 0. --> AXI write request
+    write_axi(32'h1020_0008, 128'h00000000_00000001_00000000_00000000);
+
     // Wait for EOC of cluster 0 before terminating the simulation.
     wait (cl_eoc[0]);
     #1us;
@@ -351,12 +377,6 @@ module pulp_tb #(
         end
       end
     end
-  end
-
-  // Drive requests into PULP.
-  initial begin
-    to_pulp_req = '0;
-    wait (rst_n);
   end
 
   // Observe SoC bus for errors.
