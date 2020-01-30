@@ -23,6 +23,7 @@ import apu_core_package::*;
 
 `include "axi/assign.svh"
 `include "axi/typedef.svh"
+`define SHARED_FPU_CLUSTER
 
 module pulp_cluster
 #(
