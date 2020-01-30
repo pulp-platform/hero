@@ -28,29 +28,31 @@ import apu_package::*;
 module core_region
 #(
   // CORE PARAMETERS
-  parameter int     CORE_ID                 = 0,
-  parameter int     ADDR_WIDTH              = 32,
-  parameter int     DATA_WIDTH              = 32,
-  parameter int     INSTR_RDATA_WIDTH       = 32,
-  parameter bit     CLUSTER_ALIAS           = 1'b1,
-  parameter int     CLUSTER_ALIAS_BASE      = 12'h000,
-  parameter int     REMAP_ADDRESS           = 0,
-  parameter int     DEBUG_HALT_ADDR         = 32'h0000_0000,
-  parameter int     APU_NARGS_CPU           = 2,
-  parameter int     APU_WOP_CPU             = 1,
-  parameter int     WAPUTYPE                = 3,
-  parameter int     APU_NDSFLAGS_CPU        = 3,
-  parameter int     APU_NUSFLAGS_CPU        = 5,
-  parameter bit     ADDREXT                 = 1'b0,
-  parameter         FPU                     =    0,
-  parameter         FP_DIVSQRT              =   0,
-  parameter bit     DEM_PER_BEFORE_TCDM_TS  = 1'b0
+  parameter int    CORE_ID = 0,
+  parameter int    ADDR_WIDTH = 32,
+  parameter int    DATA_WIDTH = 32,
+  parameter int    INSTR_RDATA_WIDTH = 32,
+  parameter bit    CLUSTER_ALIAS = 1'b1,
+  parameter int    CLUSTER_ALIAS_BASE = 12'h000,
+  parameter int    REMAP_ADDRESS = 0,
+  parameter int    DEBUG_HALT_ADDR = 32'h0000_0000,
+  parameter int    APU_NARGS_CPU = 2,
+  parameter int    APU_WOP_CPU = 1,
+  parameter int    WAPUTYPE = 3,
+  parameter int    APU_NDSFLAGS_CPU = 3,
+  parameter int    APU_NUSFLAGS_CPU = 5,
+  parameter bit    ADDREXT = 1'b0,
+  parameter FPU = 0,
+  parameter FP_DIVSQRT = 0,
+  parameter SHARED_FPU = 0,
+  parameter SHARED_FP_DIVSQRT,
+  parameter bit    DEM_PER_BEFORE_TCDM_TS = 1'b0
 `ifndef SYNTHESIS
   ,
-  parameter string  L2_SLM_FILE   = "./slm_files/l2_stim.slm",
-  parameter string  ROM_SLM_FILE  = "../sw/apps/boot/slm_files/l2_stim.slm"
+  parameter string L2_SLM_FILE = "./slm_files/l2_stim.slm",
+  parameter string ROM_SLM_FILE = "../sw/apps/boot/slm_files/l2_stim.slm"
 `endif
-)
+  )
 (
   input logic 			      clk_i,
   input logic 			      rst_ni,
@@ -130,12 +132,13 @@ module core_region
     .PULP_SECURE         ( 0                 ),
     .FPU                 ( FPU               ),
     .FP_DIVSQRT          ( FP_DIVSQRT        ),
-    .SHARED_FP           ( SHARED_FP         ),
+    .SHARED_FP           ( SHARED_FPU        ),
     .SHARED_DSP_MULT     ( 0                 ),
     .SHARED_INT_DIV      ( 0                 ),
     .SHARED_FP_DIVSQRT   ( SHARED_FP_DIVSQRT ),
     .WAPUTYPE            ( WAPUTYPE          ),
-    .DM_HaltAddress      ( DEBUG_HALT_ADDR   )
+    .DM_HaltAddress      ( DEBUG_HALT_ADDR   ),
+    .Zfinx               ( 1'b1              )
   ) RISCV_CORE (
     .clk_i                 ( clk_i                    ),
     .rst_ni                ( rst_ni                   ),
