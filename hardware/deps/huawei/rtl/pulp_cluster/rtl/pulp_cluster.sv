@@ -510,17 +510,21 @@ module pulp_cluster
   // log interconnect -> TCDM memory banks (SRAM)
   TCDM_BANK_MEM_BUS s_tcdm_bus_sram[NB_TCDM_BANKS-1:0]();
 
-  // cores -> APU
-  logic [NB_CORES-1:0]                        s_apu_master_req,
-                                              s_apu_master_gnt,
-                                              s_apu_master_rready,
-                                              s_apu_master_rvalid;
-  logic [NB_CORES-1:0][NARGS_CPU-1:0][31:0]   s_apu_master_operands;
-  logic [NB_CORES-1:0][WOP_CPU-1:0]           s_apu_master_op;
-  logic [NB_CORES-1:0][WAPUTYPE-1:0]          s_apu_master_type;
-  logic [NB_CORES-1:0][NDSFLAGS_CPU-1:0]      s_apu_master_flags;
-  logic [NB_CORES-1:0][31:0]                  s_apu_master_rdata;
-  logic [NB_CORES-1:0][NUSFLAGS_CPU-1:0]      s_apu_master_rflags;
+   // cores -> APU
+   // apu-interconnect
+   // handshake signals
+   logic [NB_CORES-1:0]        s_apu_master_req;
+   logic [NB_CORES-1:0]        s_apu_master_gnt;
+   // request channel
+   logic [NB_CORES-1:0][APU_NARGS_CPU-1:0][31:0] s_apu_master_operands;
+   logic [NB_CORES-1:0][APU_WOP_CPU-1:0]         s_apu_master_op;
+   logic [NB_CORES-1:0][WAPUTYPE-1:0]            s_apu_master_type;
+   logic [NB_CORES-1:0][APU_NDSFLAGS_CPU-1:0]    s_apu_master_flags;
+   // response channel
+   logic [NB_CORES-1:0]                          s_apu_master_rready;
+   logic [NB_CORES-1:0]                          s_apu_master_rvalid;
+   logic [NB_CORES-1:0][31:0]                    s_apu_master_rdata;
+   logic [NB_CORES-1:0][APU_NUSFLAGS_CPU-1:0]    s_apu_master_rflags;
 
   /* reset generator */
   rstgen rstgen_i (
@@ -862,7 +866,9 @@ module pulp_cluster
         .ADDREXT                   ( 1'b0                     ),
         .DEM_PER_BEFORE_TCDM_TS    ( DEM_PER_BEFORE_TCDM_TS   ),
         .FPU                       ( CLUST_FPU                ),
-        .FP_DIVSQRT                ( CLUST_FP_DIVSQRT         )
+        .FP_DIVSQRT                ( CLUST_FP_DIVSQRT         ),
+        .SHARED_FPU                ( CLUST_SHARED_FP          ),
+        .SHARED_FP_DIVSQRT         ( CLUST_SHARED_FP_DIVSQRT  )
       ) core_region_i (
         .clk_i                    ( clk_cluster               ),
         .rst_ni                   ( s_rst_n                   ),
@@ -970,7 +976,7 @@ module pulp_cluster
          .FP_TYPE_WIDTH    ( 3                 ),
 
          .NB_CORE_ARGS      ( 3                ),
-	 .CORE_DATA_WIDTH   ( 32               ),
+	       .CORE_DATA_WIDTH   ( 32               ),
          .CORE_OPCODE_WIDTH ( 6                ),
          .CORE_DSFLAGS_CPU  ( 15               ),
          .CORE_USFLAGS_CPU  ( 5                ),
@@ -1000,7 +1006,7 @@ module pulp_cluster
       (
          .clk                   ( clk_cluster                               ),
          .rst_n                 ( s_rst_n                                   ),
-	 .test_mode_i           ( test_mode_i                               ),
+	       .test_mode_i           ( test_mode_i                               ),
          .core_slave_req_i      ( s_apu_master_req                          ),
          .core_slave_gnt_o      ( s_apu_master_gnt                          ),
          .core_slave_type_i     ( s_apu__type                               ),
