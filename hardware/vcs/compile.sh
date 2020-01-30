@@ -3,10 +3,10 @@
 # version=vcs-2017.03
 version=vcs-2019.06
 
-flags="-nc -full64 -timescale=1ps/1ps -assert svaext "
+flags="-nc -full64"
 
 vcs="${version} vcs ${flags}"
-vlogan="${version} vlogan ${flags}"
+vlogan="${version} vlogan ${flags} -timescale=1ps/1ps -assert svaext"
 
 ROOT=/scratch/sriedel/huawei-2020/hero/hardware
 
@@ -815,21 +815,6 @@ ${vlogan} -sverilog \
     "+incdir+$ROOT/deps/common_cells/include" \
     "+incdir+$ROOT/deps/axi/include" \
     "+incdir+$ROOT/src/apb/include" \
-    "$ROOT/deps/axi_riscv_atomics/test/generic_memory.sv" \
-    "$ROOT/deps/axi_riscv_atomics/test/axi_memory.sv" \
-    "$ROOT/deps/axi_riscv_atomics/test/tb_axi_pkg.sv" \
-    "$ROOT/deps/axi_riscv_atomics/test/golden_memory.sv" \
-    "$ROOT/deps/axi_riscv_atomics/test/tb_top.sv" \
-    "$ROOT/deps/axi_riscv_atomics/test/axi_riscv_lrsc_tb.sv"
-
-${vlogan} -sverilog \
-    +define+TARGET_RTL \
-    +define+TARGET_SIMULATION \
-    +define+TARGET_TEST \
-    +define+TARGET_VSIM \
-    "+incdir+$ROOT/deps/common_cells/include" \
-    "+incdir+$ROOT/deps/axi/include" \
-    "+incdir+$ROOT/src/apb/include" \
     "$ROOT/deps/pulp_cluster/packages/pulp_cluster_package.sv" \
     "$ROOT/deps/pulp_cluster/packages/apu_package.sv" \
     "$ROOT/deps/pulp_cluster/rtl/axi2per_wrap.sv" \
@@ -882,3 +867,5 @@ ${vlogan} -sverilog \
     "+incdir+$ROOT/src/apb/include" \
     "$ROOT/src/apb/apb_stdout.sv" \
     "$ROOT/test/pulp_tb.sv"
+
+${vcs} -nc -full64 pulp_tb -debug_access+all -notice
