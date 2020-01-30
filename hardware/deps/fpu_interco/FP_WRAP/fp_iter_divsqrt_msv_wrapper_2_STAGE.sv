@@ -97,6 +97,17 @@ module fp_iter_divsqrt_msv_wrapper_2_STAGE
 
    enum logic [1:0] { IDLE, RUNNING , INIT_FPU } CS, NS;
 
+   logic [1:0] divsqrt_fmt;
+  // Translate fpnew formats into divsqrt formats
+  always_comb begin : translate_fmt
+    unique case (fpnew_pkg::fp_format_e'(apu_flags_Q[5:3]))
+      fpnew_pkg::FP32:    divsqrt_fmt = 2'b00;
+      fpnew_pkg::FP64:    divsqrt_fmt = 2'b01;
+      fpnew_pkg::FP16:    divsqrt_fmt = 2'b10;
+      fpnew_pkg::FP16ALT: divsqrt_fmt = 2'b11;
+      default:            divsqrt_fmt = 2'b10; // maps also FP8 to FP16
+    endcase
+  end
 
   div_sqrt_top_mvp i_fp_iter_divsqrt_msv_wrapper_2_STAGE
   (
@@ -109,7 +120,7 @@ module fp_iter_divsqrt_msv_wrapper_2_STAGE
    .RM_SI            ( apu_flags_Q[2:0]                    ), //input logic [C_RM-1:0]  // Rounding Mode   
    .Precision_ctl_SI ( '0                                  ), //input logic [C_PC-1:0]  // Precision Control 
 
-   .Format_sel_SI    ( apu_flags_Q[4:3]                    ), //input logic [C_FS-1:0]  // Format Selection,
+   .Format_sel_SI    ( divsqrt_fmt                         ), //input logic [C_FS-1:0]  // Format Selection,
    .Kill_SI          ( 1'b0                                ), //input logic                            
 
    .Result_DO        ( apu_rdata_int                       ), //output logic [C_OP_FP64-1:0]           
