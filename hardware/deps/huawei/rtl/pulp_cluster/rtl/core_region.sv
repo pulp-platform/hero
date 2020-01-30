@@ -172,7 +172,7 @@ module core_region
     .sec_lvl_o             (                          ),
     .irq_sec_i             (      1'b0                ),
 
-    .debug_req_i           ( 1'b0              ), //debug_req_i
+    .debug_req_i           ( debug_req_i              ), 
 
     .fetch_enable_i        ( fetch_en_i               ),
     .core_busy_o           ( core_busy_o              ),
