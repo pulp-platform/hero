@@ -31,6 +31,7 @@ package automatic pulp_pkg;
   endfunction
   // L2 Memory
   localparam int unsigned L2_SIZE = pulp_cluster_cfg_pkg::L2_SIZE;
+  // localparam int unsigned L2_ATOMIC = 0;
   // Peripherals
   localparam int unsigned AXI_LITE_AW = 32;
   localparam int unsigned AXI_LITE_DW = 64;
@@ -361,32 +362,46 @@ module pulp #(
   );
 
   for (genvar i = 0; i < L2_N_AXI_PORTS; i++) begin: gen_l2_ports
-    axi_riscv_atomics_wrap #(
-      .AXI_ADDR_WIDTH     (AXI_AW),
-      .AXI_DATA_WIDTH     (AXI_DW),
-      .AXI_ID_WIDTH       (AXI_IW_SB_OUP),
-      .AXI_USER_WIDTH     (AXI_UW),
-      .AXI_MAX_READ_TXNS  (4),
-      .AXI_MAX_WRITE_TXNS (4),
-      .RISCV_WORD_WIDTH   (32)
-    ) i_atomics (
-      .clk_i,
-      .rst_ni,
-      .slv    (l2_mst[i]),
-      .mst    (l2_mst_wo_atomics[i])
-    );
+    // if (L2_ATOMIC) begin
+    //   axi_riscv_atomics_wrap #(
+    //     .AXI_ADDR_WIDTH     (AXI_AW),
+    //     .AXI_DATA_WIDTH     (AXI_DW),
+    //     .AXI_ID_WIDTH       (AXI_IW_SB_OUP),
+    //     .AXI_USER_WIDTH     (AXI_UW),
+    //     .AXI_MAX_READ_TXNS  (4),
+    //     .AXI_MAX_WRITE_TXNS (4),
+    //     .RISCV_WORD_WIDTH   (32)
+    //   ) i_atomics (
+    //     .clk_i,
+    //     .rst_ni,
+    //     .slv    (l2_mst[i]),
+    //     .mst    (l2_mst_wo_atomics[i])
+    //   );
 
-    l2_mem #(
-      .AXI_AW     (AXI_AW),
-      .AXI_DW     (AXI_DW),
-      .AXI_UW     (AXI_UW),
-      .AXI_IW     (AXI_IW_SB_OUP),
-      .N_BYTES    (L2_SIZE/L2_N_AXI_PORTS)
-    ) i_l2_mem (
-      .clk_i,
-      .rst_ni,
-      .slv    (l2_mst_wo_atomics[i])
-    );
+    //   l2_mem #(
+    //     .AXI_AW     (AXI_AW),
+    //     .AXI_DW     (AXI_DW),
+    //     .AXI_UW     (AXI_UW),
+    //     .AXI_IW     (AXI_IW_SB_OUP),
+    //     .N_BYTES    (L2_SIZE/L2_N_AXI_PORTS)
+    //   ) i_l2_mem (
+    //     .clk_i,
+    //     .rst_ni,
+    //     .slv    (l2_mst_wo_atomics[i])
+    //   );
+    // end else begin
+      l2_mem #(
+        .AXI_AW     (AXI_AW),
+        .AXI_DW     (AXI_DW),
+        .AXI_UW     (AXI_UW),
+        .AXI_IW     (AXI_IW_SB_OUP),
+        .N_BYTES    (L2_SIZE/L2_N_AXI_PORTS)
+      ) i_l2_mem (
+        .clk_i,
+        .rst_ni,
+        .slv    (l2_mst[i])
+      );
+    // end
   end
 
   axi_id_resize #(
