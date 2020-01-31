@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+readonly THIS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+readonly ROOT=$(readlink -f "${THIS_DIR}/..")
+
 # version=vcs-2017.03
 version=vcs-2019.06
 
@@ -8,9 +11,7 @@ flags="-nc -full64"
 vcs="${version} vcs ${flags}"
 vlogan="${version} vlogan ${flags} -timescale=1ps/1ps -assert svaext"
 
-ROOT=/scratch/sriedel/huawei-2020/hero/hardware
-
-export VCS_HOME=/usr/pack/vcs-2019.06-kgf
+export VCS_HOME=/usr/pack/${version}-kgf
 
 ${vlogan} -sverilog \
     +define+TARGET_RTL \
