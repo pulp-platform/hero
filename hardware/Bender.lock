@@ -178,7 +178,7 @@ packages:
       - fpu_interco
       - timer_unit
   riscv:
-    revision: d84cd23a66fef580f0ee980e554432a1d2ecbea3
+    revision: 818fc10aa7429ee50c95054fb212b9f5c9b935e7
     version: ~
     source:
       Git: "https://github.com/pulp-platform/riscv.git"
