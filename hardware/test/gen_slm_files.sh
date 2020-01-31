@@ -29,13 +29,13 @@ riscv32-unknown-elf-objdump -s --start-address=0x10000000 --stop-address=0x1bfff
     | perl -p -e 's/^1b/10/' \
     | sort \
     > ${app_name}_l1.slm
-    $examples_path/common/one_word_per_line.py ${app_name}_l1.slm
+    ${HERO_INSTALL}/bin/one_word_per_line.py ${app_name}_l1.slm
 
 # Create L2 SLM
 riscv32-unknown-elf-objdump -s --start-address=0x1c000000 --stop-address=0x1cffffff ${app_path}/build/test/test | rg '^ ' | cut -c 2-45 \
     | sort \
     > ${app_name}_l2.slm
-    $examples_path/common/one_word_per_line.py ${app_name}_l2.slm
+    ${HERO_INSTALL}/bin/one_word_per_line.py ${app_name}_l2.slm
 
 # Split SLM per bank
 $slm_conv --swap-endianness -f "${app_name}_l1.slm" \

@@ -4,6 +4,7 @@ This variant of HERO provides the hardware and software to integrate PULP with a
 
 ## Repository Organization
 
+- `doc` contains the datasheet.
 - `example-apps` contains example applications and tests for PULP.
 - `hardware` contains RTL source code and scripts to simulate and synthesize PULP.
 - `pulp` contains system software for PULP.
@@ -24,19 +25,21 @@ export HERO_INSTALL=<your_path>
 ```
 We recommend you create an `install` subdirectory in this repository and set `HERO_INSTALL` to that.
 
-After that, simply execute the `setup.sh` script to build the PULP toolchain and the PULP SDK.
+After that, simply execute the `setup.sh` script to build the PULP toolchain.
 
 ## Compilation
 
 ### Environments
 
-Compilation always requires a proper environment.   When compiling for simulation `source env/esim.sh`.  When compiling for execution a board, `source` another file, e.g., `env/ehuawei.sh`.
+Compilation always requires a proper environment. When compiling with the minimal runtime `source env/ehuawei.sh`.
 
 ### Applications
 
-Run `make` in an application directory, e.g., in `example-apps/helloworld`.
+Run `make` in an application directory, e.g., in `example-apps/hello`.
 
 ## RTL Simulation
+
+### QuestaSim
 
 An environment is provided to simulate the PULP accelerator in RTL. If QuestaSim is installed, the simulation infrastructure can be initialized as follows:
 ```
@@ -48,7 +51,26 @@ Then, generate SLM files to initialize memory with
 ```
 ../test/gen_slm_files.sh <app_name>
 ```
-where `<app_name>` is the path to the directory from the `example-apps` directory (for example `helloworld`).
+where `<app_name>` is the path to the directory from the `example-apps` directory (for example `hello`).
+
+Finally, start the simulation with
+```
+./start_sim.sh
+```
+
+### VCS
+
+The repository also includes VCS scripts for simulation. However, the VCS scripts are not as mature as the QuestaSim scripts:
+```
+cd hardware/vcs
+./compile.sh
+```
+
+Then, generate SLM files to initialize memory with
+```
+../test/gen_slm_files.sh <app_name>
+```
+where `<app_name>` is the path to the directory from the `example-apps` directory (for example `hello`).
 
 Finally, start the simulation with
 ```
