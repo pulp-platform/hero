@@ -12,8 +12,17 @@ copy_git_files() {
 # Create temporary destination directory.
 readonly TMP_DST="$(mktemp -d)"
 
-# Hardware: Copy to destination.
+# Env: Copy to destination.
 cd "$SRC"
+mkdir -p "$TMP_DST/env"
+rsync -av env/ehuawei.sh "$TMP_DST/env/"
+
+# Doc: Copy to destination.
+mkdir -p "$TMP_DST/doc"
+rsync -av doc "$TMP_DST/"
+rm -rf "$TMP_DST/doc/reference_files"
+
+# Hardware: Copy to destination.
 copy_git_files hardware
 
 # Hardware: Prepare simulation script.
@@ -24,12 +33,13 @@ make vsim/compile.tcl
 rm Makefile bender
 sed -i -e 's|make -C .. vsim/compile.tcl||' vsim/compile.sh
 
-# Add SLM Converter.
+# Add SLM Converter and python script.
+cd "$SRC"
 mkdir -p "$TMP_DST/install/bin"
 cp ~andkurt/bin/slm_conv-0.3 "$TMP_DST/install/bin/slm_conv"
+cp example-apps/common/one_word_per_line.py "$TMP_DST/install/bin/one_word_per_line.py"
 
 # Toolchain and Makefile: copy to destination.
-cd "$SRC"
 copy_git_files toolchain Makefile
 
 # PULP software: copy to destination.
@@ -37,16 +47,24 @@ cd "$SRC"
 copy_git_files pulp
 
 # PULP software: Git-init SDK
-cd "$TMP_DST/pulp/sdk"
-git init
-git config --local user.name 'Packager'
-git config --local user.email 'packager@localhost'
-git add -A
-git commit -m 'initial commit'
+# NO PULP-SDK at the moment
+rm -rf "$TMP_DST/pulp/sdk"
+rm -rf "$TMP_DST/pulp/refs"
+rm -f "$TMP_DST/pulp/setup-sdk.sh"
+# cd "$TMP_DST/pulp/sdk"
+# git init
+# git config --local user.name 'Packager'
+# git config --local user.email 'packager@localhost'
+# git add -A
+# git commit -m 'initial commit'
 
 # Example applications: copy to destination.
 cd "$SRC"
 copy_git_files example-apps
+# NO OPENMP EXAMPLES
+rm -rf "$TMP_DST/example-apps/common"
+rm -rf "$TMP_DST/example-apps/helloworld"
+rm -rf "$TMP_DST/example-apps/tests-pulp"
 
 # Setup script: copy to destination.
 cd "$SRC"

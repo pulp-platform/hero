@@ -99,7 +99,7 @@ module sram #(
 
 `else // behavioral
   data_t mem [N_WORDS-1:0];
-  always_ff @(posedge clk_i) begin
+  always @(posedge clk_i) begin
     if (req_i) begin
       if (we_i) begin
         for (int unsigned i = 0; i < STRB_WIDTH; i++) begin

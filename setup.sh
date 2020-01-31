@@ -8,4 +8,3 @@ if [ -z "$HERO_INSTALL" ]; then
 fi
 
 make tc-pulp
-make sdk-pulp
