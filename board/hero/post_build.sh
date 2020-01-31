@@ -4,5 +4,5 @@ DEBUG_ROOT=$HERO_INSTALL/$TARGET_TUPLE/debug-root
 if [ -d "$DEBUG_ROOT/usr" ]; then
     echo "Installing native GDB from cross toolchain"
     cp ${STAGING_DIR}/usr/lib/libncurses.so.5* $1/usr/lib/ # we need libncurses.so.5 for gdb
-	  rsync -a --chmod=u+w $DEBUG_ROOT/usr $1
+    rsync -a --chmod=u+w $DEBUG_ROOT/usr $1
 fi

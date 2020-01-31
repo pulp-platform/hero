@@ -174,8 +174,8 @@ void kernel_2mm(int ni, int nj, int nk, int nl,
   /* D := alpha*A*B*C + beta*D */
   #pragma omp target data \
     map(tofrom: A[0:NI][0:NK], B[0:NK][0:NJ], C[0:NL][0:NJ]) \
-    map(alloc: tmp[0:NI][0:NJ]) \
-    map(from: D[0:NI][0:NL])
+    map(tofrom: tmp[0:NI][0:NJ]) \
+    map(tofrom: D[0:NI][0:NL])
   {
     #pragma omp target
     {
@@ -187,6 +187,7 @@ void kernel_2mm(int ni, int nj, int nk, int nl,
           for (int k = 0; k < _PB_NK; ++k)
             tmp[i][j] += alpha * A[i][k] * B[k][j];
         }
+
     }
     #pragma omp target
     {

@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
   char app_name[50];
   unsigned int timeout_s = 1;
   unsigned int pulp_cluster_sel = 0x1;
-  unsigned int pulp_clk_freq_mhz = PULP_DEFAULT_FREQ_MHZ;
+  unsigned int pulp_clk_freq_mhz = 50; //PULP_DEFAULT_FREQ_MHZ;
 
   if (argc < 2) {
     printf("ERROR: Specify the name of the standalone PULP application to execute as first argument Type -h for help.\n");
@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
   // reserve virtual addresses overlapping with PULP's internal physical address space
   pulp_reserve_v_addr(pulp);
 
+
   // memory map the device
   if (pulp_mmap(pulp) < 0) {
     printf("ERROR: Cannot access device\n");
@@ -89,6 +90,7 @@ int main(int argc, char *argv[])
   else
     printf("WARNING: Setting clock frequency failed\n");
 
+
   // reset device
   pulp_rab_free(pulp, 0);
   pulp_reset(pulp, 1);
@@ -100,8 +102,11 @@ int main(int argc, char *argv[])
    * Body
    */
   printf("PULP Execution\n");
+
   // load binary
-  pulp_load_bin(pulp, app_name);
+  if(pulp_load_bin(pulp, app_name) < 0) {
+    return 1;
+  }
 
   // start execution
   pulp_exe_start(pulp);

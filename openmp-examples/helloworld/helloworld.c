@@ -36,12 +36,13 @@ void helloworld (void)
 
 int main(int argc, char *argv[])
 {
-	omp_set_default_device(BIGPULP_MEMCPY);
+  omp_set_default_device(BIGPULP_MEMCPY);
 
-	#pragma omp target
-	helloworld();
-
-	helloworld();
-	return 0;
+  uint64_t k = (uint64_t)&argc;
+  #pragma omp target map(tofrom: k)
+  {
+    printf("POINTER: 0x%llx\n", (uint64_t)k);
+  }
+  printf("POINTER: 0x%llx\n", (uint64_t)k);
+  return 0;
 }
-

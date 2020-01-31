@@ -11,11 +11,13 @@ readonly TARGET=zcu102
 
 cd `pwd -P`
 
+# create project
 if [ ! -d "$TARGET" ]; then
     $VIVADO petalinux-create -t project -n "$TARGET" --template zynqMP
 fi
 cd "$TARGET"
 
+# initialize and set necessary configuration from config and local config
 $VIVADO petalinux-config --oldconfig --get-hw-description "../../hardware/fpga/hero_exil$TARGET/hero_exil$TARGET.sdk"
 
 mkdir -p components/ext_sources
@@ -36,7 +38,7 @@ echo 'CONFIG_SUBSYSTEM_SDROOT_DEV="/dev/mmcblk0p2"' >> project-spec/configs/conf
 echo 'CONFIG_SUBSYSTEM_MACHINE_NAME="zcu102-revb"' >> project-spec/configs/config
 
 if [ -f $THIS_DIR/../local.cfg ] && grep -q PT_ETH_MAC $THIS_DIR/../local.cfg; then
-    sed -e 's/PT_ETH_MAC/CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_MAC/' $THIS_DIR/../local.cfg >> project-spec/configs/config
+    sed -e 's/PT_ETH_MAC/CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_MAC/;t;d' $THIS_DIR/../local.cfg >> project-spec/configs/config
 fi
 
 $VIVADO petalinux-config --oldconfig --get-hw-description "../../hardware/fpga/hero_exil$TARGET/hero_exil$TARGET.sdk"
@@ -48,6 +50,7 @@ echo "
 };
 " > project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi
 
+# start build
 set +e
 $VIVADO petalinux-build
 echo "First build might fail, this is expected..."
@@ -56,16 +59,21 @@ mkdir -p build/tmp/work/aarch64-xilinx-linux/external-hdf/1.0-r0/git/plnx_aarch6
 cp project-spec/hw-description/system.hdf build/tmp/work/aarch64-xilinx-linux/external-hdf/1.0-r0/git/plnx_aarch64/
 $VIVADO petalinux-build
 
+# create package
 $VIVADO petalinux-package --image
 
 mkdir -p build/tmp/work/aarch64-xilinx-linux/external-hdf/1.0-r0/git/plnx_aarch64/
 
-cp "../../hardware/fpga/hero_exil$TARGET/hero_exil${TARGET}.runs/impl_1/hero_exil${TARGET}_wrapper.bit" images/linux/
 cd images/linux
 if [ ! -f regs.init ]; then
   echo ".set. 0xFF41A040 = 0x3;" > regs.init
 fi
-echo "
+
+# add bitstream from local config
+if [ -f $THIS_DIR/../local.cfg ] && grep -q HERO_BITSTREAM $THIS_DIR/../local.cfg; then
+  bitstream=$(eval echo $(sed -e 's/BR2_HERO_BITSTREAM=//;t;d' $THIS_DIR/../local.cfg | tr -d '"'))
+  cp $bitstream hero_exil${TARGET}_wrapper.bit
+  echo "
 the_ROM_image:
 {
   [init] regs.init
@@ -78,9 +86,28 @@ the_ROM_image:
 }
 " > bootgen.bif
 
-vivado-2017.2 petalinux-package --boot --force \
-  --fsbl zynqmp_fsbl.elf \
-  --fpga hero_exil${TARGET}_wrapper.bit \
-  --u-boot u-boot.elf \
-  --pmufw pmufw.elf \
-  --bif bootgen.bif
+  vivado-2017.2 petalinux-package --boot --force \
+    --fsbl zynqmp_fsbl.elf \
+    --fpga hero_exil${TARGET}_wrapper.bit \
+    --u-boot u-boot.elf \
+    --pmufw pmufw.elf \
+    --bif bootgen.bif
+else
+  echo "
+the_ROM_image:
+{
+  [init] regs.init
+  [fsbl_config] a53_x64
+  [bootloader] zynqmp_fsbl.elf
+  [pmufw_image] pmufw.elf
+  [destination_cpu=a53-0, exception_level=el-3, trustzone] bl31.elf
+  [destination_cpu=a53-0, exception_level=el-2] u-boot.elf
+}
+" > bootgen.bif
+
+  vivado-2017.2 petalinux-package --boot --force \
+    --fsbl zynqmp_fsbl.elf \
+    --u-boot u-boot.elf \
+    --pmufw pmufw.elf \
+    --bif bootgen.bif
+fi

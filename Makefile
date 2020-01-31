@@ -90,8 +90,12 @@ tc-llvm-debug:
 # SDK
 .PHONY: sdk-pulp sdk-hrv sdk-har
 
-sdk-pulp:
+sdk-pulp-hrv:
 	$(ROOT)/pulp/setup-sdk.sh hero-urania
+sdk-pulp: sdk-pulp-hrv
+
+sdk-pulp-har:
+	$(ROOT)/pulp/setup-sdk.sh hero-arm64
 
 sdk-hrv: br-hrv
 	cd $(CURDIR)/output/br-hrv && $(ROOT)/toolchain/install-sdk.sh
