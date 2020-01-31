@@ -1,0 +1,28 @@
+tech_cells_GF22FDX:
+  targets: [
+    gf22,
+    rtl,
+  ]
+  files: [
+    pulp_power_gating_gf22.sv,    
+    cluster_clock_inverter_gf22.sv,
+    cluster_clock_gating_gf22.sv,
+    pulp_clock_delay_gf22.sv,
+    pulp_clock_gating_gf22.sv,
+    pulp_clock_inverter_gf22.sv,
+    pulp_clock_mux2_gf22.sv,
+    pulp_clock_xor2_gf22.sv,
+    pulp_sync_gf22.sv,
+    pulp_clock_gating_async_gf22.sv,
+  ]
+
+r2p_wrappers_GF22FDX:
+  targets: [
+    gf22,
+    rtl,
+  ]
+  files: [
+    CCI_FIFO_64w_8b_wrap.sv,
+    DATA_FIFO_2048w_64b_wrap.sv,
+    LANE_FIFO_16w_64b_wrap.sv,
+  ]
