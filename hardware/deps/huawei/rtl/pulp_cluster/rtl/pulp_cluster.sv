@@ -23,24 +23,23 @@ import apu_core_package::*;
 
 `include "axi/assign.svh"
 `include "axi/typedef.svh"
-`define SHARED_FPU_CLUSTER
 
 module pulp_cluster
 #(
   // cluster parameters
-  parameter bit    ASYNC_INTF = 1'b1,
-  parameter int    NB_CORES = 8,
-  parameter int    NB_HWPE_PORTS = 0,
-  parameter int    NB_DMAS = 4,
-  parameter int    NB_EXT2MEM = 2,
-  parameter bit    CLUSTER_ALIAS = 1'b1,
-  parameter int    CLUSTER_ALIAS_BASE = 12'h1B0,
-  parameter int    TCDM_SIZE = 64*1024, // [B], must be 2**N
-  parameter int    NB_TCDM_BANKS = 16, // must be 2**N
-  parameter int    TCDM_BANK_SIZE = TCDM_SIZE/NB_TCDM_BANKS, // [B]
-  parameter int    TCDM_NUM_ROWS = TCDM_BANK_SIZE/4, // [words]
-  parameter bit    HWPE_PRESENT = 1'b0, // set to 1 if HW Processing Engines are present in the cluster
-  parameter bit    SHARED_FPU = 1'b0,
+  parameter bit    ASYNC_INTF              = 1'b1,
+  parameter int    NB_CORES                = 8,
+  parameter int    NB_HWPE_PORTS           = 0,
+  parameter int    NB_DMAS                 = 4,
+  parameter int    NB_EXT2MEM              = 2,
+  parameter bit    CLUSTER_ALIAS           = 1'b1,
+  parameter int    CLUSTER_ALIAS_BASE      = 12'h1B0,
+  parameter int    TCDM_SIZE               = 64*1024,                 // [B], must be 2**N
+  parameter int    NB_TCDM_BANKS           = 16,                      // must be 2**N
+  parameter int    TCDM_BANK_SIZE          = TCDM_SIZE/NB_TCDM_BANKS, // [B]
+  parameter int    TCDM_NUM_ROWS           = TCDM_BANK_SIZE/4,        // [words]
+  parameter bit    HWPE_PRESENT            = 1'b0,                    // set to 1 if HW Processing Engines are present in the cluster
+  parameter bit    SHARED_FPU              = 1'b1,
 
   // I$ parameters
   parameter int    SET_ASSOCIATIVE         = 4,
@@ -61,53 +60,53 @@ module pulp_cluster
 
   // core parameters
 
-  parameter bit    DEM_PER_BEFORE_TCDM_TS = 1'b0,
-  parameter int    ROM_BOOT_ADDR = 32'h1A000000,
-  parameter int    BOOT_ADDR = 32'h1C000000,
-  parameter int    INSTR_RDATA_WIDTH = 128,
-  parameter int    DEBUG_HALT_ADDR = 32'h0,
+  parameter bit    DEM_PER_BEFORE_TCDM_TS  = 1'b0,
+  parameter int    ROM_BOOT_ADDR           = 32'h1A000000,
+  parameter int    BOOT_ADDR               = 32'h1C000000,
+  parameter int    INSTR_RDATA_WIDTH       = 128,
+  parameter int    DEBUG_HALT_ADDR         = 32'h0,
 
-  parameter        CLUST_FPU = 1,
-  parameter        CLUST_FP_DIVSQRT = 0,
-  parameter        CLUST_SHARED_FP = 2,
+  parameter        CLUST_FPU               = 1,
+  parameter        CLUST_FP_DIVSQRT        = 0,
+  parameter        CLUST_SHARED_FP         = 2,
   parameter        CLUST_SHARED_FP_DIVSQRT = 0,
 
   // AXI parameters
-  parameter int    AXI_ADDR_WIDTH = 32,
-  parameter int    AXI_DATA_C2S_WIDTH = 64,
-  parameter int    AXI_DATA_S2C_WIDTH = 64,
-  parameter int    AXI_USER_WIDTH = 6,
-  parameter int    AXI_ID_IN_WIDTH = 4,
-  parameter int    AXI_ID_OUT_WIDTH = 6,
-  parameter int    AXI_STRB_C2S_WIDTH = AXI_DATA_C2S_WIDTH/8,
-  parameter int    AXI_STRB_S2C_WIDTH = AXI_DATA_S2C_WIDTH/8,
-  parameter int    DC_SLICE_BUFFER_WIDTH = 8,
+  parameter int    AXI_ADDR_WIDTH          = 32,
+  parameter int    AXI_DATA_C2S_WIDTH      = 64,
+  parameter int    AXI_DATA_S2C_WIDTH      = 64,
+  parameter int    AXI_USER_WIDTH          = 6,
+  parameter int    AXI_ID_IN_WIDTH         = 4,
+  parameter int    AXI_ID_OUT_WIDTH        = 6,
+  parameter int    AXI_STRB_C2S_WIDTH      = AXI_DATA_C2S_WIDTH/8,
+  parameter int    AXI_STRB_S2C_WIDTH      = AXI_DATA_S2C_WIDTH/8,
+  parameter int    DC_SLICE_BUFFER_WIDTH   = 8,
 
   // TCDM and log interconnect parameters
-  parameter int    DATA_WIDTH = 32,
-  parameter int    ADDR_WIDTH = 32,
-  parameter int    BE_WIDTH = DATA_WIDTH/8,
-  parameter int    TEST_SET_BIT = 20, // bit used to indicate a test-and-set operation during a load in TCDM
-  parameter int    ADDR_MEM_WIDTH = $clog2(TCDM_BANK_SIZE/4), // WORD address width per TCDM bank (the word width is 32 bits)
+  parameter int    DATA_WIDTH              = 32,
+  parameter int    ADDR_WIDTH              = 32,
+  parameter int    BE_WIDTH                = DATA_WIDTH/8,
+  parameter int    TEST_SET_BIT            = 20,                       // bit used to indicate a test-and-set operation during a load in TCDM
+  parameter int    ADDR_MEM_WIDTH          = $clog2(TCDM_BANK_SIZE/4), // WORD address width per TCDM bank (the word width is 32 bits)
 
   // DMA parameters
-  parameter int    TCDM_ADD_WIDTH = ADDR_MEM_WIDTH + $clog2(NB_TCDM_BANKS) + 2, // BYTE address width TCDM
-  parameter int    NB_OUTSND_BURSTS = 8,
-  parameter int    MCHAN_BURST_LENGTH = 256,
+  parameter int    TCDM_ADD_WIDTH          = ADDR_MEM_WIDTH + $clog2(NB_TCDM_BANKS) + 2, // BYTE address width TCDM
+  parameter int    NB_OUTSND_BURSTS        = 8,
+  parameter int    MCHAN_BURST_LENGTH      = 256,
 
   // peripheral and periph interconnect parameters
-  parameter int    LOG_CLUSTER = 5, // unused
-  parameter int    PE_ROUTING_LSB = 10, // LSB used as routing BIT in periph interco
-  parameter int    PE_ROUTING_MSB = 13, // MSB used as routing BIT in periph interco
-  parameter int    EVNT_WIDTH = 8, // size of the event bus
-  parameter int    REMAP_ADDRESS = 0, // for cluster virtualization
-                   
+  parameter int    LOG_CLUSTER             = 5,  // unused
+  parameter int    PE_ROUTING_LSB          = 10, // LSB used as routing BIT in periph interco
+  parameter int    PE_ROUTING_MSB          = 13, // MSB used as routing BIT in periph interco
+  parameter int    EVNT_WIDTH              = 8,  // size of the event bus
+  parameter int    REMAP_ADDRESS           = 0,  // for cluster virtualization
+
   // FPU PARAMETERS
-  parameter APU_NARGS_CPU = 3,
-  parameter APU_WOP_CPU = 6,
-  parameter WAPUTYPE = 3,
-  parameter APU_NDSFLAGS_CPU = 15,
-  parameter APU_NUSFLAGS_CPU = 5
+  parameter        APU_NARGS_CPU           = 3,
+  parameter        APU_WOP_CPU             = 6,
+  parameter        WAPUTYPE                = 3,
+  parameter        APU_NDSFLAGS_CPU        = 15,
+  parameter        APU_NUSFLAGS_CPU        = 5
 )
 (
   input  logic                             clk_i,
@@ -510,21 +509,21 @@ module pulp_cluster
   // log interconnect -> TCDM memory banks (SRAM)
   TCDM_BANK_MEM_BUS s_tcdm_bus_sram[NB_TCDM_BANKS-1:0]();
 
-   // cores -> APU
-   // apu-interconnect
-   // handshake signals
-   logic [NB_CORES-1:0]        s_apu_master_req;
-   logic [NB_CORES-1:0]        s_apu_master_gnt;
-   // request channel
-   logic [NB_CORES-1:0][APU_NARGS_CPU-1:0][31:0] s_apu_master_operands;
-   logic [NB_CORES-1:0][APU_WOP_CPU-1:0]         s_apu_master_op;
-   logic [NB_CORES-1:0][WAPUTYPE-1:0]            s_apu_master_type;
-   logic [NB_CORES-1:0][APU_NDSFLAGS_CPU-1:0]    s_apu_master_flags;
-   // response channel
-   logic [NB_CORES-1:0]                          s_apu_master_rready;
-   logic [NB_CORES-1:0]                          s_apu_master_rvalid;
-   logic [NB_CORES-1:0][31:0]                    s_apu_master_rdata;
-   logic [NB_CORES-1:0][APU_NUSFLAGS_CPU-1:0]    s_apu_master_rflags;
+  // cores -> APU
+  // apu-interconnect
+  // handshake signals
+  logic [NB_CORES-1:0]        s_apu_master_req;
+  logic [NB_CORES-1:0]        s_apu_master_gnt;
+  // request channel
+  logic [NB_CORES-1:0][APU_NARGS_CPU-1:0][31:0] s_apu_master_operands;
+  logic [NB_CORES-1:0][APU_WOP_CPU-1:0]         s_apu_master_op;
+  logic [NB_CORES-1:0][WAPUTYPE-1:0]            s_apu_master_type;
+  logic [NB_CORES-1:0][APU_NDSFLAGS_CPU-1:0]    s_apu_master_flags;
+  // response channel
+  logic [NB_CORES-1:0]                          s_apu_master_rready;
+  logic [NB_CORES-1:0]                          s_apu_master_rvalid;
+  logic [NB_CORES-1:0][31:0]                    s_apu_master_rdata;
+  logic [NB_CORES-1:0][APU_NUSFLAGS_CPU-1:0]    s_apu_master_rflags;
 
   /* reset generator */
   rstgen rstgen_i (
@@ -913,117 +912,64 @@ module pulp_cluster
     end
   endgenerate
 
-   
-//**********************************************
-//**** APU cluster - Shared execution units ****
-//**********************************************
+  /* Shared FPU cluster - Shared execution units */
+  if (SHARED_FPU) begin : gen_shared_fpu
+    shared_fpu_cluster #(
+      .NB_CORES             ( NB_CORES                  ),
+      .NB_APUS              ( 1                         ),
+      .NB_FPNEW             ( 8                         ),
+      .FP_TYPE_WIDTH        ( 3                         ),
 
-`ifdef APU_CLUSTER
+      .NB_CORE_ARGS         ( NARGS_CPU                 ),
+      .CORE_DATA_WIDTH      ( 32                        ),
+      .CORE_OPCODE_WIDTH    ( WOP_CPU                   ),
+      .CORE_DSFLAGS_CPU     ( NDSFLAGS_CPU              ),
+      .CORE_USFLAGS_CPU     ( NUSFLAGS_CPU              ),
 
-   apu_cluster
-     #(
-       .C_NB_CORES         ( NB_CORES                ),
-       .NDSFLAGS_CPU       ( APU_NDSFLAGS_CPU        ),
-       .NUSFLAGS_CPU       ( APU_NUSFLAGS_CPU        ),
-       .WOP_CPU            ( APU_WOP_CPU             ),
-       .NARGS_CPU          ( APU_NARGS_CPU           ),
-       .WAPUTYPE           ( WAPUTYPE                ),
-       .SHARED_FP          ( CLUST_SHARED_FP         ),
-       .SHARED_DSP_MULT    ( 0                       ),
-       .SHARED_INT_MULT    ( 0                       ),
-       .SHARED_INT_DIV     ( 0                       ),
-       .SHARED_FP_DIVSQRT  ( CLUST_SHARED_FP_DIVSQRT )
-       )
-   apu_cluster_i
-     (
-      .clk_i  ( clk_cluster       ),
-      .rst_ni ( s_rst_n           ),
-      .cpus   ( s_apu_cluster_bus )
-      );
+      .NB_APU_ARGS          ( 2                         ),
+      .APU_OPCODE_WIDTH     ( WOP_CPU                   ),
+      .APU_DSFLAGS_CPU      ( NDSFLAGS_CPU              ),
+      .APU_USFLAGS_CPU      ( NUSFLAGS_CPU              ),
 
-`endif
+      .NB_FPNEW_ARGS        ( NARGS_CPU                 ),
+      .FPNEW_OPCODE_WIDTH   ( WOP_CPU                   ),
+      .FPNEW_DSFLAGS_CPU    ( NDSFLAGS_CPU              ),
+      .FPNEW_USFLAGS_CPU    ( NUSFLAGS_CPU              ),
 
+      .APUTYPE_ID           ( 1                         ),
+      .FPNEWTYPE_ID         ( 0                         ),
 
-   //****************************************************
-   //**** Shared FPU cluster - Shared execution units ***
-   //****************************************************
+      .C_FPNEW_FMTBITS      (fpnew_pkg::FP_FORMAT_BITS  ),
+      .C_FPNEW_IFMTBITS     (fpnew_pkg::INT_FORMAT_BITS ),
+      .C_ROUND_BITS         (3                          ),
+      .C_FPNEW_OPBITS       (fpnew_pkg::OP_BITS         ),
+      .USE_FPU_OPT_ALLOC    ("FALSE"                    ),
+      .USE_FPNEW_OPT_ALLOC  ("TRUE"                     ),
+      .FPNEW_INTECO_TYPE    ("SINGLE_INTERCO"           )
+    ) i_shared_fpu_cluster (
+      .clk                   ( clk_cluster              ),
+      .rst_n                 ( s_rst_n                  ),
+      .test_mode_i           ( test_mode_i              ),
+      .core_slave_req_i      ( s_apu_master_req         ),
+      .core_slave_gnt_o      ( s_apu_master_gnt         ),
+      .core_slave_type_i     ( s_apu_master_type        ),
+      .core_slave_operands_i ( s_apu_master_operands    ),
+      .core_slave_op_i       ( s_apu_master_op          ),
+      .core_slave_flags_i    ( s_apu_master_flags       ),
+      .core_slave_rready_i   ( s_apu_master_rready      ),
+      .core_slave_rvalid_o   ( s_apu_master_rvalid      ),
+      .core_slave_rdata_o    ( s_apu_master_rdata       ),
+      .core_slave_rflags_o   ( s_apu_master_rflags      )
+    );
 
-  `ifdef SHARED_FPU_CLUSTER
+  end else begin : gen_no_shared_fpu
+    assign s_apu_master_gnt     = '0;
+    assign s_apu_master_rvalid  = '0;
+    assign s_apu_master_rdata   = '0;
+    assign s_apu_master_rflags  = '0;
+  end
 
-      // request channel
-      logic [NB_CORES-1:0][2:0][31:0]                s_apu__operands;
-      logic [NB_CORES-1:0][5:0]                      s_apu__op;
-      logic [NB_CORES-1:0][2:0]                      s_apu__type;
-      logic [NB_CORES-1:0][14:0]                     s_apu__flags;
-      // response channel
-      logic [NB_CORES-1:0][4:0]                      s_apu__rflags;
-
-      genvar k;
-      for(k=0;k<NB_CORES;k++)
-      begin
-        assign s_apu__operands[k][2:0] = s_apu_master_operands[k][2:0];
-        assign s_apu__op[k][5:0]       = s_apu_master_op[k][5:0];
-        assign s_apu__type[k][2:0]     = s_apu_master_type[k][2:0];
-        assign s_apu__flags[k][14:0]   = s_apu_master_flags[k][14:0];
-        assign s_apu_master_rflags[k][4:0] = s_apu__rflags[k][4:0];
-      end
-
-       shared_fpu_cluster
-      #(
-         .NB_CORES         ( NB_CORES          ),
-         .NB_APUS          ( 1                 ),
-         .NB_FPNEW         ( 8                 ),
-         .FP_TYPE_WIDTH    ( 3                 ),
-
-         .NB_CORE_ARGS      ( 3                ),
-	       .CORE_DATA_WIDTH   ( 32               ),
-         .CORE_OPCODE_WIDTH ( 6                ),
-         .CORE_DSFLAGS_CPU  ( 15               ),
-         .CORE_USFLAGS_CPU  ( 5                ),
-
-         .NB_APU_ARGS      ( 2                 ),
-         .APU_OPCODE_WIDTH ( 6                 ),
-         .APU_DSFLAGS_CPU  ( 15                ),
-         .APU_USFLAGS_CPU  ( 5                 ),
-
-         .NB_FPNEW_ARGS        ( 3             ), //= 3,
-         .FPNEW_OPCODE_WIDTH   ( 6             ), //= 6,
-         .FPNEW_DSFLAGS_CPU    ( 15            ), //= 15,
-         .FPNEW_USFLAGS_CPU    ( 5             ), //= 5,
-
-         .APUTYPE_ID       ( 1                 ),
-         .FPNEWTYPE_ID     ( 0                 ),
-
-         .C_FPNEW_FMTBITS     (fpnew_pkg::FP_FORMAT_BITS  ),
-         .C_FPNEW_IFMTBITS    (fpnew_pkg::INT_FORMAT_BITS ),
-         .C_ROUND_BITS        (3                          ),
-         .C_FPNEW_OPBITS      (fpnew_pkg::OP_BITS         ),
-         .USE_FPU_OPT_ALLOC   ("FALSE"),
-         .USE_FPNEW_OPT_ALLOC ("TRUE"),
-         .FPNEW_INTECO_TYPE   ("SINGLE_INTERCO")
-      )
-      i_shared_fpu_cluster
-      (
-         .clk                   ( clk_cluster                               ),
-         .rst_n                 ( s_rst_n                                   ),
-	       .test_mode_i           ( test_mode_i                               ),
-         .core_slave_req_i      ( s_apu_master_req                          ),
-         .core_slave_gnt_o      ( s_apu_master_gnt                          ),
-         .core_slave_type_i     ( s_apu__type                               ),
-         .core_slave_operands_i ( s_apu__operands                           ),
-         .core_slave_op_i       ( s_apu__op                                 ),
-         .core_slave_flags_i    ( s_apu__flags                              ),
-         .core_slave_rready_i   ( s_apu_master_rready                       ),
-         .core_slave_rvalid_o   ( s_apu_master_rvalid                       ),
-         .core_slave_rdata_o    ( s_apu_master_rdata                        ),
-         .core_slave_rflags_o   ( s_apu__rflags                             )
-      );
-  `endif
-
-  //**************************************************************
-  //**** HW Processing Engines / Cluster-Coupled Accelerators ****
-  //**************************************************************
-
+  /* cluster-coupled accelerators / HW processing engines */
   generate
     if(HWPE_PRESENT == 1) begin : hwpe_gen
       // insert HWPE subsystem here
@@ -1057,7 +1003,7 @@ module pulp_cluster
       .FETCH_ADDR_WIDTH       ( 32                  ),
       .FETCH_DATA_WIDTH       ( 128                 ),
       .NB_CORES               ( NB_CORES            ),
-      .SH_NB_BANKS            ( NB_CACHE_BANKS      ), // NB_CACHE_BANKS
+      .SH_NB_BANKS            ( NB_CACHE_BANKS      ),
       .SH_NB_WAYS             ( 4                   ),
       .SH_CACHE_SIZE          ( 4*1024              ), // in Byte
       .SH_CACHE_LINE          ( 1                   ), // in word of [FETCH_DATA_WIDTH]
@@ -1069,10 +1015,10 @@ module pulp_cluster
       .SPECIAL_PRI_CACHE_SIZE ( 0                   ), // in Byte
       .AXI_ID                 ( AXI_ID_OUT_WIDTH    ),
       .AXI_ADDR               ( AXI_ADDR_WIDTH      ),
-      .AXI_USER               ( AXI_USER_WIDTH      ), //AXI_USER_WIDTH
+      .AXI_USER               ( AXI_USER_WIDTH      ),
       .AXI_DATA               ( AXI_DATA_C2S_WIDTH  ),
-      .USE_REDUCED_TAG        (   USE_RED_TAG   ), //USE_REDUCED_TAG
-      .L2_SIZE                ( 32'h00080000         )  //L2_SIZE // Size of max(L2 ,ROM) program memory in Byte
+      .USE_REDUCED_TAG        ( USE_RED_TAG         ),
+      .L2_SIZE                ( L2_SIZE             )  // Size of max(L2 ,ROM) program memory in Byte
     ) icache_top_i (
       .clk                       ( clk_cluster               ),
       .rst_n                     ( s_rst_n                   ),
