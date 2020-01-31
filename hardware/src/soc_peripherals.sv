@@ -62,7 +62,7 @@ module soc_peripherals #(
     .oup  (apb_periphs)
   );
 
-  `ifndef TARGET_SYNTHESIS
+  `ifndef SYNTHESIS
     apb_stdout #(
       .N_CORES    (N_CORES),
       .N_CLUSTERS (N_CLUSTERS),

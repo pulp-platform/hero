@@ -50,12 +50,14 @@ set search_path [ join "$IPS_PATH/axi/per2axi
                         $IPS_PATH/mchan/rtl/include
                         $IPS_PATH/cluster_peripherals/include
                         $IPS_PATH/cluster_peripherals/event_unit/include
+                        $IPS_PATH/riscv/rtl/include
                         $IPS_PATH/common_cells/include
                         $IPS_PATH/fpu_interco/
-                        $IPS_PATH/riscv/rtl/include
+                        $IPS_PATH/pulp_cluster/packages
                         $IPS_PATH/hwpe-ctrl/rtl
                         $IPS_PATH/hwpe-stream/rtl
                         $IPS_PATH/xne/rtl
+                        $IPS_PATH/pulp_cluster/packages
                         $FLL/DB
                         $RTL_PATH/include
                         $RTL_PATH/apb/include

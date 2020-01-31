@@ -28,72 +28,69 @@ import apu_package::*;
 module core_region
 #(
   // CORE PARAMETERS
-  parameter int     CORE_ID                 = 0,
-  parameter int     ADDR_WIDTH              = 32,
-  parameter int     DATA_WIDTH              = 32,
-  parameter int     INSTR_RDATA_WIDTH       = 32,
-  parameter bit     CLUSTER_ALIAS           = 1'b1,
-  parameter int     CLUSTER_ALIAS_BASE      = 12'h000,
-  parameter int     REMAP_ADDRESS           = 0,
-  parameter int     DEBUG_HALT_ADDR         = 32'h0000_0000,
-  parameter int     APU_NARGS_CPU           = 2,
-  parameter int     APU_WOP_CPU             = 1,
-  parameter int     WAPUTYPE                = 3,
-  parameter int     APU_NDSFLAGS_CPU        = 3,
-  parameter int     APU_NUSFLAGS_CPU        = 5,
-  parameter bit     ADDREXT                 = 1'b0,
-  parameter bit     FPU                     = 1'b0,
-  parameter bit     FP_DIVSQRT              = 1'b0,
-  parameter bit     DEM_PER_BEFORE_TCDM_TS  = 1'b0
+  parameter int    CORE_ID                = 0,
+  parameter int    ADDR_WIDTH             = 32,
+  parameter int    DATA_WIDTH             = 32,
+  parameter int    INSTR_RDATA_WIDTH      = 32,
+  parameter bit    CLUSTER_ALIAS          = 1'b1,
+  parameter int    CLUSTER_ALIAS_BASE     = 12'h000,
+  parameter int    REMAP_ADDRESS          = 0,
+  parameter int    DEBUG_HALT_ADDR        = 32'h0000_0000,
+  parameter int    APU_NARGS_CPU          = 2,
+  parameter int    APU_WOP_CPU            = 1,
+  parameter int    WAPUTYPE               = 3,
+  parameter int    APU_NDSFLAGS_CPU       = 3,
+  parameter int    APU_NUSFLAGS_CPU       = 5,
+  parameter bit    ADDREXT                = 1'b0,
+  parameter        FPU                    = 0,
+  parameter        FP_DIVSQRT             = 0,
+  parameter        SHARED_FPU             = 0,
+  parameter        SHARED_FP_DIVSQRT      = 0,
+  parameter bit    DEM_PER_BEFORE_TCDM_TS = 1'b0
 `ifndef SYNTHESIS
   ,
-  parameter string  L2_SLM_FILE   = "./slm_files/l2_stim.slm",
-  parameter string  ROM_SLM_FILE  = "../sw/apps/boot/slm_files/l2_stim.slm"
+  parameter string L2_SLM_FILE            = "./slm_files/l2_stim.slm",
+  parameter string ROM_SLM_FILE           = "../sw/apps/boot/slm_files/l2_stim.slm"
 `endif
-)
+  )
 (
-  input logic 			      clk_i,
-  input logic 			      rst_ni,
-  input logic 			      init_ni,
+  input  logic            clk_i,
+  input  logic            rst_ni,
+  input  logic            init_ni,
 
-  input logic [3:0] 		      base_addr_i, // FOR CLUSTER VIRTUALIZATION
+  input  logic [3:0]      base_addr_i, // FOR CLUSTER VIRTUALIZATION
+  input  logic [5:0]      cluster_id_i,
 
-  input logic [5:0] 		      cluster_id_i,
-  
-  input logic 			      irq_req_i,
-  output logic 			      irq_ack_o,
-  input logic [4:0] 		      irq_id_i,
-  output logic [4:0] 		      irq_ack_id_o,
-  
-  input logic 			      clock_en_i,
-  input logic 			      fetch_en_i,
-  input logic 			      fregfile_disable_i,
+  input  logic            irq_req_i,
+  output logic            irq_ack_o,
+  input  logic [4:0]      irq_id_i,
+  output logic [4:0]      irq_ack_id_o,
 
-  input logic [31:0] 		      boot_addr_i,
-
-  input logic 			      test_mode_i,
-
-  output logic 			      core_busy_o,
+  input  logic            clock_en_i,
+  input  logic            fetch_en_i,
+  input  logic            fregfile_disable_i,
+  input  logic [31:0]     boot_addr_i,
+  input  logic            test_mode_i,
+  output logic            core_busy_o,
 
   // Interface to Instruction Logarithmic interconnect (Req->grant handshake)
-  output logic 			      instr_req_o,
-  input logic 			      instr_gnt_i,
-  output logic [31:0] 		      instr_addr_o,
-  input logic [INSTR_RDATA_WIDTH-1:0] instr_r_rdata_i,
-  input logic 			      instr_r_valid_i,
+  output logic                         instr_req_o,
+  input  logic                         instr_gnt_i,
+  output logic [31:0]                  instr_addr_o,
+  input  logic [INSTR_RDATA_WIDTH-1:0] instr_r_rdata_i,
+  input  logic                         instr_r_valid_i,
 
-  input logic             debug_req_i,
+  input  logic            debug_req_i,
+  output logic            unaligned_o,
+  input  logic [31:0]     addrext_i,
 
-  output logic                  unaligned_o,
-  input logic [31:0]            addrext_i,
-				      
-				      // Interface for DEMUX to TCDM INTERCONNECT ,PERIPHERAL INTERCONNECT and DMA CONTROLLER
-				      XBAR_TCDM_BUS.Master tcdm_data_master,
-				      output logic [5:0]     tcdm_data_master_atop,
-				      XBAR_TCDM_BUS.Master dma_ctrl_master,
-				      XBAR_PERIPH_BUS.Master eu_ctrl_master,
-				      XBAR_PERIPH_BUS.Master periph_data_master,
-				      output logic [5:0]     periph_data_master_atop,
+  // Interface for DEMUX to TCDM INTERCONNECT ,PERIPHERAL INTERCONNECT and DMA CONTROLLER
+  XBAR_TCDM_BUS.Master   tcdm_data_master,
+  output logic [5:0]     tcdm_data_master_atop,
+  XBAR_TCDM_BUS.Master   dma_ctrl_master,
+  XBAR_PERIPH_BUS.Master eu_ctrl_master,
+  XBAR_PERIPH_BUS.Master periph_data_master,
+  output logic [5:0]     periph_data_master_atop,
 
   // only used if SHARED_FPU_CLUSTER or APU_CLUSTER
   output logic                           apu_master_req_o,
@@ -130,12 +127,13 @@ module core_region
     .PULP_SECURE         ( 0                 ),
     .FPU                 ( FPU               ),
     .FP_DIVSQRT          ( FP_DIVSQRT        ),
-    .SHARED_FP           ( SHARED_FP         ),
+    .SHARED_FP           ( SHARED_FPU        ),
     .SHARED_DSP_MULT     ( 0                 ),
     .SHARED_INT_DIV      ( 0                 ),
     .SHARED_FP_DIVSQRT   ( SHARED_FP_DIVSQRT ),
     .WAPUTYPE            ( WAPUTYPE          ),
-    .DM_HaltAddress      ( DEBUG_HALT_ADDR   )
+    .DM_HaltAddress      ( DEBUG_HALT_ADDR   ),
+    .Zfinx               ( 1'b1              )
   ) RISCV_CORE (
     .clk_i                 ( clk_i                    ),
     .rst_ni                ( rst_ni                   ),

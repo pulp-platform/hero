@@ -36,6 +36,7 @@
 
 `define FEATURE_ICACHE_STAT
 
+
 module pri_icache_controller
 #(
    parameter FETCH_ADDR_WIDTH     = 32,
@@ -119,7 +120,6 @@ module pri_icache_controller
    logic [NB_WAYS-1:0]                             fetch_way_Q;
 
    logic [FETCH_ADDR_WIDTH-1:0]                    refill_addr_bypass;
-   logic                                           refill_req_bypass;
    logic                                           refill_wait_bypass;
    logic                                           r_need_fetch;
 
@@ -131,6 +131,7 @@ module pri_icache_controller
    logic                                           r_prefetching;
    logic                                           save_fetch_way;
 
+   logic                                           save_address;
 
    logic [SCM_TAG_ADDR_WIDTH-1:0] counter_FLUSH_NS, counter_FLUSH_CS;
 
@@ -147,7 +148,7 @@ module pri_icache_controller
 
 
 
-   enum logic [2:0] { DISABLED_ICACHE, WAIT_REFILL_DONE, IDLE_ENABLED, TAG_LOOKUP, PREFETCH_TAG_LOOKUP_0, PREFETCH_TAG_LOOKUP_1, FLUSH_ICACHE, FLUSH_SET_ID } CS, NS;
+   enum logic [3:0] { DISABLED_ICACHE, BYPASS_DELAY, WAIT_REFILL_DONE, IDLE_ENABLED, TAG_LOOKUP, PREFETCH_TAG_LOOKUP_0, PREFETCH_TAG_LOOKUP_1, FLUSH_ICACHE, FLUSH_SET_ID } CS, NS;
 
    int unsigned i,j,index;
 
@@ -271,39 +272,27 @@ module pri_icache_controller
    end
 
    always_ff @(posedge clk, negedge rst_n)
-     begin
+   begin
         if(~rst_n)
-          begin
-             refill_addr_bypass             <= '0;
-             refill_req_bypass              <= 1'b0;
-             refill_wait_bypass             <= 1'b0;
-          end
+        begin
+             refill_addr_bypass   <= '0;
+             refill_wait_bypass   <= 1'b0;
+        end
         else
-          begin
+        begin
              //Use this code to be sure thhat there is not apending transaction when enable cache request is asserted
              case({fetch_req_i & fetch_gnt_o , refill_r_valid_i})
                2'b00: begin refill_wait_bypass <= refill_wait_bypass;      end
                2'b01: begin refill_wait_bypass <= 1'b0;                    end
                2'b10: begin refill_wait_bypass <= 1'b1;                    end
-               2'b11: begin refill_wait_bypass <= 1'b1;                    end
+               2'b11: begin refill_wait_bypass <= refill_wait_bypass;      end
              endcase
-
-             if (bypass_icache_i | refill_wait_bypass)
-               begin
-                  // One cycle delay signals
-                  if(fetch_req_i)
-                    begin
-                       refill_addr_bypass <= fetch_addr_i;
-                       refill_req_bypass  <= 1'b1;
-                    end
-
-                  if (refill_gnt_i)
-                    begin
-                       refill_req_bypass  <= 1'b0;
-                    end
-               end
-          end
-     end
+             if (save_address)
+             begin
+                 refill_addr_bypass <= fetch_addr_i;
+             end
+        end
+   end
 
 
 // --------------------- //
@@ -360,6 +349,8 @@ begin
    hit_counter_enable      = 1'b0;
    miss_counter_enable     = 1'b0;
 
+   save_address            = 1'b0;
+
    case(CS)
 
       DISABLED_ICACHE:
@@ -373,25 +364,46 @@ begin
          fetch_rdata_o       = refill_r_data_i;
          fetch_rvalid_o      = refill_r_valid_i; // Must a single beat transaction
 
+         save_address        = fetch_req_i;
+
+
          // If the gnt = 1 directly when there is request,
          // then wait transfer finish.
-         if(bypass_icache_i | refill_wait_bypass) // Already Bypassed
+         if(bypass_icache_i ) // Already Bypassed
          begin
-            NS = DISABLED_ICACHE;
+            NS = ( fetch_req_i ) ? BYPASS_DELAY : DISABLED_ICACHE;
             // gnt = 1 directly when there is request
             if(bypass_icache_i)
               fetch_gnt_o     = fetch_req_i;
 
             // Delay one cycle signal
-            refill_req_o    = refill_req_bypass;
-            refill_addr_o   = refill_addr_bypass;
+            refill_req_o    = 1'b0;
+            refill_addr_o   = 1'b0;
          end
          else
          begin // Enable ICache
             fetch_gnt_o   = 1'b0;
             refill_req_o  = 1'b0;
-            NS            = FLUSH_ICACHE;
+            NS            = (refill_wait_bypass) ? DISABLED_ICACHE : FLUSH_ICACHE;
          end
+      end
+
+      BYPASS_DELAY:
+      begin
+            clear_pipe      = 1'b1;
+      	    refill_req_o    = 1'b1;
+            refill_addr_o   = refill_addr_bypass;
+            fetch_rvalid_o  = 1'b0;
+            cache_is_bypassed_o = 1'b1;
+
+            if(refill_gnt_i)
+            begin
+            	NS = DISABLED_ICACHE;
+            end
+            else
+            begin
+            	NS = BYPASS_DELAY;
+            end
       end
 
       FLUSH_ICACHE:

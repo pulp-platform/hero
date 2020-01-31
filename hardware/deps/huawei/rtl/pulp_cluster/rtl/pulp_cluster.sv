@@ -39,7 +39,7 @@ module pulp_cluster
   parameter int    TCDM_BANK_SIZE          = TCDM_SIZE/NB_TCDM_BANKS, // [B]
   parameter int    TCDM_NUM_ROWS           = TCDM_BANK_SIZE/4,        // [words]
   parameter bit    HWPE_PRESENT            = 1'b0,                    // set to 1 if HW Processing Engines are present in the cluster
-  parameter bit    SHARED_FPU              = 1'b0,
+  parameter bit    SHARED_FPU              = 1'b1,
 
   // I$ parameters
   parameter int    SET_ASSOCIATIVE         = 4,
@@ -53,21 +53,23 @@ module pulp_cluster
   parameter int    L2_SIZE                 = 256*1024,
   parameter bit    USE_REDUCED_TAG         = 1'b1,
   parameter        USE_RED_TAG             = "TRUE",
-  parameter string L0_BUFFER_FEATURE       = "DISABLED",
-  parameter string MULTICAST_FEATURE       = "DISABLED",
-  parameter string SHARED_ICACHE           = "ENABLED",
-  parameter string DIRECT_MAPPED_FEATURE   = "DISABLED",
+  parameter        L0_BUFFER_FEATURE       = "DISABLED",
+  parameter        MULTICAST_FEATURE       = "DISABLED",
+  parameter        SHARED_ICACHE           = "ENABLED",
+  parameter        DIRECT_MAPPED_FEATURE   = "DISABLED",
 
   // core parameters
+
   parameter bit    DEM_PER_BEFORE_TCDM_TS  = 1'b0,
   parameter int    ROM_BOOT_ADDR           = 32'h1A000000,
   parameter int    BOOT_ADDR               = 32'h1C000000,
   parameter int    INSTR_RDATA_WIDTH       = 128,
   parameter int    DEBUG_HALT_ADDR         = 32'h0,
-  parameter bit    CLUST_FPU               = 1'b1,
-  parameter bit    CLUST_FP_DIVSQRT        = 1'b0,
-  parameter bit    CLUST_SHARED_FP         = 1'b0,
-  parameter bit    CLUST_SHARED_FP_DIVSQRT = 1'b0,
+
+  parameter        CLUST_FPU               = 1,
+  parameter        CLUST_FP_DIVSQRT        = 0,
+  parameter        CLUST_SHARED_FP         = 2,
+  parameter        CLUST_SHARED_FP_DIVSQRT = 0,
 
   // AXI parameters
   parameter int    AXI_ADDR_WIDTH          = 32,
@@ -508,16 +510,20 @@ module pulp_cluster
   TCDM_BANK_MEM_BUS s_tcdm_bus_sram[NB_TCDM_BANKS-1:0]();
 
   // cores -> APU
-  logic [NB_CORES-1:0]                        s_apu_master_req,
-                                              s_apu_master_gnt,
-                                              s_apu_master_rready,
-                                              s_apu_master_rvalid;
-  logic [NB_CORES-1:0][NARGS_CPU-1:0][31:0]   s_apu_master_operands;
-  logic [NB_CORES-1:0][WOP_CPU-1:0]           s_apu_master_op;
-  logic [NB_CORES-1:0][WAPUTYPE-1:0]          s_apu_master_type;
-  logic [NB_CORES-1:0][NDSFLAGS_CPU-1:0]      s_apu_master_flags;
-  logic [NB_CORES-1:0][31:0]                  s_apu_master_rdata;
-  logic [NB_CORES-1:0][NUSFLAGS_CPU-1:0]      s_apu_master_rflags;
+  // apu-interconnect
+  // handshake signals
+  logic [NB_CORES-1:0]        s_apu_master_req;
+  logic [NB_CORES-1:0]        s_apu_master_gnt;
+  // request channel
+  logic [NB_CORES-1:0][APU_NARGS_CPU-1:0][31:0] s_apu_master_operands;
+  logic [NB_CORES-1:0][APU_WOP_CPU-1:0]         s_apu_master_op;
+  logic [NB_CORES-1:0][WAPUTYPE-1:0]            s_apu_master_type;
+  logic [NB_CORES-1:0][APU_NDSFLAGS_CPU-1:0]    s_apu_master_flags;
+  // response channel
+  logic [NB_CORES-1:0]                          s_apu_master_rready;
+  logic [NB_CORES-1:0]                          s_apu_master_rvalid;
+  logic [NB_CORES-1:0][31:0]                    s_apu_master_rdata;
+  logic [NB_CORES-1:0][APU_NUSFLAGS_CPU-1:0]    s_apu_master_rflags;
 
   /* reset generator */
   rstgen rstgen_i (
@@ -859,7 +865,9 @@ module pulp_cluster
         .ADDREXT                   ( 1'b0                     ),
         .DEM_PER_BEFORE_TCDM_TS    ( DEM_PER_BEFORE_TCDM_TS   ),
         .FPU                       ( CLUST_FPU                ),
-        .FP_DIVSQRT                ( CLUST_FP_DIVSQRT         )
+        .FP_DIVSQRT                ( CLUST_FP_DIVSQRT         ),
+        .SHARED_FPU                ( CLUST_SHARED_FP          ),
+        .SHARED_FP_DIVSQRT         ( CLUST_SHARED_FP_DIVSQRT  )
       ) core_region_i (
         .clk_i                    ( clk_cluster               ),
         .rst_ni                   ( s_rst_n                   ),
@@ -904,11 +912,12 @@ module pulp_cluster
     end
   endgenerate
 
+  /* Shared FPU cluster - Shared execution units */
   if (SHARED_FPU) begin : gen_shared_fpu
     shared_fpu_cluster #(
       .NB_CORES             ( NB_CORES                  ),
       .NB_APUS              ( 1                         ),
-      .NB_FPNEW             ( 4                         ),
+      .NB_FPNEW             ( 8                         ),
       .FP_TYPE_WIDTH        ( 3                         ),
 
       .NB_CORE_ARGS         ( NARGS_CPU                 ),
@@ -1006,10 +1015,10 @@ module pulp_cluster
       .SPECIAL_PRI_CACHE_SIZE ( 0                   ), // in Byte
       .AXI_ID                 ( AXI_ID_OUT_WIDTH    ),
       .AXI_ADDR               ( AXI_ADDR_WIDTH      ),
-      .AXI_USER               ( 6                   ), //AXI_USER_WIDTH
+      .AXI_USER               ( AXI_USER_WIDTH      ),
       .AXI_DATA               ( AXI_DATA_C2S_WIDTH  ),
-      .USE_REDUCED_TAG        ( USE_RED_TAG         ), //USE_REDUCED_TAG
-      .L2_SIZE                ( 32'h00080000        )  //L2_SIZE // Size of max(L2 ,ROM) program memory in Byte
+      .USE_REDUCED_TAG        ( USE_RED_TAG         ),
+      .L2_SIZE                ( L2_SIZE             )  // Size of max(L2 ,ROM) program memory in Byte
     ) icache_top_i (
       .clk                       ( clk_cluster               ),
       .rst_n                     ( s_rst_n                   ),
@@ -1189,14 +1198,14 @@ module pulp_cluster
       .ICACHE_DATA_WIDTH     ( ICACHE_DATA_WIDTH      ),
       .ICACHE_ID_WIDTH       ( NB_CORES               ),
       .ICACHE_ADDR_WIDTH     ( 32                     ),
-      .L0_BUFFER_FEATURE     ( L0_BUFFER_FEATURE      ),
+      .L0_BUFFER_FEATURE     ( "DISABLED"             ),
       .L0_SIZE               ( ICACHE_DATA_WIDTH      ),
       .INSTR_RDATA_WIDTH     ( INSTR_RDATA_WIDTH      ),
       .SUPPORT_BOTH_PRI_SH   ( "FALSE"                ),
-      .SHARED_ICACHE         ( SHARED_ICACHE          ),
-      .MULTICAST_FEATURE     ( MULTICAST_FEATURE      ),
+      .SHARED_ICACHE         ( "ENABLED"              ),
+      .MULTICAST_FEATURE     ( "DISABLED"             ),
       .MULTICAST_GRANULARITY ( 1                      ),
-      .DIRECT_MAPPED_FEATURE ( DIRECT_MAPPED_FEATURE  ),
+      .DIRECT_MAPPED_FEATURE ( "DISABLED"             ),
       .L2_SIZE               ( L2_SIZE                ),
       .USE_REDUCED_TAG       ( USE_REDUCED_TAG        ),
       // AXI PARAMETER

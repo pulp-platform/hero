@@ -35,7 +35,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-// `define USE_REQ_BUFF
+`define USE_REQ_BUFF
 `define USE_RESP_BUFF
 `define FEATURE_ICACHE_STAT
 

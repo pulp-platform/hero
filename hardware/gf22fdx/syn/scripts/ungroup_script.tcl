@@ -5,25 +5,24 @@ foreach_in_collection cell $ALL_SCM {
     set_db $cell .boundary_opto strict_no
 }
 
-ungroup [get_cells rstgen_i]                             -flatten
-ungroup [get_cells data_master_slice_i/*]                -flatten
-ungroup [get_cells data_slave_slice_i/*]                 -flatten
-ungroup [get_cells CORE[*].core_region_i/*_CORE/*]       -flatten
-ungroup [get_cells CORE[*].core_region_i/core_demux_i/*] -flatten
-ungroup [get_cells cluster_interconnect_wrap_i/*]        -flatten
-ungroup [get_cells cluster_peripherals_i/*]              -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/data_master_slice_i/*]                -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/data_slave_slice_i/*]                 -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[*].core_region_i/*_CORE/*]       -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[*].core_region_i/core_demux_i/*] -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/*]        -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_peripherals_i/*]              -flatten
 
-ungroup [get_cells dmac_wrap_i/*]                        -flatten
-ungroup [get_cells per2axi_wrap_i/*]                     -flatten
-ungroup [get_cells axi2mem_wrap_i/*]                     -flatten
-ungroup [get_cells axi2per_wrap_i/*]                     -flatten
-ungroup [get_cells cluster_bus_wrap_i/*]                 -flatten
-ungroup [get_cells u_event_dc/*]                         -flatten
-ungroup [get_cells u_clustercg/*]                        -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/dmac_wrap_i/*]                        -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/per2axi_wrap_i/*]                     -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/axi2mem_wrap_i/*]                     -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/axi2per_wrap_i/*]                     -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_bus_wrap_i/*]                 -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/u_event_dc/*]                         -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/u_clustercg/*]                        -flatten
 
-ungroup [get_cells axi_size_UPSIZE_32_64_wrap_i/*]       -flatten
+ungroup [get_cells agen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/xi_size_UPSIZE_32_64_wrap_i/*]       -flatten
 
-ungroup [get_cells icache_top_i/PRI_ICACHE*/*]         -flatten
-ungroup [get_cells icache_top_i/Main*/*]               -flatten
-ungroup [get_cells icache_top_i/ICACHE_INTERC*/*]      -flatten
-ungroup [get_cells icache_top_i/MULTI*/*]              -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/icache_top_i/PRI_ICACHE*/*]         -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/icache_top_i/Main*/*]               -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/icache_top_i/ICACHE_INTERC*/*]      -flatten
+ungroup [get_cells gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/icache_top_i/MULTI*/*]              -flatten

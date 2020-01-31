@@ -117,7 +117,7 @@ packages:
     dependencies:
       - common_cells
   hier-icache:
-    revision: e2739360df1170fe200dab54b7393286ae51ace5
+    revision: 32ab11ec4601923cb1cc8f8620a5bf081b781cc0
     version: 1.0.1
     source:
       Git: "https://github.com/pulp-platform/hier-icache.git"
@@ -178,7 +178,7 @@ packages:
       - fpu_interco
       - timer_unit
   riscv:
-    revision: d84cd23a66fef580f0ee980e554432a1d2ecbea3
+    revision: 818fc10aa7429ee50c95054fb212b9f5c9b935e7
     version: ~
     source:
       Git: "https://github.com/pulp-platform/riscv.git"

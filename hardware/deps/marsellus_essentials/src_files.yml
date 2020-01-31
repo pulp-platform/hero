@@ -1,0 +1,44 @@
+quentin_essentials:
+  targets: [
+    rtl,
+    gf22,
+  ]
+  files: [
+    pad_frame_gf22.sv,
+    memwrap.sv,
+  ]
+
+tech-gf22:
+  targets: [
+    rtl,
+  ]
+
+  flags: [
+    skip_synthesis,
+  ]
+  vlog_opts: [
+    +nospecify,
+  ]
+  files: [
+    /usr/pack/gf-22-kgf/dz/mem/model/verilog/IN22FDX_S1D_NFRG_W04096B032M04C128.v,
+    /usr/pack/gf-22-kgf/dz/mem/model/verilog/IN22FDX_S1D_NFRG_W02048B032M04C128.v,
+    /usr/pack/gf-22-kgf/dz/mem/model/verilog/IN22FDX_S1D_NFRG_W01024B032M04C128.v,
+    /usr/pack/gf-22-kgf/dz/mem/model/verilog/IN22FDX_R1PH_NFHN_W00512B064M02C256.v,
+    /usr/pack/gf-22-kgf/dz/mem/model/verilog/IN22FDX_R1PH_NFHN_W00256B046M02C256.v,
+    /usr/pack/gf-22-kgf/dz/mem/model/verilog/IN22FDX_R1PH_NFHN_W00256B016M02C256.v,
+    /usr/pack/gf-22-kgf/dz/mem/model/verilog/IN22FDX_R1PH_NFHN_W00256B128M02C256.v,
+    /usr/pack/gf-22-kgf/dz/mem/model/verilog/IN22FDX_R1PH_NFHN_W01024B032M04C256.v,
+    /usr/pack/gf-22-kgf/dz/mem/model/verilog/IN22FDX_ROMI_FRG_W02048B032M32C064_boot_code.v,
+    /usr/pack/gf-22-kgf/invecas/io/V04R30/IN22FDX_GPIO18_10M3S30P_V0430/model/verilog/IN22FDX_GPIO18_10M3S30P_V0430.v,
+    /usr/pack/gf-22-kgf/dz/mem/model/verilog/submod/r1ph_memory_generic.v,
+    /usr/pack/gf-22-kgf/dz/mem/model/verilog/submod/s1p_memory_generic.v,
+    /usr/pack/gf-22-kgf/dz/mem/model/verilog/submod/romi_memory_generic.v,
+    /usr/pack/gf-22-kgf/invecas/std/V05R00/GF22FDX_SC8T_104CPP_BASE_CSC20L/model/verilog/GF22FDX_SC8T_104CPP_BASE_CSC20L.v,
+    /usr/pack/gf-22-kgf/invecas/std/V05R00/GF22FDX_SC8T_104CPP_BASE_CSC24L/model/verilog/GF22FDX_SC8T_104CPP_BASE_CSC24L.v,
+    /usr/pack/gf-22-kgf/invecas/std/V05R00/GF22FDX_SC8T_104CPP_BASE_CSC28L/model/verilog/GF22FDX_SC8T_104CPP_BASE_CSC28L.v,
+    /usr/pack/gf-22-kgf/invecas/std/V02R00/GF22FDX_SC8T_104CPP_HPK_CSL/model/verilog/GF22FDX_SC8T_104CPP_HPK_CSL.v,
+  ]
+  defines: [
+    IVCS_MSG_LVL=0
+  ]
+ 
