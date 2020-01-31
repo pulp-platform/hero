@@ -1,1 +1,0 @@
-export PULPRUN_PLATFORM=board
