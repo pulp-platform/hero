@@ -74,7 +74,7 @@ With the toolchains and SDKs installed, several development environments can be 
 
 A complete Linux environment with kernel and the base root filesystem for the Digilent Genesys 2 environment can be built with:
 ```
-make br-har-ediggenesys2
+make br-hrv-ediggenesys2
 ```
 The final product of this is a binary `hrv-ediggenesys-base-bbl.bin` in the `output` folder. This binary has to be put on an SD card to be loaded on the board. This SD card needs to be initialized with a GPT (GUID partition table). Be *CAREFUL* to execute the following steps on the correct partition and device (the SD card).
 ```
