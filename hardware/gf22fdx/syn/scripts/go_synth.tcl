@@ -54,33 +54,30 @@ uniquify -force
 report_timing -loop -max_paths 100 > TIMING_LOOP.rpt
 
 # Ungroup script
-#source -echo -verbose scripts/ungroup_script.tcl
+source -echo -verbose scripts/ungroup_script.tcl
 after 3000
 
 source -echo -verbose  scripts/constraints/constraints_mode0.sdc
+source -echo -verbose  scripts/create_path_groups.tcl
 
 # INSERT CLOCK GATE
 source -echo -verbose ./scripts/insert_clock_gating.tcl
 
 # retiming
-set_optimize_registers true -designs "*fpnew_*"
+set_optimize_registers true -minimum_period_only -designs "*fpnew_*"
+
+# critical range for debug only
+set_critical_range 200 *
 
 # Compile Ultra
 compile_ultra -no_autoungroup -no_boundary_optimization -timing -gate_clock
 
 # Reports
-
 sh mkdir -p ./reports
 
-report_timing      -nosplit > reports/timing.rpt
+report_timing -max_paths 100 -nosplit > reports/timing.rpt
 report_area  -hier -nosplit > reports/area.rpt
-report_resources -hierarchy > reports/dp_resource.rpt
-
-report_timing -through fc_subsystem_i/FC_CORE.lFC_CORE/*                 > reports/core.rpt
-report_timing -through fc_subsystem_i/FC_CORE.lFC_CORE/instr*            > reports/core_instr.rpt
-report_timing -through fc_subsystem_i/FC_CORE.lFC_CORE/data*             > reports/core_data.rpt
-report_timing -through fc_subsystem_i/FC_CORE.lFC_CORE/ex_stage_i/*      > reports/core_exstage.rpt
-report_timing -through fc_subsystem_i/FC_CORE.lFC_CORE/ex_stage_i/*fpu*  > reports/core_fpu.rpt
+report_resources   -hierarchy > reports/dp_resource.rpt
 
 # Dump Verilog
 sh mkdir -p ./mapped
@@ -91,7 +88,7 @@ define_name_rules fixbackslashes -allowed "A-Za-z0-9_" -first_restricted "\\" -r
 change_names -rule fixbackslashes -h
 
 sh mkdir -p ./export
-write -format verilog -hier -o ./netlists/$OUT_FILENAME.v
+write -format verilog -hier -o ./export/$OUT_FILENAME.v
 
 sh date
 sh echo "Current git version is `git rev-parse --short HEAD`"
