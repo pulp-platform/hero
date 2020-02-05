@@ -5,6 +5,7 @@ package:
 dependencies:
   axi2apb: { git: "https://github.com/pulp-platform/axi2apb.git", rev: atop }
   axi: { git: "https://github.com/pulp-platform/axi.git", rev: axi_dwc_akurth }
+  axi_mem_if: { git: "https://github.com/pulp-platform/axi_mem_if.git", rev: fix-name-conflict }
   axi2mem: { git: "https://github.com/pulp-platform/axi2mem.git", rev: undefined } # TODO: upstream
   axi_node: { git: "https://github.com/pulp-platform/axi_node.git", rev: atop }
   axi_rab: { git: "https://github.com/pulp-platform/axi_rab.git", rev: urania }
@@ -12,6 +13,7 @@ dependencies:
   axi_slice_dc: { git: "https://github.com/pulp-platform/axi_slice_dc.git", rev: atomics }
   common_verification: { git: "https://github.com/pulp-platform/common_verification.git", rev: release-0.2 }
   pulp_cluster: { git: "https://github.com/pulp-platform/pulp_cluster.git", rev: atomics }
+  riscv-dbg: { git: "https://github.com/pulp-platform/riscv-dbg.git", rev: v0.3 }
 
 workspace:
   checkout_dir: "./deps"
@@ -31,6 +33,9 @@ sources:
   - src/soc_bus.sv
   - src/soc_ctrl_regs.sv
   - src/sram.sv
+  - src/debug_system.sv
+  - src/core2axi.sv
+  - src/axi_tcdm_if.sv
   # Level 1
   - src/l2_mem.sv
   - src/pulp_cluster_ooc.sv
@@ -44,5 +49,9 @@ sources:
     files:
       # Level 0
       - src/apb/apb_stdout.sv
+      # - test/riscv_pkg.sv
+      # - test/jtag_test.sv
+      # - test/dm_test.sv
       # Level 1
       - test/pulp_tb.sv
+      # - test/debug_system_tb.sv
