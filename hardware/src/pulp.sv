@@ -61,8 +61,8 @@ package automatic pulp_pkg;
 
   // Debug module
   localparam logic [31:0] JTAG_IDCODE = 32'h249511C3; //TODO: do we have a sane value for this?
+  localparam int unsigned N_DEBUG = 1;
   // localparam int unsigned AXI_IW_DEBUG = 1;
-  // localparam int unsigned N_DEBUG = 1;
 endpackage
 
 import pulp_pkg::*;
@@ -100,7 +100,8 @@ module pulp #(
 );
 
   // Derived Constants
-  localparam int unsigned AXI_IW_SB_OUP = axi_iw_sb_oup(N_CLUSTERS);
+  localparam int unsigned N_SLAVES = soc_bus_pkg::n_slaves(N_CLUSTERS) + N_DEBUG;
+  localparam int unsigned AXI_IW_SB_OUP = axi_iw_sb_oup(N_SLAVES);
   localparam int unsigned NR_HARTS = N_CLUSTERS * pulp_cluster_cfg_pkg::N_CORES;
 
   // debug signals

@@ -76,7 +76,7 @@ module soc_bus #(
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (soc_bus_pkg::oup_id_w(N_CLUSTERS, AXI_IW_INP)), //TODO: could be buggy
+    .AXI_ID_WIDTH   (soc_bus_pkg::oup_id_w(N_SLAVES, AXI_IW_INP)), //TODO: could be buggy
     .AXI_USER_WIDTH (AXI_UW)
   ) masters [N_MASTERS-1:0]();
 //  TODO: FIXING ISSUE IN SYNTHESIS
