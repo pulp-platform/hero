@@ -58,6 +58,11 @@ package automatic pulp_pkg;
   `AXI_TYPEDEF_R_CHAN_T(        axi_r_t,      axi_data_t, axi_id_t, axi_user_t);
   `AXI_TYPEDEF_REQ_T(           axi_req_t,    axi_aw_t, axi_w_t, axi_ar_t);
   `AXI_TYPEDEF_RESP_T(          axi_resp_t,   axi_b_t, axi_r_t);
+
+  // Debug module
+  localparam logic [31:0] JTAG_IDCODE = 32'h249511C3; //TODO: do we have a sane value for this?
+  // localparam int unsigned AXI_IW_DEBUG = 1;
+  // localparam int unsigned N_DEBUG = 1;
 endpackage
 
 import pulp_pkg::*;
@@ -84,11 +89,22 @@ module pulp #(
   output axi_req_t              ext_req_o,
   input  axi_resp_t             ext_resp_i,
   input  axi_req_t              ext_req_i,
-  output axi_resp_t             ext_resp_o
+  output axi_resp_t             ext_resp_o,
+
+  //JTAG
+  input  logic                  jtag_tck_i,
+  input  logic                  jtag_trst_ni,
+  input  logic                  jtag_tdi_i,
+  input  logic                  jtag_tms_i,
+  output logic                  jtag_tdo_o
 );
 
   // Derived Constants
   localparam int unsigned AXI_IW_SB_OUP = axi_iw_sb_oup(N_CLUSTERS);
+  localparam int unsigned NR_HARTS = N_CLUSTERS * pulp_cluster_cfg_pkg::N_CORES;
+
+  // debug signals
+  logic [NR_HARTS-1:0] core_debug_req;
 
   // Interfaces to Clusters
   // i_soc_bus.cl_mst -> [cl_inp]
@@ -230,6 +246,38 @@ module pulp #(
     .AXI_USER_WIDTH (AXI_UW)
   ) periph_mst_dwced();
 
+  // Interface from debug module to soc bus
+  // i_debug_system.dm_master -> [debug_mst_predwc]
+  // -> i_dwc_debug_mst -> [debug_mst_dwced]
+  // -> i_soc_bus.debug_slv
+  // we don't really support anything else than 32 bits for now
+  localparam int unsigned AXI_DW_DM = 32;
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW_DM),
+    .AXI_ID_WIDTH   (AXI_IW_SB_INP),
+    .AXI_USER_WIDTH (AXI_UW)
+  ) debug_mst_predwc();
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW_SB_INP),
+    .AXI_USER_WIDTH (AXI_UW)
+  ) debug_mst_dwced();
+
+   AXI_BUS #(
+    .AXI_ADDR_WIDTH (AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
+    .AXI_USER_WIDTH (AXI_UW)
+  ) debug_slv_predwc();
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW_DM),
+    .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
+    .AXI_USER_WIDTH (AXI_UW)
+  ) debug_slv_dwced();
+
   for (genvar i = 0; i < N_CLUSTERS; i++) begin: gen_clusters
     axi_id_resize #(
       .ADDR_WIDTH   (AXI_AW),
@@ -262,6 +310,8 @@ module pulp #(
     assign cluster_id = i;
 
     if (pulp_cluster_cfg_pkg::ASYNC) begin : gen_cluster_async
+      initial $fatal("debug_req_i not yet implemented for ASYNC");
+
       axi_slice_dc_slave_wrap #(
         .AXI_ADDR_WIDTH (AXI_AW),
         .AXI_DATA_WIDTH (AXI_DW_CL),
@@ -306,6 +356,8 @@ module pulp #(
       );
 
     end else begin : gen_cluster_sync
+      localparam int unsigned N_CORES = pulp_cluster_cfg_pkg::N_CORES;
+
       pulp_cluster_sync i_cluster (
         .clk_i,
         .rst_ni,
@@ -314,7 +366,7 @@ module pulp #(
         .fetch_en_i   (cl_fetch_en_i[i]),
         .eoc_o        (cl_eoc_o[i]),
         .busy_o       (cl_busy_o[i]),
-        .dbg_irq_i    ('0),
+        .dbg_irq_i    (core_debug_req[N_CORES*(i+1)-1:N_CORES*i]),
         .slv          (cl_inp_dwced[i]),
         .mst          (cl_oup_predwc[i])
       );
@@ -357,6 +409,7 @@ module pulp #(
     .L2_N_PORTS           (L2_N_AXI_PORTS),
     .L2_N_BYTES_PER_PORT  (L2_SIZE/L2_N_AXI_PORTS),
     .PERIPH_N_BYTES       (32*1024),
+    .DEBUG_N_BYTES        (64*1024), // TODO: might not need to be that large
     .MST_SLICE_DEPTH      (1),
     .SLV_SLICE_DEPTH      (1)
   ) i_soc_bus (
@@ -366,7 +419,9 @@ module pulp #(
     .cl_mst     (cl_inp),
     .l2_mst     (l2_mst),
     .ext_mst    (ext_mst),
-    .ext_slv    (ext_slv_remapped)
+    .ext_slv    (ext_slv_remapped),
+    .debug_slv  (debug_mst_dwced),
+    .debug_mst  (debug_slv_predwc)
   );
 
   axi_atop_filter #(
@@ -447,6 +502,55 @@ module pulp #(
     .rst_ni,
     .slv    (periph_mst),
     .mst    (periph_mst_dwced)
+  );
+
+  axi_data_width_converter #(
+    .ADDR_WIDTH     (AXI_AW),
+    .SI_DATA_WIDTH  (AXI_DW_DM),
+    .MI_DATA_WIDTH  (AXI_DW),
+    .ID_WIDTH       (AXI_IW_SB_INP),
+    .USER_WIDTH     (AXI_UW),
+    .NR_OUTSTANDING (1)
+  ) i_dwc_debug_mst (
+    .clk_i,
+    .rst_ni,
+    .slv    (debug_mst_predwc),
+    .mst    (debug_mst_dwced)
+  );
+
+  axi_data_width_converter #(
+    .ADDR_WIDTH     (AXI_AW),
+    .SI_DATA_WIDTH  (AXI_DW),
+    .MI_DATA_WIDTH  (AXI_DW_DM),
+    .ID_WIDTH       (AXI_IW_SB_OUP),
+    .USER_WIDTH     (AXI_UW),
+    .NR_OUTSTANDING (1)
+  ) i_dwc_debug_slv (
+    .clk_i,
+    .rst_ni,
+    .slv    (debug_slv_predwc),
+    .mst    (debug_slv_dwced)
+  );
+
+  debug_system #(
+    .AXI_AW (AXI_AW),
+    .AXI_DW (AXI_DW_DM),
+    .AXI_IW (AXI_IW_SB_INP),
+    .AXI_UW (AXI_UW),
+    .JTAG_IDCODE (JTAG_IDCODE),
+    .NR_HARTS (NR_HARTS)
+  ) i_debug_system (
+    .clk_i,
+    .rst_ni,
+    .test_en_i        ('0),
+    .jtag_tck_i,
+    .jtag_trst_ni,
+    .jtag_tdi_i,
+    .jtag_tms_i,
+    .jtag_tdo_o,
+    .core_debug_req_o (core_debug_req),
+    .dm_slave         (debug_slv_dwced),
+    .dm_master        (debug_mst_predwc)
   );
 
   soc_peripherals #(
