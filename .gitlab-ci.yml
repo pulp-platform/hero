@@ -19,7 +19,23 @@ build_test_archive:
     - cp "$CI_PROJECT_DIR/hero_huawei.tar.gz" .
     - tar xf hero_huawei.tar.gz && rm hero_huawei.tar.gz
     - export HERO_INSTALL="$(pwd)/install"
-    - ./setup.sh
+    ### build base toolchains
+    - make tc-pulp
+    ### build examples
+    - source env/ehuawei.sh
+    ### Test both simulators
+    - >
+      for sim in vsim vcs; do
+        # Compile testbench
+        cd hardware/$sim
+        ./compile.sh
+        for d in hello; do
+          make -C ../../example-apps/$d clean all
+          ../test/gen_slm_files.sh $d
+          ./start_sim.sh
+        done
+        cd -
+      done
 
 build_test_rest:
   stage: build_test_rest
@@ -30,10 +46,10 @@ build_test_rest:
     - make sdk-pulp
     ### build examples
     - source env/esim.sh
-    - >
-      for d in helloworld; do
-        make -C openmp-examples/$d all
-      done
+    # - >
+    #   for d in helloworld; do
+    #     make -C example-apps/$d all
+    #   done
     ### compile testbench
     - cd hardware/vsim
     - ./compile.sh
@@ -41,8 +57,8 @@ build_test_rest:
     ### simulate examples
     - cd hardware/vsim
     - >
-      for d in tests-pulp helloworld; do
-        make -C ../../openmp-examples/$d clean all
+      for d in hello; do
+        make -C ../../example-apps/$d clean all
         ../test/gen_slm_files.sh $d
         ./start_sim.sh
       done
@@ -50,5 +66,5 @@ build_test_rest:
   artifacts:
     paths:
       - install
-      - openmp-examples
-      - pulp/sdk
+      - example-apps
+      - pulp
