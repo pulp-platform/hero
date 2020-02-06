@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 ### BUILDS A TOOLCHAIN USING CROSSTOOL-NG ###
 
 # stop on errors

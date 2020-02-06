@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 ### SETUP A HERO LLVM RTE ###
 THIS_DIR=$(dirname "$(readlink -f "$0")")
 
