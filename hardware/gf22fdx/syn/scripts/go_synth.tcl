@@ -26,7 +26,7 @@ set reAnalyzeRTL "TRUE"
 set DESIGN_NAME  "pulp"
 
 # Set VERILOG defines
-set DEFINES "SYNTHESIS=1"
+set DEFINE "SYNTHESIS=1"
 set DEFINE "INVECAS=1"
 
 sh mkdir -p unmapped
@@ -93,5 +93,7 @@ write -format verilog -hier -o ./export/$OUT_FILENAME.v
 sh date
 sh echo "Current git version is `git rev-parse --short HEAD`"
 
+start_gui
+
 #14)
-exit
+#exit

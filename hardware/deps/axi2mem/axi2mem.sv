@@ -252,7 +252,7 @@ module axi2mem #(
   assign sel_r = ~meta.write | meta.atop[5];
 
   stream_fifo #(
-    .FALL_THROUGH (1'b1),
+    .FALL_THROUGH (1'b0),
     .DEPTH        (1 + BufDepth),
     .T            (logic[1:0])
   ) i_sel_buf (
@@ -270,7 +270,7 @@ module axi2mem #(
   );
 
   stream_fifo #(
-    .FALL_THROUGH (1'b1),
+    .FALL_THROUGH (1'b0),
     .DEPTH        (1 + BufDepth),
     .T            (meta_t)
   ) i_meta_buf (
