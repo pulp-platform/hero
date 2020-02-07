@@ -193,6 +193,7 @@ module pulp_cluster_ooc (
     .DEM_PER_BEFORE_TCDM_TS   (1'b0),
     .ROM_BOOT_ADDR            (ROM_BOOT_ADDR),
     .BOOT_ADDR                (BOOT_ADDR),
+    .DEBUG_HALT_ADDR          (DM_HALT_ADDR),
     // AXI Parameters
     .AXI_ADDR_WIDTH           (AXI_AW),
     .AXI_DATA_C2S_WIDTH       (AXI_DW),
