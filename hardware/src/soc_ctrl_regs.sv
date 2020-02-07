@@ -29,8 +29,8 @@ module soc_ctrl_regs #(
     .ADDR_WIDTH (ADDR_WIDTH),
     .DATA_WIDTH (DATA_WIDTH),
     .N_SLV      (N_SLV),
-    .ADDR_BEGIN ({32'h0000_0090, 32'h0000_0080, 32'h0000_0014, 32'h0000_0010, 32'h0000_0000}),
-    .ADDR_END   ({32'h0000_0FFF, 32'h0000_008F, 32'h0000_007F, 32'h0000_0013, 32'h0000_000F})
+    .ADDR_BEGIN ({32'h0000_00B0, 32'h0000_00A0, 32'h0000_0014, 32'h0000_0010, 32'h0000_0000}),
+    .ADDR_END   ({32'h0000_0FFF, 32'h0000_00AF, 32'h0000_007F, 32'h0000_0013, 32'h0000_000F})
   ) i_apb_bus (
     .inp  (apb),
     .oup  (apb_bus)

@@ -360,6 +360,7 @@ void exit(int status)
 #ifdef ARCHI_HAS_FC
     apb_soc_status_set(status);
 #else
+    apb_soc_status_set(status);
     hal_cluster_ctrl_eoc_set(1);
 #endif
     pos_wait_forever();

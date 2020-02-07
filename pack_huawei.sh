@@ -37,7 +37,6 @@ sed -i -e 's|make -C .. vsim/compile.tcl||' vsim/compile.sh
 cd "$SRC"
 mkdir -p "$TMP_DST/install/bin"
 cp ~andkurt/bin/slm_conv-0.3 "$TMP_DST/install/bin/slm_conv"
-cp example-apps/common/one_word_per_line.py "$TMP_DST/install/bin/one_word_per_line.py"
 
 # Toolchain and Makefile: copy to destination.
 copy_git_files toolchain Makefile
@@ -62,7 +61,10 @@ rm -f "$TMP_DST/pulp/setup-sdk.sh"
 cd "$SRC"
 copy_git_files example-apps
 # NO OPENMP EXAMPLES
-rm -rf "$TMP_DST/example-apps/common"
+rm -rf "$TMP_DST/example-apps/common/gcc"
+rm -rf "$TMP_DST/example-apps/common/bench.h"
+rm -rf "$TMP_DST/example-apps/common/default.mk"
+rm -rf "$TMP_DST/example-apps/common/hero_atomic.h"
 rm -rf "$TMP_DST/example-apps/helloworld"
 rm -rf "$TMP_DST/example-apps/tests-pulp"
 
