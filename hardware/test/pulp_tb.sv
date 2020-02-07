@@ -64,6 +64,12 @@ module pulp_tb #(
   axi_resp_t  from_pulp_resp,
               to_pulp_resp;
 
+  logic jtag_tck;
+  logic jtag_trst_n;
+  logic jtag_tdi;
+  logic jtag_tms;
+  logic jtag_tdo;
+
   clk_rst_gen #(
     .CLK_PERIOD     (CLK_PERIOD),
     .RST_CLK_CYCLES (10)
@@ -91,7 +97,13 @@ module pulp_tb #(
     .ext_req_o      (from_pulp_req),
     .ext_resp_i     (from_pulp_resp),
     .ext_req_i      (to_pulp_req),
-    .ext_resp_o     (to_pulp_resp)
+    .ext_resp_o     (to_pulp_resp),
+
+    .jtag_tck_i     (jtag_tck),
+    .jtag_trst_ni   (jtag_trst_n),
+    .jtag_tdi_i     (jtag_tdi),
+    .jtag_tms_i     (jtag_tms),
+    .jtag_tdo_o     (jtag_tdo)
   );
 
   // AXI Node for Memory (slave 0) and Peripherals (slave 1)

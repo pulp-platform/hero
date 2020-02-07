@@ -30,7 +30,8 @@ module soc_bus #(
   parameter int unsigned  PERIPH_N_BYTES = 0,       // [B]
   parameter int unsigned  DEBUG_N_BYTES = 0,        // [B]
   parameter int unsigned  MST_SLICE_DEPTH = 0,
-  parameter int unsigned  SLV_SLICE_DEPTH = 0
+  parameter int unsigned  SLV_SLICE_DEPTH = 0,
+  parameter logic [63:0]  DEBUG_BASE_ADDR = 0
 ) (
   input  logic    clk_i,
   input  logic    rst_ni,
@@ -108,7 +109,7 @@ module soc_bus #(
       valid_rule[0][i]  = 1'b1;
     end
 
-    // Everthing in `0x1A..` to EXT
+    // Everthing in `0x1A..` (above debug) to EXT
     start_addr[1][IDX_EXT]  = 64'h0000_0000_1A00_0000;
     end_addr[1][IDX_EXT]    = 64'h0000_0000_1AFF_FFFF;
     valid_rule[1][IDX_EXT]  = 1'b1;
@@ -122,12 +123,12 @@ module soc_bus #(
     end
 
     // Debug module
-    start_addr[0][IDX_DEBUG_MST] = 64'h0000_0000_1A11_0000;
+    start_addr[0][IDX_DEBUG_MST] = DEBUG_BASE_ADDR;  // > `0x1C..` and above L2
     end_addr[0][IDX_DEBUG_MST]   = start_addr[0][IDX_DEBUG_MST] + DEBUG_N_BYTES - 1;
     valid_rule[0][IDX_DEBUG_MST] = 1'b1;
 
-    // Everything above L2 Memory to EXT
-    start_addr[2][IDX_EXT]  = end_addr[0][IDX_L2_MEM + L2_N_PORTS - 1] + 1; // TODO: verify the addr mapping
+    // Everything above debug module to EXT
+    start_addr[2][IDX_EXT]  = end_addr[0][IDX_DEBUG_MST] + 1; // TODO: verify the addr mapping
     end_addr[2][IDX_EXT]    = 64'hFFFF_FFFF_FFFF_FFFF;
     valid_rule[2][IDX_EXT]  = 1'b1;
   end
