@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+THIS_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 set -e
 
 readonly script_path="$( cd "$(dirname "$0")" ; pwd -P )"
@@ -21,6 +22,12 @@ fi
 readonly app_path="$examples_path/$app_dir"
 readonly app_name=$(basename $app_dir)
 
+# Remove this once we ship the complete package to huawei
+one_word_per_line="${HERO_INSTALL}/bin/one_word_per_line.py"
+if [[ ! $(type -P "$one_word_per_line") ]] ; then
+    one_word_per_line="$THIS_DIR/../../example-apps/common/one_word_per_line.py"
+fi
+
 mkdir -p "$slm_path"
 cd "$slm_path"
 
@@ -29,13 +36,13 @@ riscv32-unknown-elf-objdump -s --start-address=0x10000000 --stop-address=0x1bfff
     | perl -p -e 's/^1b/10/' \
     | sort \
     > ${app_name}_l1.slm
-    ${HERO_INSTALL}/bin/one_word_per_line.py ${app_name}_l1.slm
+    $one_word_per_line ${app_name}_l1.slm
 
 # Create L2 SLM
 riscv32-unknown-elf-objdump -s --start-address=0x1c000000 --stop-address=0x1cffffff ${app_path}/build/test/test | rg '^ ' | cut -c 2-45 \
     | sort \
     > ${app_name}_l2.slm
-    ${HERO_INSTALL}/bin/one_word_per_line.py ${app_name}_l2.slm
+    $one_word_per_line ${app_name}_l2.slm
 
 # Split SLM per bank
 $slm_conv --swap-endianness -f "${app_name}_l1.slm" \
