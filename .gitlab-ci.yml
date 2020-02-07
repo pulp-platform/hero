@@ -13,6 +13,8 @@ stages:
 
 build_test_archive:
   stage: build_test_rest
+  tags:
+    - dolent2
   script:
     - ./pack_huawei.sh
     - cd "$(mktemp -d)"
@@ -39,6 +41,8 @@ build_test_archive:
 
 build_test_rest:
   stage: build_test_rest
+  tags:
+    - dolent2
   script:
     ### build base toolchains
     - make tc-pulp
