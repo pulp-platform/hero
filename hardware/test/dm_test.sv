@@ -1639,7 +1639,7 @@ package dm_test;
       logic [31:0] dm_data;
       logic [31:0] saved;
       logic [6:0]  dm_addr;
-      logic [31:0] key_word = 32'hbeefdead;
+      logic [31:0] key_word = 32'hbeefdead & ~32'h1; // dpc lower bit always zero
 
       error = 1'b0;
 
