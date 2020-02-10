@@ -1,5 +1,16 @@
 # Create group for core with ID $1 (argument)
 
+add wave -noupdate -group Core[$1] -group "Software Debugging" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$1]/core_region_i/RISCV_CORE/clk_i
+add wave -noupdate -group Core[$1] -group "Software Debugging" -divider "Instructions at ID stage, sampled half a cycle later"
+add wave -noupdate -group Core[$1] -group "Software Debugging" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$1]/core_region_i/RISCV_CORE/riscv_tracer_i/insn_disas
+add wave -noupdate -group Core[$1] -group "Software Debugging" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$1]/core_region_i/RISCV_CORE/riscv_tracer_i/insn_pc
+add wave -noupdate -group Core[$1] -group "Software Debugging" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$1]/core_region_i/RISCV_CORE/riscv_tracer_i/insn_val
+add wave -noupdate -group Core[$1] -group "Software Debugging" -divider "Program counter at ID and IF stage"
+add wave -noupdate -group Core[$1] -group "Software Debugging" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$1]/core_region_i/RISCV_CORE/pc_id
+add wave -noupdate -group Core[$1] -group "Software Debugging" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$1]/core_region_i/RISCV_CORE/pc_if
+add wave -noupdate -group Core[$1] -group "Software Debugging" -divider "Register File contents"
+add wave -noupdate -group Core[$1] -group "Software Debugging" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$1]/core_region_i/RISCV_CORE/id_stage_i/registers_i/riscv_register_file_i/mem
+
 add wave -noupdate -group Core[$1] -group IF /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$1]/core_region_i/RISCV_CORE/if_stage_i/clk
 add wave -noupdate -group Core[$1] -group IF /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$1]/core_region_i/RISCV_CORE/if_stage_i/rst_n
 add wave -noupdate -group Core[$1] -group IF /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$1]/core_region_i/RISCV_CORE/if_stage_i/m_trap_base_addr_i

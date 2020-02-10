@@ -7,6 +7,22 @@ quietly virtual signal -install {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i
 quietly virtual signal -install {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i} { /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/instr_rdata_i[19:15]} rs1
 quietly virtual signal -install {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i} { /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/instr_rdata_i[24:20]} rs2
 quietly WaveActivateNextPane {} 0
+
+for {set core 0} {$core < 8} {incr core} {
+    # trace on toplevel for quick comparison
+    add wave -noupdate -group "Trace Core $core" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$core]/core_region_i/RISCV_CORE/clk_i
+    add wave -noupdate -group "Trace Core $core" -divider "Instructions at ID stage, sampled half a cycle later"
+    add wave -noupdate -group "Trace Core $core" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$core]/core_region_i/RISCV_CORE/riscv_tracer_i/insn_disas
+    add wave -noupdate -group "Trace Core $core" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$core]/core_region_i/RISCV_CORE/riscv_tracer_i/insn_pc
+    add wave -noupdate -group "Trace Core $core" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$core]/core_region_i/RISCV_CORE/riscv_tracer_i/insn_val
+    add wave -noupdate -group "Trace Core $core" -divider "Program counter at ID and IF stage"
+    add wave -noupdate -group "Trace Core $core" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$core]/core_region_i/RISCV_CORE/pc_id
+    add wave -noupdate -group "Trace Core $core" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$core]/core_region_i/RISCV_CORE/pc_if
+    add wave -noupdate -group "Trace Core $core" -divider "Register File contents"
+    add wave -noupdate -group "Trace Core $core" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$core]/core_region_i/RISCV_CORE/id_stage_i/registers_i/riscv_register_file_i/mem
+}
+
+
 for {set core 0}  {$core < 8} {incr core} {
     do ../test/wave_core.do $core
 }
