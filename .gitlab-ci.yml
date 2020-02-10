@@ -1,23 +1,25 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   HERO_INSTALL: '$CI_PROJECT_DIR/install'
+  TEMP_JOB_DIR: '/tmp/hero_gitlab_ci_$CI_JOB_ID'
 
 before_script:
-  - mkdir -p $HERO_INSTALL
+  - mkdir -p "$HERO_INSTALL"
+  - mkdir -p "$TEMP_JOB_DIR"
 
 after_script:
-  - chmod -R u+w $HERO_INSTALL
+  - chmod -R u+w "$HERO_INSTALL"
+  - chmod -R u+w "$TEMP_JOB_DIR"
+  - rm -rf "$TEMP_JOB_DIR"
 
 stages:
   - build_test_rest
 
 build_test_archive:
   stage: build_test_rest
-  tags:
-    - dolent2
   script:
     - ./pack_huawei.sh
-    - cd "$(mktemp -d)"
+    - cd "$TEMP_JOB_DIR"
     - cp "$CI_PROJECT_DIR/hero_huawei.tar.gz" .
     - tar xf hero_huawei.tar.gz && rm hero_huawei.tar.gz
     - export HERO_INSTALL="$(pwd)/install"
@@ -41,8 +43,6 @@ build_test_archive:
 
 build_test_rest:
   stage: build_test_rest
-  tags:
-    - dolent2
   script:
     ### build base toolchains
     - make tc-pulp
