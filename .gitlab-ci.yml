@@ -11,6 +11,7 @@ after_script:
 stages:
   - build_fpga
   - build_test_rest
+  - build_test_har_olinux_exilzcu102
 
 build_fpga:
   stage: build_fpga
@@ -63,6 +64,42 @@ build_test_rest:
         ./start_sim.sh
       done
     - cd -
+    ### test benchmarks
+    - >
+      for d in openmp-examples/polybench-acc/*/; do
+        if [ $(basename $d) = "common" ]; then
+          continue
+        fi
+        make -C $d only=pulp default-as=host clean all
+        make -C $d only=pulp clean all
+        .gitlab-ci.d/verify-bench.sh $(basename $d)
+      done
+  artifacts:
+    paths:
+      - install
+      - openmp-examples
+      - pulp/sdk
+
+build_test_har_olinux_exilzcu102:
+  stage: build_test_har_olinux_exilzcu102
+  script:
+    ### Toolchains
+    - make tc-pulp
+    - make tc-har-olinux
+    ### PULP SDK
+    - make sdk-pulp
+    ### Host SDK
+    - make sdk-har
+    ### Heterogeneous Toolchain
+    - make tc-llvm
+    ### Build Xilinx ZCU102 Environment
+    - make br-har-exilzcu102
+    ### build examples
+    - source env/esim.sh
+    - >
+      for d in helloworld; do
+        make -C openmp-examples/$d all
+      done
     ### test benchmarks
     - >
       for d in openmp-examples/polybench-acc/*/; do
