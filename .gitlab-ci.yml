@@ -3,6 +3,7 @@ variables:
   HERO_INSTALL: '$CI_PROJECT_DIR/install'
 
 before_script:
+  - env
   - mkdir -p $HERO_INSTALL
 
 after_script:
@@ -10,8 +11,11 @@ after_script:
 
 stages:
   - build_fpga
-  - build_test_har_olinux_exilzcu102
-  - build_test_rest
+  - build_toolchain
+  - build_sdks
+  - build_hetero
+  - build_environ # TODO
+  - test_xilzcu102
 
 build_fpga:
   stage: build_fpga
@@ -27,75 +31,81 @@ build_fpga:
       when: always
   script: make -C hardware/fpga all
 
-build_test_rest:
-  stage: build_test_rest
-  script:
-    ### build base toolchains
-    - make tc-pulp tc-hrv-olinux tc-har-olinux
-    ### build accelerator sdk
-    - make sdk-pulp
-    ### build host sdks
-    - make sdk-har
-    - make sdk-hrv
-    ### build other images
-    - make br-hrv-ediggenesys2
-    - make br-har-exilzcu102
-    - make br-hrv-eqemu
-    ### build llvm
-    - make tc-llvm
-    ### build tools
-    - make tools-hrv-openocd
-    ### build examples
-    - source env/esim.sh
-    - >
-      for d in helloworld; do
-        make -C openmp-examples/$d all
-      done
-    ### compile testbench
-    - cd hardware/vsim
-    - ./compile.sh
-    - cd -
-    ### simulate examples
-    - cd hardware/vsim
-    - >
-      for d in tests-pulp helloworld; do
-        make -C ../../openmp-examples/$d only=pulp clean all
-        ../test/gen_slm_files.sh $d
-        ./start_sim.sh
-      done
-    - cd -
-    ### test benchmarks
-    - >
-      for d in openmp-examples/polybench-acc/*/; do
-        if [ $(basename $d) = "common" ]; then
-          continue
-        fi
-        make -C $d only=pulp default-as=host clean all
-        make -C $d only=pulp clean all
-        .gitlab-ci.d/verify-bench.sh $(basename $d)
-      done
+build_tc_pulp:
+  stage: build_toolchain
+  script: make tc-pulp
   artifacts:
     paths:
       - install
       - openmp-examples
       - pulp/sdk
+      - output
 
-build_test_har_olinux_exilzcu102:
-  stage: build_test_har_olinux_exilzcu102
+build_tc_hrv-olinux:
+  stage: build_toolchain
+  script: make tc-hrv-olinux
+  artifacts:
+    paths:
+      - install
+      - openmp-examples
+      - pulp/sdk
+      - output
+
+build_tc_har-olinux:
+  stage: build_toolchain
+  script: make tc-har-olinux
+  artifacts:
+    paths:
+      - install
+      - openmp-examples
+      - pulp/sdk
+      - output
+
+build_sdk_pulp:
+  stage: build_sdks
+  script: make sdk-pulp
+  artifacts:
+    paths:
+      - install
+      - openmp-examples
+      - pulp/sdk
+      - output
+
+build_sdk_hrv:
+  stage: build_sdks
+  script: make sdk-hrv
+  artifacts:
+    paths:
+      - install
+      - openmp-examples
+      - pulp/sdk
+      - output
+
+build_sdk_har:
+  stage: build_sdks
+  script: make sdk-har
+  artifacts:
+    paths:
+      - install
+      - openmp-examples
+      - pulp/sdk
+      - output
+
+build_hetero:
+  stage: build_hetero
+  script: make tc-llvm
+  artifacts:
+    paths:
+      - install
+      - openmp-examples
+      - pulp/sdk
+      - output
+
+test_xilzcu102:
+  stage: test_xilzcu102
   script:
-    ### Toolchains
-    - make tc-pulp
-    - make tc-har-olinux
-    ### PULP SDK
-    - make sdk-pulp
-    ### Host SDK
-    - make sdk-har
-    ### Heterogeneous Toolchain
-    - make tc-llvm
-    ### Build Xilinx ZCU102 Environment
-    - make br-har-exilzcu102
     ### build examples
-    - source env/esim.sh
+    - source env/exilzcu102.sh
     - >
       for d in helloworld; do
         make -C openmp-examples/$d all
@@ -115,3 +125,4 @@ build_test_har_olinux_exilzcu102:
       - install
       - openmp-examples
       - pulp/sdk
+      - output
