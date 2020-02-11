@@ -1,4 +1,4 @@
-LATEX_CMD=pdflatex
+LATEX_CMD=pdflatex-2016
 
 all: refman.pdf
 
