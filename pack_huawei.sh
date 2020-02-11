@@ -15,7 +15,7 @@ readonly TMP_DST="$(mktemp -d)"
 # Env: Copy to destination.
 cd "$SRC"
 mkdir -p "$TMP_DST/env"
-rsync -av env/ehuawei.sh "$TMP_DST/env/"
+rsync -av env/* "$TMP_DST/env/"
 
 # Doc: Copy to destination.
 mkdir -p "$TMP_DST/doc"

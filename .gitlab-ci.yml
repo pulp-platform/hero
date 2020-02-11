@@ -25,15 +25,31 @@ build_test_archive:
     - export HERO_INSTALL="$(pwd)/install"
     ### build base toolchains
     - make tc-pulp
-    ### build examples
-    - source env/ehuawei.sh
+    ### build RTL tests
+    - source env/ehuawei-test.sh
     ### Test both simulators
     - >
       for sim in vsim vcs; do
         # Compile testbench
         cd hardware/$sim
         ./compile.sh
-        for d in hello; do
+        for d in hello parMatrixMul; do
+          make -C ../../example-apps/$d clean all
+          ../test/gen_slm_files.sh $d
+          ./start_sim.sh
+        done
+        cd -
+      done
+    ### build SDK and software tests
+    - make sdk-pulp
+    - source env/esim.sh
+    ### Test both simulators
+    - >
+      for sim in vsim vcs; do
+        # Compile testbench
+        cd hardware/$sim
+        ./compile.sh
+        for d in tests-pulp; do
           make -C ../../example-apps/$d clean all
           ../test/gen_slm_files.sh $d
           ./start_sim.sh
@@ -41,32 +57,56 @@ build_test_archive:
         cd -
       done
 
-build_test_rest:
+build_test_pulp-runtime:
+  stage: build_test_rest
+  script:
+    ### build base toolchains
+    - make tc-pulp
+    ### Configure pulp-runtime
+    - source env/ehuawei-test.sh
+    ### Test both simulators
+    - make -C "$CI_PROJECT_DIR/hardware" vcs/compile.sh
+    - >
+      for sim in vsim vcs; do
+        # Compile testbench
+        cd hardware/$sim
+        ./compile.sh
+        for d in hello parMatrixMul; do
+          make -C ../../example-apps/$d clean all
+          ../test/gen_slm_files.sh $d
+          ./start_sim.sh
+        done
+        cd -
+      done
+  artifacts:
+    paths:
+      - install
+      - example-apps
+      - pulp
+
+build_test_sdk:
   stage: build_test_rest
   script:
     ### build base toolchains
     - make tc-pulp
     ### build accelerator sdk
     - make sdk-pulp
-    ### build examples
+    ### Configure for SDK
     - source env/esim.sh
-    # - >
-    #   for d in helloworld; do
-    #     make -C example-apps/$d all
-    #   done
-    ### compile testbench
-    - cd hardware/vsim
-    - ./compile.sh
-    - cd -
-    ### simulate examples
-    - cd hardware/vsim
+    ### Test both simulators
+    - make -C "$CI_PROJECT_DIR/hardware" vcs/compile.sh
     - >
-      for d in hello; do
-        make -C ../../example-apps/$d clean all
-        ../test/gen_slm_files.sh $d
-        ./start_sim.sh
+      for sim in vsim vcs; do
+        # Compile testbench
+        cd hardware/$sim
+        ./compile.sh
+        for d in tests-pulp; do
+          make -C ../../example-apps/$d clean all
+          ../test/gen_slm_files.sh $d
+          ./start_sim.sh
+        done
+        cd -
       done
-    - cd -
   artifacts:
     paths:
       - install
@@ -78,7 +118,7 @@ pulp_run_target_test:
   script:
     ### setup toolchain
     - ./setup.sh
-    - source env/esim.sh
+    - source env/ehuawei-test.sh
     ### compile testbench
     - cd hardware/vsim
     - ./compile.sh
