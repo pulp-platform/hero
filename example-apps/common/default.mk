@@ -13,20 +13,35 @@ endif
 .DEFAULT_GOAL = all
 DEFMK_ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
+# Take the config name to link to proper libraries
+CURRENT_CONFIG_NAME := $(shell echo $(PULP_CURRENT_CONFIG) | cut -d '@' -f 1)
+# CURRENT_CONFIG_NAME := $(echo $(PULP_CURRENT_CONFIG) | cut -d '@' -f 1)
+
 # CFLAGS and LDFLAGS have three components/stages
 # 1) without suffix, they apply to heterogeneous compilation;
 # 2) with _PULP suffix, they apply only to the PULP part of compilation;
 # 3) with _COMMON suffix, they apply to both PULP and host compilation.
 CFLAGS_COMMON += $(cflags) -O$(opt)
 LDFLAGS_COMMON ?= $(ldflags)
-CFLAGS_COMMON += -D__device= -D__PULP__
-CFLAGS_COMMON += -fopenmp
-CFLAGS_PULP += $(CFLAGS_COMMON) -march=rv32imacXgap9
-LDFLAGS_PULP += $(LDFLAGS_COMMON) -lgomp -L$(PULP_SDK_INSTALL)/lib/hero-huawei
-LDFLAGS_PULP += -T $(PULP_SDK_INSTALL)/hero/omptarget.ld
 
+CFLAGS_COMMON += -D__device= -D__PULP__ -fopenmp
+CFLAGS_PULP   += $(CFLAGS_COMMON) -march=rv32imacXgap9
+LDFLAGS_PULP  += $(LDFLAGS_COMMON)
+LDFLAGS_PULP  += $(PULP_SDK_INSTALL)/lib/$(CURRENT_CONFIG_NAME)/rt/crt0.o
+LDFLAGS_PULP  += $(PULP_SDK_INSTALL)/hero/$(CURRENT_CONFIG_NAME)/rt_conf.o
+LDFLAGS_PULP  += -nostdlib -nostartfiles
+LDFLAGS_PULP  += -L$(HERO_INSTALL)/riscv32-unknown-elf/lib
+LDFLAGS_PULP  += -L$(HERO_INSTALL)/lib/gcc/riscv32-unknown-elf/7.1.1
+LDFLAGS_PULP  += -L$(PULP_SDK_INSTALL)/lib/$(CURRENT_CONFIG_NAME)
+LDFLAGS_PULP  += -T$(PULP_SDK_INSTALL)/hero/$(CURRENT_CONFIG_NAME)/config.ld
+LDFLAGS_PULP  += -T$(PULP_SDK_INSTALL)/hero/omptarget.ld
+# Libraries in correct order
+LIBS += -lgomp -lomptarget-pulp -lomp -lrt -lrtio -lrt -lhero-target -lvmm -larchi_host -lrt -larchi_host -lm -lc -lgcc -lc
+
+INCPATHS += -I$(DEFMK_ROOT)
+INCPATHS += -I$(DEFMK_ROOT)/gcc
 INCPATHS += -I$(DEFMK_ROOT)/../../support/libhero-target/inc
-INCPATHS += -I$(DEFMK_ROOT)/../common/gcc
+
 LIBPATHS ?=
 
 BENCHMARK = $(shell basename `pwd`)
@@ -48,7 +63,7 @@ all : $(DEPS) $(EXE) $(EXE).dis slm
 
 $(EXE): $(SRC:.c=.o)
 	touch libgomp.spec
-	$(CC) $(LIBPATHS) $(CFLAGS_PULP) $^ $(LDFLAGS_PULP) -o $@
+	$(CC) $(LIBPATHS) $(CFLAGS_PULP) $^ $(LDFLAGS_PULP) $(LIBS) -o $@
 
 slm: $(EXE)_l1.slm $(EXE)_l2.slm
 
