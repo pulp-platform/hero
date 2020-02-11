@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 ## INSTALL A SDK FROM A BUILDROOT ENVIRONMENT ##
 
 if [ -z "$HERO_INSTALL" ]; then
