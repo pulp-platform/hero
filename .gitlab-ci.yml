@@ -10,8 +10,8 @@ after_script:
 
 stages:
   - build_fpga
-  - build_test_rest
   - build_test_har_olinux_exilzcu102
+  - build_test_rest
 
 build_fpga:
   stage: build_fpga
