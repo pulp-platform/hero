@@ -31,19 +31,13 @@ build_har_olinux_exilzcu102:
   stage: build_test_rest
   script: 
     ### Toolchains
-    - make tc-pulp
-    - make tc-har-olinux
+    - bash -c make tc-pulp
+    - bash -c make tc-har-olinux
     ### SDKs
-    - env
-    - ccache -C
-    - env
-    - make sdk-pulp
-    - env
-    - ccache -C
-    - env
-    - make sdk-har
+    - bash -c make sdk-pulp
+    - bash -c make sdk-har
     ### Hetero TC
-    - make tc-llvm
+    - bash -c make tc-llvm
     ### build examples
     - source env/exilzcu102.sh
     - >
