@@ -132,9 +132,10 @@ fi
 UPDATE_CONFIG=NO
 if [ ! -f "local.cfg" ]; then
   UPDATE_CONFIG=YES
-fi
-if [ -z $(cat local.cfg | grep BR2_HERO_BITSTREAM) ]; then
-  UPDATE_CONFIG=YES
+else
+  if [ -z $(cat local.cfg | grep BR2_HERO_BITSTREAM) ]; then
+    UPDATE_CONFIG=YES
+  fi
 fi
 
 # If the previous checks told us to update the local config, do it here.
