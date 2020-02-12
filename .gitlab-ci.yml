@@ -11,20 +11,20 @@ after_script:
 
 stages:
   - build_fpga
-  - build_test_rest
+  - build_rest
 
 build_fpga:
   stage: build_fpga
-  rules:
-    - changes:
-      - hardware/deps/**/*
-      - hardware/fpga/**/*
-      - hardware/src/**/*
-      when: always
-    - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME'
-      when: always
-    - if: $CI_EVERYTHING
-      when: always
+  #rules:
+  #  - changes:
+  #    - hardware/deps/**/*
+  #    - hardware/fpga/**/*
+  #    - hardware/src/**/*
+  #    when: always
+  #  - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME'
+  #    when: always
+  #  - if: $CI_EVERYTHING
+  #    when: always
   script: make -C hardware/fpga all
   artifacts:
     paths:
@@ -33,7 +33,7 @@ build_fpga:
     - local.cfg
 
 build_har_olinux_exilzcu102:
-  stage: build_test_rest
+  stage: build_rest
   script: 
     ### Toolchains
     - make har-exilzcu102
@@ -62,7 +62,7 @@ build_har_olinux_exilzcu102:
       - pulp/sdk
 
 build_other:
-  stage: build_test_rest
+  stage: build_rest
   script: 
     ### Make everything that has not been tested as part of a complete setup
     - make tc-hrv-olinux
