@@ -24,15 +24,26 @@ readonly app_name=$(basename $app_dir)
 mkdir -p "$slm_path"
 cd "$slm_path"
 
+# Find binary
+if [[ -e "${app_path}/build/test/test" ]]; then
+    # Binary in application compiled with the pulp-runtime
+    readonly binary="${app_path}/build/test/test"
+elif [[ -e "${app_path}/${app_name}" ]]; then
+    # Binary in application compiled with the SDK
+    readonly binary="${app_path}/${app_name}"
+else
+    echo "Make sure a binary can be found in the app folder"
+fi
+
 # Create L1 SLM
-riscv32-unknown-elf-objdump -s --start-address=0x10000000 --stop-address=0x1bffffff ${app_path}/build/test/test | rg '^ ' | cut -c 2-45 \
+riscv32-unknown-elf-objdump -s --start-address=0x10000000 --stop-address=0x1bffffff "$binary" | rg '^ ' | cut -c 2-45 \
     | perl -p -e 's/^1b/10/' \
     | sort \
     > ${app_name}_l1.slm
     $examples_path/common/one_word_per_line.py ${app_name}_l1.slm
 
 # Create L2 SLM
-riscv32-unknown-elf-objdump -s --start-address=0x1c000000 --stop-address=0x1cffffff ${app_path}/build/test/test | rg '^ ' | cut -c 2-45 \
+riscv32-unknown-elf-objdump -s --start-address=0x1c000000 --stop-address=0x1cffffff "$binary" | rg '^ ' | cut -c 2-45 \
     | sort \
     > ${app_name}_l2.slm
     $examples_path/common/one_word_per_line.py ${app_name}_l2.slm
