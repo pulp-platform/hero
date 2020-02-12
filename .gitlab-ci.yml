@@ -15,17 +15,7 @@ stages:
 
 build_fpga:
   stage: build_fpga
-  #rules:
-  #  - changes:
-  #    - hardware/deps/**/*
-  #    - hardware/fpga/**/*
-  #    - hardware/src/**/*
-  #    when: always
-  #  - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME'
-  #    when: always
-  #  - if: $CI_EVERYTHING
-  #    when: always
-  script: make -C hardware/fpga all
+  script: bash -c ./.gitlab-ci.d/conditionally_build_bitstream.sh
   artifacts:
     paths:
     - hardware/fpga/hero_exilzcu102/hero_exilzcu102.sdk/hero_exilzcu102_wrapper.bit
