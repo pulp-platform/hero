@@ -17,8 +17,10 @@ SHA_CACHE_PATH="$CACHE_PATH/git_commit_sha.txt"
 
 # The relative paths from the HERO base repo where the output files from the
 # FPGA build should be put.
-BIT_BUILD_PATH="hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1/hero_exilzcu102_wrapper.bit"
-HDF_BUILD_PATH="hardware/fpga/hero_exilzcu102/hero_exilzcu102.sdk/hero_exilzcu102_wrapper.hdf"
+BIT_BUILD_LOC="hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1"
+HDF_BUILD_LOC="hardware/fpga/hero_exilzcu102/hero_exilzcu102.sdk"
+BIT_BUILD_PATH="$BIT_BUILD_LOC/hero_exilzcu102_wrapper.bit"
+HDF_BUILD_PATH="$HDF_BUILD_LOC/hero_exilzcu102_wrapper.hdf"
 
 # The relative path from the HERO base repo where the FPGA build Makefile is
 # located.
@@ -58,7 +60,7 @@ if [ -f "$SHA_CACHE_PATH" ]; then
 
   # Check that this commit still exists in the repo, otherwise we cannot make
   # a diff against it.
-  if git cat-file -e $OLDSHA^{commit}; then
+  if git cat-file -e $OLDSHA; then
 
     echo "Will compare old commit $OLDSHA with new $NEWSHA"
 
@@ -102,7 +104,7 @@ echo "Should we rebuild? $REBUILD"
 # fetch the cached files.
 if [ "$REBUILD" = "YES" ]; then
   echo "Starting rebuild";
-  #make -C "$FPGA_PATH" all
+  make -C "$FPGA_PATH" all
   if [ $? -ne 0 ]; then
     echo "Build failed!";
     exit 1;
@@ -119,6 +121,8 @@ if [ "$REBUILD" = "YES" ]; then
   chmod -R a+rwx $CACHE_PATH
 else
   echo "Fetching cached build from $OLDSHA";
+  mkdir -p "$BIT_BUILD_LOC"
+  mkdir -p "$HDF_BUILD_LOC"
   cp "$BIT_CACHE_PATH" "$BIT_BUILD_PATH"
   cp "$HDF_CACHE_PATH" "$HDF_BUILD_PATH"
 fi
