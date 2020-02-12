@@ -18,7 +18,7 @@ build_har_olinux_exilzcu102:
   stage: build_har_olinux_exilzcu102
   script: 
     ### Bitstream
-    bash -c ./.gitlab-ci.d/conditionally_build_bitstream.sh
+    - bash -c ./.gitlab-ci.d/conditionally_build_bitstream.sh
     ### Toolchains
     - make har-exilzcu102
     ### build examples
@@ -52,7 +52,7 @@ build_other:
   stage: build_rest
   script: 
     ### Bitstream
-    bash -c ./.gitlab-ci.d/conditionally_build_bitstream.sh
+    - bash -c ./.gitlab-ci.d/conditionally_build_bitstream.sh
     ### Make everything that has not been tested as part of har-exilzcu102
     - make tc-hrv-olinux
     - make sdk-hrv
