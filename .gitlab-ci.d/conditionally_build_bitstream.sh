@@ -91,7 +91,7 @@ if [ -f "$SHA_CACHE_PATH" ]; then
       fi
     fi
   else
-    echo "The cached SHA does not exist in the repo (any more?). Must rebuild."
+    echo "The cached SHA does not exist. Either commit is removed, or commit is older than CI's GIT_DEPTH. Must rebuild."
   fi
 else
   echo "No old commit for branch -- need to rebuild";

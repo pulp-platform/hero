@@ -1,4 +1,5 @@
 variables:
+  GIT_DEPTH: 24
   GIT_SUBMODULE_STRATEGY: recursive
   HERO_INSTALL: '$CI_PROJECT_DIR/install'
 
