@@ -34,9 +34,13 @@ build_har_olinux_exilzcu102:
     - make tc-pulp
     - make tc-har-olinux
     ### SDKs
+    - env
     - ccache -C
+    - env
     - make sdk-pulp
+    - env
     - ccache -C
+    - env
     - make sdk-har
     ### Hetero TC
     - make tc-llvm
