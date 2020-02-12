@@ -11,11 +11,7 @@ after_script:
 
 stages:
   - build_fpga
-  - build_toolchain
-  - build_sdks
-  - build_hetero
-  - build_environ # TODO
-  - test_xilzcu102
+  - build_test_rest
 
 build_fpga:
   stage: build_fpga
@@ -31,79 +27,17 @@ build_fpga:
       when: always
   script: make -C hardware/fpga all
 
-build_tc_pulp:
-  stage: build_toolchain
-  script: make tc-pulp
-  artifacts:
-    paths:
-      - install
-      - openmp-examples
-      - pulp/sdk
-      - output
-
-build_tc_hrv-olinux:
-  stage: build_toolchain
-  script: make tc-hrv-olinux
-  artifacts:
-    paths:
-      - install
-      - openmp-examples
-      - pulp/sdk
-      - output
-
-build_tc_har-olinux:
-  stage: build_toolchain
-  script: make tc-har-olinux
-  artifacts:
-    paths:
-      - install
-      - openmp-examples
-      - pulp/sdk
-      - output
-
-build_sdk_pulp:
-  stage: build_sdks
-  script: make sdk-pulp
-  artifacts:
-    paths:
-      - install
-      - openmp-examples
-      - pulp/sdk
-      - output
-
-build_sdk_hrv:
-  stage: build_sdks
-  script: make sdk-hrv
-  artifacts:
-    paths:
-      - install
-      - openmp-examples
-      - pulp/sdk
-      - output
-
-build_sdk_har:
-  stage: build_sdks
-  script: make sdk-har
-  artifacts:
-    paths:
-      - install
-      - openmp-examples
-      - pulp/sdk
-      - output
-
-build_hetero:
-  stage: build_hetero
-  script: make tc-llvm
-  artifacts:
-    paths:
-      - install
-      - openmp-examples
-      - pulp/sdk
-      - output
-
-test_xilzcu102:
-  stage: test_xilzcu102
-  script:
+build_har_olinux_exilzcu102:
+  stage: build_test_rest
+  script: 
+    ### Toolchains
+    - make tc-pulp
+    - make tc-har-olinux
+    ### SDKs
+    - make sdk-pulp
+    - make sdk-har
+    ### Hetero TC
+    - make tc-llvm
     ### build examples
     - source env/exilzcu102.sh
     - >
@@ -120,9 +54,24 @@ test_xilzcu102:
         make -C $d only=pulp clean all
         .gitlab-ci.d/verify-bench.sh $(basename $d)
       done
+    ### Make SD card etc
+    - make br-har-exilzcu102
   artifacts:
     paths:
       - install
       - openmp-examples
       - pulp/sdk
-      - output
+
+build_other:
+  stage: build_test_rest
+  script: 
+    ### Make everything that has not been tested as part of a complete setup
+    - make tc-hrv-olinux
+    - make sdk-hrv
+    - make br-har-ediggenesys2
+    - make br-hrv-eqemu
+  artifacts:
+    paths:
+      - install
+      - openmp-examples
+      - pulp/sdk
