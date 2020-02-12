@@ -37,8 +37,6 @@ build_har_olinux_exilzcu102:
         make -C $d only=pulp clean all
         .gitlab-ci.d/verify-bench.sh $(basename $d)
       done
-    ### Make SD card etc
-    - make br-har-exilzcu102
   artifacts:
     paths:
     - install
