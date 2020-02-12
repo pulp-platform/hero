@@ -12,5 +12,5 @@ vsim/compile.tcl: bender
 
 bender: Makefile
 	curl --proto '=https' --tlsv1.2 -sSf https://iis-people.ee.ethz.ch/~andkurt/bender-init \
-		| sh -s -- 0.14.0
+		| bash -s -- 0.14.0
 	touch bender
