@@ -18,7 +18,7 @@ build_fpga:
   script: bash -c ./.gitlab-ci.d/conditionally_build_bitstream.sh
   artifacts:
     paths:
-    - hardware/fpga/hero_exilzcu102/hero_exilzcu102.sdk/hero_exilzcu102_wrapper.bit
+    - hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1/hero_exilzcu102_wrapper.bit
     - hardware/fpga/hero_exilzcu102/hero_exilzcu102.sdk/hero_exilzcu102_wrapper.hdf
     - local.cfg
 
