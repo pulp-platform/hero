@@ -26,18 +26,17 @@ build_fpga:
     - if: $CI_EVERYTHING
       when: always
   script: make -C hardware/fpga all
+  artifacts:
+    paths:
+    - hardware/fpga/hero_exilzcu102/hero_exilzcu102.sdk/hero_exilzcu102_wrapper.bit
+    - hardware/fpga/hero_exilzcu102/hero_exilzcu102.sdk/hero_exilzcu102_wrapper.hdf
+    - local.cfg
 
 build_har_olinux_exilzcu102:
   stage: build_test_rest
   script: 
     ### Toolchains
-    - bash -c make tc-pulp
-    - bash -c make tc-har-olinux
-    ### SDKs
-    - bash -c make sdk-pulp
-    - bash -c make sdk-har
-    ### Hetero TC
-    - bash -c make tc-llvm
+    - make har-exilzcu102
     ### build examples
     - source env/exilzcu102.sh
     - >
