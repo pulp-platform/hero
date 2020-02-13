@@ -175,15 +175,23 @@ module pulp #(
   ) l2_mst_wo_atomics[L2_N_AXI_PORTS-1:0]();
 
   // Interfaces from PULP to Host
-  // i_soc_bus.ext_mst -> [ext_mst] -> [ext_{req_o,resp_i}]
+  // i_soc_bus.ext_mst -> [ext_mst]
+  // -> i_atop_filter -> [ext_mst_atop_filtered]
+  // -> [ext_{req_o,resp_i}]
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
     .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
     .AXI_USER_WIDTH (AXI_UW)
   ) ext_mst();
-  `AXI_ASSIGN_TO_REQ(ext_req_o, ext_mst);
-  `AXI_ASSIGN_FROM_RESP(ext_mst, ext_resp_i);
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
+    .AXI_USER_WIDTH (AXI_UW)
+  ) ext_mst_atop_filtered();
+  `AXI_ASSIGN_TO_REQ(ext_req_o, ext_mst_atop_filtered);
+  `AXI_ASSIGN_FROM_RESP(ext_mst_atop_filtered, ext_resp_i);
 
   // Interfaces from Host to PULP
   // [ext_{req_i,resp_o}] -> [ext_slv]
@@ -359,6 +367,16 @@ module pulp #(
     .l2_mst     (l2_mst),
     .ext_mst    (ext_mst),
     .ext_slv    (ext_slv_remapped)
+  );
+
+  axi_atop_filter #(
+    .AXI_ID_WIDTH       (AXI_IW),
+    .AXI_MAX_WRITE_TXNS (N_CLUSTERS * pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS)
+  ) i_atop_filter (
+    .clk_i,
+    .rst_ni,
+    .slv  (ext_mst),
+    .mst  (ext_mst_atop_filtered)
   );
 
   for (genvar i = 0; i < L2_N_AXI_PORTS; i++) begin: gen_l2_ports
