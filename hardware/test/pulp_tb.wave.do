@@ -7,6 +7,22 @@ quietly virtual signal -install {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i
 quietly virtual signal -install {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i} { /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/instr_rdata_i[19:15]} rs1
 quietly virtual signal -install {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i} { /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[0]/core_region_i/RISCV_CORE/id_stage_i/instr_rdata_i[24:20]} rs2
 quietly WaveActivateNextPane {} 0
+
+for {set core 0} {$core < 8} {incr core} {
+    # trace on toplevel for quick comparison
+    add wave -noupdate -group "Trace Core $core" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$core]/core_region_i/RISCV_CORE/clk_i
+    add wave -noupdate -group "Trace Core $core" -divider "Instructions at ID stage, sampled half a cycle later"
+    add wave -noupdate -group "Trace Core $core" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$core]/core_region_i/RISCV_CORE/riscv_tracer_i/insn_disas
+    add wave -noupdate -group "Trace Core $core" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$core]/core_region_i/RISCV_CORE/riscv_tracer_i/insn_pc
+    add wave -noupdate -group "Trace Core $core" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$core]/core_region_i/RISCV_CORE/riscv_tracer_i/insn_val
+    add wave -noupdate -group "Trace Core $core" -divider "Program counter at ID and IF stage"
+    add wave -noupdate -group "Trace Core $core" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$core]/core_region_i/RISCV_CORE/pc_id
+    add wave -noupdate -group "Trace Core $core" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$core]/core_region_i/RISCV_CORE/pc_if
+    add wave -noupdate -group "Trace Core $core" -divider "Register File contents"
+    add wave -noupdate -group "Trace Core $core" /pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/CORE[$core]/core_region_i/RISCV_CORE/id_stage_i/registers_i/riscv_register_file_i/mem
+}
+
+
 for {set core 0}  {$core < 8} {incr core} {
     do ../test/wave_core.do $core
 }
@@ -1092,28 +1108,28 @@ add wave -noupdate -group {speriph_master[UNUSED]} {/pulp_tb/dut/gen_clusters[0]
 add wave -noupdate -group {speriph_master[UNUSED]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[3]/r_opc}
 add wave -noupdate -group {speriph_master[UNUSED]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[3]/r_id}
 add wave -noupdate -group {speriph_master[UNUSED]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[3]/r_rdata}
-add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/req}
-add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/add}
-add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/wen}
-add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/wdata}
-add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/be}
-add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/gnt}
-add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/id}
-add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/r_valid}
-add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/r_opc}
-add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/r_id}
-add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/r_rdata}
-add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/req}
-add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/add}
-add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/wen}
-add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/wdata}
-add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/be}
-add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/gnt}
-add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/id}
-add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/r_valid}
-add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/r_opc}
-add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/r_id}
-add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[7]/r_rdata}
+add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/req}
+add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/add}
+add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/wen}
+add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/wdata}
+add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/be}
+add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/gnt}
+add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/id}
+add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/r_valid}
+add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/r_opc}
+add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/r_id}
+add wave -noupdate -group {speriph_master[HWPE]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[4]/r_rdata}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/req}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/add}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/wen}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/wdata}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/be}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/gnt}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/id}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/r_valid}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/r_opc}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/r_id}
+add wave -noupdate -group {speriph_master[ICACHE_CTRL]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[5]/r_rdata}
 add wave -noupdate -group {speriph_master[DMA]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/req}
 add wave -noupdate -group {speriph_master[DMA]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/add}
 add wave -noupdate -group {speriph_master[DMA]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master[6]/wen}
