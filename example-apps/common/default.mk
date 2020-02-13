@@ -21,7 +21,7 @@ CFLAGS_COMMON += $(cflags) -O$(opt)
 LDFLAGS_COMMON ?= $(ldflags)
 CFLAGS_COMMON += -D__device= -D__PULP__
 CFLAGS_COMMON += -fopenmp
-CFLAGS_PULP += $(CFLAGS_COMMON) -march=rv32imafcXpulpv2
+CFLAGS_PULP += $(CFLAGS_COMMON) -march=rv32imacXgap9
 LDFLAGS_PULP += $(LDFLAGS_COMMON) -lgomp -L$(PULP_SDK_INSTALL)/lib/hero-huawei
 LDFLAGS_PULP += -T $(PULP_SDK_INSTALL)/hero/omptarget.ld
 
