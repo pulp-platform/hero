@@ -36,7 +36,7 @@ CFLAGS_COMMON += $(cflags) -fopenmp=libomp -O$(opt) -static
 ifeq ($(default-as),pulp)
   CFLAGS_COMMON += -fhero-device-default-as=device
 endif
-CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV)
+CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -I$(HERO_PULP_INC_DIR)
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
 LDFLAGS_COMMON ?= $(ldflags) -static
 LDFLAGS_PULP += $(LDFLAGS_COMMON)
@@ -122,8 +122,9 @@ all: $(DEPS) $(EXE) $(EXE).dis
 %-out.ll: %-host.OMP.ll %-dev.OMP.ll
 	$(COB) -inputs="$(@:-out.ll=-host.OMP.ll),$(@:-out.ll=-dev.OMP.ll)" -outputs=$@ -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)"
 
-$(EXE): $(SRC:.c=-out.ll)
-	$(CC) $(LIBPATHS) $(CFLAGS) $< $(LDFLAGS) -o $@
+exeobjs := $(patsubst %.c, %-out.ll, $(SRC))
+$(EXE): $(exeobjs)
+	$(CC) $(LIBPATHS) $(CFLAGS) $(exeobjs) $(LDFLAGS) -o $@
 
 $(EXE).dis: $(EXE)
 	$(HOST_OBJDUMP) -d $^ > $@

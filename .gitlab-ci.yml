@@ -21,19 +21,34 @@ build_har_olinux_exilzcu102:
     - bash -c ./.gitlab-ci.d/conditionally_build_bitstream.sh
     ### Toolchains
     - make har-exilzcu102
+    ### Simulator
+    - make -C hardware
+    - cd hardware/vsim
+    - ./compile.sh
+    - cd ../..
     ### build examples
     - source env/exilzcu102.sh
     - >
-      for d in helloworld; do
+      for d in helloworld mm-large mm-small; do
         make -C openmp-examples/$d all
       done
-    ### test benchmarks
+    ### test benchmarks: compile
     - >
       for d in openmp-examples/polybench-acc/*/; do
         if [ $(basename $d) = "common" ]; then
           continue
         fi
         make -C $d only=pulp default-as=host clean all
+        make -C $d only=pulp clean all
+        make -C $d default-as=host clean all
+        make -C $d default-as=pulp clean all
+      done
+    ### test benchmarks: simulate
+    - >
+      for d in openmp-examples/polybench-acc/*/; do
+        if [ $(basename $d) = "common" ]; then
+          continue
+        fi
         make -C $d only=pulp clean all
         .gitlab-ci.d/verify-bench.sh $(basename $d)
       done
