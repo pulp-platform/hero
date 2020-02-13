@@ -318,8 +318,8 @@ module pulp #(
     logic [5:0] cluster_id;
     assign cluster_id = i;
 
+    localparam int unsigned N_CORES = pulp_cluster_cfg_pkg::N_CORES;
     if (pulp_cluster_cfg_pkg::ASYNC) begin : gen_cluster_async
-      initial $fatal("debug_req_i not yet implemented for ASYNC");
 
       axi_slice_dc_slave_wrap #(
         .AXI_ADDR_WIDTH (AXI_AW),
@@ -343,7 +343,7 @@ module pulp #(
         .fetch_en_i   (cl_fetch_en_i[i]),
         .eoc_o        (cl_eoc_o[i]),
         .busy_o       (cl_busy_o[i]),
-        .dbg_irq_i    ('0/* TODO */),
+        .dbg_irq_i    (core_debug_req[(i << 5) +: N_CORES]),
         .slv          (cl_inp_async[i]),
         .mst          (cl_oup_async[i])
       );
@@ -365,7 +365,6 @@ module pulp #(
       );
 
     end else begin : gen_cluster_sync
-      localparam int unsigned N_CORES = pulp_cluster_cfg_pkg::N_CORES;
 
       pulp_cluster_sync i_cluster (
         .clk_i,
@@ -375,7 +374,7 @@ module pulp #(
         .fetch_en_i   (cl_fetch_en_i[i]),
         .eoc_o        (cl_eoc_o[i]),
         .busy_o       (cl_busy_o[i]),
-        .dbg_irq_i    (core_debug_req[N_CORES*(i+1)-1:N_CORES*i]),
+        .dbg_irq_i    (core_debug_req[(i << 5) +: N_CORES]),
         .slv          (cl_inp_dwced[i]),
         .mst          (cl_oup_predwc[i])
       );

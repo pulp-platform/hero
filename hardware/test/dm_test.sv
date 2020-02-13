@@ -1619,10 +1619,10 @@ package dm_test;
       // restore state before test
       // TODO: restore_reg_state(saved_regs, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
       for (logic [15:0] regno = 16'h1001; regno < 16'h1020; regno=regno+1) begin
-        write_reg_abstract_cmd(regno,registers[regno[4:0]],  s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+        write_reg_abstract_cmd(regno, registers[regno[4:0]], s_tck, s_tms, s_trstn, s_tdi, s_tdo);
       end
 
-      this.restore_mem_state (address_i, old_mem, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+      this.restore_mem_state(address_i, old_mem, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
     endtask
 
 
@@ -2371,177 +2371,116 @@ package dm_test;
 
     endtask
 
-    // This runs all test dm tests there are. For that to work we have to run
-    // these before we load the binary into the L2 since we make ram and
-    // registers dirty. begin_l2_instr contains the boot address which is
-    // required when this tests ends so that the program can properly resume
-    // after this tests are run once the binary is loaded into l2.
-
-    // Note: This is not run for the hero/pulp. We use debug_system_tb instead
-    // which does about the same thing
+    // This runs all test dm tests there are.
     task run_dm_tests (
-      int          fc_core_id,
-      int          begin_l2_instr, // required to restart booting process
+      input int    n_clusters,
+      input int    n_cores,
       output logic error,
-      ref logic    s_tck,
-      ref logic    s_tms,
-      ref logic    s_trstn,
-      ref logic    s_tdi,
-      ref logic    s_tdo
+      ref logic    jtag_tck,
+      ref logic    jtag_tms,
+      ref logic    jtag_trst_n,
+      ref logic    jtag_tdi,
+      ref logic    jtag_tdo
     );
-      logic [31:0] dm_data;
+      automatic logic [19:0] core_id = 0;
+      // run jtag tests
+      //
+      jtag_test::jtag_reset(jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi);
+      jtag_test::jtag_softreset(jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi);
 
+      dm_test::test_jtag_idcode(pulp_pkg::JTAG_IDCODE,
+        jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
 
-      dump_dm_info(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      // $display("[TB] %t - TEST discover harts", $realtime);
-      // debug_mode_if.test_discover_harts(dm_data[0],
-      //                                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      // if (error)
-      //     $display("[TB] %t FAIL", $realtime);
-      // else
-      //     $display("[TB] %t OK", $realtime);
+      dm_test::jtag_bypass_test(jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
 
-      set_hartsel(fc_core_id, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+      // select dmi register
+      init_dmi_access(jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi);
+      // enable debug access
+      set_dmactive(1'b1, jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+      // generic info dump about debug
+      dump_dm_info(jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+      // configure system bus
+      set_sbreadonaddr(1'b1, jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+      test_read_sbcs(jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
 
-      set_sbreadonaddr(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+      // select hart
+      for (logic [5:0] cluster = 0; cluster < n_clusters; cluster++) begin
+        for (logic [3:0] core = 0; core < n_cores; core++) begin
+          // mhartid = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]}
+          core_id = {9'b0, cluster, 1'b0, core};
 
-      // check if we can read sbcs and some of its entries
-      test_read_sbcs(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+          set_hartsel(core_id, jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
 
+          $display("[TB] %t - Halting core with id=%d", $realtime, core_id);
+          halt_harts(jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
 
-      // Make sure that we get into an infinite loop on BEGIN_L2_INSTR
-      // this is for our test setup
-      // Write while(1) to BEGIN_L2_INSTR
-      write_mem_sb(begin_l2_instr, {25'b0, 7'b1101111},
-        s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+          $display("[TB] %t - Writing the boot address into dpc", $realtime);
+          write_reg_abstract_cmd(riscv::CSR_DPC, pulp_cluster_cfg_pkg::BOOT_ADDR,
+            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
 
-      $display("[TB] %t - Resuming the CORE", $realtime);
-      resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+          $display("[TB] %t - Resuming the core", $realtime);
+          resume_harts(jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
 
-      $display("[TB] %t - Halting the Core", $realtime);
-      halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+          $display("[TB] %t - Halting the core", $realtime);
+          halt_harts(jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
 
-      // simple check whether we can read abstractcs and if progbufsize and
-      // datacount are ok
-      test_read_abstractcs(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+          // simple check whether we can read abstractcs and if progbufsize and
+          // datacount are ok
+          test_read_abstractcs(jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
 
-      // for the following tests we need the cpu to be fetching and running
-      $display("[TB] %t - TEST halt resume functionality", $realtime);
-      test_halt_resume(error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      if (error)
-        $display("[TB] %t FAIL", $realtime);
-      else
-        $display("[TB] %t OK", $realtime);
+          // for the following tests we need the cpu to be fetching and running
+          test_halt_resume(error,
+            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+          assert(!error);
 
-      $display("[TB] %t - TEST wfi wake up logic",$realtime);
-      test_wfi_wakeup(error, begin_l2_instr,
-        s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      $display("[TB] %t OK", $realtime); //otherwise we wouldn't get here
+          test_wfi_wakeup(error, pulp_cluster_cfg_pkg::BOOT_ADDR,
+            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo); //TODO: makes mem dirty
+          assert(!error);
 
-      $display("[TB] %t - TEST read/write gpr with abstract command and proper waiting logic",
-                  $realtime);
-      test_gpr_read_write_abstract_high_level(error, s_tck, s_tms,
-          s_trstn, s_tdi, s_tdo);
-      if (error)
-        $display("[TB] %t FAIL", $realtime);
-      else
-        $display("[TB] %t OK", $realtime);
+          test_gpr_read_write_abstract_high_level(error,
+            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo); //TODO: makes mem dirty
+          assert(!error);
 
-      $display("[TB] %t - TEST dumping register values using abstract command", $realtime);
-      read_reg_abstract_cmd(riscv::CSR_DCSR, dm_data, s_tck, s_tms,
-          s_trstn, s_tdi, s_tdo);
-      $display("[TB] %t dcsr is %x", $realtime, dm_data);
-      read_reg_abstract_cmd(riscv::CSR_DPC, dm_data, s_tck, s_tms,
-          s_trstn, s_tdi, s_tdo);
-      $display("[TB] %t dpc is %x", $realtime, dm_data);
-      read_reg_abstract_cmd(riscv::CSR_MTVEC, dm_data, s_tck, s_tms,
-          s_trstn, s_tdi, s_tdo);
-      $display("[TB] %t mtvec is %x", $realtime, dm_data);
-      read_reg_abstract_cmd(riscv::CSR_MCAUSE, dm_data, s_tck, s_tms,
-          s_trstn, s_tdi, s_tdo);
-      $display("[TB] %t mcause is %x", $realtime, dm_data);
-      read_reg_abstract_cmd('h1002, dm_data, s_tck, s_tms,
-          s_trstn, s_tdi, s_tdo);
-      $display("[TB] %t x2 is %x", $realtime, dm_data);
+          test_bad_aarsize (error,
+            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+          assert(!error);
 
-      $display("[TB] %t - TEST bad abstract command (aarsize > 2)", $realtime);
-      test_bad_aarsize (error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      if(error)
-        $display("[TB] %t FAIL", $realtime);
-      else
-        $display("[TB] %t OK", $realtime);
+          test_abstract_cmds_prog_buf(error, pulp_cluster_cfg_pkg::BOOT_ADDR,
+            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo); //TODO: makes mem dirty
+          assert(!error);
 
-      $display("[TB] %t - TEST abstract commands and program buffer", $realtime);
-      test_abstract_cmds_prog_buf(error, begin_l2_instr,
-          s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      if(error)
-        $display("[TB] %t FAIL", $realtime);
-      else
-        $display("[TB] %t OK", $realtime);
+          test_read_write_dpc(error,
+            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+          assert(!error);
 
-      $display("[TB] %t - TEST read/write dpc" , $realtime);
-      test_read_write_dpc(error, s_tck, s_tms,
-          s_trstn, s_tdi, s_tdo);
-      if(error)
-        $display("[TB] %t FAIL", $realtime);
-      else
-        $display("[TB] %t OK", $realtime);
+          test_read_write_csr(error,
+            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+          assert(!error);
 
-      $display("[TB] %t - TEST read/write csr" , $realtime);
-      test_read_write_csr(error, s_tck, s_tms,
-          s_trstn, s_tdi, s_tdo);
+          test_ebreak_in_program_buffer(error,
+            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+          assert(!error);
 
-      $display("[TB] %t - TEST read/write csr with program buffer (TODO)", $realtime);
-      $display("[TB] %t - TEST dret outside debug mode (TODO)", $realtime);
+          test_debug_cause_values(error, pulp_cluster_cfg_pkg::BOOT_ADDR,
+            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+          assert(!error);
 
-      $display("[TB] %t - TEST ebreak in program buffer", $realtime);
-      test_ebreak_in_program_buffer(error,
-        s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      if(error)
-        $display("[TB] %t FAIL", $realtime);
-      else
-        $display("[TB] %t OK", $realtime);
+          test_single_stepping_abstract_cmd(error, pulp_cluster_cfg_pkg::BOOT_ADDR,
+            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+          assert(!error);
 
+          test_single_stepping_edge_cases(error, pulp_cluster_cfg_pkg::BOOT_ADDR,
+            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+          assert(!error);
 
-      $display("[TB] %t - TEST debug cause values", $realtime);
-      test_debug_cause_values(error, begin_l2_instr,
-        s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      if(error)
-        $display("[TB] %t FAIL", $realtime);
-      else
-        $display("[TB] %t OK", $realtime);
+          // $display("[TB] %t - TEST wfi in program buffer", $realtime);
+          // dm_if.test_wfi_in_program_buffer(error,
+          //     jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
 
-      $display("[TB] %t - TEST single stepping", $realtime);
-      test_single_stepping_abstract_cmd(error, begin_l2_instr,
-          s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      if(error)
-        $display("[TB] %t FAIL", $realtime);
-      else
-        $display("[TB] %t OK", $realtime);
+        end
+      end
+    endtask
 
-      $display("[TB] %t - TEST single stepping edge cases", $realtime);
-      test_single_stepping_edge_cases(error, begin_l2_instr,
-          s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      if(error)
-        $display("[TB] %t FAIL", $realtime);
-      else
-        $display("[TB] %t OK", $realtime);
-
-      $display("[TB] %t - TEST wfi in program buffer", $realtime);
-      test_wfi_in_program_buffer(error, s_tck, s_tms,
-          s_trstn, s_tdi, s_tdo);
-      $display("[TB] %t OK", $realtime); //otherwise we wouldn't get here
-
-      $display("[TB] %t - TEST halt request during wfi (TODO)", $realtime);
-
-
-      // allows the jtag booting process to smoothly continue once we leave
-      // this test
-      $display("[TB] %t - Writing the boot address into dpc", $realtime);
-      write_reg_abstract_cmd(riscv::CSR_DPC, begin_l2_instr,
-          s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
-      endtask
-   endclass
+  endclass
 
 endpackage // debug_module_test
