@@ -16,9 +16,10 @@ module debug_system #(
   parameter int unsigned AXI_UW = 0,
 
   parameter logic [31:0] JTAG_IDCODE = 32'h1,
-  parameter int          NR_HARTS = -1
-  // parameter int                 BusWidth        = -1,
-  // parameter logic [NR_HARTS-1:0] SelectableHarts = -1,
+  parameter int unsigned N_CORES = 0,
+  parameter int unsigned N_CLUSTERS = 0,
+  parameter logic [31:0] MAX_HARTS = 0
+  // parameter int                 BusWidth        = -1
 ) (
   input logic  clk_i,
   input logic  rst_ni,
@@ -30,7 +31,7 @@ module debug_system #(
   input logic  jtag_tms_i,
   output logic jtag_tdo_o,
   // debug requests to core
-  output logic [NR_HARTS-1:0] core_debug_req_o,
+  output logic [MAX_HARTS-1:0] core_debug_req_o,
   // access from cores
   AXI_BUS.Slave dm_slave,
 
@@ -68,17 +69,29 @@ module debug_system #(
   logic                   dmi_resp_ready;
   logic                   dmi_resp_valid;
 
-  // we assume a continuous hartspace where are all harts are selectable
-  localparam [NR_HARTS-1:0] SELECTABLE_HARTS = '1;
+  // we assume the following hartspace:
+  // logic [5:0] cluster_id = 0...N_CLUSTERS-1
+  // logic [3:0] core_id = 0...N_CORES-1
+  // mhartid = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]}
+
+  // each core with hartid=x must set bit number x in SELECTABLE_HARTS
+  function logic [MAX_HARTS-1:0] sel_harts();
+    sel_harts = 0;
+    for (logic [5:0] i = 0; i < N_CLUSTERS; i++) begin
+      for (logic [3:0] j = 0; j < N_CORES; j++) begin
+        sel_harts |= (1 << {32'b0, i, 1'b0, j});
+      end
+    end
+  endfunction // sel_harts
+
+  localparam [MAX_HARTS-1:0] SELECTABLE_HARTS = sel_harts();
+
   // jtag tap produces dmi commands
   dm::dmi_req_t  dmi_req;
   dm::dmi_resp_t dmi_resp;
 
-  // // debug requests to cores
-  // logic          [NR_HARTS-1:0] core_debug_req;
-  // We want the harts to be numbered from 0 to NR_HARTS-1. The spec allows
-  // "holes" in the hart space but tools are not able to handle these cases.
-  dm::hartinfo_t [NR_HARTS-1:0] hartinfo;
+  // debug requests to cores
+  dm::hartinfo_t [MAX_HARTS-1:0] hartinfo;
 
   // describe capabilities of a hart
   localparam dm::hartinfo_t RI5CY_HARTINFO = '{
@@ -94,7 +107,7 @@ module debug_system #(
   // face
   always_comb begin
     hartinfo = '{default: '0};
-    for (int i = 0; i < NR_HARTS; i++)
+    for (int i = 0; i < MAX_HARTS; i++)
       hartinfo[i] = RI5CY_HARTINFO;
   end
 
@@ -230,7 +243,7 @@ module debug_system #(
 
   // RISC-V External Debug Version 0.13.1
   dm_top #(
-    .NrHarts           (NR_HARTS),
+    .NrHarts           (MAX_HARTS),
     .BusWidth          (BUS_WIDTH),
     .SelectableHarts   (SELECTABLE_HARTS)
   ) i_dm_top (

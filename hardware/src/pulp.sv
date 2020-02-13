@@ -104,8 +104,16 @@ module pulp #(
   localparam int unsigned AXI_IW_SB_OUP = axi_iw_sb_oup(N_SLAVES);
   localparam int unsigned NR_HARTS = N_CLUSTERS * pulp_cluster_cfg_pkg::N_CORES;
 
+
+  // maximum hartid in system
+  // we have the following hartspace:
+  // logic [5:0] cluster_id = 0...N_CLUSTERS-1
+  // logic [3:0] core_id = 0...N_CORES-1
+  // mhartid = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]}
+  localparam logic [31:0] DM_MAX_HARTS = ((N_CLUSTERS-1) << 5) | 32'(pulp_cluster_cfg_pkg::N_CORES);
+
   // debug signals
-  logic [NR_HARTS-1:0] core_debug_req;
+  logic [DM_MAX_HARTS-1:0] core_debug_req;
 
   // Interfaces to Clusters
   // i_soc_bus.cl_mst -> [cl_inp]
@@ -540,7 +548,9 @@ module pulp #(
     .AXI_IW (AXI_IW_SB_INP),
     .AXI_UW (AXI_UW),
     .JTAG_IDCODE (JTAG_IDCODE),
-    .NR_HARTS (NR_HARTS)
+    .N_CORES (pulp_cluster_cfg_pkg::N_CORES),
+    .N_CLUSTERS (N_CLUSTERS),
+    .MAX_HARTS (DM_MAX_HARTS)
   ) i_debug_system (
     .clk_i,
     .rst_ni,
