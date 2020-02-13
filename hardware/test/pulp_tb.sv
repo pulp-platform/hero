@@ -169,7 +169,7 @@ module pulp_tb #(
     .AXI_AW     (pulp_pkg::AXI_AW),
     .AXI_IW     (AXI_IW+1),
     .AXI_UW     (pulp_pkg::AXI_UW),
-    .N_CORES    (8),
+    .N_CORES    (pulp_cluster_cfg_pkg::N_CORES),
     .N_CLUSTERS (N_CLUSTERS)
   ) i_peripherals (
     .clk_i      (clk),
