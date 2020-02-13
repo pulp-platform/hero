@@ -44,6 +44,7 @@ build_har_olinux_exilzcu102:
         make -C $d default-as=pulp clean all
       done
     ### test benchmarks: simulate
+    - source env/esim-exilzcu102.sh
     - >
       for d in openmp-examples/polybench-acc/*/; do
         if [ $(basename $d) = "common" ]; then
