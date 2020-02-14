@@ -3,22 +3,26 @@ THIS_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 
 set -e
 
-if [ -z "$VIVADO" ]; then
-  VIVADO="vivado-2017.2"
+if [ -z "$NO_IIS" ]; then
+  PETALINUX_VER=''
+else
+  if [ -z "$PETALINUX_VER" ]; then
+    PETALINUX_VER="vivado-2017.2"
+  fi
 fi
-readonly VIVADO
+readonly PETALINUX_VER
 readonly TARGET=zcu102
 
 cd `pwd -P`
 
 # create project
 if [ ! -d "$TARGET" ]; then
-    $VIVADO petalinux-create -t project -n "$TARGET" --template zynqMP
+    $PETALINUX_VER petalinux-create -t project -n "$TARGET" --template zynqMP
 fi
 cd "$TARGET"
 
 # initialize and set necessary configuration from config and local config
-$VIVADO petalinux-config --oldconfig --get-hw-description "../../hardware/fpga/hero_exil$TARGET/hero_exil$TARGET.sdk"
+$PETALINUX_VER petalinux-config --oldconfig --get-hw-description "../../hardware/fpga/hero_exil$TARGET/hero_exil$TARGET.sdk"
 
 mkdir -p components/ext_sources
 cd components/ext_sources
@@ -41,7 +45,7 @@ if [ -f $THIS_DIR/../local.cfg ] && grep -q PT_ETH_MAC $THIS_DIR/../local.cfg; t
     sed -e 's/PT_ETH_MAC/CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_MAC/;t;d' $THIS_DIR/../local.cfg >> project-spec/configs/config
 fi
 
-$VIVADO petalinux-config --oldconfig --get-hw-description "../../hardware/fpga/hero_exil$TARGET/hero_exil$TARGET.sdk"
+$PETALINUX_VER petalinux-config --oldconfig --get-hw-description "../../hardware/fpga/hero_exil$TARGET/hero_exil$TARGET.sdk"
 
 echo "
 /include/ \"system-conf.dtsi\"
@@ -52,15 +56,15 @@ echo "
 
 # start build
 set +e
-$VIVADO petalinux-build
+$PETALINUX_VER petalinux-build
 echo "First build might fail, this is expected..."
 set -e
 mkdir -p build/tmp/work/aarch64-xilinx-linux/external-hdf/1.0-r0/git/plnx_aarch64/
 cp project-spec/hw-description/system.hdf build/tmp/work/aarch64-xilinx-linux/external-hdf/1.0-r0/git/plnx_aarch64/
-$VIVADO petalinux-build
+$PETALINUX_VER petalinux-build
 
 # create package
-$VIVADO petalinux-package --image
+$PETALINUX_VER petalinux-package --image
 
 mkdir -p build/tmp/work/aarch64-xilinx-linux/external-hdf/1.0-r0/git/plnx_aarch64/
 
@@ -86,7 +90,7 @@ the_ROM_image:
 }
 " > bootgen.bif
 
-  vivado-2017.2 petalinux-package --boot --force \
+  $PETALINUX_VER petalinux-package --boot --force \
     --fsbl zynqmp_fsbl.elf \
     --fpga hero_exil${TARGET}_wrapper.bit \
     --u-boot u-boot.elf \
@@ -105,7 +109,7 @@ the_ROM_image:
 }
 " > bootgen.bif
 
-  vivado-2017.2 petalinux-package --boot --force \
+  $PETALINUX_VER petalinux-package --boot --force \
     --fsbl zynqmp_fsbl.elf \
     --u-boot u-boot.elf \
     --pmufw pmufw.elf \
