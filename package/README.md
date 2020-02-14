@@ -10,3 +10,12 @@ Contains package scripts to conveniently build HEROi host setup and other board 
 * vitetris: tetris game to play on Ariane
 * zynq-fclkcfg: driver for clock configuration on Zynq(MP) boards
 * zynq-mkbootimage: creates required boot.bin image for booting Zynq(MP)
+
+To work with the packages during development it is useful to go to the respective output directory (for example `output/br-har`) and rebuild the respective packages there before transferring them back to the NFS or to the device. This can be done as follows for the core HERO infrastructure:
+```
+make pulp-driver-rebuild libpulp-rebuild hero-openmp-rebuild hero-apps-rebuild
+scp target/lib/modules/<kernel_version>/extra/pulp.ko <root_dir>/mnt/root
+scp target/usr/lib/libpulp.so <root_dir>/usr/lib/
+scp target/usr/lib/libomp* <root_dir>/usr/lib/
+scp target/usr/bin/pulp-standalone <root_dir>/usr/bin
+```
