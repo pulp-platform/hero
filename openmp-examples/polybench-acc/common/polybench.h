@@ -200,7 +200,7 @@ extern void* polybench_alloc_data(unsigned long long int n, int elt_size);
 extern void polybench_dealloc_data(void*);
 
 /* HERO customizations */
-#include <hero-target.h>
+#include <libhero-target/hero-target.h>
 #ifndef POLYBENCH_HERO_MEM_LEVEL
     #define POLYBENCH_HERO_MEM_LEVEL 2
 #endif
