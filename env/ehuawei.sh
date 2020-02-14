@@ -15,6 +15,7 @@ export BOARD=HUAWEI
 export ARCH="arm"
 
 source ${THIS_DIR}/../pulp/pulp-runtime/configs/hero.sh
+export VSIM_PATH=${THIS_DIR}/../hardware/vsim
 
 unset CFLAGS
 unset LDFLAGS
