@@ -401,7 +401,11 @@ module pulp_tb #(
   for (genvar iCluster = 0; iCluster < N_CLUSTERS; iCluster++) begin: gen_fill_tcdm_cluster
     for (genvar iBank = 0; iBank < 16; iBank++) begin: gen_fill_tcdm_bank
       initial begin
-        $readmemh($sformatf("../test/slm_files/l1_0_%01d.slm", iBank),
+        automatic string slm_path;
+        automatic int ignore;
+        slm_path = "../test/slm_files"; // default path
+        ignore = $value$plusargs("slm_path=%s", slm_path);
+        $readmemh($sformatf("%s/l1_0_%01d.slm", slm_path, iBank),
           dut.gen_clusters[iCluster].gen_cluster_sync.i_cluster.i_ooc.i_bound.gen_tcdm_banks[iBank].i_mem.mem);
       end
     end
@@ -419,7 +423,11 @@ module pulp_tb #(
       for (genvar iCol = 0; iCol < N_PAR_CUTS; iCol++) begin: gen_fill_l2_cols
         int unsigned file_ser_idx = iPort*N_SER_CUTS + iRow;
         initial begin
-          $readmemh($sformatf("../test/slm_files/l2_%01d_%01d.slm", file_ser_idx, iCol),
+          automatic string slm_path;
+          automatic int ignore;
+          slm_path = "../test/slm_files"; // default path
+          ignore = $value$plusargs("slm_path=%s", slm_path);
+          $readmemh($sformatf("%s/l2_%01d_%01d.slm", slm_path, file_ser_idx, iCol),
             dut.gen_l2_ports[iPort].i_l2_mem.gen_rows[iRow].gen_cols[iCol].i_mem_cut.mem);
         end
       end
