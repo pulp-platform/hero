@@ -11,6 +11,7 @@
 # specific language governing permissions and limitations under the License.
 #
 # Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+# Andreas Kurth  <akurth@iis.ee.ethz.ch>
 
 set -e
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
@@ -27,24 +28,9 @@ for DW in 8 16 32 64 128 256 512 1024; do
 	call_vsim tb_axi_to_axi_lite -GDW=$DW -t 1ps -c
 done
 
-test_axi_lite_xbar() {
-	call_vsim tb_axi_lite_xbar -GNUM_MASTER=$1 -GNUM_SLAVE=$2 -t 1ps -c
-}
-
-# regression test cases
-test_axi_lite_xbar 1 1
-# test_axi_lite_xbar 4 9 # This seems to be a bug in ModelSim!
-
-for NM in 1 2 3 4 8; do
-	test_axi_lite_xbar $NM 4
-done
-
-for NS in 1 2 3 4 8; do
-	test_axi_lite_xbar 4 $NS
-done
-
 call_vsim tb_axi_delayer
-call_vsim tb_axi_id_remap
 call_vsim tb_axi_atop_filter -GN_TXNS=1000
-call_vsim tb_axi_perf_mon
+call_vsim tb_axi_xbar -t 1ns -coverage -voptargs="+acc +cover=bcesfx"
+call_vsim tb_axi_lite_xbar -t 1ns -coverage -voptargs="+acc +cover=bcesfx"
 call_vsim tb_axi_cdc
+call_vsim tb_axi_lite_to_apb -t 1ns -coverage -voptargs="+acc +cover=bcesfx"

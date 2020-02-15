@@ -1,5 +1,4 @@
-// Copyright (c) 2014-2018 ETH Zurich, University of Bologna
-//
+// Copyright (c) 2020 ETH Zurich and University of Bologna.
 // Copyright and related rights are licensed under the Solderpad Hardware
 // License, Version 0.51 (the "License"); you may not use this file except in
 // compliance with the License.  You may obtain a copy of the License at
@@ -8,458 +7,225 @@
 // this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-//
-// Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 
-import axi_pkg::*;
+// Author: Wolfgang Roenninger <wroennin@ethz.ch>
 
+// axi_lite_xbar: Fully-connected AXI4-Lite crossbar.
+// See `doc/axi_lite_xbar.md` for the documentation,
+// including the definition of parameters and ports.
 
-/// An AXI4-Lite crossbar.
+`include "axi/assign.svh"
+`include "axi/typedef.svh"
+
 module axi_lite_xbar #(
-  /// The address width.
-  parameter int ADDR_WIDTH = -1,
-  /// The data width.
-  parameter int DATA_WIDTH = -1,
-  /// The number of master ports.
-  parameter int NUM_MASTER = 1,
-  /// The number of slave ports.
-  parameter int NUM_SLAVE = 1,
-  /// The number of routing rules.
-  parameter int NUM_RULES = -1
-)(
-  input logic            clk_i               ,
-  input logic            rst_ni              ,
-  AXI_LITE.Slave         master [NUM_MASTER] ,
-  AXI_LITE.Master        slave  [NUM_SLAVE]  ,
-  AXI_ROUTING_RULES.xbar rules
+  parameter axi_pkg::xbar_cfg_t Cfg = '0,
+  parameter type aw_chan_t          = logic,
+  parameter type  w_chan_t          = logic,
+  parameter type  b_chan_t          = logic,
+  parameter type ar_chan_t          = logic,
+  parameter type  r_chan_t          = logic,
+  parameter type     req_t          = logic,
+  parameter type    resp_t          = logic,
+  parameter type    rule_t          = axi_pkg::xbar_rule_64_t,
+  // DEPENDENT PARAMETERS, DO NOT OVERWRITE!
+  parameter int unsigned MstIdxWidth = (Cfg.NoMstPorts > 32'd1) ? $clog2(Cfg.NoMstPorts) : 32'd1
+) (
+  input  logic                                        clk_i,
+  input  logic                                        rst_ni,
+  input  logic                                        test_i,
+  input  req_t  [Cfg.NoSlvPorts-1:0]                  slv_ports_req_i,
+  output resp_t [Cfg.NoSlvPorts-1:0]                  slv_ports_resp_o,
+  output req_t  [Cfg.NoMstPorts-1:0]                  mst_ports_req_o,
+  input  resp_t [Cfg.NoMstPorts-1:0]                  mst_ports_resp_i,
+  input  rule_t [Cfg.NoAddrRules-1:0]                 addr_map_i,
+  input  logic  [Cfg.NoSlvPorts-1:0]                  en_default_mst_port_i,
+  input  logic  [Cfg.NoSlvPorts-1:0][MstIdxWidth-1:0] default_mst_port_i
 );
 
-  // The arbitration bus.
-  AXI_ARBITRATION #(.NUM_REQ(NUM_MASTER)) s_arb_rd(), s_arb_wr();
+  typedef logic [Cfg.AxiAddrWidth-1:0]   addr_t;
+  typedef logic [Cfg.AxiDataWidth-1:0]   data_t;
+  typedef logic [Cfg.AxiDataWidth/8-1:0] strb_t;
+  // to account for the decoding error slave
+  typedef logic [$clog2(Cfg.NoMstPorts + 1)-1:0] mst_port_idx_t;
+  // full AXI typedef for the decode error slave, id_t and user_t are logic and will be
+  // removed during logic optimization as they are stable
+  `AXI_TYPEDEF_AW_CHAN_T ( full_aw_chan_t, addr_t,         logic, logic )
+  `AXI_TYPEDEF_W_CHAN_T  ( full_w_chan_t,  data_t, strb_t,        logic )
+  `AXI_TYPEDEF_B_CHAN_T  ( full_b_chan_t,                  logic, logic )
+  `AXI_TYPEDEF_AR_CHAN_T ( full_ar_chan_t, addr_t,         logic, logic )
+  `AXI_TYPEDEF_R_CHAN_T  ( full_r_chan_t,  data_t,         logic, logic )
+  `AXI_TYPEDEF_REQ_T  ( full_req_t,  full_aw_chan_t, full_w_chan_t, full_ar_chan_t )
+  `AXI_TYPEDEF_RESP_T ( full_resp_t, full_b_chan_t,  full_r_chan_t )
 
-  // For now just instantiate the simple crossbar. We may want to add different
-  // implementations later.
-  axi_lite_xbar_simple #(
-    .ADDR_WIDTH ( ADDR_WIDTH ),
-    .DATA_WIDTH ( DATA_WIDTH ),
-    .NUM_MASTER ( NUM_MASTER ),
-    .NUM_SLAVE  ( NUM_SLAVE  ),
-    .NUM_RULES  ( NUM_RULES  )
-  ) i_simple (
-    .clk_i  ( clk_i        ),
-    .rst_ni ( rst_ni       ),
-    .master ( master       ),
-    .slave  ( slave        ),
-    .rules  ( rules        ),
-    .arb_rd ( s_arb_rd.req ),
-    .arb_wr ( s_arb_wr.req )
-  );
+  // signals from the axi_lite_demuxes, one index more for decode error routing
+  req_t  [Cfg.NoSlvPorts-1:0][Cfg.NoMstPorts:0] slv_reqs;
+  resp_t [Cfg.NoSlvPorts-1:0][Cfg.NoMstPorts:0] slv_resps;
 
-  // Instantiate round-robin arbiters for the read and write channels.
-  axi_arbiter #(
-    .NUM_REQ ( NUM_MASTER )
-  ) i_arb_rd (
-    .clk_i  ( clk_i        ),
-    .rst_ni ( rst_ni       ),
-    .arb    ( s_arb_rd.arb )
-  );
+  // signals into the axi_lite_muxes, are of type slave as the multiplexer extends the ID
+  req_t  [Cfg.NoMstPorts-1:0][Cfg.NoSlvPorts-1:0] mst_reqs;
+  resp_t [Cfg.NoMstPorts-1:0][Cfg.NoSlvPorts-1:0] mst_resps;
 
-  axi_arbiter #(
-    .NUM_REQ ( NUM_MASTER )
-  ) i_arb_wr (
-    .clk_i  ( clk_i        ),
-    .rst_ni ( rst_ni       ),
-    .arb    ( s_arb_wr.arb )
-  );
+  for (genvar i = 0; i < Cfg.NoSlvPorts; i++) begin : gen_slv_port_demux
+    logic [MstIdxWidth-1:0] dec_aw,        dec_ar;
+    mst_port_idx_t          slv_aw_select, slv_ar_select;
+    logic                   dec_aw_error;
+    logic                   dec_ar_error;
 
-endmodule
+    full_req_t  decerr_req;
+    full_resp_t decerr_resp;
 
+    addr_decode #(
+      .NoIndices  ( Cfg.NoMstPorts  ),
+      .NoRules    ( Cfg.NoAddrRules ),
+      .addr_t     ( addr_t          ),
+      .rule_t     ( rule_t          )
+    ) i_axi_aw_decode (
+      .addr_i           ( slv_ports_req_i[i].aw.addr ),
+      .addr_map_i       ( addr_map_i                 ),
+      .idx_o            ( dec_aw                     ),
+      .dec_valid_o      ( /*not used*/               ),
+      .dec_error_o      ( dec_aw_error               ),
+      .en_default_idx_i ( en_default_mst_port_i[i]   ),
+      .default_idx_i    ( default_mst_port_i[i]      )
+    );
 
-/// A simple implementation of an AXI4-Lite crossbar. Can only serve one master
-/// at a time.
-module axi_lite_xbar_simple #(
-  /// The address width.
-  parameter int ADDR_WIDTH = -1,
-  /// The data width.
-  parameter int DATA_WIDTH = -1,
-  /// The number of master ports.
-  parameter int NUM_MASTER = 1,
-  /// The number of slave ports.
-  parameter int NUM_SLAVE = 1,
-  /// The number of routing rules.
-  parameter int NUM_RULES = -1
-)(
-  input logic            clk_i               ,
-  input logic            rst_ni              ,
-  AXI_LITE.Slave         master [NUM_MASTER] ,
-  AXI_LITE.Master        slave  [NUM_SLAVE]  ,
-  AXI_ROUTING_RULES.xbar rules               ,
-  AXI_ARBITRATION.req    arb_rd              ,
-  AXI_ARBITRATION.req    arb_wr
-);
+    addr_decode #(
+      .NoIndices  ( Cfg.NoMstPorts  ),
+      .addr_t     ( addr_t          ),
+      .NoRules    ( Cfg.NoAddrRules ),
+      .rule_t     ( rule_t          )
+    ) i_axi_ar_decode (
+      .addr_i           ( slv_ports_req_i[i].ar.addr ),
+      .addr_map_i       ( addr_map_i                 ),
+      .idx_o            ( dec_ar                     ),
+      .dec_valid_o      ( /*not used*/               ),
+      .dec_error_o      ( dec_ar_error               ),
+      .en_default_idx_i ( en_default_mst_port_i[i]   ),
+      .default_idx_i    ( default_mst_port_i[i]      )
+    );
 
-  `ifndef SYNTHESIS
-  initial begin
-    assert(NUM_MASTER > 0);
-    assert(NUM_SLAVE > 0);
-    assert(NUM_RULES > 0);
-    assert(rules.AXI_ADDR_WIDTH == ADDR_WIDTH);
-    assert(rules.NUM_SLAVE == NUM_SLAVE);
+    assign slv_aw_select = (dec_aw_error) ?
+        mst_port_idx_t'(Cfg.NoMstPorts) : mst_port_idx_t'(dec_aw);
+    assign slv_ar_select = (dec_ar_error) ?
+        mst_port_idx_t'(Cfg.NoMstPorts) : mst_port_idx_t'(dec_ar);
+
+    // make sure that the default slave does not get changed, if there is an unserved Ax
+    // pragma translate_off
+    `ifndef VERILATOR
+    default disable iff (~rst_ni);
+    default_aw_mst_port_en: assert property(
+      @(posedge clk_i) (slv_ports_req_i[i].aw_valid && !slv_ports_resp_o[i].aw_ready)
+          |=> $stable(en_default_mst_port_i[i]))
+        else $fatal (1, $sformatf("It is not allowed to change the default mst port\
+                                   enable, when there is an unserved Aw beat. Slave Port: %0d", i));
+    default_aw_mst_port: assert property(
+      @(posedge clk_i) (slv_ports_req_i[i].aw_valid && !slv_ports_resp_o[i].aw_ready)
+          |=> $stable(default_mst_port_i[i]))
+        else $fatal (1, $sformatf("It is not allowed to change the default mst port\
+                                   when there is an unserved Aw beat. Slave Port: %0d", i));
+    default_ar_mst_port_en: assert property(
+      @(posedge clk_i) (slv_ports_req_i[i].ar_valid && !slv_ports_resp_o[i].ar_ready)
+          |=> $stable(en_default_mst_port_i[i]))
+        else $fatal (1, $sformatf("It is not allowed to change the enable, when\
+                                   there is an unserved Ar beat. Slave Port: %0d", i));
+    default_ar_mst_port: assert property(
+      @(posedge clk_i) (slv_ports_req_i[i].ar_valid && !slv_ports_resp_o[i].ar_ready)
+          |=> $stable(default_mst_port_i[i]))
+        else $fatal (1, $sformatf("It is not allowed to change the default mst port\
+                                   when there is an unserved Ar beat. Slave Port: %0d", i));
+    `endif
+    // pragma translate_on
+    axi_lite_demux #(
+      .aw_chan_t      ( aw_chan_t          ),  // AW Channel Type
+      .w_chan_t       (  w_chan_t          ),  //  W Channel Type
+      .b_chan_t       (  b_chan_t          ),  //  B Channel Type
+      .ar_chan_t      ( ar_chan_t          ),  // AR Channel Type
+      .r_chan_t       (  r_chan_t          ),  //  R Channel Type
+      .req_t          ( req_t              ),
+      .resp_t         ( resp_t             ),
+      .NoMstPorts     ( Cfg.NoMstPorts + 1 ),
+      .MaxTrans       ( Cfg.MaxMstTrans    ),
+      .FallThrough    ( Cfg.FallThrough    ),
+      .SpillAw        ( Cfg.LatencyMode[9] ),
+      .SpillW         ( Cfg.LatencyMode[8] ),
+      .SpillB         ( Cfg.LatencyMode[7] ),
+      .SpillAr        ( Cfg.LatencyMode[6] ),
+      .SpillR         ( Cfg.LatencyMode[5] )
+    ) i_axi_lite_demux (
+      .clk_i,   // Clock
+      .rst_ni,  // Asynchronous reset active low
+      .test_i,  // Testmode enable
+      .slv_req_i       ( slv_ports_req_i[i]  ),
+      .slv_aw_select_i ( slv_aw_select       ),
+      .slv_ar_select_i ( slv_ar_select       ),
+      .slv_resp_o      ( slv_ports_resp_o[i] ),
+      .mst_reqs_o      ( slv_reqs[i]         ),
+      .mst_resps_i     ( slv_resps[i]        )
+    );
+
+    // connect the decode error module to the last index of the demux master port
+    // typedef as the decode error slave uses full axi
+    axi_lite_to_axi #(
+      .req_lite_t  ( req_t       ),
+      .resp_lite_t ( resp_t      ),
+      .req_t       ( full_req_t  ),
+      .resp_t      ( full_resp_t )
+    ) i_dec_err_conv (
+      .slv_req_lite_i  ( slv_reqs[i][Cfg.NoMstPorts]  ),
+      .slv_resp_lite_o ( slv_resps[i][Cfg.NoMstPorts] ),
+      .mst_req_o       ( decerr_req                   ),
+      .mst_resp_i      ( decerr_resp                  )
+    );
+
+    axi_decerr_slv #(
+      .AxiIdWidth  ( 32'd1                       ), // ID width is one as defined as logic above
+      .req_t       ( full_req_t                  ), // AXI request struct
+      .resp_t      ( full_resp_t                 ), // AXI response struct
+      .FallThrough ( 1'b0                        ),
+      .MaxTrans    ( $clog2(Cfg.MaxMstTrans) + 1 )
+    ) i_axi_decerr_slv (
+      .clk_i      ( clk_i       ),  // Clock
+      .rst_ni     ( rst_ni      ),  // Asynchronous reset active low
+      .test_i     ( test_i      ),  // Testmode enable
+      // slave port
+      .slv_req_i  ( decerr_req  ),
+      .slv_resp_o ( decerr_resp )
+    );
   end
 
-  // Check master address widths are all equal.
-  for (genvar i = 0; i < NUM_MASTER; i++) begin : g_chk_master
-    initial begin
-      assert(master[i].AXI_ADDR_WIDTH == ADDR_WIDTH);
-      assert(master[i].AXI_DATA_WIDTH == DATA_WIDTH);
+  // cross all channels
+  for (genvar i = 0; i < Cfg.NoSlvPorts; i++) begin : gen_xbar_slv_cross
+    for (genvar j = 0; j < Cfg.NoMstPorts; j++) begin : gen_xbar_mst_cross
+      assign mst_reqs[j][i]  = slv_reqs[i][j];
+      assign slv_resps[i][j] = mst_resps[j][i];
     end
   end
 
-  // Check slave address widths are all equal.
-  for (genvar i = 0; i < NUM_SLAVE; i++) begin
-    initial begin
-      assert(slave[i].AXI_ADDR_WIDTH == ADDR_WIDTH);
-      assert(slave[i].AXI_DATA_WIDTH == DATA_WIDTH);
-    end
+  for (genvar i = 0; i < Cfg.NoMstPorts; i++) begin : gen_mst_port_mux
+    axi_lite_mux #(
+      .aw_chan_t   ( aw_chan_t          ), // AW Channel Type
+      .w_chan_t    (  w_chan_t          ), //  W Channel Type
+      .b_chan_t    (  b_chan_t          ), //  B Channel Type
+      .ar_chan_t   ( ar_chan_t          ), // AR Channel Type
+      .r_chan_t    (  r_chan_t          ), //  R Channel Type
+      .req_t       ( req_t              ),
+      .resp_t      ( resp_t             ),
+      .NoSlvPorts  ( Cfg.NoSlvPorts     ), // Number of Masters for the module
+      .MaxTrans    ( Cfg.MaxSlvTrans    ),
+      .FallThrough ( Cfg.FallThrough    ),
+      .SpillAw     ( Cfg.LatencyMode[4] ),
+      .SpillW      ( Cfg.LatencyMode[3] ),
+      .SpillB      ( Cfg.LatencyMode[2] ),
+      .SpillAr     ( Cfg.LatencyMode[1] ),
+      .SpillR      ( Cfg.LatencyMode[0] )
+    ) i_axi_lite_mux (
+      .clk_i,  // Clock
+      .rst_ni, // Asynchronous reset active low
+      .test_i, // Test Mode enable
+      .slv_reqs_i  ( mst_reqs[i]         ),
+      .slv_resps_o ( mst_resps[i]        ),
+      .mst_req_o   ( mst_ports_req_o[i]  ),
+      .mst_resp_i  ( mst_ports_resp_i[i] )
+    );
   end
-  `endif
-
-  typedef logic [ADDR_WIDTH-1:0]   addr_t;
-  typedef logic [DATA_WIDTH-1:0]   data_t;
-  typedef logic [DATA_WIDTH/8-1:0] strb_t;
-
-  typedef logic [$clog2(NUM_MASTER)-1:0] master_id_t;
-  typedef logic [$clog2(NUM_SLAVE)-1:0]  slave_id_t;
-
-  // The tag specifies which master is currently being served, and what slave it
-  // is targeting. There are independent tags for read and write.
-  struct packed {
-    master_id_t master;
-    slave_id_t  slave;
-  } tag_rd_d, tag_wr_d, tag_rd_q, tag_wr_q;
-
-  enum { RD_IDLE, RD_REQ, RD_RESP, RD_ERR_RESP } state_rd_d, state_rd_q;
-  enum { WR_IDLE, WR_REQ, WR_DATA, WR_RESP, WR_ERR_DATA, WR_ERR_RESP } state_wr_d, state_wr_q;
-
-  always_ff @(posedge clk_i or negedge rst_ni) begin
-    if (~rst_ni) begin
-      state_rd_q <= RD_IDLE;
-      state_wr_q <= WR_IDLE;
-      tag_rd_q <= '0;
-      tag_wr_q <= '0;
-    end else begin
-      state_rd_q <= state_rd_d;
-      state_wr_q <= state_wr_d;
-      tag_rd_q <= tag_rd_d;
-      tag_wr_q <= tag_wr_d;
-    end
-  end
-
-  // Generate the master-side multiplexer. This allows one of the masters to be
-  // contacted by setting the master_sel_{rd,wr} signal.
-  master_id_t master_sel_rd, master_sel_wr;
-
-  addr_t [NUM_MASTER-1:0] master_araddr_pack;
-  logic  [NUM_MASTER-1:0] master_rready_pack;
-
-  addr_t [NUM_MASTER-1:0] master_awaddr_pack;
-  data_t [NUM_MASTER-1:0] master_wdata_pack;
-  strb_t [NUM_MASTER-1:0] master_wstrb_pack;
-  logic  [NUM_MASTER-1:0] master_wvalid_pack;
-  logic  [NUM_MASTER-1:0] master_bready_pack;
-
-  addr_t master_araddr;
-  logic  master_arready;
-  data_t master_rdata;
-  resp_t master_rresp;
-  logic  master_rvalid;
-  logic  master_rready;
-
-  addr_t master_awaddr;
-  logic  master_awready;
-  data_t master_wdata;
-  strb_t master_wstrb;
-  logic  master_wvalid;
-  logic  master_wready;
-  resp_t master_bresp;
-  logic  master_bvalid;
-  logic  master_bready;
-
-  for (genvar i = 0; i < NUM_MASTER; i++) begin
-    assign master_araddr_pack[i]   = master[i].ar_addr;
-    assign master[i].ar_ready      = master_arready && (i == master_sel_rd);
-    assign master[i].r_data        = master_rdata;
-    assign master[i].r_resp        = master_rresp;
-    assign master[i].r_valid       = master_rvalid && (i == master_sel_rd);
-    assign master_rready_pack[i]   = master[i].r_ready;
-
-    assign master_awaddr_pack[i]   = master[i].aw_addr;
-    assign master[i].aw_ready      = master_awready && (i == master_sel_wr);
-    assign master_wdata_pack[i]    = master[i].w_data;
-    assign master_wstrb_pack[i]    = master[i].w_strb;
-    assign master_wvalid_pack[i]   = master[i].w_valid;
-    assign master[i].w_ready       = master_wready && (i == master_sel_wr);
-    assign master[i].b_resp        = master_bresp;
-    assign master_bready_pack[i]   = master[i].b_ready;
-    assign master[i].b_valid       = master_bvalid && (i == master_sel_wr);
-  end
-
-  assign master_araddr  = master_araddr_pack  [master_sel_rd];
-  assign master_rready  = master_rready_pack  [master_sel_rd];
-
-  assign master_awaddr  = master_awaddr_pack  [master_sel_wr];
-  assign master_wdata   = master_wdata_pack   [master_sel_wr];
-  assign master_wstrb   = master_wstrb_pack   [master_sel_wr];
-  assign master_wvalid  = master_wvalid_pack  [master_sel_wr];
-  assign master_bready  = master_bready_pack  [master_sel_wr];
-
-  // Generate the slave-side multiplexer. This allows one of the slaves to be
-  // contacted by setting the slave_sel_{rd,wr} signal.
-  slave_id_t slave_sel_rd, slave_sel_wr;
-
-  logic  [NUM_SLAVE-1:0] slave_arready_pack;
-  data_t [NUM_SLAVE-1:0] slave_rdata_pack;
-  resp_t [NUM_SLAVE-1:0] slave_rresp_pack;
-  logic  [NUM_SLAVE-1:0] slave_rvalid_pack;
-
-  logic  [NUM_SLAVE-1:0] slave_awready_pack;
-  logic  [NUM_SLAVE-1:0] slave_wready_pack;
-  resp_t [NUM_SLAVE-1:0] slave_bresp_pack;
-  logic  [NUM_SLAVE-1:0] slave_bvalid_pack;
-
-  addr_t slave_araddr;
-  logic  slave_arvalid;
-  logic  slave_arready;
-  data_t slave_rdata;
-  resp_t slave_rresp;
-  logic  slave_rvalid;
-  logic  slave_rready;
-
-  addr_t slave_awaddr;
-  logic  slave_awvalid;
-  logic  slave_awready;
-  data_t slave_wdata;
-  strb_t slave_wstrb;
-  logic  slave_wvalid;
-  logic  slave_wready;
-  resp_t slave_bresp;
-  logic  slave_bvalid;
-  logic  slave_bready;
-
-  for (genvar i = 0; i < NUM_SLAVE; i++) begin
-    assign slave[i].ar_addr      = slave_araddr;
-    assign slave[i].ar_valid     = slave_arvalid && (i == slave_sel_rd);
-    assign slave_arready_pack[i] = slave[i].ar_ready;
-    assign slave_rdata_pack[i]   = slave[i].r_data;
-    assign slave_rresp_pack[i]   = slave[i].r_resp;
-    assign slave_rvalid_pack[i]  = slave[i].r_valid;
-    assign slave[i].r_ready      = slave_rready && (i == slave_sel_rd);
-
-    assign slave[i].aw_addr      = slave_awaddr;
-    assign slave[i].aw_valid     = slave_awvalid && (i == slave_sel_wr);
-    assign slave_awready_pack[i] = slave[i].aw_ready;
-    assign slave[i].w_data       = slave_wdata;
-    assign slave[i].w_strb       = slave_wstrb;
-    assign slave[i].w_valid      = slave_wvalid && (i == slave_sel_wr);
-    assign slave_wready_pack[i]  = slave[i].w_ready;
-    assign slave_bresp_pack[i]   = slave[i].b_resp;
-    assign slave_bvalid_pack[i]  = slave[i].b_valid;
-    assign slave[i].b_ready      = slave_bready && (i == slave_sel_wr);
-  end
-
-  assign slave_arready = slave_arready_pack [slave_sel_rd];
-  assign slave_rdata   = slave_rdata_pack   [slave_sel_rd];
-  assign slave_rresp   = slave_rresp_pack   [slave_sel_rd];
-  assign slave_rvalid  = slave_rvalid_pack  [slave_sel_rd];
-
-  assign slave_awready = slave_awready_pack [slave_sel_wr];
-  assign slave_wready  = slave_wready_pack  [slave_sel_wr];
-  assign slave_bresp   = slave_bresp_pack   [slave_sel_wr];
-  assign slave_bvalid  = slave_bvalid_pack  [slave_sel_wr];
-
-  // Route the valid signals of the masters to the arbiters. They will decide
-  // which request will be granted.
-  for (genvar i = 0; i < NUM_MASTER; i++) begin
-    assign arb_rd.in_req[i] = master[i].ar_valid;
-    assign arb_wr.in_req[i] = master[i].aw_valid;
-  end
-
-  // Perform address resolution.
-  addr_t rd_resolve_addr, wr_resolve_addr;
-  logic [$clog2(NUM_SLAVE)-1:0] rd_match_idx, wr_match_idx;
-  logic rd_match_ok, wr_match_ok;
-
-  axi_address_resolver #(
-    .ADDR_WIDTH( ADDR_WIDTH ),
-    .NUM_SLAVE ( NUM_SLAVE  ),
-    .NUM_RULES ( NUM_RULES  )
-  ) i_rd_resolver (
-    .rules       ( rules           ),
-    .addr_i      ( rd_resolve_addr ),
-    .match_idx_o ( rd_match_idx    ),
-    .match_ok_o  ( rd_match_ok     )
-  );
-
-  axi_address_resolver #(
-    .ADDR_WIDTH( ADDR_WIDTH ),
-    .NUM_SLAVE ( NUM_SLAVE  ),
-    .NUM_RULES ( NUM_RULES  )
-  ) i_wr_resolver (
-    .rules       ( rules           ),
-    .addr_i      ( wr_resolve_addr ),
-    .match_idx_o ( wr_match_idx    ),
-    .match_ok_o  ( wr_match_ok     )
-  );
-
-  // Read state machine.
-  always_comb begin
-    state_rd_d      = state_rd_q;
-    tag_rd_d        = tag_rd_q;
-
-    arb_rd.out_ack  = 0;
-    master_sel_rd   = tag_rd_q.master;
-    slave_sel_rd    = tag_rd_q.slave;
-    rd_resolve_addr = master_araddr;
-
-    slave_araddr    = master_araddr;
-    slave_arvalid   = 0;
-    master_arready  = 0;
-    master_rdata    = slave_rdata;
-    master_rresp    = slave_rresp;
-    master_rvalid   = 0;
-    slave_rready    = 0;
-
-    case (state_rd_q)
-      RD_IDLE: begin
-        master_sel_rd = arb_rd.out_sel;
-        if (arb_rd.out_req) begin
-          arb_rd.out_ack  = 1;
-          tag_rd_d.master = arb_rd.out_sel;
-          state_rd_d      = RD_REQ;
-        end
-      end
-
-      RD_REQ: begin
-        slave_sel_rd   = rd_match_idx;
-        tag_rd_d.slave = rd_match_idx;
-        // If the address resolution was successful, propagate the request and
-        // wait for a response. Otherwise immediately return an error.
-        if (rd_match_ok) begin
-          slave_arvalid = 1;
-          if (slave_arready) begin
-            state_rd_d     = RD_RESP;
-            master_arready = 1;
-          end
-        end else begin
-          state_rd_d     = RD_ERR_RESP;
-          master_arready = 1;
-        end
-      end
-
-      RD_RESP: begin
-        master_rvalid = slave_rvalid;
-        slave_rready = master_rready;
-        if (slave_rvalid && master_rready) begin
-          state_rd_d = RD_IDLE;
-        end
-      end
-
-      // Address resolution failed. Return an error response.
-      RD_ERR_RESP: begin
-        master_rresp  = axi_pkg::RESP_DECERR;
-        master_rvalid = 1;
-        if (master_rready) begin
-          state_rd_d = RD_IDLE;
-        end
-      end
-
-      default: state_rd_d = RD_IDLE;
-    endcase
-  end
-
-  // Write state machine.
-  always_comb begin
-    state_wr_d = state_wr_q;
-    tag_wr_d   = tag_wr_q;
-
-    arb_wr.out_ack  = 0;
-    master_sel_wr   = tag_wr_q.master;
-    slave_sel_wr    = tag_wr_q.slave;
-    wr_resolve_addr = master_awaddr;
-
-    slave_awaddr    = master_awaddr;
-    slave_awvalid   = 0;
-    master_awready  = 0;
-    slave_wdata     = master_wdata;
-    slave_wstrb     = master_wstrb;
-    slave_wvalid    = 0;
-    master_wready   = 0;
-    master_bresp    = slave_bresp;
-    master_bvalid   = 0;
-    slave_bready    = 0;
-
-    case (state_wr_q)
-      WR_IDLE: begin
-        master_sel_wr = arb_wr.out_sel;
-        if (arb_wr.out_req) begin
-          arb_wr.out_ack  = 1;
-          tag_wr_d.master = arb_wr.out_sel;
-          state_wr_d      = WR_REQ;
-        end
-      end
-
-      WR_REQ: begin
-        slave_sel_wr   = wr_match_idx;
-        tag_wr_d.slave = wr_match_idx;
-        // If the address resolution was successful, propagate the request and
-        // wait for a response. Otherwise immediately return an error.
-        if (wr_match_ok) begin
-          slave_awvalid = 1;
-          if (slave_awready) begin
-            state_wr_d     = WR_DATA;
-            master_awready = 1;
-          end
-        end else begin
-          state_wr_d     = WR_ERR_DATA;
-          master_awready = 1;
-        end
-      end
-
-      WR_DATA: begin
-        master_wready = slave_wready;
-        slave_wvalid = master_wvalid;
-        if (slave_wvalid && master_wready) begin
-          state_wr_d = WR_RESP;
-        end
-      end
-
-      WR_RESP: begin
-        master_bvalid = slave_bvalid;
-        slave_bready = master_bready;
-        if (slave_bvalid && master_bready) begin
-          state_wr_d = WR_IDLE;
-        end
-      end
-
-      // Address resolution failed. Discard the data transfer.
-      WR_ERR_DATA: begin
-        master_wready = 1;
-        if (master_wvalid) begin
-          state_wr_d = WR_ERR_RESP;
-        end
-      end
-
-      // Address resolution failed. Return an error response.
-      WR_ERR_RESP: begin
-        master_bresp  = axi_pkg::RESP_DECERR;
-        master_bvalid = 1;
-        if (master_bready) begin
-          state_wr_d = WR_IDLE;
-        end
-      end
-
-      default: state_wr_d = WR_IDLE;
-    endcase
-  end
-
 endmodule

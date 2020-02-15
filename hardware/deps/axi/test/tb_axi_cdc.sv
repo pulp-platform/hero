@@ -1,4 +1,4 @@
-// Copyright 2019 ETH Zurich and University of Bologna.
+// Copyright 2019-2020 ETH Zurich and University of Bologna.
 // Copyright and related rights are licensed under the Solderpad Hardware
 // License, Version 0.51 (the "License"); you may not use this file except in
 // compliance with the License.  You may obtain a copy of the License at
@@ -155,19 +155,19 @@ module tb_axi_cdc #(
     logic  last;
   } r_chan_t;
 
-  axi_cdc #(
-    .AW         (AXI_AW),
-    .DW         (AXI_DW),
-    .IW         (AXI_IW),
-    .UW         (AXI_UW),
-    .LOG_DEPTH  (2)
+  axi_cdc_intf #(
+    .AXI_ADDR_WIDTH (AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW),
+    .AXI_USER_WIDTH (AXI_UW),
+    .LOG_DEPTH      (2)
   ) dut (
-    .clk_slv_i  (upstream_clk),
-    .rst_slv_ni (upstream_rst_n),
-    .slv        (upstream),
-    .clk_mst_i  (downstream_clk),
-    .rst_mst_ni (downstream_rst_n),
-    .mst        (downstream)
+    .src_clk_i  (upstream_clk),
+    .src_rst_ni (upstream_rst_n),
+    .src        (upstream),
+    .dst_clk_i  (downstream_clk),
+    .dst_rst_ni (downstream_rst_n),
+    .dst        (downstream)
   );
 
   typedef axi_test::rand_axi_master #(
@@ -191,7 +191,7 @@ module tb_axi_cdc #(
 
   initial begin
     wait (upstream_rst_n);
-    axi_master.run(N_RD_TXNS, N_WR_TXNS, '0, '1);
+    axi_master.run(N_RD_TXNS, N_WR_TXNS);
   end
 
   typedef axi_test::rand_axi_slave #(
