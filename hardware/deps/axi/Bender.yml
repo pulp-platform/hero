@@ -27,6 +27,7 @@ sources:
   - src/axi_cut.sv
   - src/axi_delayer.sv
   - src/axi_demux.sv
+  - src/axi_id_remap.sv
   - src/axi_id_prepend.sv
   - src/axi_join.sv
   - src/axi_lite_demux.sv
@@ -57,6 +58,7 @@ sources:
       - test/tb_axi_atop_filter.sv
       - test/tb_axi_cdc.sv
       - test/tb_axi_delayer.sv
+      - test/tb_axi_id_remap.sv
       - test/tb_axi_lite_to_apb.sv
       - test/tb_axi_lite_to_axi.sv
       - test/tb_axi_lite_xbar.sv

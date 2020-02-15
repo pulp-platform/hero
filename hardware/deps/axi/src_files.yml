@@ -13,6 +13,7 @@ axi:
     - src/axi_modify_address.sv
     - src/axi_to_axi_lite.sv
 
+    - src/axi_id_remap.sv
 axi_sim:
   files:
     - src/axi_test.sv
