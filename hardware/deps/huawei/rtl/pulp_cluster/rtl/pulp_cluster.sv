@@ -1342,7 +1342,8 @@ module pulp_cluster
     );
 
   end else begin : gen_axi_cut
-    axi_cut #(
+    axi_cut_intf #(
+      .BYPASS     ( 1'b0                ),
       .ADDR_WIDTH ( AXI_ADDR_WIDTH      ),
       .DATA_WIDTH ( AXI_DATA_C2S_WIDTH  ),
       .ID_WIDTH   ( AXI_ID_OUT_WIDTH    ),
@@ -1353,10 +1354,11 @@ module pulp_cluster
       .in     (s_data_master),
       .out    (s_data_master_cut)
     );
-    axi_cut #(
+    axi_cut_intf #(
+      .BYPASS     ( 1'b0                ),
       .ADDR_WIDTH ( AXI_ADDR_WIDTH      ),
       .DATA_WIDTH ( AXI_DATA_S2C_WIDTH  ),
-      .ID_WIDTH   ( AXI_ID_IN_WIDTH    ),
+      .ID_WIDTH   ( AXI_ID_IN_WIDTH     ),
       .USER_WIDTH ( AXI_USER_WIDTH      )
     ) i_data_slave_cut (
       .clk_i,
