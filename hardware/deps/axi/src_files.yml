@@ -14,6 +14,8 @@ axi:
     - src/axi_to_axi_lite.sv
 
     - src/axi_id_remap.sv
+
+    - src/axi_data_width_converter.sv
 axi_sim:
   files:
     - src/axi_test.sv
