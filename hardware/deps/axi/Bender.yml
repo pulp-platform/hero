@@ -21,6 +21,7 @@ sources:
   - src/axi_pkg.sv
   # Level 1
   - src/axi_intf.sv
+  - src/axi_perf_mon.sv
   # Level 2
   - src/axi_atop_filter.sv
   - src/axi_cdc.sv
@@ -62,6 +63,7 @@ sources:
       - test/tb_axi_lite_to_apb.sv
       - test/tb_axi_lite_to_axi.sv
       - test/tb_axi_lite_xbar.sv
+        #- test/tb_axi_perf_mon.sv
       - test/tb_axi_to_axi_lite.sv
       - test/tb_axi_xbar_pkg.sv
       - test/tb_axi_xbar.sv
