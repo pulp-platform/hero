@@ -541,12 +541,13 @@ module pulp_cluster
 
   /* cluster bus and attached peripherals */
   cluster_bus_wrap #(
-    .NB_CORES         ( NB_CORES           ),
-    .AXI_ADDR_WIDTH   ( AXI_ADDR_WIDTH     ),
-    .AXI_DATA_WIDTH   ( AXI_DATA_C2S_WIDTH ),
-    .AXI_USER_WIDTH   ( AXI_USER_WIDTH     ),
-    .AXI_ID_IN_WIDTH  ( AXI_ID_IN_WIDTH    ),
-    .AXI_ID_OUT_WIDTH ( AXI_ID_OUT_WIDTH   )
+    .NB_CORES             ( NB_CORES              ),
+    .DMA_NB_OUTSND_BURSTS ( NB_OUTSND_BURSTS      ),
+    .AXI_ADDR_WIDTH       ( AXI_ADDR_WIDTH        ),
+    .AXI_DATA_WIDTH       ( AXI_DATA_C2S_WIDTH    ),
+    .AXI_USER_WIDTH       ( AXI_USER_WIDTH        ),
+    .AXI_ID_IN_WIDTH      ( AXI_ID_IN_WIDTH       ),
+    .AXI_ID_OUT_WIDTH     ( AXI_ID_OUT_WIDTH      )
   ) cluster_bus_wrap_i (
     .clk_i         ( clk_cluster       ),
     .rst_ni        ( rst_ni            ),
