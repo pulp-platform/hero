@@ -433,8 +433,11 @@ module pulp #(
     .debug_mst  (debug_slv_predwc)
   );
 
-  axi_atop_filter #(
+  axi_atop_filter_intf #(
     .AXI_ID_WIDTH       (AXI_IW),
+    .AXI_ADDR_WIDTH     (AXI_AW),
+    .AXI_DATA_WIDTH     (AXI_DW),
+    .AXI_USER_WIDTH     (AXI_UW),
     .AXI_MAX_WRITE_TXNS (N_CLUSTERS * pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS)
   ) i_atop_filter (
     .clk_i,
