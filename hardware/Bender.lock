@@ -97,7 +97,7 @@ packages:
     dependencies:
       - cluster_interconnect
   common_cells:
-    revision: 53fade6f0f101a236b6280d872a73c47cf08b83b
+    revision: bbc0bf4699eb2c6babafce5924d86810507189a2
     version: ~
     source:
       Git: "https://github.com/pulp-platform/common_cells.git"
