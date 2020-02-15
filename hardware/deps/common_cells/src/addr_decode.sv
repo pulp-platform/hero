@@ -84,7 +84,7 @@ module addr_decode #(
   // pragma translate_off
   initial begin : proc_check_parameters
     assume ($bits(addr_i) == $bits(addr_map_i[0].start_addr)) else
-      $warning($sformatf("Input address has %d bits and address map has %d bits.",
+      $warning($sformatf("Input address has %0d bits and address map has %0d bits.",
         $bits(addr_i), $bits(addr_map_i[0].start_addr)));
     assume (NoRules > 0) else
       $fatal(1, $sformatf("At least one rule needed"));
@@ -108,14 +108,14 @@ module addr_decode #(
       for (int unsigned i = 0; i < NoRules; i++) begin
         check_start : assume (addr_map_i[i].start_addr < addr_map_i[i].end_addr) else
           $fatal(1, $sformatf("This rule has a higher start than end address!!!\n\
-              Violating rule %d.\n\
+              Violating rule %0d.\n\
               Rule> IDX: %h START: %h END: %h\n\
               #####################################################",
               i ,addr_map_i[i].idx, addr_map_i[i].start_addr, addr_map_i[i].end_addr));
         // check the SLV ids
         check_idx : assume (addr_map_i[i].idx < NoIndices) else
             $fatal(1, $sformatf("This rule has a IDX that is not allowed!!!\n\
-            Violating rule %d.\n\
+            Violating rule %0d.\n\
             Rule> IDX: %h START: %h END: %h\n\
             Rule> MAX_IDX: %h\n\
             #####################################################",
@@ -126,8 +126,8 @@ module addr_decode #(
           check_overlap : assume (!((addr_map_i[j].start_addr < addr_map_i[i].end_addr) &&
                                     (addr_map_i[j].end_addr > addr_map_i[i].start_addr)))   else
                $warning($sformatf("Overlapping address region found!!!\n\
-              Rule %d: IDX: %h START: %h END: %h\n\
-              Rule %d: IDX: %h START: %h END: %h\n\
+              Rule %0d: IDX: %h START: %h END: %h\n\
+              Rule %0d: IDX: %h START: %h END: %h\n\
               #####################################################",
               i, addr_map_i[i].idx, addr_map_i[i].start_addr, addr_map_i[i].end_addr,
               j, addr_map_i[j].idx, addr_map_i[j].start_addr, addr_map_i[j].end_addr));
