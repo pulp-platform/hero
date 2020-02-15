@@ -29,8 +29,6 @@ module soc_bus #(
   parameter int unsigned  L2_N_BYTES_PER_PORT = 0,  // [B]
   parameter int unsigned  PERIPH_N_BYTES = 0,       // [B]
   parameter int unsigned  DEBUG_N_BYTES = 0,        // [B]
-  parameter int unsigned  MST_SLICE_DEPTH = 0,
-  parameter int unsigned  SLV_SLICE_DEPTH = 0,
   parameter logic [63:0]  DEBUG_BASE_ADDR = 0
 ) (
   input  logic    clk_i,
@@ -44,28 +42,20 @@ module soc_bus #(
   AXI_BUS.Master  debug_mst
 );
 
-  localparam int unsigned N_REGIONS = 3;
-  localparam int unsigned N_DEBUG = 1;
-  localparam int unsigned N_MASTERS = N_CLUSTERS + L2_N_PORTS + 1 + N_DEBUG; //TODO: rewrite this, unclear
-  localparam int unsigned N_SLAVES = soc_bus_pkg::n_slaves(N_CLUSTERS) + N_DEBUG;
+  localparam int unsigned N_MASTERS = N_CLUSTERS + L2_N_PORTS + 2; // ext and debug
+  localparam int unsigned N_SLAVES = soc_bus_pkg::n_slaves(N_CLUSTERS) + 2; // ext and debug
   localparam int unsigned IDX_L2_MEM = N_CLUSTERS;
   localparam int unsigned IDX_EXT = IDX_L2_MEM + 1;
   localparam int unsigned IDX_DEBUG_MST = IDX_EXT + 1;
 
   localparam int unsigned IDX_EXT_SLV = N_CLUSTERS;
-  localparam int unsigned IDX_DEBUG_SLV = N_CLUSTERS + 1;
+  localparam int unsigned IDX_DEBUG_SLV = IDX_EXT_SLV + 1;
 
-
-  typedef logic [AXI_AW-1:0] addr_t;
-
-  addr_t  [N_REGIONS-1:0][N_MASTERS-1:0]  start_addr,
-                                          end_addr;
-  logic   [N_REGIONS-1:0][N_MASTERS-1:0]  valid_rule;
 
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (AXI_IW_INP), //TODO: could be buggy
+    .AXI_ID_WIDTH   (AXI_IW_INP),
     .AXI_USER_WIDTH (AXI_UW)
   ) slaves [N_SLAVES-1:0]();
   for (genvar i = 0; i < N_CLUSTERS; i++) begin: gen_bind_cluster_slv
@@ -77,7 +67,7 @@ module soc_bus #(
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (soc_bus_pkg::oup_id_w(N_SLAVES, AXI_IW_INP)), //TODO: could be buggy
+    .AXI_ID_WIDTH   (soc_bus_pkg::oup_id_w(N_SLAVES, AXI_IW_INP)),
     .AXI_USER_WIDTH (AXI_UW)
   ) masters [N_MASTERS-1:0]();
 //  TODO: FIXING ISSUE IN SYNTHESIS
@@ -92,66 +82,70 @@ module soc_bus #(
   `AXI_ASSIGN(debug_mst, masters[3]);
 
   // Address Map
-  always_comb begin
-    start_addr  = '0;
-    end_addr    = '0;
-    valid_rule  = '0;
-
-    // Everything below Cluster 0 to EXT
-    start_addr[0][IDX_EXT]  = 64'h0000_0000_0000_0000;
-    end_addr[0][IDX_EXT]    = 64'h0000_0000_0FFF_FFFF;
-    valid_rule[0][IDX_EXT]  = 1'b1;
-
-    // Clusters
-    for (int i = 0; i < N_CLUSTERS; i++) begin
-      start_addr[0][i]  = 64'h0000_0000_1000_0000 + i * 32'h0040_0000;
-      end_addr[0][i]    = start_addr[0][i] + 32'h002F_FFFF;
-      valid_rule[0][i]  = 1'b1;
-    end
-
-    // Everthing in `0x1A..` (above debug) to EXT
-    start_addr[1][IDX_EXT]  = 64'h0000_0000_1A00_0000;
-    end_addr[1][IDX_EXT]    = 64'h0000_0000_1AFF_FFFF;
-    valid_rule[1][IDX_EXT]  = 1'b1;
-
-    // L2 Memory
-    for (int i = 0; i < L2_N_PORTS; i++) begin
-      automatic int unsigned idx = IDX_L2_MEM + i;
-      start_addr[0][idx]  = 64'h0000_0000_1C00_0000 + i*L2_N_BYTES_PER_PORT;
-      end_addr[0][idx]    = start_addr[0][idx] + L2_N_BYTES_PER_PORT - 1;
-      valid_rule[0][idx]  = 1'b1;
-    end
-
-    // Debug module
-    start_addr[0][IDX_DEBUG_MST] = DEBUG_BASE_ADDR;  // > `0x1C..` and above L2
-    end_addr[0][IDX_DEBUG_MST]   = start_addr[0][IDX_DEBUG_MST] + DEBUG_N_BYTES - 1;
-    valid_rule[0][IDX_DEBUG_MST] = 1'b1;
-
-    // Everything above debug module to EXT
-    start_addr[2][IDX_EXT]  = end_addr[0][IDX_DEBUG_MST] + 1; // TODO: verify the addr mapping
-    end_addr[2][IDX_EXT]    = 64'hFFFF_FFFF_FFFF_FFFF;
-    valid_rule[2][IDX_EXT]  = 1'b1;
+  localparam int unsigned N_RULES = N_CLUSTERS + L2_N_PORTS + 1; // plus debug
+  axi_pkg::xbar_rule_32_t [N_RULES-1:0] addr_map;
+  // Clusters
+  for (genvar i = 0; i < N_CLUSTERS; i++) begin : gen_addr_map_clusters
+    logic [AXI_AW-1:0] cluster_base_addr = 32'h1000_0000 + i * 32'h0040_0000;
+    assign addr_map[i] = '{
+      idx:        i,
+      start_addr: cluster_base_addr,
+      end_addr:   cluster_base_addr + 32'h0030_0000
+    };
   end
+  for (genvar i = 0; i < L2_N_PORTS; i++) begin : gen_addr_map_l2
+    logic [AXI_AW-1:0] l2_port_base_addr = 32'h1C00_0000 + i*L2_N_BYTES_PER_PORT;
+    assign addr_map[N_CLUSTERS + i] = '{
+      idx:        IDX_L2_MEM + i,
+      start_addr: l2_port_base_addr,
+      end_addr:   l2_port_base_addr + L2_N_BYTES_PER_PORT
+    };
+  end
+  assign addr_map[N_CLUSTERS + L2_N_PORTS] = '{
+    idx:        IDX_DEBUG_MST,
+    start_addr: DEBUG_BASE_ADDR,
+    end_addr:   DEBUG_BASE_ADDR + DEBUG_N_BYTES
+  };
+  // pragma translate_off
+  `ifndef VERILATOR
+    initial begin
+      assert (AXI_AW == 32)
+        else $fatal("Address map is only defined for 32-bit addresses!");
+    end
+  `endif
+  // pragma translate_on
 
-  axi_node_wrap_with_slices #(
-    .NB_MASTER          (N_MASTERS),
-    .NB_SLAVE           (N_SLAVES),
-    .NB_REGION          (N_REGIONS),
-    .AXI_ADDR_WIDTH     (AXI_AW),
-    .AXI_DATA_WIDTH     (AXI_DW),
-    .AXI_ID_WIDTH       (AXI_IW_INP),
-    .AXI_USER_WIDTH     (AXI_UW),
-    .MASTER_SLICE_DEPTH (MST_SLICE_DEPTH),
-    .SLAVE_SLICE_DEPTH  (SLV_SLICE_DEPTH)
-  ) i_axi_node_wrap (
-    .clk          (clk_i),
-    .rst_n        (rst_ni),
-    .test_en_i    (1'b0),
-    .slave        (slaves),
-    .master       (masters),
-    .start_addr_i (start_addr),
-    .end_addr_i   (end_addr),
-    .valid_rule_i (valid_rule)
+  localparam int unsigned MAX_TXNS_PER_CLUSTER =  pulp_cluster_cfg_pkg::N_CORES +
+                                                  pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS;
+
+  localparam axi_pkg::xbar_cfg_t xbar_cfg = '{
+    NoSlvPorts:         N_SLAVES,
+    NoMstPorts:         N_MASTERS,
+    MaxMstTrans:        MAX_TXNS_PER_CLUSTER,
+    MaxSlvTrans:        N_CLUSTERS * MAX_TXNS_PER_CLUSTER,
+    FallThrough:        1'b0,
+    LatencyMode:        axi_pkg::CUT_ALL_PORTS,
+    AxiIdWidthSlvPorts: AXI_IW_INP,
+    AxiIdUsedSlvPorts:  AXI_IW_INP,
+    AxiAddrWidth:       AXI_AW,
+    AxiDataWidth:       AXI_DW,
+    NoAddrRules:        N_RULES
+  };
+  logic [$clog2(N_MASTERS)-1:0] default_mst_port;
+  assign default_mst_port = IDX_EXT; // use external port as default master port
+  axi_xbar_intf #(
+    .AXI_USER_WIDTH (AXI_UW),
+    .Cfg            (xbar_cfg),
+    .rule_t         (axi_pkg::xbar_rule_32_t)
+  ) i_axi_xbar (
+    .clk_i,
+    .rst_ni,
+    .test_i                 (1'b0),
+    .slv_ports              (slaves),
+    .mst_ports              (masters),
+    .addr_map_i             (addr_map),
+    .en_default_mst_port_i  ({N_SLAVES{1'b1}}), // enable default master port for all slave ports
+    .default_mst_port_i     ({N_SLAVES{default_mst_port}})
   );
 
 endmodule

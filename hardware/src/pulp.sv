@@ -418,9 +418,7 @@ module pulp #(
     .L2_N_BYTES_PER_PORT  (L2_SIZE/L2_N_AXI_PORTS),
     .PERIPH_N_BYTES       (32*1024),
     .DEBUG_N_BYTES        (pulp_cluster_cfg_pkg::DM_SIZE),
-    .DEBUG_BASE_ADDR      (64'(pulp_cluster_cfg_pkg::DM_BASE_ADDR)),
-    .MST_SLICE_DEPTH      (1),
-    .SLV_SLICE_DEPTH      (1)
+    .DEBUG_BASE_ADDR      (64'(pulp_cluster_cfg_pkg::DM_BASE_ADDR))
   ) i_soc_bus (
     .clk_i,
     .rst_ni,
