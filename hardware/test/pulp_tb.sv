@@ -18,6 +18,7 @@
 module pulp_tb #(
   // TB Parameters
   parameter time          CLK_PERIOD = 1000ps,
+  parameter bit           RUN_DM_TESTS = 0,
   // SoC Parameters
   parameter int unsigned  N_CLUSTERS = 1,
   parameter int unsigned  AXI_DW = 128,
@@ -64,6 +65,12 @@ module pulp_tb #(
   axi_resp_t  from_pulp_resp,
               to_pulp_resp;
 
+  logic jtag_tck;
+  logic jtag_trst_n;
+  logic jtag_tdi;
+  logic jtag_tms;
+  logic jtag_tdo;
+
   clk_rst_gen #(
     .CLK_PERIOD     (CLK_PERIOD),
     .RST_CLK_CYCLES (10)
@@ -91,7 +98,13 @@ module pulp_tb #(
     .ext_req_o      (from_pulp_req),
     .ext_resp_i     (from_pulp_resp),
     .ext_req_i      (to_pulp_req),
-    .ext_resp_o     (to_pulp_resp)
+    .ext_resp_o     (to_pulp_resp),
+
+    .jtag_tck_i     (jtag_tck),
+    .jtag_trst_ni   (jtag_trst_n),
+    .jtag_tdi_i     (jtag_tdi),
+    .jtag_tms_i     (jtag_tms),
+    .jtag_tdo_o     (jtag_tdo)
   );
 
   // AXI Node for Memory (slave 0) and Peripherals (slave 1)
@@ -337,11 +350,32 @@ module pulp_tb #(
 
   // Simulation control
   initial begin
+    automatic dm_test::dm_if dm_if = new;
+    automatic logic error;
+
     cl_fetch_en = '0;
     to_pulp_req = '0;
     // Wait for reset.
     wait (rst_n);
     @(posedge clk);
+
+    // run dm tests instead of regular software tests
+    if (RUN_DM_TESTS) begin
+      // TODO: multiple write_axi seem to get stuck.
+      // make cores loop on boot addr
+      // disable icache for debug module test
+      // write_axi(32'h1020_1400, 128'h00000000_00000000_00000000_00000000);
+      // 1c008080
+      //write_axi(32'h1c00_8080, 128'h00000000_00000000_00000000_1c008080);
+      // enable all cores (TODO: what to do when multiple clusters)
+      //write_axi(32'h1020_0008, 128'h00000000_000000ff_00000000_00000000);
+      // TODO: remove this workaround when write_axi is fixed
+      write_axi(32'h1020_0008, 128'h00000000_00000001_00000000_00000000);
+
+      dm_if.run_dm_tests(N_CLUSTERS, pulp_cluster_cfg_pkg::N_CORES, error,
+                           jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+      $finish();
+    end
 
     // Start cluster 0.
     // cl_fetch_en[0] = 1'b1;

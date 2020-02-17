@@ -28,8 +28,10 @@ module soc_bus #(
   parameter int unsigned  L2_N_PORTS = 1,
   parameter int unsigned  L2_N_BYTES_PER_PORT = 0,  // [B]
   parameter int unsigned  PERIPH_N_BYTES = 0,       // [B]
+  parameter int unsigned  DEBUG_N_BYTES = 0,        // [B]
   parameter int unsigned  MST_SLICE_DEPTH = 0,
-  parameter int unsigned  SLV_SLICE_DEPTH = 0
+  parameter int unsigned  SLV_SLICE_DEPTH = 0,
+  parameter logic [63:0]  DEBUG_BASE_ADDR = 0
 ) (
   input  logic    clk_i,
   input  logic    rst_ni,
@@ -37,14 +39,22 @@ module soc_bus #(
   AXI_BUS.Master  cl_mst[N_CLUSTERS-1:0],
   AXI_BUS.Master  l2_mst[L2_N_PORTS-1:0],
   AXI_BUS.Master  ext_mst,
-  AXI_BUS.Slave   ext_slv
+  AXI_BUS.Slave   ext_slv,
+  AXI_BUS.Slave   debug_slv,
+  AXI_BUS.Master  debug_mst
 );
 
   localparam int unsigned N_REGIONS = 3;
-  localparam int unsigned N_MASTERS = N_CLUSTERS + L2_N_PORTS + 1;
-  localparam int unsigned N_SLAVES = soc_bus_pkg::n_slaves(N_CLUSTERS);
+  localparam int unsigned N_DEBUG = 1;
+  localparam int unsigned N_MASTERS = N_CLUSTERS + L2_N_PORTS + 1 + N_DEBUG; //TODO: rewrite this, unclear
+  localparam int unsigned N_SLAVES = soc_bus_pkg::n_slaves(N_CLUSTERS) + N_DEBUG;
   localparam int unsigned IDX_L2_MEM = N_CLUSTERS;
   localparam int unsigned IDX_EXT = IDX_L2_MEM + 1;
+  localparam int unsigned IDX_DEBUG_MST = IDX_EXT + 1;
+
+  localparam int unsigned IDX_EXT_SLV = N_CLUSTERS;
+  localparam int unsigned IDX_DEBUG_SLV = N_CLUSTERS + 1;
+
 
   typedef logic [AXI_AW-1:0] addr_t;
 
@@ -55,21 +65,22 @@ module soc_bus #(
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (AXI_IW_INP),
+    .AXI_ID_WIDTH   (AXI_IW_INP), //TODO: could be buggy
     .AXI_USER_WIDTH (AXI_UW)
   ) slaves [N_SLAVES-1:0]();
   for (genvar i = 0; i < N_CLUSTERS; i++) begin: gen_bind_cluster_slv
     `AXI_ASSIGN(slaves[i], cl_slv[i]);
   end
-  `AXI_ASSIGN(slaves[N_CLUSTERS], ext_slv);
+  `AXI_ASSIGN(slaves[IDX_EXT_SLV], ext_slv);
+  `AXI_ASSIGN(slaves[IDX_DEBUG_SLV], debug_slv);
 
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (soc_bus_pkg::oup_id_w(N_CLUSTERS, AXI_IW_INP)),
+    .AXI_ID_WIDTH   (soc_bus_pkg::oup_id_w(N_SLAVES, AXI_IW_INP)), //TODO: could be buggy
     .AXI_USER_WIDTH (AXI_UW)
   ) masters [N_MASTERS-1:0]();
-//  FIXING ISSUE IN SYNTHESIS
+//  TODO: FIXING ISSUE IN SYNTHESIS
 //  for (genvar i = 0; i < N_CLUSTERS; i++) begin: gen_bind_clusters
     `AXI_ASSIGN(cl_mst[0], masters[0]);
 //  end
@@ -77,6 +88,8 @@ module soc_bus #(
     `AXI_ASSIGN(l2_mst[0], masters[1]);
 //  end
   `AXI_ASSIGN(ext_mst, masters[2]);
+  //`AXI_ASSIGN(debug_mst, masters[IDX_DEBUG_MST]);
+  `AXI_ASSIGN(debug_mst, masters[3]);
 
   // Address Map
   always_comb begin
@@ -96,7 +109,7 @@ module soc_bus #(
       valid_rule[0][i]  = 1'b1;
     end
 
-    // Everthing in `0x1A..` to EXT
+    // Everthing in `0x1A..` (above debug) to EXT
     start_addr[1][IDX_EXT]  = 64'h0000_0000_1A00_0000;
     end_addr[1][IDX_EXT]    = 64'h0000_0000_1AFF_FFFF;
     valid_rule[1][IDX_EXT]  = 1'b1;
@@ -109,8 +122,13 @@ module soc_bus #(
       valid_rule[0][idx]  = 1'b1;
     end
 
-    // Everything above L2 Memory to EXT
-    start_addr[2][IDX_EXT]  = end_addr[0][IDX_L2_MEM+L2_N_PORTS-1] + 1;
+    // Debug module
+    start_addr[0][IDX_DEBUG_MST] = DEBUG_BASE_ADDR;  // > `0x1C..` and above L2
+    end_addr[0][IDX_DEBUG_MST]   = start_addr[0][IDX_DEBUG_MST] + DEBUG_N_BYTES - 1;
+    valid_rule[0][IDX_DEBUG_MST] = 1'b1;
+
+    // Everything above debug module to EXT
+    start_addr[2][IDX_EXT]  = end_addr[0][IDX_DEBUG_MST] + 1; // TODO: verify the addr mapping
     end_addr[2][IDX_EXT]    = 64'hFFFF_FFFF_FFFF_FFFF;
     valid_rule[2][IDX_EXT]  = 1'b1;
   end

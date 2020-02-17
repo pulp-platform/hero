@@ -773,6 +773,16 @@ ${vlogan} -sverilog \
     "+incdir+$ROOT/deps/common_cells/include" \
     "+incdir+$ROOT/deps/axi/include" \
     "+incdir+$ROOT/src/apb/include" \
+    "$ROOT/deps/axi_mem_if/src/axi_mem_if.sv"
+
+${vlogan} -sverilog \
+    +define+TARGET_RTL \
+    +define+TARGET_SIMULATION \
+    +define+TARGET_TEST \
+    +define+TARGET_VSIM \
+    "+incdir+$ROOT/deps/common_cells/include" \
+    "+incdir+$ROOT/deps/axi/include" \
+    "+incdir+$ROOT/src/apb/include" \
     "$ROOT/deps/axi_rab/rtl/axi4_ar_sender.sv" \
     "$ROOT/deps/axi_rab/rtl/axi4_aw_sender.sv" \
     "$ROOT/deps/axi_rab/rtl/axi4_b_sender.sv" \
@@ -843,6 +853,24 @@ ${vlogan} -sverilog \
     "+incdir+$ROOT/deps/common_cells/include" \
     "+incdir+$ROOT/deps/axi/include" \
     "+incdir+$ROOT/src/apb/include" \
+    "$ROOT/deps/riscv-dbg/src/dm_pkg.sv" \
+    "$ROOT/deps/riscv-dbg/debug_rom/debug_rom.sv" \
+    "$ROOT/deps/riscv-dbg/src/dm_csrs.sv" \
+    "$ROOT/deps/riscv-dbg/src/dm_mem.sv" \
+    "$ROOT/deps/riscv-dbg/src/dm_top.sv" \
+    "$ROOT/deps/riscv-dbg/src/dmi_cdc.sv" \
+    "$ROOT/deps/riscv-dbg/src/dmi_jtag.sv" \
+    "$ROOT/deps/riscv-dbg/src/dmi_jtag_tap.sv" \
+    "$ROOT/deps/riscv-dbg/src/dm_sba.sv"
+
+${vlogan} -sverilog \
+    +define+TARGET_RTL \
+    +define+TARGET_SIMULATION \
+    +define+TARGET_TEST \
+    +define+TARGET_VSIM \
+    "+incdir+$ROOT/deps/common_cells/include" \
+    "+incdir+$ROOT/deps/axi/include" \
+    "+incdir+$ROOT/src/apb/include" \
     "$ROOT/src/apb/apb_bus.sv" \
     "$ROOT/src/apb/apb_ro_regs.sv" \
     "$ROOT/src/apb/apb_rw_regs.sv" \
@@ -852,6 +880,9 @@ ${vlogan} -sverilog \
     "$ROOT/src/soc_bus.sv" \
     "$ROOT/src/soc_ctrl_regs.sv" \
     "$ROOT/src/sram.sv" \
+    "$ROOT/src/debug_system.sv" \
+    "$ROOT/src/core2axi.sv" \
+    "$ROOT/src/axi_tcdm_if.sv" \
     "$ROOT/src/l2_mem.sv" \
     "$ROOT/src/pulp_cluster_ooc.sv" \
     "$ROOT/src/soc_peripherals.sv" \
@@ -867,6 +898,9 @@ ${vlogan} -sverilog \
     "+incdir+$ROOT/deps/axi/include" \
     "+incdir+$ROOT/src/apb/include" \
     "$ROOT/src/apb/apb_stdout.sv" \
+    "$ROOT/test/riscv_pkg.sv" \
+    "$ROOT/test/jtag_test.sv" \
+    "$ROOT/test/dm_test.sv" \
     "$ROOT/test/pulp_tb.sv"
 
 ${vcs} -nc -full64 pulp_tb -debug_access+all -notice

@@ -14,6 +14,12 @@ package automatic pulp_cluster_cfg_pkg;
   localparam int unsigned DC_BUF_W = 8;
   // -- Cores
   localparam int unsigned N_CORES = 8; // must be a power of 2 and <= 8
+  localparam logic [31:0] ROM_BOOT_ADDR = 32'h1A00_0000;
+  localparam logic [31:0] BOOT_ADDR = 32'h1C00_8080;
+  // -- Debug module
+  localparam logic [31:0] DM_BASE_ADDR = 32'h1D00_0000; // begin of address space
+  localparam int unsigned DM_SIZE = 16 * 1024; // 16kB according to debug-system.md
+  localparam logic [31:0] DM_ROM_ADDR = DM_BASE_ADDR + 32'h800;
   // -- AXI
   localparam int unsigned AXI_AW = 32; // [bit]
   localparam int unsigned AXI_DW = 64; // [bit]

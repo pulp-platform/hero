@@ -37,6 +37,13 @@ packages:
       Git: "https://github.com/pulp-platform/axi2per.git"
     dependencies:
       - axi_slice
+  axi_mem_if:
+    revision: 0c7456caa29262cca278fd28a23ab1c99eff4a79
+    version: ~
+    source:
+      Git: "https://github.com/pulp-platform/axi_mem_if.git"
+    dependencies:
+      - axi
   axi_node:
     revision: dbf2610c95eeb43f0fbf9241618caafd36dc9d19
     version: ~
@@ -223,4 +230,10 @@ packages:
     version: ~
     source:
       Git: "https://github.com/pulp-platform/fpu_interco.git"
+    dependencies: []
+  riscv-dbg:
+    revision: a502c410b6056d363127b74fd6da58aa2a7091c4
+    version: 0.3.0
+    source:
+      Git: "https://github.com/pulp-platform/riscv-dbg.git"
     dependencies: []
