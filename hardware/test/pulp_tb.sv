@@ -362,9 +362,9 @@ module pulp_tb #(
     end
 
     // Start cluster 0.
-    // cl_fetch_en[0] = 1'b1;
+    cl_fetch_en[0] = 1'b1;
     // Only start core 0. --> AXI write request
-    write_axi(32'h1020_0008, 128'h00000000_00000001_00000000_00000000);
+    // write_axi(32'h1020_0008, 128'h00000000_00000001_00000000_00000000);
 
     // Wait for EOC of cluster 0 before terminating the simulation.
     wait (cl_eoc[0]);

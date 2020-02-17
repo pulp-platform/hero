@@ -62,7 +62,7 @@ unsigned check_events()
       *trigg_addr = 1;
     }
   }
-  omp_set_num_threads(8);
+  // omp_set_num_threads(8);
   return !correct;
 }
 

@@ -52,9 +52,9 @@ int main(int argc, char *argv[])
   unsigned n_errors = 0;
 
   n_errors += report_n_errors(test_m_instrs, "M instructions");
-  n_errors += report_n_errors(test_dma, "DMA transfers");
+  // n_errors += report_n_errors(test_dma, "DMA transfers");
   n_errors += report_n_errors(test_floats, "floating-point calculations");
-  n_errors += report_n_errors(test_atomic, "atomic memory accesses");
+  // n_errors += report_n_errors(test_atomic, "atomic memory accesses");
   n_errors += report_n_errors(test_intrinsics, "PULP intrinsics");
 
   n_errors += report_pass_fail(
