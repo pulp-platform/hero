@@ -317,7 +317,7 @@ module cluster_control_unit
       rdata_q           <= '0;
       id_q              <= '0;
       rvalid_q          <= 1'b0;
-       
+
       hwpe_sel_o        <= 1'b1;
       hwpe_en_o         <= 1'b0;
 
@@ -344,7 +344,7 @@ module cluster_control_unit
         rdata_q <= rdata_n;
         id_q    <= id_n;
       end
-      
+
       hwpe_sel_o        <= hwpe_sel_n;
       hwpe_en_o         <= hwpe_en_n;
 
@@ -363,7 +363,7 @@ module cluster_control_unit
       TCDM_arb_policy_o <= TCDM_arb_policy_n;
 
       if (start_fetch)
-        fetch_en_q <= 8'b00000001;
+        fetch_en_q <= '1;
       else
         fetch_en_q <= fetch_en_n;
 
