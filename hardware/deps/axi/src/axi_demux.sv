@@ -51,6 +51,16 @@ module axi_demux #(
 
   localparam int unsigned IdCounterWidth = $clog2(MaxTrans);
 
+  typedef logic [AxiIdWidth-1:0] axi_id_t;
+  typedef struct packed {
+    aw_chan_t aw_chan;
+    select_t  aw_select;
+  } aw_chan_select_t;
+  typedef struct packed {
+    ar_chan_t ar_chan;
+    select_t  ar_select;
+  } ar_chan_select_t;
+
   // pass through if only one master port
   if (NoMstPorts == 32'h1) begin : gen_no_demux
     assign mst_reqs_o[0] = slv_req_i;
@@ -60,15 +70,6 @@ module axi_demux #(
     //--------------------------------------
     // Typedefs for the Fifo's / Queues
     //--------------------------------------
-    typedef logic [AxiIdWidth-1:0] axi_id_t;
-    typedef struct packed {
-      aw_chan_t aw_chan;
-      select_t  aw_select;
-    } aw_chan_select_t;
-    typedef struct packed {
-      ar_chan_t ar_chan;
-      select_t  ar_select;
-    } ar_chan_select_t;
 
     //--------------------------------------
     //--------------------------------------
