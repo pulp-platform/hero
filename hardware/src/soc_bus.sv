@@ -75,11 +75,10 @@ module soc_bus #(
     `AXI_ASSIGN(cl_mst[0], masters[0]);
 //  end
 //  for (genvar i = 0; i < L2_N_PORTS; i++) begin: gen_bind_l2
-    `AXI_ASSIGN(l2_mst[0], masters[1]);
+    `AXI_ASSIGN(l2_mst[0], masters[IDX_L2_MEM]);
 //  end
-  `AXI_ASSIGN(ext_mst, masters[2]);
-  //`AXI_ASSIGN(debug_mst, masters[IDX_DEBUG_MST]);
-  `AXI_ASSIGN(debug_mst, masters[3]);
+  `AXI_ASSIGN(ext_mst, masters[IDX_EXT]);
+  `AXI_ASSIGN(debug_mst, masters[IDX_DEBUG_MST]);
 
   // Address Map
   localparam int unsigned N_RULES = N_CLUSTERS + L2_N_PORTS + 1; // plus debug
