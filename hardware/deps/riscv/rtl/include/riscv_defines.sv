@@ -413,8 +413,8 @@ parameter int unsigned C_LAT_FP16       = 'd1;
 parameter int unsigned C_LAT_FP16ALT    = 'd1;
 parameter int unsigned C_LAT_FP8        = 'd1;
 parameter int unsigned C_LAT_DIVSQRT    = 'd1; // divsqrt post-processing pipe
-parameter int unsigned C_LAT_CONV       = 'd0;
-parameter int unsigned C_LAT_NONCOMP    = 'd0;
+parameter int unsigned C_LAT_CONV       = 'd1;
+parameter int unsigned C_LAT_NONCOMP    = 'd1;
 
 // General FPU-specific defines
 
