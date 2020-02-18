@@ -541,12 +541,13 @@ module pulp_cluster
 
   /* cluster bus and attached peripherals */
   cluster_bus_wrap #(
-    .NB_CORES         ( NB_CORES           ),
-    .AXI_ADDR_WIDTH   ( AXI_ADDR_WIDTH     ),
-    .AXI_DATA_WIDTH   ( AXI_DATA_C2S_WIDTH ),
-    .AXI_USER_WIDTH   ( AXI_USER_WIDTH     ),
-    .AXI_ID_IN_WIDTH  ( AXI_ID_IN_WIDTH    ),
-    .AXI_ID_OUT_WIDTH ( AXI_ID_OUT_WIDTH   )
+    .NB_CORES             ( NB_CORES              ),
+    .DMA_NB_OUTSND_BURSTS ( NB_OUTSND_BURSTS      ),
+    .AXI_ADDR_WIDTH       ( AXI_ADDR_WIDTH        ),
+    .AXI_DATA_WIDTH       ( AXI_DATA_C2S_WIDTH    ),
+    .AXI_USER_WIDTH       ( AXI_USER_WIDTH        ),
+    .AXI_ID_IN_WIDTH      ( AXI_ID_IN_WIDTH       ),
+    .AXI_ID_OUT_WIDTH     ( AXI_ID_OUT_WIDTH      )
   ) cluster_bus_wrap_i (
     .clk_i         ( clk_cluster       ),
     .rst_ni        ( rst_ni            ),
@@ -588,16 +589,16 @@ module pulp_cluster
   `AXI_ASSIGN_TO_REQ(ext_tcdm_req, s_ext_tcdm_bus);
   `AXI_ASSIGN_FROM_RESP(s_ext_tcdm_bus, ext_tcdm_resp);
   always_comb begin
-    `AXI_SET_W_CHAN(ext_tcdm_req_buf.w, ext_tcdm_req.w);
+    ext_tcdm_req_buf.w = ext_tcdm_req.w;
     ext_tcdm_req_buf.w_valid = ext_tcdm_req.w_valid;
     ext_tcdm_resp.w_ready = ext_tcdm_resp_buf.w_ready;
-    `AXI_SET_AR_CHAN(ext_tcdm_req_buf.ar, ext_tcdm_req.ar);
+    ext_tcdm_req_buf.ar = ext_tcdm_req.ar;
     ext_tcdm_req_buf.ar_valid = ext_tcdm_req.ar_valid;
     ext_tcdm_resp.ar_ready = ext_tcdm_resp_buf.ar_ready;
-    `AXI_SET_B_CHAN(ext_tcdm_resp.b, ext_tcdm_resp_buf.b);
+    ext_tcdm_resp.b = ext_tcdm_resp_buf.b;
     ext_tcdm_resp.b_valid = ext_tcdm_resp_buf.b_valid;
     ext_tcdm_req_buf.b_ready = ext_tcdm_req.b_ready;
-    `AXI_SET_R_CHAN(ext_tcdm_resp.r, ext_tcdm_resp_buf.r);
+    ext_tcdm_resp.r = ext_tcdm_resp_buf.r;
     ext_tcdm_resp.r_valid = ext_tcdm_resp_buf.r_valid;
     ext_tcdm_req_buf.r_ready = ext_tcdm_req.r_ready;
   end
@@ -1342,7 +1343,8 @@ module pulp_cluster
     );
 
   end else begin : gen_axi_cut
-    axi_cut #(
+    axi_cut_intf #(
+      .BYPASS     ( 1'b0                ),
       .ADDR_WIDTH ( AXI_ADDR_WIDTH      ),
       .DATA_WIDTH ( AXI_DATA_C2S_WIDTH  ),
       .ID_WIDTH   ( AXI_ID_OUT_WIDTH    ),
@@ -1353,10 +1355,11 @@ module pulp_cluster
       .in     (s_data_master),
       .out    (s_data_master_cut)
     );
-    axi_cut #(
+    axi_cut_intf #(
+      .BYPASS     ( 1'b0                ),
       .ADDR_WIDTH ( AXI_ADDR_WIDTH      ),
       .DATA_WIDTH ( AXI_DATA_S2C_WIDTH  ),
-      .ID_WIDTH   ( AXI_ID_IN_WIDTH    ),
+      .ID_WIDTH   ( AXI_ID_IN_WIDTH     ),
       .USER_WIDTH ( AXI_USER_WIDTH      )
     ) i_data_slave_cut (
       .clk_i,

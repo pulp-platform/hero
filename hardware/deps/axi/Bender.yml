@@ -4,10 +4,10 @@ package:
     - "Andreas Kurth <akurth@iis.ee.ethz.ch>" # current maintainer
     - "Fabian Schuiki <fschuiki@iis.ee.ethz.ch>"
     - "Florian Zaruba <zarubaf@iis.ee.ethz.ch>"
+    - "Wolfgang Roenninger <wroennin@ethz.ch>"
 
 dependencies:
-  apb: { git: "https://github.com/pulp-platform/apb.git", rev: release-0.2 }
-  common_cells: { git: "https://github.com/pulp-platform/common_cells.git", rev: counter-ext }
+  common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.16.3 }
   common_verification: { git: "https://github.com/pulp-platform/common_verification.git", version: 0.1.1 }
 
 export_include_dirs:
@@ -20,36 +20,35 @@ sources:
   # Level 0
   - src/axi_pkg.sv
   # Level 1
-  - src/axi_address_width_converter.sv
-  - src/axi_demux.sv
   - src/axi_intf.sv
-  - src/axi_mux.sv
   - src/axi_perf_mon.sv
   # Level 2
-  - src/axi_address_resolver.sv
-  - src/axi_arbiter.sv
   - src/axi_atop_filter.sv
-  - src/axi_burst_splitter.sv
-  - src/axi_bypass.sv
   - src/axi_cdc.sv
   - src/axi_cut.sv
   - src/axi_data_downsize.sv
   - src/axi_data_upsize.sv
   - src/axi_delayer.sv
+  - src/axi_demux.sv
+  - src/axi_id_remap.sv
+  - src/axi_id_prepend.sv
   - src/axi_join.sv
-  - src/axi_lite_cut.sv
+  - src/axi_lite_demux.sv
   - src/axi_lite_join.sv
+  - src/axi_lite_mux.sv
+  - src/axi_lite_to_apb.sv
   - src/axi_lite_to_axi.sv
   - src/axi_modify_address.sv
+  - src/axi_mux.sv
   - src/axi_read_burst_buffer.sv
   - src/axi_to_axi_lite.sv
   # Level 3
-  - src/axi_bypass_wrap.sv
   - src/axi_data_width_converter.sv
-  - src/axi_id_remap.sv
-  - src/axi_lite_multicut.sv
-  - src/axi_lite_xbar.sv
+  - src/axi_decerr_slv.sv
   - src/axi_multicut.sv
+  # Level 4
+  - src/axi_lite_xbar.sv
+  - src/axi_xbar.sv
 
   - target: synth_test
     files:
@@ -62,13 +61,15 @@ sources:
   - target: test
     files:
       - test/tb_axi_atop_filter.sv
-      - test/tb_axi_burst_splitter.sv
       - test/tb_axi_cdc.sv
+      - test/tb_axi_delayer.sv
       - test/tb_axi_dwc_downsize.sv
       - test/tb_axi_dwc_upsize.sv
       - test/tb_axi_id_remap.sv
-      - test/tb_axi_delayer.sv
+      - test/tb_axi_lite_to_apb.sv
       - test/tb_axi_lite_to_axi.sv
       - test/tb_axi_lite_xbar.sv
         #- test/tb_axi_perf_mon.sv
       - test/tb_axi_to_axi_lite.sv
+      - test/tb_axi_xbar_pkg.sv
+      - test/tb_axi_xbar.sv

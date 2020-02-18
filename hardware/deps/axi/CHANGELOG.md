@@ -4,25 +4,200 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+
 ## Unreleased
 
 ### Added
-- `axi_id_remap` now raises an error when it receives any atomic operation, which it currently does
-  not support.
-- Add macros for assigning to and from AXI channel structs and an AXI interface.
-- Add constrained randomizing master and slave test drivers.
-- Add performance monitor.
-- Add data width converter (up- and downsizer).
-- Add write burst packer.
-- Add read burst buffer.
 
 ### Changed
-- Change `reset` tasks in `axi_driver` and `axi_lite_driver` (both test modules) to functions.
+
+### Fixed
+
+
+## 0.12.0 - 2020-02-14
+
+### Added
+- `axi_lite_to_apb`: AXI4-Lite to APB4 converter.
+
+
+## 0.11.0 - 2020-02-13
+
+### Added
+- `axi_cdc`: Add a safe AXI clock domain crossing (CDC) implementation.
+
+### Changed
+- The interface variants of `axi_demux` and `axi_mux` have been changed to match the convention for
+  interface variants in this repository:
+  - `axi_demux_wrap`: Change name to `axi_demux_intf` and change parameter names to ALL_CAPS.
+  - `axi_mux_wrap`: Change name to `axi_mux_intf`, and change parameter names to ALL_CAPS.
+- `axi_demux`: Default parameters to `0`.
+
+### Fixed
+- `axi_demux`: Add parameter case for `NoMstPorts == 1`.
+
+
+## 0.10.2 - 2020-02-13
+
+### Fixed
+- `axi_atop_filter`: Remove unreachable `default` in `unique case` block.
+- `axi_demux_wrap`: Fix signals passed to demux.
+- `axi_lite_demux_intf`: Fix signal passed to demux.
+- `axi_lite_mux`: Add missing declaration of `r_fifo_push`.
+
+
+## 0.10.1 - 2020-02-12
+
+### Fixed
+- `axi_lite_xbar`: Fix synthesis for `NoMstPorts == 1`.
+
+
+## 0.10.0 - 2020-02-11
+
+### Added
+- `axi_lite_xbar`: fully-connected AXI4-Lite crossbar.
+- `axi_lite_demux`: AXI4-Lite demultiplexer from one slave port to a configurable number of master
+  ports.
+- `axi_lite_mux`: AXI4-Lite multiplexer from a configurable number of slave ports to one master
+  port.
+
+### Changed
+- `axi_test`: Extended package with random AXI4-Lite master and slave test bench classes.
+
+
+## 0.9.2 - 2020-02-11
+
+### Fixed
+- `axi_pkg`: Fix value of `CUT_ALL_PORTS` (in `xbar_latency_e`) in Vivado synthesis.
+
+
+## 0.9.1 - 2020-01-18
+
+### Fixed
+- `axi_decerr_slv`: Fix parameter to be UpperCamelCase
+
+
+## 0.9.0 - 2020-01-16
+
+### Added
+- `axi_test`: Constrained randomizing AXI master (`rand_axi_master`) and slave (`rand_axi_slave`).
+  - `rand_axi_master` issues a configurable number of read and write transactions to configurable
+    memory regions (address ranges with associated memory types) and with random properties within
+    constraints (e.g., burst length, exclusive accesses, atomic operations).
+  - `rand_axi_slave` responds to transactions with random delays and data.
+- `axi_pkg`: AXI memory types (`mem_type_t`) and functions `get_arcache` and `get_awcache` to
+  calculate `AxCACHE` bits for a given memory type.
+- Add `axi_decerr_slv`.
+- Add `axi_id_prepend`.
+- Add fully compliant `axi_xbar`.
+- Add documentation on `axi_mux`, `axi_demux` and `axi_xbar`
+- Module overview to `README.md`
+
+### Changed
+- `axi_test`: The `reset` tasks in `axi_driver` and `axi_lite_driver` are now functions.
+- Bump `common_cells` to `1.16.0` which contains the address decoding logic used in `axi_xbar`.
+
+### Fixed
+- `axi_intf` move import into interface bodies.
+- `axi_pkg` make functions automatic, fixing a problem with Synopsys.
+
+
+## 0.8.2 - 2019-12-20
+
+### Fixed
+- `src_files.yml`: Add `only_local` flag for `axi_test`.
+- `axi_test`:
+  - Add missing default parameters to `axi_lite_driver`.
+  - Move wildcard import from `axi_test` into package to prevent pollution of compilation unit.
+
+
+## 0.8.1 - 2019-12-19
+
+### Added
+- `axi_pkg`: Functions to calculate addresses and byte positions within a beat.
+
+
+## 0.8.0 - 2019-12-19
+
+All modules have been changed from SystemVerilog interfaces to struct ports.  Thus, all modules in
+this repository are now available in tools that do not support interfaces.  Interfaces are now
+opt-in: every module has a variant with `_intf` suffix that is functionally equivalent but has
+interfaces instead of struct ports.  If you would like to keep using interfaces, please add an
+`_intf` suffix to any module you are using from this repository.  Some `_intf` variants require more
+parameters (e.g., to define the ID width) than the module prior to this release, but otherwise the
+`_intf` variants are drop-in replacements.
+
+We encourage the use of structs to build AXI infrastructure, and we have added a set of `typdef`
+macros and have extended the `assign` macros to keep designers productive and prevent mismatches.
+
+Additionally, we have removed a set of modules that had known issues.  We will provide new
+implementations for these modules in near-term releases and no longer support the removed modules.
+
+The individual changes for each module follow.
+
+### Added
+- `assign.svh`:
+  - Macros for setting an AXI or AXI-Lite interface from channel or request/response structs inside
+    a process (`AXI_SET_FROM_*` and `AXI_LITE_SET_FROM_*`) and outside a process like an assignment
+    (`AXI_ASSIGN_FROM_*` and `AXI_LITE_ASSIGN_FROM_*`).
+  - Macros for setting channel or request/response structs to the signals of an AXI or AXI-Lite
+    interface inside a process (`AXI_SET_TO_*` and `AXI_LITE_SET_TO_*`) and outside a process like
+    an assignment (`AXI_ASSIGN_TO_*`, `AXI_LITE_ASSIGN_TO_*`).
+- `typedef.svh`: Macros for defining AXI or AXI-Lite channel (`AXI_TYPEDEF_*_CHAN_T` and
+  `AXI_LITE_TYPEDEF_*_CHAN_T`) and request/response structs (`AXI_TYPEDEF_RE{Q,SP}_T` and
+  `AXI_LITE_TYPEDEF_RE{Q,SP}_T`).
+
+### Changed
+- `axi_atop_filter` has been changed from interfaces to struct ports.  Please use the newly added
+  `axi_atop_filter_intf` module if you prefer interfaces.
+- `axi_cut` has been changed from interfaces to struct ports.  Please use the newly added
+  `axi_cut_intf` module if you prefer interfaces.
+- `axi_delayer` has been changed from interfaces to struct ports.  Please use the newly added
+  `axi_delayer_intf` module if you prefer interfaces.
+- `axi_join` has been renamed to `axi_join_intf`, and `axi_lite_join` has been renamed to
+  `axi_lite_join_intf`.  To join two structs, simply assign them instead.
+- `axi_multicut` has been changed from interfaces to struct ports.  Please use the newly added
+  `axi_multicut_intf` module if you prefer interfaces.
+- `axi_modify_address` has been changed from interfaces to struct ports.  Please use the newly added
+  `axi_modify_address_intf` module if you prefer interfaces.
+- `axi_lite_to_axi` has been changed from interfaces to struct ports.  Please use the newly added
+  `axi_lite_to_axi_intf` module if you prefer interfaces.
 
 ### Removed
-- `axi_pkg` previously defined fixed widths for ID, user, address, and data signal and derived
-  structs for the five AXI channels from them.  However, these widths are not equal for all
-  instantiations and usages of this package.  Therefore, they have been removed.
+- `axi_lite_xbar`:  This interconnect module was not a full crossbar and its routing rules interface
+  no longer fits our demands.  A replacement will be provided in a near-term release.
+- `axi_address_resolver` was used together with `axi_lite_xbar` and is removed along with it.  If a
+  standalone replacement for this module is required, please use `addr_decoder` from `common_cells`.
+- `axi_arbiter` was used together with `axi_lite_xbar` and is removed along with it.  If a
+  standalone replacement of this module is required, please use `rr_arb_tree` from `common_cells`.
+  A near-term release will introduce an AXI multiplexer and demultiplexer to suit protocol-specific
+  needs.
+- `axi_id_remap` had problems with ordering and ATOPs.  A new, correct implementation will be
+  provided in a near-term release.
+- `axi_lite_cut` has been rendered unnecessary by changing `axi_cut` to struct ports.  To get a cut
+  with AXI-Lite ports, simply pass AXI-Lite channels and request/response structs as parameters.  If
+  you prefer interfaces, please replace any `axi_lite_cut` with the newly added `axi_lite_cut_intf`
+  module.
+- `axi_lite_multicut`: same rationale and transition procedure as for `axi_lite_cut`.
+- In `axi_pkg`, the `*Width` `localparam`s and the `id_t`, `addr_t`, etc. `typedef`s have been
+  removed.  There is no one-fits-all value of these parameters, so we cannot provide a generic
+  definition for them in this package.  Please use the added macros in `typedef.svh` to define your
+  own types with a few lines of code (which you can put into your own package, for example).
+
+
+## 0.7.2 - 2019-12-03
+
+### Fixed
+- axi_to_axi_lite: Fix underflow in internal buffers.
+- axi_to_axi_lite: Remove restriction on size of internal buffers.
+
+## 0.7.1 - 2019-11-19
+
+### Changed
+- axi_multicut: Simplified implementation without changing I/O behavior.
+
+### Fixed
+- src_files: Removed `axi_test.sv` from synthesized files.
+- tb_axi_lite_xbar: Fixed AW->W dependency.
 
 ## 0.7.0 - 2019-05-28
 

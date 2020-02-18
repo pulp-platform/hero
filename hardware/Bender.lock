@@ -7,7 +7,7 @@ packages:
       Git: "https://github.com/pulp-platform/apb.git"
     dependencies: []
   axi:
-    revision: 88c92c17563af8644920b4ef26456b5fa8e363e2
+    revision: 73d890edbe33b02e8b05a6da262606cf681a04de
     version: ~
     source:
       Git: "https://github.com/pulp-platform/axi.git"
@@ -97,7 +97,7 @@ packages:
     dependencies:
       - cluster_interconnect
   common_cells:
-    revision: 53fade6f0f101a236b6280d872a73c47cf08b83b
+    revision: bbc0bf4699eb2c6babafce5924d86810507189a2
     version: ~
     source:
       Git: "https://github.com/pulp-platform/common_cells.git"

@@ -9,9 +9,25 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
+// Author:
+// Andreas Kurth  <akurth@iis.ee.ethz.ch>
+
+// Macros to define AXI and AXI-Lite Channel and Request/Response Structs
+
 `ifndef AXI_TYPEDEF_SVH_
 `define AXI_TYPEDEF_SVH_
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// AXI4+ATOP Channel and Request/Response Structs
+//
+// Usage Example:
+// `AXI_TYPEDEF_AW_CHAN_T(axi_aw_t,   axi_addr_t, axi_id_t, axi_user_t);
+// `AXI_TYPEDEF_W_CHAN_T (axi_w_t,    axi_data_t, axi_strb_t, axi_user_t);
+// `AXI_TYPEDEF_B_CHAN_T (axi_b_t,    axi_id_t, axi_user_t);
+// `AXI_TYPEDEF_AR_CHAN_T(axi_ar_t,   axi_addr_t, axi_id_t, axi_user_t);
+// `AXI_TYPEDEF_R_CHAN_T (axi_r_t,    axi_data_t, axi_id_t, axi_user_t);
+// `AXI_TYPEDEF_REQ_T    (axi_req_t,  axi_aw_t, axi_w_t, axi_ar_t);
+// `AXI_TYPEDEF_RESP_T   (axi_resp_t, axi_b_t, axi_r_t);
 `define AXI_TYPEDEF_AW_CHAN_T(aw_chan_t, addr_t, id_t, user_t)  \
   typedef struct packed {                                       \
     id_t              id;                                       \
@@ -27,7 +43,6 @@
     axi_pkg::atop_t   atop;                                     \
     user_t            user;                                     \
   } aw_chan_t;
-
 `define AXI_TYPEDEF_W_CHAN_T(w_chan_t, data_t, strb_t, user_t)  \
   typedef struct packed {                                       \
     data_t data;                                                \
@@ -35,14 +50,12 @@
     logic  last;                                                \
     user_t user;                                                \
   } w_chan_t;
-
 `define AXI_TYPEDEF_B_CHAN_T(b_chan_t, id_t, user_t)  \
   typedef struct packed {                             \
     id_t            id;                               \
     axi_pkg::resp_t resp;                             \
     user_t          user;                             \
   } b_chan_t;
-
 `define AXI_TYPEDEF_AR_CHAN_T(ar_chan_t, addr_t, id_t, user_t)  \
   typedef struct packed {                                       \
     id_t              id;                                       \
@@ -57,7 +70,6 @@
     axi_pkg::region_t region;                                   \
     user_t            user;                                     \
   } ar_chan_t;
-
 `define AXI_TYPEDEF_R_CHAN_T(r_chan_t, data_t, id_t, user_t)  \
   typedef struct packed {                                     \
     id_t            id;                                       \
@@ -66,7 +78,6 @@
     logic           last;                                     \
     user_t          user;                                     \
   } r_chan_t;
-
 `define AXI_TYPEDEF_REQ_T(req_t, aw_chan_t, w_chan_t, ar_chan_t)  \
   typedef struct packed {                                         \
     aw_chan_t aw;                                                 \
@@ -78,7 +89,6 @@
     logic     ar_valid;                                           \
     logic     r_ready;                                            \
   } req_t;
-
 `define AXI_TYPEDEF_RESP_T(resp_t, b_chan_t, r_chan_t)  \
   typedef struct packed {                               \
     logic     aw_ready;                                 \
@@ -89,48 +99,66 @@
     logic     r_valid;                                  \
     r_chan_t  r;                                        \
   } resp_t;
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// In AXI-Lite, the AR and AW channels have the same fields.
-`define AXI_LITE_TYPEDEF_AX_CHAN_T(ax_chan_t, addr_t, id_t, user_t) \
-  typedef struct packed {                                           \
-    id_t              id;                                           \
-    addr_t            addr;                                         \
-    axi_pkg::size_t   size;                                         \
-    axi_pkg::prot_t   prot;                                         \
-    user_t            user;                                         \
-  } ax_chan_t;
 
-`define AXI_LITE_TYPEDEF_W_CHAN_T(w_chan_t, data_t, strb_t, user_t) \
-  typedef struct packed {                                           \
-    data_t data;                                                    \
-    strb_t strb;                                                    \
-    user_t user;                                                    \
-  } w_chan_t;
-
-`define AXI_LITE_TYPEDEF_B_CHAN_T(b_chan_t, id_t, user_t) \
-  `AXI_TYPEDEF_B_CHAN_T(b_chan_t, id_t, user_t)
-
-`define AXI_LITE_TYPEDEF_R_CHAN_T(r_chan_t, data_t, id_t, user_t) \
-  typedef struct packed {                                         \
-    id_t            id;                                           \
-    data_t          data;                                         \
-    axi_pkg::resp_t resp;                                         \
-    user_t          user;                                         \
-  } r_chan_t;
-
-`define AXI_LITE_TYPEDEF_REQ_T(req_t, ax_chan_t, w_chan_t)  \
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// AXI-Lite (4+Prot) Channel and Request/Response Structs
+//
+// Usage Example:
+// `AXI_LITE_TYPEDEF_AW_CHAN_T(axi_lite_aw_t,   axi_lite_addr_t);
+// `AXI_LITE_TYPEDEF_W_CHAN_T (axi_lite_w_t,    axi_lite_data_t, axi_lite_strb_t);
+// `AXI_LITE_TYPEDEF_B_CHAN_T (axi_lite_b_t);
+// `AXI_LITE_TYPEDEF_AR_CHAN_T(axi_lite_ar_t,   axi_lite_addr_t);
+// `AXI_LITE_TYPEDEF_R_CHAN_T (axi_lite_r_t,    axi_lite_data_t);
+// `AXI_LITE_TYPEDEF_REQ_T    (axi_lite_req_t,  axi_lite_aw_t, axi_lite_w_t, axi_lite_ar_t);
+// `AXI_LITE_TYPEDEF_RESP_T   (axi_lite_resp_t, axi_lite_b_t, axi_lite_r_t);
+`define AXI_LITE_TYPEDEF_AW_CHAN_T(aw_chan_lite_t, addr_t)  \
   typedef struct packed {                                   \
-    ax_chan_t aw;                                           \
-    logic     aw_valid;                                     \
-    w_chan_t  w;                                            \
-    logic     w_valid;                                      \
-    logic     b_ready;                                      \
-    ax_chan_t ar;                                           \
-    logic     ar_valid;                                     \
-    logic     r_ready;                                      \
-  } req_t;
+    addr_t          addr;                                   \
+    axi_pkg::prot_t prot;                                   \
+  } aw_chan_lite_t;
+`define AXI_LITE_TYPEDEF_W_CHAN_T(w_chan_lite_t, data_t, strb_t)  \
+  typedef struct packed {                                         \
+    data_t   data;                                                \
+    strb_t   strb;                                                \
+  } w_chan_lite_t;
+`define AXI_LITE_TYPEDEF_B_CHAN_T(b_chan_lite_t)  \
+  typedef struct packed {                         \
+    axi_pkg::resp_t resp;                         \
+  } b_chan_lite_t;
+`define AXI_LITE_TYPEDEF_AR_CHAN_T(ar_chan_lite_t, addr_t)  \
+  typedef struct packed {                                   \
+    addr_t          addr;                                   \
+    axi_pkg::prot_t prot;                                   \
+  } ar_chan_lite_t;
+`define AXI_LITE_TYPEDEF_R_CHAN_T(r_chan_lite_t, data_t)  \
+  typedef struct packed {                                 \
+    data_t          data;                                 \
+    axi_pkg::resp_t resp;                                 \
+  } r_chan_lite_t;
+`define AXI_LITE_TYPEDEF_REQ_T(req_lite_t, aw_chan_lite_t, w_chan_lite_t, ar_chan_lite_t)  \
+  typedef struct packed {                                                                  \
+    aw_chan_lite_t aw;                                                                     \
+    logic          aw_valid;                                                               \
+    w_chan_lite_t  w;                                                                      \
+    logic          w_valid;                                                                \
+    logic          b_ready;                                                                \
+    ar_chan_lite_t ar;                                                                     \
+    logic          ar_valid;                                                               \
+    logic          r_ready;                                                                \
+  } req_lite_t;
+`define AXI_LITE_TYPEDEF_RESP_T(resp_lite_t, b_chan_lite_t, r_chan_lite_t)  \
+  typedef struct packed {                                                   \
+    logic          aw_ready;                                                \
+    logic          w_ready;                                                 \
+    b_chan_lite_t  b;                                                       \
+    logic          b_valid;                                                 \
+    logic          ar_ready;                                                \
+    r_chan_lite_t  r;                                                       \
+    logic          r_valid;                                                 \
+  } resp_lite_t;
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-`define AXI_LITE_TYPEDEF_RESP_T(resp_t, b_chan_t, r_chan_t) \
-  `AXI_TYPEDEF_RESP_T(resp_t, b_chan_t, r_chan_t)
 
 `endif

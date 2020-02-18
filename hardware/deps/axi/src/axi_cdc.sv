@@ -1,4 +1,4 @@
-// Copyright (c) 2019 ETH Zurich, University of Bologna
+// Copyright (c) 20192-2020 ETH Zurich, University of Bologna
 //
 // Copyright and related rights are licensed under the Solderpad Hardware
 // License, Version 0.51 (the "License"); you may not use this file except in
@@ -9,6 +9,10 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
+// Andreas Kurth <akurth@iis.ee.ethz.ch>
+// Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+// Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+
 `include "axi/assign.svh"
 import axi_pkg::*;
 
@@ -18,200 +22,173 @@ import axi_pkg::*;
 /// ports are in separate clock domains.  IMPORTANT: For each AXI channel, you MUST properly
 /// constrain three paths through the FIFO; see the header of `cdc_fifo_gray` for instructions.
 module axi_cdc #(
-  parameter int unsigned  AW = 0,
-  parameter int unsigned  DW = 0,
-  parameter int unsigned  IW = 0,
-  parameter int unsigned  UW = 0,
+  parameter type aw_chan_t  = logic, // AW Channel Type
+  parameter type w_chan_t   = logic, //  W Channel Type
+  parameter type b_chan_t   = logic, //  B Channel Type
+  parameter type ar_chan_t  = logic, // AR Channel Type
+  parameter type r_chan_t   = logic, //  R Channel Type
+  parameter type axi_req_t  = logic, // encapsulates request channels
+  parameter type axi_resp_t = logic, // encapsulates request channels
   /// Depth of the FIFO crossing the clock domain, given as 2**LOG_DEPTH.
-  parameter int unsigned  LOG_DEPTH = 0
+  parameter int unsigned  LogDepth  = 1
 ) (
-  input  logic    clk_slv_i,
-  input  logic    rst_slv_ni,
-  AXI_BUS.Slave   slv,
-  input  logic    clk_mst_i,
-  input  logic    rst_mst_ni,
-  AXI_BUS.Master  mst
+  // slave side - clocked by `src_clk_i`
+  input  logic      src_clk_i,
+  input  logic      src_rst_ni,
+  input  axi_req_t  src_req_i,
+  output axi_resp_t src_resp_o,
+  // master side - clocked by `dst_clk_i`
+  input  logic      dst_clk_i,
+  input  logic      dst_rst_ni,
+  output axi_req_t  dst_req_o,
+  input  axi_resp_t dst_resp_i
 );
 
-  typedef logic [AW-1:0]    addr_t;
-  typedef logic [DW-1:0]    data_t;
-  typedef logic [IW-1:0]    id_t;
-  typedef logic [DW/8-1:0]  strb_t;
-  typedef logic [UW-1:0]    user_t;
+    cdc_fifo_gray #(
+        //  We need to cast to bits here because of some arbitrary bug in Synopsys.
+        .WIDTH       ( $bits(aw_chan_t)    ),
+        .LOG_DEPTH   ( LogDepth            )
+    ) i_cdc_fifo_gray_aw (
+        .src_rst_ni,
+        .src_clk_i,
+        .src_data_i  ( src_req_i.aw        ),
+        .src_valid_i ( src_req_i.aw_valid  ),
+        .src_ready_o ( src_resp_o.aw_ready ),
+        .dst_rst_ni,
+        .dst_clk_i,
+        .dst_data_o  ( dst_req_o.aw        ),
+        .dst_valid_o ( dst_req_o.aw_valid  ),
+        .dst_ready_i ( dst_resp_i.aw_ready )
+    );
 
-  // AW Channel
+    cdc_fifo_gray #(
+        .WIDTH       ( $bits(w_chan_t)    ),
+        .LOG_DEPTH   ( LogDepth           )
+    ) i_cdc_fifo_gray_w (
+        .src_rst_ni,
+        .src_clk_i,
+        .src_data_i  ( src_req_i.w        ),
+        .src_valid_i ( src_req_i.w_valid  ),
+        .src_ready_o ( src_resp_o.w_ready ),
+        .dst_rst_ni,
+        .dst_clk_i,
+        .dst_data_o  ( dst_req_o.w        ),
+        .dst_valid_o ( dst_req_o.w_valid  ),
+        .dst_ready_i ( dst_resp_i.w_ready )
+    );
 
-  typedef struct packed {
-    id_t     id;
-    addr_t   addr;
-    len_t    len;
-    size_t   size;
-    burst_t  burst;
-    logic    lock;
-    cache_t  cache;
-    prot_t   prot;
-    qos_t    qos;
-    region_t region;
-    atop_t   atop;
-    user_t   user;
-  } aw_chan_t;
-  aw_chan_t slv_aw, mst_aw;
+    cdc_fifo_gray #(
+        .WIDTH       ( $bits(b_chan_t)    ),
+        .LOG_DEPTH   ( LogDepth           )
+    ) i_cdc_fifo_gray_b (
+        .src_rst_ni  ( dst_rst_ni         ),
+        .src_clk_i   ( dst_clk_i          ),
+        .src_data_i  ( dst_resp_i.b       ),
+        .src_valid_i ( dst_resp_i.b_valid ),
+        .src_ready_o ( dst_req_o.b_ready  ),
+        .dst_rst_ni  ( src_rst_ni         ),
+        .dst_clk_i   ( src_clk_i          ),
+        .dst_data_o  ( src_resp_o.b       ),
+        .dst_valid_o ( src_resp_o.b_valid ),
+        .dst_ready_i ( src_req_i.b_ready  )
+    );
 
-  `AXI_ASSIGN_TO_AW(slv_aw, slv);
-  `AXI_ASSIGN_FROM_AW(mst, mst_aw);
+    cdc_fifo_gray #(
+        .WIDTH       ( $bits(ar_chan_t)    ),
+        .LOG_DEPTH   ( LogDepth            )
+    ) i_cdc_fifo_gray_ar (
+        .src_rst_ni,
+        .src_clk_i,
+        .src_data_i  ( src_req_i.ar        ),
+        .src_valid_i ( src_req_i.ar_valid  ),
+        .src_ready_o ( src_resp_o.ar_ready ),
+        .dst_rst_ni,
+        .dst_clk_i,
+        .dst_data_o  ( dst_req_o.ar        ),
+        .dst_valid_o ( dst_req_o.ar_valid  ),
+        .dst_ready_i ( dst_resp_i.ar_ready )
+    );
 
-  cdc_fifo_gray #(
-    .T          (aw_chan_t),
-    .LOG_DEPTH  (LOG_DEPTH)
-  ) i_aw_cdc (
-    .src_rst_ni   (rst_slv_ni),
-    .src_clk_i    (clk_slv_i),
-    .src_data_i   (slv_aw),
-    .src_valid_i  (slv.aw_valid),
-    .src_ready_o  (slv.aw_ready),
-
-    .dst_rst_ni   (rst_mst_ni),
-    .dst_clk_i    (clk_mst_i),
-    .dst_data_o   (mst_aw),
-    .dst_valid_o  (mst.aw_valid),
-    .dst_ready_i  (mst.aw_ready)
-  );
-
-  // W Channel
-
-  typedef struct packed {
-    data_t data;
-    strb_t strb;
-    user_t user;
-    logic  last;
-  } w_chan_t;
-  w_chan_t slv_w, mst_w;
-
-  `AXI_ASSIGN_TO_W(slv_w, slv);
-  `AXI_ASSIGN_FROM_W(mst, mst_w);
-
-  cdc_fifo_gray #(
-    .T          (w_chan_t),
-    .LOG_DEPTH  (LOG_DEPTH)
-  ) i_w_cdc (
-    .src_rst_ni   (rst_slv_ni),
-    .src_clk_i    (clk_slv_i),
-    .src_data_i   (slv_w),
-    .src_valid_i  (slv.w_valid),
-    .src_ready_o  (slv.w_ready),
-
-    .dst_rst_ni   (rst_mst_ni),
-    .dst_clk_i    (clk_mst_i),
-    .dst_data_o   (mst_w),
-    .dst_valid_o  (mst.w_valid),
-    .dst_ready_i  (mst.w_ready)
-  );
-
-  // B Channel
-
-  typedef struct packed {
-    id_t   id;
-    resp_t resp;
-    user_t user;
-  } b_chan_t;
-  b_chan_t slv_b, mst_b;
-
-  `AXI_ASSIGN_TO_B(mst_b, mst);
-  `AXI_ASSIGN_FROM_B(slv, slv_b);
-
-  cdc_fifo_gray #(
-    .T          (b_chan_t),
-    .LOG_DEPTH  (LOG_DEPTH)
-  ) i_b_cdc (
-    .src_rst_ni   (rst_mst_ni),
-    .src_clk_i    (clk_mst_i),
-    .src_data_i   (mst_b),
-    .src_valid_i  (mst.b_valid),
-    .src_ready_o  (mst.b_ready),
-
-    .dst_rst_ni   (rst_slv_ni),
-    .dst_clk_i    (clk_slv_i),
-    .dst_data_o   (slv_b),
-    .dst_valid_o  (slv.b_valid),
-    .dst_ready_i  (slv.b_ready)
-  );
-
-  // AR Channel
-
-  typedef struct packed {
-    id_t     id;
-    addr_t   addr;
-    len_t    len;
-    size_t   size;
-    burst_t  burst;
-    logic    lock;
-    cache_t  cache;
-    prot_t   prot;
-    qos_t    qos;
-    region_t region;
-    user_t   user;
-  } ar_chan_t;
-  ar_chan_t mst_ar, slv_ar;
-
-  `AXI_ASSIGN_TO_AR(slv_ar, slv);
-  `AXI_ASSIGN_FROM_AR(mst, mst_ar);
-
-  cdc_fifo_gray #(
-    .T          (ar_chan_t),
-    .LOG_DEPTH  (LOG_DEPTH)
-  ) i_ar_cdc (
-    .src_rst_ni   (rst_slv_ni),
-    .src_clk_i    (clk_slv_i),
-    .src_data_i   (slv_ar),
-    .src_valid_i  (slv.ar_valid),
-    .src_ready_o  (slv.ar_ready),
-
-    .dst_rst_ni   (rst_mst_ni),
-    .dst_clk_i    (clk_mst_i),
-    .dst_data_o   (mst_ar),
-    .dst_valid_o  (mst.ar_valid),
-    .dst_ready_i  (mst.ar_ready)
-  );
-
-  // R Channel
-
-  typedef struct packed {
-    id_t   id;
-    data_t data;
-    resp_t resp;
-    user_t user;
-    logic  last;
-  } r_chan_t;
-  r_chan_t mst_r, slv_r;
-
-  `AXI_ASSIGN_TO_R(mst_r, mst);
-  `AXI_ASSIGN_FROM_R(slv, slv_r);
-
-  cdc_fifo_gray #(
-    .T          (r_chan_t),
-    .LOG_DEPTH  (LOG_DEPTH)
-  ) i_r_cdc (
-    .src_rst_ni   (rst_mst_ni),
-    .src_clk_i    (clk_mst_i),
-    .src_data_i   (mst_r),
-    .src_valid_i  (mst.r_valid),
-    .src_ready_o  (mst.r_ready),
-
-    .dst_rst_ni   (rst_slv_ni),
-    .dst_clk_i    (clk_slv_i),
-    .dst_data_o   (slv_r),
-    .dst_valid_o  (slv.r_valid),
-    .dst_ready_i  (slv.r_ready)
-  );
-
-// pragma translate_off
-`ifndef VERILATOR
-  initial begin: p_assertions
-    assert (AW > 0) else $fatal("AXI address width must be at least 1!");
-    assert (DW > 0) else $fatal("AXI data width must be at least 1!");
-    assert (IW > 0) else $fatal("AXI ID width must be at least 1!");
-  end
-`endif
-// pragma translate_on
+    cdc_fifo_gray #(
+        .WIDTH       ( $bits(r_chan_t)    ),
+        .LOG_DEPTH   ( LogDepth           )
+    ) i_cdc_fifo_gray_r (
+        .src_rst_ni  ( dst_rst_ni         ),
+        .src_clk_i   ( dst_clk_i          ),
+        .src_data_i  ( dst_resp_i.r       ),
+        .src_valid_i ( dst_resp_i.r_valid ),
+        .src_ready_o ( dst_req_o.r_ready  ),
+        .dst_rst_ni  ( src_rst_ni         ),
+        .dst_clk_i   ( src_clk_i          ),
+        .dst_data_o  ( src_resp_o.r       ),
+        .dst_valid_o ( src_resp_o.r_valid ),
+        .dst_ready_i ( src_req_i.r_ready  )
+    );
 
 endmodule
+
+`include "axi/assign.svh"
+`include "axi/typedef.svh"
+
+// interface wrapper
+module axi_cdc_intf #(
+  parameter int unsigned AXI_ID_WIDTH   = 0,
+  parameter int unsigned AXI_ADDR_WIDTH = 0,
+  parameter int unsigned AXI_DATA_WIDTH = 0,
+  parameter int unsigned AXI_USER_WIDTH = 0,
+  /// Depth of the FIFO crossing the clock domain, given as 2**LOG_DEPTH.
+  parameter int unsigned LOG_DEPTH = 1
+) (
+   // slave side - clocked by `src_clk_i`
+  input  logic      src_clk_i,
+  input  logic      src_rst_ni,
+  AXI_BUS.Slave     src,
+  // master side - clocked by `dst_clk_i`
+  input  logic      dst_clk_i,
+  input  logic      dst_rst_ni,
+  AXI_BUS.Master    dst
+);
+
+  typedef logic [AXI_ID_WIDTH-1:0]     id_t;
+  typedef logic [AXI_ADDR_WIDTH-1:0]   addr_t;
+  typedef logic [AXI_DATA_WIDTH-1:0]   data_t;
+  typedef logic [AXI_DATA_WIDTH/8-1:0] strb_t;
+  typedef logic [AXI_USER_WIDTH-1:0]   user_t;
+  `AXI_TYPEDEF_AW_CHAN_T ( aw_chan_t, addr_t, id_t,         user_t);
+  `AXI_TYPEDEF_W_CHAN_T  (  w_chan_t, data_t,       strb_t, user_t);
+  `AXI_TYPEDEF_B_CHAN_T  (  b_chan_t,         id_t,         user_t);
+  `AXI_TYPEDEF_AR_CHAN_T ( ar_chan_t, addr_t, id_t,         user_t);
+  `AXI_TYPEDEF_R_CHAN_T  (  r_chan_t, data_t, id_t,         user_t);
+  `AXI_TYPEDEF_REQ_T     (     req_t, aw_chan_t, w_chan_t, ar_chan_t);
+  `AXI_TYPEDEF_RESP_T    (    resp_t,  b_chan_t, r_chan_t);
+
+  req_t  src_req,  dst_req;
+  resp_t src_resp, dst_resp;
+
+  `AXI_ASSIGN_TO_REQ    ( src_req,  src      );
+  `AXI_ASSIGN_FROM_RESP ( src,      src_resp );
+
+  `AXI_ASSIGN_FROM_REQ  ( dst     , dst_req  );
+  `AXI_ASSIGN_TO_RESP   ( dst_resp, dst      );
+
+  axi_cdc #(
+    .aw_chan_t  ( aw_chan_t ),
+    .w_chan_t   ( w_chan_t  ),
+    .b_chan_t   ( b_chan_t  ),
+    .ar_chan_t  ( ar_chan_t ),
+    .r_chan_t   ( r_chan_t  ),
+    .axi_req_t  ( req_t     ),
+    .axi_resp_t ( resp_t    ),
+    .LogDepth   ( LOG_DEPTH )
+  ) i_axi_cdc (
+    .src_clk_i,
+    .src_rst_ni,
+    .src_req_i  ( src_req  ),
+    .src_resp_o ( src_resp ),
+    .dst_clk_i,
+    .dst_rst_ni,
+    .dst_req_o  ( dst_req  ),
+    .dst_resp_i ( dst_resp )
+  );
+
+  endmodule

@@ -46,11 +46,12 @@ module pulp_tb #(
   typedef pulp_pkg::lite_addr_t axi_lite_addr_t;
   typedef pulp_pkg::lite_data_t axi_lite_data_t;
   typedef pulp_pkg::lite_strb_t axi_lite_strb_t;
-  `AXI_LITE_TYPEDEF_AX_CHAN_T(  axi_lite_ax_t,    axi_lite_addr_t, axi_id_t, axi_user_t);
-  `AXI_LITE_TYPEDEF_W_CHAN_T(   axi_lite_w_t,     axi_lite_data_t, axi_lite_strb_t, axi_user_t);
-  `AXI_LITE_TYPEDEF_B_CHAN_T(   axi_lite_b_t,     axi_id_t, axi_user_t);
-  `AXI_LITE_TYPEDEF_R_CHAN_T(   axi_lite_r_t,     axi_lite_data_t, axi_id_t, axi_user_t);
-  `AXI_LITE_TYPEDEF_REQ_T(      axi_lite_req_t,   axi_lite_ax_t, axi_lite_w_t);
+  `AXI_LITE_TYPEDEF_AW_CHAN_T(  axi_lite_aw_t,    axi_lite_addr_t);
+  `AXI_LITE_TYPEDEF_W_CHAN_T(   axi_lite_w_t,     axi_lite_data_t, axi_lite_strb_t);
+  `AXI_LITE_TYPEDEF_B_CHAN_T(   axi_lite_b_t);
+  `AXI_LITE_TYPEDEF_AR_CHAN_T(  axi_lite_ar_t,    axi_lite_addr_t);
+  `AXI_LITE_TYPEDEF_R_CHAN_T(   axi_lite_r_t,     axi_lite_data_t);
+  `AXI_LITE_TYPEDEF_REQ_T(      axi_lite_req_t,   axi_lite_aw_t, axi_lite_w_t, axi_lite_ar_t);
   `AXI_LITE_TYPEDEF_RESP_T(     axi_lite_resp_t,  axi_lite_b_t, axi_lite_r_t);
 
   logic clk,
@@ -113,7 +114,7 @@ module pulp_tb #(
     .AXI_DATA_WIDTH (AXI_DW),
     .AXI_ID_WIDTH   (AXI_IW),
     .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
-  ) from_pulp[1:0] ();
+  ) from_pulp[0:0] ();
   AXI_BUS #(
     .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
@@ -128,41 +129,48 @@ module pulp_tb #(
   ) to_periphs ();
   `AXI_ASSIGN_FROM_REQ(from_pulp[0], from_pulp_req);
   `AXI_ASSIGN_TO_RESP (from_pulp_resp, from_pulp[0]);
-  localparam int unsigned NODE_REGIONS = 2;
-  logic [NODE_REGIONS-1:0][1:0][pulp_pkg::AXI_AW-1:0] node_start, node_end;
-  logic [NODE_REGIONS-1:0][1:0]                       node_valid;
-  always_comb begin
-    node_start = '0;
-    node_end = '0;
-    node_valid = '0;
 
-    node_start[0][1] = 64'h0000_0000_1a10_0000;
-    node_end  [0][1] = 64'h0000_0000_1a10_ffff;
-    node_valid[0][1] = 1'b1;
-    node_start[0][0] = 64'h0000_0000_0000_0000;
-    node_end  [0][0] = node_start[0][1] - 1;
-    node_valid[0][0] = 1'b1;
-    node_start[1][0] = node_end[0][1] + 1;
-    node_end  [1][0] = 64'hffff_ffff_ffff_ffff;
-    node_valid[1][0] = 1'b1;
-  end
-  axi_node_intf_wrap #(
-    .NB_MASTER      (2),
-    .NB_SLAVE       (2), // actually only 1 but then vsim cannot handle axi_node
-    .NB_REGION      (2),
-    .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
-    .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (AXI_IW),
-    .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
-  ) i_xbar (
-    .clk          (clk),
-    .rst_n        (rst_n),
-    .test_en_i    (1'b0),
-    .slave        (from_pulp),
-    .master       (from_xbar),
-    .start_addr_i (node_start),
-    .end_addr_i   (node_end),
-    .valid_rule_i (node_valid)
+  localparam int unsigned N_RULES = 1;
+  axi_pkg::xbar_rule_32_t [N_RULES-1:0] addr_map;
+  assign addr_map[0] = '{
+    idx:        1,
+    start_addr: 32'h1a10_0000,
+    end_addr:   32'h1a11_0000
+  };
+  `ifndef VERILATOR
+    initial begin
+      assert (pulp_pkg::AXI_AW == 32)
+        else $fatal("Address map is only defined for 32-bit addresses!");
+    end
+  `endif
+  localparam int unsigned MAX_TXNS_PER_CLUSTER =  pulp_cluster_cfg_pkg::N_CORES +
+                                                  pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS;
+  localparam axi_pkg::xbar_cfg_t xbar_cfg = '{
+    NoSlvPorts:         1,
+    NoMstPorts:         2,
+    MaxMstTrans:        MAX_TXNS_PER_CLUSTER,
+    MaxSlvTrans:        N_CLUSTERS * MAX_TXNS_PER_CLUSTER,
+    FallThrough:        1'b0,
+    LatencyMode:        axi_pkg::NO_LATENCY,
+    AxiIdWidthSlvPorts: AXI_IW,
+    AxiIdUsedSlvPorts:  AXI_IW,
+    AxiAddrWidth:       pulp_pkg::AXI_AW,
+    AxiDataWidth:       AXI_DW,
+    NoAddrRules:        N_RULES
+  };
+  axi_xbar_intf #(
+    .AXI_USER_WIDTH (pulp_pkg::AXI_UW),
+    .Cfg            (xbar_cfg),
+    .rule_t         (axi_pkg::xbar_rule_32_t)
+  ) i_axi_xbar (
+    .clk_i                  (clk),
+    .rst_ni                 (rst_n),
+    .test_i                 (1'b0),
+    .slv_ports              (from_pulp),
+    .mst_ports              (from_xbar),
+    .addr_map_i             (addr_map),
+    .en_default_mst_port_i  ({1{1'b1}}), // enable default master port for all slave ports
+    .default_mst_port_i     ({1{1'b0}})  // use slave 0 as default master port
   );
 
   // Peripherals

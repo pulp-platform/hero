@@ -13,9 +13,7 @@ module pulp_ooc #(
   localparam int unsigned AXI_DW_LITE = 32,
   localparam type lite_addr_t = logic [AXI_AW_LITE-1:0],
   localparam type lite_data_t = logic [AXI_DW_LITE-1:0],
-  localparam type lite_id_t = logic, // only ID 0 supported
-  localparam type lite_strb_t = logic [AXI_DW_LITE/8-1:0],
-  localparam type lite_user_t = logic
+  localparam type lite_strb_t = logic [AXI_DW_LITE/8-1:0]
 ) (
   // Clocks and Resets
   input  logic              clk_i,
@@ -113,34 +111,23 @@ module pulp_ooc #(
   output logic              slv_r_valid_o,
   input  logic              slv_r_ready_i,
 
-  input  lite_id_t          rab_conf_aw_id_i,
   input  lite_addr_t        rab_conf_aw_addr_i,
-  input  axi_pkg::size_t    rab_conf_aw_size_i,
   input  axi_pkg::prot_t    rab_conf_aw_prot_i,
-  input  lite_user_t        rab_conf_aw_user_i,
   input  logic              rab_conf_aw_valid_i,
   output logic              rab_conf_aw_ready_o,
   input  lite_data_t        rab_conf_w_data_i,
   input  lite_strb_t        rab_conf_w_strb_i,
-  input  lite_user_t        rab_conf_w_user_i,
   input  logic              rab_conf_w_valid_i,
   output logic              rab_conf_w_ready_o,
-  output lite_id_t          rab_conf_b_id_o,
   output axi_pkg::resp_t    rab_conf_b_resp_o,
-  output lite_user_t        rab_conf_b_user_o,
   output logic              rab_conf_b_valid_o,
   input  logic              rab_conf_b_ready_i,
-  input  lite_id_t          rab_conf_ar_id_i,
   input  lite_addr_t        rab_conf_ar_addr_i,
-  input  axi_pkg::size_t    rab_conf_ar_size_i,
   input  axi_pkg::prot_t    rab_conf_ar_prot_i,
-  input  lite_user_t        rab_conf_ar_user_i,
   input  logic              rab_conf_ar_valid_i,
   output logic              rab_conf_ar_ready_o,
-  output lite_id_t          rab_conf_r_id_o,
   output lite_data_t        rab_conf_r_data_o,
   output axi_pkg::resp_t    rab_conf_r_resp_o,
-  output lite_user_t        rab_conf_r_user_o,
   output logic              rab_conf_r_valid_o,
   input  logic              rab_conf_r_ready_i,
 
@@ -167,11 +154,12 @@ module pulp_ooc #(
   `AXI_TYPEDEF_REQ_T    (req_t, aw_t, w_t, ar_t)
   `AXI_TYPEDEF_RESP_T   (resp_t, b_t, r_t)
 
-  `AXI_LITE_TYPEDEF_AX_CHAN_T (lite_ax_t, lite_addr_t, lite_id_t, lite_user_t)
-  `AXI_LITE_TYPEDEF_W_CHAN_T  (lite_w_t, lite_data_t, lite_strb_t, lite_user_t)
-  `AXI_LITE_TYPEDEF_B_CHAN_T  (lite_b_t, lite_id_t, lite_user_t)
-  `AXI_LITE_TYPEDEF_R_CHAN_T  (lite_r_t, lite_data_t, lite_id_t, lite_user_t)
-  `AXI_LITE_TYPEDEF_REQ_T     (lite_req_t, lite_ax_t, lite_w_t)
+  `AXI_LITE_TYPEDEF_AW_CHAN_T (lite_aw_t, lite_addr_t)
+  `AXI_LITE_TYPEDEF_W_CHAN_T  (lite_w_t, lite_data_t, lite_strb_t)
+  `AXI_LITE_TYPEDEF_B_CHAN_T  (lite_b_t)
+  `AXI_LITE_TYPEDEF_AR_CHAN_T (lite_ar_t, lite_addr_t)
+  `AXI_LITE_TYPEDEF_R_CHAN_T  (lite_r_t, lite_data_t)
+  `AXI_LITE_TYPEDEF_REQ_T     (lite_req_t, lite_aw_t, lite_w_t, lite_ar_t)
   `AXI_LITE_TYPEDEF_RESP_T    (lite_resp_t, lite_b_t, lite_r_t)
 
   req_t       to_pulp_req,
@@ -273,34 +261,23 @@ module pulp_ooc #(
   assign slv_r_valid_o          = to_pulp_resp.r_valid;
   assign to_pulp_req.r_ready    = slv_r_ready_i;
 
-  assign rab_conf_req.aw.id     = rab_conf_aw_id_i;
   assign rab_conf_req.aw.addr   = rab_conf_aw_addr_i;
-  assign rab_conf_req.aw.size   = rab_conf_aw_size_i;
   assign rab_conf_req.aw.prot   = rab_conf_aw_prot_i;
-  assign rab_conf_req.aw.user   = rab_conf_aw_user_i;
   assign rab_conf_req.aw_valid  = rab_conf_aw_valid_i;
   assign rab_conf_aw_ready_o    = rab_conf_resp.aw_ready;
   assign rab_conf_req.w.data    = rab_conf_w_data_i;
   assign rab_conf_req.w.strb    = rab_conf_w_strb_i;
-  assign rab_conf_req.w.user    = rab_conf_w_user_i;
   assign rab_conf_req.w_valid   = rab_conf_w_valid_i;
   assign rab_conf_w_ready_o     = rab_conf_resp.w_ready;
-  assign rab_conf_b_id_o        = rab_conf_resp.b.id;
   assign rab_conf_b_resp_o      = rab_conf_resp.b.resp;
-  assign rab_conf_b_user_o      = rab_conf_resp.b.user;
   assign rab_conf_b_valid_o     = rab_conf_resp.b_valid;
   assign rab_conf_req.b_ready   = rab_conf_b_ready_i;
-  assign rab_conf_req.ar.id     = rab_conf_ar_id_i;
   assign rab_conf_req.ar.addr   = rab_conf_ar_addr_i;
-  assign rab_conf_req.ar.size   = rab_conf_ar_size_i;
   assign rab_conf_req.ar.prot   = rab_conf_ar_prot_i;
-  assign rab_conf_req.ar.user   = rab_conf_ar_user_i;
   assign rab_conf_req.ar_valid  = rab_conf_ar_valid_i;
   assign rab_conf_ar_ready_o    = rab_conf_resp.ar_ready;
-  assign rab_conf_r_id_o        = rab_conf_resp.r.id;
   assign rab_conf_r_data_o      = rab_conf_resp.r.data;
   assign rab_conf_r_resp_o      = rab_conf_resp.r.resp;
-  assign rab_conf_r_user_o      = rab_conf_resp.r.user;
   assign rab_conf_r_valid_o     = rab_conf_resp.r_valid;
   assign rab_conf_req.r_ready   = rab_conf_r_ready_i;
 
