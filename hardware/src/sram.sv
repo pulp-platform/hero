@@ -28,6 +28,8 @@ module sram #(
   output data_t rdata_o
 );
 
+localparam NB_CUTS = N_WORDS / 1024 ;
+
 
 `ifdef SYNTHESIS
   `ifdef TARGET_XILINX
@@ -73,20 +75,49 @@ module sram #(
     );
   `else
 
-  logic [31:0] BE_BW;
+  logic [31: 0] BE_BW;
+  logic [31: 0] Q_int;
+  logic [ 4: 0] CEN_int;
+  logic [ 3: 0] muxsel;
+
+
+  assign CEN_int[0] = ~req_i |  addr_i[12] |  addr_i[11] |  addr_i[10];
+  assign CEN_int[1] = ~req_i |  addr_i[12] |  addr_i[11] | ~addr_i[10];
+  assign CEN_int[2] = ~req_i |  addr_i[12] | ~addr_i[11] |  addr_i[10];
+  assign CEN_int[3] = ~req_i |  addr_i[12] | ~addr_i[11] | ~addr_i[10];
+  assign CEN_int[4] = ~req_i | ~addr_i[12] |  addr_i[11] |  addr_i[10];
 
   assign BE_BW      = { {8{be_i[3]}}, {8{be_i[2]}}, {8{be_i[1]}}, {8{be_i[0]}} };
+
+  assign rdata_o = Q_int[muxsel];
+
+
+  always_ff @(posedge CLK or negedge RSTN)
+  begin
+    if(~rst_ni)
+    begin
+      muxsel <= '0;
+    end
+    else
+    begin
+      if(~req_i == 1'b0)
+        muxsel <= addr_i[12:10];
+    end
+  end
+
+  generate
+    for (genvar i=0; i<NB_CUTS; i++) begin : CUT 
 
   IN22FDX_R1PH_NFHN_W01024B032M04C256 i_tcdm_bank
   (
     .CLK          ( clk_i            ),
-    .CEN          ( ~req_i           ),
+    .CEN          ( CEN_int[i]       ),
     .RDWEN        ( we_i             ),
     .AW           ( addr_i[9:2]      ),
     .AC           ( addr_i[1:0]      ),
     .D            ( wdata_i          ),
     .BW           ( BE_BW            ),
-    .Q            ( rdata_o          ),
+    .Q            ( Q_int[i]         ),   //rdata_o 
     .T_LOGIC      ( 1'b0             ),
     .MA_SAWL      ( '0               ),
     .MA_WL        ( '0               ),
@@ -94,6 +125,9 @@ module sram #(
     .MA_WRASD     ( '0               ),
     .OBSV_CTL     (                  )
   );
+
+    end
+  endgenerate
 
   `endif
 
