@@ -345,6 +345,7 @@ module pulp_tb #(
     to_pulp_req.aw       = '0;
     to_pulp_req.w.data   = data;
     to_pulp_req.w.strb   = '1;
+    to_pulp_req.w.last   = 1'b1;
     to_pulp_req.w_valid  = 1'b1;
     `wait_for(to_pulp_resp.w_ready)
     to_pulp_req.w_valid  = 1'b0;
