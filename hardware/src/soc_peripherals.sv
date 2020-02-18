@@ -23,8 +23,14 @@ module soc_peripherals #(
   AXI_BUS.Slave axi
 );
 
-  // AXI to AXI Lite
+  localparam int unsigned N_SLAVES = 2;
 
+  localparam int unsigned SOC_CTRL_START = pulp_cluster_cfg_pkg::SOC_PERIPH_BASE_ADDR + 16'h4000;
+  localparam int unsigned SOC_CTRL_END   = SOC_CTRL_START + 16'h0FFF;
+  localparam int unsigned STD_OUT_START  = pulp_cluster_cfg_pkg::SOC_PERIPH_BASE_ADDR + 16'hF000;
+  localparam int unsigned STD_OUT_END    = STD_OUT_START  + 16'h0FFF;
+
+  // AXI to AXI Lite
   AXI_LITE #(
     .AXI_ADDR_WIDTH(AXI_AW),
     .AXI_DATA_WIDTH(AXI_DW)
@@ -52,26 +58,26 @@ module soc_peripherals #(
     logic [AXI_AW-1:0] end_addr;
   } rule_t;
   rule_t [1:0]   addr_map;
-  assign addr_map[0] = '{idx: 0, start_addr: 32'h1A10_4000, end_addr: 32'h1A10_4FFF};
-  assign addr_map[1] = '{idx: 1, start_addr: 32'h1A10_F000, end_addr: 32'h1A10_FFFF};
+  assign addr_map[0] = '{idx: 0, start_addr: SOC_CTRL_START, end_addr: SOC_CTRL_END};
+  assign addr_map[1] = '{idx: 1, start_addr: STD_OUT_START,  end_addr: STD_OUT_END };
 
-  logic [AXI_AW-1:0]      paddr;
-  logic [2:0]             pprot;
-  logic [1:0]             psel;
-  logic                   penable;
-  logic                   pwrite;
-  logic [AXI_DW-1:0]      pwdata;
-  logic [AXI_DW/8-1:0]    pstrb;
-  logic [1:0]             pready;
-  logic [1:0][AXI_DW-1:0] prdata;
-  logic [1:0]             pslverr;
+  logic [AXI_AW-1:0]               paddr;
+  logic [2:0]                      pprot;
+  logic [N_SLAVES-1:0]             psel;
+  logic                            penable;
+  logic                            pwrite;
+  logic [AXI_DW-1:0]               pwdata;
+  logic [AXI_DW/8-1:0]             pstrb;
+  logic [N_SLAVES-1:0]             pready;
+  logic [N_SLAVES-1:0][AXI_DW-1:0] prdata;
+  logic [N_SLAVES-1:0]             pslverr;
 
   axi_lite_to_apb_intf #(
-    .NoApbSlaves (32'd2 ),
-    .NoRules     (32'd2 ),
-    .AddrWidth   (AXI_AW),
-    .DataWidth   (AXI_DW),
-    .rule_t      (rule_t)
+    .NoApbSlaves (N_SLAVES),
+    .NoRules     (N_SLAVES),
+    .AddrWidth   (AXI_AW  ),
+    .DataWidth   (AXI_DW  ),
+    .rule_t      (rule_t  )
   ) i_axi_lite_to_apb (
     .clk_i,
     .rst_ni,
@@ -92,9 +98,9 @@ module soc_peripherals #(
   APB_BUS #(
     .APB_ADDR_WIDTH (AXI_AW),
     .APB_DATA_WIDTH (AXI_DW)
-  ) apb_periphs[1:0] ();
+  ) apb_periphs[N_SLAVES-1:0] ();
 
-  for (genvar slv = 0; slv < unsigned'(2); slv++) begin: gen_apb_assign
+  for (genvar slv = 0; slv < N_SLAVES; slv++) begin: gen_apb_assign
     assign apb_periphs[slv].paddr = paddr;
     assign apb_periphs[slv].pwdata = pwdata;
     assign apb_periphs[slv].pwrite = pwrite;
@@ -106,6 +112,16 @@ module soc_peripherals #(
   end
 
   // Peripherals
+  soc_ctrl_regs #(
+    .N_CORES    (N_CORES),
+    .N_CLUSTERS (N_CLUSTERS),
+    .ADDR_WIDTH (AXI_AW),
+    .DATA_WIDTH (AXI_DW)
+  ) i_soc_ctrl_regs (
+    .clk_i,
+    .rst_ni,
+    .apb    (apb_periphs[0])
+  );
 
   `ifndef SYNTHESIS
     apb_stdout #(
@@ -123,16 +139,5 @@ module soc_peripherals #(
     assign apb_periphs[1].pslverr = 1'b1;
     assign apb_periphs[1].prdata = '0;
   `endif
-
-  soc_ctrl_regs #(
-    .N_CORES    (N_CORES),
-    .N_CLUSTERS (N_CLUSTERS),
-    .ADDR_WIDTH (AXI_AW),
-    .DATA_WIDTH (AXI_DW)
-  ) i_soc_ctrl_regs (
-    .clk_i,
-    .rst_ni,
-    .apb    (apb_periphs[0])
-  );
 
 endmodule

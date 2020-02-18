@@ -416,7 +416,8 @@ module pulp #(
     .N_CLUSTERS           (N_CLUSTERS),
     .L2_N_PORTS           (L2_N_AXI_PORTS),
     .L2_N_BYTES_PER_PORT  (L2_SIZE/L2_N_AXI_PORTS),
-    .PERIPH_N_BYTES       (32*1024),
+    .PERIPH_N_BYTES       (pulp_cluster_cfg_pkg::SOC_PERIPH_SIZE),
+    .PERIPH_BASE_ADDR     (64'(pulp_cluster_cfg_pkg::SOC_PERIPH_BASE_ADDR)),
     .DEBUG_N_BYTES        (pulp_cluster_cfg_pkg::DM_SIZE),
     .DEBUG_BASE_ADDR      (64'(pulp_cluster_cfg_pkg::DM_BASE_ADDR))
   ) i_soc_bus (
@@ -428,7 +429,8 @@ module pulp #(
     .ext_mst    (ext_mst),
     .ext_slv    (ext_slv_remapped),
     .debug_slv  (debug_mst_dwced),
-    .debug_mst  (debug_slv_predwc)
+    .debug_mst  (debug_slv_predwc),
+    .periph_mst (periph_mst)
   );
 
   axi_atop_filter_intf #(

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Replace `axi_node` with standard-compliant crossbar `axi_xbar`.
+- Move `soc_peripherals` from testbench to `soc_bus`. Most importantly, this includes the `soc_control_registers`.
 
 ### Fixed
 - `axi2mem`: Ensure starvation freedom when prioritizing individual writes over read bursts.

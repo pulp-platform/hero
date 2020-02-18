@@ -173,33 +173,6 @@ module pulp_tb #(
     .default_mst_port_i     ({1{1'b0}})  // use slave 0 as default master port
   );
 
-  // Peripherals
-  axi_dw_converter_intf #(
-    .AXI_ADDR_WIDTH     (pulp_pkg::AXI_AW),
-    .AXI_SLV_DATA_WIDTH (AXI_DW),
-    .AXI_MST_DATA_WIDTH (32),
-    .AXI_ID_WIDTH       (AXI_IW+1),
-    .AXI_USER_WIDTH     (pulp_pkg::AXI_UW)
-  ) i_dwc_peripherals (
-    .clk_i  (clk),
-    .rst_ni (rst_n),
-    .slv    (from_xbar[1]),
-    .mst    (to_periphs)
-  );
-  soc_peripherals #(
-    .AXI_AW     (pulp_pkg::AXI_AW),
-    .AXI_IW     (AXI_IW+1),
-    .AXI_UW     (pulp_pkg::AXI_UW),
-    .AXI_DW     (32),
-    .N_CORES    (pulp_cluster_cfg_pkg::N_CORES),
-    .N_CLUSTERS (N_CLUSTERS)
-  ) i_peripherals (
-    .clk_i      (clk),
-    .rst_ni     (rst_n),
-    .test_en_i  (1'b0),
-    .axi        (to_periphs)
-  );
-
   // Emulate infinite memory with AXI slave port.
   initial begin
     automatic logic [7:0] mem[axi_addr_t];

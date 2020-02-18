@@ -28,6 +28,7 @@ module soc_bus #(
   parameter int unsigned  L2_N_PORTS = 1,
   parameter int unsigned  L2_N_BYTES_PER_PORT = 0,  // [B]
   parameter int unsigned  PERIPH_N_BYTES = 0,       // [B]
+  parameter int unsigned  PERIPH_BASE_ADDR = 0,       // [B]
   parameter int unsigned  DEBUG_N_BYTES = 0,        // [B]
   parameter logic [63:0]  DEBUG_BASE_ADDR = 0
 ) (
@@ -39,14 +40,16 @@ module soc_bus #(
   AXI_BUS.Master  ext_mst,
   AXI_BUS.Slave   ext_slv,
   AXI_BUS.Slave   debug_slv,
-  AXI_BUS.Master  debug_mst
+  AXI_BUS.Master  debug_mst,
+  AXI_BUS.Master  periph_mst
 );
 
-  localparam int unsigned N_MASTERS = N_CLUSTERS + L2_N_PORTS + 2; // ext and debug
+  localparam int unsigned N_MASTERS = N_CLUSTERS + L2_N_PORTS + 3; // ext, debug and periph
   localparam int unsigned N_SLAVES = soc_bus_pkg::n_slaves(N_CLUSTERS) + 2; // ext and debug
   localparam int unsigned IDX_L2_MEM = N_CLUSTERS;
   localparam int unsigned IDX_EXT = IDX_L2_MEM + 1;
   localparam int unsigned IDX_DEBUG_MST = IDX_EXT + 1;
+  localparam int unsigned IDX_PERIPH = IDX_DEBUG_MST + 1;
 
   localparam int unsigned IDX_EXT_SLV = N_CLUSTERS;
   localparam int unsigned IDX_DEBUG_SLV = IDX_EXT_SLV + 1;
@@ -79,9 +82,10 @@ module soc_bus #(
 //  end
   `AXI_ASSIGN(ext_mst, masters[IDX_EXT]);
   `AXI_ASSIGN(debug_mst, masters[IDX_DEBUG_MST]);
+  `AXI_ASSIGN(periph_mst, masters[IDX_PERIPH]);
 
   // Address Map
-  localparam int unsigned N_RULES = N_CLUSTERS + L2_N_PORTS + 1; // plus debug
+  localparam int unsigned N_RULES = N_CLUSTERS + L2_N_PORTS + 2; // plus debug and periph
   axi_pkg::xbar_rule_32_t [N_RULES-1:0] addr_map;
   // Clusters
   for (genvar i = 0; i < N_CLUSTERS; i++) begin : gen_addr_map_clusters
@@ -104,6 +108,11 @@ module soc_bus #(
     idx:        IDX_DEBUG_MST,
     start_addr: DEBUG_BASE_ADDR,
     end_addr:   DEBUG_BASE_ADDR + DEBUG_N_BYTES
+  };
+  assign addr_map[N_CLUSTERS + L2_N_PORTS + 1] = '{
+    idx:        IDX_PERIPH,
+    start_addr: PERIPH_BASE_ADDR,
+    end_addr:   PERIPH_BASE_ADDR + PERIPH_N_BYTES
   };
   // pragma translate_off
   `ifndef VERILATOR
