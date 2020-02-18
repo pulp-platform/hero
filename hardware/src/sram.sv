@@ -76,9 +76,9 @@ localparam NB_CUTS = N_WORDS / 1024 ;
   `else
 
   logic [31: 0] BE_BW;
-  logic [31: 0] Q_int;
-  logic [ 4: 0] CEN_int;
-  logic [ 3: 0] muxsel;
+  logic [NB_CUTS -1 : 0] [31: 0] Q_int;
+  logic [NB_CUTS -1 : 0] CEN_int;
+  logic [NB_CUTS -2 : 0] muxsel;
 
 
   assign CEN_int[0] = ~req_i |  addr_i[12] |  addr_i[11] |  addr_i[10];
