@@ -91,7 +91,7 @@ module pulp_cluster
 
   // DMA parameters
   parameter int    TCDM_ADD_WIDTH          = ADDR_MEM_WIDTH + $clog2(NB_TCDM_BANKS) + 2, // BYTE address width TCDM
-  parameter int    NB_OUTSND_BURSTS        = 8,
+  parameter int    NB_OUTSND_BURSTS        = 64,
   parameter int    MCHAN_BURST_LENGTH      = 128,
 
   // peripheral and periph interconnect parameters

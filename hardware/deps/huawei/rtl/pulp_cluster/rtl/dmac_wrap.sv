@@ -19,7 +19,7 @@
 module dmac_wrap
 #(
   parameter NB_CTRLS           = 1,
-  parameter NB_OUTSND_BURSTS   = 8,
+  parameter NB_OUTSND_BURSTS   = 64,
   parameter MCHAN_BURST_LENGTH = 256,
   parameter AXI_ADDR_WIDTH     = 32,
   parameter AXI_DATA_WIDTH     = 64,
