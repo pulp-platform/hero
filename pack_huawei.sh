@@ -53,8 +53,11 @@ git config --local user.email 'packager@localhost'
 git add -A
 git commit -m 'initial commit'
 
-# Example applications: copy to destination.
+# PULP software: Copy libhero-target
 cd "$SRC"
+copy_git_files support/libhero-target
+
+# Example applications: copy to destination.
 copy_git_files example-apps
 
 # Setup script: copy to destination.
