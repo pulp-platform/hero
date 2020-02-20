@@ -200,7 +200,7 @@ clean:
 # run target per config, see e.g. default_run_target.mk
 
 dis:
-	$(PULP_OBJDUMP) $(PULP_ARCH_OBJDFLAGS) $(disopt) $(TARGETS)
+	$(PULP_OBJDUMP) $(PULP_ARCH_OBJDFLAGS) $(disopt) $(TARGETS) > $(TARGETS).s
 
 size:
 	$(PULPRT_HOME)/bin/pos-size --binary=$(TARGETS) --depth=10
