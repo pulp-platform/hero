@@ -16,6 +16,8 @@ module sram #(
   parameter int unsigned STRB_WIDTH = DATA_WIDTH/8,
   parameter type addr_t = logic[$clog2(N_WORDS)-1:0],
   parameter type data_t = logic[DATA_WIDTH-1:0],
+  parameter int unsigned NB_CUTS     = N_WORDS / 1024,
+  parameter int unsigned MORE_CUTS   = (NB_CUTS > 1) ? 1: 0,
   parameter type strb_t = logic[STRB_WIDTH-1:0]
 ) (
   input  logic  clk_i,
@@ -28,7 +30,6 @@ module sram #(
   output data_t rdata_o
 );
 
-localparam NB_CUTS = N_WORDS / 1024 ;
 
 
 `ifdef SYNTHESIS
@@ -74,25 +75,23 @@ localparam NB_CUTS = N_WORDS / 1024 ;
       .wea            (we)
     );
   `else
+  `ifdef MORE_CUTS
 
-  logic [31: 0] BE_BW;
   logic [NB_CUTS -1 : 0] [31: 0] Q_int;
   logic [NB_CUTS -1 : 0] CEN_int;
-  logic [NB_CUTS -2 : 0] muxsel;
+  logic [$clog2(NB_CUTS) -1 : 0] muxsel;
 
 
-  assign CEN_int[0] = ~req_i |  addr_i[12] |  addr_i[11] |  addr_i[10];
-  assign CEN_int[1] = ~req_i |  addr_i[12] |  addr_i[11] | ~addr_i[10];
-  assign CEN_int[2] = ~req_i |  addr_i[12] | ~addr_i[11] |  addr_i[10];
-  assign CEN_int[3] = ~req_i |  addr_i[12] | ~addr_i[11] | ~addr_i[10];
-  assign CEN_int[4] = ~req_i | ~addr_i[12] |  addr_i[11] |  addr_i[10];
-
-  assign BE_BW      = { {8{be_i[3]}}, {8{be_i[2]}}, {8{be_i[1]}}, {8{be_i[0]}} };
+  // assign CEN_int[0] = ~req_i |  addr_i[12] |  addr_i[11] |  addr_i[10];
+  // assign CEN_int[1] = ~req_i |  addr_i[12] |  addr_i[11] | ~addr_i[10];
+  // assign CEN_int[2] = ~req_i |  addr_i[12] | ~addr_i[11] |  addr_i[10];
+  // assign CEN_int[3] = ~req_i |  addr_i[12] | ~addr_i[11] | ~addr_i[10];
+  // assign CEN_int[4] = ~req_i | ~addr_i[12] |  addr_i[11] |  addr_i[10];
 
   assign rdata_o = Q_int[muxsel];
 
 
-  always_ff @(posedge CLK or negedge RSTN)
+  always_ff @(posedge clk_i or negedge rst_ni)
   begin
     if(~rst_ni)
     begin
@@ -101,23 +100,54 @@ localparam NB_CUTS = N_WORDS / 1024 ;
     else
     begin
       if(~req_i == 1'b0)
-        muxsel <= addr_i[12:10];
+        muxsel <= addr_i[10+ $clog2(NB_CUTS)-1: 10];
     end
   end
 
+  genvar i;
   generate
-    for (genvar i=0; i<NB_CUTS; i++) begin : CUT 
+    for(i=0;i<NB_CUTS; i++) begin : CUT 
+      assign CEN_int[i] = ~req_i| ~(addr_i[10 +$clog2(NB_CUTS)-1:10 ] == i) ;
+      logic [31: 0] BE_BW;
+      assign BE_BW      = { {8{be_i[3]}}, {8{be_i[2]}}, {8{be_i[1]}}, {8{be_i[0]}} };
+
+      IN22FDX_R1PH_NFHN_W01024B032M04C256 i_tcdm_bank
+      (
+        .CLK          ( clk_i            ),
+        .CEN          ( CEN_int[i]       ),
+        .RDWEN        ( we_i             ),
+        .AW           ( addr_i[9:2]      ),
+        .AC           ( addr_i[1:0]      ),
+        .D            ( wdata_i          ),
+        .BW           ( BE_BW            ),
+        .Q            ( Q_int[i]         ),   //rdata_o 
+        .T_LOGIC      ( 1'b0             ),
+        .MA_SAWL      ( '0               ),
+        .MA_WL        ( '0               ),
+        .MA_WRAS      ( '0               ),
+        .MA_WRASD     ( '0               ),
+        .OBSV_CTL     (                  )
+      );
+
+    end
+  endgenerate
+
+ `else
+
+  logic [31:0] BE_BW;
+
+  assign BE_BW      = { {8{be_i[3]}}, {8{be_i[2]}}, {8{be_i[1]}}, {8{be_i[0]}} };
 
   IN22FDX_R1PH_NFHN_W01024B032M04C256 i_tcdm_bank
   (
     .CLK          ( clk_i            ),
-    .CEN          ( CEN_int[i]       ),
+    .CEN          ( ~req_i           ),
     .RDWEN        ( we_i             ),
     .AW           ( addr_i[9:2]      ),
     .AC           ( addr_i[1:0]      ),
     .D            ( wdata_i          ),
     .BW           ( BE_BW            ),
-    .Q            ( Q_int[i]         ),   //rdata_o 
+    .Q            ( rdata_o          ),
     .T_LOGIC      ( 1'b0             ),
     .MA_SAWL      ( '0               ),
     .MA_WL        ( '0               ),
@@ -125,11 +155,9 @@ localparam NB_CUTS = N_WORDS / 1024 ;
     .MA_WRASD     ( '0               ),
     .OBSV_CTL     (                  )
   );
-
-    end
-  endgenerate
-
   `endif
+  `endif
+
 
 `else // behavioral
   data_t mem [N_WORDS-1:0];
