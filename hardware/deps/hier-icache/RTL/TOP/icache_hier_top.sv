@@ -56,9 +56,6 @@ module icache_hier_top
 
    parameter PRI_NB_WAYS       = 2,
    parameter PRI_CACHE_SIZE    = 512,       // in Byte
-   parameter USE_SPECIAL_CORE  = "FALSE",
-   parameter SPECIAL_CORE_ID   = 8,
-   parameter SPECIAL_PRI_CACHE_SIZE = 1024, // in Byte
    parameter PRI_CACHE_LINE    = 1,         // in word of [FETCH_DATA_WIDTH]
 
    parameter AXI_ID            = 6,
@@ -143,14 +140,10 @@ module icache_hier_top
    // ---------------------------------------------------------------
 
    input  logic [NB_CORES-1:0]                          enable_l1_l15_prefetch_i,
-   input  logic                                         special_core_dest_i,
 
    SP_ICACHE_CTRL_UNIT_BUS.Slave                        IC_ctrl_unit_bus_main[SH_NB_BANKS],
    PRI_ICACHE_CTRL_UNIT_BUS.Slave                       IC_ctrl_unit_bus_pri[NB_CORES]
 );
-
-   localparam NUM_AXI_CH_IN = (USE_SPECIAL_CORE == "TRUE") ? (SH_NB_BANKS+1) : SH_NB_BANKS;
-
 
    // signals from PRI cache and interconnect
    logic [NB_CORES-1:0]                                 refill_req_int;
@@ -159,14 +152,6 @@ module icache_hier_top
    logic [NB_CORES-1:0]                                 refill_r_valid_int;
    logic [NB_CORES-1:0] [FETCH_DATA_WIDTH-1:0]          refill_r_data_int;
 
-
-
-   // signals from PRI cache and interconnect
-   logic [NB_CORES-1:0]                                 refill_to_intc_req_int;
-   logic [NB_CORES-1:0]                                 refill_to_intc_gnt_int;
-   logic [NB_CORES-1:0] [FETCH_ADDR_WIDTH-1:0]          refill_to_intc_addr_int;
-   logic [NB_CORES-1:0]                                 refill_to_intc_r_valid_int;
-   logic [NB_CORES-1:0] [FETCH_DATA_WIDTH-1:0]          refill_to_intc_r_data_int;
    // to LINT2AXI
    logic                                                refill_to_AXINODE_req_int;
    logic                                                refill_to_AXINODE_gnt_int;
@@ -188,64 +173,64 @@ module icache_hier_top
 
    // signal from icache-sh banks to axi node
    localparam  AXI_ID_INT  =  1;
-   localparam  AXI_ID_OUT  =  $clog2(NUM_AXI_CH_IN) + AXI_ID_INT;
+   localparam  AXI_ID_OUT  =  $clog2(SH_NB_BANKS) + AXI_ID_INT;
    localparam  ADDR_OFFSET =  $clog2(FETCH_DATA_WIDTH)-3;
 
-   logic [NUM_AXI_CH_IN-1:0][AXI_ID_INT-1:0]             axi_master_awid_int;
-   logic [NUM_AXI_CH_IN-1:0][AXI_ADDR-1:0]               axi_master_awaddr_int;
-   logic [NUM_AXI_CH_IN-1:0][ 7:0]                       axi_master_awlen_int;
-   logic [NUM_AXI_CH_IN-1:0][ 2:0]                       axi_master_awsize_int;
-   logic [NUM_AXI_CH_IN-1:0][ 1:0]                       axi_master_awburst_int;
-   logic [NUM_AXI_CH_IN-1:0]                             axi_master_awlock_int;
-   logic [NUM_AXI_CH_IN-1:0][ 3:0]                       axi_master_awcache_int;
-   logic [NUM_AXI_CH_IN-1:0][ 2:0]                       axi_master_awprot_int;
-   logic [NUM_AXI_CH_IN-1:0][ 3:0]                       axi_master_awregion_int;
-   logic [NUM_AXI_CH_IN-1:0][ AXI_USER-1:0]              axi_master_awuser_int;
-   logic [NUM_AXI_CH_IN-1:0][ 3:0]                       axi_master_awqos_int;
-   logic [NUM_AXI_CH_IN-1:0]                             axi_master_awvalid_int;
-   logic [NUM_AXI_CH_IN-1:0]                             axi_master_awready_int;
+   logic [SH_NB_BANKS-1:0][AXI_ID_INT-1:0]             axi_master_awid_int;
+   logic [SH_NB_BANKS-1:0][AXI_ADDR-1:0]               axi_master_awaddr_int;
+   logic [SH_NB_BANKS-1:0][ 7:0]                       axi_master_awlen_int;
+   logic [SH_NB_BANKS-1:0][ 2:0]                       axi_master_awsize_int;
+   logic [SH_NB_BANKS-1:0][ 1:0]                       axi_master_awburst_int;
+   logic [SH_NB_BANKS-1:0]                             axi_master_awlock_int;
+   logic [SH_NB_BANKS-1:0][ 3:0]                       axi_master_awcache_int;
+   logic [SH_NB_BANKS-1:0][ 2:0]                       axi_master_awprot_int;
+   logic [SH_NB_BANKS-1:0][ 3:0]                       axi_master_awregion_int;
+   logic [SH_NB_BANKS-1:0][ AXI_USER-1:0]              axi_master_awuser_int;
+   logic [SH_NB_BANKS-1:0][ 3:0]                       axi_master_awqos_int;
+   logic [SH_NB_BANKS-1:0]                             axi_master_awvalid_int;
+   logic [SH_NB_BANKS-1:0]                             axi_master_awready_int;
 
     //AXI write data bus -------------- // // --------------
-   logic [NUM_AXI_CH_IN-1:0] [AXI_DATA-1:0]              axi_master_wdata_int;
-   logic [NUM_AXI_CH_IN-1:0] [AXI_DATA/8-1:0]            axi_master_wstrb_int;
-   logic [NUM_AXI_CH_IN-1:0]                             axi_master_wlast_int;
-   logic [NUM_AXI_CH_IN-1:0] [ AXI_USER-1:0]             axi_master_wuser_int;
-   logic [NUM_AXI_CH_IN-1:0]                             axi_master_wvalid_int;
-   logic [NUM_AXI_CH_IN-1:0]                             axi_master_wready_int;
+   logic [SH_NB_BANKS-1:0] [AXI_DATA-1:0]              axi_master_wdata_int;
+   logic [SH_NB_BANKS-1:0] [AXI_DATA/8-1:0]            axi_master_wstrb_int;
+   logic [SH_NB_BANKS-1:0]                             axi_master_wlast_int;
+   logic [SH_NB_BANKS-1:0] [ AXI_USER-1:0]             axi_master_wuser_int;
+   logic [SH_NB_BANKS-1:0]                             axi_master_wvalid_int;
+   logic [SH_NB_BANKS-1:0]                             axi_master_wready_int;
     // ---------------------------------------------------------------
 
     //AXI BACKWARD write response bus -------------- // // --------------
-   logic [NUM_AXI_CH_IN-1:0] [AXI_ID_INT-1:0]            axi_master_bid_int;
-   logic [NUM_AXI_CH_IN-1:0] [ 1:0]                      axi_master_bresp_int;
-   logic [NUM_AXI_CH_IN-1:0] [ AXI_USER-1:0]             axi_master_buser_int;
-   logic [NUM_AXI_CH_IN-1:0]                             axi_master_bvalid_int;
-   logic [NUM_AXI_CH_IN-1:0]                             axi_master_bready_int;
+   logic [SH_NB_BANKS-1:0] [AXI_ID_INT-1:0]            axi_master_bid_int;
+   logic [SH_NB_BANKS-1:0] [ 1:0]                      axi_master_bresp_int;
+   logic [SH_NB_BANKS-1:0] [ AXI_USER-1:0]             axi_master_buser_int;
+   logic [SH_NB_BANKS-1:0]                             axi_master_bvalid_int;
+   logic [SH_NB_BANKS-1:0]                             axi_master_bready_int;
     // ---------------------------------------------------------------
 
     //AXI read address bus -------------------------------------------
-   logic [NUM_AXI_CH_IN-1:0][AXI_ID_INT-1:0]             axi_master_arid_int;       //
-   logic [NUM_AXI_CH_IN-1:0][AXI_ADDR-1:0]               axi_master_araddr_int;     //
-   logic [NUM_AXI_CH_IN-1:0][ 7:0]                       axi_master_arlen_int;      // burst length - 1 to 256
-   logic [NUM_AXI_CH_IN-1:0][ 2:0]                       axi_master_arsize_int;     // size of each transfer in burst
-   logic [NUM_AXI_CH_IN-1:0][ 1:0]                       axi_master_arburst_int;    // for bursts>1, accept only incr burst=01
-   logic [NUM_AXI_CH_IN-1:0]                             axi_master_arlock_int;     // only normal access supported axs_awlock=00
-   logic [NUM_AXI_CH_IN-1:0][ 3:0]                       axi_master_arcache_int;    //
-   logic [NUM_AXI_CH_IN-1:0][ 2:0]                       axi_master_arprot_int;     //
-   logic [NUM_AXI_CH_IN-1:0][ 3:0]                       axi_master_arregion_int;   //
-   logic [NUM_AXI_CH_IN-1:0][ AXI_USER-1:0]              axi_master_aruser_int;     //
-   logic [NUM_AXI_CH_IN-1:0][ 3:0]                       axi_master_arqos_int;      //
-   logic [NUM_AXI_CH_IN-1:0]                             axi_master_arvalid_int;    // master addr valid
-   logic [NUM_AXI_CH_IN-1:0]                             axi_master_arready_int;    // slave ready to accept
+   logic [SH_NB_BANKS-1:0][AXI_ID_INT-1:0]             axi_master_arid_int;       //
+   logic [SH_NB_BANKS-1:0][AXI_ADDR-1:0]               axi_master_araddr_int;     //
+   logic [SH_NB_BANKS-1:0][ 7:0]                       axi_master_arlen_int;      // burst length - 1 to 256
+   logic [SH_NB_BANKS-1:0][ 2:0]                       axi_master_arsize_int;     // size of each transfer in burst
+   logic [SH_NB_BANKS-1:0][ 1:0]                       axi_master_arburst_int;    // for bursts>1, accept only incr burst=01
+   logic [SH_NB_BANKS-1:0]                             axi_master_arlock_int;     // only normal access supported axs_awlock=00
+   logic [SH_NB_BANKS-1:0][ 3:0]                       axi_master_arcache_int;    //
+   logic [SH_NB_BANKS-1:0][ 2:0]                       axi_master_arprot_int;     //
+   logic [SH_NB_BANKS-1:0][ 3:0]                       axi_master_arregion_int;   //
+   logic [SH_NB_BANKS-1:0][ AXI_USER-1:0]              axi_master_aruser_int;     //
+   logic [SH_NB_BANKS-1:0][ 3:0]                       axi_master_arqos_int;      //
+   logic [SH_NB_BANKS-1:0]                             axi_master_arvalid_int;    // master addr valid
+   logic [SH_NB_BANKS-1:0]                             axi_master_arready_int;    // slave ready to accept
     // --------------------------------------------------------------------------------
 
     //AXI BACKWARD read data bus ----------------------------------------------
-   logic [NUM_AXI_CH_IN-1:0][AXI_ID_INT-1:0]             axi_master_rid_int;        //
-   logic [NUM_AXI_CH_IN-1:0][AXI_DATA-1:0]               axi_master_rdata_int;      //
-   logic [NUM_AXI_CH_IN-1:0][ 1:0]                       axi_master_rresp_int;      //
-   logic [NUM_AXI_CH_IN-1:0]                             axi_master_rlast_int;      // last transfer in burst
-   logic [NUM_AXI_CH_IN-1:0][ AXI_USER-1:0]              axi_master_ruser_int;      //
-   logic [NUM_AXI_CH_IN-1:0]                             axi_master_rvalid_int;     // slave data valid
-   logic [NUM_AXI_CH_IN-1:0]                             axi_master_rready_int;     // master ready to accept
+   logic [SH_NB_BANKS-1:0][AXI_ID_INT-1:0]             axi_master_rid_int;        //
+   logic [SH_NB_BANKS-1:0][AXI_DATA-1:0]               axi_master_rdata_int;      //
+   logic [SH_NB_BANKS-1:0][ 1:0]                       axi_master_rresp_int;      //
+   logic [SH_NB_BANKS-1:0]                             axi_master_rlast_int;      // last transfer in burst
+   logic [SH_NB_BANKS-1:0][ AXI_USER-1:0]              axi_master_ruser_int;      //
+   logic [SH_NB_BANKS-1:0]                             axi_master_rvalid_int;     // slave data valid
+   logic [SH_NB_BANKS-1:0]                             axi_master_rready_int;     // master ready to accept
 
    logic [NB_CORES - 1 :0][31:0]                         congestion_counter;
 
@@ -337,7 +322,7 @@ module icache_hier_top
             .FETCH_DATA_WIDTH     ( FETCH_DATA_WIDTH ), //= 128,      // Size of the fetch data
 
             .NB_WAYS              ( PRI_NB_WAYS      ), //= 4,        // Cache associativity
-            .CACHE_SIZE           ( (USE_SPECIAL_CORE == "TRUE") ? (( i == SPECIAL_CORE_ID ) ? SPECIAL_PRI_CACHE_SIZE : PRI_CACHE_SIZE) :  PRI_CACHE_SIZE  ), //= 4096,     // Ccache capacity in Byte
+            .CACHE_SIZE           ( PRI_CACHE_SIZE   ), //= 512      // Ccache capacity in Byte
             .CACHE_LINE           ( PRI_CACHE_LINE   ), //= 1,        // in word of [FETCH_DATA_WIDTH]
 
             .USE_REDUCED_TAG      ( USE_REDUCED_TAG  ), //= "TRUE",   // TRUE | FALSE
@@ -382,156 +367,7 @@ module icache_hier_top
         `endif
          );
       end
-
-      if( USE_SPECIAL_CORE == "TRUE")
-      begin : DEMUX_SPECIAL_CORE
-            hier_icache_demux
-            #(
-                .FETCH_ADDR_WIDTH ( FETCH_ADDR_WIDTH),
-                .FETCH_DATA_WIDTH ( FETCH_DATA_WIDTH)
-            )
-            hier_icache_demux
-            (
-                .clk                ( clk                                 ),
-                .rst_n              ( rst_n                               ),
-                .destination_i      ( special_core_dest_i                 ),
-
-                // signals from PRI cache and interconnect
-                .refill_req_i       ( refill_req_int[SPECIAL_CORE_ID]     ),
-                .refill_gnt_o       ( refill_gnt_int[SPECIAL_CORE_ID]     ),
-                .refill_addr_i      ( refill_addr_int[SPECIAL_CORE_ID]    ),
-                .refill_r_valid_o   ( refill_r_valid_int[SPECIAL_CORE_ID] ),
-                .refill_r_data_o    ( refill_r_data_int[SPECIAL_CORE_ID]  ),
-
-               
-                // signals from PRI cache and interconnect
-                .refill_req_o       ( {refill_to_AXINODE_req_int,     refill_to_intc_req_int[SPECIAL_CORE_ID]}     ),
-                .refill_gnt_i       ( {refill_to_AXINODE_gnt_int,     refill_to_intc_gnt_int[SPECIAL_CORE_ID]}     ),
-                .refill_addr_o      ( {refill_to_AXINODE_addr_int,    refill_to_intc_addr_int[SPECIAL_CORE_ID]}    ),
-                .refill_r_valid_i   ( {refill_to_AXINODE_r_valid_int, refill_to_intc_r_valid_int[SPECIAL_CORE_ID]} ),
-                .refill_r_data_i    ( {refill_to_AXINODE_r_data_int,  refill_to_intc_r_data_int[SPECIAL_CORE_ID]}  )
-            );
-
-
-
-
-            icache128_2_axi64 
-            #(
-                .ADDR_WIDTH         ( FETCH_ADDR_WIDTH  ), //= 32,
-                .DATA_WIDTH         ( FETCH_DATA_WIDTH  ), //= 128,
-
-                .AXI_DATA_WIDTH     ( AXI_DATA          ), //= 64,
-                .AXI_ADDR_WIDTH     ( AXI_ADDR          ), //= 32,
-                .AXI_USER_WIDTH     ( AXI_USER          ), //= 1,
-                .AXI_ID_WIDTH       ( AXI_ID_INT        ), //= 5,
-                .AXI_STRB_WIDTH     ( AXI_DATA/8        )  //= AXI_DATA_WIDTH/8
-            )
-            LINT2AXI
-            (
-                // Clock and Reset
-                .clk_i            ( clk    ),
-                .rst_ni           ( rst_n  ),
-
-
-                // signals from PRI cache and interconnect
-                .refill_req_i     ( refill_to_AXINODE_req_int      ),
-                .refill_gnt_o     ( refill_to_AXINODE_gnt_int      ),
-                .refill_addr_i    ( refill_to_AXINODE_addr_int     ),
-                .refill_r_valid_o ( refill_to_AXINODE_r_valid_int  ),
-                .refill_r_data_o  ( refill_to_AXINODE_r_data_int   ),
-
-
-                // ---------------------------------------------------------
-                // AXI TARG Port Declarations ------------------------------
-                // ---------------------------------------------------------
-                //AXI write address bus -------------- // USED// -----------
-                .aw_id_o        ( axi_master_awid_int     [NUM_AXI_CH_IN-1] ),
-                .aw_addr_o      ( axi_master_awaddr_int   [NUM_AXI_CH_IN-1] ),
-                .aw_len_o       ( axi_master_awlen_int    [NUM_AXI_CH_IN-1] ),
-                .aw_size_o      ( axi_master_awsize_int   [NUM_AXI_CH_IN-1] ),
-                .aw_burst_o     ( axi_master_awburst_int  [NUM_AXI_CH_IN-1] ),
-                .aw_lock_o      ( axi_master_awlock_int   [NUM_AXI_CH_IN-1] ),
-                .aw_cache_o     ( axi_master_awcache_int  [NUM_AXI_CH_IN-1] ),
-                .aw_prot_o      ( axi_master_awprot_int   [NUM_AXI_CH_IN-1] ),
-                .aw_region_o    ( axi_master_awregion_int [NUM_AXI_CH_IN-1] ),
-                .aw_user_o      ( axi_master_awuser_int   [NUM_AXI_CH_IN-1] ),
-                .aw_qos_o       ( axi_master_awqos_int    [NUM_AXI_CH_IN-1] ),
-                .aw_valid_o     ( axi_master_awvalid_int  [NUM_AXI_CH_IN-1] ),
-                .aw_ready_i     ( axi_master_awready_int  [NUM_AXI_CH_IN-1] ),
-                // ---------------------------------------------------------
-
-                //AXI write data bus -------------- // USED// --------------
-                .w_data_o       ( axi_master_wdata_int    [NUM_AXI_CH_IN-1]  ),
-                .w_strb_o       ( axi_master_wstrb_int    [NUM_AXI_CH_IN-1]  ),
-                .w_last_o       ( axi_master_wlast_int    [NUM_AXI_CH_IN-1]  ),
-                .w_user_o       ( axi_master_wuser_int    [NUM_AXI_CH_IN-1]  ),
-                .w_valid_o      ( axi_master_wvalid_int   [NUM_AXI_CH_IN-1]  ),
-                .w_ready_i      ( axi_master_wready_int   [NUM_AXI_CH_IN-1]  ),
-                // ---------------------------------------------------------
-
-                //AXI write response bus -------------- // USED// ----------
-                .b_id_i         ( axi_master_bid_int      [NUM_AXI_CH_IN-1]  ),
-                .b_resp_i       ( axi_master_bresp_int    [NUM_AXI_CH_IN-1]  ),
-                .b_valid_i      ( axi_master_bvalid_int   [NUM_AXI_CH_IN-1]  ),
-                .b_user_i       ( axi_master_buser_int    [NUM_AXI_CH_IN-1]  ),
-                .b_ready_o      ( axi_master_bready_int   [NUM_AXI_CH_IN-1]  ),
-                // ---------------------------------------------------------
-
-                //AXI read address bus -------------------------------------
-                .ar_id_o        ( axi_master_arid_int     [NUM_AXI_CH_IN-1]  ),
-                .ar_addr_o      ( axi_master_araddr_int   [NUM_AXI_CH_IN-1]  ),
-                .ar_len_o       ( axi_master_arlen_int    [NUM_AXI_CH_IN-1]  ),
-                .ar_size_o      ( axi_master_arsize_int   [NUM_AXI_CH_IN-1]  ),
-                .ar_burst_o     ( axi_master_arburst_int  [NUM_AXI_CH_IN-1]  ),
-                .ar_lock_o      ( axi_master_arlock_int   [NUM_AXI_CH_IN-1]  ),
-                .ar_cache_o     ( axi_master_arcache_int  [NUM_AXI_CH_IN-1]  ),
-                .ar_prot_o      ( axi_master_arprot_int   [NUM_AXI_CH_IN-1]  ),
-                .ar_region_o    ( axi_master_arregion_int [NUM_AXI_CH_IN-1]  ),
-                .ar_user_o      ( axi_master_aruser_int   [NUM_AXI_CH_IN-1]  ),
-                .ar_qos_o       ( axi_master_arqos_int    [NUM_AXI_CH_IN-1]  ),
-                .ar_valid_o     ( axi_master_arvalid_int  [NUM_AXI_CH_IN-1]  ),
-                .ar_ready_i     ( axi_master_arready_int  [NUM_AXI_CH_IN-1]  ),
-                // ---------------------------------------------------------
-
-                //AXI read data bus ----------------------------------------
-                .r_id_i         ( axi_master_rid_int      [NUM_AXI_CH_IN-1]  ),
-                .r_data_i       ( axi_master_rdata_int    [NUM_AXI_CH_IN-1]  ),
-                .r_resp_i       ( axi_master_rresp_int    [NUM_AXI_CH_IN-1]  ),
-                .r_last_i       ( axi_master_rlast_int    [NUM_AXI_CH_IN-1]  ),
-                .r_user_i       ( axi_master_ruser_int    [NUM_AXI_CH_IN-1]  ),
-                .r_valid_i      ( axi_master_rvalid_int   [NUM_AXI_CH_IN-1]  ),
-                .r_ready_o      ( axi_master_rready_int   [NUM_AXI_CH_IN-1]  )
-                // ---------------------------------------------------------
-            );
-
-
-            for(i=0;i<NB_CORES;i++)
-            begin : STRAIGTH_PARTIAL_BINDING
-
-               if(i != SPECIAL_CORE_ID)
-               begin
-                  assign refill_to_intc_req_int[i]  = refill_req_int[i];
-                  assign refill_to_intc_addr_int[i] = refill_addr_int[i];
-                  assign refill_gnt_int[i]          = refill_to_intc_gnt_int[i];
-                  assign refill_r_valid_int[i]      = refill_to_intc_r_valid_int[i];
-                  assign refill_r_data_int[i]       = refill_to_intc_r_data_int[i];
-               end
-
-            end
-      end
-      else
-      begin : NO_DEMUX_SPECIAL_CORE
-            assign refill_to_intc_req_int  = refill_req_int;
-            assign refill_to_intc_addr_int = refill_addr_int;
-            assign refill_gnt_int          = refill_to_intc_gnt_int;
-            assign refill_r_valid_int      = refill_to_intc_r_valid_int;
-            assign refill_r_data_int       = refill_to_intc_r_data_int;
-      end
-
-
    endgenerate
-
-
 
    ////////////////////////////////////////////////////////////////////////////////////
    // ██╗ ██████╗ █████╗  ██████╗██╗  ██╗███████╗    ██╗███╗   ██╗████████╗ ██████╗  //
@@ -564,11 +400,11 @@ module icache_hier_top
       .clk_i          ( clk                              ),
       .rst_ni         ( rst_n                            ),
 
-      .request_i      ( refill_to_intc_req_int           ), // Data request
-      .address_i      ( refill_to_intc_addr_int          ), // Data request Address
-      .grant_o        ( refill_to_intc_gnt_int           ), //
-      .response_o     ( refill_to_intc_r_valid_int       ), // Data Response Valid (For LOAD/STORE commands)
-      .read_data_o    ( refill_to_intc_r_data_int        ), // Data Response DATA (For LOAD commands)
+      .request_i      ( refill_req_int                   ), // Data request
+      .address_i      ( refill_addr_int                  ), // Data request Address
+      .grant_o        ( refill_gnt_int                   ), //
+      .response_o     ( refill_r_valid_int               ), // Data Response Valid (For LOAD/STORE commands)
+      .read_data_o    ( refill_r_data_int                ), // Data Response DATA (For LOAD commands)
 
       .request_o      ( fetch_req_to_main_cache          ), // Data request
       .address_o      ( fetch_addr_to_main_cache         ), // Data request Address
@@ -779,7 +615,7 @@ generate
       logic [N_REGION-1:0][N_MASTER_PORT-1:0][31:0]                      cfg_START_ADDR_int;
       logic [N_REGION-1:0][N_MASTER_PORT-1:0][31:0]                      cfg_END_ADDR_int;
       logic [N_REGION-1:0][N_MASTER_PORT-1:0]                            cfg_valid_rule_int;
-      logic [NUM_AXI_CH_IN-1:0][N_MASTER_PORT-1:0]                       cfg_connectivity_map_int;
+      logic [SH_NB_BANKS-1:0][N_MASTER_PORT-1:0]                       cfg_connectivity_map_int;
 
       assign cfg_START_ADDR_int[0][0]       = 32'h0000_0000;
       assign cfg_END_ADDR_int[0][0]         = 32'hFFFF_FFFF;
@@ -787,7 +623,7 @@ generate
 
 
 
-      for(i=0; i<NUM_AXI_CH_IN; i++)
+      for(i=0; i<SH_NB_BANKS; i++)
          assign cfg_connectivity_map_int[i][0]       = 1'b1;
 
       /////////////////////////////////////////////////////////////////
@@ -811,7 +647,7 @@ generate
           .AXI_ID_OUT         ( AXI_ID_OUT               ),
 
           .N_MASTER_PORT      ( 1                        ),
-          .N_SLAVE_PORT       ( NUM_AXI_CH_IN            ),
+          .N_SLAVE_PORT       ( SH_NB_BANKS              ),
 
 
           .FIFO_DEPTH_DW      ( 2                        ),

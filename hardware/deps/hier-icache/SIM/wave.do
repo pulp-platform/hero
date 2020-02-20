@@ -10,7 +10,7 @@ add wave -noupdate -group CORE_0 {/tb/CORE[0]/CORE/fetch_rdata_i}
 add wave -noupdate -group CORE_0 {/tb/CORE[0]/CORE/fetch_enable_i}
 add wave -noupdate -group CORE_0 {/tb/CORE[0]/CORE/RANDOM_ADD}
 add wave -noupdate -group CORE_0 {/tb/CORE[0]/CORE/i}
-add wave -noupdate -group CORE_0 {/tb/CORE[0]/CORE/count_trans}
+add wave -noupdate -group CORE_0 -radix decimal {/tb/CORE[0]/CORE/count_trans}
 add wave -noupdate -group CORE_0 {/tb/CORE[0]/CORE/CS}
 add wave -noupdate -group CORE_0 {/tb/CORE[0]/CORE/NS}
 add wave -noupdate -group CORE_0 {/tb/CORE[0]/CORE/fetch_req_int}

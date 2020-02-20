@@ -49,12 +49,11 @@
     `define FLUSH_L1_ONLY             6'b00_0010 //0x08
     `define SEL_FLUSH_ICACHE          6'b00_0011 //0x0C
 
-`ifdef FEATURE_ICACHE_STAT  //TO BE TESTED DEEPLY 
+`ifdef FEATURE_ICACHE_STAT  //TO BE TESTED DEEPLY
     `define CLEAR_CNTS                6'b00_0100 //0x10
     `define ENABLE_CNTS               6'b00_0101 //0x14
 `endif
-    `define SPECIAL_CORE_CACHE_CFG    6'b00_0110 //0x18
-    `define ENABLE_L1_L15_PREFETCH   6'b00_0111 //0x1C
+    `define ENABLE_L1_L15_PREFETCH    6'b00_0111 //0x18
 
 
 //-----------------------------------//
@@ -103,8 +102,7 @@ module hier_icache_ctrl_unit
     output logic [31:0]                          L2_icache_sel_flush_addr_o,
     input  logic [NB_CACHE_BANKS-1:0]            L2_icache_sel_flush_ack_i,
 
-    output logic [NB_CORES-1:0]                  enable_l1_l15_prefetch_o,
-    output logic                                 special_core_icache_cfg_o
+    output logic [NB_CORES-1:0]                  enable_l1_l15_prefetch_o
 
 `ifdef FEATURE_ICACHE_STAT
     ,
@@ -175,21 +173,21 @@ module hier_icache_ctrl_unit
      genvar index;
 
 
- 
+
    always_comb
    begin : REGISTER_BIND_OUT
       L1_icache_bypass_req_o     =  ~ICACHE_CTRL_REGS[`ENABLE_ICACHE][NB_CORES-1:0];
-      L1_icache_sel_flush_addr_o =   ICACHE_CTRL_REGS[`SEL_FLUSH_ICACHE];    
+      L1_icache_sel_flush_addr_o =   ICACHE_CTRL_REGS[`SEL_FLUSH_ICACHE];
 
       L2_icache_enable_req_o     =   ICACHE_CTRL_REGS[`ENABLE_ICACHE][NB_CACHE_BANKS+NB_CORES-1:NB_CORES];
       L2_icache_disable_req_o    =  ~ICACHE_CTRL_REGS[`ENABLE_ICACHE][NB_CACHE_BANKS+NB_CORES-1:NB_CORES];
-      
+
       L2_icache_sel_flush_addr_o =   ICACHE_CTRL_REGS[`SEL_FLUSH_ICACHE];
-      
+
 `ifdef FEATURE_ICACHE_STAT
       L1_enable_regs_o           =   ICACHE_CTRL_REGS[`ENABLE_CNTS][NB_CORES-1:0];
       L2_enable_regs_o           =   ICACHE_CTRL_REGS[`ENABLE_CNTS][NB_CACHE_BANKS+NB_CORES-1:NB_CORES];
-`endif      
+`endif
 
    end
 
@@ -205,7 +203,7 @@ module hier_icache_ctrl_unit
    logic [31:0] global_L2_hit;
    logic [31:0] global_L2_trans;
    logic [31:0] global_L2_miss;
-   
+
 
     always_comb
     begin
@@ -269,7 +267,7 @@ generate
 
         always @(*)
         begin
-          
+
           if(index<NB_CACHE_BANKS)
           begin
               perf_cnt_L2[index][0] = L2_hit_count_i   [index];
@@ -287,7 +285,7 @@ generate
 
 
      end //~for(index=0; index<16; index++)
- `else 
+ `else
     assign perf_cnt_enable = 32'hBAD_ACCE5;
  `endif
 
@@ -305,9 +303,9 @@ generate
               L1_mask_flush_req_CS     <= '0;
               L1_mask_sel_flush_req_CS <= '0;
 
-              L2_mask_enable_req_CS    <= '0;   
-              L2_mask_disable_req_CS   <= '0;  
-              L2_mask_flush_req_CS     <= '0;    
+              L2_mask_enable_req_CS    <= '0;
+              L2_mask_disable_req_CS   <= '0;
+              L2_mask_flush_req_CS     <= '0;
               L2_mask_sel_flush_req_CS <= '0;
 
               speriph_slave_r_id_o    <=   '0;
@@ -320,7 +318,6 @@ generate
                 ICACHE_CTRL_REGS[i] <= '0;
               end
 
-              special_core_icache_cfg_o <= 1'b0;
               enable_l1_l15_prefetch_o  <=  'h0;
       end
       else
@@ -332,9 +329,9 @@ generate
         L1_mask_flush_req_CS     <= L1_mask_flush_req_NS;
         L1_mask_sel_flush_req_CS <= L1_mask_sel_flush_req_NS;
 
-        L2_mask_enable_req_CS    <= L2_mask_enable_req_NS;   
-        L2_mask_disable_req_CS   <= L2_mask_disable_req_NS;  
-        L2_mask_flush_req_CS     <= L2_mask_flush_req_NS;    
+        L2_mask_enable_req_CS    <= L2_mask_enable_req_NS;
+        L2_mask_disable_req_CS   <= L2_mask_disable_req_NS;
+        L2_mask_flush_req_CS     <= L2_mask_flush_req_NS;
         L2_mask_sel_flush_req_CS <= L2_mask_sel_flush_req_NS;
 
 
@@ -371,13 +368,7 @@ generate
                   ICACHE_CTRL_REGS[`ENABLE_CNTS][NB_CORES+NB_CACHE_BANKS-1:0] <= {(NB_CORES+NB_CACHE_BANKS){speriph_slave_wdata_i[0]}};
                 end
             `endif
-
-                8'h18: // Special core cache dstination
-                begin
-                  special_core_icache_cfg_o <= speriph_slave_wdata_i[0];
-                end
-
-                8'h1C: // enable l1 to l15 prefetch feature 
+                8'h18: // enable l1 to l15 prefetch feature
                 begin
                   enable_l1_l15_prefetch_o <= speriph_slave_wdata_i[NB_CORES-1:0];
                 end
@@ -414,91 +405,90 @@ generate
 
           // Clear and start
           5:   begin speriph_slave_r_rdata_o       <= perf_cnt_enable;            end
-          6:   begin speriph_slave_r_rdata_o       <= special_core_icache_cfg_o;  end
-          7:   begin speriph_slave_r_rdata_o       <= enable_l1_l15_prefetch_o;   end
+          6:   begin speriph_slave_r_rdata_o       <= enable_l1_l15_prefetch_o;   end
 
           (BASE_PERF_CNT+0):   begin speriph_slave_r_rdata_o       <= 32'hF1CA_B01A ;  end
           (BASE_PERF_CNT+1):   begin speriph_slave_r_rdata_o       <= 32'hF1CA_B01A ;  end
           (BASE_PERF_CNT+2):   begin speriph_slave_r_rdata_o       <= 32'hF1CA_B01A ;  end
           (BASE_PERF_CNT+3):   begin speriph_slave_r_rdata_o       <= 32'hF1CA_B01A ;  end
 
-          (BASE_PERF_CNT+4):   begin speriph_slave_r_rdata_o       <= global_L1_hit;  end  
-          (BASE_PERF_CNT+5):   begin speriph_slave_r_rdata_o       <= global_L1_trans;  end  
-          (BASE_PERF_CNT+6):   begin speriph_slave_r_rdata_o       <= global_L1_miss;  end  
-          (BASE_PERF_CNT+7):   begin speriph_slave_r_rdata_o       <= global_L1_cong;  end  
+          (BASE_PERF_CNT+4):   begin speriph_slave_r_rdata_o       <= global_L1_hit;  end
+          (BASE_PERF_CNT+5):   begin speriph_slave_r_rdata_o       <= global_L1_trans;  end
+          (BASE_PERF_CNT+6):   begin speriph_slave_r_rdata_o       <= global_L1_miss;  end
+          (BASE_PERF_CNT+7):   begin speriph_slave_r_rdata_o       <= global_L1_cong;  end
 
-          (BASE_PERF_CNT+8):   begin speriph_slave_r_rdata_o       <= global_L2_hit;  end  
-          (BASE_PERF_CNT+9):   begin speriph_slave_r_rdata_o       <= global_L2_trans;  end  
-          (BASE_PERF_CNT+10):  begin speriph_slave_r_rdata_o       <= global_L2_miss;  end  
-          (BASE_PERF_CNT+11):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[1][3];  end  
+          (BASE_PERF_CNT+8):   begin speriph_slave_r_rdata_o       <= global_L2_hit;  end
+          (BASE_PERF_CNT+9):   begin speriph_slave_r_rdata_o       <= global_L2_trans;  end
+          (BASE_PERF_CNT+10):  begin speriph_slave_r_rdata_o       <= global_L2_miss;  end
+          (BASE_PERF_CNT+11):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[1][3];  end
 
 
-          (BASE_PERF_CNT+12):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[2][0];  end  
-          (BASE_PERF_CNT+13):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[2][1];  end  
-          (BASE_PERF_CNT+14):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[2][2];  end  
-          (BASE_PERF_CNT+15):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[2][3];  end  
+          (BASE_PERF_CNT+12):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[2][0];  end
+          (BASE_PERF_CNT+13):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[2][1];  end
+          (BASE_PERF_CNT+14):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[2][2];  end
+          (BASE_PERF_CNT+15):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[2][3];  end
 
-          (BASE_PERF_CNT+16):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[3][0];  end  
-          (BASE_PERF_CNT+17):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[3][1];  end  
-          (BASE_PERF_CNT+18):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[3][2];  end  
-          (BASE_PERF_CNT+19):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[3][3];  end  
+          (BASE_PERF_CNT+16):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[3][0];  end
+          (BASE_PERF_CNT+17):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[3][1];  end
+          (BASE_PERF_CNT+18):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[3][2];  end
+          (BASE_PERF_CNT+19):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[3][3];  end
 
-          (BASE_PERF_CNT+20):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[4][0];  end  
-          (BASE_PERF_CNT+21):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[4][1];  end  
-          (BASE_PERF_CNT+22):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[4][2];  end  
-          (BASE_PERF_CNT+23):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[4][3];  end  
+          (BASE_PERF_CNT+20):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[4][0];  end
+          (BASE_PERF_CNT+21):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[4][1];  end
+          (BASE_PERF_CNT+22):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[4][2];  end
+          (BASE_PERF_CNT+23):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[4][3];  end
 
-          (BASE_PERF_CNT+24):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[5][0];  end  
-          (BASE_PERF_CNT+25):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[5][1];  end  
-          (BASE_PERF_CNT+26):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[5][2];  end  
-          (BASE_PERF_CNT+27):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[5][3];  end  
+          (BASE_PERF_CNT+24):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[5][0];  end
+          (BASE_PERF_CNT+25):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[5][1];  end
+          (BASE_PERF_CNT+26):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[5][2];  end
+          (BASE_PERF_CNT+27):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[5][3];  end
 
-          (BASE_PERF_CNT+28):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[6][0];  end  
-          (BASE_PERF_CNT+29):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[6][1];  end  
-          (BASE_PERF_CNT+30):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[6][2];  end  
-          (BASE_PERF_CNT+31):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[6][3];  end  
+          (BASE_PERF_CNT+28):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[6][0];  end
+          (BASE_PERF_CNT+29):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[6][1];  end
+          (BASE_PERF_CNT+30):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[6][2];  end
+          (BASE_PERF_CNT+31):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[6][3];  end
 
-          (BASE_PERF_CNT+32):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[7][0];  end  
-          (BASE_PERF_CNT+33):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[7][1];  end  
-          (BASE_PERF_CNT+34):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[7][2];  end  
-          (BASE_PERF_CNT+35):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[7][3];  end  
+          (BASE_PERF_CNT+32):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[7][0];  end
+          (BASE_PERF_CNT+33):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[7][1];  end
+          (BASE_PERF_CNT+34):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[7][2];  end
+          (BASE_PERF_CNT+35):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[7][3];  end
 
-          (BASE_PERF_CNT+36):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[8][0];  end  
-          (BASE_PERF_CNT+37):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[8][1];  end  
-          (BASE_PERF_CNT+38):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[8][2];  end  
-          (BASE_PERF_CNT+39):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[8][3];  end  
+          (BASE_PERF_CNT+36):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[8][0];  end
+          (BASE_PERF_CNT+37):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[8][1];  end
+          (BASE_PERF_CNT+38):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[8][2];  end
+          (BASE_PERF_CNT+39):  begin speriph_slave_r_rdata_o       <= perf_cnt_L1[8][3];  end
 
-          (BASE_PERF_CNT+40):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[0][0];  end  
-          (BASE_PERF_CNT+41):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[0][1];  end  
-          (BASE_PERF_CNT+42):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[0][2];  end   
+          (BASE_PERF_CNT+40):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[0][0];  end
+          (BASE_PERF_CNT+41):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[0][1];  end
+          (BASE_PERF_CNT+42):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[0][2];  end
 
-          (BASE_PERF_CNT+43):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[1][0]; end  
-          (BASE_PERF_CNT+44):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[1][1]; end  
-          (BASE_PERF_CNT+45):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[1][2]; end  
+          (BASE_PERF_CNT+43):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[1][0]; end
+          (BASE_PERF_CNT+44):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[1][1]; end
+          (BASE_PERF_CNT+45):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[1][2]; end
 
-          (BASE_PERF_CNT+46):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[2][0]; end  
-          (BASE_PERF_CNT+47):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[2][1]; end  
-          (BASE_PERF_CNT+48):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[2][2]; end  
+          (BASE_PERF_CNT+46):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[2][0]; end
+          (BASE_PERF_CNT+47):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[2][1]; end
+          (BASE_PERF_CNT+48):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[2][2]; end
 
-          (BASE_PERF_CNT+49):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[3][0]; end  
-          (BASE_PERF_CNT+50):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[3][1]; end  
-          (BASE_PERF_CNT+51):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[3][2]; end  
+          (BASE_PERF_CNT+49):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[3][0]; end
+          (BASE_PERF_CNT+50):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[3][1]; end
+          (BASE_PERF_CNT+51):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[3][2]; end
 
-          (BASE_PERF_CNT+52):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[4][0]; end  
-          (BASE_PERF_CNT+53):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[4][1]; end  
-          (BASE_PERF_CNT+54):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[4][2]; end   
+          (BASE_PERF_CNT+52):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[4][0]; end
+          (BASE_PERF_CNT+53):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[4][1]; end
+          (BASE_PERF_CNT+54):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[4][2]; end
 
-          (BASE_PERF_CNT+55):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[5][0]; end  
-          (BASE_PERF_CNT+56):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[5][1]; end  
-          (BASE_PERF_CNT+57):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[5][2]; end  
+          (BASE_PERF_CNT+55):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[5][0]; end
+          (BASE_PERF_CNT+56):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[5][1]; end
+          (BASE_PERF_CNT+57):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[5][2]; end
 
-          (BASE_PERF_CNT+58):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[6][0]; end  
-          (BASE_PERF_CNT+59):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[6][1]; end  
-          (BASE_PERF_CNT+60):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[6][2]; end  
+          (BASE_PERF_CNT+58):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[6][0]; end
+          (BASE_PERF_CNT+59):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[6][1]; end
+          (BASE_PERF_CNT+60):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[6][2]; end
 
-          (BASE_PERF_CNT+61):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[7][0]; end  
-          (BASE_PERF_CNT+62):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[7][1]; end  
-          (BASE_PERF_CNT+63):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[7][2]; end 
+          (BASE_PERF_CNT+61):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[7][0]; end
+          (BASE_PERF_CNT+62):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[7][1]; end
+          (BASE_PERF_CNT+63):  begin speriph_slave_r_rdata_o       <= perf_cnt_L2[7][2]; end
 
 
           default : begin speriph_slave_r_rdata_o <= 32'hDEAD_CA5E; end
@@ -525,7 +515,7 @@ endgenerate
 
    always_comb
    begin
-        // SPER SIDE 
+        // SPER SIDE
         speriph_slave_gnt_o    = 1'b0;
 
         is_write               = 1'b0;
@@ -612,7 +602,7 @@ endgenerate
                             begin
                               NS = SEL_FLUSH_ICACHE;
                               L1_mask_sel_flush_req_NS = L1_icache_sel_flush_req_o;
-                              L2_mask_sel_flush_req_NS = L2_icache_sel_flush_req_o;                              
+                              L2_mask_sel_flush_req_NS = L2_icache_sel_flush_req_o;
                             end
 
 
@@ -682,7 +672,7 @@ endgenerate
 
 
 
-          ENABLE_ICACHE: 
+          ENABLE_ICACHE:
           begin
             speriph_slave_gnt_o = 1'b0;
             L1_mask_bypass_req_NS = L1_icache_bypass_ack_i & L1_mask_bypass_req_CS;
@@ -706,7 +696,7 @@ endgenerate
 
 
 
-          DISABLE_ICACHE: 
+          DISABLE_ICACHE:
           begin
             speriph_slave_gnt_o = 1'b0;
 
@@ -761,7 +751,7 @@ endgenerate
               begin
                 speriph_slave_gnt_o = 1'b1;
                 NS  = IDLE;
-               
+
                 deliver_response = 1'b1;
               end
               else

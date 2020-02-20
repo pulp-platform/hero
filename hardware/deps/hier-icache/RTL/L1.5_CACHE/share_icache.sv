@@ -33,7 +33,7 @@ module share_icache
    parameter AXI_DATA               = 64,
    parameter AXI_USER               = 6,
 
-   parameter USE_REDUCED_TAG    = "TRUE",
+   parameter USE_REDUCED_TAG        = "TRUE",   // TRUE | FALSE
    parameter L2_SIZE                = 262144    // Size of max(L2 ,ROM) program memory in Byte
 )
 (

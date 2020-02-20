@@ -46,7 +46,7 @@ module pulp_cluster
   parameter bit    PRIV_ICACHE             = 1'b1,
   parameter bit    MP_ICACHE               = 1'b0,
   parameter bit    SP_ICACHE               = 1'b0,
-  parameter int    NB_CACHE_BANKS          = PRIV_ICACHE ? 8 : 8,
+  parameter int    NB_CACHE_BANKS          = PRIV_ICACHE ? 2 : 8,
   parameter int    CACHE_LINE              = 1,
   parameter int    CACHE_SIZE              = 4096,
   parameter int    ICACHE_DATA_WIDTH       = 128,
@@ -1011,9 +1011,6 @@ module pulp_cluster
       .PRI_NB_WAYS            ( 4                   ),
       .PRI_CACHE_SIZE         ( 512                 ), // in Byte
       .PRI_CACHE_LINE         ( 1                   ), // in word of [FETCH_DATA_WIDTH]
-      .USE_SPECIAL_CORE       ( "FALSE"             ),
-      .SPECIAL_CORE_ID        ( 0                   ),
-      .SPECIAL_PRI_CACHE_SIZE ( 0                   ), // in Byte
       .AXI_ID                 ( AXI_ID_OUT_WIDTH    ),
       .AXI_ADDR               ( AXI_ADDR_WIDTH      ),
       .AXI_USER               ( AXI_USER_WIDTH      ),
@@ -1077,8 +1074,7 @@ module pulp_cluster
       .axi_master_bready_o    ( s_core_instr_bus.b_ready   ),
 
       .IC_ctrl_unit_bus_pri   ( IC_ctrl_unit_bus_pri       ),
-      .IC_ctrl_unit_bus_main  ( IC_ctrl_unit_bus_main      ),
-      .special_core_dest_i    ( '0                         )
+      .IC_ctrl_unit_bus_main  ( IC_ctrl_unit_bus_main      )
     );
 
   end else begin : gen_no_priv_icache

@@ -25,8 +25,7 @@ module hier_icache_ctrl_unit_wrap
 
     SP_ICACHE_CTRL_UNIT_BUS.Master              IC_ctrl_unit_bus_main[NB_CACHE_BANKS],
     PRI_ICACHE_CTRL_UNIT_BUS.Master             IC_ctrl_unit_bus_pri[NB_CORES],
-    output logic [NB_CORES-1:0]                 enable_l1_l15_prefetch_o,
-    output logic                                special_core_icache_cfg_o
+    output logic [NB_CORES-1:0]                 enable_l1_l15_prefetch_o
 
 );
 
@@ -158,8 +157,7 @@ module hier_icache_ctrl_unit_wrap
        .L2_icache_sel_flush_req_o   (  IC_ctrl_unit_bus_main_sel_flush_req   ),
        .L2_icache_sel_flush_addr_o  (  IC_ctrl_unit_bus_main_sel_flush_addr  ),
        .L2_icache_sel_flush_ack_i   (  IC_ctrl_unit_bus_main_sel_flush_ack   ),
-       .enable_l1_l15_prefetch_o    ( enable_l1_l15_prefetch_o               ),
-      .special_core_icache_cfg_o    ( special_core_icache_cfg_o              )
+       .enable_l1_l15_prefetch_o    ( enable_l1_l15_prefetch_o               )
 
 
 
