@@ -88,6 +88,8 @@ module axi_id_prepend #(
         mst_ar_chans_o[i].id = {pre_id_i, slv_ar_chans_i[i].id[AxiIdWidthSlvPort-1:0]};
       end
     end
+    // The ID is in the highest bits of the struct, so an assignment from a channel with a wide ID
+    // to a channel with a shorter ID correctly cuts the prepended ID.
     assign slv_b_chans_o[i] = mst_b_chans_i[i];
     assign slv_r_chans_o[i] = mst_r_chans_i[i];
   end

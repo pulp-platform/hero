@@ -14,10 +14,10 @@ analyze -format sv -work work \
         "${IPS_PATH}/axi/src/axi_atop_filter.sv" \
         "${IPS_PATH}/axi/src/axi_cdc.sv" \
         "${IPS_PATH}/axi/src/axi_cut.sv" \
-        "${IPS_PATH}/axi/src/axi_data_downsize.sv" \
-        "${IPS_PATH}/axi/src/axi_data_upsize.sv" \
         "${IPS_PATH}/axi/src/axi_delayer.sv" \
         "${IPS_PATH}/axi/src/axi_demux.sv" \
+        "${IPS_PATH}/axi/src/axi_dw_downsizer.sv" \
+        "${IPS_PATH}/axi/src/axi_dw_upsizer.sv" \
         "${IPS_PATH}/axi/src/axi_id_remap.sv" \
         "${IPS_PATH}/axi/src/axi_id_prepend.sv" \
         "${IPS_PATH}/axi/src/axi_join.sv" \
@@ -30,8 +30,8 @@ analyze -format sv -work work \
         "${IPS_PATH}/axi/src/axi_mux.sv" \
         "${IPS_PATH}/axi/src/axi_read_burst_buffer.sv" \
         "${IPS_PATH}/axi/src/axi_to_axi_lite.sv" \
-        "${IPS_PATH}/axi/src/axi_data_width_converter.sv" \
-        "${IPS_PATH}/axi/src/axi_decerr_slv.sv" \
+        "${IPS_PATH}/axi/src/axi_dw_converter.sv" \
+        "${IPS_PATH}/axi/src/axi_err_slv.sv" \
         "${IPS_PATH}/axi/src/axi_multicut.sv" \
         "${IPS_PATH}/axi/src/axi_lite_xbar.sv" \
         "${IPS_PATH}/axi/src/axi_xbar.sv" \

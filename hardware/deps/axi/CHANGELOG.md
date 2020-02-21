@@ -8,10 +8,33 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 
 ### Added
+- `axi_dw_converter`: A data width converter between AXI interfaces of any data width.
+- `axi_dw_downsizer`: A data width converter between a narrow AXI master and a wider AXI slave.
+- `axi_dw_upsizer`: A data width converter between a wide AXI master and a narrower AXI slave.
 
 ### Changed
 
+- `axi_decerr_slv` can now generate either `SLVERR` or `DECERR` error responses, via the Resp
+parameter. It has been renamed accordingly, to `axi_err_slv`.
+
 ### Fixed
+
+
+## 0.13.0 - 2020-02-18
+
+### Added
+- `axi_xbar_intf`: Add interface variant of crossbar.
+
+### Fixed
+- `axi_atop_filter`: Fix ModelSim warnings by adding `default` statement.  The signal in the `case`
+  has a single bit, and both values were correctly handled in synthesis.  However, when starting
+  simulation, the signal has an undefined value, and ModelSim threw warnings that this violated the
+  `unique` condition.
+- `axi_demux`: Move `typedef` outside `generate` for compatibility with VCS.
+- `axi_id_prepend`:
+  - Fix text of some assertion messages.
+  - Fix case of prepending a single-bit ID.
+- `tb_axi_xbar`: Fix for localparam `AxiIdWidthSlaves` to be dependent on the number of masters.
 
 
 ## 0.12.0 - 2020-02-14

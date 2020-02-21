@@ -7,6 +7,9 @@ axi:
     - src/axi_atop_filter.sv
     - src/axi_cut.sv
     - src/axi_delayer.sv
+    - src/axi_dw_converter.sv
+    - src/axi_dw_downsizer.sv
+    - src/axi_dw_upsizer.sv
     - src/axi_join.sv
     - src/axi_lite_join.sv
     - src/axi_lite_to_axi.sv
@@ -15,7 +18,6 @@ axi:
 
     - src/axi_id_remap.sv
 
-    - src/axi_data_width_converter.sv
 axi_sim:
   files:
     - src/axi_test.sv
