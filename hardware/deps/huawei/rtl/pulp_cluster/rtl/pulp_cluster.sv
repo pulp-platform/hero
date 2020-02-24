@@ -143,6 +143,8 @@ module pulp_cluster
 
   input logic  [NB_CORES-1:0]               dbg_irq_valid_i,
 
+  input logic                              mailbox_evt_i,
+
   // AXI4 SLAVE
   //***************************************
   // WRITE ADDRESS CHANNEL
@@ -341,6 +343,8 @@ module pulp_cluster
   logic                              s_events_valid;
   logic                              s_events_ready;
   logic [EVNT_WIDTH-1:0]             s_events_data;
+
+  logic                              s_mailbox_evt;
 
   // Signals Between CORE_ISLAND and INSTRUCTION CACHES
   logic [NB_CORES-1:0]                        instr_req;
@@ -779,6 +783,11 @@ module pulp_cluster
     .busy_o         ( s_dmac_busy        )
   );
 
+
+  /* MAILBOX EVENT */
+
+  assign s_mailbox_evt = mailbox_evt_i;
+
   cluster_peripherals #(
     .NB_CORES       ( NB_CORES       ),
     .NB_MPERIPHS    ( NB_MPERIPHS    ),
@@ -807,6 +816,8 @@ module pulp_cluster
     .dma_cfg_master         ( s_periph_dma_bus                   ),
     .dma_cl_event_i         ( s_dma_cl_event                     ),
     .dma_cl_irq_i           ( s_dma_cl_irq                       ),
+
+    .mailbox_evt_i          ( s_mailbox_evt                      ),
 
     .soc_periph_evt_ready_o ( s_events_ready                     ),
     .soc_periph_evt_valid_i ( s_events_valid                     ),

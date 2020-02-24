@@ -31,7 +31,7 @@ module cluster_event_map
   input logic [NB_CORES-1:0][1:0]   timer_events_i,
   input logic [NB_CORES-1:0][31:0]  cluster_events_i,
 
-  input logic decompr_done_evt_i,
+  input logic decompr_done_evt_i, //map here new event coming from ext
 
 
   output logic [NB_CORES-1:0][31:0] events_mapped_o

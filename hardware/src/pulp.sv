@@ -85,6 +85,8 @@ module pulp #(
   output logic [N_CLUSTERS-1:0] cl_eoc_o,
   output logic [N_CLUSTERS-1:0] cl_busy_o,
 
+  input  logic                  mailbox_evt_i, //mailbox event dedicated signal
+
   output axi_req_t              ext_req_o,
   input  axi_resp_t             ext_resp_i,
   input  axi_req_t              ext_req_i,
@@ -343,6 +345,7 @@ module pulp #(
         .eoc_o        (cl_eoc_o[i]),
         .busy_o       (cl_busy_o[i]),
         .dbg_irq_i    (core_debug_req[(i << 5) +: N_CORES]),
+        .mailbox_evt_i (mailbox_evt_i),
         .slv          (cl_inp_async[i]),
         .mst          (cl_oup_async[i])
       );
@@ -374,6 +377,7 @@ module pulp #(
         .eoc_o        (cl_eoc_o[i]),
         .busy_o       (cl_busy_o[i]),
         .dbg_irq_i    (core_debug_req[(i << 5) +: N_CORES]),
+        .mailbox_evt_i (mailbox_evt_i),
         .slv          (cl_inp_dwced[i]),
         .mst          (cl_oup_predwc[i])
       );
