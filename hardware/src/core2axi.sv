@@ -279,7 +279,7 @@ module core2axi
   assign aw_addr_o   = data_addr_i;
   assign aw_size_o   = 3'b010;
   assign aw_len_o    = '0;
-  assign aw_burst_o  = '0;
+  assign aw_burst_o  = axi_pkg::BURST_INCR;
   assign aw_lock_o   = '0;
   assign aw_cache_o  = '0;
   assign aw_prot_o   = '0;
@@ -291,7 +291,7 @@ module core2axi
   assign ar_addr_o   = data_addr_i;
   assign ar_size_o   = 3'b010;
   assign ar_len_o    = '0;
-  assign ar_burst_o  = '0;
+  assign ar_burst_o  = axi_pkg::BURST_INCR;
   assign ar_prot_o   = '0;
   assign ar_region_o = '0;
   assign ar_lock_o   = '0;
