@@ -41,3 +41,78 @@ PULP_SRCS     += kernel/chips/hero/soc.c
 
 include $(PULPRT_HOME)/rules/pulpos/configs/default.mk
 include $(PULPRT_HOME)/rules/pulpos/default_rules.mk
+
+# include $(PULPRT_HOME)/rules/pulpos/default_run_target.mk
+# customized run target for hero
+
+# TODO: fix this hack
+SLM_CONV=~andkurt/bin/slm_conv-0.3
+
+ifeq '$(platform)' 'gvsoc'
+run:
+	pulp-run --platform=$(platform) --config=$(PULPRUN_TARGET) --dir=$(TARGET_BUILD_DIR) --binary=$(TARGETS) $(runner_args) prepare run
+endif
+
+ifeq '$(platform)' 'rtl'
+
+$(TARGET_BUILD_DIR)/modelsim.ini:
+	ln -s $(VSIM_PATH)/modelsim.ini $@
+
+$(TARGET_BUILD_DIR)/run_pulp_runtime.tcl:
+	ln -s $(VSIM_PATH)/run_pulp_runtime.tcl $@
+
+$(TARGET_BUILD_DIR)/compile.tcl:
+	ln -s $(VSIM_PATH)/compile.tcl $@
+
+$(TARGET_BUILD_DIR)/start_sim_pulp_runtime.sh:
+	ln -s $(VSIM_PATH)/start_sim_pulp_runtime.sh $@
+
+$(TARGET_BUILD_DIR)/compile.sh:
+	ln -s $(VSIM_PATH)/compile.sh $@
+
+$(TARGET_BUILD_DIR)/work:
+	ln -s $(VSIM_PATH)/work $@
+
+$(TARGET_BUILD_DIR)/pulp_tb.wave.do:
+	ln -s $(VSIM_PATH)/../test/pulp_tb.wave.do $@
+
+
+run: $(TARGETS) $(TARGET_BUILD_DIR)/modelsim.ini $(TARGET_BUILD_DIR)/run_pulp_runtime.tcl \
+	$(TARGET_BUILD_DIR)/compile.tcl  $(TARGET_BUILD_DIR)/start_sim_pulp_runtime.sh \
+	$(TARGET_BUILD_DIR)/compile.sh $(TARGET_BUILD_DIR)/pulp_tb.wave.do \
+	$(TARGET_BUILD_DIR)/work
+# Create L1 SLM
+	$(PULP_OBJDUMP) -s --start-address=0x10000000 --stop-address=0x1bffffff $(TARGET_BUILD_DIR)/test/test | rg '^ ' | cut -c 2-45 \
+	    | perl -p -e 's/^1b/10/' \
+	    | sort \
+	    > $(TARGET_BUILD_DIR)/main_l1.slm
+	    $(HERO_INSTALL)/bin/one_word_per_line.py $(TARGET_BUILD_DIR)/main_l1.slm
+
+# Create L2 SLM
+	$(PULP_OBJDUMP) -s --start-address=0x1c000000 --stop-address=0x1cffffff $(TARGET_BUILD_DIR)/test/test | rg '^ ' | cut -c 2-45 \
+	    | sort \
+	    > $(TARGET_BUILD_DIR)/main_l2.slm
+	    $(HERO_INSTALL)/bin/one_word_per_line.py $(TARGET_BUILD_DIR)/main_l2.slm
+
+# Split SLM per bank
+	$(SLM_CONV) --swap-endianness -f "$(TARGET_BUILD_DIR)/main_l1.slm" \
+	    -w 32 -P 16 -S 1 -n 2048 -s 0x10000000 -F "$(TARGET_BUILD_DIR)/l1_%01S_%01P.slm"
+	$(SLM_CONV) --swap-endianness -f "$(TARGET_BUILD_DIR)/main_l2.slm" \
+	    -w 32 -P  4 -S 16 -n 1024 -s 0x1c000000 -F "$(TARGET_BUILD_DIR)/l2_%01S_%01P.slm"
+
+ifdef gui
+	export VSIM_FLAGS=+slm_path=.; \
+	cd $(TARGET_BUILD_DIR) && ./start_sim_pulp_runtime.sh
+else
+	export VSIM_FLAGS=+slm_path=.; \
+	unset DISPLAY; \
+	cd $(TARGET_BUILD_DIR) && ./start_sim_pulp_runtime.sh
+endif
+
+endif
+
+# TODO (?)
+# ifeq '$(platform)' 'fpga'
+# run:
+# 	$(PULPRT_HOME)/bin/elf_run_genesys2.sh $(TARGETS)
+# endif

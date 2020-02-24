@@ -72,3 +72,20 @@ build_test_rest:
       - install
       - example-apps
       - pulp
+
+pulp_run_target_test:
+  stage: build_test_rest
+  script:
+    ### setup toolchain
+    - ./setup.sh
+    - source env/esim.sh
+    ### compile testbench
+    - cd hardware/vsim
+    - ./compile.sh
+    - cd -
+    ### simulate examples
+    - make -C example-apps/hello all run
+    - cd -
+  artifacts:
+    paths:
+      - example-apps

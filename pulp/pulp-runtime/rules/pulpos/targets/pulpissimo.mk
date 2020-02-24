@@ -41,3 +41,4 @@ PULP_SRCS     += kernel/chips/pulpissimo/soc.c
 
 include $(PULPRT_HOME)/rules/pulpos/configs/default.mk
 include $(PULPRT_HOME)/rules/pulpos/default_rules.mk
+include $(PULPRT_HOME)/rules/pulpos/default_run_target.mk
