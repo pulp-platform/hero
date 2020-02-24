@@ -340,6 +340,7 @@ module pulp_tb #(
     to_pulp_req.aw.addr  = addr;
     to_pulp_req.aw.size  = 3'h2;
     to_pulp_req.aw_valid = 1'b1;
+    to_pulp_req.aw.burst = axi_pkg::BURST_INCR;
     `wait_for(to_pulp_resp.aw_ready)
     to_pulp_req.aw_valid = 1'b0;
     to_pulp_req.aw       = '0;
