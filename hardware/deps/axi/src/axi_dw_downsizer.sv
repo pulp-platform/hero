@@ -662,7 +662,9 @@ module axi_dw_downsizer #(
     // Can start a new request as soon as w_state_d is W_IDLE
     if (w_state_d == W_IDLE) begin
       // Reset channels
-      w_req_d.aw = '0;
+      w_req_d.aw             = '0  ;
+      w_req_d.aw_valid       = 1'b0;
+      w_req_d.aw_throw_error = 1'b0;
 
       if (slv_req_i.aw_valid && slv_req_i.aw.atop[5]) begin // ATOP with an R response
         inject_aw_into_ar_req = 1'b1                 ;
