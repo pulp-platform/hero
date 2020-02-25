@@ -13,14 +13,15 @@ create_library_set -name lib_ffg_M40C \
     ../technology/lib/GF22FDX_SC8T_104CPP_HPK_CSL_FFG_0P88V_0P00V_0P00V_0P00V_M40C.lib \
     ../technology/lib/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_FFG_0P880V_0P880V_0P000V_0P000V_M40C.lib \
     ../technology/lib/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_FFG_0P880V_0P880V_0P000V_0P000V_M40C.lib \
-    ./../../ips/gf22_FLL/deliverable/LIB/gf22_FLL_FFG_0P88V_0P00V_0P00V_0P00V_M40C.lib \
-                         ] -aocv [ list \
+    ../technology/lib/IN22FDX_R1PH_NFHN_W01024B032M04C256_104cpp_FFG_0P880V_0P000V_0P000V_M40C.lib \
+			    ] -aocv [ list \
     ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC20L_FFG_0P88V_0P00V_0P00V_0P00V_M40C.aocv \
     ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC24L_FFG_0P88V_0P00V_0P00V_0P00V_M40C.aocv \
     ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC28L_FFG_0P88V_0P00V_0P00V_0P00V_M40C.aocv \
-/usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_FFG_0P880V_0P880V_0P000V_0P000V_M40C.aocv \
-/usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_FFG_0P880V_0P880V_0P000V_0P000V_M40C.aocv \
-                        ]
+    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_FFG_0P880V_0P880V_0P000V_0P000V_M40C.aocv \
+    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_FFG_0P880V_0P880V_0P000V_0P000V_M40C.aocv \
+    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_R1PH_NFHN_W01024B032M04C256_104cpp_FFG_0P880V_0P000V_0P000V_M40C.aocv \
+				     ]
 
 create_library_set -name lib_ffg_125C \
                    -timing [ list \
@@ -30,47 +31,50 @@ create_library_set -name lib_ffg_125C \
     ../technology/lib/GF22FDX_SC8T_104CPP_HPK_CSL_FFG_0P88V_0P00V_0P00V_0P00V_125C.lib \
     ../technology/lib/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_FFG_0P880V_0P880V_0P000V_0P000V_125C.lib \
     ../technology/lib/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_FFG_0P880V_0P880V_0P000V_0P000V_125C.lib \
-    ./../../ips/gf22_FLL/deliverable/LIB/gf22_FLL_FFG_0P88V_0P00V_0P00V_0P00V_125C.lib \
-                         ] -aocv [ list \
+    ../technology/lib/IN22FDX_R1PH_NFHN_W01024B032M04C256_104cpp_FFG_0P880V_0P000V_0P000V_125C.lib \
+			    ] -aocv [ list \
     ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC20L_FFG_0P88V_0P00V_0P00V_0P00V_125C.aocv \
     ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC24L_FFG_0P88V_0P00V_0P00V_0P00V_125C.aocv \
     ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC28L_FFG_0P88V_0P00V_0P00V_0P00V_125C.aocv \
-/usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_FFG_0P880V_0P880V_0P000V_0P000V_125C.aocv \
-/usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_FFG_0P880V_0P880V_0P000V_0P000V_125C.aocv \
+    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_FFG_0P880V_0P880V_0P000V_0P000V_125C.aocv \
+    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_FFG_0P880V_0P880V_0P000V_0P000V_125C.aocv \
+    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_R1PH_NFHN_W01024B032M04C256_104cpp_FFG_0P880V_0P000V_0P000V_125C.aocv \   
                         ]
 
 create_library_set -name lib_ssg_M40C \
                    -timing [ list \
-    ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC20L_SSG_0P59V_0P00V_0P00V_0P00V_M40C.lib.gz \
-    ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC24L_SSG_0P59V_0P00V_0P00V_0P00V_M40C.lib.gz \
-    ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC28L_SSG_0P59V_0P00V_0P00V_0P00V_M40C.lib.gz \
-    ../technology/lib/GF22FDX_SC8T_104CPP_HPK_CSL_SSG_0P59V_0P00V_0P00V_0P00V_M40C.lib \
-    ../technology/lib/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_SSG_0P590V_0P720V_0P000V_0P000V_M40C.lib \
-    ../technology/lib/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_SSG_0P590V_0P720V_0P000V_0P000V_M40C.lib \
-     ./../../ips/gf22_FLL/deliverable/LIB/gf22_FLL_SSG_0P72V_0P00V_0P00V_0P00V_M40C.lib \
+    ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC20L_SSG_0P72V_0P00V_0P00V_0P00V_M40C.lib.gz \
+    ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC24L_SSG_0P72V_0P00V_0P00V_0P00V_M40C.lib.gz \
+    ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC28L_SSG_0P72V_0P00V_0P00V_0P00V_M40C.lib.gz \
+    ../technology/lib/GF22FDX_SC8T_104CPP_HPK_CSL_SSG_0P72V_0P00V_0P00V_0P00V_M40C.lib \
+    ../technology/lib/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_SSG_0P720V_0P720V_0P000V_0P000V_M40C.lib \
+    ../technology/lib/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_SSG_0P720V_0P720V_0P000V_0P000V_M40C.lib \
+    ../technology/lib/IN22FDX_R1PH_NFHN_W01024B032M04C256_104cpp_SSG_0P720V_0P000V_0P000V_M40C.lib \	 
                          ] -aocv [ list \
-    ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC20L_SSG_0P59V_0P00V_0P00V_0P00V_M40C.aocv \
-    ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC24L_SSG_0P59V_0P00V_0P00V_0P00V_M40C.aocv \
-    ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC28L_SSG_0P59V_0P00V_0P00V_0P00V_M40C.aocv \
-    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_SSG_0P590V_0P720V_0P000V_0P000V_M40C.aocv \
-    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_SSG_0P590V_0P720V_0P000V_0P000V_M40C.aocv \
+    ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC20L_SSG_0P72V_0P00V_0P00V_0P00V_M40C.aocv \
+    ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC24L_SSG_0P72V_0P00V_0P00V_0P00V_M40C.aocv \
+    ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC28L_SSG_0P72V_0P00V_0P00V_0P00V_M40C.aocv \
+    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_SSG_0P720V_0P720V_0P000V_0P000V_M40C.aocv \
+    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_SSG_0P720V_0P720V_0P000V_0P000V_M40C.aocv \
+    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_R1PH_NFHN_W01024B032M04C256_104cpp_SSG_0P720V_0P000V_0P000V_M40C.aocv \   
                         ]
 
 create_library_set -name lib_ssg_125C \
                    -timing [ list \
-    ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC20L_SSG_0P59V_0P00V_0P00V_0P00V_125C.lib.gz \
-    ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC24L_SSG_0P59V_0P00V_0P00V_0P00V_125C.lib.gz \
-    ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC28L_SSG_0P59V_0P00V_0P00V_0P00V_125C.lib.gz \
-    ../technology/lib/GF22FDX_SC8T_104CPP_HPK_CSL_SSG_0P59V_0P00V_0P00V_0P00V_125C.lib \
-    ../technology/lib/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_SSG_0P590V_0P720V_0P000V_0P000V_125C.lib \
-    ../technology/lib/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_SSG_0P590V_0P720V_0P000V_0P000V_125C.lib \
-     ./../../ips/gf22_FLL/deliverable/LIB/gf22_FLL_SSG_0P72V_0P00V_0P00V_0P00V_125C.lib \
-                         ] -aocv [ list \
-    ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC20L_SSG_0P59V_0P00V_0P00V_0P00V_125C.aocv \
-    ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC24L_SSG_0P59V_0P00V_0P00V_0P00V_125C.aocv \
-    ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC28L_SSG_0P59V_0P00V_0P00V_0P00V_125C.aocv \
-/usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_SSG_0P590V_0P720V_0P000V_0P000V_125C.aocv \
-/usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_SSG_0P590V_0P720V_0P000V_0P000V_125C.aocv \
+    ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC20L_SSG_0P72V_0P00V_0P00V_0P00V_125C.lib.gz \
+    ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC24L_SSG_0P72V_0P00V_0P00V_0P00V_125C.lib.gz \
+    ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC28L_SSG_0P72V_0P00V_0P00V_0P00V_125C.lib.gz \
+    ../technology/lib/GF22FDX_SC8T_104CPP_HPK_CSL_SSG_0P72V_0P00V_0P00V_0P00V_125C.lib \
+    ../technology/lib/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_SSG_0P720V_0P720V_0P000V_0P000V_125C.lib \
+    ../technology/lib/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_SSG_0P720V_0P720V_0P000V_0P000V_125C.lib \
+    ../technology/lib/IN22FDX_R1PH_NFHN_W01024B032M04C256_104cpp_SSG_0P720V_0P000V_0P000V_125C.lib \
+		  ] -aocv [ list \
+    ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC20L_SSG_0P72V_0P00V_0P00V_0P00V_125C.aocv \
+    ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC24L_SSG_0P72V_0P00V_0P00V_0P00V_125C.aocv \
+    ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC28L_SSG_0P72V_0P00V_0P00V_0P00V_125C.aocv \
+    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_SSG_0P720V_0P720V_0P000V_0P000V_125C.aocv \
+    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_SSG_0P720V_0P720V_0P000V_0P000V_125C.aocv \
+    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_R1PH_NFHN_W01024B032M04C256_104cpp_SSG_0P720V_0P000V_0P000V_125C.aocv \   
                         ]
 
 
@@ -82,13 +86,14 @@ create_library_set -name lib_tt_025C \
     ../technology/lib/GF22FDX_SC8T_104CPP_HPK_CSL_TT_0P80V_0P00V_0P00V_0P00V_25C.lib \
     ../technology/lib/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_TT_0P800V_0P800V_0P000V_0P000V_025C.lib \
     ../technology/lib/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_TT_0P800V_0P800V_0P000V_0P000V_025C.lib \
-     ./../../ips/gf22_FLL/deliverable/LIB/gf22_FLL_TT_0P80V_0P00V_0P00V_0P00V_25C.lib \
+    ../technology/lib/IN22FDX_R1PH_NFHN_W01024B032M04C256_104cpp_TT_0P800V_0P000V_0P000V_025C.lib \	 
                          ] -aocv [ list \
     ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC20L_TT_0P80V_0P00V_0P00V_0P00V_25C.aocv \
     ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC24L_TT_0P80V_0P00V_0P00V_0P00V_25C.aocv \
     ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC28L_TT_0P80V_0P00V_0P00V_0P00V_25C.aocv \
-/usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_TT_0P800V_0P800V_0P000V_0P000V_025C.aocv \
-/usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_TT_0P800V_0P800V_0P000V_0P000V_025C.aocv \
+    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W04096B032M04C128_104cpp_TT_0P800V_0P800V_0P000V_0P000V_025C.aocv \
+    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_TT_0P800V_0P800V_0P000V_0P000V_025C.aocv \
+    /usr/pack/gf-22-kgf/dz/mem/model/timing/aocv/IN22FDX_R1PH_NFHN_W01024B032M04C256_104cpp_TT_0P800V_0P000V_0P000V_025C.aocv \   
                         ]
 
 # RC corners

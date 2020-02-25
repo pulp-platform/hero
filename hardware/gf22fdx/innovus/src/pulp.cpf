@@ -33,7 +33,7 @@
 #-------------------------------------------------------------------------------
 set_cpf_version 1.1
 set_hierarchy_separator "/"
-set_design pulp_soc
+set_design pulp
 
 define_library_set -name GFwc_0v59_125 -libraries \
     [list  \
@@ -43,7 +43,6 @@ define_library_set -name GFwc_0v59_125 -libraries \
        ../technology/lib/GF22FDX_SC8T_104CPP_HPK_CSL_SSG_0P59V_0P00V_0P00V_0P00V_125C.lib \
        ../technology/lib/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_SSG_0P590V_0P720V_0P000V_0P000V_125C.lib \
        ../technology/lib/IN22FDX_S1D_NFRG_W02048B032M04C128_104cpp_SSG_0P590V_0P720V_0P000V_0P000V_125C.lib \
-       ./../../ips/gf22_FLL/deliverable/LIB/gf22_FLL_SSG_0P72V_0P00V_0P00V_0P00V_125C.lib \
      ]
 
 #######################################################################################
@@ -82,11 +81,6 @@ create_power_mode -name PM_default \
 create_power_nets  -nets VDD
 create_ground_nets -nets VSS
 
-### MEMORY
-
-create_power_nets  -nets VDD_PER
-create_power_nets  -nets VDD_ARR
-
 ### BODY BIAS
 
 create_bias_net    -net VPW_P
@@ -96,23 +90,10 @@ create_bias_net    -net VNW_N
 ### Power Nets Connections
 #######################################################################################
 
-### MEMORY
-
-create_global_connection  -net VDD_ARR -pins VCS
-
-create_global_connection  -net VDD_PER -pins VDD -instances l2_ram_i/CUTS_*__bank_gen_bank_i/cut_*
-create_global_connection  -net VDD_PER -pins VDD -instances l2_ram_i/bank_sram_pri*_i/cut_*
-
 ### CORE
 
 create_global_connection -net VDD    -pins VDD
 create_global_connection -net VSS    -pins VSS
-
-### FLL
-
-create_global_connection -net VDD    -pins VDDA
-create_global_connection -net VDD    -pins VDD_AO
-
 
 ### BODY BIAS
 
@@ -124,8 +105,6 @@ create_global_connection -net VNW_N  -pins VBN
 #######################################################################################
 
 update_power_domain -name PD_core      -primary_power_net VDD      -primary_ground_net VSS
-update_power_domain -name PD_memarray  -primary_power_net VDD_ARR  -primary_ground_net VSS
-update_power_domain -name PD_periphery -primary_power_net VDD_PER  -primary_ground_net VSS
 update_power_domain -name PD_core      -pmos_bias_net VNW_N        -nmos_bias_net VPW_P
 
 

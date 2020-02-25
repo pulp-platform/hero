@@ -1,7 +1,7 @@
 ##########################################################################
 #  Design Setings
 ##########################################################################
-set CHIP        "pulp_soc"
+set CHIP        "pulp"
 set DESIGNNAME  ${CHIP}
 set reportDir  reports
 set savePrefix ${DESIGNNAME}
@@ -14,7 +14,7 @@ setLibraryUnit -cap  1pf
 ##########################################################################
 # load Config & FP
 ##########################################################################
-source  ./src/pulp_soc.globals
+source  ./src/pulp.globals
 init_design
 
 report_analysis_views > reports/mmmc_view.rpt
@@ -25,15 +25,14 @@ setNanoRouteMode -routeBottomRoutingLayer 2
 setNanoRouteMode -routeTopRoutingLayer    8
 
 set floorW [ expr 1840.0 ]
-set floorH [ expr 1255.0 ]
+set floorH [ expr 1500.0 ]
 set floorMargin 0.5
 floorPlan -coreMarginsBy io -d  $floorW $floorH $floorMargin $floorMargin $floorMargin $floorMargin
-source scripts/add_pin.tcl
 
 ##########################################################################
 #  Memory and FLL Placements
 ##########################################################################
-source scripts/pulp_soc_place_hm.tcl
+source scripts/pulp_place_hm.tcl
 
 ##########################################################################
 #  Settings: WellTaps and TIE cells
@@ -53,15 +52,15 @@ addWellTap -cellInterval  $wellTap(maxdis) -fixedGap
 #  power Route
 ##########################################################################
 free_power_intent
-read_power_intent -cpf src/pulp_soc.cpf
+read_power_intent -cpf src/pulp.cpf
 commit_power_intent
 fit
 
-source scripts/pulp_soc_power_grid_m3_m9.tcl
-source scripts/pulp_soc_power_viaResize_m3_m9_VDD.tcl
-source scripts/pulp_soc_power_viaResize_m3_m9_VSS.tcl
-source scripts/pulp_soc_power_stripes_blocks_m7.tcl
-source scripts/pulp_soc_power_grid_m9_m10.tcl
+source scripts/pulp_power_grid_m3_m9.tcl
+source scripts/pulp_power_viaResize_m3_m9_VDD.tcl
+source scripts/pulp_power_viaResize_m3_m9_VSS.tcl
+source scripts/pulp_power_stripes_blocks_m7.tcl
+source scripts/pulp_power_grid_m9_m10.tcl
 
 # FOLLOW PINS
 sroute -connect { corePin } \
@@ -76,7 +75,7 @@ redraw
 
 saveDesign save/pulp_top_01_floorplan.enc
 
-write_lef_abstract save/pulp_soc.lef -stripePin
+write_lef_abstract save/pulp.lef -stripePin
 
 ##########################################################################
 # Placement
@@ -100,17 +99,17 @@ setAnalysisMode -analysisType onChipVariation -cppr both
 
 setAnalysisMode -aocv true
 
-source scripts/pulp_soc_update_mmmc_sdc_prects.tcl
+source scripts/pulp_update_mmmc_sdc_prects.tcl
 
 report_clocks                    >  reports/clocks_prePlace.rpt
 report_clocks -uncertainty_table >> reports/clocks_prePlace.rpt
 
-place_opt_design -out_dir reports/pulp_soc_02_place_opt_design
+place_opt_design -out_dir reports/pulp_02_place_opt_design
 checkPlace
 addTieHiLo
 saveDesign save/pulp_top_02_placed.enc
 
-timeDesign -preCTS -expandedViews -outDir reports/pulp_soc_02_timedesign_preCTS
+timeDesign -preCTS -expandedViews -outDir reports/pulp_02_timedesign_preCTS
 
 ##########################################################################
 # CTS
@@ -120,18 +119,18 @@ echo "= CTS                                                                     
 echo "================================================================================"
 
 #You have to generete this only the first time, then modify it according to your needs
-#the modified file is scripts/pulp_soc.ccopt.tcl
+#the modified file is scripts/pulp.ccopt.tcl
 #create_ccopt_clock_tree_spec -file src/create_ccopt_clock_tree_spec.innovus.spec.tcl
-create_ccopt_clock_tree_spec -file src/pulp_soc.ccopt.tcl
-source src/pulp_soc.ccopt.pre.tcl
-source src/pulp_soc.ccopt.tcl
-source src/pulp_soc.ccopt.post.tcl
+create_ccopt_clock_tree_spec -file src/pulp.ccopt.tcl
+source src/pulp.ccopt.pre.tcl
+source src/pulp.ccopt.tcl
+source src/pulp.ccopt.post.tcl
 
-ccopt_design -outDir reports/pulp_soc_03_ccopt_design
+ccopt_design -outDir reports/pulp_03_ccopt_design
 
 saveDesign save/pulp_top_03_cts.enc
 
-source scripts/pulp_soc_update_mmmc_sdc_postcts.tcl
+source scripts/pulp_update_mmmc_sdc_postcts.tcl
 
 mkdir -p ./reports/clock
 
@@ -139,15 +138,15 @@ mkdir -p ./reports/clock
 report_ccopt_clock_trees -file ./reports/clock/clock_trees.rpt
 report_ccopt_skew_groups -file ./reports/clock/skew_groups.rpt
 
-timeDesign       -postCTS -expandedViews -outDir reports/pulp_soc_03_timedesign_postCTS
-timeDesign -hold -postCTS -expandedViews -outDir reports/pulp_soc_03_timedesign_postCTS
+timeDesign       -postCTS -expandedViews -outDir reports/pulp_03_timedesign_postCTS
+timeDesign -hold -postCTS -expandedViews -outDir reports/pulp_03_timedesign_postCTS
 
 optDesign -postCTS -hold
 
 saveDesign save/pulp_top_03_cts_hold.enc
 
-timeDesign       -postCTS -expandedViews -outDir reports/pulp_soc_03_timedesign_postCTS_hold
-timeDesign -hold -postCTS -expandedViews -outDir reports/pulp_soc_03_timedesign_postCTS_hold
+timeDesign       -postCTS -expandedViews -outDir reports/pulp_03_timedesign_postCTS_hold
+timeDesign -hold -postCTS -expandedViews -outDir reports/pulp_03_timedesign_postCTS_hold
 
 report_clocks                    >  reports/clocks_postCTS.rpt
 report_clocks -uncertainty_table >> reports/clocks_postCTS.rpt
@@ -174,10 +173,10 @@ routeDesign -globalDetail
 
 saveDesign save/pulp_top_04_routed.enc
 
-source scripts/pulp_soc_update_mmmc_sdc_postroute.tcl
+source scripts/pulp_update_mmmc_sdc_postroute.tcl
 
-timeDesign       -postRoute -expandedViews -outDir reports/pulp_soc_04_timedesign_postRoute
-timeDesign -hold -postRoute -expandedViews -outDir reports/pulp_soc_04_timedesign_postRoute
+timeDesign       -postRoute -expandedViews -outDir reports/pulp_04_timedesign_postRoute
+timeDesign -hold -postRoute -expandedViews -outDir reports/pulp_04_timedesign_postRoute
 
 report_clocks                    >  reports/clocks_postRoute.rpt
 report_clocks -uncertainty_table >> reports/clocks_postRoute.rpt
@@ -186,15 +185,15 @@ setExtractRCMode -engine postRoute
 setDelayCalMode -siAware true
 #setOptMode -fixDrc true
 
-source scripts/pulp_soc_update_mmmc_sdc_postroute_allViews_typ.tcl
+source scripts/pulp_update_mmmc_sdc_postroute_allViews_typ.tcl
 
 optDesign -postRoute -hold
 
 saveDesign save/pulp_top_04_routed_hold.enc
 
 ## setup and hold*** optDesign -postCTS
-timeDesign       -postRoute -expandedViews -outDir reports/pulp_soc_04_timedesign_postRoute_hold
-timeDesign -hold -postRoute -expandedViews -outDir reports/pulp_soc_04_timedesign_postRoute_hold
+timeDesign       -postRoute -expandedViews -outDir reports/pulp_04_timedesign_postRoute_hold
+timeDesign -hold -postRoute -expandedViews -outDir reports/pulp_04_timedesign_postRoute_hold
 
 ##########################################################################
 # chip finishing
@@ -225,19 +224,19 @@ setNanoRouteMode -droutePostRouteSwapVia multiCut
 routeDesign -viaOpt
 
 #do final timing analysis
-timedesign -postRoute -expandedViews       -outDir reports/timing -prefix pulp_soc_final
-timedesign -postRoute -expandedViews -hold -outDir reports/timing -prefix pulp_soc_final
+timedesign -postRoute -expandedViews       -outDir reports/timing -prefix pulp_final
+timedesign -postRoute -expandedViews -hold -outDir reports/timing -prefix pulp_final
 
 deleteRouteBlk -all
-verify_drc -report reports/verify/pulp_soc.drc.rpt
-verifyProcessAntenna -leffile reports/verify/pulp_soc.antenna.lef -reportfile reports/verify/pulp_soc.antenna.rpt
-verifyWellTap -report  reports/verify/pulp_soc.wellTap.rpt
+verify_drc -report reports/verify/pulp.drc.rpt
+verifyProcessAntenna -leffile reports/verify/pulp.antenna.lef -reportfile reports/verify/pulp.antenna.rpt
+verifyWellTap -report  reports/verify/pulp.wellTap.rpt
 
 deleteEmptyModule
 
 saveDesign save/pulp_top_final.enc
 
-source scripts/pulp_soc_exportall.tcl
+source scripts/pulp_exportall.tcl
 
 source scripts/checkdesign.tcl
 
@@ -257,6 +256,6 @@ group_path   -name reg2ff       -from $regs -to $ff
 group_path   -name ff2reg       -from $ff -to $regs
 
 
-timedesign -postRoute -expandedViews       -outDir reports/timing -prefix pulp_soc_final_pathGroup
-timedesign -postRoute -expandedViews -hold -outDir reports/timing -prefix pulp_soc_final_pathGroup
+timedesign -postRoute -expandedViews       -outDir reports/timing -prefix pulp_final_pathGroup
+timedesign -postRoute -expandedViews -hold -outDir reports/timing -prefix pulp_final_pathGroup
 

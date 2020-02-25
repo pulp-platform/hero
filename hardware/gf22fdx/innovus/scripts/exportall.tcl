@@ -104,5 +104,6 @@ streamOut out/${NAME}.gds.gz  -mapFile ../technology/22FDSOI_edi2gds_colored.lay
   /usr/pack/gf-22-kgf/dz/mem/gds/IN22FDX_S1D_NFRG_W04096B032M04C128.gds \
   /usr/pack/gf-22-kgf/dz/mem/gds/IN22FDX_S1D_NFRG_W02048B032M04C128.gds \
   /usr/pack/gf-22-kgf/dz/mem/gds/IN22FDX_ROMI_FRG_W02048B032M32C064_boot_code.gds \
+  /usr/pack/gf-22-kgf/dz/mem/gds/IN22FDX_R1PH_NFHN_W01024B032M04C256.gds \
   }
 

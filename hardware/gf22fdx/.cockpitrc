@@ -1,0 +1,111 @@
+[cockpit]
+  # Do not change this section
+  config = 2017-2
+
+  # Still Work in Progress
+
+[library]
+  # Setup files will be generated for these libraries.
+  #
+  # - only libraries that can be found in the "kit.ascii" database
+  #   can be used (see cockpit.log for the full unix path)
+  #   Standard cells, Low VT (fast), Regular VT and High VT (slow) are possible.
+  #   Note that you can mix and match all VTs..
+  # - use "-update" or "-rewrite" for the changes to take effect
+  #
+  # The following libraries are available:
+  #   technology    : 22FDX
+  #
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V0.4_1.0     (10 Metals)  ++ OBSOLETE ++
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V0.5_0.0     (10 Metals)  ++ OBSOLETE ++
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V1.0_0.0     (10 Metals)  ++ OBSOLETE ++
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V1.1_0.0     (10 Metals)  ++ OBSOLETE ++
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V1.1_2.0     (10 Metals)  ++ OBSOLETE ++
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V1.2_0.0     (10 Metals)
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V1.3_0.0     (10 Metals)
+  #_
+  # For a comparison list see:
+  #
+  #   http://eda.ee.ethz.ch/index.php/
+  #
+  #   libraries     : SuperLow VT (fastfast)                      Low VT (fast)
+  #       8 track     GF22FDX_SC8T_104CPP_BASE_CSC20SL_V02.R20    GF22FDX_SC8T_104CPP_BASE_CSC20L_V02.R20  ++ OBSOLETE ++
+  #                   GF22FDX_SC8T_104CPP_BASE_CSC24SL_V02.R20    GF22FDX_SC8T_104CPP_BASE_CSC24L_V02.R20  ++ OBSOLETE ++
+  #                   GF22FDX_SC8T_104CPP_BASE_CSC28SL_V02.R20    GF22FDX_SC8T_104CPP_BASE_CSC28L_V02.R20  ++ OBSOLETE ++
+  #
+  #       8 track     GF22FDX_SC8T_104CPP_BASE_CSC20SL_V04R00     GF22FDX_SC8T_104CPP_BASE_CSC20L_V04R00  ++ OBSOLETE ++
+  #                   GF22FDX_SC8T_104CPP_BASE_CSC24SL_V04R00     GF22FDX_SC8T_104CPP_BASE_CSC24L_V04R00  ++ OBSOLETE ++
+  #                   GF22FDX_SC8T_104CPP_BASE_CSC28SL_V04R00     GF22FDX_SC8T_104CPP_BASE_CSC28L_V04R00  ++ OBSOLETE ++
+  #
+  #       8 track     GF22FDX_SC8T_104CPP_BASE_CSC20SL_V05R00     GF22FDX_SC8T_104CPP_BASE_CSC20L_V05R00
+  #                   GF22FDX_SC8T_104CPP_BASE_CSC24SL_V05R00     GF22FDX_SC8T_104CPP_BASE_CSC24L_V05R00
+  #                   GF22FDX_SC8T_104CPP_BASE_CSC28SL_V05R00     GF22FDX_SC8T_104CPP_BASE_CSC28L_V05R00
+  #
+  #                   GF22FDX_SC8T_104CPP_LPK_CSSL_V02R00         GF22FDX_SC8T_104CPP_LPK_CSL_V02R00
+  #                   GF22FDX_SC8T_104CPP_SHIFT_CSSL_V02R00       GF22FDX_SC8T_104CPP_SHIFT_CSL_V02R00
+  #
+  #
+  #   pad-libraries : GF22FDX_GPIO18_10M30PSG_V03.R10     ++ OBSOLETE ++
+  #                   IN22FDX_GPIO18_10M30P_V0410         ++ OBSOLETE ++
+  #                   IN22FDX_GPIO18_10M3S30P_V0430       ++ OBSOLETE ++
+  #                   IN22FDX_GPIO18_10M3S30P_FDK_V04R40
+  #
+  #
+  #   mem compiler  : gf22memory
+
+  libs    = 22FDX 10M_2Mx_6Cx_2Ix_LB__V1.3_0.0 gf22memory \
+            GF22FDX_SC8T_104CPP_BASE_CSC20SL_V05R00 GF22FDX_SC8T_104CPP_BASE_CSC20L_V05R00 \
+            GF22FDX_SC8T_104CPP_BASE_CSC24SL_V05R00 GF22FDX_SC8T_104CPP_BASE_CSC24L_V05R00 \
+            GF22FDX_SC8T_104CPP_BASE_CSC28SL_V05R00 GF22FDX_SC8T_104CPP_BASE_CSC28L_V05R00 \
+            GF22FDX_SC8T_104CPP_LPK_CSL_V02R00                                             \
+            GF22FDX_SC8T_104CPP_HPK_CSL_V02R00                                             \
+            IN22FDX_GPIO18_10M3S30P_FDK_V04R40
+
+  # see /usr/pack/gf-22-kgf/dz/mem/gds to see which macros have already been generated
+  # enter the name WITHOUT '.gds' in the list below, contact us <dz@ee.ethz.ch>
+
+  macros  = IN22FDX_S1D_NFRG_W04096B032M04C128 \
+            IN22FDX_S1D_NFRG_W02048B032M04C128 \
+            IN22FDX_ROMI_FRG_W02048B032M32C064_boot_code \
+            IN22FDX_R1PH_NFHN_W01024B032M04C256
+
+[version]
+  # Setup files will be generated for these software versions.
+  # - only versions that can be found in the "kit.ascii" database
+  #   can be used (see cockpit.log for the full unix path)
+  # - if you change a version you might need to adjust some
+  #   startups in the [command] section too...
+  # - use "-update" or "-rewrite" for the changes to take effect
+
+  # WARNING: The primary purpose is to keep version settings within each
+  # project. Fiddling around will most likely result in an unsupported
+  # combinations and perl errors. Better update this file as a whole
+  # with '-updaterc'.
+
+  modelsim  =  modelsim-10.5a
+  synopsys  =  synopsys-2016.03
+  tetramax  =  tetramax-2016.03
+  innovus   =  innovus-17
+  dfii      =  ic-12
+  #calibre   =  calibre-2017.2
+  calibre   =  calibre-2017.4
+    # for 10M_2Mx_6Cx_2Ix_LB__V1.3_0.0
+
+[command]
+  # Startup commands available through the GUI buttons.
+  # - startup commands can be modified but need to be compatible with the
+  #   setup file versions selected in the [version] section
+  # - to add more modelsim/synopsys startups to the GUI just put your own entries
+  #   of the form "(modelsim|synopsys):<label> = <command>" there
+  # - changes will take effect the next time you start
+
+#  emacs                        =  emacs -f vhdl-mode
+  modelsim                     =  vsim-10.5a
+  synopsys:DC Shell            =  xterm -g 120x40 -T synopsys-2016.03 -e "sh -c 'synopsys-2016.03 dc_shell -64bit | tee view_command.log'"
+  synopsys:DesignVision        =  xterm -g 120x40 -T synopsys-2016.03 -e "sh -c 'synopsys-2016.03 design_vision -64bit -xg_mode | tee view_command.log'"
+  tetramax                     =  synopsys-2016.03 tmax
+  innovus                      =  xterm -g 136x40 -T innovus-17.11 -e "cds_innovus-17.11.000 innovus"
+  calibre                      =  xterm -g 120x40 -T calibredrv -e "./start_calibre"
+  dfii                         =  ./start_dfii
+  dz:llama                     = llama
+
