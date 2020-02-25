@@ -34,6 +34,7 @@ axi:
     # Level 4
     - src/axi_lite_xbar.sv
     - src/axi_xbar.sv
+    - src/axi_id_remap.sv
 
 axi_sim:
   files:
