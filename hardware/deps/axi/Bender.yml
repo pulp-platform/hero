@@ -25,6 +25,7 @@ sources:
   - src/axi_perf_mon.sv
   # Level 2
   - src/axi_atop_filter.sv
+  - src/axi_burst_splitter.sv
   - src/axi_cdc.sv
   - src/axi_cut.sv
   - src/axi_delayer.sv
