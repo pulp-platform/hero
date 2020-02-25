@@ -33,6 +33,11 @@ pos_init_entry:
     csrr    a0, 0xF14
     andi    a1, a0, 0x1f
     srli    a0, a0, 5
+#ifdef ARCHI_CL_BOOT
+    li      a2, ARCHI_FC_CID
+    beq     a0, a2, do_cl_boot
+    bnez    a1, pe_start
+#else
 #ifdef ARCHI_FC_CID
     li      a2, ARCHI_FC_CID
     bne     a0, a2, pe_start
@@ -40,8 +45,7 @@ pos_init_entry:
     bnez    a1, pe_start
 #endif
 #endif
-
-
+#endif
 
     # Clear the bss segment
     la      t0, _bss_start
@@ -156,3 +160,23 @@ pe_start:
     add  x2, x2, x1
     j    cluster_entry_stub
 #endif
+
+do_cl_boot:
+    li  x2, 0x10200000
+    li  x3, -1
+    la  x4, _start
+    sw  x4, 0x40(x2)
+    sw  x4, 0x44(x2)
+    sw  x4, 0x48(x2)
+    sw  x4, 0x4C(x2)
+    sw  x4, 0x50(x2)
+    sw  x4, 0x54(x2)
+    sw  x4, 0x58(x2)
+    sw  x4, 0x5C(x2)
+    sw  x3, 8(x2)
+
+loop:
+    li x2, 0x1a109800
+    sw x0, 0(x2)
+    wfi
+    j loop

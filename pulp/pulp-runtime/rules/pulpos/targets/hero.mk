@@ -3,7 +3,7 @@ PULP_CFLAGS       +=  -D__riscv__
 PULP_ARCH_CFLAGS ?=  -march=rv32imcxgap9
 PULP_ARCH_LDFLAGS ?=  -march=rv32imcxgap9
 PULP_ARCH_OBJDFLAGS ?= -Mmarch=rv32imcxgap9
-PULP_CFLAGS    += -fdata-sections -ffunction-sections -include chips/hero/config.h -I$(PULPRT_HOME)/include/chips/hero -DARCHI_NO_FC=1
+PULP_CFLAGS    += -fdata-sections -ffunction-sections -include chips/hero/config.h -I$(PULPRT_HOME)/include/chips/hero -DARCHI_NO_FC=1 -DARCHI_CL_BOOT=1
 PULP_OMP_CFLAGS    += -fopenmp -mnativeomp
 PULP_LDFLAGS += -nostartfiles -nostdlib -Wl,--gc-sections -L$(PULPRT_HOME)/kernel -Tchips/hero/link.ld -lgcc
 
