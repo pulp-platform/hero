@@ -18,23 +18,6 @@ if [ -z "$HERO_INSTALL" ]; then
     exit 1
 fi
 
-# If in CI mode and not full test: Take the prebuilt compiler
-if [ -n "$CI" -a -z "$FULL_CI_TEST" ]; then
-    echo "Take shortcut for compiler installation"
-
-    PULP_RISCV_GCC=v1.0.16-pulp-riscv-gcc-centos-7.tar.bz2
-    mkdir -p "$HERO_INSTALL"
-    # Download the compiler
-    if [[ ! -f $PULP_RISCV_GCC ]]; then
-        wget https://github.com/pulp-platform/pulp-riscv-gnu-toolchain/releases/download/v1.0.16/v1.0.16-pulp-riscv-gcc-centos-7.tar.bz2
-    else
-        echo "$PULP_RISC_GCC is already downloaded, skipping"
-    fi
-    # Unpack to HERO_INSTALL
-    tar -xvf "$PULP_RISCV_GCC" -C "$HERO_INSTALL" --strip 1
-    exit 0
-fi
-
 conf_dir=$(readlink -f $(dirname "$1"))
 
 # FIXME: install dependencies for crosstool-ng if not found on host
@@ -105,7 +88,7 @@ $HERO_INSTALL/bin/ct-ng upgradeconfig > /dev/null
 
 # # deduce tuple, sysroot
 TUPLE=$($HERO_INSTALL/bin/ct-ng -s show-tuple)
-ARCH=$(echo $TUPLE | cut -f1 -d'-')
+ARCH=$(echo "$TUPLE" | cut -f1 -d'-')
 SYSROOT=$HERO_INSTALL/$TUPLE/sysroot
 
 # check previous install and clear sysroot between builds if exists
@@ -138,10 +121,11 @@ echo "Starting toolchain build..."
 unset LD_LIBRARY_PATH
 $HERO_INSTALL/bin/ct-ng build
 
-if [ ! -d $SYSROOT ]; then
+echo "$SYSROOT"
+if [ ! -d "$SYSROOT" ]; then
     SYSROOT=
 else
-    SYSROOT=$(readlink -f $SYSROOT)
+    SYSROOT="$(readlink -f $SYSROOT)"
 fi
 
 # fixup generic hardcoded paths in installed host toolchain
@@ -175,10 +159,10 @@ if case $ARCH in riscv*) ;; *) false;; esac; then
             exit 1
         fi
 
-        chmod -R u+w $SYSROOT
+        chmod -R u+w "$SYSROOT"
         ORIGDIR=$(pwd)
         for dir in $libdir/$abidir usr/$libdir/$abidir; do
-            cd $SYSROOT/$dir
+            cd "$SYSROOT/$dir"
             curdir=$(readlink -f $(pwd))
             # move files to libdir, leaving symlink and create symlinks to symlinks
             for file in $(find . -type f -o -type l); do
@@ -204,7 +188,7 @@ if case $ARCH in riscv*) ;; *) false;; esac; then
         done
 
         for dir in lib usr/lib; do
-            cd $SYSROOT/$dir
+            cd "$SYSROOT/$dir"
             # clean symlinks in libdir
             for file in $(find . -type l); do
                 destrelsysroot=$(readlink -f $file | sed "s|$SYSROOT/||")
@@ -219,25 +203,25 @@ if case $ARCH in riscv*) ;; *) false;; esac; then
         done
 
         # remove original lib directories
-        rm -rf $SYSROOT/$libdir
-        rm -rf $SYSROOT/usr/$libdir
+        rm -rf "$SYSROOT/$libdir"
+        rm -rf "$SYSROOT/usr/$libdir"
 
         # create necessary symlinks to make the toolchain work
         for dir in . usr; do
-            cd $SYSROOT/$dir
-            ln -s lib $libdir
+            cd "$SYSROOT/$dir"
+            ln -s lib "$libdir"
             cd lib
-            ln -s . $abidir
+            ln -s . "$abidir"
         done
 
         cd $ORIGDIR
-        chmod -R u-w $SYSROOT
+        chmod -R u-w "$SYSROOT"
     fi
 fi
 
 # alias the toolchain if requested ($2 = vendor alias, $3 = optional suffix useful for buildroot)
 if [ ! -z "$2" ] || [ ! -z "$3" ]; then
-    chmod -R u+w $HERO_INSTALL/bin
+    chmod -R u+w "$HERO_INSTALL/bin"
     vendor=$(echo "$TUPLE" | sed -E 's/^\w*-(\w*)-.*/\1/')
     cd "$HERO_INSTALL/bin"
     for tf in $TUPLE*; do
