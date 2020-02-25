@@ -57,8 +57,7 @@
             GF22FDX_SC8T_104CPP_BASE_CSC20SL_V05R00 GF22FDX_SC8T_104CPP_BASE_CSC20L_V05R00 \
             GF22FDX_SC8T_104CPP_BASE_CSC24SL_V05R00 GF22FDX_SC8T_104CPP_BASE_CSC24L_V05R00 \
             GF22FDX_SC8T_104CPP_BASE_CSC28SL_V05R00 GF22FDX_SC8T_104CPP_BASE_CSC28L_V05R00 \
-            GF22FDX_SC8T_104CPP_LPK_CSL_V02R00                                             \
-            GF22FDX_SC8T_104CPP_HPK_CSL_V02R00                                             \
+	    GF22FDX_SC12T_104CPP_HPK_CSR_V02R20 \
             IN22FDX_GPIO18_10M3S30P_FDK_V04R40
 
   # see /usr/pack/gf-22-kgf/dz/mem/gds to see which macros have already been generated
