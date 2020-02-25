@@ -3,7 +3,6 @@ package:
   authors: [ "Andreas Kurth <akurth@iis.ee.ethz.ch>" ]
 
 dependencies:
-  axi2apb: { git: "https://github.com/pulp-platform/axi2apb.git", rev: atop }
   axi: { git: "https://github.com/pulp-platform/axi.git", version: 0.12.0 }
   axi_mem_if: { git: "https://github.com/pulp-platform/axi_mem_if.git", rev: fix-name-conflict }
   axi2mem: { git: "https://github.com/pulp-platform/axi2mem.git", rev: undefined } # TODO: upstream

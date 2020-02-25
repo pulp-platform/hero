@@ -45,6 +45,3 @@ analyze -format sverilog  -work work ${IPS_PATH}/axi_riscv_atomics/src/axi_riscv
 analyze -format sverilog  -work work ${IPS_PATH}/axi_riscv_atomics/src/axi_riscv_lrsc_wrap.sv
 analyze -format sverilog  -work work ${IPS_PATH}/axi_riscv_atomics/src/axi_riscv_amos_wrap.sv
 analyze -format sverilog  -work work ${IPS_PATH}/axi_riscv_atomics/src/axi_riscv_atomics_wrap.sv
-
-analyze -format sverilog  -work work ${IPS_PATH}/axi2apb/src/axi2apb_wrap.sv
-analyze -format sverilog  -work work ${IPS_PATH}/axi2apb/src/axi2apb_64_32.sv
