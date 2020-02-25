@@ -11,7 +11,8 @@ module soc_ctrl_regs #(
   parameter int unsigned  N_CORES     = 0,
   parameter int unsigned  N_CLUSTERS  = 0,
   parameter int unsigned  ADDR_WIDTH  = 0,
-  parameter int unsigned  DATA_WIDTH  = 0
+  parameter int unsigned  DATA_WIDTH  = 0,
+  parameter logic [ADDR_WIDTH-1:0] BASE_ADDR = 0
 ) (
   input  logic  clk_i,
   input  logic  rst_ni,
@@ -19,9 +20,6 @@ module soc_ctrl_regs #(
 );
 
   localparam int unsigned N_SLV = 5;
-
-  localparam int unsigned SOC_CTRL_START = pulp_cluster_cfg_pkg::SOC_PERIPH_BASE_ADDR + 16'h4000;
-  localparam int unsigned SOC_CTRL_END   = SOC_CTRL_START + 16'h0FFF;
 
   APB_BUS #(
     .APB_ADDR_WIDTH (ADDR_WIDTH),
@@ -32,8 +30,8 @@ module soc_ctrl_regs #(
     .ADDR_WIDTH (ADDR_WIDTH),
     .DATA_WIDTH (DATA_WIDTH),
     .N_SLV      (N_SLV),
-    .ADDR_BEGIN ({SOC_CTRL_START + 12'h0B0, SOC_CTRL_START + 12'h0A0, SOC_CTRL_START + 12'h014, SOC_CTRL_START + 12'h010, SOC_CTRL_START + 12'h000}),
-    .ADDR_END   ({SOC_CTRL_START + 12'hFFF, SOC_CTRL_START + 12'h0AF, SOC_CTRL_START + 12'h07F, SOC_CTRL_START + 12'h013, SOC_CTRL_START + 12'h00F})
+    .ADDR_BEGIN ({BASE_ADDR + 12'h0B0, BASE_ADDR + 12'h0A0, BASE_ADDR + 12'h014, BASE_ADDR + 12'h010, BASE_ADDR + 12'h000}),
+    .ADDR_END   ({BASE_ADDR + 12'hFFF, BASE_ADDR + 12'h0AF, BASE_ADDR + 12'h07F, BASE_ADDR + 12'h013, BASE_ADDR + 12'h00F})
   ) i_apb_bus (
     .inp  (apb),
     .oup  (apb_bus)

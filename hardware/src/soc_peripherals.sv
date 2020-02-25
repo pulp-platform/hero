@@ -116,7 +116,8 @@ module soc_peripherals #(
     .N_CORES    (N_CORES),
     .N_CLUSTERS (N_CLUSTERS),
     .ADDR_WIDTH (AXI_AW),
-    .DATA_WIDTH (AXI_DW)
+    .DATA_WIDTH (AXI_DW),
+    .BASE_ADDR  (SOC_CTRL_START)
   ) i_soc_ctrl_regs (
     .clk_i,
     .rst_ni,
