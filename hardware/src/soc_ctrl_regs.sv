@@ -20,6 +20,9 @@ module soc_ctrl_regs #(
 
   localparam int unsigned N_SLV = 5;
 
+  localparam int unsigned SOC_CTRL_START = pulp_cluster_cfg_pkg::SOC_PERIPH_BASE_ADDR + 16'h4000;
+  localparam int unsigned SOC_CTRL_END   = SOC_CTRL_START + 16'h0FFF;
+
   APB_BUS #(
     .APB_ADDR_WIDTH (ADDR_WIDTH),
     .APB_DATA_WIDTH (DATA_WIDTH)
@@ -29,8 +32,8 @@ module soc_ctrl_regs #(
     .ADDR_WIDTH (ADDR_WIDTH),
     .DATA_WIDTH (DATA_WIDTH),
     .N_SLV      (N_SLV),
-    .ADDR_BEGIN ({32'h0000_00B0, 32'h0000_00A0, 32'h0000_0014, 32'h0000_0010, 32'h0000_0000}),
-    .ADDR_END   ({32'h0000_0FFF, 32'h0000_00AF, 32'h0000_007F, 32'h0000_0013, 32'h0000_000F})
+    .ADDR_BEGIN ({SOC_CTRL_START + 12'h0B0, SOC_CTRL_START + 12'h0A0, SOC_CTRL_START + 12'h014, SOC_CTRL_START + 12'h010, SOC_CTRL_START + 12'h000}),
+    .ADDR_END   ({SOC_CTRL_START + 12'hFFF, SOC_CTRL_START + 12'h0AF, SOC_CTRL_START + 12'h07F, SOC_CTRL_START + 12'h013, SOC_CTRL_START + 12'h00F})
   ) i_apb_bus (
     .inp  (apb),
     .oup  (apb_bus)
