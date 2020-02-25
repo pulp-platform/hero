@@ -241,7 +241,7 @@ module pulp #(
   // i_soc_bus.periph_mst -> [periph_mst]
   // -> i_dwc_periph_mst -> [periph_mst_dwced]
   // -> i_periphs.axi
-  localparam int unsigned AXI_DW_PERIPHS = 64;
+  localparam int unsigned AXI_DW_PERIPHS = 32;
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
@@ -569,6 +569,7 @@ module pulp #(
     .AXI_AW     (AXI_AW),
     .AXI_IW     (AXI_IW_SB_OUP),
     .AXI_UW     (AXI_UW),
+    .AXI_DW     (AXI_DW_PERIPHS),
     .N_CORES    (pulp_cluster_cfg_pkg::N_CORES),
     .N_CLUSTERS (N_CLUSTERS)
   ) i_periphs (

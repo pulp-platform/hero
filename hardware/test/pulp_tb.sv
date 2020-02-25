@@ -177,7 +177,7 @@ module pulp_tb #(
   axi_dw_converter_intf #(
     .AXI_ADDR_WIDTH     (pulp_pkg::AXI_AW),
     .AXI_SLV_DATA_WIDTH (AXI_DW),
-    .AXI_MST_DATA_WIDTH (64),
+    .AXI_MST_DATA_WIDTH (32),
     .AXI_ID_WIDTH       (AXI_IW+1),
     .AXI_USER_WIDTH     (pulp_pkg::AXI_UW)
   ) i_dwc_peripherals (
@@ -190,6 +190,7 @@ module pulp_tb #(
     .AXI_AW     (pulp_pkg::AXI_AW),
     .AXI_IW     (AXI_IW+1),
     .AXI_UW     (pulp_pkg::AXI_UW),
+    .AXI_DW     (32),
     .N_CORES    (pulp_cluster_cfg_pkg::N_CORES),
     .N_CLUSTERS (N_CLUSTERS)
   ) i_peripherals (
