@@ -17,3 +17,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - `axi2mem`: Ensure starvation freedom when prioritizing individual writes over read bursts.
+- `riscv`: Propagate enabled A extension to MISA CSR.
