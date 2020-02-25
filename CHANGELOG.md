@@ -28,3 +28,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `riscv`: Propagate enabled A extension to MISA CSR.
 - `axi_dwc`: Ensure the W beat is sent even if the AW is not yet accepted.
 - Remove FLL configuration in `pulp-runtime`.
+- `axi_riscv_atomics`: Improve compatibility with VCS.
