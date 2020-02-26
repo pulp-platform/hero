@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Move `soc_peripherals` from testbench to `soc_bus`. Most importantly, this includes the `soc_control_registers`.
 - Change the AXI burst type of the cluster from `FIXED` to `INCR`.
 - Replace deprecated `axi2apb` module with `axi_to_axi_lite` and `axi_lite_to_apb` module.
+- Match boot address with Hero (`0x1C00_8080` --> `1C00_0080`)
 
 ### Fixed
 - `axi2mem`: Ensure starvation freedom when prioritizing individual writes over read bursts.
