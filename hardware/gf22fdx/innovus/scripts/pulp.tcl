@@ -33,7 +33,7 @@ floorPlan -coreMarginsBy io -d  $floorW $floorH $floorMargin $floorMargin $floor
 #  Memory and FLL Placements
 ##########################################################################
 source scripts/pulp_place_hm.tcl
-
+source scripts/add_pin.tcl
 ##########################################################################
 #  Settings: WellTaps and TIE cells
 ##########################################################################
