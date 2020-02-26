@@ -188,7 +188,7 @@ module pulp_cluster_ooc (
     .CLUST_SHARED_FP          (32'h00000002),
     .CLUST_SHARED_FP_DIVSQRT  (32'h00000002),
     // I$ Parameters
-    .NB_CACHE_BANKS           (8),
+    .NB_CACHE_BANKS           (2),
     .CACHE_SIZE               (ICACHE_SIZE),
     .L2_SIZE                  (L2_SIZE),
     // Core Parameters

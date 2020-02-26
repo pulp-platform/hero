@@ -34,7 +34,7 @@ module pulp_cluster
   parameter int    NB_EXT2MEM              = 2,
   parameter bit    CLUSTER_ALIAS           = 1'b1,
   parameter int    CLUSTER_ALIAS_BASE      = 12'h1B0,
-  parameter int    TCDM_SIZE               = 64*1024,                 // [B], must be 2**N
+  parameter int    TCDM_SIZE               = 320*1024,                 // [B], must be 2**N
   parameter int    NB_TCDM_BANKS           = 16,                      // must be 2**N
   parameter int    TCDM_BANK_SIZE          = TCDM_SIZE/NB_TCDM_BANKS, // [B]
   parameter int    TCDM_NUM_ROWS           = TCDM_BANK_SIZE/4,        // [words]
@@ -1017,10 +1017,10 @@ module pulp_cluster
       .NB_CORES               ( NB_CORES            ),
       .SH_NB_BANKS            ( NB_CACHE_BANKS      ),
       .SH_NB_WAYS             ( 4                   ),
-      .SH_CACHE_SIZE          ( 4*1024              ), // in Byte
+      .SH_CACHE_SIZE          ( 8*1024              ), // in Byte
       .SH_CACHE_LINE          ( 1                   ), // in word of [FETCH_DATA_WIDTH]
       .PRI_NB_WAYS            ( 4                   ),
-      .PRI_CACHE_SIZE         ( 512                 ), // in Byte
+      .PRI_CACHE_SIZE         ( 1 * 1024            ), // in Byte
       .PRI_CACHE_LINE         ( 1                   ), // in word of [FETCH_DATA_WIDTH]
       .AXI_ID                 ( AXI_ID_OUT_WIDTH    ),
       .AXI_ADDR               ( AXI_ADDR_WIDTH      ),

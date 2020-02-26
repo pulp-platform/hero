@@ -10,6 +10,9 @@
 
 
 // `define  USE_SRAM
+`ifdef SYNHESIS
+`define USE_DATA_SRAM
+`endif
 
 module ram_ws_rs_data_scm
 #(
@@ -48,25 +51,45 @@ module ram_ws_rs_data_scm
                 assign {n_aw, n_ac} = addr;
                 assign bw = (we_n) ?  '0 : '1;
 
-                // GF22
-                SPREG_32w_128b sram_data
+                IN22FDX_R1PH_NFHN_W00032B128M02C256 sram_data //
                 (
-
-                    .CLK      ( clk   ), // input
-                    .CEN      ( cs_n  ), // input
-                    .RDWEN    ( we_n  ), // input
-                    .AW       ( n_aw  ), // input [3:0]
-                    .AC       ( n_ac  ), // input
-                    .D        ( wdata ), // input [127:0]
-                    .BW       ( '1    ), // input [127:0]
-                    .T_LOGIC  ( 1'b0  ), // input
-                    .MA_SAWL  ( '0    ), // input
-                    .MA_WL    ( '0    ), // input
-                    .MA_WRAS  ( '0    ), // input
-                    .MA_WRASD ( '0    ), // input
-                    .Q        ( rdata ), // output [127:0]
-                    .OBSV_CTL (       )  // output
+                
+                    .CLK          ( clk_i            ),
+                    .CEN          ( we_n             ),
+                    .RDWEN        ( we_i             ),
+                    .AW           ( addr[4:1]        ),
+                    .AC           ( addr[0]          ),
+                    .D            ( wdata            ),
+                    .BW           ( bw               ),
+                    .Q            ( rdata            ),   
+                    .T_LOGIC      ( 1'b0             ),
+                    .MA_SAWL      ( '0               ),
+                    .MA_WL        ( '0               ),
+                    .MA_WRAS      ( '0               ),
+                    .MA_WRASD     ( '0               ),
+                    .OBSV_CTL     (                  )
+                
                 );
+
+                // GF22
+                // SPREG_32w_128b sram_data
+                // (
+
+                //     .CLK      ( clk   ), // input
+                //     .CEN      ( cs_n  ), // input
+                //     .RDWEN    ( we_n  ), // input
+                //     .AW       ( n_aw  ), // input [3:0]
+                //     .AC       ( n_ac  ), // input
+                //     .D        ( wdata ), // input [127:0]
+                //     .BW       ( '1    ), // input [127:0]
+                //     .T_LOGIC  ( 1'b0  ), // input
+                //     .MA_SAWL  ( '0    ), // input
+                //     .MA_WL    ( '0    ), // input
+                //     .MA_WRAS  ( '0    ), // input
+                //     .MA_WRASD ( '0    ), // input
+                //     .Q        ( rdata ), // output [127:0]
+                //     .OBSV_CTL (       )  // output
+                // );
 
                 // TSMC55
                 // SRAM_SP_32w_128b sram_data
@@ -89,38 +112,58 @@ module ram_ws_rs_data_scm
                 assign {n_aw[2], n_as, n_aw[1:0], n_ac} = addr;
                 assign bw = (we_n) ?  '0 : '1;
 
-                SP1D_64w_128b sram_data
+                IN22FDX_R1PH_NFHN_W00064B128M02C256 sram_data // /usr/pack/gf-22-kgf/dz/mem/R1PH/V03R01/model/verilog/
                 (
-                    .CLK         ( clk           ),
-                    .CEN         ( cs_n          ),
-                    .RDWEN       ( we_n          ),
-                    .DEEPSLEEP   ( 1'b0          ),
-                    .POWERGATE   ( 1'b0          ),
-                    .AS          ( n_as          ),
-                    .AW          ( n_aw          ),
-                    .AC          ( n_ac          ),
-                    .D           ( wdata         ),
-                    .BW          ( bw            ),
-                    .T_BIST      ( 1'b0          ),
-                    .T_LOGIC     ( 1'b0          ),
-                    .T_CEN       ( 1'b0          ),
-                    .T_RDWEN     ( 1'b0          ),
-                    .T_DEEPSLEEP ( 1'b0          ),
-                    .T_POWERGATE ( 1'b0          ),
-                    .T_STAB      ( '0            ),
-                    .T_WBT       ( '0            ),
-                    .T_AS        ( '0            ),
-                    .T_AW        ( '0            ),
-                    .T_AC        ( '0            ),
-                    .T_D         ( '0            ),
-                    .T_BW        ( '0            ),
-                    .MA_SAWL     ( '0            ),
-                    .MA_WL       ( '0            ),
-                    .MA_WRAS     ( '0            ),
-                    .MA_WRASD    ( '0            ),
-                    .Q           ( rdata         ),
-                    .OBSV_CTL    (               )
+                
+                    .CLK          ( clk_i            ),
+                    .CEN          ( we_n             ),
+                    .RDWEN        ( we_i             ),
+                    .AW           ( addr[5:1]        ),
+                    .AC           ( addr[0]          ),
+                    .D            ( wdata            ),
+                    .BW           ( bw               ),
+                    .Q            ( rdata            ),   
+                    .T_LOGIC      ( 1'b0             ),
+                    .MA_SAWL      ( '0               ),
+                    .MA_WL        ( '0               ),
+                    .MA_WRAS      ( '0               ),
+                    .MA_WRASD     ( '0               ),
+                    .OBSV_CTL     (                  )
+                
                 );
+
+                // SP1D_64w_128b sram_data
+                // (
+                //     .CLK         ( clk           ),
+                //     .CEN         ( cs_n          ),
+                //     .RDWEN       ( we_n          ),
+                //     .DEEPSLEEP   ( 1'b0          ),
+                //     .POWERGATE   ( 1'b0          ),
+                //     .AS          ( n_as          ),
+                //     .AW          ( n_aw          ),
+                //     .AC          ( n_ac          ),
+                //     .D           ( wdata         ),
+                //     .BW          ( bw            ),
+                //     .T_BIST      ( 1'b0          ),
+                //     .T_LOGIC     ( 1'b0          ),
+                //     .T_CEN       ( 1'b0          ),
+                //     .T_RDWEN     ( 1'b0          ),
+                //     .T_DEEPSLEEP ( 1'b0          ),
+                //     .T_POWERGATE ( 1'b0          ),
+                //     .T_STAB      ( '0            ),
+                //     .T_WBT       ( '0            ),
+                //     .T_AS        ( '0            ),
+                //     .T_AW        ( '0            ),
+                //     .T_AC        ( '0            ),
+                //     .T_D         ( '0            ),
+                //     .T_BW        ( '0            ),
+                //     .MA_SAWL     ( '0            ),
+                //     .MA_WL       ( '0            ),
+                //     .MA_WRAS     ( '0            ),
+                //     .MA_WRASD    ( '0            ),
+                //     .Q           ( rdata         ),
+                //     .OBSV_CTL    (               )
+                // );
             end
             default : /* default */;
         endcase
