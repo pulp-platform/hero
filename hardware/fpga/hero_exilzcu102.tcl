@@ -152,9 +152,7 @@ export_ip_user_files -of_objects [get_ips hero_exilzcu102_i_pulp_0] \
 
 # Define include and defines again for PULP.
 eval [exec sed {s/current_fileset/get_filesets hero_exilzcu102_i_pulp_0/} \
-  vivado_ips/define_includes.tcl]
-eval [exec sed {s/current_fileset/get_filesets hero_exilzcu102_i_pulp_0/} \
-  vivado_ips/define_defines.tcl]
+  vivado_ips/define_defines_includes_no_simset.tcl]
 
 # Include debug settings.
 add_files -fileset constrs_1 ./hero_exilzcu102_debug.xdc

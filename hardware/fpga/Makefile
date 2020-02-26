@@ -1,8 +1,8 @@
-BENDER := ../bender script vivado | sed 's/verilog_dir/include_dirs/'# TODO: update Bender to fix this and simset
+BENDER := ../bender script vivado
 BENDER_FILES := ../bender ../Bender.yml ../Bender.lock
 DEFINE_TCLS := \
-    vivado_ips/define_defines.tcl \
-    vivado_ips/define_includes.tcl \
+    vivado_ips/define_defines_includes.tcl \
+    vivado_ips/define_defines_includes_no_simset.tcl \
     vivado_ips/define_sources.tcl
 
 ifeq ($(VIVADO),)
@@ -23,14 +23,14 @@ vivado_ips/pulp_txilzu9eg: ${DEFINE_TCLS}
 vivado_ips/pulp_txilzu9eg.v: src/pulp.py src/pulp.template_v
 	cd src && ./pulp.py > ../$@
 
-vivado_ips/define_defines.tcl: $(BENDER_FILES)
-	${BENDER} | sed -n '/^set_property verilog_define/,/^\] \[current_fileset\]/p' > $@
+vivado_ips/define_defines_includes.tcl: $(BENDER_FILES)
+	${BENDER} --only-defines --only-includes > $@
 
-vivado_ips/define_includes.tcl: $(BENDER_FILES)
-	${BENDER} | sed -n '/^set_property include_dirs/,/^\] \[current_fileset\]/p;/^\] \[current_fileset\]/q' > $@
+vivado_ips/define_defines_includes_no_simset.tcl: $(BENDER_FILES)
+	${BENDER} --only-defines --only-includes --no-simset > $@
 
 vivado_ips/define_sources.tcl: $(BENDER_FILES)
-	${BENDER} | sed -n '/^set_property include_dirs/q;p' > $@
+	${BENDER} --only-sources > $@
 
 ../bender: ../Makefile
 	make -C .. bender

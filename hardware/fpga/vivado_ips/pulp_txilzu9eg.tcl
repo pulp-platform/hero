@@ -3,8 +3,7 @@ set_property part xczu9eg-ffvb1156-2-e [current_project]
 
 source ./define_sources.tcl
 add_files -norecurse -fileset [current_fileset] ./pulp_txilzu9eg.v
-source ./define_includes.tcl
-source ./define_defines.tcl
+source ./define_defines_includes.tcl
 add_files -norecurse -fileset constrs_1 {./pulp_txilzu9eg_synth.xdc ./pulp_txilzu9eg_impl.xdc}
 set_property used_in_implementation false [get_files ./pulp_txilzu9eg_synth.xdc]
 set_property used_in_synthesis false [get_files ./pulp_txilzu9eg_impl.xdc]
