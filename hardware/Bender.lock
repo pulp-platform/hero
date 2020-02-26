@@ -7,21 +7,13 @@ packages:
       Git: "https://github.com/pulp-platform/apb.git"
     dependencies: []
   axi:
-    revision: 73d890edbe33b02e8b05a6da262606cf681a04de
+    revision: 6da7c84630786f7421b2501b95bab61e52c7438e
     version: ~
     source:
       Git: "https://github.com/pulp-platform/axi.git"
     dependencies:
       - common_cells
       - common_verification
-  axi2apb:
-    revision: 61a07b11f7cf4b6aa96100ac1b0f3a86a780018b
-    version: ~
-    source:
-      Git: "https://github.com/pulp-platform/axi2apb.git"
-    dependencies:
-      - apb
-      - axi
   axi2mem:
     revision: f038968581a54cc5c5fc6fac83fa5d914f89b036
     version: ~

@@ -913,14 +913,6 @@ add wave -noupdate -group soc_periphs/axi /pulp_tb/dut/i_periphs/axi/r_last
 add wave -noupdate -group soc_periphs/axi /pulp_tb/dut/i_periphs/axi/r_user
 add wave -noupdate -group soc_periphs/axi /pulp_tb/dut/i_periphs/axi/r_valid
 add wave -noupdate -group soc_periphs/axi /pulp_tb/dut/i_periphs/axi/r_ready
-add wave -noupdate -group soc_periphs/apb /pulp_tb/dut/i_periphs/apb/paddr
-add wave -noupdate -group soc_periphs/apb /pulp_tb/dut/i_periphs/apb/pwdata
-add wave -noupdate -group soc_periphs/apb /pulp_tb/dut/i_periphs/apb/pwrite
-add wave -noupdate -group soc_periphs/apb /pulp_tb/dut/i_periphs/apb/psel
-add wave -noupdate -group soc_periphs/apb /pulp_tb/dut/i_periphs/apb/penable
-add wave -noupdate -group soc_periphs/apb /pulp_tb/dut/i_periphs/apb/prdata
-add wave -noupdate -group soc_periphs/apb /pulp_tb/dut/i_periphs/apb/pready
-add wave -noupdate -group soc_periphs/apb /pulp_tb/dut/i_periphs/apb/pslverr
 add wave -noupdate -group soc_ctrl_regs/apb /pulp_tb/dut/i_periphs/i_soc_ctrl_regs/apb/paddr
 add wave -noupdate -group soc_ctrl_regs/apb /pulp_tb/dut/i_periphs/i_soc_ctrl_regs/apb/pwdata
 add wave -noupdate -group soc_ctrl_regs/apb /pulp_tb/dut/i_periphs/i_soc_ctrl_regs/apb/pwrite

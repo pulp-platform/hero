@@ -241,7 +241,7 @@ module pulp #(
   // i_soc_bus.periph_mst -> [periph_mst]
   // -> i_dwc_periph_mst -> [periph_mst_dwced]
   // -> i_periphs.axi
-  localparam int unsigned AXI_DW_PERIPHS = 64;
+  localparam int unsigned AXI_DW_PERIPHS = 32;
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
@@ -302,12 +302,12 @@ module pulp #(
       .out    (cl_inp_remapped[i])
     );
 
-    axi_data_width_converter #(
-      .ADDR_WIDTH     (AXI_AW),
-      .SI_DATA_WIDTH  (AXI_DW),
-      .MI_DATA_WIDTH  (AXI_DW_CL),
-      .ID_WIDTH       (AXI_IW_CL_INP),
-      .USER_WIDTH     (AXI_UW)
+    axi_dw_converter_intf #(
+      .AXI_ADDR_WIDTH     (AXI_AW),
+      .AXI_SLV_DATA_WIDTH (AXI_DW),
+      .AXI_MST_DATA_WIDTH (AXI_DW_CL),
+      .AXI_ID_WIDTH       (AXI_IW_CL_INP),
+      .AXI_USER_WIDTH     (AXI_UW)
     ) i_dwc_cl_inp (
       .clk_i,
       .rst_ni,
@@ -380,13 +380,13 @@ module pulp #(
       );
     end
 
-    axi_data_width_converter #(
-      .ADDR_WIDTH     (AXI_AW),
-      .SI_DATA_WIDTH  (AXI_DW_CL),
-      .MI_DATA_WIDTH  (AXI_DW),
-      .ID_WIDTH       (AXI_IW_CL_OUP),
-      .USER_WIDTH     (AXI_UW),
-      .NR_OUTSTANDING (8)
+    axi_dw_converter_intf #(
+      .AXI_ADDR_WIDTH     (AXI_AW),
+      .AXI_SLV_DATA_WIDTH (AXI_DW_CL),
+      .AXI_MST_DATA_WIDTH (AXI_DW),
+      .AXI_ID_WIDTH       (AXI_IW_CL_OUP),
+      .AXI_USER_WIDTH     (AXI_UW),
+      .AXI_MAX_READS      (8)
     ) i_dwc_cl_oup (
       .clk_i,
       .rst_ni,
@@ -416,7 +416,8 @@ module pulp #(
     .N_CLUSTERS           (N_CLUSTERS),
     .L2_N_PORTS           (L2_N_AXI_PORTS),
     .L2_N_BYTES_PER_PORT  (L2_SIZE/L2_N_AXI_PORTS),
-    .PERIPH_N_BYTES       (32*1024),
+    .PERIPH_N_BYTES       (pulp_cluster_cfg_pkg::SOC_PERIPH_SIZE),
+    .PERIPH_BASE_ADDR     (64'(pulp_cluster_cfg_pkg::SOC_PERIPH_BASE_ADDR)),
     .DEBUG_N_BYTES        (pulp_cluster_cfg_pkg::DM_SIZE),
     .DEBUG_BASE_ADDR      (64'(pulp_cluster_cfg_pkg::DM_BASE_ADDR))
   ) i_soc_bus (
@@ -428,7 +429,8 @@ module pulp #(
     .ext_mst    (ext_mst),
     .ext_slv    (ext_slv_remapped),
     .debug_slv  (debug_mst_dwced),
-    .debug_mst  (debug_slv_predwc)
+    .debug_mst  (debug_slv_predwc),
+    .periph_mst (periph_mst)
   );
 
   axi_atop_filter_intf #(
@@ -501,12 +503,12 @@ module pulp #(
     .out    (ext_slv_remapped)
   );
 
-  axi_data_width_converter #(
-    .ADDR_WIDTH     (AXI_AW),
-    .SI_DATA_WIDTH  (AXI_DW),
-    .MI_DATA_WIDTH  (AXI_DW_PERIPHS),
-    .ID_WIDTH       (AXI_IW_SB_OUP),
-    .USER_WIDTH     (AXI_UW)
+  axi_dw_converter_intf #(
+    .AXI_ADDR_WIDTH     (AXI_AW),
+    .AXI_SLV_DATA_WIDTH (AXI_DW),
+    .AXI_MST_DATA_WIDTH (AXI_DW_PERIPHS),
+    .AXI_ID_WIDTH       (AXI_IW_SB_OUP),
+    .AXI_USER_WIDTH     (AXI_UW)
   ) i_dwc_periph_mst (
     .clk_i,
     .rst_ni,
@@ -514,13 +516,13 @@ module pulp #(
     .mst    (periph_mst_dwced)
   );
 
-  axi_data_width_converter #(
-    .ADDR_WIDTH     (AXI_AW),
-    .SI_DATA_WIDTH  (AXI_DW_DM),
-    .MI_DATA_WIDTH  (AXI_DW),
-    .ID_WIDTH       (AXI_IW_SB_INP),
-    .USER_WIDTH     (AXI_UW),
-    .NR_OUTSTANDING (1)
+  axi_dw_converter_intf #(
+    .AXI_ADDR_WIDTH     (AXI_AW),
+    .AXI_SLV_DATA_WIDTH (AXI_DW_DM),
+    .AXI_MST_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH       (AXI_IW_SB_INP),
+    .AXI_USER_WIDTH     (AXI_UW),
+    .AXI_MAX_READS      (1)
   ) i_dwc_debug_mst (
     .clk_i,
     .rst_ni,
@@ -528,13 +530,13 @@ module pulp #(
     .mst    (debug_mst_dwced)
   );
 
-  axi_data_width_converter #(
-    .ADDR_WIDTH     (AXI_AW),
-    .SI_DATA_WIDTH  (AXI_DW),
-    .MI_DATA_WIDTH  (AXI_DW_DM),
-    .ID_WIDTH       (AXI_IW_SB_OUP),
-    .USER_WIDTH     (AXI_UW),
-    .NR_OUTSTANDING (1)
+  axi_dw_converter_intf #(
+    .AXI_ADDR_WIDTH     (AXI_AW),
+    .AXI_SLV_DATA_WIDTH (AXI_DW),
+    .AXI_MST_DATA_WIDTH (AXI_DW_DM),
+    .AXI_ID_WIDTH       (AXI_IW_SB_OUP),
+    .AXI_USER_WIDTH     (AXI_UW),
+    .AXI_MAX_READS      (1)
   ) i_dwc_debug_slv (
     .clk_i,
     .rst_ni,
@@ -569,6 +571,7 @@ module pulp #(
     .AXI_AW     (AXI_AW),
     .AXI_IW     (AXI_IW_SB_OUP),
     .AXI_UW     (AXI_UW),
+    .AXI_DW     (AXI_DW_PERIPHS),
     .N_CORES    (pulp_cluster_cfg_pkg::N_CORES),
     .N_CLUSTERS (N_CLUSTERS)
   ) i_periphs (

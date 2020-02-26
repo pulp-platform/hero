@@ -65,8 +65,10 @@ void cluster_start(int cid, int (*entry)())
     cluster_entry = entry;
 
     // Init FLL
+#ifdef FLL_VERSION
     pos_fll_init(POS_FLL_CL);
-      
+#endif
+
     // Initialize cluster L1 memory allocator
     alloc_init_l1(cid);
 

@@ -28,6 +28,18 @@ for DW in 8 16 32 64 128 256 512 1024; do
 	call_vsim tb_axi_to_axi_lite -GDW=$DW -t 1ps -c
 done
 
+for DW in 8 16 32 64 128 256 512 1024; do
+    for (( MULT = 2; MULT <= `echo 1024/$DW`; MULT *= 2 )); do
+        call_vsim tb_axi_dw_downsizer -GDW=$DW -GMULT=$MULT -t 1ps -c
+    done
+done
+
+for DW in 8 16 32 64 128 256 512 1024; do
+    for (( MULT = `echo 1024/$DW | bc`; MULT > 1; MULT /= 2 )); do
+        call_vsim tb_axi_dw_upsizer -GDW=$DW -GMULT=$MULT -t 1ps -c
+    done
+done
+
 call_vsim tb_axi_delayer
 call_vsim tb_axi_id_remap
 call_vsim tb_axi_atop_filter -GN_TXNS=1000
@@ -36,3 +48,4 @@ call_vsim tb_axi_lite_xbar -t 1ns -coverage -voptargs="+acc +cover=bcesfx"
 call_vsim tb_axi_perf_mon
 call_vsim tb_axi_cdc
 call_vsim tb_axi_lite_to_apb -t 1ns -coverage -voptargs="+acc +cover=bcesfx"
+call_vsim tb_axi_to_axi_lite -t 1ns -coverage -voptargs="+acc +cover=bcesfx"

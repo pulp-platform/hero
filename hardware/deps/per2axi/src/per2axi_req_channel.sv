@@ -132,7 +132,7 @@ module per2axi_req_channel
         axi_master_aw_valid_o = 1'b0;
         axi_master_w_valid_o  = 1'b0;
         axi_master_w_last_o   = 1'b0;
-        
+
         if (per_slave_req_i == 1'b1 &&       // REQUEST FROM PERIPHERAL INTERCONNECT
             per_slave_we_i == 1'b0 &&        // WRITE OPERATION
             axi_master_aw_ready_i == 1'b1 && // AXI WRITE ADDRESS CHANNEL AVAILABLE
@@ -272,15 +272,15 @@ module per2axi_req_channel
          else $error("No byte enable below addressed byte may be active!");
    `endif
 
-   // use FIXED burst type, length is anyway 0
-   assign axi_master_aw_burst_o = 2'b00;
-   assign axi_master_ar_burst_o = 2'b00;
+   // use INCR burst type, length is anyway 0
+   assign axi_master_aw_burst_o = axi_pkg::BURST_INCR;
+   assign axi_master_ar_burst_o = axi_pkg::BURST_INCR;
 
    // TRANSACTION REQUEST GENERATION
    assign trans_req_o = axi_master_ar_valid_o;
    assign trans_id_o  = axi_master_ar_id_o;
    assign trans_add_o = axi_master_ar_addr_o;
-   
+
    assign atop_req_o  = (axi_master_aw_atop_o[5:3] == AWATOP_STORE) ? 1'b0 : |axi_master_aw_atop_o;
    assign atop_id_o   = axi_master_aw_id_o;
    assign atop_add_o  = axi_master_aw_addr_o;
@@ -318,5 +318,5 @@ module per2axi_req_channel
    end
 
    assign axi_master_w_user_o    = '0;
-   
+
 endmodule

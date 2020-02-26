@@ -49,8 +49,11 @@ module axi_demux #(
   input  resp_t   [NoMstPorts-1:0] mst_resps_i
 );
 
-  localparam int unsigned IdCounterWidth = $clog2(MaxTrans);
+  localparam int unsigned IdCounterWidth = MaxTrans > 1 ? $clog2(MaxTrans) : 1;
 
+  //--------------------------------------
+  // Typedefs for the FIFOs / Queues
+  //--------------------------------------
   typedef logic [AxiIdWidth-1:0] axi_id_t;
   typedef struct packed {
     aw_chan_t aw_chan;
@@ -67,9 +70,6 @@ module axi_demux #(
     assign slv_resp_o    = mst_resps_i;
   // other non degenerate cases
   end else begin : gen_demux
-    //--------------------------------------
-    // Typedefs for the Fifo's / Queues
-    //--------------------------------------
 
     //--------------------------------------
     //--------------------------------------
