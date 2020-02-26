@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `debug_subsystem` for RISC-V compliant external debug support (spec v0.13)
 - Add `dm_test`, a debug module testbench
 - Initial development
+- Readd `pulp-sdk`
 
 ### Changed
 - Replace `axi_node` with standard-compliant crossbar `axi_xbar`.
