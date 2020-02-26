@@ -30,8 +30,8 @@ module soc_ctrl_regs #(
     .ADDR_WIDTH (ADDR_WIDTH),
     .DATA_WIDTH (DATA_WIDTH),
     .N_SLV      (N_SLV),
-    .ADDR_BEGIN ({BASE_ADDR + 12'h0B0, BASE_ADDR + 12'h0A0, BASE_ADDR + 12'h014, BASE_ADDR + 12'h010, BASE_ADDR + 12'h000}),
-    .ADDR_END   ({BASE_ADDR + 12'hFFF, BASE_ADDR + 12'h0AF, BASE_ADDR + 12'h07F, BASE_ADDR + 12'h013, BASE_ADDR + 12'h00F})
+    .ADDR_BEGIN ({BASE_ADDR + 12'h090, BASE_ADDR + 12'h080, BASE_ADDR + 12'h014, BASE_ADDR + 12'h010, BASE_ADDR + 12'h000}),
+    .ADDR_END   ({BASE_ADDR + 12'hFFF, BASE_ADDR + 12'h08F, BASE_ADDR + 12'h07F, BASE_ADDR + 12'h013, BASE_ADDR + 12'h00F})
   ) i_apb_bus (
     .inp  (apb),
     .oup  (apb_bus)

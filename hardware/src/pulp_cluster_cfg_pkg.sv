@@ -18,7 +18,7 @@ package automatic pulp_cluster_cfg_pkg;
   localparam logic [31:0] BOOT_ADDR = 32'h1C00_0080;
   // -- SoC peripherals
   localparam logic [31:0] SOC_PERIPH_BASE_ADDR = 32'h1A10_0000; // begin of address space
-  localparam int unsigned SOC_PERIPH_SIZE = 64 * 1024; // 64kB
+  localparam int unsigned SOC_PERIPH_SIZE = 32 * 1024; // 32kB
   // -- Debug module
   localparam logic [31:0] DM_BASE_ADDR = 32'h1D00_0000; // begin of address space
   localparam int unsigned DM_SIZE = 16 * 1024; // 16kB according to debug-system.md

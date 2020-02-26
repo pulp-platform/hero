@@ -25,9 +25,9 @@ module soc_peripherals #(
 
   localparam int unsigned N_SLAVES = 2;
 
-  localparam int unsigned SOC_CTRL_START = pulp_cluster_cfg_pkg::SOC_PERIPH_BASE_ADDR + 16'h4000;
+  localparam int unsigned SOC_CTRL_START = pulp_cluster_cfg_pkg::SOC_PERIPH_BASE_ADDR + 16'h3000;
   localparam int unsigned SOC_CTRL_END   = SOC_CTRL_START + 16'h0FFF;
-  localparam int unsigned STD_OUT_START  = pulp_cluster_cfg_pkg::SOC_PERIPH_BASE_ADDR + 16'hF000;
+  localparam int unsigned STD_OUT_START  = pulp_cluster_cfg_pkg::SOC_PERIPH_BASE_ADDR + 16'h4000;
   localparam int unsigned STD_OUT_END    = STD_OUT_START  + 16'h0FFF;
 
   // AXI to AXI Lite
