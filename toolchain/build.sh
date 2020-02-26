@@ -87,7 +87,7 @@ fi
 $HERO_INSTALL/bin/ct-ng upgradeconfig > /dev/null
 
 # # deduce tuple, sysroot
-TUPLE=$($HERO_INSTALL/bin/ct-ng -s show-tuple)
+TUPLE=$($HERO_INSTALL/bin/ct-ng -s --no-print-directory show-tuple)
 ARCH=$(echo "$TUPLE" | cut -f1 -d'-')
 SYSROOT=$HERO_INSTALL/$TUPLE/sysroot
 
