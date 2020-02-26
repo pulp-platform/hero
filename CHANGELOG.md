@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replace deprecated `axi2apb` module with `axi_to_axi_lite` and `axi_lite_to_apb` module.
 - Match boot address with Hero (`0x1C00_8080` --> `1C00_0080`)
 - Match `soc_peripherals` address with Hero
+- Change boot behavior of `pulp-runtime` to match Hero's
 
 ### Fixed
 - `axi2mem`: Ensure starvation freedom when prioritizing individual writes over read bursts.
