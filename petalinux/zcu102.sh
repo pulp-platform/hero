@@ -3,7 +3,7 @@ THIS_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 
 set -e
 
-if [ -z "$NO_IIS" ]; then
+if [ -n "$NO_IIS" ]; then
   PETALINUX_VER=''
 else
   if [ -z "$PETALINUX_VER" ]; then
