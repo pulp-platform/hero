@@ -32,4 +32,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `axi_riscv_atomics`: Improve compatibility with VCS.
 - `pulp_cluster`: The AxCACHE signal is no longer statically set to *Normal Non-Cacheable
   Non-Bufferable* but properly fed through from internal masters.  Accesses by the instruction cache
-  are now *Modifiable* for efficient reshaping downstream.
+  and the DMA unit are now *Modifiable* for efficient reshaping downstream.
