@@ -726,7 +726,7 @@ generate
       assign axi_master_awsize_o    = axi_master_awsize_int;
       assign axi_master_awburst_o   = axi_master_awburst_int;
       assign axi_master_awlock_o    = axi_master_awlock_int;
-      assign axi_master_awcache_o   = axi_master_awcache_int;
+      assign axi_master_awcache_o   = axi_master_awcache_int | 4'b0010; // make modifiable
       assign axi_master_awprot_o    = axi_master_awprot_int;
       assign axi_master_awregion_o  = axi_master_awregion_int;
       assign axi_master_awuser_o    = axi_master_awuser_int;
@@ -753,7 +753,7 @@ generate
       assign axi_master_arsize_o    = axi_master_arsize_int;
       assign axi_master_arburst_o   = axi_master_arburst_int;
       assign axi_master_arlock_o    = axi_master_arlock_int;
-      assign axi_master_arcache_o   = axi_master_arcache_int;
+      assign axi_master_arcache_o   = axi_master_arcache_int | 4'b0010; // make modifiable
       assign axi_master_arprot_o    = axi_master_arprot_int;
       assign axi_master_arregion_o  = axi_master_arregion_int;
       assign axi_master_aruser_o    = axi_master_aruser_int;
@@ -798,6 +798,7 @@ generate
       // ██║  ██║██╔╝ ██╗██║    ██║ ╚████║╚██████╔╝██████╔╝███████╗  //
       // ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝    ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚══════╝  //
       /////////////////////////////////////////////////////////////////
+      logic [3:0] axi_master_awcache, axi_master_arcache;
       axi_node
       #(
 
@@ -888,7 +889,7 @@ generate
         .master_awsize_o        ( axi_master_awsize_o               ),
         .master_awburst_o       ( axi_master_awburst_o              ),
         .master_awlock_o        ( axi_master_awlock_o               ),
-        .master_awcache_o       ( axi_master_awcache_o              ),
+        .master_awcache_o       ( axi_master_awcache                ),
         .master_awprot_o        ( axi_master_awprot_o               ),
         .master_awregion_o      ( axi_master_awregion_o             ),
         .master_awatop_o        ( /* unused */                      ),
@@ -916,7 +917,7 @@ generate
         .master_arsize_o        ( axi_master_arsize_o               ),
         .master_arburst_o       ( axi_master_arburst_o              ),
         .master_arlock_o        ( axi_master_arlock_o               ),
-        .master_arcache_o       ( axi_master_arcache_o              ),
+        .master_arcache_o       ( axi_master_arcache                ),
         .master_arprot_o        ( axi_master_arprot_o               ),
         .master_arregion_o      ( axi_master_arregion_o             ),
         .master_aruser_o        ( axi_master_aruser_o               ),
@@ -938,6 +939,8 @@ generate
         .cfg_connectivity_map_i ( cfg_connectivity_map_int          )
 
       );
+      assign axi_master_awcache_o = axi_master_awcache | 4'b0010; // make modifiable
+      assign axi_master_arcache_o = axi_master_arcache | 4'b0010; // make modifiable
 
       assign     axi_master_awid_o[AXI_ID-1:AXI_ID_OUT] = {(AXI_ID-AXI_ID_OUT){1'b0}};
       assign     axi_master_arid_o[AXI_ID-1:AXI_ID_OUT] = {(AXI_ID-AXI_ID_OUT){1'b0}};
