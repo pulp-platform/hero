@@ -10,7 +10,7 @@
 
 
 // `define  USE_SRAM
-`ifdef SYNHESIS
+`ifdef SYNTHESIS
 `define USE_DATA_SRAM
 `endif
 
@@ -54,9 +54,9 @@ module ram_ws_rs_data_scm
                 IN22FDX_R1PH_NFHN_W00032B128M02C256 sram_data //
                 (
                 
-                    .CLK          ( clk_i            ),
-                    .CEN          ( we_n             ),
-                    .RDWEN        ( we_i             ),
+                    .CLK          ( clk              ),
+                    .CEN          ( cs_n             ),
+                    .RDWEN        ( write            ),
                     .AW           ( addr[4:1]        ),
                     .AC           ( addr[0]          ),
                     .D            ( wdata            ),
@@ -115,9 +115,9 @@ module ram_ws_rs_data_scm
                 IN22FDX_R1PH_NFHN_W00064B128M02C256 sram_data // /usr/pack/gf-22-kgf/dz/mem/R1PH/V03R01/model/verilog/
                 (
                 
-                    .CLK          ( clk_i            ),
-                    .CEN          ( we_n             ),
-                    .RDWEN        ( we_i             ),
+                    .CLK          ( clk              ),
+                    .CEN          ( cs_n             ),
+                    .RDWEN        ( write            ),
                     .AW           ( addr[5:1]        ),
                     .AC           ( addr[0]          ),
                     .D            ( wdata            ),

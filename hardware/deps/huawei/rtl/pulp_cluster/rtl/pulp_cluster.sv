@@ -1304,7 +1304,9 @@ module pulp_cluster
 
     sram #(
       .N_WORDS    (TCDM_NUM_ROWS),
-      .DATA_WIDTH (32)
+      .DATA_WIDTH (32),
+      .NB_CUTS    (5),
+      .MORE_CUTS  (1)
     ) i_mem (
       .clk_i    (clk_cluster),
       .rst_ni   (rst_ni),
