@@ -53,7 +53,7 @@ build_test_archive:
       fi
     - export HERO_INSTALL="$HERO_INSTALL_NEW"
     ### build RTL tests
-    - source env/ehuawei-test.sh
+    - source env/ehuawei-minimal-runtime.sh
     ### Test both simulators
     - >
       for sim in vsim vcs; do
@@ -89,7 +89,7 @@ build_test_pulp-runtime:
   script:
     ### Setup toolchain in `build_toolchain`
     ### Configure pulp-runtime
-    - source env/ehuawei-test.sh
+    - source env/ehuawei-minimal-runtime.sh
     ### Test both simulators
     - make -C "$CI_PROJECT_DIR/hardware" vcs/compile.sh
     - >
@@ -142,7 +142,7 @@ pulp_run_target_test:
   stage: build_test_rest
   script:
     ### Setup toolchain in `build_toolchain`
-    - source env/ehuawei-test.sh
+    - source env/ehuawei-minimal-runtime.sh
     ### compile testbench
     - cd hardware/vsim
     - ./compile.sh
