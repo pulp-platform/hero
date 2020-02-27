@@ -301,7 +301,7 @@ module pulp_cluster_ooc (
     .data_master_aw_burst_o       (mst_aw_burst_o),
     .data_master_aw_lock_o        (mst_aw_lock_o),
     .data_master_aw_atop_o        (mst_aw_atop_o),
-    .data_master_aw_cache_o       (),
+    .data_master_aw_cache_o       (mst_aw_cache_o),
     .data_master_aw_qos_o         (mst_aw_qos_o),
     .data_master_aw_id_o          (mst_aw_id_o),
     .data_master_aw_user_o        (mst_aw_user_o),
@@ -316,7 +316,7 @@ module pulp_cluster_ooc (
     .data_master_ar_size_o        (mst_ar_size_o),
     .data_master_ar_burst_o       (mst_ar_burst_o),
     .data_master_ar_lock_o        (mst_ar_lock_o),
-    .data_master_ar_cache_o       (),
+    .data_master_ar_cache_o       (mst_ar_cache_o),
     .data_master_ar_qos_o         (mst_ar_qos_o),
     .data_master_ar_id_o          (mst_ar_id_o),
     .data_master_ar_user_o        (mst_ar_user_o),
@@ -349,11 +349,6 @@ module pulp_cluster_ooc (
     .data_master_b_valid_i        (mst_b_valid_i),
     .data_master_b_ready_o        (mst_b_ready_o)
   );
-  // Make all reads and writes from cluster modifiable.
-  // TODO: This might be undesired for transactions from cores to peripherals, better modify the
-  // DMA and I$ to issue modifiable transactions.
-  assign mst_ar_cache_o = 4'b0010;
-  assign mst_aw_cache_o = 4'b0010;
 
 endmodule
 
