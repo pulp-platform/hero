@@ -1,0 +1,13 @@
+build/
+output/
+install/
+all_state.txt
+core_state.txt
+efuse_preload.data
+plt_config.json
+rt_state.txt
+stimuli/
+test.debugInfo
+tx_uart.log
+*.bk
+

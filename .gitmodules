@@ -5,6 +5,3 @@
 	path = pulp/sdk
 	url = git@iis-git.ee.ethz.ch:hero/pulp-sdk.git
 	ignore = dirty
-[submodule "pulp/virtual-platform"]
-	path = pulp/virtual-platform
-	url = https://github.com/pulp-platform/pulp-builder

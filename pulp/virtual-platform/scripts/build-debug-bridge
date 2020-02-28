@@ -1,0 +1,11 @@
+#!/bin/bash -ex
+
+install_dir=$PWD/install
+ws_install_dir=$PWD/install/ws
+build_dir=$PWD/build
+
+make -C json-tools all install BUILD_DIR=$build_dir/json-tools INSTALL_DIR=$ws_install_dir
+
+make -C pulp-configs all install BUILD_DIR=$build_dir/pulp-configs INSTALL_DIR=$ws_install_dir TARGET_INSTALL_DIR=$install_dir
+
+make -C pulp-debug-bridge all BUILD_DIR=$build_dir/pulp-debug-bridge INSTALL_DIR=$ws_install_dir TARGET_INSTALL_DIR=$install_dir
