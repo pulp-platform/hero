@@ -26,21 +26,21 @@ package automatic pulp_cluster_cfg_pkg;
   // -- AXI
   localparam int unsigned AXI_AW = 32; // [bit]
   localparam int unsigned AXI_DW = 64; // [bit]
-  localparam int unsigned AXI_IW_MST = 6; // [bit]; do not change, seems to break instruction cache
-  localparam int unsigned AXI_IW_SLV = 4; // [bit]
+  localparam int unsigned AXI_IW_MST = 8; // [bit]; do not change, seems to break instruction cache
+  localparam int unsigned AXI_IW_SLV = 6; // [bit]
   localparam int unsigned AXI_UW = 4; // [bit]
   // -- DMA
   localparam int unsigned DMA_MAX_BURST_SIZE = 2048; // [B], must be a power of 2
   // Maximum number of beats in a DMA burst on the SoC bus
   localparam int unsigned DMA_MAX_BURST_LEN = DMA_MAX_BURST_SIZE / (AXI_DW/8);
   // Maximum number of transactions the DMA can have in flight
-  localparam int unsigned DMA_MAX_N_TXNS = N_CORES;
+  localparam int unsigned DMA_MAX_N_TXNS = 64;
   localparam int unsigned N_DMAS = 4; // larger values seem to break the cluster
   // -- Instruction Cache
   localparam int unsigned ICACHE_SIZE = 4096; // [B], must be a power of 2
   // -- TCDM
   localparam int unsigned N_TCDM_BANKS = 2*N_CORES; // must be a power of 2
-  localparam int unsigned TCDM_SIZE = 128*1024; // [B], must be a power of 2
+  localparam int unsigned TCDM_SIZE = 320*1024; // [B], must be a power of 2
   // -- L2 Memory (not inside cluster)
   localparam int unsigned L2_SIZE = 256*1024; // [B], must be a power of 2
 

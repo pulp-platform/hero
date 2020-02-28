@@ -1,0 +1,44 @@
+##########################################################################
+#  Title       : load design
+#  Project     : gf 22 dz flow
+##########################################################################
+#  File        : chip.globals
+#  Author      : Beat Muheim  <muheim@ee.ethz.ch>
+#  Company     : Microelectronics Design Center (DZ), ETH Zurich
+##########################################################################
+#  Description : It will read the netlist the cell abstraction and the
+#                view definition file.
+#
+#                Perform:
+#                source <globals-file>
+#                init_design
+#
+#  Inputs      : ../synopsys/netlists/top.v src/chip.v lef src/chip.io src/mmmc.view.tcl
+#  Outputs     :
+#  Rhesuses    :
+##########################################################################
+#  Copyright (c) 2016 Microelectronics Design Center, ETH Zurich
+##########################################################################
+# v0.1 - <muheim@ee.ethz.ch> -Tue Jan 19 11:20:22 CET 2016
+#  - copy from gf28
+##########################################################################
+
+set defHierChar {/}
+set init_verilog { ../synopsys/export/pulp.v }
+set init_design_settop 0
+set init_design_uniquify 1
+
+set init_lef_file {
+    ../technology/lef/22FDSOI_10M_2Mx_6Cx_2Ix_LB_104cpp_tech.lef \
+    ../technology/lef/GF22FDX_SC8T_104CPP_BASE_CSC20L.lef        \
+    ../technology/lef/GF22FDX_SC8T_104CPP_BASE_CSC24L.lef        \
+    ../technology/lef/GF22FDX_SC8T_104CPP_BASE_CSC28L.lef        \
+    ../technology/lef/GF22FDX_SC8T_104CPP_HPK_CSL.lef            \
+    ../technology/lef/IN22FDX_S1D_NFRG_W04096B032M04C128.lef     \
+    ../technology/lef/IN22FDX_S1D_NFRG_W02048B032M04C128.lef     \
+    ../technology/lef/IN22FDX_R1PH_NFHN_W01024B032M04C256.lef    \
+    }
+
+set init_import_mode {-treatUndefinedCellAsBbox 0 -keepEmptyModule 1 -useLefDef56 1 }
+
+set init_mmmc_file {./src/pulp.mmmc.view.tcl}

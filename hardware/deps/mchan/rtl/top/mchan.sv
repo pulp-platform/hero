@@ -24,7 +24,7 @@ module mchan
     parameter TCDM_ADD_WIDTH           = 16, // WIDTH OF TCDM ADDRESS
     parameter EXT_ADD_WIDTH            = 32, // WIDTH OF GLOBAL EXTERNAL ADDRESS
     
-    parameter NB_OUTSND_TRANS          = 8,  // NUMBER OF OUTSTANDING TRANSACTIONS
+    parameter NB_OUTSND_TRANS          = 64, // NUMBER OF OUTSTANDING TRANSACTIONS
     parameter MCHAN_BURST_LENGTH       = 64, // ANY POWER OF 2 VALUE FROM 8 TO 2048
     
     parameter AXI_ADDR_WIDTH           = 32,

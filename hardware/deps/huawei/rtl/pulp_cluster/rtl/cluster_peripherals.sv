@@ -78,6 +78,8 @@ module cluster_peripherals
   input  logic [NB_CORES-1:0]         dbg_req_i,
   output logic [NB_CORES-1:0]         dbg_req_o,
 
+  input  logic                        mailbox_evt_i,
+
   // SRAM SPEED REGULATION --> TCDM
   output logic [1:0]                  TCDM_arb_policy_o,
 
@@ -134,6 +136,7 @@ module cluster_peripherals
       assign s_timer_events[I]   = {s_timer_out_hi_event,s_timer_out_lo_event};
       assign s_dma_events[I][0] = dma_cl_event_i;
       assign s_dma_events[I][1] = dma_cl_irq_i;
+
     end
   endgenerate
   
@@ -226,7 +229,7 @@ module cluster_peripherals
 
     .acc_events_i           ( s_acc_events           ),
     .dma_events_i           ( s_dma_events           ),
-    .decompr_done_evt_i     (  '0   ),  //decompr_done_evt_i 
+    .mailbox_evt_i          ( mailbox_evt_i          ),  
     .timer_events_i         ( s_timer_events         ),
     .cluster_events_i       ( s_cluster_events       ),
 
@@ -315,7 +318,6 @@ module cluster_peripherals
       .speriph_slave              ( speriph_slave[SPER_ICACHE_CTRL] ),
       .IC_ctrl_unit_bus_pri       ( IC_ctrl_unit_bus_pri            ),
       .IC_ctrl_unit_bus_main      ( IC_ctrl_unit_bus_main           ),
-      .special_core_icache_cfg_o  ( special_core_icache_cfg_o       ),
       .enable_l1_l15_prefetch_o   ( enable_l1_l15_prefetch_o        )
     );
 

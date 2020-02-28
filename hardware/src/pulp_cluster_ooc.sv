@@ -24,6 +24,8 @@ module pulp_cluster_ooc (
   output logic          busy_o,
   input  logic [N_CORES-1:0] dbg_irq_i,
 
+  input  logic          mailbox_evt_i,
+
   // Slave Port
   // AW
   input  addr_t         slv_aw_addr_i,
@@ -186,7 +188,7 @@ module pulp_cluster_ooc (
     .CLUST_SHARED_FP          (32'h00000002),
     .CLUST_SHARED_FP_DIVSQRT  (32'h00000002),
     // I$ Parameters
-    .NB_CACHE_BANKS           (8),
+    .NB_CACHE_BANKS           (2),
     .CACHE_SIZE               (ICACHE_SIZE),
     .L2_SIZE                  (L2_SIZE),
     // Core Parameters
@@ -236,6 +238,8 @@ module pulp_cluster_ooc (
     .pf_evt_valid_o               (),
 
     .dbg_irq_valid_i              (dbg_irq_i),
+
+    .mailbox_evt_i                (mailbox_evt_i),
 
     .data_slave_aw_addr_i         (slv_aw_addr_i),
     .data_slave_aw_prot_i         (slv_aw_prot_i),
@@ -362,6 +366,7 @@ module pulp_cluster_sync (
   output logic        eoc_o,
   output logic        busy_o,
   input  logic [N_CORES-1:0] dbg_irq_i,
+  input  logic        mailbox_evt_i,
   AXI_BUS.Slave       slv,
   AXI_BUS.Master      mst
 );
@@ -375,6 +380,8 @@ module pulp_cluster_sync (
     .eoc_o,
     .busy_o,
     .dbg_irq_i,
+
+    .mailbox_evt_i        (mailbox_evt_i),
 
     .slv_aw_addr_i        (slv.aw_addr),
     .slv_aw_prot_i        (slv.aw_prot),
@@ -500,6 +507,7 @@ module pulp_cluster_async (
   output logic          eoc_o,
   output logic          busy_o,
   input  logic [N_CORES-1:0] dbg_irq_i,
+  input  logic          mailbox_evt_i,
   AXI_BUS_ASYNC.Slave   slv,
   AXI_BUS_ASYNC.Master  mst
 );
@@ -513,6 +521,8 @@ module pulp_cluster_async (
     .eoc_o,
     .busy_o,
     .dbg_irq_i,
+
+    .mailbox_evt_i        (mailbox_evt_i),
 
     .slv_aw_addr_i        (slv.aw_addr),
     .slv_aw_prot_i        (slv.aw_prot),

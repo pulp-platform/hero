@@ -1,0 +1,1 @@
+../../../../synopsys/scripts/constraints/input_output_delay.sdc

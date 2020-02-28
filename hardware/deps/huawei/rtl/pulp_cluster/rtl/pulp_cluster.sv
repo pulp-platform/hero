@@ -34,7 +34,7 @@ module pulp_cluster
   parameter int    NB_EXT2MEM              = 2,
   parameter bit    CLUSTER_ALIAS           = 1'b1,
   parameter int    CLUSTER_ALIAS_BASE      = 12'h1B0,
-  parameter int    TCDM_SIZE               = 64*1024,                 // [B], must be 2**N
+  parameter int    TCDM_SIZE               = 320*1024,                 // [B], must be 2**N
   parameter int    NB_TCDM_BANKS           = 16,                      // must be 2**N
   parameter int    TCDM_BANK_SIZE          = TCDM_SIZE/NB_TCDM_BANKS, // [B]
   parameter int    TCDM_NUM_ROWS           = TCDM_BANK_SIZE/4,        // [words]
@@ -46,7 +46,7 @@ module pulp_cluster
   parameter bit    PRIV_ICACHE             = 1'b1,
   parameter bit    MP_ICACHE               = 1'b0,
   parameter bit    SP_ICACHE               = 1'b0,
-  parameter int    NB_CACHE_BANKS          = PRIV_ICACHE ? 8 : 8,
+  parameter int    NB_CACHE_BANKS          = PRIV_ICACHE ? 2 : 8,
   parameter int    CACHE_LINE              = 1,
   parameter int    CACHE_SIZE              = 4096,
   parameter int    ICACHE_DATA_WIDTH       = 128,
@@ -91,8 +91,8 @@ module pulp_cluster
 
   // DMA parameters
   parameter int    TCDM_ADD_WIDTH          = ADDR_MEM_WIDTH + $clog2(NB_TCDM_BANKS) + 2, // BYTE address width TCDM
-  parameter int    NB_OUTSND_BURSTS        = 8,
-  parameter int    MCHAN_BURST_LENGTH      = 256,
+  parameter int    NB_OUTSND_BURSTS        = 64,
+  parameter int    MCHAN_BURST_LENGTH      = 128,
 
   // peripheral and periph interconnect parameters
   parameter int    LOG_CLUSTER             = 5,  // unused
@@ -142,6 +142,8 @@ module pulp_cluster
   output logic                             pf_evt_valid_o,
 
   input logic  [NB_CORES-1:0]               dbg_irq_valid_i,
+
+  input logic                              mailbox_evt_i,
 
   // AXI4 SLAVE
   //***************************************
@@ -341,6 +343,8 @@ module pulp_cluster
   logic                              s_events_valid;
   logic                              s_events_ready;
   logic [EVNT_WIDTH-1:0]             s_events_data;
+
+  logic                              s_mailbox_evt;
 
   // Signals Between CORE_ISLAND and INSTRUCTION CACHES
   logic [NB_CORES-1:0]                        instr_req;
@@ -571,7 +575,7 @@ module pulp_cluster
   logic [NB_EXT2MEM-1:0][ 3:0]  s_ext_xbar_bus_be;
   logic [NB_EXT2MEM-1:0][ 5:0]  s_ext_xbar_bus_atop;
   // Fall-through register on AW due to protocol violation by upstream (dependency on aw_ready for
-  // w_valid).
+  // w_valid).  Reinforced to spill registers to cut long paths on requests through axi2mem.
   typedef logic [31:0] addr_t;
   typedef logic [AXI_DATA_C2S_WIDTH-1:0] data_t;
   typedef logic [AXI_ID_OUT_WIDTH-1:0] id_oup_t;
@@ -589,12 +593,6 @@ module pulp_cluster
   `AXI_ASSIGN_TO_REQ(ext_tcdm_req, s_ext_tcdm_bus);
   `AXI_ASSIGN_FROM_RESP(s_ext_tcdm_bus, ext_tcdm_resp);
   always_comb begin
-    ext_tcdm_req_buf.w = ext_tcdm_req.w;
-    ext_tcdm_req_buf.w_valid = ext_tcdm_req.w_valid;
-    ext_tcdm_resp.w_ready = ext_tcdm_resp_buf.w_ready;
-    ext_tcdm_req_buf.ar = ext_tcdm_req.ar;
-    ext_tcdm_req_buf.ar_valid = ext_tcdm_req.ar_valid;
-    ext_tcdm_resp.ar_ready = ext_tcdm_resp_buf.ar_ready;
     ext_tcdm_resp.b = ext_tcdm_resp_buf.b;
     ext_tcdm_resp.b_valid = ext_tcdm_resp_buf.b_valid;
     ext_tcdm_req_buf.b_ready = ext_tcdm_req.b_ready;
@@ -602,19 +600,41 @@ module pulp_cluster
     ext_tcdm_resp.r_valid = ext_tcdm_resp_buf.r_valid;
     ext_tcdm_req_buf.r_ready = ext_tcdm_req.r_ready;
   end
-  fall_through_register #(
+  spill_register #(
     .T  (aw_chan_t)
-  ) i_axi2mem_aw_ft_reg (
+  ) i_axi2mem_aw_spill_reg (
     .clk_i  (clk_cluster),
     .rst_ni,
-    .clr_i  (1'b0),
-    .testmode_i (1'b0),
     .valid_i  (ext_tcdm_req.aw_valid),
     .ready_o  (ext_tcdm_resp.aw_ready),
     .data_i   (ext_tcdm_req.aw),
     .valid_o  (ext_tcdm_req_buf.aw_valid),
     .ready_i  (ext_tcdm_resp_buf.aw_ready),
     .data_o   (ext_tcdm_req_buf.aw)
+  );
+  spill_register #(
+    .T  (w_chan_t)
+  ) i_axi2mem_w_spill_reg (
+    .clk_i  (clk_cluster),
+    .rst_ni,
+    .valid_i  (ext_tcdm_req.w_valid),
+    .ready_o  (ext_tcdm_resp.w_ready),
+    .data_i   (ext_tcdm_req.w),
+    .valid_o  (ext_tcdm_req_buf.w_valid),
+    .ready_i  (ext_tcdm_resp_buf.w_ready),
+    .data_o   (ext_tcdm_req_buf.w)
+  );
+  spill_register #(
+    .T  (ar_chan_t)
+  ) i_axi2mem_ar_spill_reg (
+    .clk_i  (clk_cluster),
+    .rst_ni,
+    .valid_i  (ext_tcdm_req.ar_valid),
+    .ready_o  (ext_tcdm_resp.ar_ready),
+    .data_i   (ext_tcdm_req.ar),
+    .valid_o  (ext_tcdm_req_buf.ar_valid),
+    .ready_i  (ext_tcdm_resp_buf.ar_ready),
+    .data_o   (ext_tcdm_req_buf.ar)
   );
 
   axi2mem #(
@@ -779,6 +799,11 @@ module pulp_cluster
     .busy_o         ( s_dmac_busy        )
   );
 
+
+  /* MAILBOX EVENT */
+
+  assign s_mailbox_evt = mailbox_evt_i;
+
   cluster_peripherals #(
     .NB_CORES       ( NB_CORES       ),
     .NB_MPERIPHS    ( NB_MPERIPHS    ),
@@ -807,6 +832,8 @@ module pulp_cluster
     .dma_cfg_master         ( s_periph_dma_bus                   ),
     .dma_cl_event_i         ( s_dma_cl_event                     ),
     .dma_cl_irq_i           ( s_dma_cl_irq                       ),
+
+    .mailbox_evt_i          ( s_mailbox_evt                      ),
 
     .soc_periph_evt_ready_o ( s_events_ready                     ),
     .soc_periph_evt_valid_i ( s_events_valid                     ),
@@ -1006,14 +1033,11 @@ module pulp_cluster
       .NB_CORES               ( NB_CORES            ),
       .SH_NB_BANKS            ( NB_CACHE_BANKS      ),
       .SH_NB_WAYS             ( 4                   ),
-      .SH_CACHE_SIZE          ( 4*1024              ), // in Byte
+      .SH_CACHE_SIZE          ( 8*1024              ), // in Byte
       .SH_CACHE_LINE          ( 1                   ), // in word of [FETCH_DATA_WIDTH]
       .PRI_NB_WAYS            ( 4                   ),
-      .PRI_CACHE_SIZE         ( 512                 ), // in Byte
+      .PRI_CACHE_SIZE         ( 1 * 1024            ), // in Byte
       .PRI_CACHE_LINE         ( 1                   ), // in word of [FETCH_DATA_WIDTH]
-      .USE_SPECIAL_CORE       ( "FALSE"             ),
-      .SPECIAL_CORE_ID        ( 0                   ),
-      .SPECIAL_PRI_CACHE_SIZE ( 0                   ), // in Byte
       .AXI_ID                 ( AXI_ID_OUT_WIDTH    ),
       .AXI_ADDR               ( AXI_ADDR_WIDTH      ),
       .AXI_USER               ( AXI_USER_WIDTH      ),
@@ -1077,8 +1101,7 @@ module pulp_cluster
       .axi_master_bready_o    ( s_core_instr_bus.b_ready   ),
 
       .IC_ctrl_unit_bus_pri   ( IC_ctrl_unit_bus_pri       ),
-      .IC_ctrl_unit_bus_main  ( IC_ctrl_unit_bus_main      ),
-      .special_core_dest_i    ( '0                         )
+      .IC_ctrl_unit_bus_main  ( IC_ctrl_unit_bus_main      )
     );
 
   end else begin : gen_no_priv_icache
@@ -1297,7 +1320,9 @@ module pulp_cluster
 
     sram #(
       .N_WORDS    (TCDM_NUM_ROWS),
-      .DATA_WIDTH (32)
+      .DATA_WIDTH (32),
+      .NB_CUTS    (5),
+      .MORE_CUTS  (1)
     ) i_mem (
       .clk_i    (clk_cluster),
       .rst_ni   (rst_ni),
