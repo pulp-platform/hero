@@ -64,9 +64,9 @@ copy_git_files example-apps
 cd "$SRC"
 rsync -av setup.sh "$TMP_DST/"
 
-# ReadMe and Prerequisites: copy to destination.
+# ReadMe, Prerequisites, and Changelog: copy to destination.
 cd "$SRC"
-copy_git_files README.md PREREQUISITES.md
+copy_git_files README.md PREREQUISITES.md CHANGELOG.md
 
 # Create archive from temporary destination directory.
 sleep 1 # give Git time to settle
