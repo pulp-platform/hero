@@ -229,7 +229,7 @@ module cluster_peripherals
 
     .acc_events_i           ( s_acc_events           ),
     .dma_events_i           ( s_dma_events           ),
-    .decompr_done_evt_i     ( mailbox_evt_i          ),  
+    .mailbox_evt_i          ( mailbox_evt_i          ),  
     .timer_events_i         ( s_timer_events         ),
     .cluster_events_i       ( s_cluster_events       ),
 
