@@ -31,7 +31,7 @@ After that, simply execute the `setup.sh` script to build the PULP toolchain.
 
 ### Environments
 
-Compilation always requires a proper environment. When compiling with the minimal runtime `source env/ehuawei.sh`.
+Compilation always requires a proper environment. When compiling with the minimal runtime `source env/ehuawei-minimal-runtime.sh`. For the full SDK use `source env/esim.sh`
 
 ### Applications
 

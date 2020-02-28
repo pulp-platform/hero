@@ -23,6 +23,33 @@ __rt_stack_size = DEFINED(__rt_stack_size) ? __rt_stack_size : 0x800;
 SECTIONS
 {
   /*
+   * L2 PRIVATE BANK1
+   *
+   * Contains FC code
+   */
+
+  .vectors MAX(0x1c000000,ALIGN(256)) :
+  {
+    __irq_vector_base = .;
+    KEEP(*(.vectors))
+  } > L2
+
+  .text :
+  {
+    . = ALIGN(4);
+    _stext = .;
+    *(.text)
+    *(.text.*)
+    _etext  =  .;
+    *(.lit)
+    *(.shdata)
+    _endtext = .;
+    . = ALIGN(4);
+  } > L2
+
+  __l2_priv1_end = ALIGN(4);
+
+  /*
    * L2 PRIVATE BANK0
    *
    * Contains FC data
@@ -169,37 +196,6 @@ SECTIONS
 
 
   __l2_priv0_end = ALIGN(4);
-
-
-
-
-  /*
-   * L2 PRIVATE BANK1
-   *
-   * Contains FC code
-   */
-
-  .vectors MAX(0x1c008000,ALIGN(256)) :
-  {
-    __irq_vector_base = .;
-    KEEP(*(.vectors))
-  } > L2
-
-  .text :
-  {
-    . = ALIGN(4);
-    _stext = .;
-    *(.text)
-    *(.text.*)
-    _etext  =  .;
-    *(.lit)
-    *(.shdata)
-    _endtext = .;
-    . = ALIGN(4);
-  } > L2
-
-  __l2_priv1_end = ALIGN(4);
-
 
   /*
    * L2 SHARED BANKS

@@ -15,7 +15,7 @@ readonly TMP_DST="$(mktemp -d)"
 # Env: Copy to destination.
 cd "$SRC"
 mkdir -p "$TMP_DST/env"
-rsync -av env/ehuawei.sh "$TMP_DST/env/"
+rsync -av env/* "$TMP_DST/env/"
 
 # Doc: Copy to destination.
 mkdir -p "$TMP_DST/doc"
@@ -46,27 +46,19 @@ cd "$SRC"
 copy_git_files pulp
 
 # PULP software: Git-init SDK
-# NO PULP-SDK at the moment
-rm -rf "$TMP_DST/pulp/sdk"
-rm -rf "$TMP_DST/pulp/refs"
-rm -f "$TMP_DST/pulp/setup-sdk.sh"
-# cd "$TMP_DST/pulp/sdk"
-# git init
-# git config --local user.name 'Packager'
-# git config --local user.email 'packager@localhost'
-# git add -A
-# git commit -m 'initial commit'
+cd "$TMP_DST/pulp/sdk"
+git init
+git config --local user.name 'Packager'
+git config --local user.email 'packager@localhost'
+git add -A
+git commit -m 'initial commit'
+
+# PULP software: Copy libhero-target
+cd "$SRC"
+copy_git_files support/libhero-target
 
 # Example applications: copy to destination.
-cd "$SRC"
 copy_git_files example-apps
-# NO OPENMP EXAMPLES
-rm -rf "$TMP_DST/example-apps/common/gcc"
-rm -rf "$TMP_DST/example-apps/common/bench.h"
-rm -rf "$TMP_DST/example-apps/common/default.mk"
-rm -rf "$TMP_DST/example-apps/common/hero_atomic.h"
-rm -rf "$TMP_DST/example-apps/helloworld"
-rm -rf "$TMP_DST/example-apps/tests-pulp"
 
 # Setup script: copy to destination.
 cd "$SRC"

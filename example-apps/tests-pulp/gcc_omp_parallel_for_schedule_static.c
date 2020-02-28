@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <omp.h>
 #include <stdlib.h>
+#include <string.h>
 
 int gcc_omp_parallel_for_schedule_static (void)
 {

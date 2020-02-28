@@ -1,6 +1,7 @@
 *.bin
 *.mcs
 *.tar.gz
+*.bk
 /install/
 output/*
 local.mk

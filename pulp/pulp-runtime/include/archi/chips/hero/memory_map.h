@@ -32,26 +32,19 @@
 #define ARCHI_L2_SHARED_ADDR  0x1c010000
 #define ARCHI_L2_SHARED_SIZE  0x00030000
 
-
 /*
  * SOC PERIPHERALS
  */
 
 #define ARCHI_SOC_PERIPHERALS_ADDR    0x1A100000
 
-#define ARCHI_FC_TIMER_SIZE           0x00000800
-
-
-#define ARCHI_FLL_OFFSET              0x00000000
-#define ARCHI_GPIO_OFFSET             0x00001000
-#define ARCHI_UDMA_OFFSET             0x00002000
-#define ARCHI_APB_SOC_CTRL_OFFSET     0x00004000
-#define ARCHI_SOC_EU_OFFSET           0x00006000
-#define ARCHI_FC_ITC_OFFSET           0x00009800
-#define ARCHI_FC_TIMER_OFFSET         0x0000B000
-#define ARCHI_STDOUT_OFFSET           0x0000F000
-
-
+#define ARCHI_GPIO_OFFSET             0x00000000 // Not implemented
+#define ARCHI_UDMA_OFFSET             0x00000000 // Not implemented
+#define ARCHI_APB_SOC_CTRL_OFFSET     0x00003000
+#define ARCHI_SOC_EU_OFFSET           0x00000000 // Not implemented
+#define ARCHI_FC_ITC_OFFSET           0x00000000 // Not implemented
+#define ARCHI_FC_TIMER_OFFSET         0x00000000 // Not implemented
+#define ARCHI_STDOUT_OFFSET           0x00004000
 
 #define ARCHI_GPIO_ADDR              ( ARCHI_SOC_PERIPHERALS_ADDR + ARCHI_GPIO_OFFSET )
 #define ARCHI_UDMA_ADDR              ( ARCHI_SOC_PERIPHERALS_ADDR + ARCHI_UDMA_OFFSET )
@@ -61,19 +54,6 @@
 #define ARCHI_FC_TIMER_ADDR          ( ARCHI_SOC_PERIPHERALS_ADDR + ARCHI_FC_TIMER_OFFSET )
 #define ARCHI_STDOUT_ADDR            ( ARCHI_SOC_PERIPHERALS_ADDR + ARCHI_STDOUT_OFFSET )
 
-#define ARCHI_FLL_AREA_SIZE          0x00000010
-
-
-
-
-/*
- * FC
- */
-
-#define ARCHI_FC_ADDR                   0x00000000
-#define ARCHI_FC_GLOBAL_ADDR            0x1B000000
-
-
 /*
  * CLUSTER
  */
@@ -81,8 +61,6 @@
 #define ARCHI_CLUSTER_ADDR              0x1B000000
 #define ARCHI_CLUSTER_SIZE              0x00400000
 #define ARCHI_CLUSTER_GLOBAL_ADDR(cid)  (0x10000000 + (cid)*ARCHI_CLUSTER_SIZE)
-
-
 
 /*
  * CLUSTER PERIPHERALS
@@ -108,8 +86,6 @@
 #define ARCHI_HWCE_ADDR                            ( ARCHI_CLUSTER_PERIPHERALS_ADDR + ARCHI_HWCE_OFFSET )
 #define ARCHI_MCHAN_EXT_ADDR                       ( ARCHI_CLUSTER_PERIPHERALS_ADDR + ARCHI_MCHAN_EXT_OFFSET )
 
-
-
 /*
  * CLUSTER DEMUX PERIPHERALS
  */
@@ -118,7 +94,6 @@
 
 #define ARCHI_EU_DEMUX_OFFSET                 ( 0x00000 )
 #define ARCHI_MCHAN_DEMUX_OFFSET              ( 0x00400 )
-
 
 #define ARCHI_DEMUX_PERIPHERALS_ADDR          ( ARCHI_CLUSTER_ADDR + ARCHI_DEMUX_PERIPHERALS_OFFSET )
 

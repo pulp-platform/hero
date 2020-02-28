@@ -47,6 +47,9 @@ void cluster_entry_stub()
 {
     cluster_core_init();
 
+    // Go to sleep until master core set everything up
+    eu_bar_trig_wait_clr(eu_bar_addr(0));
+
     int retval = ((int (*)())cluster_entry)();
 
     if (hal_core_id() == 0)
@@ -88,7 +91,8 @@ void cluster_start(int cid, int (*entry)())
       plp_ctrl_core_bootaddr_set_remote(cid, i, (int)_start);
     }
 
-    eoc_fetch_enable_remote(cid, (1<<ARCHI_CLUSTER_NB_PE) - 1);
+    // In Hero, all the cores' fetch enable signal are enabled
+    eu_bar_trig_wait_clr(eu_bar_addr(0));
 }
 
 

@@ -1,9 +1,25 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   HERO_INSTALL: '$CI_PROJECT_DIR/install'
-  TEMP_JOB_DIR: '/tmp/hero_gitlab_ci_$CI_JOB_ID'
+  TEMP_JOB_DIR: '$CI_PROJECT_DIR/archive/hero_gitlab_ci_$CI_JOB_ID'
+  DEPLOY_USER: 'hero'
+  DEPLOY_HOST: 'localhost'
+  DEPLOY_PATH: 'builds/$CI_COMMIT_REF_NAME'
+
 
 before_script:
+  # Disable display in CI.
+  - unset DISPLAY
+  # Load key for deployment.
+  - eval $(ssh-agent -s)
+  - echo $SSH_PRIVATE_KEY | base64 -d | tr -d '\r' | ssh-add -
+  - unset SSH_PRIVATE_KEY
+  # Prepare deployment target.
+  - export DEPLOY_REMOTE="$DEPLOY_USER@$DEPLOY_HOST"
+  - export DEPLOY_TARGET="$DEPLOY_REMOTE:$DEPLOY_PATH"
+  - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
+  - ssh $DEPLOY_REMOTE "mkdir -p $DEPLOY_PATH"
+  # Prepare local install directory.
   - mkdir -p "$HERO_INSTALL"
   - mkdir -p "$TEMP_JOB_DIR"
 
@@ -13,6 +29,7 @@ after_script:
   - rm -rf "$TEMP_JOB_DIR"
 
 stages:
+  - build_toolchain
   - build_test_rest
 
 build_test_archive:
@@ -22,18 +39,44 @@ build_test_archive:
     - cd "$TEMP_JOB_DIR"
     - cp "$CI_PROJECT_DIR/hero_huawei.tar.gz" .
     - tar xf hero_huawei.tar.gz && rm hero_huawei.tar.gz
-    - export HERO_INSTALL="$(pwd)/install"
-    ### build base toolchains
-    - make tc-pulp
-    ### build examples
-    - source env/ehuawei.sh
+    - export HERO_INSTALL_NEW="$(pwd)/install"
+    - mkdir -p "$HERO_INSTALL_NEW"
+    ### build base toolchains --> Add fast path for CI
+    - >
+      if [[ -n "$FULL_CI_TEST" ]] || [[ ! -x "$HERO_INSTALL/bin/riscv32-unknown-elf-gcc" ]]; then
+          # Build the toolchain like it's done in the regular setup
+          echo "Build the full toolchain"
+          ./setup.sh
+      else
+          echo "Use fast path to copy toolchain"
+          rsync -av "$HERO_INSTALL/" "$HERO_INSTALL_NEW/"
+      fi
+    - export HERO_INSTALL="$HERO_INSTALL_NEW"
+    ### build RTL tests
+    - source env/ehuawei-minimal-runtime.sh
     ### Test both simulators
     - >
       for sim in vsim vcs; do
         # Compile testbench
         cd hardware/$sim
         ./compile.sh
-        for d in hello; do
+        for d in hello parMatrixMul; do
+          make -C ../../example-apps/$d clean all
+          ../test/gen_slm_files.sh $d
+          ./start_sim.sh
+        done
+        cd -
+      done
+    ### build SDK and software tests
+    - make sdk-pulp
+    - source env/esim.sh
+    ### Test both simulators
+    - >
+      for sim in vsim vcs; do
+        # Compile testbench
+        cd hardware/$sim
+        ./compile.sh
+        for d in tests-pulp; do
           make -C ../../example-apps/$d clean all
           ../test/gen_slm_files.sh $d
           ./start_sim.sh
@@ -41,32 +84,54 @@ build_test_archive:
         cd -
       done
 
-build_test_rest:
+build_test_pulp-runtime:
   stage: build_test_rest
   script:
-    ### build base toolchains
-    - make tc-pulp
+    ### Setup toolchain in `build_toolchain`
+    ### Configure pulp-runtime
+    - source env/ehuawei-minimal-runtime.sh
+    ### Test both simulators
+    - make -C "$CI_PROJECT_DIR/hardware" vcs/compile.sh
+    - >
+      for sim in vsim vcs; do
+        # Compile testbench
+        cd hardware/$sim
+        ./compile.sh
+        for d in hello parMatrixMul; do
+          make -C ../../example-apps/$d clean all
+          ../test/gen_slm_files.sh $d
+          ./start_sim.sh
+        done
+        cd -
+      done
+  artifacts:
+    paths:
+      - install
+      - example-apps
+      - pulp
+
+build_test_sdk:
+  stage: build_test_rest
+  script:
+    ### Setup toolchain in `build_toolchain`
     ### build accelerator sdk
     - make sdk-pulp
-    ### build examples
+    ### Configure for SDK
     - source env/esim.sh
-    # - >
-    #   for d in helloworld; do
-    #     make -C example-apps/$d all
-    #   done
-    ### compile testbench
-    - cd hardware/vsim
-    - ./compile.sh
-    - cd -
-    ### simulate examples
-    - cd hardware/vsim
+    ### Test both simulators
+    - make -C "$CI_PROJECT_DIR/hardware" vcs/compile.sh
     - >
-      for d in hello; do
-        make -C ../../example-apps/$d clean all
-        ../test/gen_slm_files.sh $d
-        ./start_sim.sh
+      for sim in vsim vcs; do
+        # Compile testbench
+        cd hardware/$sim
+        ./compile.sh
+        for d in tests-pulp; do
+          make -C ../../example-apps/$d clean all
+          ../test/gen_slm_files.sh $d
+          ./start_sim.sh
+        done
+        cd -
       done
-    - cd -
   artifacts:
     paths:
       - install
@@ -76,9 +141,8 @@ build_test_rest:
 pulp_run_target_test:
   stage: build_test_rest
   script:
-    ### setup toolchain
-    - ./setup.sh
-    - source env/esim.sh
+    ### Setup toolchain in `build_toolchain`
+    - source env/ehuawei-minimal-runtime.sh
     ### compile testbench
     - cd hardware/vsim
     - ./compile.sh
@@ -89,3 +153,13 @@ pulp_run_target_test:
   artifacts:
     paths:
       - example-apps
+
+build_toolchain:
+  stage: build_toolchain
+  script:
+    - env
+    ### Build toolchain with possible fast-path
+    - ./.gitlab-ci.d/build-toolchain.sh
+  artifacts:
+    paths:
+      - install

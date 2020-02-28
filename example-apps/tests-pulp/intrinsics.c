@@ -24,14 +24,21 @@
 unsigned check_bitext()
 {
   unsigned n_errors = 0;
-  n_errors += (__builtin_pulp_fl1(31) != 4);
-  n_errors += (__builtin_pulp_fl1(32) != 5);
-  n_errors += (__builtin_pulp_fl1(0) != 32);
+  // Prevent compiler optimization
+  volatile unsigned val = 0;
+  val = 31;
+  n_errors += (__builtin_pulp_fl1(val) != 4);
+  val = 32;
+  n_errors += (__builtin_pulp_fl1(val) != 5);
+  val = 0;
+  n_errors += (__builtin_pulp_fl1(val) != 32);
   int bits = 0;
-  bits = __builtin_bitinsert(0, 7, 1, 3);
-  n_errors += (bits != 24); //11000
-  bits = __builtin_bitinsert(bits, 5, 2, 7);
-  n_errors += (bits != 664); //1010011000
+  val = 7;
+  bits = __builtin_bitinsert(0, val, 1, 3);
+  n_errors += (bits != 8); //01000
+  val = 5;
+  bits = __builtin_bitinsert(bits, val, 2, 7);
+  n_errors += (bits != 136); //0010001000
   return n_errors;
 }
 
@@ -62,7 +69,7 @@ unsigned check_events()
       *trigg_addr = 1;
     }
   }
-  omp_set_num_threads(8);
+  // omp_set_num_threads(8);
   return !correct;
 }
 

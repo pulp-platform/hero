@@ -25,7 +25,7 @@ udma/i2s/version=2
 udma/uart/version=1
 event_unit/version=3
 perf_counters=True
-fll/version=1
+fll/version=0
 padframe/version=1
 udma/spim/version=3
 gpio/version=3
@@ -34,8 +34,8 @@ udma/version=3
 soc_eu/version=2
 
 # FLL
-PULP_SRCS     += kernel/fll-v$(fll/version).c
-PULP_SRCS     += kernel/freq-domains.c
+# PULP_SRCS     += kernel/fll-v$(fll/version).c
+# PULP_SRCS     += kernel/freq-domains.c
 PULP_SRCS     += kernel/chips/hero/soc.c
 
 

@@ -37,37 +37,37 @@ static unsigned condition_or_printf(bool condition, const char* fmt, ...)
 
 inline static void* pulp_l1_base()
 {
-  extern void __pulp_l1_base;
+  extern char __pulp_l1_base;
   return &__pulp_l1_base;
 }
 
 inline static void* pulp_l1_end()
 {
-  extern void __pulp_l1_end;
+  extern char __pulp_l1_end;
   return &__pulp_l1_end;
 }
 
 inline static void* pulp_l1_alias_base()
 {
-  extern void __pulp_l1_alias_base;
+  extern char __pulp_l1_alias_base;
   return &__pulp_l1_alias_base;
 }
 
 inline static void* pulp_l1_alias_end()
 {
-  extern void __pulp_l1_alias_end;
+  extern char __pulp_l1_alias_end;
   return &__pulp_l1_alias_end;
 }
 
 inline static void* pulp_l2_base()
 {
-  extern void __pulp_l2_base;
+  extern char __pulp_l2_base;
   return &__pulp_l2_base;
 }
 
 inline static void* pulp_l2_end()
 {
-  extern void __pulp_l2_end;
+  extern char __pulp_l2_end;
   return &__pulp_l2_end;
 }
 
@@ -78,25 +78,25 @@ inline static unsigned pulp_l2_size()
 
 inline static unsigned pulp_cluster_n_cores()
 {
-  extern void __rt_nb_pe;
+  extern char __rt_nb_pe;
   return (unsigned)&__rt_nb_pe;
 }
 
 inline static unsigned pulp_n_clusters()
 {
-  extern void __rt_nb_cluster;
+  extern char __rt_nb_cluster;
   return (unsigned)&__rt_nb_cluster;
 }
 
 inline static size_t pulp_stack_size()
 {
-  extern void __rt_stack_size;
+  extern char __rt_stack_size;
   return (size_t)&__rt_stack_size;
 }
 
 inline static void* pulp_cluster_base(const unsigned cluster_id)
 {
-  extern void __pulp_cluster_size;
+  extern char __pulp_cluster_size;
   return pulp_l1_base() + cluster_id * (unsigned)&__pulp_cluster_size;
 }
 
@@ -107,21 +107,21 @@ inline static uint64_t align_64(uint64_t addr)
 
 inline static uint64_t test_l1_base()
 {
-  return align_64((uint64_t)pulp_l1_end() - pulp_cluster_n_cores()*pulp_stack_size());
+  return align_64((uint64_t)(uint32_t)pulp_l1_end() - pulp_cluster_n_cores()*pulp_stack_size());
 }
 
 inline static uint64_t test_l1_alias_base()
 {
-  return align_64((uint64_t)pulp_l1_alias_end() - pulp_cluster_n_cores()*pulp_stack_size());
+  return align_64((uint64_t)(uint32_t)pulp_l1_alias_end() - pulp_cluster_n_cores()*pulp_stack_size());
 }
 
 inline static uint64_t test_l1_other_base()
 {
-  return align_64((uint64_t)pulp_cluster_base(1) + 0x1000);
+  return align_64((uint64_t)(uint32_t)pulp_cluster_base(1) + 0x1000);
 }
 inline static uint64_t test_l2_base()
 {
-  return align_64((uint64_t)pulp_l2_end() - 0x1000);
+  return align_64((uint64_t)(uint32_t)pulp_l2_end() - 0x1000);
 }
 
 inline static uint64_t test_dram_base()

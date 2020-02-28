@@ -190,15 +190,15 @@ inline static unsigned check_addr(int32_t* const addr)
 {
   unsigned n_errors = 0;
 
-  n_errors += check_amo(addr, 9,                              &atomic_swap, &thread_num,      &check_swap);
-  n_errors += check_amo(addr, 0,                              &atomic_add,  &one,             &check_add);
-  n_errors += check_amo(addr, 1,                              &atomic_and,  &zero,            &check_and);
-  n_errors += check_amo(addr, 0,                              &atomic_or,   &one,             &check_or);
-  n_errors += check_amo(addr, 0,                              &atomic_xor,  &one,             &check_xor);
-  n_errors += check_amo(addr, min_max_threshold,              &atomic_max,  &neg_thread_num,  &check_max);
-  n_errors += check_amo(addr, minu_maxu_threshold,  (amo_fn_t)&atomic_maxu, &thread_num,      &check_maxu);
-  n_errors += check_amo(addr, min_max_threshold,              &atomic_min,  &neg_thread_num,  &check_min);
-  n_errors += check_amo(addr, minu_maxu_threshold,  (amo_fn_t)&atomic_minu, &thread_num,      &check_minu);
+  n_errors += check_amo(addr, 9,                              &atomic_swap, (int32_t (*)(void))&thread_num,      &check_swap);
+  n_errors += check_amo(addr, 0,                              &atomic_add,  (int32_t (*)(void))&one,             &check_add);
+  n_errors += check_amo(addr, 1,                              &atomic_and,  (int32_t (*)(void))&zero,            &check_and);
+  n_errors += check_amo(addr, 0,                              &atomic_or,   (int32_t (*)(void))&one,             &check_or);
+  n_errors += check_amo(addr, 0,                              &atomic_xor,  (int32_t (*)(void))&one,             &check_xor);
+  n_errors += check_amo(addr, min_max_threshold,              &atomic_max,  (int32_t (*)(void))&neg_thread_num,  &check_max);
+  n_errors += check_amo(addr, minu_maxu_threshold,  (amo_fn_t)&atomic_maxu, (int32_t (*)(void))&thread_num,      &check_maxu);
+  n_errors += check_amo(addr, min_max_threshold,              &atomic_min,  (int32_t (*)(void))&neg_thread_num,  &check_min);
+  n_errors += check_amo(addr, minu_maxu_threshold,  (amo_fn_t)&atomic_minu, (int32_t (*)(void))&thread_num,      &check_minu);
 
   return n_errors;
 }
