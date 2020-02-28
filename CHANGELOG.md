@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `dm_test`, a debug module testbench
 - Initial development
 - Readd `pulp-sdk`
+- Add syn and pnr scripts.
+- Add topographical syn scripts.
+- Add event line for mailbox.
+- Add tests for dma (mchan).
 
 ### Changed
 - Replace `axi_node` with standard-compliant crossbar `axi_xbar`.
@@ -24,6 +28,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename env script for minimal runtime to `ehuawei-minimal-runtime.sh`
 - Re-enable atomics at L2.
 - `pulp_cluster`: Insert spill (pipeline) registers on request paths into `axi2mem` to break long paths.
+- `mchan`: change burst lenght from 256 to 128.
+- `pulp_cluster_cfg_pkg`: change axi id width to 6 (cluster slave side) and to 8 (soc slave side).
+- `pulp_cluster_cfg_pkg`: change tcdm size to 320 KB.
+- `sram`: modify memory cut size for the extended tcdm.
+- `hier-icache`: remove prefetch feature and add pipelines on both request and response paths to improve timing.
+
 
 ### Fixed
 - `axi2mem`: Ensure starvation freedom when prioritizing individual writes over read bursts.
@@ -36,3 +46,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and the DMA unit are now *Modifiable* for efficient reshaping downstream.
 - In the linker script of `pulp-runtime`, `__l2_shared_end` was computed wrong.  This has been
   corrected to the last address of the `L2` memory section.
+- `riscv`: fix fpu paramters to correctly pipeline the fpus.
+- `hier-icache`: fix icache bypass.
+
