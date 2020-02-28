@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change boot behavior of `pulp-runtime` to match Hero's
 - Rename env script for minimal runtime to `ehuawei-minimal-runtime.sh`
 - Re-enable atomics at L2.
+- `pulp_cluster`: Insert spill (pipeline) registers on request paths into `axi2mem` to break long paths.
 
 ### Fixed
 - `axi2mem`: Ensure starvation freedom when prioritizing individual writes over read bursts.
