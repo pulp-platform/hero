@@ -1,6 +1,8 @@
 #SETUP
 sh date
 sh echo "Current git version is `git rev-parse --short HEAD`"
+sh rm -rf alib
+
 source scripts/rm_setup/design_setup.tcl
 
 #SYNTHESIS SCRIPT
@@ -31,6 +33,12 @@ set DEFINE "INVECAS=1"
 
 sh mkdir -p unmapped
 
+# Operating conditions
+set TEMP 125C
+set VBN 0P00
+set VBP 0P00
+
+
 # ANALIZE THE RTL CODE or Read the GTECH
 if { $reAnalyzeRTL == "TRUE" } {
     file delete -force -- ./work
@@ -50,6 +58,19 @@ after 10000
 set uniquify_naming_style "soc_%s_%d"
 uniquify -force
 
+#############
+##   UPF   ##
+#############
+
+create_scenario SSG_0P72V_0P00V_${VBN}V_${VBP}V_RCmax_${TEMP}
+current_scenario SSG_0P72V_0P00V_${VBN}V_${VBP}V_RCmax_${TEMP}
+set_scenario_options -leakage_power true -dynamic_power true
+set_operating_conditions SSG_0P72V_0P00V_${VBN}V_${VBP}V_${TEMP}
+
+# Read RC estimation files
+set_tlu_plus_files -max_tluplus  $tlu_path/10M_2Mx_6Cx_2Ix_LBthick/22fdsoi_10M_2Mx_6Cx_2Ix_LBthick_FuncRCmax_detailed.tluplus \
+                   -tech2itf_map $tech_mw_path/10M_2Mx_6Cx_2Ix_LB/22FDSOI_10M_2Mx_6Cx_2Ix_LB_StarRCXT_MW.map
+check_tlu_plus_files
 
 report_timing -loop -max_paths 100 > TIMING_LOOP.rpt
 
@@ -62,6 +83,7 @@ source -echo -verbose  scripts/create_path_groups.tcl
 
 # INSERT CLOCK GATE
 source -echo -verbose ./scripts/insert_clock_gating.tcl
+
 
 # retiming
 set_optimize_registers true -minimum_period_only -designs "*fpnew_*"
