@@ -32,9 +32,7 @@ source "$ROOT/setup.sh"
 
 # Custom configurations
 out_dir="$ROOT/output"
-config_file="$ROOT/plt_config.json"
-export PULP_CURRENT_CONFIG_ARGS="gvsoc/trace=.* gvsoc/event=.* gvsoc/vcd/gtkw=true"
+trace="/sys/board/chip/cluster/pe.*/insn:$out_dir/cluster"
 
-pulp-run --platform=gvsoc --config=pulp --binary="$binary" --dir="$out_dir" --trace="/sys/board/chip/cluster/*/insn:$out_dir/log" --trace="/sys/board/chip/soc/fc/insn*:$out_dir/fc" prepare run
-# pulp-run --platform=gvsoc --config=pulp --binary="$binary" --dir="$out_dir" --trace="/sys/board/chip/fc/*:$out_dir/fc" prepare run
-# pulp-run --platform=gvsoc --config=pulp --binary="$binary" --dir="$out_dir" --config-file="$config_file" prepare run > "$out_dir/log"
+pulp-run --platform=gvsoc --config=pulp --binary="$binary" --dir="$out_dir" --trace="$trace" prepare run
+# pulp-run --platform=gvsoc --config=pulp --binary="$binary" --dir="$out_dir" --trace="/sys/board/chip/cluster/pe.*/insn:$out_dir/cluster" --trace="/sys/board/chip/soc/fc/insn*:$out_dir/fc" prepare run
