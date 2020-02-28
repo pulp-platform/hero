@@ -137,6 +137,7 @@ module axi_burst_splitter #(
           b_state_d         = BReady;
         end
       end
+      default: b_state_d = BReady;
     endcase
   end
 
@@ -215,6 +216,7 @@ module axi_burst_splitter #(
           r_state_d         = RFeedthrough;
         end
       end
+      default: r_state_d = RFeedthrough;
     endcase
   end
 
@@ -237,10 +239,10 @@ module axi_burst_splitter #(
     else $fatal(1, "Wrapping burst on AW received, which this module does not support!");
   assume property (@(posedge clk_i) slv_req_i.ar_valid |-> slv_req_i.ar.burst != axi_pkg::BURST_WRAP)
     else $fatal(1, "Wrapping burst on AR received, which this module does not support!");
-  assume property (@(posedge clk_i) slv_req_i.aw_valid && slv_resp_o.aw_ready |->
+  assume property (@(posedge clk_i) slv_req_i.aw_valid && slv_resp_o.aw_ready && slv_req_i.aw.len > '0 |->
       |(slv_req_i.aw.cache & axi_pkg::CACHE_MODIFIABLE) || slv_req_i.aw.len > 15)
     else $warning("Splitting a non-modifiable AW burst with 16 beats or less, which violates the AXI spec.");
-  assume property (@(posedge clk_i) slv_req_i.ar_valid && slv_resp_o.ar_ready |->
+  assume property (@(posedge clk_i) slv_req_i.ar_valid && slv_resp_o.ar_ready && slv_req_i.aw.len > '0|->
       |(slv_req_i.ar.cache & axi_pkg::CACHE_MODIFIABLE) || slv_req_i.ar.len > 15)
     else $warning("Splitting a non-modifiable AR burst with 16 beats or less, which violates the AXI spec.");
   // Outputs
@@ -363,6 +365,7 @@ module axi_burst_splitter_ax_chan #(
           end
         end
       end
+      default: state_d = Idle;
     endcase
   end
 

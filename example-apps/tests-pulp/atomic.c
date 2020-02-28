@@ -211,8 +211,11 @@ unsigned test_atomic()
   n_errors += check_addr((int32_t*)test_l1_base());
   printf("Testing atomic transactions on aliased L1 ..\n");
   n_errors += check_addr((int32_t*)test_l1_alias_base());
-  printf("Testing atomic transactions on L1 of other cluster ..\n");
-  n_errors += check_addr((int32_t*)test_l1_other_base());
+  if (pulp_n_clusters() > 1)
+  {
+    printf("Testing atomic transactions on L1 of other cluster ..\n");
+    n_errors += check_addr((int32_t*)test_l1_other_base());
+  }
   printf("Testing atomic transactions on L2 ..\n");
   n_errors += check_addr((int32_t*)test_l2_base());
   // Atomic transactions on DRAM are not implemented yet.

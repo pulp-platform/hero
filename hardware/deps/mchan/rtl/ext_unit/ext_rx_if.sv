@@ -238,7 +238,7 @@ module ext_rx_if
    assign axi_master_ar_size_o   = 3'd3;
    assign axi_master_ar_burst_o  = {1'b0,cmd_bst_i};
    assign axi_master_ar_lock_o   = '0;
-   assign axi_master_ar_cache_o  = '0;
+   assign axi_master_ar_cache_o  = 4'b0010; // modifiable
    assign axi_master_ar_qos_o    = '0;
    assign axi_master_ar_user_o   = '0;
    

@@ -22,9 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Match `soc_peripherals` address with Hero
 - Change boot behavior of `pulp-runtime` to match Hero's
 - Rename env script for minimal runtime to `ehuawei-minimal-runtime.sh`
+- Re-enable atomics at L2.
 
 ### Fixed
 - `axi2mem`: Ensure starvation freedom when prioritizing individual writes over read bursts.
 - `riscv`: Propagate enabled A extension to MISA CSR.
 - `axi_dwc`: Ensure the W beat is sent even if the AW is not yet accepted.
 - Remove FLL configuration in `pulp-runtime`.
+- `axi_riscv_atomics`: Improve compatibility with VCS.
+- `pulp_cluster`: The AxCACHE signal is no longer statically set to *Normal Non-Cacheable
+  Non-Bufferable* but properly fed through from internal masters.  Accesses by the instruction cache
+  and the DMA unit are now *Modifiable* for efficient reshaping downstream.

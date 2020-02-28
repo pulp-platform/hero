@@ -161,6 +161,8 @@ module axi_riscv_lrsc #(
     typedef enum logic [1:0] {
         B_U='x, B_REGULAR='0, B_EXCLUSIVE, B_INJECT
     } b_cmd_t;
+    // The following type is required as VCS does not support passing an `enum` type as a parameter.
+    typedef logic[$bits(b_cmd_t)-1:0] b_cmd_compat_t;
 
     typedef struct packed {
         axi_id_t    id;
@@ -287,6 +289,7 @@ module axi_riscv_lrsc #(
                     b_inj_full,                 b_inj_empty;
 
     b_cmd_t         b_status_inp_cmd,           b_status_oup_cmd;
+    b_cmd_compat_t                              b_status_oup_cmd_compat;
 
     logic           b_status_inp_req,           b_status_oup_req,
                     b_status_inp_gnt,           b_status_oup_gnt,
@@ -489,7 +492,7 @@ module axi_riscv_lrsc #(
     id_queue #(
         .ID_WIDTH   (AXI_ID_WIDTH),
         .CAPACITY   (AXI_MAX_WRITE_TXNS),
-        .data_t     (b_cmd_t)
+        .data_t     (b_cmd_compat_t) // workaround as VCS cannot pass `enum` type as parameter
     ) i_b_status_queue (
         .clk_i              (clk_i),
         .rst_ni             (rst_ni),
@@ -505,10 +508,11 @@ module axi_riscv_lrsc #(
         .oup_id_i           (b_status_oup_id),
         .oup_pop_i          (b_status_oup_pop),
         .oup_req_i          (b_status_oup_req),
-        .oup_data_o         (b_status_oup_cmd),
+        .oup_data_o         (b_status_oup_cmd_compat),
         .oup_data_valid_o   (b_status_oup_valid),
         .oup_gnt_o          (b_status_oup_gnt)
     );
+    assign b_status_oup_cmd = b_cmd_t'(b_status_oup_cmd_compat);
 
     // ID Queue to track in-flight writes.
     id_queue #(
