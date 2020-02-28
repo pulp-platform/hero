@@ -33,3 +33,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pulp_cluster`: The AxCACHE signal is no longer statically set to *Normal Non-Cacheable
   Non-Bufferable* but properly fed through from internal masters.  Accesses by the instruction cache
   and the DMA unit are now *Modifiable* for efficient reshaping downstream.
+- In the linker script of `pulp-runtime`, `__l2_shared_end` was computed wrong.  This has been
+  corrected to the last address of the `L2` memory section.
