@@ -293,6 +293,7 @@ module axi_lite_to_apb #(
           apb_update  = 1'b1;
         end
       end
+      default: apb_state_d = Setup;
     endcase
   end
 
