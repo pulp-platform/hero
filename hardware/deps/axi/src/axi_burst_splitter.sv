@@ -137,6 +137,7 @@ module axi_burst_splitter #(
           b_state_d         = BReady;
         end
       end
+      default: b_state_d = BReady;
     endcase
   end
 
@@ -215,6 +216,7 @@ module axi_burst_splitter #(
           r_state_d         = RFeedthrough;
         end
       end
+      default: r_state_d = RFeedthrough;
     endcase
   end
 
@@ -363,6 +365,7 @@ module axi_burst_splitter_ax_chan #(
           end
         end
       end
+      default: state_d = Idle;
     endcase
   end
 
