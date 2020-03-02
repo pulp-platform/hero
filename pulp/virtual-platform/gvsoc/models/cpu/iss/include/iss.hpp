@@ -23,6 +23,7 @@
 
 #include "iss_core.hpp"
 #include "rv32i.hpp"
+#include "rv32a.hpp"
 #include "rv32c.hpp"
 #include "rv32m.hpp"
 #include "rvf.hpp"
