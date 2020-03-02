@@ -39,5 +39,8 @@ source "$ROOT/setup.sh"
 out_dir="$ROOT/output"
 trace="/sys/board/chip/cluster/pe.*/insn:$out_dir/cluster"
 
+# Print configuration
+echo "Write the following traces: $trace to $out_dir"
+
 pulp-run --platform=gvsoc --config=pulp --binary="$binary" --dir="$out_dir" --trace="$trace" prepare run
 # pulp-run --platform=gvsoc --config=pulp --binary="$binary" --dir="$out_dir" --trace="/sys/board/chip/cluster/pe.*/insn:$out_dir/cluster" --trace="/sys/board/chip/soc/fc/insn*:$out_dir/fc" prepare run

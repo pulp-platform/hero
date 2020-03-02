@@ -76,3 +76,18 @@ Finally, start the simulation with
 ```
 ./start_sim.sh
 ```
+
+## Virtual Platform
+
+Build the virtual platfrom by executing `make virtual-platform` in the repository's root directory.
+
+To launch an application use the `run_vp.sh` script in the `pulp/virual-platform` repository. It takes the name of an application or the full path to a binary as an argument. For example to launch the `hello` application use:
+``` bash
+./pulp/virual-platform/run_vp.sh hello
+```
+
+The script contains two configuration variables.
+- `out_dir`: Contains the path to the output logs of the virtual platform.
+- `trace`: Indicates which events should be logged and to which files they should be written.
+
+By default, the instruction trace of all cores is written to `pulp/virtual-platform/output/cluster`.
