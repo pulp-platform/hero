@@ -14,3 +14,14 @@ tc-pulp:
 
 sdk-pulp:
 	$(ROOT)/pulp/setup-sdk.sh hero-huawei
+
+# Bender
+.PHONY: bender
+
+bender:
+	make -C "$(ROOT)/hardware" bender
+	if [ -z $(HERO_INSTALL) ]; then echo "HERO_INSTALL not set!"; exit 1; fi
+	chmod -R u+w "$(HERO_INSTALL)/bin"
+	ln -sf "$(shell realpath --relative-to="$(HERO_INSTALL)/bin/" "$(ROOT)/hardware/bender")" "$(HERO_INSTALL)/bin/"
+	chmod -R u-w "$(HERO_INSTALL)/bin"
+
