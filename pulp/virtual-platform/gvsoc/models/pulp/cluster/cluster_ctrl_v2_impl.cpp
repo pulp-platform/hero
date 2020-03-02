@@ -94,7 +94,7 @@ vp::io_req_status_e cluster_ctrl::req(void *__this, vp::io_req *req)
 
   if (offset == ARCHI_CLUSTER_CTRL_EOC)
   {
-    _this->clock->stop_engine(*(uint32_t *)data);
+    _this->clock->stop_engine();
     return vp::IO_REQ_OK;
   }
   else if (offset == ARCHI_CLUSTER_CTRL_FETCH_EN)

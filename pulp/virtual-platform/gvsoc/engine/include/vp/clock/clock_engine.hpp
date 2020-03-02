@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* 
+/*
  * Authors: Germain Haugou, ETH (germain.haugou@iis.ee.ethz.ch)
  */
 
@@ -44,7 +44,7 @@ namespace vp {
     bool dequeue_from_engine();
 
     void apply_frequency(int frequency);
-    
+
     inline clock_event *reenqueue(clock_event *event, int64_t cycles);
 
     inline clock_event *reenqueue_ext(clock_event *event, int64_t cycles);
@@ -108,6 +108,8 @@ namespace vp {
 
     inline int64_t get_cycles() { return cycles; }
 
+    inline void stop_engine() { engine->stop_engine(); }
+
     inline void stop_engine(int status) { engine->stop_engine(status); }
 
     int64_t get_period() { return period; }
@@ -141,7 +143,7 @@ namespace vp {
 
     // Gives the current cycle count of this engine.
     // It is always usable, whatever the state of the engine.
-    // It is updated either when events are executed or when the 
+    // It is updated either when events are executed or when the
     // engine is updated by an external interaction.
     int64_t cycles = 0;
 
@@ -160,7 +162,7 @@ namespace vp {
     bool must_flush_delayed_queue;
 
     vp::trace cycles_trace;
-  };    
+  };
 
 };
 
