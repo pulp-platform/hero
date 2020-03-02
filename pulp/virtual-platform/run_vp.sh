@@ -26,6 +26,11 @@ fi
 # Print which binary is executed
 echo "Run $binary"
 
+# Temporarily remove variables from different environments
+unset PULP_SDK_HOME
+unset INSTALL_DIR
+unset PULP_SDK_INSTALL
+
 # Source the virtual platform's environment
 source "$ROOT/configs/pulp.sh"
 source "$ROOT/setup.sh"
