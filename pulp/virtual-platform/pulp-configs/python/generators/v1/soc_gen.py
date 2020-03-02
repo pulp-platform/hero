@@ -53,6 +53,10 @@ def get_config(tp):
   has_hwme          = tp.get('soc/peripherals/hwme') is not None
   has_fc_icache     = tp.get('**/peripherals/fc_icache') is not None
   taps_conf         = tp.get('soc/taps')
+  l2_memory_type    = tp.get_child_str('soc/l2/vp_class')
+
+  if l2_memory_type is None:
+    l2_memory_type = "memory/memory"
 
   comps = {}
 
@@ -384,14 +388,14 @@ def get_config(tp):
         ('size', tp.get_child_int("soc/l2/priv0/size")),
         ('map_base', tp.get_child_str("soc/l2/priv0/base")),
         ('map_size', tp.get_child_str("soc/l2/priv0/size")),
-        ('vp_class', "memory/memory")
+        ('vp_class', l2_memory_type)
     ]))
 
     soc.l2_priv1 = Component(properties=OrderedDict([
         ('size', tp.get_child_int("soc/l2/priv1/size")),
         ('map_base', tp.get_child_str("soc/l2/priv1/base")),
         ('map_size', tp.get_child_str("soc/l2/priv1/size")),
-        ('vp_class', "memory/memory")
+        ('vp_class', l2_memory_type)
     ]))
 
     soc.l2_shared = Component(properties=OrderedDict([
@@ -408,7 +412,7 @@ def get_config(tp):
         'l2_shared_%d' % i,
         Component(properties=OrderedDict([
           ('size', int(l2_shared_size / l2_shared_nb_banks)),
-          ('vp_class', "memory/memory")
+          ('vp_class', l2_memory_type)
         ]))
       )
 
@@ -418,7 +422,7 @@ def get_config(tp):
         ('size', tp.get_child_int("soc/l2/size")),
         ('map_base', tp.get_child_str("soc/l2/base")),
         ('map_size', tp.get_child_str("soc/l2/size")),
-        ('vp_class', "memory/memory")
+        ('vp_class', l2_memory_type)
     ]))
 
   if has_rom:

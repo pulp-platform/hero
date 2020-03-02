@@ -56,7 +56,8 @@
     "l1": {
       "base": "0x10000000",
       "size": "0x00050000",
-      "banking_factor": 2
+      "banking_factor": 2,
+      "vp_class": "memory/memory_atomic"
     },
 
     "icache": {
@@ -185,6 +186,7 @@
       "base": "0x1C000000",
       "size": "0x00040000",
       "is_partitioned": true,
+      "vp_class": "memory/memory_atomic",
 
       "priv0": {
         "base"         : "0x1C000000",

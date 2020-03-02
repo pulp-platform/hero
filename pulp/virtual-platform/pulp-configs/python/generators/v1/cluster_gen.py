@@ -50,8 +50,10 @@ def get_config(tp, cluster_id):
 
   nb_l1_banks = 1<<int(math.log(nb_pe * l1_banking_factor, 2.0))
   l1_bank_size = int(tp.get_child_int('cluster/l1/size') / nb_l1_banks)
+  l1_memory_type = tp.get_child_str('cluster/l1/vp_class')
 
-
+  if l1_memory_type is None:
+    l1_memory_type = "memory/memory"
 
   cluster = Component(properties=OrderedDict([
     ('version', cluster_version),
@@ -224,7 +226,7 @@ def get_config(tp, cluster_id):
       Component(properties=OrderedDict([
         ('size', l1_bank_size),
         ('width_bits', 2),
-        ('vp_class', "memory/memory"),
+        ('vp_class', l1_memory_type),
         ('power_models', {"includes": ["power_models/l1/l1.json"] }),
         ('power_trigger', True if i == 0 else False)
       ]))
@@ -411,7 +413,7 @@ def get_config(tp, cluster_id):
 
   for i in range(0, 4):
     cluster.dma.set('loc_itf_%d' % i, cluster.l1_ico.new_itf('dma_in_%d' % i))
-   
+
   for i in range(0, 4):
     cluster.l1_ico.set('dma_in_%d' % i, cluster.l1_ico.interleaver.new_itf('in_%d' % (nb_pe + i)))
 
@@ -426,13 +428,13 @@ def get_config(tp, cluster_id):
   for i in range(0, nb_pe):
     cluster.l1_ico.get('pe%d_ico' % i).dma_alias = cluster.l1_ico.new_itf('dma_alias_%d'%i)
 
-  for i in range(0, nb_pe):  
+  for i in range(0, nb_pe):
     cluster.l1_ico.get('pe%d_ico' % i).event_unit = cluster.l1_ico.new_itf('event_unit_%d'%i)
 
-  for i in range(0, nb_pe):  
+  for i in range(0, nb_pe):
     cluster.l1_ico.get('pe%d_ico' % i).event_unit_alias = cluster.l1_ico.new_itf('event_unit_alias_%d'%i)
 
-  for i in range(0, nb_pe):  
+  for i in range(0, nb_pe):
     cluster.l1_ico.get('pe%d_ico' % i).cluster_ico = cluster.l1_ico.cluster_ico
 
   for i in range(0, nb_l1_banks):
@@ -450,13 +452,13 @@ def get_config(tp, cluster_id):
 
   for i in range(0, nb_pe):
     cluster.l1_ico.set('ext_counter_%d[%d]'%(i, first_external_pcer + 1), cluster.l1_ico.get('pe%d_ico'%i).new_itf('nb_write[1]'))
-    
+
   for i in range(0, nb_pe):
     cluster.l1_ico.set('ext_counter_%d[%d]'%(i, first_external_pcer + 2), cluster.l1_ico.get('pe%d_ico'%i).new_itf('read_stalls[1]'))
-    
+
   for i in range(0, nb_pe):
     cluster.l1_ico.set('ext_counter_%d[%d]'%(i, first_external_pcer + 3), cluster.l1_ico.get('pe%d_ico'%i).new_itf('write_stalls[1]'))
-    
+
   for i in range(0, nb_pe):
     cluster.l1_ico.set('ext_counter_%d[%d]'%(i, first_external_pcer + 4), cluster.l1_ico.get('pe%d_ico'%i).new_itf('stalls[0]'))
 
