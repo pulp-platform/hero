@@ -2,6 +2,10 @@ IMPLEMENTATIONS += memory/memory_impl
 COMPONENTS += memory/memory
 memory/memory_impl_SRCS = memory/memory_impl.cpp
 
+IMPLEMENTATIONS += memory/memory_atomic_impl
+COMPONENTS += memory/memory_atomic
+memory/memory_atomic_impl_SRCS = memory/memory_atomic_impl.cpp
+
 IMPLEMENTATIONS += memory/ddr_impl
 COMPONENTS += memory/ddr
 ifdef VP_USE_SYSTEMC
