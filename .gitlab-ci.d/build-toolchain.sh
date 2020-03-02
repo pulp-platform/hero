@@ -19,6 +19,7 @@ if [[ -n "$FULL_CI_TEST" ]] || ssh "$DEPLOY_REMOTE" "test ! -x \"$DEPLOY_PATH/bi
     # Build the toolchain like it's done in the regular setup
     echo "Build the full toolchain"
     "$ROOT/../setup.sh"
+    make -C "$ROOT/../" bender
     # Create a tag just to debug CI
     echo "Create a tag"
     chmod u+w "$HERO_INSTALL"
