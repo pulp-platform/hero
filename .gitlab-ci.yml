@@ -45,13 +45,14 @@ build_test_archive:
     - >
       if [[ -n "$FULL_CI_TEST" ]] || [[ ! -x "$HERO_INSTALL/bin/riscv32-unknown-elf-gcc" ]]; then
           # Build the toolchain like it's done in the regular setup
+          export HERO_INSTALL="$HERO_INSTALL_NEW"
           echo "Build the full toolchain"
           ./setup.sh
       else
           echo "Use fast path to copy toolchain"
           rsync -av "$HERO_INSTALL/" "$HERO_INSTALL_NEW/"
+          export HERO_INSTALL="$HERO_INSTALL_NEW"
       fi
-    - export HERO_INSTALL="$HERO_INSTALL_NEW"
     ### build RTL tests
     - source env/ehuawei-minimal-runtime.sh
     ### Test both simulators
