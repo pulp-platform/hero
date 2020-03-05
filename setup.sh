@@ -8,13 +8,43 @@ if [ -z "$HERO_INSTALL" ]; then
   exit 1
 fi
 
-make -C "$ROOT" tc-pulp
+SCRIPT_SYMLINKS=1
+SDK_PULP=1
+TC_PULP=1
+while (( "$#" )); do
+  case "$1" in
+    --no-tc-pulp)
+      TC_PULP=0
+      shift 1
+      ;;
+    --no-script-symlinks)
+      SCRIPT_SYMLINKS=0
+      shift 1
+      ;;
+    --no-sdk-pulp)
+      SDK_PULP=0
+      shift 1
+      ;;
+    *)
+      echo "Error: Unsupported argument '$1'" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [ $TC_PULP = 1 ]; then
+  make -C "$ROOT" tc-pulp
+fi
 
 # Install scripts via symlink
-chmod -R u+w "$HERO_INSTALL/bin"
-ln -sf "$(realpath --relative-to="$HERO_INSTALL/bin/" "$ROOT/example-apps/common/one_word_per_line.py")" "$HERO_INSTALL/bin/"
-ln -sf "$(realpath --relative-to="$HERO_INSTALL/bin/" "$ROOT/hardware/test/gen_slm_files.sh")" "$HERO_INSTALL/bin/"
-chmod -R u-w "$HERO_INSTALL/bin"
+if [ $SCRIPT_SYMLINKS = 1 ]; then
+  chmod -R u+w "$HERO_INSTALL/bin"
+  ln -sf "$(realpath --relative-to="$HERO_INSTALL/bin/" "$ROOT/example-apps/common/one_word_per_line.py")" "$HERO_INSTALL/bin/"
+  ln -sf "$(realpath --relative-to="$HERO_INSTALL/bin/" "$ROOT/hardware/test/gen_slm_files.sh")" "$HERO_INSTALL/bin/"
+  chmod -R u-w "$HERO_INSTALL/bin"
+fi
 
 # Build PULP SDK.
-make -C "$ROOT" sdk-pulp
+if [ $SDK_PULP = 1 ]; then
+  make -C "$ROOT" sdk-pulp
+fi
