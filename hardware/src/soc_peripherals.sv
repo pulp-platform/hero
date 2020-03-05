@@ -37,10 +37,10 @@ module soc_peripherals #(
   ) axi_lite ();
 
   axi_to_axi_lite_intf #(
-    .AxiAddrWidth   (AXI_AW),
-    .AxiDataWidth   (AXI_DW),
-    .AxiIdWidth     (AXI_IW),
-    .AxiUserWidth   (AXI_UW)
+    .AXI_ADDR_WIDTH (AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW),
+    .AXI_USER_WIDTH (AXI_UW)
   ) i_axi_to_axi_lite (
     .clk_i,
     .rst_ni,
