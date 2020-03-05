@@ -52,6 +52,7 @@ build_test_archive:
           echo "Use fast path to copy toolchain"
           rsync -av "$HERO_INSTALL/" "$HERO_INSTALL_NEW/"
           export HERO_INSTALL="$HERO_INSTALL_NEW"
+          ./setup.sh --no-tc-pulp --no-script-symlinks
       fi
     ### build RTL tests
     - source env/ehuawei-minimal-runtime.sh
@@ -68,8 +69,7 @@ build_test_archive:
         done
         cd -
       done
-    ### build SDK and software tests
-    - make sdk-pulp
+    ### reconfigure to use PULP SDK
     - source env/esim.sh
     ### Test both simulators
     - >
