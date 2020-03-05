@@ -7,7 +7,7 @@ packages:
       Git: "https://github.com/pulp-platform/apb.git"
     dependencies: []
   axi:
-    revision: 6da7c84630786f7421b2501b95bab61e52c7438e
+    revision: 69118dd1019c88dc43236f7b944caa5697386280
     version: ~
     source:
       Git: "https://github.com/pulp-platform/axi.git"

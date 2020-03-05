@@ -35,8 +35,9 @@ module synth_bench (
 
   // AXI_ID_WIDTH and AXI_USER_WIDTH
   for (genvar i = 0; i < 3; i++) begin
-    localparam int IUW = AXI_ID_USER_WIDTH[i];
-    synth_slice #(.AW(32), .DW(32), .IW(IUW), .UW(IUW)) s(.*);
+    localparam int UW = AXI_ID_USER_WIDTH[i];
+    localparam int IW = (UW == 0) ? 1 : UW;
+    synth_slice #(.AW(32), .DW(32), .IW(IW), .UW(UW)) s(.*);
   end
 
   // ATOP Filter
@@ -86,35 +87,19 @@ module synth_bench (
     end
   end
 
-  // Performance Monitor
-  synth_axi_perf_mon #(
-    // Number of monitored AXI interfaces
-    .N_MON          (2),
-    // AXI parameters
-    .AW             (64),
-    .IW             (4),
-    // Capabilities of all interface monitors
-    .CAP_HS         (1'b1),
-    .CAP_FL_TXN     (1'b1),
-    .CAP_FL_DAT     (1'b0),
-    .CAP_TX_DAT     (1'b0),
-    .CAP_STALL      (1'b1),
-    .CAP_RT         (1'b0),
-    .CAP_EXCL       (1'b1),
-    .CAP_ATOP       (1'b1),
-    // Counter widths for all interface monitors
-    .CW_CLK         (56),
-    .CW_HS_CMD      (32),
-    .CW_HS_DAT      (32),
-    .CW_FL_TXN_ACC  (63),
-    .CW_FL_TXN_MAX  (10),
-    .CW_STALL_CMD   (56),
-    .CW_STALL_DAT   (56),
-    .CW_STALL_MAX   (16),
-    .CW_EXCL        (10),
-    .CW_ATOP        (14)
-  ) i_perf_mon ();
-
+  // AXI4-Lite Mailbox
+  for (genvar i_irq_mode = 0; i_irq_mode < 4; i_irq_mode++) begin
+    localparam bit EDGE_TRIG = i_irq_mode[0];
+    localparam bit ACT_HIGH  = i_irq_mode[1];
+    for (genvar i_depth = 2; i_depth < 8; i_depth++) begin
+      localparam int unsigned DEPTH = 2**i_depth;
+      synth_axi_lite_mailbox #(
+        .MAILBOX_DEPTH ( DEPTH     ),
+        .IRQ_EDGE_TRIG ( EDGE_TRIG ),
+        .IRQ_ACT_HIGH  ( ACT_HIGH  )
+      ) i_axi_lite_mailbox (.*);
+    end
+  end
 endmodule
 
 
@@ -140,12 +125,20 @@ module synth_slice #(
     .AXI_DATA_WIDTH(DW)
   ) a_lite(), b_lite();
 
-  axi_to_axi_lite_intf a (
+  axi_to_axi_lite_intf #(
+    .AXI_ID_WIDTH       (IW),
+    .AXI_ADDR_WIDTH     (AW),
+    .AXI_DATA_WIDTH     (DW),
+    .AXI_USER_WIDTH     (UW),
+    .AXI_MAX_WRITE_TXNS (32'd10),
+    .AXI_MAX_READ_TXNS  (32'd10),
+    .FALL_THROUGH       (1'b0)
+  ) a (
     .clk_i      (clk_i),
     .rst_ni     (rst_ni),
     .testmode_i (1'b0),
-    .in         (a_full.Slave),
-    .out        (a_lite.Master)
+    .slv        (a_full.Slave),
+    .mst        (a_lite.Master)
   );
   axi_lite_to_axi_intf b (
     .in   (b_lite.Slave),
@@ -204,12 +197,11 @@ module synth_axi_lite_to_apb #(
   typedef logic [31:0]            addr_t;
   typedef logic [DataWidth-1:0]   data_t;
   typedef logic [DataWidth/8-1:0] strb_t;
-  typedef logic [NoApbSlaves-1:0] sel_t;
 
   typedef struct packed {
     addr_t          paddr;   // same as AXI4-Lite
     axi_pkg::prot_t pprot;   // same as AXI4-Lite, specification is the same
-    sel_t           psel;    // onehot, one psel line per connected APB4 slave
+    logic           psel;    // one request line per connected APB4 slave
     logic           penable; // enable signal shows second APB4 cycle
     logic           pwrite;  // write enable
     data_t          pwdata;  // write data, comes from W channel
@@ -230,10 +222,10 @@ module synth_axi_lite_to_apb #(
   `AXI_LITE_TYPEDEF_REQ_T     (  axi_req_t, aw_chan_t, w_chan_t, ar_chan_t )
   `AXI_LITE_TYPEDEF_RESP_T    ( axi_resp_t,  b_chan_t, r_chan_t )
 
-  axi_req_t                     axi_req;
-  axi_resp_t                    axi_resp;
-  apb_req_t                     apb_req;
-  apb_resp_t  [NoApbSlaves-1:0] apb_resp;
+  axi_req_t                    axi_req;
+  axi_resp_t                   axi_resp;
+  apb_req_t  [NoApbSlaves-1:0] apb_req;
+  apb_resp_t [NoApbSlaves-1:0] apb_resp;
 
   axi_pkg::xbar_rule_32_t [NoApbSlaves-1:0] addr_map;
 
@@ -303,10 +295,10 @@ endmodule
 `include "axi/typedef.svh"
 
 module synth_axi_lite_xbar #(
-  parameter int unsigned NoSlvMst
+  parameter int unsigned NoSlvMst = 32'd1
 ) (
-  input clk_i,  // Clock
-  input rst_ni  // Asynchronous reset active low
+  input logic clk_i,  // Clock
+  input logic rst_ni  // Asynchronous reset active low
 );
   typedef logic [32'd32-1:0]   addr_t;
   typedef logic [32'd32-1:0]   data_t;
@@ -361,148 +353,38 @@ module synth_axi_lite_xbar #(
   );
 endmodule
 
-module synth_axi_perf_mon #(
-  // Number of monitored AXI interfaces
-  parameter int unsigned  N_MON         = 0,
-  // AXI parameters
-  parameter int unsigned  AW            = 0,
-  parameter int unsigned  IW            = 0,
-  // Capabilities of all interface monitors
-  parameter bit           CAP_HS        = 1'b0,
-  parameter bit           CAP_FL_TXN    = 1'b0,
-  parameter bit           CAP_FL_DAT    = 1'b0,
-  parameter bit           CAP_TX_DAT    = 1'b0,
-  parameter bit           CAP_STALL     = 1'b0,
-  parameter bit           CAP_RT        = 1'b0,
-  parameter bit           CAP_EXCL      = 1'b0,
-  parameter bit           CAP_ATOP      = 1'b0,
-  // Counter widths for all interface monitors
-  parameter int unsigned  CW_CLK        = 0,
-  parameter int unsigned  CW_HS_CMD     = 0,
-  parameter int unsigned  CW_HS_DAT     = 0,
-  parameter int unsigned  CW_FL_TXN_ACC = 0,
-  parameter int unsigned  CW_FL_TXN_MAX = 0,
-  parameter int unsigned  CW_FL_DAT_ACC = 0,
-  parameter int unsigned  CW_FL_DAT_MAX = 0,
-  parameter int unsigned  CW_TX_DAT     = 0,
-  parameter int unsigned  CW_STALL_CMD  = 0,
-  parameter int unsigned  CW_STALL_DAT  = 0,
-  parameter int unsigned  CW_STALL_MAX  = 0,
-  parameter int unsigned  CW_RT_ACC     = 0,
-  parameter int unsigned  CW_RT_MAX     = 0,
-  parameter int unsigned  CW_EXCL       = 0,
-  parameter int unsigned  CW_ATOP       = 0,
-  // Dependent parameters, do not override.
-  parameter type id_t = logic [IW-1:0]
+module synth_axi_lite_mailbox #(
+  parameter int unsigned MAILBOX_DEPTH = 32'd1,
+  parameter bit          IRQ_EDGE_TRIG = 1'b0,
+  parameter bit          IRQ_ACT_HIGH  = 1'b0
+) (
+  input logic clk_i,  // Clock
+  input logic rst_ni  // Asynchronous reset active low
 );
+  typedef logic [32'd32-1:0]   addr_t;
 
-  // APB Readout and Control Interface
-  logic        pclk_i;
-  logic        preset_ni;
-  logic [31:0] paddr_i;
-  logic  [2:0] pprot_i;
-  logic        psel_i;
-  logic        penable_i;
-  logic        pwrite_i;
-  logic [31:0] pwdata_i;
-  logic  [3:0] pstrb_i;
-  logic        pready_o;
-  logic [31:0] prdata_o;
-  logic        pslverr_o;
+  AXI_LITE #(
+    .AXI_ADDR_WIDTH (32'd32),
+    .AXI_DATA_WIDTH (32'd32)
+  ) slv [1:0] ();
 
-  // Monitored AXI Interfaces
-  logic  [N_MON-1:0] clk_axi_i;
-  logic  [N_MON-1:0] rst_axi_ni;
-  id_t   [N_MON-1:0] ar_id_i;
-  len_t  [N_MON-1:0] ar_len_i;
-  size_t [N_MON-1:0] ar_size_i;
-  logic  [N_MON-1:0] ar_lock_i;
-  logic  [N_MON-1:0] ar_valid_i;
-  logic  [N_MON-1:0] ar_ready_i;
-  id_t   [N_MON-1:0] aw_id_i;
-  len_t  [N_MON-1:0] aw_len_i;
-  size_t [N_MON-1:0] aw_size_i;
-  logic  [N_MON-1:0] aw_lock_i;
-  atop_t [N_MON-1:0] aw_atop_i;
-  logic  [N_MON-1:0] aw_valid_i;
-  logic  [N_MON-1:0] aw_ready_i;
-  id_t   [N_MON-1:0] r_id_i;
-  logic  [N_MON-1:0] r_last_i;
-  logic  [N_MON-1:0] r_valid_i;
-  logic  [N_MON-1:0] r_ready_i;
-  logic  [N_MON-1:0] w_last_i;
-  logic  [N_MON-1:0] w_valid_i;
-  logic  [N_MON-1:0] w_ready_i;
-  id_t   [N_MON-1:0] b_id_i;
-  resp_t [N_MON-1:0] b_resp_i;
-  logic  [N_MON-1:0] b_valid_i;
-  logic  [N_MON-1:0] b_ready_i;
+  logic        test;
+  logic  [1:0] irq;
+  addr_t [1:0] base_addr;
 
-  axi_perf_mon #(
-    .N_MON          (N_MON),
-    .IW             (IW),
-    .CAP_HS         (CAP_HS),
-    .CAP_FL_TXN     (CAP_FL_TXN),
-    .CAP_FL_DAT     (CAP_FL_DAT),
-    .CAP_TX_DAT     (CAP_TX_DAT),
-    .CAP_STALL      (CAP_STALL),
-    .CAP_RT         (CAP_RT),
-    .CAP_EXCL       (CAP_EXCL),
-    .CAP_ATOP       (CAP_ATOP),
-    .CW_CLK         (CW_CLK),
-    .CW_HS_CMD      (CW_HS_CMD),
-    .CW_HS_DAT      (CW_HS_DAT),
-    .CW_FL_TXN_ACC  (CW_FL_TXN_ACC),
-    .CW_FL_TXN_MAX  (CW_FL_TXN_MAX),
-    .CW_FL_DAT_ACC  (CW_FL_DAT_ACC),
-    .CW_FL_DAT_MAX  (CW_FL_DAT_MAX),
-    .CW_TX_DAT      (CW_TX_DAT),
-    .CW_STALL_CMD   (CW_STALL_CMD),
-    .CW_STALL_DAT   (CW_STALL_DAT),
-    .CW_STALL_MAX   (CW_STALL_MAX),
-    .CW_RT_ACC      (CW_RT_ACC),
-    .CW_RT_MAX      (CW_RT_MAX),
-    .CW_EXCL        (CW_EXCL),
-    .CW_ATOP        (CW_ATOP)
-  ) dut (
-    .pclk_i,
-    .preset_ni,
-    .paddr_i,
-    .pprot_i,
-    .psel_i,
-    .penable_i,
-    .pwrite_i,
-    .pwdata_i,
-    .pstrb_i,
-    .pready_o,
-    .prdata_o,
-    .pslverr_o,
-    .clk_axi_i,
-    .rst_axi_ni,
-    .ar_id_i,
-    .ar_len_i,
-    .ar_size_i,
-    .ar_lock_i,
-    .ar_valid_i,
-    .ar_ready_i,
-    .aw_id_i,
-    .aw_len_i,
-    .aw_size_i,
-    .aw_lock_i,
-    .aw_atop_i,
-    .aw_valid_i,
-    .aw_ready_i,
-    .r_id_i,
-    .r_last_i,
-    .r_valid_i,
-    .r_ready_i,
-    .w_last_i,
-    .w_valid_i,
-    .w_ready_i,
-    .b_id_i,
-    .b_resp_i,
-    .b_valid_i,
-    .b_ready_i
+  axi_lite_mailbox_intf #(
+    .MAILBOX_DEPTH  ( MAILBOX_DEPTH  ),
+    .IRQ_EDGE_TRIG  ( IRQ_EDGE_TRIG  ),
+    .IRQ_ACT_HIGH   ( IRQ_ACT_HIGH   ),
+    .AXI_ADDR_WIDTH ( 32'd32         ),
+    .AXI_DATA_WIDTH ( 32'd32         )
+  ) i_axi_lite_mailbox (
+    .clk_i       ( clk_i     ), // Clock
+    .rst_ni      ( rst_ni    ), // Asynchronous reset active low
+    .test_i      ( test      ), // Testmode enable
+    // slave ports [1:0]
+    .slv         ( slv       ),
+    .irq_o       ( irq       ), // interrupt output for each port
+    .base_addr_i ( base_addr )  // base address for each port
   );
-
 endmodule

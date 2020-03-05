@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Include all the SDK's submodules in the package.
   - Match memory sizes and addresses of cluster components with the hardware.
 - `axi_dwc`: Fix incorrect handling of bursts in upsizer.
+- `atop_filter`: Ensure the W beat is sent even if the AW is not yet accepted.
 
 
 ## 2020-02-28

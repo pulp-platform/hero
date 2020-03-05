@@ -22,7 +22,6 @@ sources:
   - src/axi_pkg.sv
   # Level 1
   - src/axi_intf.sv
-  - src/axi_perf_mon.sv
   # Level 2
   - src/axi_atop_filter.sv
   - src/axi_burst_splitter.sv
@@ -32,22 +31,21 @@ sources:
   - src/axi_demux.sv
   - src/axi_dw_downsizer.sv
   - src/axi_dw_upsizer.sv
-  - src/axi_id_remap.sv
   - src/axi_id_prepend.sv
   - src/axi_join.sv
   - src/axi_lite_demux.sv
   - src/axi_lite_join.sv
+  - src/axi_lite_mailbox.sv
   - src/axi_lite_mux.sv
   - src/axi_lite_to_apb.sv
   - src/axi_lite_to_axi.sv
   - src/axi_modify_address.sv
   - src/axi_mux.sv
-  - src/axi_read_burst_buffer.sv
-  - src/axi_to_axi_lite.sv
   # Level 3
-  - src/axi_dw_converter.sv
   - src/axi_err_slv.sv
+  - src/axi_dw_converter.sv
   - src/axi_multicut.sv
+  - src/axi_to_axi_lite.sv
   # Level 4
   - src/axi_lite_xbar.sv
   - src/axi_xbar.sv
@@ -69,8 +67,8 @@ sources:
       - test/tb_axi_dw_upsizer.sv
       - test/tb_axi_lite_to_apb.sv
       - test/tb_axi_lite_to_axi.sv
+      - test/tb_axi_lite_mailbox.sv
       - test/tb_axi_lite_xbar.sv
-        #- test/tb_axi_perf_mon.sv
       - test/tb_axi_to_axi_lite.sv
       - test/tb_axi_xbar_pkg.sv
       - test/tb_axi_xbar.sv

@@ -8,16 +8,45 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 
 ### Added
-- `axi_dw_converter`: A data width converter between AXI interfaces of any data width.
-- `axi_dw_downsizer`: A data width converter between a narrow AXI master and a wider AXI slave.
-- `axi_dw_upsizer`: A data width converter between a wide AXI master and a narrower AXI slave.
 
 ### Changed
 
-- `axi_decerr_slv` can now generate either `SLVERR` or `DECERR` error responses, via the Resp
-parameter. It has been renamed accordingly, to `axi_err_slv`.
+### Fixed
+- `axi_top_filter`: The master interface of this module in one case depended on `aw_ready` before
+  applying `w_valid`, which is a violation of the AXI specification that can lead to deadlocks.
+  This issue has been fixed by removing that dependency.
+
+
+## 0.15.0 - 2020-02-28
+
+### Added
+- `axi_burst_splitter`: Split AXI4 bursts to single-beat transactions.
+- `axi_dw_converter`: A data width converter between AXI interfaces of any data width.
+- `axi_dw_downsizer`: A data width converter between a wide AXI slave and a narrower AXI master.
+- `axi_dw_upsizer`: A data width converter between a narrow AXI slave and a wider AXI master.
+
+### Changed
+- `axi_lite_to_apb`: The `psel` field of the `apb_req_t` struct is now a single bit.  That is, every
+  APB slave has its own request struct.  Accordingly, `apb_req_o` is now an array with `NoApbSlaves`
+  entries.
+- `axi_decerr_slv` has been replaced by a more generic `axi_err_slv`, which takes the kind of error
+  as parameter.  This `axi_err_slv` no longer has a `FallThrough` parameter; instead, a response
+  (i.e., B or R beat) now always comes one cycle after the AW or AR beat (as required by the AXI
+  Spec) but the slave can accept a W beat in the same cycle as the corresponding AW beat.
+  Additionally, `axi_err_slv` got a parameter `ATOPs` that defines if it supports atomic operations.
+- `axi_to_axi_lite`: Rework module to structs and add burst support.
 
 ### Fixed
+- `axi_demux`: The `case` statement controlling the counters had not been specified `unique` even
+  though it qualified for it.  This has been fixed.
+- `axi_lite_mux_intf`: Fix signal names in internal assignments, names of parameters of
+  `axi_lite_mux` instance, and typos in assertion messages.
+
+
+## 0.14.0 - 2020-02-24
+
+### Added
+- Add `axi_lite_mailbox`: AXI4-Lite mailbox.
 
 
 ## 0.13.0 - 2020-02-18
