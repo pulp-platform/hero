@@ -20,7 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Include all the SDK's submodules in the package.
   - Match memory sizes and addresses of cluster components with the hardware.
 - `axi_dwc`: Fix incorrect handling of bursts in upsizer.
-- `atop_filter`: Ensure the W beat is sent even if the AW is not yet accepted.
+- `axi_top_filter`:
+  - The master interface of this module in one case depended on `aw_ready` before applying
+    `w_valid`, which is a violation of the AXI specification that can lead to deadlocks.  This issue
+    has been fixed by removing that dependency.
+  - The slave interface of this module could illegally change the value of B and R beats between
+    valid and handshake.  This has been fixed.
 
 
 ## 2020-02-28

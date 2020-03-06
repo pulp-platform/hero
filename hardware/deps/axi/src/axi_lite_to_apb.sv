@@ -358,7 +358,7 @@ module axi_lite_to_apb_intf #(
   // APB Slave Address Map
   input  rule_t [NoRules-1:0]     addr_map_i
 );
-  localparam int unsigned SelBinWidth = NoApbSlaves > 1 ? $clog2(NoApbSlaves) : 1;
+  localparam int unsigned SelIdxWidth = NoApbSlaves > 1 ? $clog2(NoApbSlaves) : 1;
 
   typedef struct packed {
     addr_t          paddr;   // same as AXI4-Lite
@@ -388,7 +388,7 @@ module axi_lite_to_apb_intf #(
   axi_resp_t                    axi_resp;
   apb_req_t   [NoApbSlaves-1:0] apb_req;
   apb_resp_t  [NoApbSlaves-1:0] apb_resp;
-  logic       [SelBinWidth-1:0] apb_sel;
+  logic       [SelIdxWidth-1:0] apb_sel;
 
   `AXI_LITE_ASSIGN_TO_REQ    ( axi_req,  slv       )
   `AXI_LITE_ASSIGN_FROM_RESP ( slv,       axi_resp )
