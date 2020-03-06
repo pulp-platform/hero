@@ -88,6 +88,9 @@ build_test_archive:
     - make virtual-platform
     - ./pulp/virtual-platform/run_vp.sh hello
     - ./pulp/virtual-platform/run_vp.sh tests-pulp
+  artifacts:
+    paths:
+    - hero_huawei.tar.gz
 
 build_test_pulp-runtime:
   stage: build_test_rest
@@ -123,7 +126,7 @@ build_test_sdk:
   script:
     ### Setup toolchain in `build_toolchain`
     ### build accelerator sdk
-    - make sdk-pulp
+    - ./pulp/setup-sdk.sh hero-huawei
     ### Configure for SDK
     - source env/esim.sh
     ### Test both simulators

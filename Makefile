@@ -13,7 +13,7 @@ tc-pulp:
 .PHONY: sdk-pulp
 
 sdk-pulp:
-	$(ROOT)/pulp/setup-sdk.sh hero-huawei
+	$(ROOT)/pulp/setup-sdk.sh --no-checkout hero-huawei
 
 # Bender
 .PHONY: bender
