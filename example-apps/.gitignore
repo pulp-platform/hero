@@ -14,5 +14,6 @@ testsuite
 *.i
 *.bc
 *.slm
+*.debugInfo
 .deps/
 libgomp.spec

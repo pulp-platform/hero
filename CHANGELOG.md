@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add Virtual Platform for PULP at `pulp/virtual-platform`.
 
 ### Changed
+- `example-apps`: Remove the heterogeneous OpenMP functions not supported by GCC from the `helloworld` app.
 
 ### Fixed
 - `setup.sh`: Build PULP SDK in setup script.
