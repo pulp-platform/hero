@@ -20,7 +20,7 @@ More details can be found [here](PREREQUISITES.md).
 ### Setup
 
 The toolchain is installed to the directory given by your `HERO_INSTALL` environment variable. Please set it to your preferred installation location before continuing with the next step
-```
+``` bash
 export HERO_INSTALL=<your_path>
 ```
 We recommend you create an `install` subdirectory in this repository and set `HERO_INSTALL` to that.
@@ -35,20 +35,30 @@ Compilation always requires a proper environment. When compiling with the minima
 
 ### Applications
 
-Run `make` in an application directory, e.g., in `example-apps/hello`.
+The `example-apps` folder contains different example applications, which are supposed to be used with different environments.
+
+- **Minimal runtime (`source env/ehuawei-minimal-runtime.sh`):**
+  + hello
+  + mchan_tests
+  + parMatrixMul
+- **Pulp SDK (`source env/esim.sh`):**
+  + helloworld
+  + tests-pulp
+
+Run `make` in an application directory to build it, e.g., in `example-apps/hello`.
 
 ## RTL Simulation
 
 ### QuestaSim
 
 An environment is provided to simulate the PULP accelerator in RTL. If QuestaSim is installed, the simulation infrastructure can be initialized as follows:
-```
+``` bash
 cd hardware/vsim
 ./compile.sh
 ```
 
 Then, generate SLM files to initialize memory with
-```
+``` bash
 ../test/gen_slm_files.sh <app_name>
 ```
 where `<app_name>` is the path to the directory from the `example-apps` directory (for example `hello`).
@@ -61,19 +71,19 @@ Finally, start the simulation with
 ### VCS
 
 The repository also includes VCS scripts for simulation. However, the VCS scripts are not as mature as the QuestaSim scripts:
-```
+``` bash
 cd hardware/vcs
 ./compile.sh
 ```
 
 Then, generate SLM files to initialize memory with
-```
+``` bash
 ../test/gen_slm_files.sh <app_name>
 ```
 where `<app_name>` is the path to the directory from the `example-apps` directory (for example `hello`).
 
 Finally, start the simulation with
-```
+``` bash
 ./start_sim.sh
 ```
 
