@@ -52,6 +52,7 @@ git config --local user.name 'Packager'
 git config --local user.email 'packager@localhost'
 git add -A
 git commit -m 'initial commit'
+../setup-sdk.sh --no-build
 
 # PULP software: Copy libhero-target
 cd "$SRC"
