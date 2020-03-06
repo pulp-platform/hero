@@ -1,0 +1,39 @@
+This repo was flattened from the following commit:
+[submodule "pulp/virtual-platform"]
+	path = pulp/virtual-platform
+	url = https://github.com/pulp-platform/pulp-builder
+	commit = 2f295dab45677feb0b4bebe2533e72555f696c57
+
+Submodules:
+[submodule "pulp-debug-bridge"]
+	path = pulp-debug-bridge
+	url = https://github.com/pulp-platform/pulp-debug-bridge.git
+	commit = fca88a482b54f1e668ab1219383dc8f0655b6c01
+[submodule "pulp-configs"]
+	path = pulp-configs
+	url = https://github.com/pulp-platform/pulp-configs.git
+	commit = 0b3078b483a37b226f9f79612934838d454acb16
+[submodule "json-tools"]
+	path = json-tools
+	url = https://github.com/pulp-platform/json-tools.git
+	commit = d458a8734912f4aa497320d589fd00be6c2f2437
+[submodule "gvsoc"]
+	path = gvsoc
+	url = https://github.com/pulp-platform/gvsoc.git
+	commit = d780fddd150561b6a16a8fc1d43737d27e01aab9
+[submodule "dpi-models"]
+	path = dpi-models
+	url = https://github.com/pulp-platform/dpi-models.git
+	commit = 3e30e2f246adbd29624e664d43d9125625ff3c78
+[submodule "archi"]
+	path = archi
+	url = https://github.com/pulp-platform/archi.git
+	commit = 73ce1093a65f300750b17f8aec6cce52a7fdc24e
+[submodule "runner"]
+	path = runner
+	url = https://github.com/pulp-platform/runner.git
+	commit = 5d5303c3a6cc90d814b7da55ce682f20b9773e76
+[submodule "pulp-sdk-doc"]
+	path = doc
+	url = https://github.com/pulp-platform/pulp-sdk-doc.git
+	commit = 3b0e6a752fd1b5b5bcc44e27e92eb6c95764fcc6

@@ -25,3 +25,9 @@ bender:
 	ln -sf "$(shell realpath --relative-to="$(HERO_INSTALL)/bin/" "$(ROOT)/hardware/bender")" "$(HERO_INSTALL)/bin/"
 	chmod -R u-w "$(HERO_INSTALL)/bin"
 
+# Virtual Platform
+.PHONY: virtual-platform
+
+virtual-platform:
+	cd "$(ROOT)/pulp/virtual-platform" && \
+	./scripts/build-gvsoc

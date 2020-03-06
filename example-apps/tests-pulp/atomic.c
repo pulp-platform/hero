@@ -140,7 +140,7 @@ static unsigned check_min(const int32_t* const res, size_t N)
   unsigned n_errors = 0;
   for (unsigned i = 0; i < N; ++i) {
     n_errors += condition_or_printf(res[i] <= min_max_threshold,
-        "Atomic MAX must only produce values <= %d", min_max_threshold);
+        "Atomic MIN must only produce values <= %d", min_max_threshold);
   }
   return n_errors;
 }

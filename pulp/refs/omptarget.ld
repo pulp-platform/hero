@@ -49,7 +49,7 @@ __pulp_l2_end         = __pulp_l2_base + LENGTH(L2);
 __pulp_cluster_size = 0x00400000;
 
 /*
- * This linker script try to put FC data in L2 private bank0 and FC code 
+ * This linker script try to put FC data in L2 private bank0 and FC code
  * in L2 private bank1 to avoid contention between FC code and data
  * as FC has no instruction cache and is so often accessing L2 to
  * get instructions. Everything can be shifted in case one bank is full.
@@ -161,7 +161,10 @@ SECTIONS
     *(.data_tiny_l1.*)
     *(.data_alias_l1)
     *(.data_alias_l1.*)
-  } > L1_aliased
+  } > L1_aliased AT> L1
+  /* The tiny data's virtual memory address is L1_aliased, but the logical memory address is on L1.
+   * The LMA is specified (with `AT> L1`) to ensure the data is written to the TCDM memory when
+   * loading the binary */
 
   .l1cluster_g (ORIGIN(L1) + SIZEOF(.data_tiny_l1)): {
     . = ALIGN(4);

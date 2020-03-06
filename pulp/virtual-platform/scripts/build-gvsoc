@@ -1,0 +1,32 @@
+#!/bin/bash -ex
+ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+
+source "$ROOT/../configs/pulp.sh"
+source "$ROOT/../setup.sh"
+
+install_dir=$PWD/install
+doc_install_dir=$PWD/install/doc
+ws_install_dir=$PWD/install/ws
+build_dir=$PWD/build
+
+export PATH=$ws_install_dir/bin:$PATH
+export PYTHONPATH=$ws_install_dir/python:$PYTHONPATH
+export PULP_CONFIGS_PATH=$ws_install_dir/configs
+
+#git submodule update --init json-tools pulp-configs archi pulp-debug-bridge dpi-models gvsoc runner doc
+
+make -C json-tools all install BUILD_DIR=$build_dir/json-tools INSTALL_DIR=$ws_install_dir
+
+make -C pulp-configs all_scons BUILD_DIR=$build_dir/pulp-configs INSTALL_DIR=$ws_install_dir TARGET_INSTALL_DIR=$install_dir
+
+make -C archi build BUILD_DIR=$build_dir/archi INSTALL_DIR=$ws_install_dir TARGET_INSTALL_DIR=$install_dir
+
+make -C pulp-debug-bridge all BUILD_DIR=$build_dir/pulp-debug-bridge INSTALL_DIR=$ws_install_dir TARGET_INSTALL_DIR=$install_dir
+
+make -C dpi-models build install BUILD_DIR=$build_dir/archi INSTALL_DIR=$ws_install_dir TARGET_INSTALL_DIR=$install_dir
+
+make -C gvsoc build BUILD_DIR=$build_dir/gvsoc INSTALL_DIR=$ws_install_dir TARGET_INSTALL_DIR=$install_dir
+
+make -C runner sdk.build BUILD_DIR=$build_dir/gvsoc INSTALL_DIR=$ws_install_dir TARGET_INSTALL_DIR=$install_dir
+
+make -C doc vp BUILD_DIR=$build_dir/doc DOC_INSTALL_DIR=$doc_install_dir

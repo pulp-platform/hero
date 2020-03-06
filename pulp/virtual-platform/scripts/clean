@@ -1,0 +1,19 @@
+#!/bin/bash -ex
+
+install_dir=$TARGET_INSTALL_DIR
+ws_install_dir=$INSTALL_DIR
+build_dir=$BUILD_DIR
+
+if [ -z "$install_dir" ]; then
+  install_dir=$PWD/install
+fi
+
+if [ -z "$ws_install_dir" ]; then
+  ws_install_dir=$PWD/install/ws
+fi
+
+if [ -z "$build_dir" ]; then
+  build_dir=$PWD/build
+fi
+
+rm -rf $install_dir $ws_install_dir $build_dir
