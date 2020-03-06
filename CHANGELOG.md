@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- `setup.sh`: Build PULP SDK in setup script.
 
 
 ## 2020-02-28
