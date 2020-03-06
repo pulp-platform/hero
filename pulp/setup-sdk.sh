@@ -32,6 +32,7 @@ plpbuild --g runtime checkout --stdout
 set +e
 plpbuild --m pulp-rt build --stdout
 echo 'NOTE: The failure of building `pulp-rt` at this point is known and can be tolerated.'
+set -e
 
 # Now that the `pulp-rt` headers are installed, we can go ahead and install `archi-host` followed by
 # a re-installation of the entire SDK.  At some point, this will fail because two of the runtime
