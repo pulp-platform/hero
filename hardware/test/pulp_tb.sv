@@ -30,6 +30,8 @@ module pulp_tb #(
 
   localparam int unsigned AXI_IW = pulp_pkg::axi_iw_sb_oup(N_CLUSTERS);
   localparam int unsigned AXI_SW = AXI_DW/8;  // width of strobe
+  localparam int unsigned NB_SLV = 1;
+  localparam int unsigned NB_MST = 1;
   typedef pulp_pkg::addr_t      axi_addr_t;
   typedef logic [AXI_DW-1:0]    axi_data_t;
   typedef logic [AXI_IW-1:0]    axi_id_t;
@@ -114,28 +116,22 @@ module pulp_tb #(
     .AXI_DATA_WIDTH (AXI_DW),
     .AXI_ID_WIDTH   (AXI_IW),
     .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
-  ) from_pulp[0:0] ();
+  ) from_pulp[NB_MST-1:0] ();
   AXI_BUS #(
     .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
     .AXI_ID_WIDTH   (AXI_IW+1),
     .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
-  ) from_xbar[1:0] ();
-  AXI_BUS #(
-    .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
-    .AXI_DATA_WIDTH (64),
-    .AXI_ID_WIDTH   (AXI_IW+1),
-    .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
-  ) to_periphs ();
+  ) from_xbar[NB_SLV-1:0] ();
   `AXI_ASSIGN_FROM_REQ(from_pulp[0], from_pulp_req);
   `AXI_ASSIGN_TO_RESP (from_pulp_resp, from_pulp[0]);
 
   localparam int unsigned N_RULES = 1;
   axi_pkg::xbar_rule_32_t [N_RULES-1:0] addr_map;
   assign addr_map[0] = '{
-    idx:        1,
-    start_addr: 32'h1a10_0000,
-    end_addr:   32'h1a11_0000
+    idx:        0,
+    start_addr: 32'h0000_0000,
+    end_addr:   32'hFFFF_FFFF
   };
   `ifndef VERILATOR
     initial begin
@@ -146,8 +142,8 @@ module pulp_tb #(
   localparam int unsigned MAX_TXNS_PER_CLUSTER =  pulp_cluster_cfg_pkg::N_CORES +
                                                   pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS;
   localparam axi_pkg::xbar_cfg_t xbar_cfg = '{
-    NoSlvPorts:         1,
-    NoMstPorts:         2,
+    NoSlvPorts:         NB_MST,
+    NoMstPorts:         NB_SLV,
     MaxMstTrans:        MAX_TXNS_PER_CLUSTER,
     MaxSlvTrans:        N_CLUSTERS * MAX_TXNS_PER_CLUSTER,
     FallThrough:        1'b0,
