@@ -27,6 +27,7 @@ fi
 echo "Run $binary"
 
 # Source the virtual platform's environment
+source "$ROOT/configs/pulp.sh"
 source "$ROOT/setup.sh"
 
 # Custom configurations

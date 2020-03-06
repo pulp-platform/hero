@@ -29,4 +29,5 @@ bender:
 .PHONY: virtual-platform
 
 virtual-platform:
-	"$(ROOT)/pulp/virtual-platform/scripts/update-gvsoc.sh"
+	cd "$(ROOT)/pulp/virtual-platform" && \
+	./scripts/build-gvsoc

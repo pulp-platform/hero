@@ -1,4 +1,8 @@
 #!/bin/bash -ex
+ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+
+source "$ROOT/../configs/pulp.sh"
+source "$ROOT/../setup.sh"
 
 install_dir=$PWD/install
 doc_install_dir=$PWD/install/doc

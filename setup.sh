@@ -11,6 +11,7 @@ fi
 SCRIPT_SYMLINKS=1
 SDK_PULP=1
 TC_PULP=1
+BUILD_VP=1
 while (( "$#" )); do
   case "$1" in
     --no-tc-pulp)
@@ -25,6 +26,10 @@ while (( "$#" )); do
       SDK_PULP=0
       shift 1
       ;;
+    --no-vp)
+      BUILD_VP=0
+      shift 1
+      ;;
     *)
       echo "Error: Unsupported argument '$1'" >&2
       exit 1
@@ -32,6 +37,7 @@ while (( "$#" )); do
   esac
 done
 
+# Build toolchain
 if [ $TC_PULP = 1 ]; then
   make -C "$ROOT" tc-pulp
 fi
@@ -47,4 +53,9 @@ fi
 # Build PULP SDK.
 if [ $SDK_PULP = 1 ]; then
   make -C "$ROOT" sdk-pulp
+fi
+
+# Build virtual platform
+if [ $BUILD_VP = 1 ]; then
+  make -C "$ROOT" virtual-platform
 fi
