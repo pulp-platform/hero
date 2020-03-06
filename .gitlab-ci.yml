@@ -123,7 +123,7 @@ build_test_sdk:
   script:
     ### Setup toolchain in `build_toolchain`
     ### build accelerator sdk
-    - make sdk-pulp
+    - ./pulp/setup-sdk.sh hero-huawei
     ### Configure for SDK
     - source env/esim.sh
     ### Test both simulators
