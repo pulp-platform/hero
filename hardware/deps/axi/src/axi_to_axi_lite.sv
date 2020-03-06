@@ -9,27 +9,27 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 //
-// File:   axi_to_axi_lite.sv
-// Author: Wolfgang Roenninger <wroennin@student.ethz.ch>
-// Date:   05.01.2020
+// Authors: Fabian Schuiki      <fschuiki@iis.ee.ethz.ch>
+//          Andreas Kurth       <akurth@iis.ee.ethz.ch>
+//          Wolfgang Roenninger <wroennin@iis.ee.ethz.ch>
 //
 // Description: An AXI4+ATOP to AXI4-Lite adapter with atomic transaction and burst support.
 
 module axi_to_axi_lite #(
-  parameter int unsigned AxiIdWidth      = 32'd0,
   parameter int unsigned AxiAddrWidth    = 32'd0,
   parameter int unsigned AxiDataWidth    = 32'd0,
+  parameter int unsigned AxiIdWidth      = 32'd0,
   parameter int unsigned AxiUserWidth    = 32'd0,
   parameter int unsigned AxiMaxWriteTxns = 32'd0,
   parameter int unsigned AxiMaxReadTxns  = 32'd0,
   parameter bit          FallThrough     = 1'b1,  // FIFOs in Fall through mode in ID reflect
-  parameter type full_req_t  = logic,
-  parameter type full_resp_t = logic,
-  parameter type lite_req_t  = logic,
-  parameter type lite_resp_t = logic
+  parameter type         full_req_t      = logic,
+  parameter type         full_resp_t     = logic,
+  parameter type         lite_req_t      = logic,
+  parameter type         lite_resp_t     = logic
 ) (
-	input  logic       clk_i,    // Clock
-	input  logic       rst_ni,   // Asynchronous reset active low
+  input  logic       clk_i,    // Clock
+  input  logic       rst_ni,   // Asynchronous reset active low
   input  logic       test_i,   // Testmode enable
   // slave port full AXI4+ATOP
   input  full_req_t  slv_req_i,
@@ -95,6 +95,17 @@ module axi_to_axi_lite #(
     .mst_req_o  ( mst_req_o     ),
     .mst_resp_i ( mst_resp_i    )
   );
+
+  // Assertions, check params
+  // pragma translate_off
+  `ifndef VERILATOR
+  initial begin
+    assume (AxiIdWidth   > 0) else $fatal(1, "AXI ID width has to be > 0");
+    assume (AxiAddrWidth > 0) else $fatal(1, "AXI address width has to be > 0");
+    assume (AxiDataWidth > 0) else $fatal(1, "AXI data width has to be > 0");
+  end
+  `endif
+  // pragma translate_on
 endmodule
 
 // Description: This module does the translation of the full AXI4+ATOP to AXI4-Lite signals.
@@ -215,20 +226,18 @@ module axi_to_axi_lite_id_reflect #(
   // Assertions
   // pragma translate_off
   `ifndef VERILATOR
-  `ifndef SYNTHESIS
   aw_atop: assume property( @(posedge clk_i) disable iff (~rst_ni)
                         slv_req_i.aw_valid |-> (slv_req_i.aw.atop == '0)) else
-    $fatal(1, $sformatf("Module does not support atomics. Value observed: %0b", slv_req_i.aw.atop));
+    $fatal(1, "Module does not support atomics. Value observed: %0b", slv_req_i.aw.atop);
   aw_axi_len: assume property( @(posedge clk_i) disable iff (~rst_ni)
                         slv_req_i.aw_valid |-> (slv_req_i.aw.len == '0)) else
-    $fatal(1, $sformatf("AW request length has to be zero. Value observed: %0b", slv_req_i.aw.len));
+    $fatal(1, "AW request length has to be zero. Value observed: %0b", slv_req_i.aw.len);
   w_axi_last: assume property( @(posedge clk_i) disable iff (~rst_ni)
                         slv_req_i.w_valid |-> (slv_req_i.w.last == 1'b1)) else
-    $fatal(1, $sformatf("W last signal has to be one. Value observed: %0b", slv_req_i.w.last));
+    $fatal(1, "W last signal has to be one. Value observed: %0b", slv_req_i.w.last);
   ar_axi_len: assume property( @(posedge clk_i) disable iff (~rst_ni)
                         slv_req_i.ar_valid |-> (slv_req_i.ar.len == '0)) else
-    $fatal(1, $sformatf("AR request length has to be zero. Value observed: %0b", slv_req_i.ar.len));
-  `endif
+    $fatal(1, "AR request length has to be zero. Value observed: %0b", slv_req_i.ar.len);
   `endif
   // pragma translate_on
 endmodule
@@ -238,15 +247,15 @@ endmodule
 `include "axi/typedef.svh"
 module axi_to_axi_lite_intf #(
   /// AXI bus parameters
-  parameter int unsigned AxiIdWidth      = 32'd0,
-  parameter int unsigned AxiAddrWidth    = 32'd0,
-  parameter int unsigned AxiDataWidth    = 32'd0,
-  parameter int unsigned AxiUserWidth    = 32'd0,
+  parameter int unsigned AXI_ADDR_WIDTH     = 32'd0,
+  parameter int unsigned AXI_DATA_WIDTH     = 32'd0,
+  parameter int unsigned AXI_ID_WIDTH       = 32'd0,
+  parameter int unsigned AXI_USER_WIDTH     = 32'd0,
   /// Maximum number of outstanding writes.
-  parameter int unsigned AxiMaxWriteTxns = 32'd1,
+  parameter int unsigned AXI_MAX_WRITE_TXNS = 32'd1,
   /// Maximum number of outstanding reads.
-  parameter int unsigned AxiMaxReadTxns  = 32'd1,
-  parameter bit          FallThrough     = 1'b1
+  parameter int unsigned AXI_MAX_READ_TXNS  = 32'd1,
+  parameter bit          FALL_THROUGH       = 1'b1
 ) (
   input logic     clk_i,
   input logic     rst_ni,
@@ -254,11 +263,11 @@ module axi_to_axi_lite_intf #(
   AXI_BUS.Slave   slv,
   AXI_LITE.Master mst
 );
-  typedef logic [AxiIdWidth-1:0]       id_t;
-  typedef logic [AxiAddrWidth-1:0]   addr_t;
-  typedef logic [AxiDataWidth-1:0]   data_t;
-  typedef logic [AxiDataWidth/8-1:0] strb_t;
-  typedef logic [AxiUserWidth-1:0]   user_t;
+  typedef logic [AXI_ADDR_WIDTH-1:0]   addr_t;
+  typedef logic [AXI_DATA_WIDTH-1:0]   data_t;
+  typedef logic [AXI_ID_WIDTH-1:0]       id_t;
+  typedef logic [AXI_DATA_WIDTH/8-1:0] strb_t;
+  typedef logic [AXI_USER_WIDTH-1:0]   user_t;
   // full channels typedefs
   `AXI_TYPEDEF_AW_CHAN_T( full_aw_chan_t, addr_t, id_t,         user_t)
   `AXI_TYPEDEF_W_CHAN_T (  full_w_chan_t, data_t,       strb_t, user_t)
@@ -288,17 +297,17 @@ module axi_to_axi_lite_intf #(
   `AXI_LITE_ASSIGN_TO_RESP   ( lite_resp, mst       )
 
   axi_to_axi_lite #(
-    .AxiIdWidth      ( AxiIdWidth      ),
-    .AxiAddrWidth    ( AxiAddrWidth    ),
-    .AxiDataWidth    ( AxiDataWidth    ),
-    .AxiUserWidth    ( AxiUserWidth    ),
-    .AxiMaxWriteTxns ( AxiMaxWriteTxns ),
-    .AxiMaxReadTxns  ( AxiMaxReadTxns  ),
-    .FallThrough     ( FallThrough     ),  // FIFOs in Fall through mode in ID reflect
-    .full_req_t      ( full_req_t      ),
-    .full_resp_t     ( full_resp_t     ),
-    .lite_req_t      ( lite_req_t      ),
-    .lite_resp_t     ( lite_resp_t     )
+    .AxiAddrWidth    ( AXI_ADDR_WIDTH     ),
+    .AxiDataWidth    ( AXI_DATA_WIDTH     ),
+    .AxiIdWidth      ( AXI_ID_WIDTH       ),
+    .AxiUserWidth    ( AXI_USER_WIDTH     ),
+    .AxiMaxWriteTxns ( AXI_MAX_WRITE_TXNS ),
+    .AxiMaxReadTxns  ( AXI_MAX_READ_TXNS  ),
+    .FallThrough     ( FALL_THROUGH       ),  // FIFOs in Fall through mode in ID reflect
+    .full_req_t      ( full_req_t         ),
+    .full_resp_t     ( full_resp_t        ),
+    .lite_req_t      ( lite_req_t         ),
+    .lite_resp_t     ( lite_resp_t        )
   ) i_axi_to_axi_lite (
     .clk_i      ( clk_i      ),
     .rst_ni     ( rst_ni     ),
@@ -310,17 +319,4 @@ module axi_to_axi_lite_intf #(
     .mst_req_o  ( lite_req   ),
     .mst_resp_i ( lite_resp  )
   );
-  // Assertions, check params
-  // pragma translate_off
-  `ifndef VERILATOR
-  `ifndef SYNTHESIS
-  initial begin
-    assume (AxiIdWidth   > 0) else $fatal(1, "AxiIdWidth has to be > 0");
-    assume (AxiAddrWidth > 0) else $fatal(1, "AxiAddrWidth has to be > 0");
-    assume (AxiDataWidth > 0) else $fatal(1, "AxiDataWidth has to be > 0");
-    assume (AxiUserWidth > 0) else $fatal(1, "AxiUserWidth has to be > 0");
-  end
-  `endif
-  `endif
-  // pragma translate_on
 endmodule

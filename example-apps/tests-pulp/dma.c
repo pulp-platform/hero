@@ -23,15 +23,15 @@
 // Clang.
 #include <stdbool.h>
 #include <stdint.h>
-#define ARCHI_DEMUX_PERIPHERALS_ADDR  0x1B204000
-#define ARCHI_MCHAN_DEMUX_OFFSET         0x00400
+#define ARCHI_CLUSTER_PERIPHERALS_ADDR  0x10200000
+#define ARCHI_MCHAN_EXT_OFFSET          0x00001800
 #define DMA_READ(offset) \
-  *((volatile uint32_t*)(ARCHI_DEMUX_PERIPHERALS_ADDR + ARCHI_MCHAN_DEMUX_OFFSET + (offset)))
+  *((volatile uint32_t*)(ARCHI_CLUSTER_PERIPHERALS_ADDR + ARCHI_MCHAN_EXT_OFFSET + (offset)))
 #define DMA_WRITE(value, offset) \
-  *((volatile uint32_t*)(ARCHI_DEMUX_PERIPHERALS_ADDR + ARCHI_MCHAN_DEMUX_OFFSET + (offset))) = value
-#define PLP_DMA_SIZE_BIT        0
-#define PLP_DMA_TYPE_BIT       16
-#define PLP_DMA_INCR_BIT       17
+  *((volatile uint32_t*)(ARCHI_CLUSTER_PERIPHERALS_ADDR + ARCHI_MCHAN_EXT_OFFSET + (offset))) = value
+#define PLP_DMA_SIZE_BIT      00
+#define PLP_DMA_TYPE_BIT      17
+#define PLP_DMA_INCR_BIT      18
 #define PLP_DMA_QUEUE_OFFSET  0x0
 #define PLP_DMA_STATUS_OFFSET 0x4
 static uint32_t plp_dma_counter_alloc()
@@ -74,11 +74,18 @@ void rt_time_wait_cycles(const unsigned cycles)
 // Regression test for counter overflow in TCDM unit
 static bool regression_tcdm_counter_overflow()
 {
-  if ((uint32_t)0x1c02a7d4 >= (uint32_t)pulp_l2_end()) {
+  const uint32_t l2_addr = 0x1c02a7d4;
+  const uint32_t l1_addr = 0x100fbea0;
+  const uint32_t size    = 2144;
+  if (l2_addr + size >= (uint32_t)pulp_l2_end()) {
    printf("Warning: TCDM counter overflow regression skipped due to L2 size.\n");
    return false;
   }
-  const int dma = plp_dma_memcpy(0x1c02a7d4, 0x100fbea0, 2144, true);
+  if (l1_addr + size >= (uint32_t)pulp_l1_end()) {
+   printf("Warning: TCDM counter overflow regression skipped due to L1 size.\n");
+   return false;
+  }
+  const int dma = plp_dma_memcpy(l2_addr, l1_addr, size, true);
   const short unsigned timeout_delta = 256;
   unsigned counter = 256 * timeout_delta;
   bool timeout = false;

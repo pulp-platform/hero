@@ -23,15 +23,14 @@
 //   typedef struct packed {
 //     addr_t paddr;   // same as AXI4-Lite
 //     prot_t pprot;   // same as AXI4-Lite, specification is the same
-//     sel_t  psel;    // onehot, one psel line per connected APB4 slave
+//     logic  psel;    // each APB4 slave has its own single-bit psel
 //     logic  penable; // enable signal shows second APB4 cycle
 //     logic  pwrite;  // write enable
 //     data_t pwdata;  // write data, comes from W channel
 //     strb_t pstrb;   // write strb, comes from W channel
 //   } apb_req_t;
-// To connect one APB4 slave the corresponding `psel` signal only asserts, when the address
-// decoding matches. To connect to a single APB4 slave connect each of the `apb_req_o` signals,
-// however only the corresponding `psel` bit.
+// For every APB4 slave, the `psel` field is only asserted when the decoded address matches that
+// slave.  If `psel` is deasserted, the value of the other fields may be undefined.
 //
 // The type of the APB4 response is required to look like:
 //  typedef struct packed {
@@ -62,7 +61,7 @@ module axi_lite_to_apb #(
   input  axi_lite_req_t               axi_lite_req_i,
   output axi_lite_resp_t              axi_lite_resp_o,
   // APB master port
-  output apb_req_t                    apb_req_o,
+  output apb_req_t  [NoApbSlaves-1:0] apb_req_o,
   input  apb_resp_t [NoApbSlaves-1:0] apb_resp_i,
   // APB Slave Address Map
   input  rule_t     [NoRules-1:0]     addr_map_i
@@ -230,17 +229,9 @@ module axi_lite_to_apb #(
 
   always_comb begin
     // default assignments
-    apb_state_d  = apb_state_q;
-    apb_update  = 1'b0;
-    apb_req_o   = '{
-      paddr:   apb_req.addr,
-      pprot:   apb_req.prot,
-      psel:    '0,
-      penable: '0,
-      pwrite:  apb_req.write,
-      pwdata:  apb_req.data,
-      pstrb:   apb_req.strb
-    };
+    apb_state_d     = apb_state_q;
+    apb_update      = 1'b0;
+    apb_req_o       = '0;
     apb_req_ready   = 1'b0;
     // response defaults to the two response spill registers
     apb_wresp       = axi_pkg::RESP_SLVERR;
@@ -251,13 +242,22 @@ module axi_lite_to_apb #(
     unique case (apb_state_q)
       Setup: begin
         // `Idle` and `Setup` steps
-        // can check here for readyness, because the response goes into spill_registers
+        // can check here for readiness, because the response goes into spill_registers
         if (apb_req_valid && apb_wresp_ready && apb_rresp_ready) begin
           if (apb_dec_valid) begin
             // `Setup` step
-            apb_req_o.psel[apb_sel_idx] = 1'b1;
-            apb_state_d                 = Access;
-            apb_update                  = 1'b1;
+            // set the request output
+            apb_req_o[apb_sel_idx] = '{
+              paddr:   apb_req.addr,
+              pprot:   apb_req.prot,
+              psel:    1'b1,
+              penable: 1'b0,
+              pwrite:  apb_req.write,
+              pwdata:  apb_req.data,
+              pstrb:   apb_req.strb
+            };
+            apb_state_d = Access;
+            apb_update  = 1'b1;
           end else begin
             // decode error, generate error and do not generate APB request, pop it
             apb_req_ready = 1'b1;
@@ -273,8 +273,15 @@ module axi_lite_to_apb #(
       end
       Access: begin
         // `Access` step
-        apb_req_o.psel[apb_sel_idx] = 1'b1;
-        apb_req_o.penable           = 1'b1;
+        apb_req_o[apb_sel_idx] = '{
+          paddr:   apb_req.addr,
+          pprot:   apb_req.prot,
+          psel:    1'b1,
+          penable: 1'b1,
+          pwrite:  apb_req.write,
+          pwdata:  apb_req.data,
+          pstrb:   apb_req.strb
+        };
         if (apb_resp_i[apb_sel_idx].pready) begin
           // transfer, pop the request, genereate response and update state
           apb_req_ready = 1'b1;
@@ -293,7 +300,7 @@ module axi_lite_to_apb #(
           apb_update  = 1'b1;
         end
       end
-      default: apb_state_d = Setup;
+      default: /* do nothing */ ;
     endcase
   end
 
@@ -303,20 +310,17 @@ module axi_lite_to_apb #(
   // pragma translate_off
   `ifndef VERILATOR
   initial begin : check_params
-    addr_width:  assert ($bits(axi_lite_req_i.aw.addr ) == $bits(apb_req_o.paddr)) else
+    addr_width:  assert ($bits(axi_lite_req_i.aw.addr ) == $bits(apb_req_o[0].paddr)) else
       $fatal(1, $sformatf("AXI4-Lite and APB address width not equal"));
-    wdata_width: assert ($bits(axi_lite_req_i.w.data ) == $bits(apb_req_o.pwdata)) else
+    wdata_width: assert ($bits(axi_lite_req_i.w.data ) == $bits(apb_req_o[0].pwdata)) else
       $fatal(1, $sformatf("AXI4-Lite and APB write data width not equal"));
-    strb_width:  assert ($bits(axi_lite_req_i.w.strb ) == $bits(apb_req_o.pstrb)) else
+    strb_width:  assert ($bits(axi_lite_req_i.w.strb ) == $bits(apb_req_o[0].pstrb)) else
       $fatal(1, $sformatf("AXI4-Lite and APB address width not equal"));
     rdata_width: assert ($bits(axi_lite_resp_o.r.data ) == $bits(apb_resp_i[0].prdata)) else
       $fatal(1, $sformatf("AXI4-Lite and APB read data width not equal"));
-    sel_width:   assert ($bits(apb_req_o.psel) == NoApbSlaves) else
-      $fatal(1, $sformatf("APB psel signal does not match parameter NoApbSlaves"));
+    sel_width:   assert ($bits(apb_req_o[0].psel) == 32'd1) else
+      $fatal(1, $sformatf("APB psel signal has to have a width of 1'b1"));
   end
-
-  sel_onehot: assert property( @(posedge clk_i) disable iff (!rst_ni) $onehot0(apb_req_o.psel)) else
-      $fatal(1, "apb_req_o.psel is not onehot");
   `endif
   // pragma translate_on
 endmodule
@@ -354,14 +358,16 @@ module axi_lite_to_apb_intf #(
   // APB Slave Address Map
   input  rule_t [NoRules-1:0]     addr_map_i
 );
+  localparam int unsigned SelIdxWidth = NoApbSlaves > 1 ? $clog2(NoApbSlaves) : 1;
+
   typedef struct packed {
-     addr_t          paddr;   // same as AXI4-Lite
-     axi_pkg::prot_t pprot;   // same as AXI4-Lite, specification is the same
-     sel_t           psel;    // onehot, one psel line per connected APB4 slave
-     logic           penable; // enable signal shows second APB4 cycle
-     logic           pwrite;  // write enable
-     data_t          pwdata;  // write data, comes from W channel
-     strb_t          pstrb;   // write strb, comes from W channel
+    addr_t          paddr;   // same as AXI4-Lite
+    axi_pkg::prot_t pprot;   // same as AXI4-Lite, specification is the same
+    logic           psel;    // onehot, one psel line per connected APB4 slave
+    logic           penable; // enable signal shows second APB4 cycle
+    logic           pwrite;  // write enable
+    data_t          pwdata;  // write data, comes from W channel
+    strb_t          pstrb;   // write strb, comes from W channel
   } apb_req_t;
 
   typedef struct packed {
@@ -380,20 +386,28 @@ module axi_lite_to_apb_intf #(
 
   axi_req_t                     axi_req;
   axi_resp_t                    axi_resp;
-  apb_req_t                     apb_req;
+  apb_req_t   [NoApbSlaves-1:0] apb_req;
   apb_resp_t  [NoApbSlaves-1:0] apb_resp;
+  logic       [SelIdxWidth-1:0] apb_sel;
 
   `AXI_LITE_ASSIGN_TO_REQ    ( axi_req,  slv       )
   `AXI_LITE_ASSIGN_FROM_RESP ( slv,       axi_resp )
 
-  assign paddr_o   = apb_req.paddr;
-  assign pprot_o   = apb_req.pprot;
-  assign pselx_o   = apb_req.psel;
-  assign penable_o = apb_req.penable;
-  assign pwrite_o  = apb_req.pwrite;
-  assign pwdata_o  = apb_req.pwdata;
-  assign pstrb_o   = apb_req.pstrb;
+  onehot_to_bin #(
+    .ONEHOT_WIDTH ( NoApbSlaves )
+  ) i_onehot_to_bin (
+    .onehot ( pselx_o ),
+    .bin    ( apb_sel )
+  );
+
+  assign paddr_o   = apb_req[apb_sel].paddr;
+  assign pprot_o   = apb_req[apb_sel].pprot;
+  assign penable_o = apb_req[apb_sel].penable;
+  assign pwrite_o  = apb_req[apb_sel].pwrite;
+  assign pwdata_o  = apb_req[apb_sel].pwdata;
+  assign pstrb_o   = apb_req[apb_sel].pstrb;
   for (genvar i = 0; i < NoApbSlaves; i++) begin : gen_apb_resp_assign
+    assign pselx_o[i]          = apb_req[i].psel;
     assign apb_resp[i].pready  = pready_i[i];
     assign apb_resp[i].prdata  = prdata_i[i];
     assign apb_resp[i].pslverr = pslverr_i[i];

@@ -10,10 +10,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - `example-apps`: Remove the heterogeneous OpenMP functions not supported by GCC from the `helloworld` app.
+- Align memory sizes in `pulp/sdk` to 320KiB of L1 memory and 256KiB of L2 memory
+- `pulp/sdk`: Update DMA library version to `mchan_v7`.
+- `pulp_tb`: Remove unused ports on `axi_xbar`
 
 ### Fixed
 - `setup.sh`: Build PULP SDK in setup script.
-- `sdk`: Include all the SDK's submodules in the package.
+- `pulp/sdk`:
+  - Include all the SDK's submodules in the package.
+  - Match memory sizes and addresses of cluster components with the hardware.
+- `axi_dwc`: Fix incorrect handling of bursts in upsizer.
+- `axi_top_filter`:
+  - The master interface of this module in one case depended on `aw_ready` before applying
+    `w_valid`, which is a violation of the AXI specification that can lead to deadlocks.  This issue
+    has been fixed by removing that dependency.
+  - The slave interface of this module could illegally change the value of B and R beats between
+    valid and handshake.  This has been fixed.
 
 
 ## 2020-02-28
