@@ -11,10 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `example-apps`: Remove the heterogeneous OpenMP functions not supported by GCC from the `helloworld` app.
 - Align memory sizes in `pulp/sdk` to 320KiB of L1 memory and 256KiB of L2 memory
+- `pulp/sdk`: Update DMA library version to `mchan_v7`.
 
 ### Fixed
 - `setup.sh`: Build PULP SDK in setup script.
-- `sdk`: Include all the SDK's submodules in the package.
+- `pulp/sdk`:
+  - Include all the SDK's submodules in the package.
+  - Match memory sizes and addresses of cluster components with the hardware.
 
 
 ## 2020-02-28

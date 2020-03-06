@@ -103,7 +103,7 @@ hero_dma_memcpy_async(void *dst, void *src, int size)
     pulp_tryread((unsigned *)((ext_addr + size_tmp - 1) & 0xFFFFFFFC));
 
     // just wait for the last one...
-    dma = (hero_dma_job_t)plp_dma_memcpy_priv(ext_addr,loc_addr,size_tmp,ext2loc);
+    dma = (hero_dma_job_t)plp_dma_memcpy(ext_addr,loc_addr,size_tmp,ext2loc);
 
     size     -= size_tmp;
     ext_addr += size_tmp;
