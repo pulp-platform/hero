@@ -553,7 +553,7 @@ module axi_dw_upsizer #(
 
               W_INCR_UPSIZE:
                 // Forward when the burst is finished, or after filling up a word
-                if (w_req_q.burst_len == 0 || (aligned_addr(w_req_d.aw.addr, $clog2(AxiMstStrbWidth) != aligned_addr(w_req_q.aw.addr, $clog2(AxiMstStrbWidth)))))
+                if (w_req_q.burst_len == 0 || (aligned_addr(w_req_d.aw.addr, $clog2(AxiMstStrbWidth)) != aligned_addr(w_req_q.aw.addr, $clog2(AxiMstStrbWidth))))
                   w_req_d.w_valid = 1'b1;
             endcase
           end
