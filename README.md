@@ -35,7 +35,7 @@ Compilation always requires a proper environment. When compiling with the minima
 
 ### Applications
 
-The `example-apps` folder contains different example applications. Which are supposed to be used with different environments.
+The `example-apps` folder contains different example applications, which are supposed to be used with different environments.
 
 - **Minimal runtime (`source env/ehuawei-minimal-runtime.sh`):**
   + hello
