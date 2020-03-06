@@ -55,11 +55,11 @@ for m in \
     debug-bridge; \
 do
     cmd=""
-    if [ $BUILD = 1 ]; then
-        cmd="$cmd build"
-    fi
     if [ $CHECKOUT = 1 ]; then
         cmd="$cmd checkout"
+    fi
+    if [ $BUILD = 1 ]; then
+        cmd="$cmd build"
     fi
     plpbuild --m $m $cmd --stdout
 done
