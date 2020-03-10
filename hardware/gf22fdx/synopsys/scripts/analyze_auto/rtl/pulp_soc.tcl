@@ -10,7 +10,7 @@ analyze -format sverilog -work work ${RTL_PATH}/apb/apb_rw_regs.sv
 analyze -format sverilog -work work ${RTL_PATH}/axi_rab_wrap.sv
 analyze -format sverilog -work work ${RTL_PATH}/pulp_cluster_cfg_pkg.sv
 
-
+analyze -format sverilog -work work ${RTL_PATH}/debug_system.sv
 analyze -format sverilog -work work ${RTL_PATH}/l2_mem.sv
 analyze -format sverilog -work work ${RTL_PATH}/pulp_cluster_ooc.sv
 analyze -format sverilog -work work ${RTL_PATH}/soc_bus.sv
@@ -20,3 +20,5 @@ analyze -format sverilog -work work ${RTL_PATH}/sram.sv
 
 analyze -format sverilog -work work ${RTL_PATH}/pulp.sv
 analyze -format sverilog -work work ${RTL_PATH}/pulp_ooc.sv
+analyze -format sverilog -work work ${RTL_PATH}/core2axi.sv
+analyze -format sverilog -work work ${RTL_PATH}/axi_tcdm_if.sv
