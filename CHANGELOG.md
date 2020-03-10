@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- `event_unit_flex`: Fix update condition for `r_valid` which fixes the multi-cycle `r_valid` in riscy's LSU
 
 
 ## 2020-03-06

@@ -54,6 +54,7 @@ module event_unit_interface_mux
   logic [NB_CORES-1:0]                  demux_slave_update;
   logic [NB_CORES-1:0]                  demux_add_is_core;
   logic [NB_CORES-1:0]                  demux_slave_gnt_mux;
+  logic [NB_CORES-1:0]                  demux_slave_gnt_mux_del;
 
   // helper arrays to work around sv dynamic bus index select limitation
   logic [NB_CORES-1:0]                  demux_slaves_core_req;
@@ -83,7 +84,8 @@ module event_unit_interface_mux
       // activation condition for responses on each demux plug
       assign demux_slave_update[I] = ( (demux_slave[I].req & ~demux_slave_req_del[I]) ||
                                        (~demux_slave[I].req & demux_slave_req_del[I]) ||
-                                       (demux_slave[I].req & demux_slave_gnt_mux[I])     );
+                                       (demux_slave[I].req & demux_slave_gnt_mux[I])  ||
+                                       (demux_slave_req_del[I] & demux_slave_gnt_mux_del[I]));
       // check if Core I wants to access its private event_unit_core
       assign demux_add_is_core[I]  = ( ( demux_slave[I].add[9] == 1'b0 )                             ||   // some core reg
                                        ({demux_slave[I].add[9],demux_slave[I].add[4:2]} == 4'b1_101) ||   // barrier_trigg_self
@@ -198,6 +200,7 @@ module event_unit_interface_mux
         if (~rst_ni)
         begin
           demux_slave_req_del[I] <= 1'b0;
+          demux_slave_gnt_mux_del[I] <= 1'b0;
 
           demux_ip_sel_SP[I]     <= 1'b0;
           demux_barr_sel_SP[I]   <= '0;
@@ -207,6 +210,7 @@ module event_unit_interface_mux
         else
         begin
           demux_slave_req_del[I] <= demux_slave[I].req;
+          demux_slave_gnt_mux_del[I] <= demux_slave_gnt_mux[I];
           if ( demux_slave_update[I] ) begin
             demux_ip_sel_SP[I]    <= ~demux_add_is_core[I];
             demux_barr_sel_SP[I]  <= demux_slave_gnt_barr_bin[I];
@@ -234,6 +238,7 @@ module event_unit_interface_mux
   logic       speriph_slave_req_del;
   logic       speriph_slave_update;
   logic       speriph_slave_gnt_mux;
+  logic       speriph_slave_gnt_mux_del;
 
   logic [NB_CORES+NB_BARR+2:0] interc_slaves_req;
 
@@ -250,7 +255,8 @@ module event_unit_interface_mux
   // activation condition for speriph slave responses
   assign speriph_slave_update = ( (speriph_slave.req & ~speriph_slave_req_del) ||
                                   (~speriph_slave.req & speriph_slave_req_del) ||
-                                  (speriph_slave.req & speriph_slave_gnt_mux)     );
+                                  (speriph_slave.req & speriph_slave_gnt_mux)  ||
+                                  (speriph_slave_req_del & speriph_slave_gnt_mux_del));
 
   // broadcast master->slave signals with exception of req
   generate
@@ -358,10 +364,12 @@ module event_unit_interface_mux
       speriph_slave.r_id    <= '0;
       interc_ip_sel_SP      <= '0;
       speriph_slave_req_del <= 1'b0;
+      speriph_slave_gnt_mux_del <= 1'b0;
     end
     else
     begin
       speriph_slave_req_del <= speriph_slave.req;
+      speriph_slave_gnt_mux_del <= speriph_slave_gnt_mux;
       if ( speriph_slave_update )
       begin
         speriph_slave.r_id <= speriph_slave.id;
