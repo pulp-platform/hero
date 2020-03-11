@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   features: `assert property`, `assume property`, `package automatic`, and `unique0 case`.
 - `rr_arb_tree`: Fix width of ports for `NumIn == 1`.
 - `axi_xbar`: Fix width of ports and signals for `NoMstPorts == 1`.
+- `pulp_tb`: Add missing `mailbox_evt_i` connection for `pulp`.
 
 
 ## 2020-03-06
