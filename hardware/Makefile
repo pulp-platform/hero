@@ -24,6 +24,7 @@ vcs/compile.sh: bender
 	ex -s -c '3i|readonly THIS_DIR="$$(dirname "$$(readlink -f "$${BASH_SOURCE[0]}")")"' -c x $@
 	ex -s -c '4i|readonly ROOT="$$(readlink -f "$${THIS_DIR}/..")"' -c x $@
 	ex -s -c '5i|set -e' -c x $@ # abort on first compile error
+	perl -i -00ne 'print unless /(?<!ROOT\/)test\//' $@ # exclude unsupported test code
 	echo "$(VCS) vcs $(VCS_ARGS) -full64 pulp_tb -debug_access+all -notice" >> $@
 	chmod +x $@
 
