@@ -497,6 +497,7 @@ module axi_demux #(
 // Validate parameters.
 // pragma translate_off
 `ifndef VERILATOR
+`ifndef TARGET_VCS
     initial begin: validate_params
       no_mst_ports: assume (NoMstPorts > 0) else
         $fatal(1, "The Number of slaves (NoMstPorts) has to be at least 1");
@@ -523,6 +524,7 @@ module axi_demux #(
     ar_stable: assert property( @(posedge clk_i) (ar_valid && !ar_ready)
                                |=> $stable(slv_ar_chan_select)) else
       $fatal(1, "slv_aw_chan_select unstable with valid set.");
+`endif
 `endif
 // pragma translate_on
   end
