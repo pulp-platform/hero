@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `core2axi`, `debug_system`, and `riscv-dbg`.
 - Improve compatibility with VCS 2017.03 by avoiding usage of `unique0 case` and `package
   automatic`.
+- `rr_arb_tree`: Fix width of ports for `NumIn == 1`.
 
 
 ## 2020-03-06
