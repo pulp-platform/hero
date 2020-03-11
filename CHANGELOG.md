@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fix multicycle path constraints of instruction cache.
   - Add missing elaboration/analysis commands for `axi_burst_splitter`, `axi_mem_if, `axi_tcdm_if`,
     `core2axi`, `debug_system`, and `riscv-dbg`.
+- Improve compatibility with VCS 2017.03 by avoiding usage of `unique0 case` and `package
+  automatic`.
 
 
 ## 2020-03-06
