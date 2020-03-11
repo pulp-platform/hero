@@ -14,7 +14,7 @@
 `include "axi/assign.svh"
 `include "axi/typedef.svh"
 
-package automatic pulp_pkg;
+package pulp_pkg;
 
   // Addressing
   localparam int unsigned AXI_AW = pulp_cluster_cfg_pkg::AXI_AW;
@@ -26,7 +26,7 @@ package automatic pulp_pkg;
   localparam int unsigned AXI_IW_SB_INP = AXI_IW_CL_OUP;
   localparam int unsigned AXI_UW = pulp_cluster_cfg_pkg::AXI_UW;
   localparam int unsigned AXI_DW = 128;
-  function int unsigned axi_iw_sb_oup(input int unsigned n_clusters);
+  function automatic int unsigned axi_iw_sb_oup(input int unsigned n_clusters);
     return soc_bus_pkg::oup_id_w(n_clusters, AXI_IW_SB_INP);
   endfunction
   // L2 Memory
