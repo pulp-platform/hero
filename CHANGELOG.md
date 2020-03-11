@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add missing elaboration/analysis commands for `axi_burst_splitter`, `axi_mem_if, `axi_tcdm_if`,
     `core2axi`, `debug_system`, and `riscv-dbg`.
 - Improve compatibility with VCS 2017.03 by avoiding the following unsupported SystemVerilog
-  features: `assert property`, `package automatic`, and `unique0 case`.
+  features: `assert property`, `assume property`, `package automatic`, and `unique0 case`.
 - `rr_arb_tree`: Fix width of ports for `NumIn == 1`.
 - `axi_xbar`: Fix width of ports and signals for `NoMstPorts == 1`.
 
