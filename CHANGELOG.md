@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - `event_unit_flex`: Fix update condition for `r_valid` which fixes the multi-cycle `r_valid` in riscy's LSU
+- Synthesis:
+  - Fix multicycle path constraints of instruction cache.
+  - Add missing elaboration/analysis commands for `axi_burst_splitter`, `axi_mem_if, `axi_tcdm_if`,
+    `core2axi`, `debug_system`, and `riscv-dbg`.
 
 
 ## 2020-03-06

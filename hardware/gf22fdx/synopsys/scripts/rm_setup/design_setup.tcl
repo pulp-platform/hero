@@ -1,4 +1,4 @@
-set NUM_CORES 8
+set NUM_CORES 1
 
 set IPS_PATH        "../../deps"
 set RTL_PATH        "../../src"

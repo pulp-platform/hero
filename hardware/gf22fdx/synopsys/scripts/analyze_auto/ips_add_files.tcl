@@ -29,7 +29,7 @@ source scripts/analyze_auto/ips/tech_cells_generic.tcl
 #source scripts/analyze_auto/ips/udma_camera.tcl
 #source scripts/analyze_auto/ips/udma_filter.tcl
 #source scripts/analyze_auto/ips/udma_external_per.tcl
-#source scripts/analyze_auto/ips/riscv-dbg.tcl
+source scripts/analyze_auto/ips/riscv-dbg.tcl
 source scripts/analyze_auto/ips/axi2mem.tcl
 source scripts/analyze_auto/ips/axi2per.tcl
 source scripts/analyze_auto/ips/per2axi.tcl
