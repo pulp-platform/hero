@@ -7,12 +7,12 @@
 // work. Any reuse/redistribution is strictly forbidden without written
 // permission from ETH Zurich.
 
-package automatic soc_bus_pkg;
-  function int unsigned n_slaves(input int unsigned n_clusters);
+package soc_bus_pkg;
+  function automatic int unsigned n_slaves(input int unsigned n_clusters);
     return n_clusters + 1;
   endfunction
 
-  function int unsigned oup_id_w(input int unsigned n_clusters, inp_id_w);
+  function automatic int unsigned oup_id_w(input int unsigned n_clusters, inp_id_w);
     return inp_id_w + $clog2(n_slaves(n_clusters));
   endfunction
 endpackage
