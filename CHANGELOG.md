@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `rr_arb_tree`: Fix width of ports for `NumIn == 1`.
 - `axi_xbar`: Fix width of ports and signals for `NoMstPorts == 1`.
 - `pulp_tb`: Add missing `mailbox_evt_i` connection for `pulp`.
+- `fifo_v3`: Predefine constant for last valid pointer index to enforce correct behavior in VCS 2017.03.
 
 
 ## 2020-03-06
