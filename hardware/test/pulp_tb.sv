@@ -30,7 +30,7 @@ module pulp_tb #(
 
   localparam int unsigned AXI_IW = pulp_pkg::axi_iw_sb_oup(N_CLUSTERS);
   localparam int unsigned AXI_SW = AXI_DW/8;  // width of strobe
-  localparam int unsigned NB_SLV = 1;
+  localparam int unsigned NB_SLV = 2;
   localparam int unsigned NB_MST = 1;
   typedef pulp_pkg::addr_t      axi_addr_t;
   typedef logic [AXI_DW-1:0]    axi_data_t;
@@ -125,15 +125,21 @@ module pulp_tb #(
     .AXI_ID_WIDTH   (AXI_IW+1),
     .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
   ) from_xbar[NB_SLV-1:0] ();
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
+    .AXI_DATA_WIDTH (32),
+    .AXI_ID_WIDTH   (AXI_IW+1),
+    .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
+  ) to_periphs ();
   `AXI_ASSIGN_FROM_REQ(from_pulp[0], from_pulp_req);
   `AXI_ASSIGN_TO_RESP (from_pulp_resp, from_pulp[0]);
 
   localparam int unsigned N_RULES = 1;
   axi_pkg::xbar_rule_32_t [N_RULES-1:0] addr_map;
   assign addr_map[0] = '{
-    idx:        0,
-    start_addr: 32'h0000_0000,
-    end_addr:   32'hFFFF_FFFF
+    idx:        1,
+    start_addr: pulp_cluster_cfg_pkg::SOC_PERIPH_BASE_ADDR,
+    end_addr:   pulp_cluster_cfg_pkg::SOC_PERIPH_BASE_ADDR+pulp_cluster_cfg_pkg::SOC_PERIPH_SIZE
   };
   `ifndef VERILATOR
     initial begin
@@ -169,6 +175,34 @@ module pulp_tb #(
     .addr_map_i             (addr_map),
     .en_default_mst_port_i  ({1{1'b1}}), // enable default master port for all slave ports
     .default_mst_port_i     ({1{1'b0}})  // use slave 0 as default master port
+  );
+
+  // Peripherals
+  axi_dw_converter_intf #(
+    .AXI_ID_WIDTH       (AXI_IW+1),
+    .AXI_ADDR_WIDTH     (pulp_pkg::AXI_AW),
+    .AXI_MST_DATA_WIDTH (32),
+    .AXI_SLV_DATA_WIDTH (AXI_DW),
+    .AXI_USER_WIDTH     (pulp_pkg::AXI_UW)
+  ) i_dwc_peripherals (
+    .clk_i  (clk),
+    .rst_ni (rst_n),
+    .slv    (from_xbar[1]),
+    .mst    (to_periphs)
+  );
+
+  soc_peripherals #(
+    .AXI_AW     (pulp_pkg::AXI_AW),
+    .AXI_IW     (AXI_IW+1),
+    .AXI_UW     (pulp_pkg::AXI_UW),
+    .AXI_DW     (32),
+    .N_CORES    (pulp_cluster_cfg_pkg::N_CORES),
+    .N_CLUSTERS (N_CLUSTERS)
+  ) i_peripherals (
+    .clk_i      (clk),
+    .rst_ni     (rst_n),
+    .test_en_i  ('0),
+    .axi        (to_periphs)
   );
 
   // Emulate infinite memory with AXI slave port.
@@ -368,9 +402,9 @@ module pulp_tb #(
     // Wait for EOC of cluster 0 before terminating the simulation.
     wait (cl_eoc[0]);
     #1us;
-    assert (dut.i_periphs.i_soc_ctrl_regs.i_core_res.reg_q[0][31])
+    assert (i_peripherals.i_soc_ctrl_regs.i_core_res.reg_q[0][31])
       else $error("Master core did not EOC properly!");
-    return_val = dut.i_periphs.i_soc_ctrl_regs.i_core_res.reg_q[0][30:0];
+    return_val = i_peripherals.i_soc_ctrl_regs.i_core_res.reg_q[0][30:0];
     assert (return_val == '0)
       else $error("Non-zero return value: %0d", return_val);
     $finish();
