@@ -238,24 +238,6 @@ module pulp #(
     .AXI_USER_WIDTH (AXI_UW)
   ) ext_slv_remapped();
 
-  // Interfaces to Peripherals
-  // i_soc_bus.periph_mst -> [periph_mst]
-  // -> i_dwc_periph_mst -> [periph_mst_dwced]
-  // -> i_periphs.axi
-  localparam int unsigned AXI_DW_PERIPHS = 32;
-  AXI_BUS #(
-    .AXI_ADDR_WIDTH (AXI_AW),
-    .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
-    .AXI_USER_WIDTH (AXI_UW)
-  ) periph_mst();
-  AXI_BUS #(
-    .AXI_ADDR_WIDTH (AXI_AW),
-    .AXI_DATA_WIDTH (AXI_DW_PERIPHS),
-    .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
-    .AXI_USER_WIDTH (AXI_UW)
-  ) periph_mst_dwced();
-
   // Interface from debug module to soc bus
   // i_debug_system.dm_master -> [debug_mst_predwc]
   // -> i_dwc_debug_mst -> [debug_mst_dwced]
@@ -419,8 +401,6 @@ module pulp #(
     .N_CLUSTERS           (N_CLUSTERS),
     .L2_N_PORTS           (L2_N_AXI_PORTS),
     .L2_N_BYTES_PER_PORT  (L2_SIZE/L2_N_AXI_PORTS),
-    .PERIPH_N_BYTES       (pulp_cluster_cfg_pkg::SOC_PERIPH_SIZE),
-    .PERIPH_BASE_ADDR     (64'(pulp_cluster_cfg_pkg::SOC_PERIPH_BASE_ADDR)),
     .DEBUG_N_BYTES        (pulp_cluster_cfg_pkg::DM_SIZE),
     .DEBUG_BASE_ADDR      (64'(pulp_cluster_cfg_pkg::DM_BASE_ADDR))
   ) i_soc_bus (
@@ -432,8 +412,7 @@ module pulp #(
     .ext_mst    (ext_mst),
     .ext_slv    (ext_slv_remapped),
     .debug_slv  (debug_mst_dwced),
-    .debug_mst  (debug_slv_predwc),
-    .periph_mst (periph_mst)
+    .debug_mst  (debug_slv_predwc)
   );
 
   axi_atop_filter_intf #(
@@ -493,19 +472,6 @@ module pulp #(
 
   axi_dw_converter_intf #(
     .AXI_ADDR_WIDTH     (AXI_AW),
-    .AXI_SLV_DATA_WIDTH (AXI_DW),
-    .AXI_MST_DATA_WIDTH (AXI_DW_PERIPHS),
-    .AXI_ID_WIDTH       (AXI_IW_SB_OUP),
-    .AXI_USER_WIDTH     (AXI_UW)
-  ) i_dwc_periph_mst (
-    .clk_i,
-    .rst_ni,
-    .slv    (periph_mst),
-    .mst    (periph_mst_dwced)
-  );
-
-  axi_dw_converter_intf #(
-    .AXI_ADDR_WIDTH     (AXI_AW),
     .AXI_SLV_DATA_WIDTH (AXI_DW_DM),
     .AXI_MST_DATA_WIDTH (AXI_DW),
     .AXI_ID_WIDTH       (AXI_IW_SB_INP),
@@ -553,20 +519,6 @@ module pulp #(
     .core_debug_req_o (core_debug_req),
     .dm_slave         (debug_slv_dwced),
     .dm_master        (debug_mst_predwc)
-  );
-
-  soc_peripherals #(
-    .AXI_AW     (AXI_AW),
-    .AXI_IW     (AXI_IW_SB_OUP),
-    .AXI_UW     (AXI_UW),
-    .AXI_DW     (AXI_DW_PERIPHS),
-    .N_CORES    (pulp_cluster_cfg_pkg::N_CORES),
-    .N_CLUSTERS (N_CLUSTERS)
-  ) i_periphs (
-    .clk_i,
-    .rst_ni,
-    .test_en_i  ('0),
-    .axi        (periph_mst_dwced)
   );
 
 endmodule

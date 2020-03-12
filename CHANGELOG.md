@@ -8,12 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- Move the `soc_peripherals` out of PULP into the testbench.
 
 ### Fixed
-- `event_unit_flex`: Fix update condition for `r_valid` which fixes the multi-cycle `r_valid` in riscy's LSU
+- `event_unit_flex`: Fix update condition for `r_valid` which fixes the multi-cycle `r_valid` in
+  RI5CY's LSU.
 - Synthesis:
   - Fix multicycle path constraints of instruction cache.
-  - Add missing elaboration/analysis commands for `axi_burst_splitter`, `axi_mem_if, `axi_tcdm_if`,
+  - Add missing elaboration/analysis commands for `axi_burst_splitter`, `axi_mem_if`, `axi_tcdm_if`,
     `core2axi`, `debug_system`, and `riscv-dbg`.
 - Improve compatibility with VCS 2017.03 by avoiding the following unsupported SystemVerilog
   constructs: `assert property`, `assume property`, `package automatic`, and `unique0 case`.
@@ -21,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `rr_arb_tree`: Fix width of ports for `NumIn == 1`.
 - `axi_xbar`: Fix width of ports and signals for `NoMstPorts == 1`.
 - `pulp_tb`: Add missing `mailbox_evt_i` connection for `pulp`.
+- `fifo_v3`: Predefine constant for last valid pointer index to enforce correct behavior in VCS
+  2017.03.
 
 
 ## 2020-03-06
