@@ -185,7 +185,6 @@ module pulp #(
 
   // Interfaces to L2 Memory
   // i_soc_bus.l2_mst -> [l2_mst]
-  // -> i_atomics -> [l2_mst_wo_atomics]
   // -> i_l2_mem.slv
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
@@ -193,12 +192,6 @@ module pulp #(
     .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
     .AXI_USER_WIDTH (AXI_UW)
   ) l2_mst[L2_N_AXI_PORTS-1:0]();
-  AXI_BUS #(
-    .AXI_ADDR_WIDTH (AXI_AW),
-    .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
-    .AXI_USER_WIDTH (AXI_UW)
-  ) l2_mst_wo_atomics[L2_N_AXI_PORTS-1:0]();
 
   // Interfaces from PULP to Host
   // i_soc_bus.ext_mst -> [ext_mst]
@@ -429,20 +422,6 @@ module pulp #(
   );
 
   for (genvar i = 0; i < L2_N_AXI_PORTS; i++) begin: gen_l2_ports
-    axi_riscv_atomics_wrap #(
-      .AXI_ADDR_WIDTH     (AXI_AW),
-      .AXI_DATA_WIDTH     (AXI_DW),
-      .AXI_ID_WIDTH       (AXI_IW_SB_OUP),
-      .AXI_USER_WIDTH     (AXI_UW),
-      .AXI_MAX_READ_TXNS  (4),
-      .AXI_MAX_WRITE_TXNS (4),
-      .RISCV_WORD_WIDTH   (32)
-    ) i_atomics (
-      .clk_i,
-      .rst_ni,
-      .slv    (l2_mst[i]),
-      .mst    (l2_mst_wo_atomics[i])
-    );
     l2_mem #(
       .AXI_AW     (AXI_AW),
       .AXI_DW     (AXI_DW),
@@ -452,7 +431,7 @@ module pulp #(
     ) i_l2_mem (
       .clk_i,
       .rst_ni,
-      .slv    (l2_mst_wo_atomics[i])
+      .slv    (l2_mst[i])
     );
   end
 
