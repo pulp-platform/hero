@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve compatibility with VCS 2017.03 by avoiding the following unsupported SystemVerilog
   constructs: `assert property`, `assume property`, `package automatic`, and `unique0 case`.
   Furthermore, exclude any test code that is not required for the top-level testbench.
+- Improve compatibility with DC 2018.06 by replacing the call to `$clog2` in `soc_bus_pkg` by an
+  equivalent constant function implementation (`cfg_math_pkg::clog2`).
 - `rr_arb_tree`: Fix width of ports for `NumIn == 1`.
 - `axi_xbar`: Fix width of ports and signals for `NoMstPorts == 1`.
 - `pulp_tb`: Add missing `mailbox_evt_i` connection for `pulp`.
