@@ -27,18 +27,20 @@ module axi_xbar #(
   parameter type slv_resp_t         = logic,
   parameter type mst_req_t          = logic,
   parameter type mst_resp_t         = logic,
-  parameter type rule_t             = axi_pkg::xbar_rule_64_t
+  parameter type rule_t             = axi_pkg::xbar_rule_64_t,
+  // Dependent constants, do not change!
+  parameter Log2NoMstPorts = (Cfg.NoMstPorts > 1) ? $clog2(Cfg.NoMstPorts) : 1
 ) (
-  input  logic                                                       clk_i,
-  input  logic                                                       rst_ni,
-  input  logic                                                       test_i,
-  input  slv_req_t  [Cfg.NoSlvPorts-1:0]                             slv_ports_req_i,
-  output slv_resp_t [Cfg.NoSlvPorts-1:0]                             slv_ports_resp_o,
-  output mst_req_t  [Cfg.NoMstPorts-1:0]                             mst_ports_req_o,
-  input  mst_resp_t [Cfg.NoMstPorts-1:0]                             mst_ports_resp_i,
-  input  rule_t     [Cfg.NoAddrRules-1:0]                            addr_map_i,
-  input  logic      [Cfg.NoSlvPorts-1:0]                             en_default_mst_port_i,
-  input  logic      [Cfg.NoSlvPorts-1:0][$clog2(Cfg.NoMstPorts)-1:0] default_mst_port_i
+  input  logic                                                clk_i,
+  input  logic                                                rst_ni,
+  input  logic                                                test_i,
+  input  slv_req_t  [Cfg.NoSlvPorts-1:0]                      slv_ports_req_i,
+  output slv_resp_t [Cfg.NoSlvPorts-1:0]                      slv_ports_resp_o,
+  output mst_req_t  [Cfg.NoMstPorts-1:0]                      mst_ports_req_o,
+  input  mst_resp_t [Cfg.NoMstPorts-1:0]                      mst_ports_resp_i,
+  input  rule_t     [Cfg.NoAddrRules-1:0]                     addr_map_i,
+  input  logic      [Cfg.NoSlvPorts-1:0]                      en_default_mst_port_i,
+  input  logic      [Cfg.NoSlvPorts-1:0][Log2NoMstPorts-1:0]  default_mst_port_i
 );
 
   typedef logic [Cfg.AxiAddrWidth-1:0]           addr_t;
@@ -54,10 +56,10 @@ module axi_xbar #(
   slv_resp_t [Cfg.NoMstPorts-1:0][Cfg.NoSlvPorts-1:0] mst_resps;
 
   for (genvar i = 0; i < Cfg.NoSlvPorts; i++) begin : gen_slv_port_demux
-    logic [$clog2(Cfg.NoMstPorts)-1:0] dec_aw,        dec_ar;
-    mst_port_idx_t                     slv_aw_select, slv_ar_select;
-    logic                              dec_aw_valid,  dec_aw_error;
-    logic                              dec_ar_valid,  dec_ar_error;
+    logic [Log2NoMstPorts-1:0]  dec_aw,        dec_ar;
+    mst_port_idx_t              slv_aw_select, slv_ar_select;
+    logic                       dec_aw_valid,  dec_aw_error;
+    logic                       dec_ar_valid,  dec_ar_error;
 
     addr_decode #(
       .NoIndices  ( Cfg.NoMstPorts  ),
@@ -97,6 +99,7 @@ module axi_xbar #(
     // make sure that the default slave does not get changed, if there is an unserved Ax
     // pragma translate_off
     `ifndef VERILATOR
+    `ifndef TARGET_VCS
     default disable iff (~rst_ni);
     default_aw_mst_port_en: assert property(
       @(posedge clk_i) (slv_ports_req_i[i].aw_valid && !slv_ports_resp_o[i].aw_ready)
@@ -118,6 +121,7 @@ module axi_xbar #(
           |=> $stable(default_mst_port_i[i]))
         else $fatal (1, $sformatf("It is not allowed to change the default mst port\
                                    when there is an unserved Ar beat. Slave Port: %0d", i));
+    `endif
     `endif
     // pragma translate_on
     axi_demux #(
@@ -230,16 +234,18 @@ endmodule
 module axi_xbar_intf #(
   parameter int unsigned AXI_USER_WIDTH =  0,
   parameter axi_pkg::xbar_cfg_t Cfg     = '0,
-  parameter type rule_t                 = axi_pkg::xbar_rule_64_t
+  parameter type rule_t                 = axi_pkg::xbar_rule_64_t,
+  // Dependent constants, do not change!
+  parameter Log2NoMstPorts = (Cfg.NoMstPorts > 1) ? $clog2(Cfg.NoMstPorts) : 1
 ) (
-  input  logic                                                    clk_i,
-  input  logic                                                    rst_ni,
-  input  logic                                                    test_i,
-  AXI_BUS.Slave                                                   slv_ports [Cfg.NoSlvPorts-1:0],
-  AXI_BUS.Master                                                  mst_ports [Cfg.NoMstPorts-1:0],
-  input  rule_t [Cfg.NoAddrRules-1:0]                             addr_map_i,
-  input  logic  [Cfg.NoSlvPorts-1:0]                              en_default_mst_port_i,
-  input  logic  [Cfg.NoSlvPorts-1:0][$clog2(Cfg.NoMstPorts)-1:0]  default_mst_port_i
+  input  logic                                            clk_i,
+  input  logic                                            rst_ni,
+  input  logic                                            test_i,
+  AXI_BUS.Slave                                           slv_ports [Cfg.NoSlvPorts-1:0],
+  AXI_BUS.Master                                          mst_ports [Cfg.NoMstPorts-1:0],
+  input  rule_t [Cfg.NoAddrRules-1:0]                     addr_map_i,
+  input  logic  [Cfg.NoSlvPorts-1:0]                      en_default_mst_port_i,
+  input  logic  [Cfg.NoSlvPorts-1:0][Log2NoMstPorts-1:0]  default_mst_port_i
 );
 
   localparam int unsigned AxiIdWidthMstPorts = Cfg.AxiIdWidthSlvPorts + $clog2(Cfg.NoSlvPorts);

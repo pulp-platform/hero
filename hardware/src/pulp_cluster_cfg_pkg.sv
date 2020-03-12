@@ -8,7 +8,7 @@
 // permission from ETH Zurich.
 
 // Configuration package for PULP cluster OOC stub
-package automatic pulp_cluster_cfg_pkg;
+package pulp_cluster_cfg_pkg;
   // -- Decoupling of cluster clock domain
   localparam bit          ASYNC = 1'b0;
   localparam int unsigned DC_BUF_W = 8;

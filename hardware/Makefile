@@ -1,7 +1,7 @@
 # Copyright ETH Zurich 2019
 VLOG_ARGS += -suppress vlog-2583 -suppress vlog-13314 -suppress vlog-13233
 #VLOG_ARGS += -define PRINT_CORE_MEM_ACCESSES
-VCS ?= vcs-2019.06
+VCS ?= vcs-2017.03
 VCS_ARGS += -nc
 VLOGAN_ARGS += $(VCS_ARGS) -timescale=1ps/1ps -assert svaext
 
@@ -23,6 +23,8 @@ vcs/compile.sh: bender
 		| grep -v "set ROOT" > $@
 	ex -s -c '3i|readonly THIS_DIR="$$(dirname "$$(readlink -f "$${BASH_SOURCE[0]}")")"' -c x $@
 	ex -s -c '4i|readonly ROOT="$$(readlink -f "$${THIS_DIR}/..")"' -c x $@
+	ex -s -c '5i|set -e' -c x $@ # abort on first compile error
+	perl -i -00ne 'print unless /(?<!ROOT\/)test\//' $@ # exclude unsupported test code
 	echo "$(VCS) vcs $(VCS_ARGS) -full64 pulp_tb -debug_access+all -notice" >> $@
 	chmod +x $@
 
