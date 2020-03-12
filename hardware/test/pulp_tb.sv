@@ -334,6 +334,7 @@ module pulp_tb #(
   initial begin
     automatic dm_test::dm_if dm_if = new;
     automatic logic error;
+    automatic int unsigned return_val;
 
     cl_fetch_en = '0;
     to_pulp_req = '0;
@@ -367,6 +368,11 @@ module pulp_tb #(
     // Wait for EOC of cluster 0 before terminating the simulation.
     wait (cl_eoc[0]);
     #1us;
+    assert (dut.i_periphs.i_soc_ctrl_regs.i_core_res.reg_q[0][31])
+      else $error("Master core did not EOC properly!");
+    return_val = dut.i_periphs.i_soc_ctrl_regs.i_core_res.reg_q[0][30:0];
+    assert (return_val == '0)
+      else $error("Non-zero return value: %0d", return_val);
     $finish();
   end
 
