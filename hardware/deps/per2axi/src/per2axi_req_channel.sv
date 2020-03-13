@@ -298,8 +298,7 @@ module per2axi_req_channel
    assign axi_master_aw_prot_o   = '0;
    assign axi_master_aw_region_o = '0;
    assign axi_master_aw_len_o    = '0;
-   // Due to a bug in the DWC, transactions have to be modifiable (except ATOPs).
-   assign axi_master_aw_cache_o  = (axi_master_aw_atop_o == '0) ? 4'b0010 : 4'b0000;
+   assign axi_master_aw_cache_o  = 4'b0000;
    assign axi_master_aw_qos_o    = '0;
    if (EN_TRYX) begin : gen_tryx_aw_user
       assign axi_master_aw_user_o = tryx_req_i[axi_master_aw_id_o].user;
@@ -310,8 +309,7 @@ module per2axi_req_channel
    assign axi_master_ar_prot_o   = '0;
    assign axi_master_ar_region_o = '0;
    assign axi_master_ar_len_o    = '0;
-   // Due to a bug in the DWC, transactions have to be modifiable.
-   assign axi_master_ar_cache_o  = 4'b0010;
+   assign axi_master_ar_cache_o  = 4'b0000;
    assign axi_master_ar_qos_o    = '0;
    if (EN_TRYX) begin : gen_tryx_ar_user
       assign axi_master_ar_user_o = tryx_req_i[axi_master_ar_id_o].user;
