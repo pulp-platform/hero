@@ -50,13 +50,13 @@ package pulp_pkg;
   typedef logic [AXI_IW-1:0]    axi_id_t;
   typedef logic [AXI_SW-1:0]    axi_strb_t;
   typedef user_t                axi_user_t;
-  `AXI_TYPEDEF_AW_CHAN_T(       axi_aw_t,     axi_addr_t, axi_id_t, axi_user_t);
-  `AXI_TYPEDEF_W_CHAN_T(        axi_w_t,      axi_data_t, axi_strb_t, axi_user_t);
-  `AXI_TYPEDEF_B_CHAN_T(        axi_b_t,      axi_id_t, axi_user_t);
-  `AXI_TYPEDEF_AR_CHAN_T(       axi_ar_t,     axi_addr_t, axi_id_t, axi_user_t);
-  `AXI_TYPEDEF_R_CHAN_T(        axi_r_t,      axi_data_t, axi_id_t, axi_user_t);
-  `AXI_TYPEDEF_REQ_T(           axi_req_t,    axi_aw_t, axi_w_t, axi_ar_t);
-  `AXI_TYPEDEF_RESP_T(          axi_resp_t,   axi_b_t, axi_r_t);
+  `AXI_TYPEDEF_AW_CHAN_T(axi_aw_t,axi_addr_t, axi_id_t, axi_user_t)
+  `AXI_TYPEDEF_W_CHAN_T(axi_w_t, axi_data_t, axi_strb_t, axi_user_t)
+  `AXI_TYPEDEF_B_CHAN_T(axi_b_t, axi_id_t, axi_user_t)
+  `AXI_TYPEDEF_AR_CHAN_T(axi_ar_t, axi_addr_t, axi_id_t, axi_user_t)
+  `AXI_TYPEDEF_R_CHAN_T(axi_r_t, axi_data_t, axi_id_t, axi_user_t)
+  `AXI_TYPEDEF_REQ_T(axi_req_t, axi_aw_t, axi_w_t, axi_ar_t)
+  `AXI_TYPEDEF_RESP_T(axi_resp_t, axi_b_t, axi_r_t)
 
   // Debug module
   localparam logic [31:0] JTAG_IDCODE = 32'h249511C3; //TODO: do we have a sane value for this?
@@ -208,8 +208,8 @@ module pulp #(
     .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
     .AXI_USER_WIDTH (AXI_UW)
   ) ext_mst();
-  `AXI_ASSIGN_TO_REQ(ext_req_o, ext_mst);
-  `AXI_ASSIGN_FROM_RESP(ext_mst, ext_resp_i);
+  `AXI_ASSIGN_TO_REQ(ext_req_o, ext_mst)
+  `AXI_ASSIGN_FROM_RESP(ext_mst, ext_resp_i)
 
   // Interfaces from Host to PULP
   // [ext_{req_i,resp_o}] -> [ext_slv]
@@ -221,8 +221,8 @@ module pulp #(
     .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
     .AXI_USER_WIDTH (AXI_UW)
   ) ext_slv();
-  `AXI_ASSIGN_FROM_REQ(ext_slv, ext_req_i);
-  `AXI_ASSIGN_TO_RESP(ext_resp_o, ext_slv);
+  `AXI_ASSIGN_FROM_REQ(ext_slv, ext_req_i)
+  `AXI_ASSIGN_TO_RESP(ext_resp_o, ext_slv)
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
