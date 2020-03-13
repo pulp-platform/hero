@@ -84,6 +84,15 @@ build_test_archive:
         done
         cd -
       done
+    ### Test elaboration for synthesis
+    - |
+      cd hardware/gf22fdx/synopsys
+      ./start_synth.sh --elab-only | tee synth.log
+      if grep -q '^Error:' synth.log; then
+        echo "Elaboration had errors!"
+        exit 1
+      fi
+      cd -
     ### Build the virtual platform
     - make virtual-platform
     - ./pulp/virtual-platform/run_vp.sh hello

@@ -52,7 +52,7 @@ set ADDITIONAL_LINK_LIB_FILES     "IN22FDX_R1PH_NFHN_W01024B032M04C256_104cpp_SS
 set link_library   [concat $target_library $link_library $ADDITIONAL_LINK_LIB_FILES]
 
 lappend search_path [file normalize $SYNDIR_MW]
-if {[shell_is_in_topographical_mode]} {
+if {[shell_is_in_topographical_mode] && ![info exists ::env(CI)]} {
       echo " topographical mode \n"
     create_mw_lib $SYNDIR_MW/out/${OUTNAME_MW}_mwlib -technology $tech_mw_path/10M_2Mx_6Cx_2Ix_LB/22FDSOI_10M_2Mx_6Cx_2Ix_LB_104cpp_8t_mw.tf   \
         -mw_reference_library [list $std_cell_path/GF22FDX_SC8T_104CPP_BASE_CSC20L/milkyway/10M_2Mx_6Cx_2Ix_LB/GF22FDX_SC8T_104CPP_BASE_CSC20L    \

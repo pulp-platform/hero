@@ -13,7 +13,7 @@ package soc_bus_pkg;
   endfunction
 
   function automatic int unsigned oup_id_w(input int unsigned n_clusters, inp_id_w);
-    return inp_id_w + $clog2(n_slaves(n_clusters));
+    return inp_id_w + cf_math_pkg::clog2(n_slaves(n_clusters));
   endfunction
 endpackage
 
