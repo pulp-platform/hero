@@ -149,8 +149,9 @@ module pulp #(
   ) cl_inp_async[N_CLUSTERS-1:0]();
 
   // Interfaces from Clusters
-  // if async:  i_cluster.data_master.* -> [cl_oup_async] -> i_dc_slice_cl_oup -> [cl_oup_predwc]
-  // else:      i_cluster.data_master.* -> [cl_oup_predwc]
+  // if async:  i_cluster.data_master.* -> [cl_oup_async] -> i_dc_slice_cl_oup -> [cl_oup_prefilter]
+  // else:      i_cluster.data_master.* -> [cl_oup_prefilter]
+  // -> i_atop_filter_cl_oup -> [cl_oup_prebuf]
   // -> i_dwc_cl_oup -> [cl_oup_prebuf]
   // -> i_r_buf_cl_oup -> [cl_oup]
   // -> i_soc_bus.cl_slv
@@ -164,6 +165,12 @@ module pulp #(
   // pragma translate_off
   initial assert (AXI_IW_CL_OUP == AXI_IW_SB_INP);
   // pragma translate_on
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW_CL),
+    .AXI_ID_WIDTH   (AXI_IW_SB_INP),
+    .AXI_USER_WIDTH (AXI_UW)
+  ) cl_oup_prefilter[N_CLUSTERS-1:0]();
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW_CL),
@@ -194,23 +201,15 @@ module pulp #(
   ) l2_mst[L2_N_AXI_PORTS-1:0]();
 
   // Interfaces from PULP to Host
-  // i_soc_bus.ext_mst -> [ext_mst]
-  // -> i_atop_filter -> [ext_mst_atop_filtered]
-  // -> [ext_{req_o,resp_i}]
+  // i_soc_bus.ext_mst -> [ext_mst] -> [ext_{req_o,resp_i}]
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
     .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
     .AXI_USER_WIDTH (AXI_UW)
   ) ext_mst();
-  AXI_BUS #(
-    .AXI_ADDR_WIDTH (AXI_AW),
-    .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
-    .AXI_USER_WIDTH (AXI_UW)
-  ) ext_mst_atop_filtered();
-  `AXI_ASSIGN_TO_REQ(ext_req_o, ext_mst_atop_filtered);
-  `AXI_ASSIGN_FROM_RESP(ext_mst_atop_filtered, ext_resp_i);
+  `AXI_ASSIGN_TO_REQ(ext_req_o, ext_mst);
+  `AXI_ASSIGN_FROM_RESP(ext_mst, ext_resp_i);
 
   // Interfaces from Host to PULP
   // [ext_{req_i,resp_o}] -> [ext_slv]
@@ -338,7 +337,7 @@ module pulp #(
         .isolate_i        (1'b0),
         .incoming_req_o   (),
         .axi_slave_async  (cl_oup_async[i]),
-        .axi_master       (cl_oup_predwc[i])
+        .axi_master       (cl_oup_prefilter[i])
       );
 
     end else begin : gen_cluster_sync
@@ -354,9 +353,22 @@ module pulp #(
         .dbg_irq_i    (core_debug_req[(i << 5) +: N_CORES]),
         .mailbox_evt_i (mailbox_evt_i),
         .slv          (cl_inp_dwced[i]),
-        .mst          (cl_oup_predwc[i])
+        .mst          (cl_oup_prefilter[i])
       );
     end
+
+    axi_atop_filter_intf #(
+      .AXI_ID_WIDTH       (AXI_IW_CL_OUP),
+      .AXI_ADDR_WIDTH     (AXI_AW),
+      .AXI_DATA_WIDTH     (AXI_DW_CL),
+      .AXI_USER_WIDTH     (AXI_UW),
+      .AXI_MAX_WRITE_TXNS (pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS)
+    ) i_atop_filter_cl_oup (
+      .clk_i,
+      .rst_ni,
+      .slv  (cl_oup_prefilter[i]),
+      .mst  (cl_oup_predwc[i])
+    );
 
     axi_dw_converter_intf #(
       .AXI_ADDR_WIDTH     (AXI_AW),
@@ -406,19 +418,6 @@ module pulp #(
     .ext_slv    (ext_slv_remapped),
     .debug_slv  (debug_mst_dwced),
     .debug_mst  (debug_slv_predwc)
-  );
-
-  axi_atop_filter_intf #(
-    .AXI_ID_WIDTH       (AXI_IW),
-    .AXI_ADDR_WIDTH     (AXI_AW),
-    .AXI_DATA_WIDTH     (AXI_DW),
-    .AXI_USER_WIDTH     (AXI_UW),
-    .AXI_MAX_WRITE_TXNS (N_CLUSTERS * pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS)
-  ) i_atop_filter (
-    .clk_i,
-    .rst_ni,
-    .slv  (ext_mst),
-    .mst  (ext_mst_atop_filtered)
   );
 
   for (genvar i = 0; i < L2_N_AXI_PORTS; i++) begin: gen_l2_ports
