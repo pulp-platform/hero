@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+
+### Fixed
+
+
+## 2020-03-14
+### Changed
 - Move the `soc_peripherals` out of PULP into the testbench.
 - Disable atomic operations at L2 memory, filter ATOPs at cluster output.
 - Make all AXI transactions issued by the cores non-modifiable.
