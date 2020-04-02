@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- Decrease L2 size to 128 KiB.
+- `pulp_cluster`:
+  - Decrease TCDM size to 128 KiB.
 
 ### Fixed
 

@@ -55,7 +55,7 @@
 
     "l1": {
       "base": "0x10000000",
-      "size": "0x00050000",
+      "size": "0x00020000",
       "banking_factor": 2,
       "vp_class": "memory/memory_atomic"
     },
@@ -184,7 +184,7 @@
 
     "l2": {
       "base": "0x1C000000",
-      "size": "0x00040000",
+      "size": "0x00020000",
       "is_partitioned": true,
       "vp_class": "memory/memory_atomic",
 
@@ -207,7 +207,7 @@
         "nb_banks"     : 4,
         "interleaving_bits" : 2,
         "base"         : "0x1C010000",
-        "size"         : "0x00030000"
+        "size"         : "0x00010000"
       }
     },
 
