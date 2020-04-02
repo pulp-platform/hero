@@ -24,7 +24,11 @@ module pulp_cluster_ooc (
   output logic          busy_o,
   input  logic [N_CORES-1:0] dbg_irq_i,
 
+  // External Events
   input  logic          mailbox_evt_i,
+  input  logic          ext_evt_1_i,
+  input  logic          ext_evt_2_i,
+  input  logic          ext_evt_3_i,
 
   // Slave Port
   // AW
@@ -239,7 +243,11 @@ module pulp_cluster_ooc (
 
     .dbg_irq_valid_i              (dbg_irq_i),
 
-    .mailbox_evt_i                (mailbox_evt_i),
+
+    .mailbox_evt_i,
+    .ext_evt_1_i,
+    .ext_evt_2_i,
+    .ext_evt_3_i,
 
     .data_slave_aw_addr_i         (slv_aw_addr_i),
     .data_slave_aw_prot_i         (slv_aw_prot_i),
@@ -367,6 +375,9 @@ module pulp_cluster_sync (
   output logic        busy_o,
   input  logic [N_CORES-1:0] dbg_irq_i,
   input  logic        mailbox_evt_i,
+  input  logic        ext_evt_1_i,
+  input  logic        ext_evt_2_i,
+  input  logic        ext_evt_3_i,
   AXI_BUS.Slave       slv,
   AXI_BUS.Master      mst
 );
@@ -381,7 +392,10 @@ module pulp_cluster_sync (
     .busy_o,
     .dbg_irq_i,
 
-    .mailbox_evt_i        (mailbox_evt_i),
+    .mailbox_evt_i,
+    .ext_evt_1_i,
+    .ext_evt_2_i,
+    .ext_evt_3_i,
 
     .slv_aw_addr_i        (slv.aw_addr),
     .slv_aw_prot_i        (slv.aw_prot),
@@ -508,6 +522,9 @@ module pulp_cluster_async (
   output logic          busy_o,
   input  logic [N_CORES-1:0] dbg_irq_i,
   input  logic          mailbox_evt_i,
+  input  logic          ext_evt_1_i,
+  input  logic          ext_evt_2_i,
+  input  logic          ext_evt_3_i,
   AXI_BUS_ASYNC.Slave   slv,
   AXI_BUS_ASYNC.Master  mst
 );
@@ -523,6 +540,9 @@ module pulp_cluster_async (
     .dbg_irq_i,
 
     .mailbox_evt_i        (mailbox_evt_i),
+    .ext_evt_1_i          (ext_evt_1_i),
+    .ext_evt_2_i          (ext_evt_2_i),
+    .ext_evt_3_i          (ext_evt_3_i),
 
     .slv_aw_addr_i        (slv.aw_addr),
     .slv_aw_prot_i        (slv.aw_prot),

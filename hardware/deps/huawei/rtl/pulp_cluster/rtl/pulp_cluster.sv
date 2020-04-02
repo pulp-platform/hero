@@ -143,7 +143,11 @@ module pulp_cluster
 
   input logic  [NB_CORES-1:0]               dbg_irq_valid_i,
 
+  /* EXTERNAL EVTS */
   input logic                              mailbox_evt_i,
+  input logic                              ext_evt_1_i,
+  input logic                              ext_evt_2_i,
+  input logic                              ext_evt_3_i,
 
   // AXI4 SLAVE
   //***************************************
@@ -345,6 +349,9 @@ module pulp_cluster
   logic [EVNT_WIDTH-1:0]             s_events_data;
 
   logic                              s_mailbox_evt;
+  logic                              s_ext_evt_1;
+  logic                              s_ext_evt_2;
+  logic                              s_ext_evt_3;
 
   // Signals Between CORE_ISLAND and INSTRUCTION CACHES
   logic [NB_CORES-1:0]                        instr_req;
@@ -800,9 +807,12 @@ module pulp_cluster
   );
 
 
-  /* MAILBOX EVENT */
+  /* MAILBOX EVENT  PLUS 3 EXTERNAL EVENTS */
 
   assign s_mailbox_evt = mailbox_evt_i;
+  assign s_ext_evt_1   = ext_evt_1_i;
+  assign s_ext_evt_2   = ext_evt_2_i;
+  assign s_ext_evt_3   = ext_evt_3_i;
 
   cluster_peripherals #(
     .NB_CORES       ( NB_CORES       ),
@@ -834,6 +844,9 @@ module pulp_cluster
     .dma_cl_irq_i           ( s_dma_cl_irq                       ),
 
     .mailbox_evt_i          ( s_mailbox_evt                      ),
+    .ext_evt_1_i            ( s_ext_evt_1                        ),
+    .ext_evt_2_i            ( s_ext_evt_2                        ),
+    .ext_evt_3_i            ( s_ext_evt_3                        ),
 
     .soc_periph_evt_ready_o ( s_events_ready                     ),
     .soc_periph_evt_valid_i ( s_events_valid                     ),

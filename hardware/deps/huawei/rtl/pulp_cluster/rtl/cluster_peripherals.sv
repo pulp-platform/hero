@@ -78,7 +78,12 @@ module cluster_peripherals
   input  logic [NB_CORES-1:0]         dbg_req_i,
   output logic [NB_CORES-1:0]         dbg_req_o,
 
+  /* EXTERNAL EVTS */
   input  logic                        mailbox_evt_i,
+  input logic                         ext_evt_1_i,
+  input logic                         ext_evt_2_i,
+  input logic                         ext_evt_3_i,
+
 
   // SRAM SPEED REGULATION --> TCDM
   output logic [1:0]                  TCDM_arb_policy_o,
@@ -227,9 +232,13 @@ module cluster_peripherals
     .rst_ni                 ( rst_ni                 ),
     .test_mode_i            ( test_mode_i            ),
 
+    .mailbox_evt_i          ( mailbox_evt_i          ),  
+    .ext_evt_1_i            ( ext_evt_1_i            ),
+    .ext_evt_2_i            ( ext_evt_2_i            ),
+    .ext_evt_3_i            ( ext_evt_3_i            ),
+
     .acc_events_i           ( s_acc_events           ),
     .dma_events_i           ( s_dma_events           ),
-    .mailbox_evt_i          ( mailbox_evt_i          ),  
     .timer_events_i         ( s_timer_events         ),
     .cluster_events_i       ( s_cluster_events       ),
 

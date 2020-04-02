@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
+- Add three event lanes for external events, mapped to the cluster event map.
 
 ### Changed
 - Decrease L2 size to 128 KiB.
