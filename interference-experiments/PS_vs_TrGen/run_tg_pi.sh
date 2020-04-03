@@ -1,7 +1,5 @@
-#!/mnt/bin/zsh
+#!bin/zsh
 
-
-PATH=$PATH:/mnt/bin:/mnt/usr/bin
 
 # Runname is just a unique name each time the script is started.
 RUNNAME=TrafGenDump_$(date +"%Y%m%d-%H%M%S")
@@ -41,7 +39,7 @@ GENERIC_CMDRAM_WORD3_HIPRIO=0xF0030
 # For experiments
 EXPERIMENT_SAMPLES=1000
 EXPERIMENT_MAX_TRAFGENS=2   # System freezes with more than two.
-EXPERIMENT_BENCHMARK_PATH=/mnt/bjoernf/trafgen/rootfs-sdcard/bjoernf/mmaxim_2mb
+EXPERIMENT_BENCHMARK_PATH=TODO_ADAPT_ME
 EXPERIMENT_BENCHMARKS=(seq.elf rand.elf axpy.elf 2mm.elf 3mm.elf atax.elf bicg.elf conv2d.elf gemm.elf)
 EXPERIMENT_QoS_CMDRAM_WORD3S=($GENERIC_CMDRAM_WORD3_LOPRIO $GENERIC_CMDRAM_WORD3_HIPRIO)
 
@@ -70,7 +68,7 @@ get_addr()
     local ENTRY_LEN=$2
     local MAJOR_OFF=$3
     local MINOR_OFF=$4
-    
+
     local THIS_ADDR=0x$(echo "obase=16;ibase=16;$BASE_ADDR + ($ENTRY_LEN * $MAJOR_OFF) + $MINOR_OFF" | bc)
     echo $THIS_ADDR
     return
@@ -102,7 +100,7 @@ write_word()
     local MINOR_OFF=$4
     local WRITEWORD=$5
     local THIS_ADDR=$(get_addr $BASE_ADDR $ENTRY_LEN $MAJOR_OFF $MINOR_OFF)
-    
+
     #echo "Would write $WRITEWORD to $THIS_ADDR"
     devmem $THIS_ADDR 32 $WRITEWORD
 }
@@ -114,7 +112,7 @@ read_word()
     local MAJOR_OFF=$3
     local MINOR_OFF=$4
     local THIS_ADDR=$(get_addr $BASE_ADDR $ENTRY_LEN $MAJOR_OFF $MINOR_OFF)
-    
+
     echo $(devmem $THIS_ADDR 32)
     return
 }
@@ -163,19 +161,19 @@ for BENCHMARK in $EXPERIMENT_BENCHMARKS; do
         write_word $TG0_CMDRAM_READ_BASE 10 0 4 0x800044FF
         write_word $TG0_CMDRAM_READ_BASE 10 0 8 0x00000000
         write_word $TG0_CMDRAM_READ_BASE 10 0 C $QOS
-        
+
         # Configure traffic generator 1
         write_word $TG1_CMDRAM_READ_BASE 10 0 0 0x78000000
         write_word $TG1_CMDRAM_READ_BASE 10 0 4 0x800044FF
         write_word $TG1_CMDRAM_READ_BASE 10 0 8 0x00000000
         write_word $TG1_CMDRAM_READ_BASE 10 0 C $QOS
-        
+
         # Configure traffic generator 2
         write_word $TG2_CMDRAM_READ_BASE 10 0 0 0x78000000
         write_word $TG2_CMDRAM_READ_BASE 10 0 4 0x800044FF
         write_word $TG2_CMDRAM_READ_BASE 10 0 8 0x00000000
         write_word $TG2_CMDRAM_READ_BASE 10 0 C $QOS
-        
+
         # Configure traffic generator 3
         write_word $TG3_CMDRAM_READ_BASE 10 0 0 0x78000000
         write_word $TG3_CMDRAM_READ_BASE 10 0 4 0x800044FF
@@ -203,7 +201,7 @@ for BENCHMARK in $EXPERIMENT_BENCHMARKS; do
             fi
 
             run_experiment $EXPERIMENT_BENCHMARK $NUM_TRAFGENS $QOS
-            
+
             sleep 1
 
             # Stop all traffic generators.
@@ -211,7 +209,7 @@ for BENCHMARK in $EXPERIMENT_BENCHMARKS; do
             write_word $TG1_MASTERCONTROL_BASE 0 0 0 $GENERIC_MASTERCONTROL_DISABLELOOP
             write_word $TG2_MASTERCONTROL_BASE 0 0 0 $GENERIC_MASTERCONTROL_DISABLELOOP
             write_word $TG3_MASTERCONTROL_BASE 0 0 0 $GENERIC_MASTERCONTROL_DISABLELOOP
-            
+
             sleep 1
 
         done;
