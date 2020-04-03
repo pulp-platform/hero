@@ -25,7 +25,7 @@ execution times for the PUT under that condition. The naming scheme of the
 output files indicate:
 
 For TG as PUT:
-    TrafGenDump\_<TIME>\_<PI>\_<FREQ>MHz\_ops=<BURSTS>\_psvspl\_datadump.txt
+    `TrafGenDump\_<TIME>\_<PI>\_<FREQ>MHz\_ops=<BURSTS>\_psvspl\_datadump.txt`
     where TIME is the time the script was launched, PI is the interfering
     benchmark (above mentioned .elf files) or none for isolation, FREQ is the
     frequency of the traffic generator, and BURSTS is the number of bursts to be
@@ -33,7 +33,7 @@ For TG as PUT:
     end-to-end latency for the traffic generator memory accesses.
 
 For TG as PI:
-    TrafGenDump\_<TIME>\_<PUT>\_<TGs>trafgen\_word3<QOS>\_datadump.txt
+    `TrafGenDump\_<TIME>\_<PUT>\_<TGs>trafgen\_word3<QOS>\_datadump.txt`
     where TIME is the time the script was launched, PUT is the benchmark whose
     times are measured (each line in the file is a sampled execution time of
     this benchmark), TGs is the number of traffic generators that are
