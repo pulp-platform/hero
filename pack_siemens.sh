@@ -71,6 +71,21 @@ copy_git_files apps openmp-examples pipeline interference-experiments
 cd "$SRC"
 copy_git_files Config.in board buildroot configs external.desc external.mk package petalinux
 
+# Bitstreams: import from HERO builds.
+cd "$TMP_DST"
+mkdir bitstreams
+cd ~hero # make sure this directory is mounted
+cp ~hero/bitstreams/siemens-m04-deliverable/* bitstreams/
+
+# Set PULP bitstream as default for Buildroot.
+echo 'BR2_HERO_BITSTREAM="$(BR2_EXTERNAL_HERO_PATH)/bitstreams/pulp.bit"' >> "$TMP_DST/local.cfg"
+
+# SD card images: import from HERO builds.
+cd "$TMP_DST"
+mkdir images
+cd ~hero # make sure this directory is mounted
+cp -r ~hero/images/siemens-m04-deliverable/* images/
+
 # Create archive from temporary destination directory.
 sleep 1 # give Git time to settle
 tar -C "$TMP_DST" -czf "$SRC/hero_siemens.tar.gz" .
