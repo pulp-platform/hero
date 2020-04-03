@@ -6,6 +6,32 @@ HERO offers a complete hardware and software platform which advances the state o
 
 This repository contains the top-level logic and is the entry point to the HERO infrastructure. All dependencies and the board images or simulation setups can be built from here. HERO aims to offer a complete solution with minimum prerequisites.
 
+## Contents of Top-Level Directory
+- `apps`: Utility applications for the host CPU
+- `bitstreams`: Pre-built bitstreams
+- `board`: Board-specific settings for Buildroot
+- `buildroot`: The Buildroot repository
+- `Config.in`: Options file for Buildroot
+- `configs`: Configurations for Buildroot
+- `env`: Environment-defining shell scripts
+- `external.desc`: Meta file for Buildroot
+- `external.mk`: Meta file for Buildroot
+- `hardware`: Source code and scripts for the hardware
+- `images`: Pre-built image files for the boot partition of an SD card
+- `install`: Target directory to which all development-machine software should be installed
+- `interference-experiments`: Source code and scripts for the interference experiments
+- `local.cfg`: Local configuration for Buildroot
+- `Makefile`: Defines build targets for all components
+- `openmp-examples`: Heterogeneous OpenMP example applications
+- `package`: Project-specific Buildroot packages
+- `petalinux`: Scripts and patches to build PetaLinux
+- `pipeline`: TODO
+- `PREREQUISITES.md`: Prerequisites for using this repository
+- `pulp`: Software for PULP
+- `support`: Host software to interact with PULP
+- `toolchain`: Configuration and sources for the toolchains
+
+
 ## Getting Started
 
 ### Prerequisites
