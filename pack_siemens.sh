@@ -55,9 +55,9 @@ git submodule update --init --recursive
 cd "$SRC"
 copy_git_files support
 
-# Setup script: copy to destination.
-cd "$SRC"
-rsync -av setup.sh "$TMP_DST/"
+## Setup script: copy to destination.
+#cd "$SRC"
+#rsync -av setup.sh "$TMP_DST/"
 
 # ReadMe and Prerequisites: copy to destination.
 cd "$SRC"
