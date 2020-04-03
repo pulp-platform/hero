@@ -1,5 +1,35 @@
 #!/usr/bin/env bash
 
+# Parse options.
+BUILD=1
+CHECKOUT=1
+PARAMS=""
+while (( "$#" )); do
+    case "$1" in
+        --no-build)
+            BUILD=0
+            shift 1
+            ;;
+        --no-checkout)
+            CHECKOUT=0
+            shift 1
+            ;;
+        --) # end argument parsing
+            shift
+            break
+            ;;
+        -*|--*)
+            echo "Error: Unsupported argument '$1'" >&2
+            exit 1
+            ;;
+        *) # preserve positional arguments
+            PARAMS="$PARAMS $1"
+            shift
+            ;;
+    esac
+done
+eval set -- "$PARAMS"
+
 # Initialize environment
 set -e
 if [ -z "$HERO_INSTALL" ]; then
@@ -33,14 +63,28 @@ for m in \
     debug-bridge2 \
     debug-bridge; \
 do
-    plpbuild --m $m checkout build --stdout
+    cmd=""
+    if [ $CHECKOUT = 1 ]; then
+        cmd="$cmd checkout"
+    fi
+    if [ $BUILD = 1 ]; then
+        cmd="$cmd build"
+    fi
+    plpbuild --m $m $cmd --stdout
 done
-plpbuild --g runtime checkout --stdout
+if [ $CHECKOUT = 1 ]; then
+    plpbuild --g runtime checkout --stdout
+fi
+
+if [ $BUILD != 1 ]; then
+    exit 0
+fi
 
 # Building `pulp-rt` will fail, but this is to be expected.
 set +e
 plpbuild --m pulp-rt build --stdout
 echo 'NOTE: The failure of building `pulp-rt` at this point is known and can be tolerated.'
+set -e
 
 # Now that the `pulp-rt` headers are installed, we can go ahead and install `archi-host` followed by
 # a re-installation of the entire SDK.  At some point, this will fail because two of the runtime
