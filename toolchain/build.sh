@@ -90,7 +90,16 @@ $HERO_INSTALL/bin/ct-ng upgradeconfig > /dev/null
 
 # # deduce tuple, sysroot
 TUPLE=$($HERO_INSTALL/bin/ct-ng -s show-tuple)
+echo "$TUPLE"
+if [ -z "$TUPLE" ]; then
+    echo "Failed to get tuple for config $1!"
+    exit 1
+fi
 ARCH=$(echo $TUPLE | cut -f1 -d'-')
+if [ -z "$ARCH" ]; then
+    echo "Failed to deduce architecture from tuple $TUPLE with config $1!"
+    exit 1
+fi
 SYSROOT=$HERO_INSTALL/$TUPLE/sysroot
 
 # check previous install and clear sysroot between builds if exists
