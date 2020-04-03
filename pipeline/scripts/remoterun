@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# This script loops autogen remotely and gets the results 
+
+if [ $# -ne 2 ]
+then
+	echo 'Please provide the run and file name'
+	exit 1
+fi
+
+redir=2> /dev/null
+
+# Loop autogen.sh on the platform
+remotehost=$(sed -n '1 p' config)
+remotedir=$(sed -n '2 p' config)
+iterations=$(sed -n '6 p' config)
+run=$1
+file=$2
+
+
+ssh ${remotehost} "pkill elf" 2> /dev/null
+echo "Running $2"
+for i in $(seq 1 ${iterations})
+do
+	ssh ${remotehost} "\
+		cd ${remotedir};\
+    echo "++STRT++" >> ${file};\
+    ./autogen.sh >> ${file};\
+    echo "--STOP--" >> ${file}" 2> /dev/null
+	echo -ne "Iterations performed: ${i}\r"
+done
+
+# Copy results to localhost
+scp ${remotehost}:${remotedir}/${file} ./temporary.txt
+cat ./temporary.txt > ./data/${run}/${file}
+rm ./temporary.txt
+ssh ${remotehost} "\
+	cd ${remotedir};\
+	rm ${file}" 2> /dev/null

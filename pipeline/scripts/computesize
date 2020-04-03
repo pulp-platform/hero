@@ -1,0 +1,60 @@
+#!/bin/python3
+# This script computes and prints the problem size to fill a given memory space
+
+import sys
+
+float_size=4
+try:
+	prog_name=sys.argv[1]
+except IndexError:
+	print("Please provide a program name and memory size in KB")
+	sys.exit()
+try:
+	mem_size=int(sys.argv[2])
+except IndexError:
+	print("Please also provide a memory size in KB")
+	sys.exit()
+
+mem_size*=1024
+
+if prog_name == '2mm':
+	a = 5 
+	b = 0
+elif prog_name == '3mm':
+	a = 7
+	b = 0
+elif prog_name == 'atax':
+	a = 1
+	b = 3
+elif prog_name == 'axpy':
+	a = 0
+	b = 2
+elif prog_name == 'bicg':
+	a = 1
+	b = 4
+elif prog_name == 'conv2d':
+	a = 2
+	b = 0
+elif prog_name == 'gemm':
+	a = 3
+	b = 0
+elif prog_name == 'pirand':
+	print(mem_size)
+	sys.exit()
+elif prog_name == 'piseq':
+	print(mem_size)
+	sys.exit()
+elif prog_name == 'rand':
+	a = 0
+	b = 2
+elif prog_name == 'seq':
+	a = 0
+	b = 2
+else:
+	print('Did not recogize program')
+	sys.exit()
+
+if a == 0:
+	print(int(mem_size/(b*float_size)))
+else:
+	print(int((-b+(b**2+4*a*mem_size/float_size)**0.5)/(2*a)))

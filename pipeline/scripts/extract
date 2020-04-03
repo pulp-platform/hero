@@ -1,0 +1,70 @@
+#!/bin/python3
+
+# This script extract multiple run files into a 
+# single hyperdimensional array and saves it
+
+import numpy as np
+import pickle
+import sys
+import os
+
+# Read configuration file
+with open('config', 'r') as f:
+	config = f.read().split('\n')
+
+name = config[6]
+files = os.listdir('data/'+name)
+sizes = []
+for f in files:
+	sizes.append(int(f.split('KB')[0]))
+
+sizes.sort()
+
+memorysize = [str(size)+'KB' for size in sizes]
+foreground = config[3].split(' ')
+background = config[4].split(' ')
+if background == ['']:
+	background = ['none']
+else:
+	background.insert(0, 'none')
+	
+iterations = int(config[5])
+runfiles = []
+
+for size in memorysize:
+	runfiles.append(size+'_'+str(iterations)+'iter.txt')
+
+# Generate labels and tensor
+labels = [memorysize, foreground, background, np.arange(0, iterations)]
+
+tensor=np.zeros([len(memorysize), len(foreground), len(background), iterations])
+
+period = (len(foreground)*len(background)) + 2
+
+for r, run in enumerate(runfiles):
+	bc, fc, ic = 0, 0, 0
+	with open('data/'+name+'/'+run, 'r') as f:
+		data=f.read().splitlines()
+
+	for i, item in enumerate(data):
+		if item == '++STRT++':
+			if data[i+period-1] != '--STOP--':
+				sys.exit("ERROR: Data corrupt")
+			continue
+		elif item == '--STOP--':
+			continue
+		
+		tensor[r, fc, bc, ic]=float(item)
+		fc += 1
+		if fc == len(foreground):
+			fc = 0
+			bc += 1
+			if bc == len(background):
+				bc = 0
+				ic += 1
+
+# Save the extracted data
+with open('results/'+name+'/tensor.pkl', 'wb') as f:
+	pickle.dump(tensor, f)
+with open('results/'+name+'/labels.pkl', 'wb') as f:
+	pickle.dump(labels, f)

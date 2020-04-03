@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# This script generates a list of commands to be executed on the Zynq board
+remotehost=$(sed -n '1 p' config)
+remotedir=$(sed -n '2 p' config)
+programs=($(sed -n '4 p' config))
+noise=($(sed -n '5 p' config))
+suffix=(.elf _noise.elf)
+
+out=scripts/autogen.sh
+rm -f ${out} 
+
+echo "#!/bin/sh" >> ${out}
+echo "# This script is generated automatically" >> ${out}
+echo 'export PATH=$PATH:/mnt/usr/bin' >> ${out}
+echo "pkill .*elf" >> ${out}
+echo "echo 1 > flag" >> ${out}
+
+# Fix foreground programs on CPU 1, background on CPU 2 and 3
+# and run them with high priority
+fore="chrt -f 42 taskset 0x1"
+back1="chrt -f 1 taskset 0x2"
+back2="chrt -f 1 taskset 0x4"
+back3="chrt -f 1 taskset 0x8"
+
+# First run tasks without interference
+for program in ${programs[*]}
+do
+	echo "${fore} ./${program}${suffix[0]}" >> ${out}
+done
+
+# Then run them with interference
+for backprog in ${noise[*]}
+do
+	echo "echo 0 > flag" >> ${out}
+	echo "${back1} ./${backprog}${suffix[1]} &" >> ${out}
+	echo "${back2} ./${backprog}${suffix[1]} &" >> ${out}
+	echo "${back3} ./${backprog}${suffix[1]} &" >> ${out}
+	for program in ${programs[*]}
+	do
+		echo "${fore} ./${program}${suffix[0]}" >> ${out}
+	done
+	#echo "pkill ${backprog}${suffix[1]}" >> ${out}
+	echo "pkill .*elf" >> ${out}
+	echo "sleep 0.5" >> ${out}
+done
+
+# Copy the autogen.sh to the platform and clean up
+scp ${out} ${remotehost}:${remotedir}/
+rm ${out}
+ssh ${remotehost} "\
+	cd ${remotedir};\
+	chmod +x autogen.sh"
+
+
+

@@ -1,0 +1,36 @@
+#!/bin/python3
+
+import subprocess
+import sys
+import time
+
+start = time.time()
+
+# Read configuration file
+with open('config', 'r') as f:
+	config = f.read().splitlines()
+
+sizes = [int(size) for size in config[2].split(' ')]
+iterations = int(config[5])
+name = config[6]
+
+# Generate folders for data and results
+#subprocess.call(['rm', '-rf', 'data/'+name])
+subprocess.call(['mkdir', 'data/'+name])
+subprocess.call(['mkdir', 'results/'+name])
+
+# Compile, generate script and run for every problem size
+for size in sizes:
+	if subprocess.call(['scripts/compile', str(size)]) != 0:
+		sys.exit("ERROR: Compilation failed")
+
+	subprocess.call(['scripts/autogenerate'])
+
+	subprocess.call(['scripts/remoterun', name, str(size)+'KB_'+str(iterations)+'iter.txt'])
+
+# Extract data into tensor
+subprocess.call(['scripts/extract'])
+
+# Display how much time it took
+finish = time.time()
+print('Run took ', round(finish-start), ' seconds')

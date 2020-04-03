@@ -1,0 +1,46 @@
+root@172.31.182.80
+/mnt/mmaxim/crosscompiled
+32 256 1024 2048
+2mm 3mm atax axpy bicg conv2d gemm rand seq
+axpy rand seq
+128
+2020-02-24_mondaymorning_run
++++++++++++++++++++++++++++++++++++++++++++++
+++   Line 1: Remote platform               ++
+++   Line 2: Directory on platform         ++ 
+++   Line 3: List of memory sizes in KB    ++
+++   Line 4: List of foreground programs   ++
+++   Line 5: List of background programs   ++
+++   Line 6: Number of runs							   ++
+++   Line 7: Data file name							   ++
++++++++++++++++++++++++++++++++++++++++++++++
+
+2mm 3mm atax axpy bicg conv2d gemm rand seq
+32 64 128 256 512 1024 2048
+
+ZC706:  Cortex A9,  dual-core private L1 with 32KB data and 32KB instructions, shared L2  512KB
+ZCU102: Cortex A53, quad-core private L1 with 32KB data and 32KB instructions, shared L2 1024KB
+
+ZC706:
+root@172.31.182.86
+/mnt/storage/mmaxim/crosscompiled
+
+ZCU102:
+root@172.31.182.80
+/mnt/mmaxim/crosscompiled
+
+List of supported programs:
+2mm 3mm atax axpy bicg conv2d gemm pirand piseq rand seq
+2mm 3mm atax axpy bicg conv2d gemm rand seq
+
+pirand and piseq do not terminate, use as background programs only!
+32 64 128 256 512 1024 2048
+100 150 200 250 300 350 400 450 500 550
+
+Address and directory of the Zynq Board:
+root@172.31.182.86
+/mnt/storage/mmaxim/crosscompiled
+
+Address of the ZCU102 Board:
+root@172.31.182.80
+/mnt/mmaxim/crosscompiled
