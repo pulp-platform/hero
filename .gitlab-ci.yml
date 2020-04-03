@@ -2,16 +2,35 @@ variables:
   GIT_DEPTH: 24
   GIT_SUBMODULE_STRATEGY: recursive
   HERO_INSTALL: '$CI_PROJECT_DIR/install'
+  TEMP_JOB_DIR: '$CI_PROJECT_DIR/archive/hero_gitlab_ci_$CI_JOB_ID'
 
 before_script:
   - env
   - mkdir -p $HERO_INSTALL
+  - mkdir -p "$TEMP_JOB_DIR"
 
 after_script:
   - chmod -R u+w $HERO_INSTALL
+  - chmod -R u+w "$TEMP_JOB_DIR"
+  - rm -rf "$TEMP_JOB_DIR"
 
 stages:
+  - build_test_archive
   - build_har_olinux_exilzcu102
+
+build_test_archive:
+  stage: build_test_archive
+  script:
+    - ./pack_siemens.sh
+    - cd "$TEMP_JOB_DIR"
+    - cp "$CI_PROJECT_DIR/hero_siemens.tar.gz" .
+    - tar xf hero_siemens.tar.gz && rm hero_siemens.tar.gz
+    - export HERO_INSTALL="$(pwd)/install"
+    - mkdir -p "$HERO_INSTALL"
+    #- ./setup.sh
+  artifacts:
+    paths:
+      - hero_siemens.tar.gz
 
 build_har_olinux_exilzcu102:
   stage: build_har_olinux_exilzcu102
