@@ -9,7 +9,7 @@ In order to reproduce the results, four steps are required:
 3. Specify evaluation options, such as which memory sizes, PUTs and PIs are of interest to be plotted;
 4. Run the evaluation script to obtain the figures.
 
-The pipeline implements the cross-compilation, remote deployment and execution,transferring of results, as well as the final plotting. As such, the scripts are intended to be executed on a workstation machine, using SSH to interact with the ZCU102 board. All interactions with the board are scripted, and do not need to be performed manually. To enable this, the pipeline must be properly pre-configured as outlined [further below](# `config`).
+The pipeline implements the cross-compilation, remote deployment and execution,transferring of results, as well as the final plotting. As such, the scripts are intended to be executed on a workstation machine, using SSH to interact with the ZCU102 board. All interactions with the board are scripted, and do not need to be performed manually. To enable this, the pipeline must be properly pre-configured as outlined further below.
 
 A high-level pseudo-code for the experiment execution pipeline looks like this:
 ```
