@@ -26,7 +26,7 @@ build_test_archive:
     - tar xf hero_siemens.tar.gz && rm hero_siemens.tar.gz
     - export HERO_INSTALL="$(pwd)/install"
     - mkdir -p "$HERO_INSTALL"
-    - ./setup.sh
+    #- ./setup.sh
   artifacts:
     paths:
       - hero_siemens.tar.gz
