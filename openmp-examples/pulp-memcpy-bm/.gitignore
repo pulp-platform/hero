@@ -1,0 +1,6 @@
+/libhero-target.a
+/libhero-target.so
+/pulp-memcpy-bm
+dma-perf.o
+hero-dma-perf
+target.so
