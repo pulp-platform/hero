@@ -15,43 +15,43 @@ stages:
 
 build_har_olinux_exilzcu102:
   stage: build_har_olinux_exilzcu102
-  script: 
-    ### Bitstream
-    - bash -c ./.gitlab-ci.d/conditionally_build_bitstream.sh
-    ### Toolchains
-    - make har-exilzcu102
-    ### Simulator
-    - make -C hardware
-    - cd hardware/vsim
-    - ./compile.sh
-    - cd ../..
-    ### test benchmarks: compile
-    - source env/exilzcu102.sh
-    - >
-      for d in openmp-examples/polybench-acc/*/; do
-        if [ $(basename $d) = "common" ]; then
-          continue
-        fi
-        make -C $d only=pulp default-as=host clean all
-        make -C $d only=pulp clean all
-        make -C $d default-as=host clean all
-        make -C $d default-as=pulp clean all
-      done
-    ### test benchmarks: simulate
-    - source env/esim-exilzcu102.sh
-    - >
-      for d in openmp-examples/polybench-acc/*/; do
-        if [ $(basename $d) = "common" ]; then
-          continue
-        fi
-        make -C $d only=pulp clean all
-        .gitlab-ci.d/verify-bench.sh $(basename $d)
-      done
+  script:
+    #### Bitstream
+    #- bash -c ./.gitlab-ci.d/conditionally_build_bitstream.sh
+    #### Toolchains
+    #- make har-exilzcu102
+    #### Simulator
+    #- make -C hardware
+    #- cd hardware/vsim
+    #- ./compile.sh
+    #- cd ../..
+    #### test benchmarks: compile
+    #- source env/exilzcu102.sh
+    #- >
+    #  for d in openmp-examples/polybench-acc/*/; do
+    #    if [ $(basename $d) = "common" ]; then
+    #      continue
+    #    fi
+    #    make -C $d only=pulp default-as=host clean all
+    #    make -C $d only=pulp clean all
+    #    make -C $d default-as=host clean all
+    #    make -C $d default-as=pulp clean all
+    #  done
+    #### test benchmarks: simulate
+    #- source env/esim-exilzcu102.sh
+    #- >
+    #  for d in openmp-examples/polybench-acc/*/; do
+    #    if [ $(basename $d) = "common" ]; then
+    #      continue
+    #    fi
+    #    make -C $d only=pulp clean all
+    #    .gitlab-ci.d/verify-bench.sh $(basename $d)
+    #  done
   artifacts:
     paths:
-    - install
-    - openmp-examples
-    - pulp/sdk
-    - hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1/hero_exilzcu102_wrapper.bit
-    - hardware/fpga/hero_exilzcu102/hero_exilzcu102.sdk/hero_exilzcu102_wrapper.hdf
-    - local.cfg
+      #- install
+      #- openmp-examples
+      #- pulp/sdk
+      #- hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1/hero_exilzcu102_wrapper.bit
+      #- hardware/fpga/hero_exilzcu102/hero_exilzcu102.sdk/hero_exilzcu102_wrapper.hdf
+      #- local.cfg
