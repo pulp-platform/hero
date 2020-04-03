@@ -90,8 +90,18 @@ $HERO_INSTALL/bin/ct-ng upgradeconfig > /dev/null
 
 # # deduce tuple, sysroot
 TUPLE=$($HERO_INSTALL/bin/ct-ng -s show-tuple)
+echo "tuple: '$TUPLE'"
+if [ -z "$TUPLE" ]; then
+    echo "Failed to get tuple for config $1!"
+    exit 1
+fi
 ARCH=$(echo $TUPLE | cut -f1 -d'-')
+if [ -z "$ARCH" ]; then
+    echo "Failed to deduce architecture from tuple $TUPLE with config $1!"
+    exit 1
+fi
 SYSROOT=$HERO_INSTALL/$TUPLE/sysroot
+echo "sysroot: '$SYSROOT'"
 
 # check previous install and clear sysroot between builds if exists
 if [ -x "$HERO_INSTALL/bin/$TUPLE-gcc" ]; then
@@ -128,6 +138,7 @@ if [ ! -d $SYSROOT ]; then
 else
     SYSROOT=$(readlink -f $SYSROOT)
 fi
+echo "sysroot: '$SYSROOT'"
 
 # fixup generic hardcoded paths in installed host toolchain
 # FIXME: this should be done properly by crosstool-ng
