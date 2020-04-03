@@ -22,7 +22,7 @@ copy_git_files hardware
 
 # Hardware: Prepare simulation script.
 cd "$TMP_DST/hardware"
-make vsim/compile.tcl vcs/compile.sh
+make vsim/compile.tcl
 
 # Hardware: Remove top-level Makefile, Bender binary, and Bender from compile script.
 rm Makefile bender
