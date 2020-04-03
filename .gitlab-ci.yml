@@ -16,6 +16,7 @@ stages:
 build_har_olinux_exilzcu102:
   stage: build_har_olinux_exilzcu102
   script:
+    - true
     #### Bitstream
     #- bash -c ./.gitlab-ci.d/conditionally_build_bitstream.sh
     #### Toolchains
