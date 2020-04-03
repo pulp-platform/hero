@@ -65,7 +65,7 @@ copy_git_files README.md PREREQUISITES.md
 
 # Apps (host, OpenMP examples, pipeline): copy to destination.
 cd "$SRC"
-copy_git_files apps openmp-examples pipeline
+copy_git_files apps openmp-examples pipeline interference-experiments
 
 # Buildroot files: copy to destination.
 cd "$SRC"
