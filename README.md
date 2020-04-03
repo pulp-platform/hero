@@ -19,6 +19,10 @@ export HERO_INSTALL=<your_path>
 ```
 We recommend you create an `install` subdirectory in this repository and set `HERO_INSTALL` to that.
 
+### Automated Installation
+For convenience, the `setup.sh` script in this folder can be executed to build all software components.  The manual setup of those components is explained below.  The `setup.sh` script does not generate a bitstream but uses the packaged `bitstreams/default.bit` to generate an SD card image.  After the script has completed, one can deploy the image files to the boot partition of an SD card (as described in the *Xilinx ZCU102* section).
+
+
 ### Toolchains
 
 HERO has configurations for multiple base toolchains. The project relies on Crosstool-NG for easily building the different toolchains. The toolchains are installed to the `HERO_INSTALL` directory.
