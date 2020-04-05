@@ -1413,20 +1413,9 @@ module pulp_cluster
     // pragma translate_on
   end
 
-  /* event synchronizers */
-  dc_token_ring_fifo_dout #(
-    .DATA_WIDTH   ( EVNT_WIDTH            ),
-    .BUFFER_DEPTH ( DC_SLICE_BUFFER_WIDTH )
-  ) u_event_dc (
-    .clk          ( clk_i                    ),
-    .rstn         ( s_rst_n                  ),
-    .data         ( s_events_data            ),
-    .valid        ( s_events_valid           ),
-    .ready        ( s_events_ready           ),
-    .write_token  ( ext_events_writetoken_i  ),
-    .read_pointer ( ext_events_readpointer_o ),
-    .data_async   ( ext_events_dataasync_i   )
-  );
+  assign s_events_data  = '0;
+  assign s_events_valid = 1'b0;
+  assign ext_events_readpointer_o = '0;
   assign s_events_async = s_events_valid;
 
   assign dma_pe_evt_valid_o = 1'b0;
