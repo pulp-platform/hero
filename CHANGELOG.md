@@ -11,8 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Decrease L2 size to 128 KiB.
 - `pulp_cluster`:
   - Decrease TCDM size to 128 KiB.
+- Modified APU-Dispatcher, Decoder, FPU_Demux allow back to back issue of up to 3 cycle fpu instructions without stalling:
+	- Modified the FSM inside the FPU DEMUX such that it won't stop new requests to wait for the previous to complete.
+	- Changed how the latency is encoded for fpu instructions inside the decoder. We now use the latency = 0 to encode instructions that takes more than 3 cycles to complete.
+	- Modified the APU_Dispatcher to allow up to 3 cycle latency fp instructions to be issued back to back. Instructions with latency = 0 (division and instr. that takes more than 3 cycles) now always stall the pipeline.
 
 ### Fixed
+- Added is_decoding signal to mask read_dependency inside the APU_Dispatcher. This fixed a bug that falsly detected a read dependency when a fetch_fail occured.
 
 ### Removed
 - PULP runtime: Remove broken `rt_*_alloc_align` functions.  These functions did not correctly
