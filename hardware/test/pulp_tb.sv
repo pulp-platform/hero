@@ -398,21 +398,43 @@ module pulp_tb #(
     wait (rst_n);
     @(posedge clk);
 
-    // run dm tests instead of regular software tests
-    if (RUN_DM_TESTS) begin
-      // TODO: multiple write_axi seem to get stuck.
-      // make cores loop on boot addr
-      // disable icache for debug module test
-      // write_axi(32'h1020_1400, 128'h00000000_00000000_00000000_00000000);
-      // 1c008080
-      //write_axi(32'h1c00_8080, 128'h00000000_00000000_00000000_1c008080);
-      // enable all cores (TODO: what to do when multiple clusters)
-      //write_axi(32'h1020_0008, 128'h00000000_000000ff_00000000_00000000);
-      // TODO: remove this workaround when write_axi is fixed
-      write_axi(32'h1020_0008, 64'h00000000_00000001);
+    // run openocd tests instead of regular software tests
+    if (RUN_CUSTOM_TESTS == "openocd") begin //TODO: make this plusargs
+    `ifndef USE_JTAG_DPI
+      $fatal(1, "JTAG DPI support was not compiled in. Add +define+USE_JTAG_DPI to VLOG_ARGS.");
+    `endif
+      // disable icache (not needed, already default)
+      write_axi(32'h1020_1400, 128'h00000000_00000000_00000000_00000000);
 
-      dm_if.run_dm_tests(N_CLUSTERS, pulp_cluster_cfg_pkg::N_CORES, error,
+      // TODO: make core loop on boot addr. We don't have a bootrom so we assume
+      // the user initialized the ram already somehow
+      write_axi(32'h1c00_0080, 128'h00000000_00000000_00000000_0000006f);
+
+      // enable jtag bridge. The dpi model will start blocking on the first jtag clock tick
+      sim_jtag_enable = 1'b1;
+      // Start cluster 0.
+      cl_fetch_en[0] = 1'b1;
+    end
+
+    // run dm tests instead of regular software tests
+    if (RUN_CUSTOM_TESTS == "dm") begin
+      // make cores loop on boot addr
+
+      // disable icache for debug module test
+      write_axi(32'h1020_1400, 128'h00000000_00000000_00000000_00000000);
+      // loop forever on entry
+      write_axi(32'h1c00_0080, 128'h00000000_00000000_00000000_0000006f);
+      //// enable all cores (TODO: what to do when multiple clusters)
+      write_axi(32'h1020_0008, 128'h00000000_000000ff_00000000_00000000);
+      // let core 0 go
+      // write_axi(32'h1020_0008, 128'h00000000_00000001_00000000_00000000);
+
+      // dm_if.run_dm_tests(N_CLUSTERS, pulp_cluster_cfg_pkg::N_CORES, error,
+      //                      jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+      // just run tests on core0 otherwise we wait all day
+      dm_if.run_dm_tests(N_CLUSTERS, 1, error,
                            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+
       $finish();
     end
 
