@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for custom `hua20` RISC-V machine architecture extension in GCC.  This comprises all
   the custom instructions of the `gap9` extension plus pipeline scheduling for two cycles FPU
   latency.
+- `SimJTAG`: JTAG DPI bridge which can be enabled with `+define+USE_JTAG_DPI`
+- `remote_bitbang`: DPI library that allows communication between OpenOCD and the JTAG DPI bridge
+- OpenOCD scripts
+- `debug_system`: ndmreset capabilities. Allows the debug module to control the system reset
 
 ### Changed
 - Update instruction cache (`hier-icache`) to improve timing.
