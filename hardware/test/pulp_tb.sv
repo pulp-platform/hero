@@ -397,6 +397,9 @@ module pulp_tb #(
     // Wait for reset.
     wait (rst_n);
     @(posedge clk);
+    // wait for the reset to propagate through the reset synchronizer in debug_system
+    for (int i = 0; i < 10; i++)
+      @(posedge clk);
 
     // run openocd tests instead of regular software tests
     if (RUN_CUSTOM_TESTS == "openocd") begin //TODO: make this plusargs

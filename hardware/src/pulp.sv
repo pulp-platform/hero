@@ -119,6 +119,9 @@ module pulp #(
   // debug signals
   logic [DM_MAX_HARTS-1:0] core_debug_req;
 
+  // non-debug module reset (synchronized)
+  logic                    ndmreset_n;
+
   // Interfaces to Clusters
   // i_soc_bus.cl_mst -> [cl_inp]
   // -> i_id_remap_cl_inp -> [cl_inp_remapped]
@@ -275,7 +278,7 @@ module pulp #(
       .TABLE_SIZE   (4)
     ) i_id_resize_cl_inp (
       .clk_i,
-      .rst_ni,
+      .rst_ni (ndmreset_n),
       .in     (cl_inp[i]),
       .out    (cl_inp_remapped[i])
     );
@@ -289,7 +292,7 @@ module pulp #(
         .AXI_USER_WIDTH           (AXI_UW)
       ) i_dwc_cl_inp (
         .clk_i,
-        .rst_ni,
+        .rst_ni (ndmreset_n),
         .slv    (cl_inp_remapped[i]),
         .mst    (cl_inp_dwced[i])
       );
@@ -311,7 +314,7 @@ module pulp #(
         .BUFFER_WIDTH   (pulp_cluster_cfg_pkg::DC_BUF_W)
       ) i_dc_slice_cl_inp (
         .clk_i,
-        .rst_ni,
+        .rst_ni (ndmreset_n),
         .test_cgbypass_i  (1'b0),
         .isolate_i        (1'b0),
         .axi_slave        (cl_inp_dwced[i]),
@@ -319,7 +322,7 @@ module pulp #(
       );
       pulp_cluster_async i_cluster (
         .clk_i,
-        .rst_ni,
+        .rst_ni (ndmreset_n),
         .ref_clk_i    (clk_i),
         .cluster_id_i (cluster_id),
         .fetch_en_i   (cl_fetch_en_i[i]),
@@ -341,7 +344,7 @@ module pulp #(
         .BUFFER_WIDTH   (pulp_cluster_cfg_pkg::DC_BUF_W)
       ) i_dc_slice_cl_oup (
         .clk_i,
-        .rst_ni,
+        .rst_ni (ndmreset_n),
         .test_cgbypass_i  (1'b0),
         .clock_down_i     (1'b0),
         .isolate_i        (1'b0),
@@ -354,7 +357,7 @@ module pulp #(
 
       pulp_cluster_sync i_cluster (
         .clk_i,
-        .rst_ni,
+        .rst_ni (ndmreset_n),
         .ref_clk_i    (clk_i),
         .cluster_id_i (cluster_id),
         .fetch_en_i   (cl_fetch_en_i[i]),
@@ -378,7 +381,7 @@ module pulp #(
       .AXI_MAX_WRITE_TXNS (pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS)
     ) i_atop_filter_cl_oup (
       .clk_i,
-      .rst_ni,
+      .rst_ni (ndmreset_n),
       .slv  (cl_oup_prefilter[i]),
       .mst  (cl_oup_predwc[i])
     );
@@ -393,7 +396,7 @@ module pulp #(
         .AXI_MAX_READS            (8)
       ) i_dwc_cl_oup (
         .clk_i,
-        .rst_ni,
+        .rst_ni (ndmreset_n),
         .slv    (cl_oup_predwc[i]),
         .mst    (cl_oup_prebuf[i])
       );
@@ -406,7 +409,7 @@ module pulp #(
         .BUF_DEPTH    (pulp_cluster_cfg_pkg::DMA_MAX_BURST_LEN)
       ) i_r_buf_cl_oup (
         .clk_i,
-        .rst_ni,
+        .rst_ni (ndmreset_n),
         .slv    (cl_oup_prebuf[i]),
         .mst    (cl_oup[i])
       );
@@ -427,7 +430,7 @@ module pulp #(
     .DEBUG_BASE_ADDR      (64'(pulp_cluster_cfg_pkg::DM_BASE_ADDR))
   ) i_soc_bus (
     .clk_i,
-    .rst_ni,
+    .rst_ni     (ndmreset_n),
     .cl_slv     (cl_oup),
     .cl_mst     (cl_inp),
     .l2_mst     (l2_mst),
@@ -446,7 +449,7 @@ module pulp #(
       .N_BYTES    (L2_SIZE/L2_N_AXI_PORTS)
     ) i_l2_mem (
       .clk_i,
-      .rst_ni,
+      .rst_ni (ndmreset_n),
       .slv    (l2_mst[i])
     );
   end
@@ -460,7 +463,7 @@ module pulp #(
     .TABLE_SIZE   (4)
   ) i_id_resize_ext_slv (
     .clk_i,
-    .rst_ni,
+    .rst_ni (ndmreset_n),
     .in     (ext_slv),
     .out    (ext_slv_remapped)
   );
@@ -474,7 +477,7 @@ module pulp #(
     .AXI_MAX_READS            (1)
   ) i_dwc_debug_mst (
     .clk_i,
-    .rst_ni,
+    .rst_ni (ndmreset_n),
     .slv    (debug_mst_predwc),
     .mst    (debug_mst_dwced)
   );
@@ -488,7 +491,7 @@ module pulp #(
     .AXI_MAX_READS            (1)
   ) i_dwc_debug_slv (
     .clk_i,
-    .rst_ni,
+    .rst_ni (ndmreset_n),
     .slv    (debug_slv_predwc),
     .mst    (debug_slv_dwced)
   );
@@ -506,6 +509,7 @@ module pulp #(
     .clk_i,
     .rst_ni,
     .test_en_i        ('0),
+    .ndmreset_no      (ndmreset_n),
     .jtag_tck_i,
     .jtag_trst_ni,
     .jtag_tdi_i,
