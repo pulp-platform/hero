@@ -1,0 +1,11 @@
+cache_root_dir: /home/gitlabci/buildcache/hero
+
+artifacts:
+  tc-pulp:
+    inputs:
+      - Makefile
+      - setup.sh
+      - toolchain/build.sh
+      - toolchain/pulp.config
+    outputs:
+      - install

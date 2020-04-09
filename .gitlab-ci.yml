@@ -1,5 +1,6 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
+  RUST_LOG: 'debug'
   HERO_INSTALL: '$CI_PROJECT_DIR/install'
   TEMP_JOB_DIR: '$CI_PROJECT_DIR/archive/hero_gitlab_ci_$CI_JOB_ID'
   DEPLOY_USER: 'hero'
@@ -8,6 +9,7 @@ variables:
 
 
 before_script:
+  - mkdir -p $HOME/buildcache/hero
   # Disable display in CI.
   - unset DISPLAY
   # Load key for deployment.
@@ -36,24 +38,15 @@ build_test_archive:
   stage: build_test_rest
   script:
     - ./pack_huawei.sh
+    - memora get tc-pulp
     - cd "$TEMP_JOB_DIR"
     - cp "$CI_PROJECT_DIR/hero_huawei.tar.gz" .
     - tar xf hero_huawei.tar.gz && rm hero_huawei.tar.gz
     - export HERO_INSTALL_NEW="$(pwd)/install"
-    - mkdir -p "$HERO_INSTALL_NEW"
-    ### build base toolchains --> Add fast path for CI
-    - >
-      if [[ -n "$FULL_CI_TEST" ]] || [[ ! -x "$HERO_INSTALL/bin/riscv32-unknown-elf-gcc" ]]; then
-          # Build the toolchain like it's done in the regular setup
-          export HERO_INSTALL="$HERO_INSTALL_NEW"
-          echo "Build the full toolchain"
-          ./setup.sh
-      else
-          echo "Use fast path to copy toolchain"
-          rsync -av "$HERO_INSTALL/" "$HERO_INSTALL_NEW/"
-          export HERO_INSTALL="$HERO_INSTALL_NEW"
-          ./setup.sh --no-tc-pulp --no-script-symlinks
-      fi
+    - rsync -ua "$HERO_INSTALL/" "$HERO_INSTALL_NEW/"
+    - export HERO_INSTALL="$HERO_INSTALL_NEW"
+    - ls "$HERO_INSTALL_NEW"
+    - ./setup.sh --no-tc-pulp --no-script-symlinks
     ### build RTL tests
     - source env/ehuawei-minimal-runtime.sh
     ### Test both simulators
@@ -104,7 +97,7 @@ build_test_archive:
 build_test_pulp-runtime:
   stage: build_test_rest
   script:
-    ### Setup toolchain in `build_toolchain`
+    - memora get tc-pulp
     ### Configure pulp-runtime
     - source env/ehuawei-minimal-runtime.sh
     ### Test both simulators
@@ -126,14 +119,13 @@ build_test_pulp-runtime:
     - ./pulp/virtual-platform/run_vp.sh hello
   artifacts:
     paths:
-      - install
       - example-apps
       - pulp
 
 build_test_sdk:
   stage: build_test_rest
   script:
-    ### Setup toolchain in `build_toolchain`
+    - memora get tc-pulp
     ### build accelerator sdk
     - ./pulp/setup-sdk.sh hero-huawei
     ### Configure for SDK
@@ -157,14 +149,13 @@ build_test_sdk:
     - ./pulp/virtual-platform/run_vp.sh helloworld
   artifacts:
     paths:
-      - install
       - example-apps
       - pulp
 
 pulp_run_target_test:
   stage: build_test_rest
   script:
-    ### Setup toolchain in `build_toolchain`
+    - memora get tc-pulp
     - source env/ehuawei-minimal-runtime.sh
     ### compile testbench
     - cd hardware/vsim
@@ -181,8 +172,8 @@ build_toolchain:
   stage: build_toolchain
   script:
     - env
-    ### Build toolchain with possible fast-path
-    - ./.gitlab-ci.d/build-toolchain.sh
-  artifacts:
-    paths:
-      - install
+    - >
+      if ! memora get tc-pulp; then
+        ./setup.sh --no-sdk-pulp --no-vp
+        memora insert tc-pulp
+      fi
