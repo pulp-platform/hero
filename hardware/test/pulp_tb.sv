@@ -179,11 +179,11 @@ module pulp_tb #(
 
   // Peripherals
   axi_dw_converter_intf #(
-    .AXI_ID_WIDTH       (AXI_IW+1),
-    .AXI_ADDR_WIDTH     (pulp_pkg::AXI_AW),
-    .AXI_MST_DATA_WIDTH (32),
-    .AXI_SLV_DATA_WIDTH (AXI_DW),
-    .AXI_USER_WIDTH     (pulp_pkg::AXI_UW)
+    .AXI_ID_WIDTH             (AXI_IW+1),
+    .AXI_ADDR_WIDTH           (pulp_pkg::AXI_AW),
+    .AXI_MST_PORT_DATA_WIDTH  (32),
+    .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW),
+    .AXI_USER_WIDTH           (pulp_pkg::AXI_UW)
   ) i_dwc_peripherals (
     .clk_i  (clk),
     .rst_ni (rst_n),

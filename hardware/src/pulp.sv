@@ -281,11 +281,11 @@ module pulp #(
     );
 
     axi_dw_converter_intf #(
-      .AXI_ADDR_WIDTH     (AXI_AW),
-      .AXI_SLV_DATA_WIDTH (AXI_DW),
-      .AXI_MST_DATA_WIDTH (AXI_DW_CL),
-      .AXI_ID_WIDTH       (AXI_IW_CL_INP),
-      .AXI_USER_WIDTH     (AXI_UW)
+      .AXI_ADDR_WIDTH           (AXI_AW),
+      .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW),
+      .AXI_MST_PORT_DATA_WIDTH  (AXI_DW_CL),
+      .AXI_ID_WIDTH             (AXI_IW_CL_INP),
+      .AXI_USER_WIDTH           (AXI_UW)
     ) i_dwc_cl_inp (
       .clk_i,
       .rst_ni,
@@ -380,12 +380,12 @@ module pulp #(
     );
 
     axi_dw_converter_intf #(
-      .AXI_ADDR_WIDTH     (AXI_AW),
-      .AXI_SLV_DATA_WIDTH (AXI_DW_CL),
-      .AXI_MST_DATA_WIDTH (AXI_DW),
-      .AXI_ID_WIDTH       (AXI_IW_CL_OUP),
-      .AXI_USER_WIDTH     (AXI_UW),
-      .AXI_MAX_READS      (8)
+      .AXI_ADDR_WIDTH           (AXI_AW),
+      .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW_CL),
+      .AXI_MST_PORT_DATA_WIDTH  (AXI_DW),
+      .AXI_ID_WIDTH             (AXI_IW_CL_OUP),
+      .AXI_USER_WIDTH           (AXI_UW),
+      .AXI_MAX_READS            (8)
     ) i_dwc_cl_oup (
       .clk_i,
       .rst_ni,
@@ -458,12 +458,12 @@ module pulp #(
   );
 
   axi_dw_converter_intf #(
-    .AXI_ADDR_WIDTH     (AXI_AW),
-    .AXI_SLV_DATA_WIDTH (AXI_DW_DM),
-    .AXI_MST_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH       (AXI_IW_SB_INP),
-    .AXI_USER_WIDTH     (AXI_UW),
-    .AXI_MAX_READS      (1)
+    .AXI_ADDR_WIDTH           (AXI_AW),
+    .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW_DM),
+    .AXI_MST_PORT_DATA_WIDTH  (AXI_DW),
+    .AXI_ID_WIDTH             (AXI_IW_SB_INP),
+    .AXI_USER_WIDTH           (AXI_UW),
+    .AXI_MAX_READS            (1)
   ) i_dwc_debug_mst (
     .clk_i,
     .rst_ni,
@@ -472,12 +472,12 @@ module pulp #(
   );
 
   axi_dw_converter_intf #(
-    .AXI_ADDR_WIDTH     (AXI_AW),
-    .AXI_SLV_DATA_WIDTH (AXI_DW),
-    .AXI_MST_DATA_WIDTH (AXI_DW_DM),
-    .AXI_ID_WIDTH       (AXI_IW_SB_OUP),
-    .AXI_USER_WIDTH     (AXI_UW),
-    .AXI_MAX_READS      (1)
+    .AXI_ADDR_WIDTH           (AXI_AW),
+    .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW),
+    .AXI_MST_PORT_DATA_WIDTH  (AXI_DW_DM),
+    .AXI_ID_WIDTH             (AXI_IW_SB_OUP),
+    .AXI_USER_WIDTH           (AXI_UW),
+    .AXI_MAX_READS            (1)
   ) i_dwc_debug_slv (
     .clk_i,
     .rst_ni,
