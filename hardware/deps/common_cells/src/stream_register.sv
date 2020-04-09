@@ -28,22 +28,30 @@ module stream_register #(
     output T        data_o
 );
 
-    stream_fifo #(
+    logic   fifo_empty,
+            fifo_full;
+
+    fifo_v2 #(
         .FALL_THROUGH   (1'b0),
+        .DATA_WIDTH     ($size(T)),
         .DEPTH          (1),
-        .T              (T)
+        .dtype          (T)
     ) i_fifo (
-        .clk_i,
-        .rst_ni,
-        .flush_i    (clr_i),
-        .testmode_i,
-        .data_i,
-        .valid_i,
-        .ready_o,
-        .data_o,
-        .valid_o,
-        .ready_i,
-        .usage_o    (/* unused */)
+        .clk_i          (clk_i),
+        .rst_ni         (rst_ni),
+        .flush_i        (clr_i),
+        .testmode_i     (testmode_i),
+        .full_o         (fifo_full),
+        .empty_o        (fifo_empty),
+        .alm_full_o     ( ),
+        .alm_empty_o    ( ),
+        .data_i         (data_i),
+        .push_i         (valid_i & ~fifo_full),
+        .data_o         (data_o),
+        .pop_i          (ready_i & ~fifo_empty)
     );
+
+    assign ready_o = ~fifo_full;
+    assign valid_o = ~fifo_empty;
 
 endmodule

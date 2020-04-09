@@ -36,8 +36,6 @@ module fifo_v3 #(
     // local parameter
     // FIFO depth - handle the case of pass-through, synthesizer will do constant propagation
     localparam int unsigned FIFO_DEPTH = (DEPTH > 0) ? DEPTH : 1;
-    // LAST_ENTRY - Precalculate the value of the last valid read/write_pointer. VCS could not handle this inline.
-    localparam logic [ADDR_DEPTH-1:0] LAST_ENTRY = FIFO_DEPTH[ADDR_DEPTH-1:0] - 1;
     // clock gating control
     logic gate_clock;
     // pointer to the read and write section of the queue
@@ -75,7 +73,7 @@ module fifo_v3 #(
             // un-gate the clock, we want to write something
             gate_clock = 1'b0;
             // increment the write counter
-            if (write_pointer_q == LAST_ENTRY)
+            if (write_pointer_q == FIFO_DEPTH[ADDR_DEPTH-1:0] - 1)
                 write_pointer_n = '0;
             else
                 write_pointer_n = write_pointer_q + 1;
@@ -86,7 +84,7 @@ module fifo_v3 #(
         if (pop_i && ~empty_o) begin
             // read from the queue is a default assignment
             // but increment the read pointer...
-            if (read_pointer_q == LAST_ENTRY)
+            if (read_pointer_n == FIFO_DEPTH[ADDR_DEPTH-1:0] - 1)
                 read_pointer_n = '0;
             else
                 read_pointer_n = read_pointer_q + 1;

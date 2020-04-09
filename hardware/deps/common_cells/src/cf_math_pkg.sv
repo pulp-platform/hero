@@ -16,12 +16,12 @@
 // function whose value can be evaluated at compile time or during elaboration.  A constant function
 // must be called with arguments that are constants.
 
-package cf_math_pkg;
+package automatic cf_math_pkg;
 
     // Ceiled Division of Two Natural Numbers
     //
     // Returns the quotient of two natural numbers, rounded towards plus infinity.
-    function automatic integer ceil_div (input longint dividend, input longint divisor);
+    function integer ceil_div (input longint dividend, input longint divisor);
         automatic longint remainder;
 
         // pragma translate_off
@@ -43,28 +43,6 @@ package cf_math_pkg;
         remainder = dividend;
         for (ceil_div = 0; remainder > 0; ceil_div++) begin
             remainder = remainder - divisor;
-        end
-    endfunction
-
-    // Ceiled Binary Logairthm of a Natural Number
-    //
-    // Returns the binary logarithm (i.e., the logarithm to the base 2) of a natural number rounded
-    // towards plus infinity.  Use this as drop-in replacement for the `$clog2` system function
-    // where the latter is not supported by your tools.
-    function automatic int unsigned clog2(input longint unsigned val);
-        longint unsigned tmp;
-
-        // pragma translate_off
-        `ifndef VERILATOR
-        if (val == 0) begin
-            $fatal(1, "Logarithm of 0 cannot be represented!");
-        end
-        `endif
-        // pragma translate_on
-
-        tmp = val - 1;
-        for (clog2 = 0; tmp > 0; clog2++) begin
-            tmp >>= 1;
         end
     endfunction
 

@@ -37,14 +37,12 @@ module rr_arb_tree #(
   parameter type         DataType   = logic [DataWidth-1:0],
   parameter bit          ExtPrio    = 1'b0, // set to 1'b1 to enable
   parameter bit          AxiVldRdy  = 1'b0, // treat req/gnt as vld/rdy
-  parameter bit          LockIn     = 1'b0, // set to 1'b1 to enable
-  // Dependent constants, do not change!
-  parameter int unsigned Log2NumIn = (NumIn > 1) ? $clog2(NumIn) : 1
+  parameter bit          LockIn     = 1'b0  // set to 1'b1 to enable
 ) (
   input  logic                             clk_i,
   input  logic                             rst_ni,
   input  logic                             flush_i, // clears the arbiter state
-  input  logic [Log2NumIn-1:0]             rr_i,    // external RR prio (needs to be enabled above)
+  input  logic [$clog2(NumIn)-1:0]         rr_i,    // external RR prio (needs to be enabled above)
   // input requests and data
   input  logic [NumIn-1:0]                 req_i,
   /* verilator lint_off UNOPTFLAT */
@@ -55,7 +53,7 @@ module rr_arb_tree #(
   input  logic                             gnt_i,
   output logic                             req_o,
   output DataType                          data_o,
-  output logic [Log2NumIn-1:0]             idx_o
+  output logic [$clog2(NumIn)-1:0]         idx_o
 );
 
   // pragma translate_off
