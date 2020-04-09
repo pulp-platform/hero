@@ -76,7 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Include all the SDK's submodules in the package.
   - Match memory sizes and addresses of cluster components with the hardware.
 - `axi_dwc`: Fix incorrect handling of bursts in upsizer.
-- `axi_top_filter`:
+- `axi_atop_filter`:
   - The master interface of this module in one case depended on `aw_ready` before applying
     `w_valid`, which is a violation of the AXI specification that can lead to deadlocks.  This issue
     has been fixed by removing that dependency.
