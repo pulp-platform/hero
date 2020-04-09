@@ -25,7 +25,7 @@ package pulp_pkg;
   // SoC Bus
   localparam int unsigned AXI_IW_SB_INP = AXI_IW_CL_OUP;
   localparam int unsigned AXI_UW = pulp_cluster_cfg_pkg::AXI_UW;
-  localparam int unsigned AXI_DW = 128;
+  localparam int unsigned AXI_DW = 64;
   function automatic int unsigned axi_iw_sb_oup(input int unsigned n_clusters);
     return soc_bus_pkg::oup_id_w(n_clusters, AXI_IW_SB_INP);
   endfunction
@@ -44,7 +44,7 @@ package pulp_pkg;
   typedef logic [AXI_LITE_DW/8-1:0] lite_strb_t;
 
   localparam int unsigned AXI_IW = axi_iw_sb_oup(1);
-  localparam int unsigned AXI_SW = 128/8;  // width of strobe
+  localparam int unsigned AXI_SW = AXI_DW/8;  // width of strobe
   typedef addr_t                axi_addr_t;
   typedef logic [AXI_DW-1:0]    axi_data_t;
   typedef logic [AXI_IW-1:0]    axi_id_t;
@@ -69,7 +69,7 @@ import pulp_pkg::*;
 module pulp #(
   // SoC Parameters
   parameter int unsigned  N_CLUSTERS = 1,           // must be a power of 2
-  parameter int unsigned  AXI_DW = 128,             // [bit]
+  parameter int unsigned  AXI_DW = 64,              // [bit]
   parameter int unsigned  L2_N_AXI_PORTS = 1,       // must be a power of 2
   parameter type          axi_req_t = axi_req_t,
   parameter type          axi_resp_t = axi_resp_t,

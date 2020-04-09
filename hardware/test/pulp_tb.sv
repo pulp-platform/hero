@@ -21,7 +21,7 @@ module pulp_tb #(
   parameter bit           RUN_DM_TESTS = 0,
   // SoC Parameters
   parameter int unsigned  N_CLUSTERS = 1,
-  parameter int unsigned  AXI_DW = 128,
+  parameter int unsigned  AXI_DW = 64,
   parameter int unsigned  L2_N_AXI_PORTS = 1
 );
 
@@ -387,7 +387,7 @@ module pulp_tb #(
       // enable all cores (TODO: what to do when multiple clusters)
       //write_axi(32'h1020_0008, 128'h00000000_000000ff_00000000_00000000);
       // TODO: remove this workaround when write_axi is fixed
-      write_axi(32'h1020_0008, 128'h00000000_00000001_00000000_00000000);
+      write_axi(32'h1020_0008, 64'h00000000_00000001);
 
       dm_if.run_dm_tests(N_CLUSTERS, pulp_cluster_cfg_pkg::N_CORES, error,
                            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
