@@ -1103,19 +1103,19 @@ module riscv_decoder
                 // ADDMUL has format dependent latency
                 ADDMUL : begin
                   unique case (fpu_dst_fmt_o)
-                    fpnew_pkg::FP32    : apu_lat_o = (C_LAT_FP32<2)    ? C_LAT_FP32+1    : 2'h3;
-                    fpnew_pkg::FP16    : apu_lat_o = (C_LAT_FP16<2)    ? C_LAT_FP16+1    : 2'h3;
-                    fpnew_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<2) ? C_LAT_FP16ALT+1 : 2'h3;
-                    fpnew_pkg::FP8     : apu_lat_o = (C_LAT_FP8<2)     ? C_LAT_FP8+1     : 2'h3;
+                    fpnew_pkg::FP32    : apu_lat_o = (C_LAT_FP32<3)    ? C_LAT_FP32+1    : 2'h0;
+                    fpnew_pkg::FP16    : apu_lat_o = (C_LAT_FP16<3)    ? C_LAT_FP16+1    : 2'h0;
+                    fpnew_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<3) ? C_LAT_FP16ALT+1 : 2'h0;
+                    fpnew_pkg::FP8     : apu_lat_o = (C_LAT_FP8<3)     ? C_LAT_FP8+1     : 2'h0;
                     default : ;
                   endcase
                 end
                 // DIVSQRT is iterative and takes more than 2 cycles
-                DIVSQRT : apu_lat_o = 2'h3;
+                DIVSQRT : apu_lat_o = 2'h0;
                 // NONCOMP uses the same latency for all formats
-                NONCOMP : apu_lat_o = (C_LAT_NONCOMP<2) ? C_LAT_NONCOMP+1 : 2'h3;
+                NONCOMP : apu_lat_o = (C_LAT_NONCOMP<3) ? C_LAT_NONCOMP+1 : 2'h0;
                 // CONV uses the same latency for all formats
-                CONV    : apu_lat_o = (C_LAT_CONV<2) ? C_LAT_CONV+1 : 2'h3;
+                CONV    : apu_lat_o = (C_LAT_CONV<3) ? C_LAT_CONV+1 : 2'h0;
               endcase
 
               // Set FPnew OP and OPMOD as the APU op
@@ -1768,20 +1768,20 @@ module riscv_decoder
               // ADDMUL has format dependent latency
               ADDMUL : begin
                 unique case (fpu_dst_fmt_o)
-                  fpnew_pkg::FP32    : apu_lat_o = (C_LAT_FP32<2)    ? C_LAT_FP32+1    : 2'h3;
-                  fpnew_pkg::FP64    : apu_lat_o = (C_LAT_FP64<2)    ? C_LAT_FP64+1    : 2'h3;
-                  fpnew_pkg::FP16    : apu_lat_o = (C_LAT_FP16<2)    ? C_LAT_FP16+1    : 2'h3;
-                  fpnew_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<2) ? C_LAT_FP16ALT+1 : 2'h3;
-                  fpnew_pkg::FP8     : apu_lat_o = (C_LAT_FP8<2)     ? C_LAT_FP8+1     : 2'h3;
+                  fpnew_pkg::FP32    : apu_lat_o = (C_LAT_FP32<3)    ? C_LAT_FP32+1    : 2'h0;
+                  fpnew_pkg::FP64    : apu_lat_o = (C_LAT_FP64<3)    ? C_LAT_FP64+1    : 2'h0;
+                  fpnew_pkg::FP16    : apu_lat_o = (C_LAT_FP16<3)    ? C_LAT_FP16+1    : 2'h0;
+                  fpnew_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<3) ? C_LAT_FP16ALT+1 : 2'h0;
+                  fpnew_pkg::FP8     : apu_lat_o = (C_LAT_FP8<3)     ? C_LAT_FP8+1     : 2'h0;
                   default : ;
                 endcase
               end
               // DIVSQRT is iterative and takes more than 2 cycles
-              DIVSQRT : apu_lat_o = 2'h3;
+              DIVSQRT : apu_lat_o = 2'h0;
               // NONCOMP uses the same latency for all formats
-              NONCOMP : apu_lat_o = (C_LAT_NONCOMP<2) ? C_LAT_NONCOMP+1 : 2'h3;
+              NONCOMP : apu_lat_o = (C_LAT_NONCOMP<3) ? C_LAT_NONCOMP+1 : 2'h0;
               // CONV uses the same latency for all formats
-              CONV    : apu_lat_o = (C_LAT_CONV<2) ? C_LAT_CONV+1 : 2'h3;
+              CONV    : apu_lat_o = (C_LAT_CONV<3) ? C_LAT_CONV+1 : 2'h0;
             endcase
           end
 
@@ -1899,11 +1899,11 @@ module riscv_decoder
           if (SHARED_FP!=1) begin
             // format dependent latency
             unique case (fpu_dst_fmt_o)
-              fpnew_pkg::FP32    : apu_lat_o = (C_LAT_FP32<2)    ? C_LAT_FP32+1    : 2'h3;
-              fpnew_pkg::FP64    : apu_lat_o = (C_LAT_FP64<2)    ? C_LAT_FP64+1    : 2'h3;
-              fpnew_pkg::FP16    : apu_lat_o = (C_LAT_FP16<2)    ? C_LAT_FP16+1    : 2'h3;
-              fpnew_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<2) ? C_LAT_FP16ALT+1 : 2'h3;
-              fpnew_pkg::FP8     : apu_lat_o = (C_LAT_FP8<2)     ? C_LAT_FP8+1     : 2'h3;
+              fpnew_pkg::FP32    : apu_lat_o = (C_LAT_FP32<3)    ? C_LAT_FP32+1    : 2'h0;
+              fpnew_pkg::FP64    : apu_lat_o = (C_LAT_FP64<3)    ? C_LAT_FP64+1    : 2'h0;
+              fpnew_pkg::FP16    : apu_lat_o = (C_LAT_FP16<3)    ? C_LAT_FP16+1    : 2'h0;
+              fpnew_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<3) ? C_LAT_FP16ALT+1 : 2'h0;
+              fpnew_pkg::FP8     : apu_lat_o = (C_LAT_FP8<3)     ? C_LAT_FP8+1     : 2'h0;
               default : ;
             endcase
           end
