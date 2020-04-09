@@ -1,5 +1,6 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
+  RUST_LOG: 'debug'
   HERO_INSTALL: '$CI_PROJECT_DIR/install'
   TEMP_JOB_DIR: '$CI_PROJECT_DIR/archive/hero_gitlab_ci_$CI_JOB_ID'
   DEPLOY_USER: 'hero'
@@ -8,6 +9,7 @@ variables:
 
 
 before_script:
+  - mkdir -p $HOME/buildcache/hero
   # Disable display in CI.
   - unset DISPLAY
   # Load key for deployment.
@@ -182,7 +184,12 @@ build_toolchain:
   script:
     - env
     ### Build toolchain with possible fast-path
-    - ./.gitlab-ci.d/build-toolchain.sh
+    - >
+      if ! memora get tc-pulp; then
+        ./setup.sh --no-sdk-pulp --no-vp
+        memora insert tc-pulp
+      fi
+
   artifacts:
     paths:
       - install
