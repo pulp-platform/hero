@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       back-to-back.  Instructions with `latency = 0` (division and other instructions that take more
       than 3 cycles) now always stall the pipeline.
   - Add second pipeline stage to FPU.
+- Update `common_cells` to v1.16.4 to fix generation of `head_tail_q` registers.
 
 ### Fixed
 - Add `is_decoding` signal to mask `read_dependency` inside `APU_Dispatcher`. This fixed a bug that
