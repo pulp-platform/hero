@@ -280,18 +280,22 @@ module pulp #(
       .out    (cl_inp_remapped[i])
     );
 
-    axi_dw_converter_intf #(
-      .AXI_ADDR_WIDTH           (AXI_AW),
-      .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW),
-      .AXI_MST_PORT_DATA_WIDTH  (AXI_DW_CL),
-      .AXI_ID_WIDTH             (AXI_IW_CL_INP),
-      .AXI_USER_WIDTH           (AXI_UW)
-    ) i_dwc_cl_inp (
-      .clk_i,
-      .rst_ni,
-      .slv    (cl_inp_remapped[i]),
-      .mst    (cl_inp_dwced[i])
-    );
+    if (AXI_DW_CL != AXI_DW) begin : gen_dwc_cl_inp
+      axi_dw_converter_intf #(
+        .AXI_ADDR_WIDTH           (AXI_AW),
+        .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW),
+        .AXI_MST_PORT_DATA_WIDTH  (AXI_DW_CL),
+        .AXI_ID_WIDTH             (AXI_IW_CL_INP),
+        .AXI_USER_WIDTH           (AXI_UW)
+      ) i_dwc_cl_inp (
+        .clk_i,
+        .rst_ni,
+        .slv    (cl_inp_remapped[i]),
+        .mst    (cl_inp_dwced[i])
+      );
+    end else begin : gen_no_dwc_cl_inp
+      `AXI_ASSIGN(cl_inp_dwced[i], cl_inp_remapped[i]);
+    end
 
     logic [5:0] cluster_id;
     assign cluster_id = i;
@@ -379,32 +383,36 @@ module pulp #(
       .mst  (cl_oup_predwc[i])
     );
 
-    axi_dw_converter_intf #(
-      .AXI_ADDR_WIDTH           (AXI_AW),
-      .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW_CL),
-      .AXI_MST_PORT_DATA_WIDTH  (AXI_DW),
-      .AXI_ID_WIDTH             (AXI_IW_CL_OUP),
-      .AXI_USER_WIDTH           (AXI_UW),
-      .AXI_MAX_READS            (8)
-    ) i_dwc_cl_oup (
-      .clk_i,
-      .rst_ni,
-      .slv    (cl_oup_predwc[i]),
-      .mst    (cl_oup_prebuf[i])
-    );
+    if (AXI_DW_CL != AXI_DW) begin : gen_dwc_cl_oup
+      axi_dw_converter_intf #(
+        .AXI_ADDR_WIDTH           (AXI_AW),
+        .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW_CL),
+        .AXI_MST_PORT_DATA_WIDTH  (AXI_DW),
+        .AXI_ID_WIDTH             (AXI_IW_CL_OUP),
+        .AXI_USER_WIDTH           (AXI_UW),
+        .AXI_MAX_READS            (8)
+      ) i_dwc_cl_oup (
+        .clk_i,
+        .rst_ni,
+        .slv    (cl_oup_predwc[i]),
+        .mst    (cl_oup_prebuf[i])
+      );
 
-    axi_read_burst_buffer_wrap #(
-      .ADDR_WIDTH   (AXI_AW),
-      .DATA_WIDTH   (AXI_DW),
-      .ID_WIDTH     (AXI_IW_CL_OUP),
-      .USER_WIDTH   (AXI_UW),
-      .BUF_DEPTH    (pulp_cluster_cfg_pkg::DMA_MAX_BURST_LEN)
-    ) i_r_buf_cl_oup (
-      .clk_i,
-      .rst_ni,
-      .slv    (cl_oup_prebuf[i]),
-      .mst    (cl_oup[i])
-    );
+      axi_read_burst_buffer_wrap #(
+        .ADDR_WIDTH   (AXI_AW),
+        .DATA_WIDTH   (AXI_DW),
+        .ID_WIDTH     (AXI_IW_CL_OUP),
+        .USER_WIDTH   (AXI_UW),
+        .BUF_DEPTH    (pulp_cluster_cfg_pkg::DMA_MAX_BURST_LEN)
+      ) i_r_buf_cl_oup (
+        .clk_i,
+        .rst_ni,
+        .slv    (cl_oup_prebuf[i]),
+        .mst    (cl_oup[i])
+      );
+    end else begin : gen_no_dwc_cl_oup
+      `AXI_ASSIGN(cl_oup[i], cl_oup_predwc[i]);
+    end
   end
 
   soc_bus #(
