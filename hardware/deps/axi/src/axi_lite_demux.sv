@@ -121,10 +121,8 @@ module axi_lite_demux #(
     // AW Channel
     //--------------------------------------
     aw_chan_select_t slv_aw_inp;
-    assign slv_aw_inp = '{
-      aw:     slv_req_i.aw,
-      select: slv_aw_select_i
-    };
+    assign slv_aw_inp.aw     = slv_req_i.aw;
+    assign slv_aw_inp.select = slv_aw_select_i;
     spill_register #(
       .T      ( aw_chan_select_t ),
       .Bypass ( ~SpillAw         )
@@ -278,10 +276,8 @@ module axi_lite_demux #(
     // AR Channel
     //--------------------------------------
     ar_chan_select_t slv_ar_inp;
-    assign slv_ar_inp = '{
-      ar:     slv_req_i.ar,
-      select: slv_ar_select_i
-    };
+    assign slv_ar_inp.ar     = slv_req_i.ar;
+    assign slv_ar_inp.select = slv_ar_select_i;
     spill_register #(
       .T      ( ar_chan_select_t ),
       .Bypass ( ~SpillAr         )
@@ -413,25 +409,25 @@ module axi_lite_demux_intf #(
   typedef logic [AxiAddrWidth-1:0]   addr_t;
   typedef logic [AxiDataWidth-1:0]   data_t;
   typedef logic [AxiDataWidth/8-1:0] strb_t;
-  `AXI_LITE_TYPEDEF_AW_CHAN_T( aw_chan_t, addr_t         )
-  `AXI_LITE_TYPEDEF_W_CHAN_T (  w_chan_t, data_t, strb_t )
-  `AXI_LITE_TYPEDEF_B_CHAN_T (  b_chan_t                 )
-  `AXI_LITE_TYPEDEF_AR_CHAN_T( ar_chan_t, addr_t         )
-  `AXI_LITE_TYPEDEF_R_CHAN_T (  r_chan_t, data_t         )
-  `AXI_LITE_TYPEDEF_REQ_T    (     req_t, aw_chan_t, w_chan_t, ar_chan_t)
-  `AXI_LITE_TYPEDEF_RESP_T   (    resp_t,  b_chan_t, r_chan_t)
+  `AXI_LITE_TYPEDEF_AW_CHAN_T(aw_chan_t, addr_t)
+  `AXI_LITE_TYPEDEF_W_CHAN_T(w_chan_t, data_t, strb_t)
+  `AXI_LITE_TYPEDEF_B_CHAN_T(b_chan_t)
+  `AXI_LITE_TYPEDEF_AR_CHAN_T(ar_chan_t, addr_t)
+  `AXI_LITE_TYPEDEF_R_CHAN_T(r_chan_t, data_t)
+  `AXI_LITE_TYPEDEF_REQ_T(req_t, aw_chan_t, w_chan_t, ar_chan_t)
+  `AXI_LITE_TYPEDEF_RESP_T(resp_t, b_chan_t, r_chan_t)
 
   req_t                   slv_req;
   resp_t                  slv_resp;
   req_t  [NoMstPorts-1:0] mst_reqs;
   resp_t [NoMstPorts-1:0] mst_resps;
 
-  `AXI_LITE_ASSIGN_TO_REQ    ( slv_req,  slv      );
-  `AXI_LITE_ASSIGN_FROM_RESP ( slv,      slv_resp );
+  `AXI_LITE_ASSIGN_TO_REQ(slv_req, slv)
+  `AXI_LITE_ASSIGN_FROM_RESP(slv, slv_resp)
 
   for (genvar i = 0; i < NoMstPorts; i++) begin : gen_assign_mst_ports
-    `AXI_LITE_ASSIGN_FROM_REQ  ( mst[i]      , mst_reqs[i] );
-    `AXI_LITE_ASSIGN_TO_RESP   ( mst_resps[i], mst[i]      );
+    `AXI_LITE_ASSIGN_FROM_REQ(mst[i], mst_reqs[i])
+    `AXI_LITE_ASSIGN_TO_RESP(mst_resps[i], mst[i])
   end
 
   axi_lite_demux #(

@@ -14,10 +14,10 @@ axi:
     - src/axi_cut.sv
     - src/axi_delayer.sv
     - src/axi_demux.sv
-    - src/axi_dw_converter.sv
     - src/axi_dw_downsizer.sv
     - src/axi_dw_upsizer.sv
     - src/axi_id_prepend.sv
+    - src/axi_isolate.sv
     - src/axi_join.sv
     - src/axi_lite_demux.sv
     - src/axi_lite_join.sv
@@ -29,12 +29,12 @@ axi:
     - src/axi_mux.sv
     # Level 3
     - src/axi_err_slv.sv
+    - src/axi_dw_converter.sv
     - src/axi_multicut.sv
     - src/axi_to_axi_lite.sv
     # Level 4
     - src/axi_lite_xbar.sv
     - src/axi_xbar.sv
-    - src/axi_id_remap.sv
 
 axi_sim:
   files:

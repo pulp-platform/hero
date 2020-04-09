@@ -54,51 +54,51 @@ module tb_axi_dw_upsizer;
   // AXI Buses
 
   AXI_BUS_DV #(
-    .AXI_ADDR_WIDTH (AW     ),
-    .AXI_DATA_WIDTH (MULT*DW),
-    .AXI_ID_WIDTH   (IW     ),
-    .AXI_USER_WIDTH (UW     )
+    .AXI_ADDR_WIDTH(AW),
+    .AXI_DATA_WIDTH(DW),
+    .AXI_ID_WIDTH  (IW),
+    .AXI_USER_WIDTH(UW)
   ) axi_master_dv (
     .clk_i(clk)
   );
 
   axi_test::rand_axi_master #(
-    .AW             (AW     ),
-    .DW             (MULT*DW),
-    .IW             (IW     ),
-    .UW             (UW     ),
-    .MAX_READ_TXNS  (8      ),
-    .MAX_WRITE_TXNS (8      ),
-    .TA             (200ps  ),
-    .TT             (700ps  )
+    .AW            (AW   ),
+    .DW            (DW   ),
+    .IW            (IW   ),
+    .UW            (UW   ),
+    .MAX_READ_TXNS (8    ),
+    .MAX_WRITE_TXNS(8    ),
+    .TA            (200ps),
+    .TT            (700ps)
   ) axi_master_drv = new (axi_master_dv);
 
   AXI_BUS_DV #(
-    .AXI_ADDR_WIDTH (AW),
-    .AXI_DATA_WIDTH (DW),
-    .AXI_ID_WIDTH   (IW),
-    .AXI_USER_WIDTH (UW)
+    .AXI_ADDR_WIDTH(AW     ),
+    .AXI_DATA_WIDTH(MULT*DW),
+    .AXI_ID_WIDTH  (IW     ),
+    .AXI_USER_WIDTH(UW     )
   ) axi_slave_dv (
     .clk_i(clk)
   );
 
   axi_test::rand_axi_slave #(
-    .AW (AW   ),
-    .DW (DW   ),
-    .IW (IW   ),
-    .UW (UW   ),
-    .TA (200ps),
-    .TT (700ps)
+    .AW(AW     ),
+    .DW(MULT*DW),
+    .IW(IW     ),
+    .UW(UW     ),
+    .TA(200ps  ),
+    .TT(700ps  )
   ) axi_slave_drv = new (axi_slave_dv);
 
   // AXI channel types
   typedef logic [AW-1:0] addr_t           ;
   typedef logic [IW-1:0] id_t             ;
   typedef logic [UW-1:0] user_t           ;
-  typedef logic [MULT*DW-1:0] mst_data_t  ;
-  typedef logic [MULT*DW/8-1:0] mst_strb_t;
-  typedef logic [DW-1:0] slv_data_t       ;
-  typedef logic [DW/8-1:0] slv_strb_t     ;
+  typedef logic [DW-1:0] mst_data_t       ;
+  typedef logic [DW/8-1:0] mst_strb_t     ;
+  typedef logic [MULT*DW-1:0] slv_data_t  ;
+  typedef logic [MULT*DW/8-1:0] slv_strb_t;
 
   `AXI_TYPEDEF_AW_CHAN_T(aw_chan_t, addr_t, id_t, user_t)            ;
   `AXI_TYPEDEF_W_CHAN_T(mst_w_chan_t, mst_data_t, mst_strb_t, user_t);
@@ -126,22 +126,22 @@ module tb_axi_dw_upsizer;
   // DUT
 
   axi_dw_converter #(
-    .AxiMaxReads    (4           ),
-    .AxiMstDataWidth(DW          ),
-    .AxiSlvDataWidth(MULT * DW   ),
-    .AxiAddrWidth   (AW          ),
-    .AxiIdWidth     (IW          ),
-    .aw_chan_t      (aw_chan_t   ),
-    .mst_w_chan_t   (slv_w_chan_t),
-    .slv_w_chan_t   (mst_w_chan_t),
-    .b_chan_t       (b_chan_t    ),
-    .ar_chan_t      (ar_chan_t   ),
-    .mst_r_chan_t   (slv_r_chan_t),
-    .slv_r_chan_t   (mst_r_chan_t),
-    .axi_mst_req_t  (slv_req_t   ),
-    .axi_mst_resp_t (slv_resp_t  ),
-    .axi_slv_req_t  (mst_req_t   ),
-    .axi_slv_resp_t (mst_resp_t  )
+    .AxiMaxReads        (4           ),
+    .AxiSlvPortDataWidth(DW          ),
+    .AxiMstPortDataWidth(MULT * DW   ),
+    .AxiAddrWidth       (AW          ),
+    .AxiIdWidth         (IW          ),
+    .aw_chan_t          (aw_chan_t   ),
+    .mst_w_chan_t       (slv_w_chan_t),
+    .slv_w_chan_t       (mst_w_chan_t),
+    .b_chan_t           (b_chan_t    ),
+    .ar_chan_t          (ar_chan_t   ),
+    .mst_r_chan_t       (slv_r_chan_t),
+    .slv_r_chan_t       (mst_r_chan_t),
+    .axi_mst_req_t      (slv_req_t   ),
+    .axi_mst_resp_t     (slv_resp_t  ),
+    .axi_slv_req_t      (mst_req_t   ),
+    .axi_slv_resp_t     (mst_resp_t  )
   ) i_dw_converter (
     .clk_i     (clk         ),
     .rst_ni    (rst         ),

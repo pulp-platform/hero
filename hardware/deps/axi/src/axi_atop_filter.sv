@@ -49,17 +49,21 @@ module axi_atop_filter #(
   input  resp_t mst_resp_i
 );
 
-  localparam int unsigned COUNTER_WIDTH = $clog2(AxiMaxWriteTxns+1);
-  typedef logic [COUNTER_WIDTH:0] cnt_t; // one extra bit to capture over/underflow
+  // Minimum counter width is 2 to detect underflows.
+  localparam int unsigned COUNTER_WIDTH = (AxiMaxWriteTxns == 1) ? 2 : $clog2(AxiMaxWriteTxns+1);
+  typedef struct packed {
+    logic                     underflow;
+    logic [COUNTER_WIDTH-1:0] cnt;
+  } cnt_t;
   cnt_t   w_cnt_d, w_cnt_q;
 
   typedef enum logic [2:0] {
     W_FEEDTHROUGH, BLOCK_AW, ABSORB_W, HOLD_B, INJECT_B, WAIT_R
-  } w_state_t;
-  w_state_t   w_state_d, w_state_q;
+  } w_state_e;
+  w_state_e   w_state_d, w_state_q;
 
-  typedef enum logic [1:0] { R_FEEDTHROUGH, INJECT_R, R_HOLD } r_state_t;
-  r_state_t   r_state_d, r_state_q;
+  typedef enum logic [1:0] { R_FEEDTHROUGH, INJECT_R, R_HOLD } r_state_e;
+  r_state_e   r_state_d, r_state_q;
 
   typedef logic [AxiIdWidth-1:0] id_t;
   id_t  id_d, id_q;
@@ -77,11 +81,11 @@ module axi_atop_filter #(
         r_resp_cmd_push_valid,  r_resp_cmd_push_ready,
         r_resp_cmd_pop_valid,   r_resp_cmd_pop_ready;
 
-  // A AW without a complete W burst is in-flight downstream if the W counter is > 0 and not
-  // overflowed.
-  assign aw_without_complete_w_downstream = !w_cnt_q[COUNTER_WIDTH] && (w_cnt_q > 0);
+  // An AW without a complete W burst is in-flight downstream if the W counter is > 0 and not
+  // underflowed.
+  assign aw_without_complete_w_downstream = !w_cnt_q.underflow && (w_cnt_q.cnt > 0);
   // A complete W burst without AW is in-flight downstream if the W counter is -1.
-  assign complete_w_without_aw_downstream = &w_cnt_q;
+  assign complete_w_without_aw_downstream = w_cnt_q.underflow && &(w_cnt_q.cnt);
 
   // Manage AW, W, and B channels.
   always_comb begin
@@ -105,7 +109,7 @@ module axi_atop_filter #(
     unique case (w_state_q)
       W_FEEDTHROUGH: begin
         // Feed AW channel through if the maximum number of outstanding bursts is not reached.
-        if (complete_w_without_aw_downstream || (w_cnt_q < AxiMaxWriteTxns)) begin
+        if (complete_w_without_aw_downstream || (w_cnt_q.cnt < AxiMaxWriteTxns)) begin
           mst_req_o.aw_valid  = slv_req_i.aw_valid;
           slv_resp_o.aw_ready = mst_resp_i.aw_ready;
         end
@@ -300,10 +304,15 @@ module axi_atop_filter #(
   always_comb begin
     w_cnt_d = w_cnt_q;
     if (mst_req_o.aw_valid && mst_resp_i.aw_ready) begin
-      w_cnt_d += 1;
+      w_cnt_d.cnt += 1;
     end
     if (mst_req_o.w_valid && mst_resp_i.w_ready && mst_req_o.w.last) begin
-      w_cnt_d -= 1;
+      w_cnt_d.cnt -= 1;
+    end
+    if (w_cnt_q.underflow && (w_cnt_d.cnt == '0)) begin
+      w_cnt_d.underflow = 1'b0;
+    end else if (w_cnt_q.cnt == '0 && &(w_cnt_d.cnt)) begin
+      w_cnt_d.underflow = 1'b1;
     end
   end
 
@@ -312,7 +321,7 @@ module axi_atop_filter #(
       id_q <= '0;
       r_beats_q <= '0;
       r_state_q <= R_FEEDTHROUGH;
-      w_cnt_q <= '0;
+      w_cnt_q <= '{default: '0};
       w_state_q <= W_FEEDTHROUGH;
     end else begin
       id_q <= id_d;
@@ -374,22 +383,22 @@ module axi_atop_filter_intf #(
   typedef logic [AXI_DATA_WIDTH/8-1:0] strb_t;
   typedef logic [AXI_USER_WIDTH-1:0]   user_t;
 
-  `AXI_TYPEDEF_AW_CHAN_T ( aw_chan_t, addr_t, id_t,         user_t)
-  `AXI_TYPEDEF_W_CHAN_T  (  w_chan_t, data_t,       strb_t, user_t)
-  `AXI_TYPEDEF_B_CHAN_T  (  b_chan_t,         id_t,         user_t)
-  `AXI_TYPEDEF_AR_CHAN_T ( ar_chan_t, addr_t, id_t,         user_t)
-  `AXI_TYPEDEF_R_CHAN_T  (  r_chan_t, data_t, id_t,         user_t)
-  `AXI_TYPEDEF_REQ_T     (     req_t, aw_chan_t, w_chan_t, ar_chan_t)
-  `AXI_TYPEDEF_RESP_T    (    resp_t,  b_chan_t, r_chan_t)
+  `AXI_TYPEDEF_AW_CHAN_T(aw_chan_t, addr_t, id_t, user_t)
+  `AXI_TYPEDEF_W_CHAN_T(w_chan_t, data_t, strb_t, user_t)
+  `AXI_TYPEDEF_B_CHAN_T(b_chan_t, id_t, user_t)
+  `AXI_TYPEDEF_AR_CHAN_T(ar_chan_t, addr_t, id_t, user_t)
+  `AXI_TYPEDEF_R_CHAN_T(r_chan_t, data_t, id_t, user_t)
+  `AXI_TYPEDEF_REQ_T(req_t, aw_chan_t, w_chan_t, ar_chan_t)
+  `AXI_TYPEDEF_RESP_T(resp_t, b_chan_t, r_chan_t)
 
   req_t  slv_req,  mst_req;
   resp_t slv_resp, mst_resp;
 
-  `AXI_ASSIGN_TO_REQ    ( slv_req,  slv      )
-  `AXI_ASSIGN_FROM_RESP ( slv,      slv_resp )
+  `AXI_ASSIGN_TO_REQ(slv_req, slv)
+  `AXI_ASSIGN_FROM_RESP(slv, slv_resp)
 
-  `AXI_ASSIGN_FROM_REQ  ( mst     , mst_req  )
-  `AXI_ASSIGN_TO_RESP   ( mst_resp, mst      )
+  `AXI_ASSIGN_FROM_REQ(mst, mst_req)
+  `AXI_ASSIGN_TO_RESP(mst_resp, mst)
 
   axi_atop_filter #(
     .AxiIdWidth      ( AXI_ID_WIDTH       ),
