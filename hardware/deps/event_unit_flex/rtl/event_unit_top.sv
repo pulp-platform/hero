@@ -29,7 +29,14 @@ module event_unit_top
   // all kinds of cluster internal events, split into different signals for readability
   input  logic [NB_CORES-1:0][3:0]  acc_events_i,
   input  logic [NB_CORES-1:0][1:0]  dma_events_i,
-  input  logic mailbox_evt_i,
+
+  /* EXTERNAL EVTS */
+  input logic                       mailbox_evt_i,
+  input logic                       ext_evt_1_i,
+  input logic                       ext_evt_2_i,
+  input logic                       ext_evt_3_i,
+
+
   input  logic [NB_CORES-1:0][1:0]  timer_events_i,
   // usually much less than 32 bit, only for flexibility for different chips
   input  logic [NB_CORES-1:0][31:0] cluster_events_i,
@@ -136,13 +143,17 @@ module event_unit_top
       .dispatch_events_i   ( cluster_int_events_dispatch  ),
       .periph_fifo_event_i ( soc_periph_event             ),
 
-      .acc_events_i        ( acc_events_i       ),
-      .dma_events_i        ( dma_events_i       ),
-      .timer_events_i      ( timer_events_i     ),
-      .cluster_events_i    ( cluster_events_i   ),
-      .mailbox_evt_i       ( mailbox_evt_i      ),
+      .acc_events_i        ( acc_events_i                 ),
+      .dma_events_i        ( dma_events_i                 ),
+      .timer_events_i      ( timer_events_i               ),
+      .cluster_events_i    ( cluster_events_i             ),
 
-      .events_mapped_o     ( cluster_int_events )
+      .mailbox_evt_i       ( mailbox_evt_i                ),
+      .ext_evt_1_i         ( ext_evt_1_i                  ),
+      .ext_evt_2_i         ( ext_evt_2_i                  ),
+      .ext_evt_3_i         ( ext_evt_3_i                  ),
+
+      .events_mapped_o     ( cluster_int_events           )
     );
 
     // combinational calculation of every sw event line for every core

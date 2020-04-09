@@ -136,9 +136,11 @@ module pulp_ooc #(
   output logic [N_CLUSTERS-1:0] cl_eoc_o,
   output logic [N_CLUSTERS-1:0] cl_busy_o,
 
-  // MAILBOX EVT
-
+  // Mailbox Event plus Three External Events
   input  logic  mailbox_evt_i,
+  input  logic  ext_evt_1_i,
+  input  logic  ext_evt_2_i,
+  input  logic  ext_evt_3_i,
 
   // RAB IRQs
   output logic  rab_from_pulp_miss_irq_o,
@@ -299,7 +301,10 @@ module pulp_ooc #(
     .cl_fetch_en_i,
     .cl_eoc_o,
     .cl_busy_o,
-    .mailbox_evt_i    (mailbox_evt_i),
+    .mailbox_evt_i,
+    .ext_evt_1_i,
+    .ext_evt_2_i,
+    .ext_evt_3_i,
     .rab_from_pulp_miss_irq_o,
     .rab_from_pulp_multi_irq_o,
     .rab_from_pulp_prot_irq_o,

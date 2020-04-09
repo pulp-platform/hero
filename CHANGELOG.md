@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
+- Add three event lanes for external events, mapped to the cluster event map.
 
 ### Changed
 - Decrease L2 size to 128 KiB.
@@ -25,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Add `is_decoding` signal to mask `read_dependency` inside `APU_Dispatcher`. This fixed a bug that
   incorrectly detected a read dependency when a `fetch_fail` occurred.
+- `pulp_cluster`: Remove unused `dc_token_ring_fifo_dout` to prevent triggering `soc_periph_evt`.
 
 ### Removed
 - PULP runtime: Remove broken `rt_*_alloc_align` functions.  These functions did not correctly

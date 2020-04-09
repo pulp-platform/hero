@@ -31,7 +31,10 @@ module cluster_event_map
   input logic [NB_CORES-1:0][1:0]   timer_events_i,
   input logic [NB_CORES-1:0][31:0]  cluster_events_i,
 
-  input logic mailbox_evt_i,
+  input logic                       mailbox_evt_i,
+  input logic                       ext_evt_1_i,
+  input logic                       ext_evt_2_i,
+  input logic                       ext_evt_3_i,
 
 
   output logic [NB_CORES-1:0][31:0] events_mapped_o
@@ -41,7 +44,10 @@ module cluster_event_map
 
   generate
     for ( I = 0; I < NB_CORES; I++ ) begin : CL_EVENT_MAP
-      assign events_mapped_o[I][31:28] = '0;
+      assign events_mapped_o[I][31] = ext_evt_3_i;
+      assign events_mapped_o[I][30] = ext_evt_2_i;
+      assign events_mapped_o[I][29] = ext_evt_1_i;
+      assign events_mapped_o[I][28] = '0;
       assign events_mapped_o[I][27]    = periph_fifo_event_i;
       assign events_mapped_o[I][26:25] = '0;
       assign events_mapped_o[I][24]    = mailbox_evt_i;
