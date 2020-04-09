@@ -11,14 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Decrease L2 size to 128 KiB.
 - `pulp_cluster`:
   - Decrease TCDM size to 128 KiB.
-- Modified APU-Dispatcher, Decoder, FPU_Demux allow back to back issue of up to 3 cycle fpu instructions without stalling:
-	- Modified the FSM inside the FPU DEMUX such that it won't stop new requests to wait for the previous to complete.
-	- Changed how the latency is encoded for fpu instructions inside the decoder. We now use the latency = 0 to encode instructions that takes more than 3 cycles to complete.
-	- Modified the APU_Dispatcher to allow up to 3 cycle latency fp instructions to be issued back to back. Instructions with latency = 0 (division and instr. that takes more than 3 cycles) now always stall the pipeline.
-- Added Secondo stage of pipeline for FPU
+  - Modify APU Dispatcher, Decoder, and FPU Demux to allow back-to-back issuing of up to 3 cycle FPU
+    instructions without stalling:
+    - Modify the FSM inside the FPU Demux such that it will not stop new requests to wait for the
+      previous to complete.
+    - Change how the latency is encoded for FPU instructions inside the decoder.  `latency = 0` now
+      encodes instructions that takes more than 3 cycles to complete.
+    - Modify the APU Dispatcher to allow up to 3 cycle latency FPU instructions to be issued
+      back-to-back.  Instructions with `latency = 0` (division and other instructions that take more
+      than 3 cycles) now always stall the pipeline.
+  - Add second pipeline stage to FPU.
 
 ### Fixed
-- Added is_decoding signal to mask read_dependency inside the APU_Dispatcher. This fixed a bug that falsly detected a read dependency when a fetch_fail occured.
+- Add `is_decoding` signal to mask `read_dependency` inside `APU_Dispatcher`. This fixed a bug that
+  incorrectly detected a read dependency when a `fetch_fail` occurred.
 
 ### Removed
 - PULP runtime: Remove broken `rt_*_alloc_align` functions.  These functions did not correctly
