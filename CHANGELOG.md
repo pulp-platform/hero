@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+### Removed
+- PULP runtime: Remove broken `rt_*_alloc_align` functions.  These functions did not correctly
+  return aligned memory.  The allocator in the PULP runtime is not suitable for aligned allocations.
+  If aligned allocations are required, a different allocator needs to be implemented (e.g.,
+  page-based).  It's quite common for RTOSes (e.g., Zephyr) to not support aligned allocation.
+
 
 ## 2020-03-14
 ### Changed
