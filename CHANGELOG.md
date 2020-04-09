@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       than 3 cycles) now always stall the pipeline.
   - Add second pipeline stage to FPU.
 - Update `common_cells` to v1.16.4 to fix generation of `head_tail_q` registers.
+- Update AXI modules to v0.18.1 to fix problems with DWC.
 
 ### Fixed
 - Add `is_decoding` signal to mask `read_dependency` inside `APU_Dispatcher`. This fixed a bug that
