@@ -1039,6 +1039,8 @@ module pulp_cluster
     end
   endgenerate
 
+  // Tie AWATOP, which is not driven by any instruction cache, off.
+  assign s_core_instr_bus.aw_atop = '0;
   if (PRIV_ICACHE) begin : gen_priv_icache
     icache_hier_top #(
       .FETCH_ADDR_WIDTH       ( 32                  ),
