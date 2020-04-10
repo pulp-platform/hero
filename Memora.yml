@@ -6,6 +6,7 @@ artifacts:
       - Makefile
       - setup.sh
       - toolchain/build.sh
+      - toolchain/patches
       - toolchain/pulp.config
     outputs:
       - install
