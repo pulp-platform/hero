@@ -430,7 +430,7 @@ module pulp_tb #(
   // localparam N_SER_CUTS = dut.gen_l2_ports[0].i_l2_mem.N_SER_CUTS; // both same on all ports
   // localparam N_PAR_CUTS = dut.gen_l2_ports[0].i_l2_mem.N_PAR_CUTS;
   localparam N_PAR_CUTS = AXI_DW / 32;
-  localparam N_SER_CUTS = (pulp_cluster_cfg_pkg::L2_SIZE/L2_N_AXI_PORTS) / (N_PAR_CUTS * (32 * 1024) / 8);
+  localparam N_SER_CUTS = (pulp_cluster_cfg_pkg::L2_SIZE/L2_N_AXI_PORTS) / (N_PAR_CUTS * (32 * 2048) / 8);
   for (genvar iPort = 0; iPort < L2_N_AXI_PORTS; iPort++) begin: gen_fill_l2_ports
     for (genvar iRow = 0; iRow < N_SER_CUTS; iRow++) begin: gen_fill_l2_rows
       for (genvar iCol = 0; iCol < N_PAR_CUTS; iCol++) begin: gen_fill_l2_cols

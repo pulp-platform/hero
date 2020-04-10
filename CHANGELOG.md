@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add three event lanes for external events, mapped to the cluster event map.
 
 ### Changed
-- Decrease L2 size to 128 KiB.
+- Decrease L2 size to 128 KiB and increase depth of each bank to 2048 rows.
 - `pulp_cluster`:
   - Decrease TCDM size to 128 KiB.
   - Modify APU Dispatcher, Decoder, and FPU Demux to allow back-to-back issuing of up to 3 cycle FPU
