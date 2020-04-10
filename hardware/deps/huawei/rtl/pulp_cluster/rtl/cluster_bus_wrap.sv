@@ -121,6 +121,8 @@ module cluster_bus_wrap
     initial begin
       assert (AXI_ADDR_WIDTH == 32)
         else $fatal("Address map is only defined for 32-bit addresses!");
+      assert (AXI_ID_IN_WIDTH + $clog2(NB_SLAVE) <= AXI_ID_OUT_WIDTH)
+        else $fatal(1, "Insufficient AXI_ID_OUT_WIDTH!");
     end
   `endif
   // pragma translate_on
