@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
+
+### Changed
+
+### Fixed
+
+
+## 2020-04-10
+### Added
 - Add three event lanes for external events, mapped to the cluster event map.
 - Add GDB to the PULP toolchain.
 
