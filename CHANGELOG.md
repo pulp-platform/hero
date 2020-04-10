@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Add three event lanes for external events, mapped to the cluster event map.
+- Add GDB to the PULP toolchain.
 
 ### Changed
 - Decrease L2 size to 128 KiB and increase depth of each bank to 2048 rows.
