@@ -26,8 +26,8 @@ package pulp_cluster_cfg_pkg;
   // -- AXI
   localparam int unsigned AXI_AW = 32; // [bit]
   localparam int unsigned AXI_DW = 64; // [bit]
-  localparam int unsigned AXI_IW_MST = 8; // [bit]; do not change, seems to break instruction cache
-  localparam int unsigned AXI_IW_SLV = 6; // [bit]
+  localparam int unsigned AXI_IW_MST = 5; // [bit]; do not change, seems to break instruction cache
+  localparam int unsigned AXI_IW_SLV = 3; // [bit]
   localparam int unsigned AXI_UW = 4; // [bit]
   // -- DMA
   localparam int unsigned DMA_MAX_BURST_SIZE = 2048; // [B], must be a power of 2

@@ -782,18 +782,18 @@ module pulp_cluster
   );
 
   dmac_wrap #(
-    .NB_CTRLS           ( 1                  ),
-    .NB_OUTSND_BURSTS   ( NB_OUTSND_BURSTS   ),
-    .MCHAN_BURST_LENGTH ( MCHAN_BURST_LENGTH ),
-    .AXI_ADDR_WIDTH     ( AXI_ADDR_WIDTH     ),
-    .AXI_DATA_WIDTH     ( AXI_DATA_C2S_WIDTH ),
-    .AXI_ID_WIDTH       ( AXI_ID_IN_WIDTH    ),
-    .AXI_USER_WIDTH     ( AXI_USER_WIDTH     ),
-    .PE_ID_WIDTH        ( NB_CORES + 1       ),
-    .TCDM_ADD_WIDTH     ( TCDM_ADD_WIDTH     ),
-    .DATA_WIDTH         ( DATA_WIDTH         ),
-    .ADDR_WIDTH         ( ADDR_WIDTH         ),
-    .BE_WIDTH           ( BE_WIDTH           )
+    .NB_CTRLS           ( 1                         ),
+    .NB_OUTSND_BURSTS   ( NB_OUTSND_BURSTS          ),
+    .MCHAN_BURST_LENGTH ( MCHAN_BURST_LENGTH        ),
+    .AXI_ADDR_WIDTH     ( AXI_ADDR_WIDTH            ),
+    .AXI_DATA_WIDTH     ( AXI_DATA_C2S_WIDTH        ),
+    .AXI_ID_WIDTH       ( $clog2(NB_OUTSND_BURSTS)  ),
+    .AXI_USER_WIDTH     ( AXI_USER_WIDTH            ),
+    .PE_ID_WIDTH        ( NB_CORES + 1              ),
+    .TCDM_ADD_WIDTH     ( TCDM_ADD_WIDTH            ),
+    .DATA_WIDTH         ( DATA_WIDTH                ),
+    .ADDR_WIDTH         ( ADDR_WIDTH                ),
+    .BE_WIDTH           ( BE_WIDTH                  )
   ) dmac_wrap_i (
     .clk_i          ( clk_cluster        ),
     .rst_ni         ( rst_ni             ),
@@ -1044,7 +1044,7 @@ module pulp_cluster
   AXI_BUS #(
     .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH      ),
     .AXI_DATA_WIDTH ( AXI_DATA_C2S_WIDTH  ),
-    .AXI_ID_WIDTH   ( AXI_ID_OUT_WIDTH    ),
+    .AXI_ID_WIDTH   ( 8                   ),
     .AXI_USER_WIDTH ( AXI_USER_WIDTH      )
   ) icache_axi ();
 
@@ -1076,7 +1076,7 @@ module pulp_cluster
       .PRI_NB_WAYS            ( 4                   ),
       .PRI_CACHE_SIZE         ( 1 * 1024            ), // in Byte
       .PRI_CACHE_LINE         ( 1                   ), // in word of [FETCH_DATA_WIDTH]
-      .AXI_ID                 ( AXI_ID_OUT_WIDTH    ),
+      .AXI_ID                 ( 8                   ),
       .AXI_ADDR               ( AXI_ADDR_WIDTH      ),
       .AXI_USER               ( AXI_USER_WIDTH      ),
       .AXI_DATA               ( AXI_DATA_C2S_WIDTH  ),
@@ -1169,7 +1169,7 @@ module pulp_cluster
       .NB_WAYS          ( SET_ASSOCIATIVE    ),
       .CACHE_SIZE       ( CACHE_SIZE         ),
       .CACHE_LINE       ( 1                  ),
-      .AXI_ID           ( AXI_ID_OUT_WIDTH   ),
+      .AXI_ID           ( 8                  ),
       .AXI_ADDR         ( AXI_ADDR_WIDTH     ),
       .AXI_USER         ( AXI_USER_WIDTH     ),
       .AXI_DATA         ( AXI_DATA_C2S_WIDTH ),
@@ -1271,7 +1271,7 @@ module pulp_cluster
       .L2_SIZE               ( L2_SIZE                ),
       .USE_REDUCED_TAG       ( USE_REDUCED_TAG        ),
       // AXI PARAMETER
-      .AXI_ID                ( AXI_ID_OUT_WIDTH       ),
+      .AXI_ID                ( 8                      ),
       .AXI_USER              ( AXI_USER_WIDTH         ),
       .AXI_DATA              ( AXI_DATA_C2S_WIDTH     ),
       .AXI_ADDR              ( AXI_ADDR_WIDTH         )

@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Remap all DMA and instruction cache AXI transactions to a single ID.  This is necessary as the
     DMA engine and the instruction cache do not support interleaved responses, and it helps reducing
     the AXI ID width of the system.
+  - Decrease AXI input ID width to 3 bit and output ID width to 5 bit.  This reduces the
+    complexity of the AXI interconnects.
 - Update `common_cells` to v1.16.4 to fix generation of `head_tail_q` registers.
 - Update AXI modules to v0.18.1 to fix problems with DWC.
 
