@@ -27,9 +27,9 @@
 // `src` was the master of `dst`.
 //
 // Usage Example:
-// `AXI_ASSIGN(slv, mst);
-// `AXI_ASSIGN_AW(dst, src);
-// `AXI_ASSIGN_R(dst, src);
+// `AXI_ASSIGN(slv, mst)
+// `AXI_ASSIGN_AW(dst, src)
+// `AXI_ASSIGN_R(dst, src)
 `define AXI_ASSIGN_AW(dst, src)           \
   assign dst.aw_id      = src.aw_id;      \
   assign dst.aw_addr    = src.aw_addr;    \
@@ -134,12 +134,12 @@
   opt_as axi_if.r_last  = r_struct.last;      \
   opt_as axi_if.r_user  = r_struct.user;
 `define AXI_FROM_REQ(opt_as, axi_if, req_struct)  \
-  `AXI_FROM_AW(opt_as, axi_if, req_struct.aw);    \
+  `AXI_FROM_AW(opt_as, axi_if, req_struct.aw)     \
   opt_as axi_if.aw_valid = req_struct.aw_valid;   \
-  `AXI_FROM_W(opt_as, axi_if, req_struct.w);      \
+  `AXI_FROM_W(opt_as, axi_if, req_struct.w)       \
   opt_as axi_if.w_valid = req_struct.w_valid;     \
   opt_as axi_if.b_ready = req_struct.b_ready;     \
-  `AXI_FROM_AR(opt_as, axi_if, req_struct.ar);    \
+  `AXI_FROM_AR(opt_as, axi_if, req_struct.ar)     \
   opt_as axi_if.ar_valid = req_struct.ar_valid;   \
   opt_as axi_if.r_ready = req_struct.r_ready;
 `define AXI_FROM_RESP(opt_as, axi_if, resp_struct)  \
@@ -147,9 +147,9 @@
   opt_as axi_if.ar_ready = resp_struct.ar_ready;    \
   opt_as axi_if.w_ready = resp_struct.w_ready;      \
   opt_as axi_if.b_valid = resp_struct.b_valid;      \
-  `AXI_FROM_B(opt_as, axi_if, resp_struct.b);       \
+  `AXI_FROM_B(opt_as, axi_if, resp_struct.b)        \
   opt_as axi_if.r_valid = resp_struct.r_valid;      \
-  `AXI_FROM_R(opt_as, axi_if, resp_struct.r);
+  `AXI_FROM_R(opt_as, axi_if, resp_struct.r)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -167,7 +167,7 @@
 //
 // Usage Example:
 // always_comb begin
-//   `AXI_SET_FROM_REQ(my_if, my_req_struct);
+//   `AXI_SET_FROM_REQ(my_if, my_req_struct)
 // end
 `define AXI_SET_FROM_AW(axi_if, aw_struct)      `AXI_FROM_AW(, axi_if, aw_struct)
 `define AXI_SET_FROM_W(axi_if, w_struct)        `AXI_FROM_W(, axi_if, w_struct)
@@ -192,7 +192,7 @@
 // `axi_if` interface from the signals in `resp_struct`.
 //
 // Usage Example:
-// `AXI_ASSIGN_FROM_REQ(my_if, my_req_struct);
+// `AXI_ASSIGN_FROM_REQ(my_if, my_req_struct)
 `define AXI_ASSIGN_FROM_AW(axi_if, aw_struct)     `AXI_FROM_AW(assign, axi_if, aw_struct)
 `define AXI_ASSIGN_FROM_W(axi_if, w_struct)       `AXI_FROM_W(assign, axi_if, w_struct)
 `define AXI_ASSIGN_FROM_B(axi_if, b_struct)       `AXI_FROM_B(assign, axi_if, b_struct)
@@ -258,12 +258,12 @@
     user: axi_if.r_user                     \
   };
 `define AXI_TO_REQ(opt_as, req_struct, axi_if)  \
-  `AXI_TO_AW(opt_as, req_struct.aw, axi_if);    \
+  `AXI_TO_AW(opt_as, req_struct.aw, axi_if)     \
   opt_as req_struct.aw_valid = axi_if.aw_valid; \
-  `AXI_TO_W(opt_as, req_struct.w, axi_if);      \
+  `AXI_TO_W(opt_as, req_struct.w, axi_if)       \
   opt_as req_struct.w_valid = axi_if.w_valid;   \
   opt_as req_struct.b_ready = axi_if.b_ready;   \
-  `AXI_TO_AR(opt_as, req_struct.ar, axi_if);    \
+  `AXI_TO_AR(opt_as, req_struct.ar, axi_if)     \
   opt_as req_struct.ar_valid = axi_if.ar_valid; \
   opt_as req_struct.r_ready = axi_if.r_ready;
 `define AXI_TO_RESP(opt_as, resp_struct, axi_if)  \
@@ -271,9 +271,9 @@
   opt_as resp_struct.ar_ready = axi_if.ar_ready;  \
   opt_as resp_struct.w_ready = axi_if.w_ready;    \
   opt_as resp_struct.b_valid = axi_if.b_valid;    \
-  `AXI_TO_B(opt_as, resp_struct.b, axi_if);       \
+  `AXI_TO_B(opt_as, resp_struct.b, axi_if)        \
   opt_as resp_struct.r_valid = axi_if.r_valid;    \
-  `AXI_TO_R(opt_as, resp_struct.r, axi_if);
+  `AXI_TO_R(opt_as, resp_struct.r, axi_if)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -292,7 +292,7 @@
 //
 // Usage Example:
 // always_comb begin
-//   `AXI_SET_TO_REQ(my_req_struct, my_if);
+//   `AXI_SET_TO_REQ(my_req_struct, my_if)
 // end
 `define AXI_SET_TO_AW(aw_struct, axi_if)     `AXI_TO_AW(, aw_struct, axi_if)
 `define AXI_SET_TO_W(w_struct, axi_if)       `AXI_TO_W(, w_struct, axi_if)
@@ -318,7 +318,7 @@
 // AW, W, and AR ready)) to the signals in the `axi_if` interface.
 //
 // Usage Example:
-// `AXI_ASSIGN_TO_REQ(my_req_struct, my_if);
+// `AXI_ASSIGN_TO_REQ(my_req_struct, my_if)
 `define AXI_ASSIGN_TO_AW(aw_struct, axi_if)     `AXI_TO_AW(assign, aw_struct, axi_if)
 `define AXI_ASSIGN_TO_W(w_struct, axi_if)       `AXI_TO_W(assign, w_struct, axi_if)
 `define AXI_ASSIGN_TO_B(b_struct, axi_if)       `AXI_TO_B(assign, b_struct, axi_if)
@@ -339,9 +339,9 @@
 // if `src` was the master of `dst`.
 //
 // Usage Example:
-// `AXI_LITE_ASSIGN(slv, mst);
-// `AXI_LITE_ASSIGN_AW(dst, src);
-// `AXI_LITE_ASSIGN_R(dst, src);
+// `AXI_LITE_ASSIGN(slv, mst)
+// `AXI_LITE_ASSIGN_AW(dst, src)
+// `AXI_LITE_ASSIGN_R(dst, src)
 `define AXI_LITE_ASSIGN_AW(dst, src)  \
   assign dst.aw_addr  = src.aw_addr;  \
   assign dst.aw_valid = src.aw_valid; \
@@ -392,12 +392,12 @@
   opt_as axi_lite_if.r_data  = r_lite_struct.data;          \
   opt_as axi_lite_if.r_resp  = r_lite_struct.resp;
 `define AXI_LITE_FROM_REQ(opt_as, axi_lite_if, req_lite_struct) \
-  `AXI_LITE_FROM_AW(opt_as, axi_lite_if, req_lite_struct.aw);   \
+  `AXI_LITE_FROM_AW(opt_as, axi_lite_if, req_lite_struct.aw)    \
   opt_as axi_lite_if.aw_valid = req_lite_struct.aw_valid;       \
-  `AXI_LITE_FROM_W(opt_as, axi_lite_if, req_lite_struct.w);     \
+  `AXI_LITE_FROM_W(opt_as, axi_lite_if, req_lite_struct.w)      \
   opt_as axi_lite_if.w_valid = req_lite_struct.w_valid;         \
   opt_as axi_lite_if.b_ready = req_lite_struct.b_ready;         \
-  `AXI_LITE_FROM_AR(opt_as, axi_lite_if, req_lite_struct.ar);   \
+  `AXI_LITE_FROM_AR(opt_as, axi_lite_if, req_lite_struct.ar)    \
   opt_as axi_lite_if.ar_valid = req_lite_struct.ar_valid;       \
   opt_as axi_lite_if.r_ready = req_lite_struct.r_ready;
 `define AXI_LITE_FROM_RESP(opt_as, axi_lite_if, resp_lite_struct) \
@@ -405,9 +405,9 @@
   opt_as axi_lite_if.ar_ready = resp_lite_struct.ar_ready;        \
   opt_as axi_lite_if.w_ready = resp_lite_struct.w_ready;          \
   opt_as axi_lite_if.b_valid = resp_lite_struct.b_valid;          \
-  `AXI_LITE_FROM_B(opt_as, axi_lite_if, resp_lite_struct.b);      \
+  `AXI_LITE_FROM_B(opt_as, axi_lite_if, resp_lite_struct.b)       \
   opt_as axi_lite_if.r_valid = resp_lite_struct.r_valid;          \
-  `AXI_LITE_FROM_R(opt_as, axi_lite_if, resp_lite_struct.r);
+  `AXI_LITE_FROM_R(opt_as, axi_lite_if, resp_lite_struct.r)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -425,7 +425,7 @@
 //
 // Usage Example:
 // always_comb begin
-//   `AXI_LITE_SET_FROM_REQ(my_if, my_req_struct);
+//   `AXI_LITE_SET_FROM_REQ(my_if, my_req_struct)
 // end
 `define AXI_LITE_SET_FROM_AW(axi_if, aw_struct)      `AXI_LITE_FROM_AW(, axi_if, aw_struct)
 `define AXI_LITE_SET_FROM_W(axi_if, w_struct)        `AXI_LITE_FROM_W(, axi_if, w_struct)
@@ -450,7 +450,7 @@
 // ready) of the `axi_if` interface from the signals in `resp_struct`.
 //
 // Usage Example:
-// `AXI_LITE_ASSIGN_FROM_REQ(my_if, my_req_struct);
+// `AXI_LITE_ASSIGN_FROM_REQ(my_if, my_req_struct)
 `define AXI_LITE_ASSIGN_FROM_AW(axi_if, aw_struct)     `AXI_LITE_FROM_AW(assign, axi_if, aw_struct)
 `define AXI_LITE_ASSIGN_FROM_W(axi_if, w_struct)       `AXI_LITE_FROM_W(assign, axi_if, w_struct)
 `define AXI_LITE_ASSIGN_FROM_B(axi_if, b_struct)       `AXI_LITE_FROM_B(assign, axi_if, b_struct)
@@ -491,12 +491,12 @@
     resp: axi_lite_if.r_resp                              \
   };
 `define AXI_LITE_TO_REQ(opt_as, req_lite_struct, axi_lite_if) \
-  `AXI_LITE_TO_AW(opt_as, req_lite_struct.aw, axi_lite_if);   \
+  `AXI_LITE_TO_AW(opt_as, req_lite_struct.aw, axi_lite_if)    \
   opt_as req_lite_struct.aw_valid = axi_lite_if.aw_valid;     \
-  `AXI_LITE_TO_W(opt_as, req_lite_struct.w, axi_lite_if);     \
+  `AXI_LITE_TO_W(opt_as, req_lite_struct.w, axi_lite_if)      \
   opt_as req_lite_struct.w_valid = axi_lite_if.w_valid;       \
   opt_as req_lite_struct.b_ready = axi_lite_if.b_ready;       \
-  `AXI_LITE_TO_AR(opt_as, req_lite_struct.ar, axi_lite_if);   \
+  `AXI_LITE_TO_AR(opt_as, req_lite_struct.ar, axi_lite_if)    \
   opt_as req_lite_struct.ar_valid = axi_lite_if.ar_valid;     \
   opt_as req_lite_struct.r_ready = axi_lite_if.r_ready;
 `define AXI_LITE_TO_RESP(opt_as, resp_lite_struct, axi_lite_if) \
@@ -504,9 +504,9 @@
   opt_as resp_lite_struct.ar_ready = axi_lite_if.ar_ready;      \
   opt_as resp_lite_struct.w_ready = axi_lite_if.w_ready;        \
   opt_as resp_lite_struct.b_valid = axi_lite_if.b_valid;        \
-  `AXI_LITE_TO_B(opt_as, resp_lite_struct.b, axi_lite_if);      \
+  `AXI_LITE_TO_B(opt_as, resp_lite_struct.b, axi_lite_if)       \
   opt_as resp_lite_struct.r_valid = axi_lite_if.r_valid;        \
-  `AXI_LITE_TO_R(opt_as, resp_lite_struct.r, axi_lite_if);
+  `AXI_LITE_TO_R(opt_as, resp_lite_struct.r, axi_lite_if)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -525,7 +525,7 @@
 //
 // Usage Example:
 // always_comb begin
-//   `AXI_LITE_SET_TO_REQ(my_req_struct, my_if);
+//   `AXI_LITE_SET_TO_REQ(my_req_struct, my_if)
 // end
 `define AXI_LITE_SET_TO_AW(aw_struct, axi_if)     `AXI_LITE_TO_AW(, aw_struct, axi_if)
 `define AXI_LITE_SET_TO_W(w_struct, axi_if)       `AXI_LITE_TO_W(, w_struct, axi_if)
@@ -551,7 +551,7 @@
 // and R valid and AW, W, and AR ready)) to the signals in the `axi_if` interface.
 //
 // Usage Example:
-// `AXI_LITE_ASSIGN_TO_REQ(my_req_struct, my_if);
+// `AXI_LITE_ASSIGN_TO_REQ(my_req_struct, my_if)
 `define AXI_LITE_ASSIGN_TO_AW(aw_struct, axi_if)     `AXI_LITE_TO_AW(assign, aw_struct, axi_if)
 `define AXI_LITE_ASSIGN_TO_W(w_struct, axi_if)       `AXI_LITE_TO_W(assign, w_struct, axi_if)
 `define AXI_LITE_ASSIGN_TO_B(b_struct, axi_if)       `AXI_LITE_TO_B(assign, b_struct, axi_if)

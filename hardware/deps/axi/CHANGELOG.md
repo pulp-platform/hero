@@ -8,15 +8,96 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 
 ### Added
-- `axi_intf`: Add single-channel assertions to `AXI_BUS_DV`.
 
 ### Changed
+
+### Fixed
+
+
+## 0.18.1 - 2020-04-08
+
+### Fixed
+- `axi_modify_address`: Fix unconnected `w_valid`.
+- `axi_dw_converter`: Fix internal inversion of up- and downconversion, which led to incorrect lane
+  steering and serialization.
+- `rand_axi_master` (in `axi_test`): In ATOP mode, this module could get stuck receiving an R beat
+  when only writes (without ATOP read responses) were left to complete.  This has been fixed.
+- `assign.svh`: Remove spurious semicolons.
+- `axi_lite_to_apb`: Fix message of assertion checking the strobe width.
+
+
+## 0.18.0 - 2020-03-24
+
+### Added
+- `axi_dw_converter`: a data width converter between AXI interfaces of any data width.  Depending on
+  its parametrization, this module instantiates one of the following:
+  - `axi_dw_downsizer`: a data width converter between a wide AXI master and a narrower slave.
+  - `axi_dw_upsizer`: a data width converter between a narrow AXI master and a wider slave.
+
+
+## 0.17.0 - 2020-03-23
+
+### Added
+- Add `axi_isolate` to isolate downstream slaves from receiving new transactions.
+
+### Changed
+- `axi_lite_to_axi`: Add mandatory `AxiDataWidth` parameter to enable fix mentioned below.
+
+### Fixed
+- Improve compatibility with Xcelium:
+  - by removing unsupported hierarchical argument to `$bits()` function in `axi_lite_to_axi`;
+  - by removing unsupported `struct` assignment in `axi_lite_demux`.
+
+
+## 0.16.3 - 2020-03-19
+
+### Changed
+- `axi_err_slv`: Add optional parameter to define data returned by read response.  The parameter
+  defaults to a 64-bit value, so buses with data width larger than or equal to 64 bit see an
+  additional 32-bit value in error responses compared to the prior version.  Other than that, this
+  change is fully backward compatible.
+
+
+## 0.16.2 - 2020-03-16
+
+### Fixed
+- `axi_atop_filter`: Fix underflow in counter for `AxiMaxWriteTxns = 1`.
+
+
+## 0.16.1 - 2020-03-13
+
+### Fixed
+- Remove whitespace in and semicolon after macro calls.
+- `axi_intf`: Improve Verilator compatibility by disabling unsupported assertions.
+
+
+## 0.16.0 - 2020-03-11
+
+### Added
+- `axi_cdc_intf`: Add interface variant of AXI clock domain crossing.
+
+### Fixed
+- `axi_cdc`: Remove unused global `import axi_pkg::*`.
+- `axi_intf`: Remove global `import axi_pkg::*` and explicitly use symbols from `axi_pkg`.
+- `axi_lite_cut_intf`: Add missing assigns to and from interface ports.
+- `tb_axi_cdc`:
+  - Remove global `import axi_pkg::*`.
+  - Define channels with `AXI_TYPEDEF` macros instead of local `typedef`s.
+
+### Removed
+- Remove unused `AXI_ARBITRATION` and `AXI_ROUTING_RULES` interfaces.
+
+
+## 0.15.1 - 2020-03-09
+
+### Added
+- `axi_intf`: Add single-channel assertions to `AXI_BUS_DV`.
 
 ### Fixed
 - `axi_lite_to_apb`: Fix the interface version (`axi_lite_to_apb_intf`) to match the changes from
   version `0.15.0`.
 - `axi_demux`: When `MaxTrans` was 1, the `IdCounterWidth` became 0.  This has been fixed.
-- `axi_top_filter`:
+- `axi_atop_filter`:
   - The master interface of this module in one case depended on `aw_ready` before applying
     `w_valid`, which is a violation of the AXI specification that can lead to deadlocks.  This issue
     has been fixed by removing that dependency.
@@ -29,15 +110,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `rand_axi_slave` (in `axi_test`):
   - Decouple receiving of Ws from receiving of AWs.  This allows to receive W beats independent of
     AW beats.
+- Update `common_cells` to `1.16.4` to fix synthesis warning in `id_queue`.
 
 
 ## 0.15.0 - 2020-02-28
 
 ### Added
 - `axi_burst_splitter`: Split AXI4 bursts to single-beat transactions.
-- `axi_dw_converter`: A data width converter between AXI interfaces of any data width.
-- `axi_dw_downsizer`: A data width converter between a wide AXI slave and a narrower AXI master.
-- `axi_dw_upsizer`: A data width converter between a narrow AXI slave and a wider AXI master.
 
 ### Changed
 - `axi_lite_to_apb`: The `psel` field of the `apb_req_t` struct is now a single bit.  That is, every

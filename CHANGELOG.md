@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add three event lanes for external events, mapped to the cluster event map.
 
 ### Changed
-- Decrease L2 size to 128 KiB.
+- Decrease L2 size to 128 KiB and increase depth of each bank to 2048 rows.
 - `pulp_cluster`:
   - Decrease TCDM size to 128 KiB.
   - Modify APU Dispatcher, Decoder, and FPU Demux to allow back-to-back issuing of up to 3 cycle FPU
@@ -22,6 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       back-to-back.  Instructions with `latency = 0` (division and other instructions that take more
       than 3 cycles) now always stall the pipeline.
   - Add second pipeline stage to FPU.
+  - Remap all DMA and instruction cache AXI transactions to a single ID.  This is necessary as the
+    DMA engine and the instruction cache do not support interleaved responses, and it helps reducing
+    the AXI ID width of the system.
+  - Decrease AXI input ID width to 3 bit and output ID width to 5 bit.  This reduces the
+    complexity of the AXI interconnects.
+- Update `common_cells` to v1.16.4 to fix generation of `head_tail_q` registers.
+- Update AXI modules to v0.18.1 to fix problems with DWC.
 
 ### Fixed
 - Add `is_decoding` signal to mask `read_dependency` inside `APU_Dispatcher`. This fixed a bug that
@@ -76,7 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Include all the SDK's submodules in the package.
   - Match memory sizes and addresses of cluster components with the hardware.
 - `axi_dwc`: Fix incorrect handling of bursts in upsizer.
-- `axi_top_filter`:
+- `axi_atop_filter`:
   - The master interface of this module in one case depended on `aw_ready` before applying
     `w_valid`, which is a violation of the AXI specification that can lead to deadlocks.  This issue
     has been fixed by removing that dependency.

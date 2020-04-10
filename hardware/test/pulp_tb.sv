@@ -21,7 +21,7 @@ module pulp_tb #(
   parameter bit           RUN_DM_TESTS = 0,
   // SoC Parameters
   parameter int unsigned  N_CLUSTERS = 1,
-  parameter int unsigned  AXI_DW = 128,
+  parameter int unsigned  AXI_DW = 64,
   parameter int unsigned  L2_N_AXI_PORTS = 1
 );
 
@@ -179,11 +179,11 @@ module pulp_tb #(
 
   // Peripherals
   axi_dw_converter_intf #(
-    .AXI_ID_WIDTH       (AXI_IW+1),
-    .AXI_ADDR_WIDTH     (pulp_pkg::AXI_AW),
-    .AXI_MST_DATA_WIDTH (32),
-    .AXI_SLV_DATA_WIDTH (AXI_DW),
-    .AXI_USER_WIDTH     (pulp_pkg::AXI_UW)
+    .AXI_ID_WIDTH             (AXI_IW+1),
+    .AXI_ADDR_WIDTH           (pulp_pkg::AXI_AW),
+    .AXI_MST_PORT_DATA_WIDTH  (32),
+    .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW),
+    .AXI_USER_WIDTH           (pulp_pkg::AXI_UW)
   ) i_dwc_peripherals (
     .clk_i  (clk),
     .rst_ni (rst_n),
@@ -387,7 +387,7 @@ module pulp_tb #(
       // enable all cores (TODO: what to do when multiple clusters)
       //write_axi(32'h1020_0008, 128'h00000000_000000ff_00000000_00000000);
       // TODO: remove this workaround when write_axi is fixed
-      write_axi(32'h1020_0008, 128'h00000000_00000001_00000000_00000000);
+      write_axi(32'h1020_0008, 64'h00000000_00000001);
 
       dm_if.run_dm_tests(N_CLUSTERS, pulp_cluster_cfg_pkg::N_CORES, error,
                            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
@@ -430,7 +430,7 @@ module pulp_tb #(
   // localparam N_SER_CUTS = dut.gen_l2_ports[0].i_l2_mem.N_SER_CUTS; // both same on all ports
   // localparam N_PAR_CUTS = dut.gen_l2_ports[0].i_l2_mem.N_PAR_CUTS;
   localparam N_PAR_CUTS = AXI_DW / 32;
-  localparam N_SER_CUTS = (pulp_cluster_cfg_pkg::L2_SIZE/L2_N_AXI_PORTS) / (N_PAR_CUTS * (32 * 1024) / 8);
+  localparam N_SER_CUTS = (pulp_cluster_cfg_pkg::L2_SIZE/L2_N_AXI_PORTS) / (N_PAR_CUTS * (32 * 2048) / 8);
   for (genvar iPort = 0; iPort < L2_N_AXI_PORTS; iPort++) begin: gen_fill_l2_ports
     for (genvar iRow = 0; iRow < N_SER_CUTS; iRow++) begin: gen_fill_l2_rows
       for (genvar iCol = 0; iCol < N_PAR_CUTS; iCol++) begin: gen_fill_l2_cols

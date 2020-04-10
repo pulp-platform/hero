@@ -94,6 +94,29 @@ module dmac_wrap
     end
   endgenerate
    
+  // Remap all I$ fetches to a single ID.  This is necessary as the DMA engine does not support
+  // interleaved responses and helps reducing the AXI ID width of the system.
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH  ),
+    .AXI_DATA_WIDTH ( AXI_DATA_WIDTH  ),
+    .AXI_ID_WIDTH   ( AXI_ID_WIDTH    ),
+    .AXI_USER_WIDTH ( AXI_USER_WIDTH  )
+  ) internal ();
+
+  axi_serializer_intf #(
+    .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH    ),
+    .AXI_DATA_WIDTH ( AXI_DATA_WIDTH    ),
+    .AXI_ID_WIDTH   ( AXI_ID_WIDTH      ),
+    .AXI_USER_WIDTH ( AXI_USER_WIDTH    ),
+    .MAX_READ_TXNS  ( NB_OUTSND_BURSTS  ),
+    .MAX_WRITE_TXNS ( NB_OUTSND_BURSTS  )
+  ) i_serializer (
+    .clk_i,
+    .rst_ni,
+    .slv    (internal),
+    .mst    (ext_master)
+  );
+
   mchan #(
 
     .NB_CTRLS                 ( NB_CTRLS              ),    // NUMBER OF CONTROL PORTS : CL, FC, DECOMPRESSOR
@@ -143,55 +166,55 @@ module dmac_wrap
     // EXTERNAL INITIATOR
     //***************************************
 
-    .axi_master_aw_valid_o     ( ext_master.aw_valid                ),
-    .axi_master_aw_addr_o      ( ext_master.aw_addr                 ),
-    .axi_master_aw_prot_o      ( ext_master.aw_prot                 ),
-    .axi_master_aw_region_o    ( ext_master.aw_region               ),
-    .axi_master_aw_atop_o      ( ext_master.aw_atop                 ),
-    .axi_master_aw_len_o       ( ext_master.aw_len                  ),
-    .axi_master_aw_size_o      ( ext_master.aw_size                 ),
-    .axi_master_aw_burst_o     ( ext_master.aw_burst                ),
-    .axi_master_aw_lock_o      ( ext_master.aw_lock                 ),
-    .axi_master_aw_cache_o     ( ext_master.aw_cache                ),
-    .axi_master_aw_qos_o       ( ext_master.aw_qos                  ),
-    .axi_master_aw_id_o        ( ext_master.aw_id[AXI_ID_WIDTH-1:0] ),
-    .axi_master_aw_user_o      ( ext_master.aw_user                 ),
-    .axi_master_aw_ready_i     ( ext_master.aw_ready                ),
+    .axi_master_aw_valid_o     ( internal.aw_valid                  ),
+    .axi_master_aw_addr_o      ( internal.aw_addr                   ),
+    .axi_master_aw_prot_o      ( internal.aw_prot                   ),
+    .axi_master_aw_region_o    ( internal.aw_region                 ),
+    .axi_master_aw_atop_o      ( internal.aw_atop                   ),
+    .axi_master_aw_len_o       ( internal.aw_len                    ),
+    .axi_master_aw_size_o      ( internal.aw_size                   ),
+    .axi_master_aw_burst_o     ( internal.aw_burst                  ),
+    .axi_master_aw_lock_o      ( internal.aw_lock                   ),
+    .axi_master_aw_cache_o     ( internal.aw_cache                  ),
+    .axi_master_aw_qos_o       ( internal.aw_qos                    ),
+    .axi_master_aw_id_o        ( internal.aw_id[AXI_ID_WIDTH-1:0]   ),
+    .axi_master_aw_user_o      ( internal.aw_user                   ),
+    .axi_master_aw_ready_i     ( internal.aw_ready                  ),
 
-    .axi_master_ar_valid_o     ( ext_master.ar_valid                ),
-    .axi_master_ar_addr_o      ( ext_master.ar_addr                 ),
-    .axi_master_ar_prot_o      ( ext_master.ar_prot                 ),
-    .axi_master_ar_region_o    ( ext_master.ar_region               ),
-    .axi_master_ar_len_o       ( ext_master.ar_len                  ),
-    .axi_master_ar_size_o      ( ext_master.ar_size                 ),
-    .axi_master_ar_burst_o     ( ext_master.ar_burst                ),
-    .axi_master_ar_lock_o      ( ext_master.ar_lock                 ),
-    .axi_master_ar_cache_o     ( ext_master.ar_cache                ),
-    .axi_master_ar_qos_o       ( ext_master.ar_qos                  ),
-    .axi_master_ar_id_o        ( ext_master.ar_id[AXI_ID_WIDTH-1:0] ),
-    .axi_master_ar_user_o      ( ext_master.ar_user                 ),
-    .axi_master_ar_ready_i     ( ext_master.ar_ready                ),
+    .axi_master_ar_valid_o     ( internal.ar_valid                  ),
+    .axi_master_ar_addr_o      ( internal.ar_addr                   ),
+    .axi_master_ar_prot_o      ( internal.ar_prot                   ),
+    .axi_master_ar_region_o    ( internal.ar_region                 ),
+    .axi_master_ar_len_o       ( internal.ar_len                    ),
+    .axi_master_ar_size_o      ( internal.ar_size                   ),
+    .axi_master_ar_burst_o     ( internal.ar_burst                  ),
+    .axi_master_ar_lock_o      ( internal.ar_lock                   ),
+    .axi_master_ar_cache_o     ( internal.ar_cache                  ),
+    .axi_master_ar_qos_o       ( internal.ar_qos                    ),
+    .axi_master_ar_id_o        ( internal.ar_id[AXI_ID_WIDTH-1:0]   ),
+    .axi_master_ar_user_o      ( internal.ar_user                   ),
+    .axi_master_ar_ready_i     ( internal.ar_ready                  ),
 
-    .axi_master_w_valid_o      ( ext_master.w_valid                 ),
-    .axi_master_w_data_o       ( ext_master.w_data                  ),
-    .axi_master_w_strb_o       ( ext_master.w_strb                  ),
-    .axi_master_w_user_o       ( ext_master.w_user                  ),
-    .axi_master_w_last_o       ( ext_master.w_last                  ),
-    .axi_master_w_ready_i      ( ext_master.w_ready                 ),
+    .axi_master_w_valid_o      ( internal.w_valid                   ),
+    .axi_master_w_data_o       ( internal.w_data                    ),
+    .axi_master_w_strb_o       ( internal.w_strb                    ),
+    .axi_master_w_user_o       ( internal.w_user                    ),
+    .axi_master_w_last_o       ( internal.w_last                    ),
+    .axi_master_w_ready_i      ( internal.w_ready                   ),
 
-    .axi_master_r_valid_i      ( ext_master.r_valid                 ),
-    .axi_master_r_data_i       ( ext_master.r_data                  ),
-    .axi_master_r_resp_i       ( ext_master.r_resp                  ),
-    .axi_master_r_last_i       ( ext_master.r_last                  ),
-    .axi_master_r_id_i         ( ext_master.r_id[AXI_ID_WIDTH-1:0]  ),
-    .axi_master_r_user_i       ( ext_master.r_user                  ),
-    .axi_master_r_ready_o      ( ext_master.r_ready                 ),
+    .axi_master_r_valid_i      ( internal.r_valid                   ),
+    .axi_master_r_data_i       ( internal.r_data                    ),
+    .axi_master_r_resp_i       ( internal.r_resp                    ),
+    .axi_master_r_last_i       ( internal.r_last                    ),
+    .axi_master_r_id_i         ( internal.r_id[AXI_ID_WIDTH-1:0]    ),
+    .axi_master_r_user_i       ( internal.r_user                    ),
+    .axi_master_r_ready_o      ( internal.r_ready                   ),
 
-    .axi_master_b_valid_i      ( ext_master.b_valid                 ),
-    .axi_master_b_resp_i       ( ext_master.b_resp                  ),
-    .axi_master_b_id_i         ( ext_master.b_id[AXI_ID_WIDTH-1:0]  ),
-    .axi_master_b_user_i       ( ext_master.b_user                  ),
-    .axi_master_b_ready_o      ( ext_master.b_ready                 ),
+    .axi_master_b_valid_i      ( internal.b_valid                   ),
+    .axi_master_b_resp_i       ( internal.b_resp                    ),
+    .axi_master_b_id_i         ( internal.b_id[AXI_ID_WIDTH-1:0]    ),
+    .axi_master_b_user_i       ( internal.b_user                    ),
+    .axi_master_b_ready_o      ( internal.b_ready                   ),
 
     .term_evt_o                ( term_event_cl_o                    ),
     .term_int_o                ( term_irq_cl_o                      ),
@@ -199,8 +222,8 @@ module dmac_wrap
     .busy_o                    ( busy_o                             )
   );
   if (AXI_ADDR_WIDTH > 32) begin : gen_zero_extend_axi_addr
-    assign ext_master.aw_addr[AXI_ADDR_WIDTH-1:32] = '0;
-    assign ext_master.ar_addr[AXI_ADDR_WIDTH-1:32] = '0;
+    assign internal.aw_addr[AXI_ADDR_WIDTH-1:32] = '0;
+    assign internal.ar_addr[AXI_ADDR_WIDTH-1:32] = '0;
   end
 
 endmodule

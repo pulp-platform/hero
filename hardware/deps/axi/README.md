@@ -13,12 +13,13 @@ This is the implementation of the AMBA AXI protocol developed as part of the PUL
 | [`axi_cut`](src/axi_cut.sv)                          | Breaks all combinatorial paths between its input and output.                                      |                                |
 | [`axi_delayer`](src/axi_delayer.sv)                  | Synthesizable module which can (randomly) delays AXI channels.                                    |                                |
 | [`axi_demux`](src/axi_demux.sv)                      | Demultiplexes an AXI bus from one slave port to multiple master ports.                            | [Doc](doc/axi_demux.md)        |
-| [`axi_dw_converter.sv`](src/axi_dw_converter.sv)     | A data width converter between AXI interfaces of any data width.                                  |                                |
-| [`axi_dw_downsizer.sv`](src/axi_dw_downsizer.sv)     | A data width converter between a wide AXI slave and a narrower AXI master.                        |                                |
-| [`axi_dw_upsizer.sv`](src/axi_dw_upsizer.sv)         | A data width converter between a narrow AXI slave and a wider AXI master.                         |                                |
+| [`axi_dw_converter`](src/axi_dw_converter.sv)        | A data width converter between AXI interfaces of any data width.                                  |                                |
+| [`axi_dw_downsizer`](src/axi_dw_downsizer.sv)        | A data width converter between a wide AXI master and a narrower AXI slave.                        |                                |
+| [`axi_dw_upsizer`](src/axi_dw_upsizer.sv)            | A data width converter between a narrow AXI master and a wider AXI slave.                         |                                |
 | [`axi_err_slv`](src/axi_err_slv.sv)                  | Always responds with an AXI decode/slave error for transactions which are sent to it.             |                                |
 | [`axi_id_prepend`](src/axi_id_prepend.sv)            | This module prepends/strips the MSB from the AXI IDs.                                             |                                |
 | [`axi_intf`](src/axi_intf.sv)                        | This file defines the interfaces we support.                                                      |                                |
+| [`axi_isolate.sv`](src/axi_isolate.sv)               | A module that can isolate downstream slaves from receiving new AXI4 transactions.                 |                                |
 | [`axi_join`](src/axi_join.sv)                        | A connector that joins two AXI interfaces.                                                        |                                |
 | [`axi_lite_demux`](src/axi_lite_demux.sv)            | Demultiplexes an AXI4-Lite bus from one slave port to multiple master ports.                      | [Doc](doc/axi_lite_demux.md)   |
 | [`axi_lite_join`](src/axi_lite_join.sv)              | A connector that joins two AXI-Lite interfaces.                                                   |                                |

@@ -100,6 +100,17 @@ module synth_bench (
       ) i_axi_lite_mailbox (.*);
     end
   end
+
+  // AXI Isolation module
+  for (genvar i = 0; i < 6; i++) begin
+    synth_axi_isolate #(
+      .NumPending   ( AXI_ADDR_WIDTH[0] ),
+      .AxiIdWidth   ( 32'd10            ),
+      .AxiAddrWidth ( 32'd64            ),
+      .AxiDataWidth ( 32'd512           ),
+      .AxiUserWidth ( 32'd10            )
+    ) i_synth_axi_isolate (.*);
+  end
 endmodule
 
 
@@ -140,7 +151,9 @@ module synth_slice #(
     .slv        (a_full.Slave),
     .mst        (a_lite.Master)
   );
-  axi_lite_to_axi_intf b (
+  axi_lite_to_axi_intf #(
+    .AXI_DATA_WIDTH (DW)
+  ) b (
     .in   (b_lite.Slave),
     .out  (b_full.Master)
   );
@@ -214,13 +227,13 @@ module synth_axi_lite_to_apb #(
     logic  pslverr;  // gets translated into either `axi_pkg::RESP_OK` or `axi_pkg::RESP_SLVERR`
   } apb_resp_t;
 
-  `AXI_LITE_TYPEDEF_AW_CHAN_T (  aw_chan_t, addr_t         )
-  `AXI_LITE_TYPEDEF_W_CHAN_T  (   w_chan_t, data_t, strb_t )
-  `AXI_LITE_TYPEDEF_B_CHAN_T  (   b_chan_t                 )
-  `AXI_LITE_TYPEDEF_AR_CHAN_T (  ar_chan_t, addr_t         )
-  `AXI_LITE_TYPEDEF_R_CHAN_T  (   r_chan_t, data_t         )
-  `AXI_LITE_TYPEDEF_REQ_T     (  axi_req_t, aw_chan_t, w_chan_t, ar_chan_t )
-  `AXI_LITE_TYPEDEF_RESP_T    ( axi_resp_t,  b_chan_t, r_chan_t )
+  `AXI_LITE_TYPEDEF_AW_CHAN_T(aw_chan_t, addr_t)
+  `AXI_LITE_TYPEDEF_W_CHAN_T(w_chan_t, data_t, strb_t)
+  `AXI_LITE_TYPEDEF_B_CHAN_T(b_chan_t)
+  `AXI_LITE_TYPEDEF_AR_CHAN_T(ar_chan_t, addr_t)
+  `AXI_LITE_TYPEDEF_R_CHAN_T(r_chan_t, data_t)
+  `AXI_LITE_TYPEDEF_REQ_T(axi_req_t, aw_chan_t, w_chan_t, ar_chan_t)
+  `AXI_LITE_TYPEDEF_RESP_T(axi_resp_t, b_chan_t, r_chan_t)
 
   axi_req_t                    axi_req;
   axi_resp_t                   axi_resp;
@@ -304,13 +317,13 @@ module synth_axi_lite_xbar #(
   typedef logic [32'd32-1:0]   data_t;
   typedef logic [32'd32/8-1:0] strb_t;
 
-  `AXI_LITE_TYPEDEF_AW_CHAN_T ( aw_chan_t, addr_t        )
-  `AXI_LITE_TYPEDEF_W_CHAN_T  (  w_chan_t, data_t, strb_t)
-  `AXI_LITE_TYPEDEF_B_CHAN_T  (  b_chan_t                )
-  `AXI_LITE_TYPEDEF_AR_CHAN_T ( ar_chan_t, addr_t        )
-  `AXI_LITE_TYPEDEF_R_CHAN_T  (  r_chan_t, data_t        )
-  `AXI_LITE_TYPEDEF_REQ_T     (     req_t, aw_chan_t, w_chan_t, ar_chan_t)
-  `AXI_LITE_TYPEDEF_RESP_T    (    resp_t,  b_chan_t, r_chan_t)
+  `AXI_LITE_TYPEDEF_AW_CHAN_T(aw_chan_t, addr_t)
+  `AXI_LITE_TYPEDEF_W_CHAN_T(w_chan_t, data_t, strb_t)
+  `AXI_LITE_TYPEDEF_B_CHAN_T(b_chan_t)
+  `AXI_LITE_TYPEDEF_AR_CHAN_T(ar_chan_t, addr_t)
+  `AXI_LITE_TYPEDEF_R_CHAN_T(r_chan_t, data_t)
+  `AXI_LITE_TYPEDEF_REQ_T(req_t, aw_chan_t, w_chan_t, ar_chan_t)
+  `AXI_LITE_TYPEDEF_RESP_T(resp_t, b_chan_t, r_chan_t)
   localparam axi_pkg::xbar_cfg_t XbarCfg = '{
     NoSlvPorts:         NoSlvMst,
     NoMstPorts:         NoSlvMst,
@@ -386,5 +399,41 @@ module synth_axi_lite_mailbox #(
     .slv         ( slv       ),
     .irq_o       ( irq       ), // interrupt output for each port
     .base_addr_i ( base_addr )  // base address for each port
+  );
+endmodule
+
+module synth_axi_isolate #(
+  parameter int unsigned NumPending   = 32'd16, // number of pending requests
+  parameter int unsigned AxiIdWidth   = 32'd0,  // AXI ID width
+  parameter int unsigned AxiAddrWidth = 32'd0,  // AXI address width
+  parameter int unsigned AxiDataWidth = 32'd0,  // AXI data width
+  parameter int unsigned AxiUserWidth = 32'd0   // AXI user width
+) (
+  input clk_i,
+  input rst_ni
+);
+
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH ( AxiIdWidth   ),
+    .AXI_DATA_WIDTH ( AxiAddrWidth ),
+    .AXI_ID_WIDTH   ( AxiDataWidth ),
+    .AXI_USER_WIDTH ( AxiUserWidth )
+  ) axi[1:0] ();
+
+  logic isolate, isolated;
+
+  axi_isolate_intf #(
+    .NUM_PENDING    ( NumPending   ), // number of pending requests
+    .AXI_ID_WIDTH   ( AxiIdWidth   ), // AXI ID width
+    .AXI_ADDR_WIDTH ( AxiAddrWidth ), // AXI address width
+    .AXI_DATA_WIDTH ( AxiDataWidth ), // AXI data width
+    .AXI_USER_WIDTH ( AxiUserWidth )  // AXI user width
+  ) i_axi_isolate_dut (
+    .clk_i,
+    .rst_ni,
+    .slv        ( axi[0]   ), // slave port
+    .mst        ( axi[1]   ), // master port
+    .isolate_i  ( isolate  ), // isolate master port from slave port
+    .isolated_o ( isolated )  // master port is isolated from slave port
   );
 endmodule
