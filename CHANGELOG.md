@@ -34,6 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `is_decoding` signal to mask `read_dependency` inside `APU_Dispatcher`. This fixed a bug that
   incorrectly detected a read dependency when a `fetch_fail` occurred.
 - `pulp_cluster`: Remove unused `dc_token_ring_fifo_dout` to prevent triggering `soc_periph_evt`.
+- `axi2mem`: Fix bug that could lead to corruption of AMO execution.
+- `amo_shim`: Fix adherence to and forwarding of byte strobe.
 
 ### Removed
 - PULP runtime: Remove broken `rt_*_alloc_align` functions.  These functions did not correctly
