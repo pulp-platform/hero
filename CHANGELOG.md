@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- `riscv` core:
+  - Remove `stall_full` signal, which was causing a combinatorial loop and was never triggered with
+    new `apu_dispatcher` changes.
+  - Adjust `csr_apu_stall` signal in the `id_stage` according to the new floating-point latencies.
 
 
 ## 2020-04-10
