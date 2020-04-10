@@ -54,6 +54,7 @@ module amo_shim #(
     logic [31:0] amo_operand_b_q;
     // requested amo should be performed on upper 32 bit
     logic        upper_word_q;
+    logic [DataWidth/8-1:0] be_q;
     logic [31:0] swap_value_q;
     logic [31:0] amo_result; // result of atomic memory operation
 
@@ -91,20 +92,18 @@ module amo_shim #(
                 // Commit AMO
                 out_req_o   = 1'b1;
                 out_add_o   = addr_q;
-                out_wen_o   = 1'b1;
+                out_be_o    = be_q;
+                out_wen_o   = |be_q;
                 // shift up if the address was pointing to the upper 32 bits
                 if (DataWidth == 64) begin
                     if (upper_word_q) begin
-                        out_be_o = 8'b1111_0000;
                         out_wdata_o = {amo_result, 32'b0};
                         in_rdata_o = {amo_operand_a, 32'b0};
                     end else begin
-                        out_be_o = 8'b0000_1111;
                         out_wdata_o = {32'b0, amo_result};
                         in_rdata_o = {32'b0, amo_operand_a};
                     end
                 end else begin
-                    out_be_o = 4'b1111;
                     out_wdata_o = amo_result;
                     in_rdata_o = amo_operand_a;
                 end
@@ -119,12 +118,14 @@ module amo_shim #(
             amo_op_q        <= amo_op_t'('0);
             addr_q          <= '0;
             amo_operand_b_q <= '0;
+            be_q            <= '0;
             swap_value_q    <= '0;
             upper_word_q    <= '0;
         end else begin
             if (load_amo) begin
                 amo_op_q        <= amo_op_t'(in_amo_i);
                 addr_q          <= in_add_i;
+                be_q            <= in_be_i;
                 if (DataWidth == 64) begin
                     if (!in_be_i[0]) begin
                         amo_operand_b_q <= in_wdata_i[63:32];
