@@ -582,7 +582,7 @@ module pulp_cluster
   logic [NB_EXT2MEM-1:0][ 3:0]  s_ext_xbar_bus_be;
   logic [NB_EXT2MEM-1:0][ 5:0]  s_ext_xbar_bus_atop;
   // Fall-through register on AW due to protocol violation by upstream (dependency on aw_ready for
-  // w_valid).  Reinforced to spill registers to cut long paths on requests through axi2mem.
+  // w_valid).  Reinforced to full AXI cut to break long paths through axi2mem.
   typedef logic [31:0] addr_t;
   typedef logic [AXI_DATA_C2S_WIDTH-1:0] data_t;
   typedef logic [AXI_ID_OUT_WIDTH-1:0] id_oup_t;
@@ -599,49 +599,22 @@ module pulp_cluster
   axi_resp_t  ext_tcdm_resp,  ext_tcdm_resp_buf;
   `AXI_ASSIGN_TO_REQ(ext_tcdm_req, s_ext_tcdm_bus);
   `AXI_ASSIGN_FROM_RESP(s_ext_tcdm_bus, ext_tcdm_resp);
-  always_comb begin
-    ext_tcdm_resp.b = ext_tcdm_resp_buf.b;
-    ext_tcdm_resp.b_valid = ext_tcdm_resp_buf.b_valid;
-    ext_tcdm_req_buf.b_ready = ext_tcdm_req.b_ready;
-    ext_tcdm_resp.r = ext_tcdm_resp_buf.r;
-    ext_tcdm_resp.r_valid = ext_tcdm_resp_buf.r_valid;
-    ext_tcdm_req_buf.r_ready = ext_tcdm_req.r_ready;
-  end
-  spill_register #(
-    .T  (aw_chan_t)
-  ) i_axi2mem_aw_spill_reg (
-    .clk_i  (clk_cluster),
+  axi_cut #(
+    .Bypass     (1'b0),
+    .aw_chan_t  (aw_chan_t),
+    .w_chan_t   (w_chan_t),
+    .b_chan_t   (b_chan_t),
+    .ar_chan_t  (ar_chan_t),
+    .r_chan_t   (r_chan_t),
+    .req_t      (axi_req_t),
+    .resp_t     (axi_resp_t)
+  ) i_axi2mem_cut (
+    .clk_i      (clk_cluster),
     .rst_ni,
-    .valid_i  (ext_tcdm_req.aw_valid),
-    .ready_o  (ext_tcdm_resp.aw_ready),
-    .data_i   (ext_tcdm_req.aw),
-    .valid_o  (ext_tcdm_req_buf.aw_valid),
-    .ready_i  (ext_tcdm_resp_buf.aw_ready),
-    .data_o   (ext_tcdm_req_buf.aw)
-  );
-  spill_register #(
-    .T  (w_chan_t)
-  ) i_axi2mem_w_spill_reg (
-    .clk_i  (clk_cluster),
-    .rst_ni,
-    .valid_i  (ext_tcdm_req.w_valid),
-    .ready_o  (ext_tcdm_resp.w_ready),
-    .data_i   (ext_tcdm_req.w),
-    .valid_o  (ext_tcdm_req_buf.w_valid),
-    .ready_i  (ext_tcdm_resp_buf.w_ready),
-    .data_o   (ext_tcdm_req_buf.w)
-  );
-  spill_register #(
-    .T  (ar_chan_t)
-  ) i_axi2mem_ar_spill_reg (
-    .clk_i  (clk_cluster),
-    .rst_ni,
-    .valid_i  (ext_tcdm_req.ar_valid),
-    .ready_o  (ext_tcdm_resp.ar_ready),
-    .data_i   (ext_tcdm_req.ar),
-    .valid_o  (ext_tcdm_req_buf.ar_valid),
-    .ready_i  (ext_tcdm_resp_buf.ar_ready),
-    .data_o   (ext_tcdm_req_buf.ar)
+    .slv_req_i  (ext_tcdm_req),
+    .slv_resp_o (ext_tcdm_resp),
+    .mst_req_o  (ext_tcdm_req_buf),
+    .mst_resp_i (ext_tcdm_resp_buf)
   );
 
   axi2mem #(
