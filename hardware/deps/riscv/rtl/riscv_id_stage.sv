@@ -952,7 +952,7 @@ module riscv_id_stage
 
   assign apu_perf_dep_o      = apu_stall;
   // stall when we access the CSR after a multicycle APU instruction
-  assign csr_apu_stall       = (csr_access & (apu_en_ex_o & (apu_lat_ex_o[1] == 1'b1) | apu_busy_i));
+  assign csr_apu_stall       = (csr_access & (apu_en_ex_o & (apu_lat_ex_o != 1'b1) | apu_busy_i));
 
 `ifndef SYNTHESIS
   always_comb begin
