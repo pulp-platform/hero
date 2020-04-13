@@ -1,4 +1,5 @@
 cache_root_dir: /home/gitlabci/buildcache/hero
+disable_env_var: FULL_CI_TEST
 
 artifacts:
   tc-pulp:
