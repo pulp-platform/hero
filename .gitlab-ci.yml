@@ -173,7 +173,7 @@ build_toolchain:
   script:
     - env
     - >
-      if ! memora get tc-pulp; then
+      if ! memora lookup tc-pulp; then
         ./setup.sh --no-sdk-pulp --no-vp
         memora insert tc-pulp
       fi
