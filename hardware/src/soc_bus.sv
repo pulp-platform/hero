@@ -88,7 +88,7 @@ module soc_bus #(
     assign addr_map[i] = '{
       idx:        i,
       start_addr: cluster_base_addr,
-      end_addr:   cluster_base_addr + 32'h0030_0000
+      end_addr:   cluster_base_addr + 32'h0040_0000
     };
   end
   for (genvar i = 0; i < L2_N_PORTS; i++) begin : gen_addr_map_l2

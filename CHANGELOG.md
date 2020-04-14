@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Add missing `default` in `unique case` statement.
     - Remove gaps and aliases in address map of peripherals.  Requests to any address not matching a
       peripheral are now responded with errors.
+- `soc_bus`: Fix cluster address space to include the entire peripheral space.
 - Synthesis elaboration scripts: Add missing `axi_serializer`.
 
 
