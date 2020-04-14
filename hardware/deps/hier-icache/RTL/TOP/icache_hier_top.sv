@@ -146,11 +146,11 @@ module icache_hier_top
 );
 
    // signals from PRI cache and interconnect
-   logic [NB_CORES-1:0]                                 refill_req_int;
-   logic [NB_CORES-1:0]                                 refill_gnt_int;
-   logic [NB_CORES-1:0] [FETCH_ADDR_WIDTH-1:0]          refill_addr_int;
-   logic [NB_CORES-1:0]                                 refill_r_valid_int;
-   logic [NB_CORES-1:0] [FETCH_DATA_WIDTH-1:0]          refill_r_data_int;
+   logic [2*NB_CORES-1:0]                                 refill_req_int;
+   logic [2*NB_CORES-1:0]                                 refill_gnt_int;
+   logic [2*NB_CORES-1:0] [FETCH_ADDR_WIDTH-1:0]          refill_addr_int;
+   logic [2*NB_CORES-1:0]                                 refill_r_valid_int;
+   logic [2*NB_CORES-1:0] [FETCH_DATA_WIDTH-1:0]          refill_r_data_int;
 
    // to LINT2AXI
    logic                                                refill_to_AXINODE_req_int;
@@ -165,11 +165,11 @@ module icache_hier_top
    // signal from icache-int to main icache
    logic [SH_NB_BANKS-1:0]                              fetch_req_to_main_cache;
    logic [SH_NB_BANKS-1:0][FETCH_ADDR_WIDTH-1:0]        fetch_addr_to_main_cache;
-   logic [SH_NB_BANKS-1:0][NB_CORES-1:0]                fetch_ID_to_main_cache;
+   logic [SH_NB_BANKS-1:0][2*NB_CORES-1:0]              fetch_ID_to_main_cache;
    logic [SH_NB_BANKS-1:0]                              fetch_gnt_from_main_cache;
    logic [SH_NB_BANKS-1:0][FETCH_DATA_WIDTH-1:0]        fetch_rdata_from_main_cache;
    logic [SH_NB_BANKS-1:0]                              fetch_rvalid_from_to_main_cache;
-   logic [SH_NB_BANKS-1:0][NB_CORES-1:0]                fetch_rID_from_main_cache;
+   logic [SH_NB_BANKS-1:0][2*NB_CORES-1:0]              fetch_rID_from_main_cache;
 
    // signal from icache-sh banks to axi node
    localparam  AXI_ID_INT  =  1;
@@ -346,6 +346,12 @@ module icache_hier_top
             .refill_r_valid_i     ( refill_r_valid_int[i]                        ),
             .refill_r_data_i      ( refill_r_data_int[i]                         ),
 
+            .pre_refill_req_o     ( refill_req_int[NB_CORES+i]                   ),
+            .pre_refill_gnt_i     ( refill_gnt_int[NB_CORES+i]                   ),
+            .pre_refill_addr_o    ( refill_addr_int[NB_CORES+i]                  ),
+            .pre_refill_r_valid_i ( refill_r_valid_int[NB_CORES+i]               ),
+            .pre_refill_r_data_i  ( refill_r_data_int[NB_CORES+i]                ),
+
             .enable_l1_l15_prefetch_i ( enable_l1_l15_prefetch_i[i]              ),
 
             .bypass_icache_i      ( IC_ctrl_unit_bus_pri[i].bypass_req           ),
@@ -383,15 +389,15 @@ module icache_hier_top
    // -----------------------------------------------------------------------------------------
 
    // Eg 9 COres: --> NCH_0 = 8, NCH_1= 1;
-   localparam N_CH0 = (2**$clog2( NB_CORES ) == NB_CORES) ? NB_CORES : 2**$clog2( NB_CORES-1);
-   localparam N_CH1 = (2**$clog2( NB_CORES ) == NB_CORES) ? 0       : NB_CORES - 2**$clog2( NB_CORES-1);
+   localparam N_CH0 = (2**$clog2( 2*NB_CORES ) == 2*NB_CORES) ? 2*NB_CORES : 2**$clog2( 2*NB_CORES-1);
+   localparam N_CH1 = (2**$clog2( 2*NB_CORES ) == 2*NB_CORES) ? 0       : 2*NB_CORES - 2**$clog2( 2*NB_CORES-1);
 
    icache_intc
    #(
       .ADDRESS_WIDTH  ( FETCH_ADDR_WIDTH                 ),
       .N_CORES        ( N_CH0                            ),
       .N_AUX_CHANNEL  ( N_CH1                            ),
-      .UID_WIDTH      ( NB_CORES                         ),
+      .UID_WIDTH      ( 2*NB_CORES                       ),
       .DATA_WIDTH     ( FETCH_DATA_WIDTH                 ),
       .N_CACHE_BANKS  ( SH_NB_BANKS                      ) // Single L1.5 cache
    )
@@ -440,7 +446,7 @@ module icache_hier_top
       .FIFO_DEPTH             ( 4                              ),
 
       .ICACHE_DATA_WIDTH      ( FETCH_DATA_WIDTH               ),
-      .ICACHE_ID_WIDTH        ( NB_CORES                       ),
+      .ICACHE_ID_WIDTH        ( 2*NB_CORES                     ),
       .ICACHE_ADDR_WIDTH      ( FETCH_ADDR_WIDTH               ),
 
       .DIRECT_MAPPED_FEATURE  ( "DISABLED"                     ),
