@@ -5,6 +5,7 @@ sources:
   - RTL/TOP/icache_hier_top.sv
   - RTL/L1_CACHE/pri_icache_controller.sv
   - RTL/L1_CACHE/pri_icache.sv
+  - RTL/L1_CACHE/register_file_2r_2w_icache.sv
   - RTL/L1.5_CACHE/AXI4_REFILL_Resp_Deserializer.sv
   - RTL/L1.5_CACHE/share_icache.sv
   - RTL/L1.5_CACHE/icache_controller.sv

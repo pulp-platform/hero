@@ -126,15 +126,17 @@ module hier_icache_ctrl_unit
 
 );
 
+   logic [NB_CACHE_BANKS+NB_CORES-1:0]                r_enable_icache;
+   logic [NB_CACHE_BANKS+NB_CORES-1:0]                r_flush_icache;
+   logic [31:0]                                       r_sel_flush_icache;
+
 `ifdef FEATURE_ICACHE_STAT
-    localparam                          NUM_REGS       = 6;
-`else
-    localparam                          NUM_REGS       = 4;
+   logic [NB_CACHE_BANKS+NB_CORES-1:0]                r_clear_cnt;
+   logic [NB_CACHE_BANKS+NB_CORES-1:0]                r_enable_cnt;
 `endif
 
 
     int unsigned  i,j,k,x,y;
-    logic [31:0]                ICACHE_CTRL_REGS[NUM_REGS];
 
     localparam BASE_PERF_CNT = 8;
 
@@ -157,9 +159,6 @@ module hier_icache_ctrl_unit
     logic [NB_CACHE_BANKS-1:0]           L2_mask_flush_req_CS,     L2_mask_flush_req_NS;
     logic [NB_CACHE_BANKS-1:0]           L2_mask_sel_flush_req_CS, L2_mask_sel_flush_req_NS;
 
-
-
-
     // Internal FSM signals --> responses
     logic                                 is_write;
     logic                                 deliver_response;
@@ -176,17 +175,17 @@ module hier_icache_ctrl_unit
 
    always_comb
    begin : REGISTER_BIND_OUT
-      L1_icache_bypass_req_o     =  ~ICACHE_CTRL_REGS[`ENABLE_ICACHE][NB_CORES-1:0];
-      L1_icache_sel_flush_addr_o =   ICACHE_CTRL_REGS[`SEL_FLUSH_ICACHE];
+      L1_icache_bypass_req_o     =  ~r_enable_icache[NB_CORES-1:0];
+      L1_icache_sel_flush_addr_o =   r_sel_flush_icache;
 
-      L2_icache_enable_req_o     =   ICACHE_CTRL_REGS[`ENABLE_ICACHE][NB_CACHE_BANKS+NB_CORES-1:NB_CORES];
-      L2_icache_disable_req_o    =  ~ICACHE_CTRL_REGS[`ENABLE_ICACHE][NB_CACHE_BANKS+NB_CORES-1:NB_CORES];
+      L2_icache_enable_req_o     =   r_enable_icache[NB_CACHE_BANKS+NB_CORES-1:NB_CORES];
+      L2_icache_disable_req_o    =  ~r_enable_icache[NB_CACHE_BANKS+NB_CORES-1:NB_CORES];
 
-      L2_icache_sel_flush_addr_o =   ICACHE_CTRL_REGS[`SEL_FLUSH_ICACHE];
+      L2_icache_sel_flush_addr_o =   r_sel_flush_icache;
 
 `ifdef FEATURE_ICACHE_STAT
-      L1_enable_regs_o           =   ICACHE_CTRL_REGS[`ENABLE_CNTS][NB_CORES-1:0];
-      L2_enable_regs_o           =   ICACHE_CTRL_REGS[`ENABLE_CNTS][NB_CACHE_BANKS+NB_CORES-1:NB_CORES];
+      L1_enable_regs_o           =   r_enable_cnt[NB_CORES-1:0];
+      L2_enable_regs_o           =   r_enable_cnt[NB_CACHE_BANKS+NB_CORES-1:NB_CORES];
 `endif
 
    end
@@ -238,8 +237,10 @@ module hier_icache_ctrl_unit
 generate
 
 
+   logic [31:0] perf_cnt_enable;
+
 `ifdef FEATURE_ICACHE_STAT
-     assign perf_cnt_enable = { {(32-NB_CACHE_BANKS-NB_CORES){1'b0}}, {ICACHE_CTRL_REGS[`ENABLE_CNTS]} };
+     assign perf_cnt_enable = { {(32-NB_CACHE_BANKS-NB_CORES){1'b0}}, {r_enable_cnt} };
      for(index=0; index<16; index++)
      begin : PERF_CNT_BINDING
 
@@ -313,12 +314,15 @@ generate
               speriph_slave_r_rdata_o <=   '0;
               speriph_slave_r_opc_o   <= 1'b0;
 
-              for(i=0;i<NUM_REGS;i++)
-              begin
-                ICACHE_CTRL_REGS[i] <= '0;
-              end
+              r_enable_icache    <=   '0;
+              r_flush_icache     <=   '0;
+              r_sel_flush_icache <=   '0;
 
-              enable_l1_l15_prefetch_o  <=  'h0;
+`ifdef FEATURE_ICACHE_STAT
+              r_clear_cnt        <=   '0;
+              r_enable_cnt       <=   '0;
+`endif
+              enable_l1_l15_prefetch_o  <=  'h00;
       end
       else
       begin
@@ -334,38 +338,36 @@ generate
         L2_mask_flush_req_CS     <= L2_mask_flush_req_NS;
         L2_mask_sel_flush_req_CS <= L2_mask_sel_flush_req_NS;
 
-
         if(is_write)
         begin
             case(speriph_slave_addr_i[7:0])
                 8'h00: // ENABLE-DISABLE
                 begin
-                      ICACHE_CTRL_REGS[`ENABLE_ICACHE][NB_CORES+NB_CACHE_BANKS-1:0] <= {(NB_CORES+NB_CACHE_BANKS){speriph_slave_wdata_i[0]}};
+                  r_enable_icache[NB_CORES+NB_CACHE_BANKS-1:0] <= {(NB_CORES+NB_CACHE_BANKS){speriph_slave_wdata_i[0]}};
                 end
 
                 8'h04: // FLUSH
                 begin
-                  ICACHE_CTRL_REGS[`FLUSH_ICACHE][NB_CORES+NB_CACHE_BANKS-1:0] <= {(NB_CORES+NB_CACHE_BANKS){speriph_slave_wdata_i[0]}};
+                  r_flush_icache[NB_CORES+NB_CACHE_BANKS-1:0] <= {(NB_CORES+NB_CACHE_BANKS){speriph_slave_wdata_i[0]}};
                 end
 
                 8'h08: // FLUSH_L1_ONLY
                 begin
-                  ICACHE_CTRL_REGS[`FLUSH_ICACHE][NB_CORES+NB_CACHE_BANKS-1:0] <= {{(NB_CACHE_BANKS){1'b0}}, {(NB_CORES){speriph_slave_wdata_i[0]}} };
+                  r_flush_icache[NB_CORES+NB_CACHE_BANKS-1:0] <= {{(NB_CACHE_BANKS){1'b0}}, {(NB_CORES){speriph_slave_wdata_i[0]}} };
                 end
-
                 8'h0C: // Sel FLUSH
                 begin
-                  ICACHE_CTRL_REGS[`SEL_FLUSH_ICACHE] <= speriph_slave_wdata_i;
+                  r_sel_flush_icache <= speriph_slave_wdata_i;
                 end
             `ifdef FEATURE_ICACHE_STAT
                 8'h10: // CLEAR
                 begin
-                  ICACHE_CTRL_REGS[`CLEAR_CNTS][NB_CORES+NB_CACHE_BANKS-1:0] <= {(NB_CORES+NB_CACHE_BANKS){speriph_slave_wdata_i[0]}};
+                  r_clear_cnt[NB_CORES+NB_CACHE_BANKS-1:0] <= {(NB_CORES+NB_CACHE_BANKS){speriph_slave_wdata_i[0]}};
                 end
 
                 8'h14: // ENABLE-DISABLE STAT REGS
                 begin
-                  ICACHE_CTRL_REGS[`ENABLE_CNTS][NB_CORES+NB_CACHE_BANKS-1:0] <= {(NB_CORES+NB_CACHE_BANKS){speriph_slave_wdata_i[0]}};
+                  r_enable_cnt[NB_CORES+NB_CACHE_BANKS-1:0] <= {(NB_CORES+NB_CACHE_BANKS){speriph_slave_wdata_i[0]}};
                 end
             `endif
                 8'h18: // enable l1 to l15 prefetch feature
@@ -377,7 +379,7 @@ generate
         else // Not Write
         begin
             if(clear_flush_reg)
-               ICACHE_CTRL_REGS[`FLUSH_ICACHE][NB_CORES+NB_CACHE_BANKS-1:0] <= { (NB_CORES+NB_CACHE_BANKS){1'b0} };
+               r_flush_icache[NB_CORES+NB_CACHE_BANKS-1:0] <= { (NB_CORES+NB_CACHE_BANKS){1'b0} };
         end
 
 
@@ -398,9 +400,9 @@ generate
           speriph_slave_r_valid_o <= 1'b1;
 
           case(speriph_slave_addr_i[8:2])
-          0:   begin speriph_slave_r_rdata_o       <= { {(32-NB_CACHE_BANKS-NB_CORES){1'b0}}, {ICACHE_CTRL_REGS[`ENABLE_ICACHE]}     }; end
-          1:   begin speriph_slave_r_rdata_o       <= { {(32-NB_CACHE_BANKS-NB_CORES){1'b0}}, {ICACHE_CTRL_REGS[`FLUSH_ICACHE]}      }; end
-          3:   begin speriph_slave_r_rdata_o       <= { {(32-NB_CACHE_BANKS-NB_CORES){1'b0}}, {ICACHE_CTRL_REGS[`SEL_FLUSH_ICACHE]}  }; end
+          0:   begin speriph_slave_r_rdata_o       <= { {(32-NB_CACHE_BANKS-NB_CORES){1'b0}}, {r_enable_icache}     }; end
+          1:   begin speriph_slave_r_rdata_o       <= { {(32-NB_CACHE_BANKS-NB_CORES){1'b0}}, {r_flush_icache}      }; end
+          3:   begin speriph_slave_r_rdata_o       <= r_sel_flush_icache; end
 
 
           // Clear and start
@@ -535,7 +537,7 @@ endgenerate
         L2_mask_disable_req_NS    = L2_mask_disable_req_CS;
         L2_mask_flush_req_NS      = L2_mask_flush_req_CS;
 
-        L2_icache_flush_req_o     =   '0; // ICACHE_CTRL_REGS[`FLUSH_ICACHE][NB_CACHE_BANKS+NB_CORES-1:NB_CORES] & (~L2_mask_flush_req_CS);
+        L2_icache_flush_req_o     =   '0;
         L1_icache_flush_req_o     =   '0;
 
         L1_icache_sel_flush_req_o = '0;
@@ -646,12 +648,12 @@ endgenerate
           begin
              for(x=0; x<NB_CORES; x++)
              begin
-                L1_clear_regs_o[x]  =   ICACHE_CTRL_REGS[`CLEAR_CNTS][x];
+                L1_clear_regs_o[x]  =   r_clear_cnt[x];
              end
 
              for(x=0; x<NB_CACHE_BANKS; x++)
              begin
-                L2_clear_regs_o[x]  =   ICACHE_CTRL_REGS[`CLEAR_CNTS][x+NB_CORES];
+                L2_clear_regs_o[x]  =   r_clear_cnt[x+NB_CORES];
              end
 
 
@@ -723,8 +725,8 @@ endgenerate
               speriph_slave_gnt_o = 1'b0;
               L1_mask_flush_req_NS = L1_icache_flush_ack_i | L1_mask_flush_req_CS;
               L2_mask_flush_req_NS = L2_icache_flush_ack_i | L2_mask_flush_req_CS;
-              L2_icache_flush_req_o     =  ICACHE_CTRL_REGS[`FLUSH_ICACHE][NB_CACHE_BANKS+NB_CORES-1:NB_CORES] & (~L2_mask_flush_req_CS);
-              L1_icache_flush_req_o     =  ICACHE_CTRL_REGS[`FLUSH_ICACHE][NB_CORES-1:0] & (~L1_mask_flush_req_CS);
+              L2_icache_flush_req_o     =  r_flush_icache[NB_CACHE_BANKS+NB_CORES-1:NB_CORES] & (~L2_mask_flush_req_CS);
+              L1_icache_flush_req_o     =  r_flush_icache[NB_CORES-1:0] & (~L1_mask_flush_req_CS);
 
               if(  &({L2_icache_flush_ack_i, L1_icache_flush_ack_i} | { L2_mask_flush_req_CS , L1_mask_flush_req_CS })    )
               begin
