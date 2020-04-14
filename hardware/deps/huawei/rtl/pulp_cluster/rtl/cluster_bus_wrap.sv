@@ -24,6 +24,7 @@ module cluster_bus_wrap
 #(
   parameter NB_CORES              =  4,
   parameter DMA_NB_OUTSND_BURSTS  =  8,
+  parameter TCDM_SIZE             =  0,
   parameter AXI_ADDR_WIDTH        = 32,
   parameter AXI_DATA_WIDTH        = 64,
   parameter AXI_ID_IN_WIDTH       =  4,
@@ -109,7 +110,7 @@ module cluster_bus_wrap
   assign addr_map[2] = '{ // TCDM
     idx:  0,
     start_addr: cluster_base_addr,
-    end_addr:   cluster_base_addr + 32'h0010_0000
+    end_addr:   cluster_base_addr + TCDM_SIZE
   };
   assign addr_map[3] = '{ // Peripherals
     idx:  1,
@@ -121,6 +122,10 @@ module cluster_bus_wrap
     initial begin
       assert (AXI_ADDR_WIDTH == 32)
         else $fatal("Address map is only defined for 32-bit addresses!");
+      assert (TCDM_SIZE <= 128*1024)
+        else $fatal(1, "TCDM size exceeds available address space in cluster bus!");
+      assert (TCDM_SIZE > 0)
+        else $fatal(1, "TCDM size must be non-zero!");
       assert (AXI_ID_IN_WIDTH + $clog2(NB_SLAVE) <= AXI_ID_OUT_WIDTH)
         else $fatal(1, "Insufficient AXI_ID_OUT_WIDTH!");
     end
