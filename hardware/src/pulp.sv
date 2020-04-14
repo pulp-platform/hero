@@ -22,6 +22,8 @@ package pulp_pkg;
   localparam int unsigned AXI_DW_CL = pulp_cluster_cfg_pkg::AXI_DW;
   localparam int unsigned AXI_IW_CL_OUP = pulp_cluster_cfg_pkg::AXI_IW_MST;
   localparam int unsigned AXI_IW_CL_INP = pulp_cluster_cfg_pkg::AXI_IW_SLV;
+  // If this is set, clusters must never apply atomic operations (ATOPs) at their AXI master port.
+  localparam logic CL_OUP_NO_ATOP = 1'b1;
   // SoC Bus
   localparam int unsigned AXI_IW_SB_INP = AXI_IW_CL_OUP;
   localparam int unsigned AXI_UW = pulp_cluster_cfg_pkg::AXI_UW;
@@ -373,18 +375,22 @@ module pulp #(
       );
     end
 
-    axi_atop_filter_intf #(
-      .AXI_ID_WIDTH       (AXI_IW_CL_OUP),
-      .AXI_ADDR_WIDTH     (AXI_AW),
-      .AXI_DATA_WIDTH     (AXI_DW_CL),
-      .AXI_USER_WIDTH     (AXI_UW),
-      .AXI_MAX_WRITE_TXNS (pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS)
-    ) i_atop_filter_cl_oup (
-      .clk_i,
-      .rst_ni (ndmreset_n),
-      .slv  (cl_oup_prefilter[i]),
-      .mst  (cl_oup_predwc[i])
-    );
+    if (!CL_OUP_NO_ATOP) begin : gen_axi_atop_filter_cl_oup
+      axi_atop_filter_intf #(
+        .AXI_ID_WIDTH       (AXI_IW_CL_OUP),
+        .AXI_ADDR_WIDTH     (AXI_AW),
+        .AXI_DATA_WIDTH     (AXI_DW_CL),
+        .AXI_USER_WIDTH     (AXI_UW),
+        .AXI_MAX_WRITE_TXNS (pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS)
+      ) i_atop_filter_cl_oup (
+        .clk_i,
+        .rst_ni (ndmreset_n),
+        .slv  (cl_oup_prefilter[i]),
+        .mst  (cl_oup_predwc[i])
+      );
+    end else begin : gen_no_axi_atop_filter_cl_oup
+      `AXI_ASSIGN(cl_oup_predwc[i], cl_oup_prefilter[i])
+    end
 
     if (AXI_DW_CL != AXI_DW) begin : gen_dwc_cl_oup
       axi_dw_converter_intf #(

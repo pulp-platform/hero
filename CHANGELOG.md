@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update instruction cache (`hier-icache`) to improve timing.
 - Change L2 memory controller to multiple ports (banking factor of 2) to achieve full duplex
   throughput of L2 AXI port.
+- `pulp`: Assuming the cluster never issues atomic operations (ATOPs) at its AXI master port,
+  remove the ATOP filter between cluster and SoC bus.
 
 ### Fixed
 - `pulp_tb`: Tie unused `ext_evt_*_i` off.
