@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   throughput of L2 AXI port.
 - `pulp`: Assuming the cluster never issues atomic operations (ATOPs) at its AXI master port,
   remove the ATOP filter between cluster and SoC bus.
+- `pulp_cluster`: Reduce maximum size of a DMA burst to 128 B.
 
 ### Fixed
 - `pulp_tb`: Tie unused `ext_evt_*_i` off.

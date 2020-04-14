@@ -30,7 +30,7 @@ package pulp_cluster_cfg_pkg;
   localparam int unsigned AXI_IW_SLV = 3; // [bit]
   localparam int unsigned AXI_UW = 4; // [bit]
   // -- DMA
-  localparam int unsigned DMA_MAX_BURST_SIZE = 2048; // [B], must be a power of 2
+  localparam int unsigned DMA_MAX_BURST_SIZE = 128; // [B], must be a power of 2
   // Maximum number of beats in a DMA burst on the SoC bus
   localparam int unsigned DMA_MAX_BURST_LEN = DMA_MAX_BURST_SIZE / (AXI_DW/8);
   // Maximum number of transactions the DMA can have in flight
