@@ -432,7 +432,7 @@ module pulp_tb #(
   // ! If the parameters in the L2 memory are changed, the changes will not automatically be applied here
   // localparam N_SER_CUTS = dut.gen_l2_ports[0].i_l2_mem.N_SER_CUTS; // both same on all ports
   // localparam N_PAR_CUTS = dut.gen_l2_ports[0].i_l2_mem.N_PAR_CUTS;
-  localparam N_PAR_CUTS = AXI_DW / 32;
+  localparam N_PAR_CUTS = 2 * AXI_DW / 32;
   localparam N_SER_CUTS = (pulp_cluster_cfg_pkg::L2_SIZE/L2_N_AXI_PORTS) / (N_PAR_CUTS * (32 * 2048) / 8);
   for (genvar iPort = 0; iPort < L2_N_AXI_PORTS; iPort++) begin: gen_fill_l2_ports
     for (genvar iRow = 0; iRow < N_SER_CUTS; iRow++) begin: gen_fill_l2_rows
@@ -444,7 +444,7 @@ module pulp_tb #(
           slm_path = "../test/slm_files"; // default path
           ignore = $value$plusargs("slm_path=%s", slm_path);
           $readmemh($sformatf("%s/l2_%01d_%01d.slm", slm_path, file_ser_idx, iCol),
-            dut.gen_l2_ports[iPort].i_l2_mem.gen_rows[iRow].gen_cols[iCol].i_mem_cut.mem);
+            dut.gen_l2_ports[iPort].i_l2_mem.gen_cols[iCol].gen_rows[iRow].i_mem_cut.mem);
         end
       end
     end

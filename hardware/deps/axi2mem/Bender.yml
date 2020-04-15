@@ -1,10 +1,19 @@
 package:
   name: axi2mem
+  authors:
+    - "Andreas Kurth <akurth@iis.ee.ethz.ch>"
+    - "Wolfgang Roenninger <wroennin@iis.ee.ethz.ch>"
 
 dependencies:
-  axi: { git: "https://github.com/pulp-platform/common_cells.git", version: 0.7.0 }
-  common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.2.2 }
-  riscv: { git: "https://github.com/pulp-platform/riscv.git", rev: atomics }
+  axi:                  { git: "https://github.com/pulp-platform/axi.git",                  version: 0.16.0 }
+  cluster_interconnect: { git: "https://github.com/pulp-platform/cluster_interconnect.git", version: 1.0.3  }
+  common_cells:         { git: "https://github.com/pulp-platform/common_cells.git",         version: 1.16.4 }
+  common_verification:  { git: "https://github.com/pulp-platform/common_verification.git",  version: 0.2.0  }
+  riscv:                { git: "https://github.com/pulp-platform/riscv.git",                rev: atomics    }
+  tech_cells_generic:   { git: "https://github.com/pulp-platform/tech_cells_generic.git",   version: 0.2.0  }
 
 sources:
-  - axi2mem.sv
+  # Level 0
+  - src/axi_to_mem.sv
+  # Level 1
+  - src/axi_to_mem_banked.sv

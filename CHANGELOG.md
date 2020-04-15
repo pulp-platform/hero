@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Update instruction cache (`hier-icache`) to improve timing.
+- Change L2 memory controller to multiple ports (banking factor of 2) to achieve full duplex
+  throughput of L2 AXI port.
 
 ### Fixed
 - `pulp_tb`: Tie unused `ext_evt_*_i` off.
@@ -57,6 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     instruction cache.
 - Update `common_cells` to v1.16.4 to fix generation of `head_tail_q` registers.
 - Update AXI modules to v0.18.1 to fix problems with DWC.
+- Reduce data width of SoC bus to 64 bit and remove data width converters and buffers, which are now
+  unnecessary.
 
 ### Fixed
 - Add `is_decoding` signal to mask `read_dependency` inside `APU_Dispatcher`. This fixed a bug that

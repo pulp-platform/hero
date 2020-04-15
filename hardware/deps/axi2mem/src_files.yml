@@ -1,4 +1,5 @@
 axi2mem:
   files: [
-    axi2mem.sv,
+    src/axi_to_mem.sv,
+    src/axi_to_mem_banked.sv,
   ]

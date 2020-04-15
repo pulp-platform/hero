@@ -318,7 +318,7 @@ module pulp_cluster
   logic                               s_hwpe_en;
 
   logic                s_cluster_periphs_busy;
-  logic                s_axi2mem_busy;
+  logic                s_axi_to_mem_busy;
   logic                s_per2axi_busy;
   logic                s_axi2per_busy;
   logic                s_dmac_busy;
@@ -446,7 +446,7 @@ module pulp_cluster
     .AXI_USER_WIDTH ( AXI_USER_WIDTH     )
   ) s_dma_ext_bus();
 
-  // ext -> axi2mem
+  // ext -> axi_to_mem
   AXI_BUS #(
     .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH     ),
     .AXI_DATA_WIDTH ( AXI_DATA_C2S_WIDTH ),
@@ -546,7 +546,7 @@ module pulp_cluster
   );
 
   /* fetch & busy genertion */
-  assign s_cluster_int_busy = s_cluster_periphs_busy | s_per2axi_busy | s_axi2per_busy | s_axi2mem_busy | s_dmac_busy | s_hwpe_busy;
+  assign s_cluster_int_busy = s_cluster_periphs_busy | s_per2axi_busy | s_axi2per_busy | s_axi_to_mem_busy | s_dmac_busy | s_hwpe_busy;
   assign busy_o = s_cluster_int_busy | (|core_busy);
   assign fetch_en_int = fetch_enable_reg_int;
 
@@ -582,7 +582,7 @@ module pulp_cluster
   logic [NB_EXT2MEM-1:0][ 3:0]  s_ext_xbar_bus_be;
   logic [NB_EXT2MEM-1:0][ 5:0]  s_ext_xbar_bus_atop;
   // Fall-through register on AW due to protocol violation by upstream (dependency on aw_ready for
-  // w_valid).  Reinforced to full AXI cut to break long paths through axi2mem.
+  // w_valid).  Reinforced to full AXI cut to break long paths through axi_to_mem.
   typedef logic [31:0] addr_t;
   typedef logic [AXI_DATA_C2S_WIDTH-1:0] data_t;
   typedef logic [AXI_ID_OUT_WIDTH-1:0] id_oup_t;
@@ -608,7 +608,7 @@ module pulp_cluster
     .r_chan_t   (r_chan_t),
     .req_t      (axi_req_t),
     .resp_t     (axi_resp_t)
-  ) i_axi2mem_cut (
+  ) i_axi_to_mem_cut (
     .clk_i      (clk_cluster),
     .rst_ni,
     .slv_req_i  (ext_tcdm_req),
@@ -617,17 +617,17 @@ module pulp_cluster
     .mst_resp_i (ext_tcdm_resp_buf)
   );
 
-  axi2mem #(
+  axi_to_mem #(
     .axi_req_t  ( axi_req_t           ),
     .axi_resp_t ( axi_resp_t          ),
     .AddrWidth  ( 32                  ),
     .DataWidth  ( AXI_DATA_C2S_WIDTH  ),
     .IdWidth    ( AXI_ID_OUT_WIDTH    ),
     .NumBanks   ( NB_EXT2MEM             )
-  ) i_axi2mem (
+  ) i_axi_to_mem (
     .clk_i        ( clk_cluster           ),
     .rst_ni       ( rst_ni                ),
-    .busy_o       ( s_axi2mem_busy        ),
+    .busy_o       ( s_axi_to_mem_busy     ),
     .axi_req_i    ( ext_tcdm_req_buf      ),
     .axi_resp_o   ( ext_tcdm_resp_buf     ),
     .mem_req_o    ( s_ext_xbar_bus_req    ),
