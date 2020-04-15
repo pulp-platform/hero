@@ -19,11 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change L2 memory controller to multiple ports (banking factor of 2) to achieve full duplex
   throughput of L2 AXI port.
 - `pulp`:
-  - Assuming the cluster never issues atomic operations (ATOPs) at its AXI master port, remove the
-    ATOP filter between cluster and SoC bus.
+  - As the cluster never issues atomic operations (ATOPs) at its AXI master port (see below),
+    remove the ATOP filter between cluster and SoC bus.
   - Move port types from parameters into package.
   - Change ID width of external slave port to 8 bit.
 - `pulp_cluster`:
+  - Disable ATOPs in `per2axi` and redirect transactions that would be ATOPs to error slave in SoC
+    bus (at address `0x1B00_....`).
   - Reduce maximum size of a DMA burst to 128 B.
   - Reduce maximum number of in-flight DMA transactions to 16.
 
