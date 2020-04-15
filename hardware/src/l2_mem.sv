@@ -22,130 +22,107 @@ module l2_mem #(
   AXI_BUS.Slave slv
 );
 
-  // Types for entire memory array
-  typedef logic   [AXI_AW-1:0] arr_addr_t;
-  typedef logic   [AXI_DW-1:0] arr_data_t;
-  typedef logic [AXI_DW/8-1:0] arr_strb_t;
+  // Properties of one memory cut, keep synchronized with instantiated macro.
+  localparam int unsigned CUT_DW = 32;          // [bit], must be a power of 2 and >=8
+  localparam int unsigned CUT_N_WORDS = 2048;   // must be a power of 2
+  localparam int unsigned CUT_N_BITS = CUT_DW * CUT_N_WORDS;
 
-  // Interface from AXI to memory array
-  logic       req, req_q, we;
-  arr_addr_t  addr;
-  arr_data_t  wdata, rdata;
-  arr_strb_t  be;
+  // Derived properties of memory array
+  localparam int unsigned N_PAR_CUTS = 2 * AXI_DW / CUT_DW;
+  localparam int unsigned PAR_CUTS_N_BYTES = N_PAR_CUTS * CUT_N_BITS / 8;
+  localparam int unsigned N_SER_CUTS = N_BYTES / PAR_CUTS_N_BYTES;
 
-  axi_to_mem_intf #(
-    .AddrWidth  (AXI_AW),
-    .DataWidth  (AXI_DW),
-    .IdWidth    (AXI_IW),
-    .UserWidth  (AXI_UW),
-    .NumBanks   (1),
-    .BufDepth   (1)
-  ) i_axi_to_mem (
+  localparam int unsigned MEM_ADDR_WIDTH = $clog2(CUT_N_WORDS * N_SER_CUTS);
+  typedef logic [N_PAR_CUTS-1:0][MEM_ADDR_WIDTH-1:0]  mem_addr_t;
+  typedef logic [N_PAR_CUTS-1:0][CUT_DW-1:0]          mem_data_t;
+  typedef logic [N_PAR_CUTS-1:0][CUT_DW/8-1:0]        mem_strb_t;
+  typedef logic [N_PAR_CUTS-1:0]                      mem_logic_t;
+
+  mem_logic_t             mem_req,
+                          mem_wen;
+  mem_addr_t              mem_addr;
+  mem_data_t              mem_wdata,
+                          mem_rdata;
+  mem_strb_t              mem_be;
+
+  axi_to_mem_banked_intf #(
+    .AXI_ID_WIDTH   (AXI_IW),
+    .AXI_ADDR_WIDTH (AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_USER_WIDTH (AXI_UW),
+    .MEM_NUM_BANKS  (N_PAR_CUTS),
+    .MEM_ADDR_WIDTH (MEM_ADDR_WIDTH),
+    .MEM_DATA_WIDTH (CUT_DW),
+    .MEM_LATENCY    (1),
+    .TOPOLOGY       (tcdm_interconnect_pkg::LIC)
+  ) i_axi_to_mem_banked (
     .clk_i,
     .rst_ni,
-    .busy_o       (/* unused */),
-    .slv          (slv),
-    .mem_req_o    (req),
-    .mem_gnt_i    (1'b1),
-    .mem_addr_o   (addr),
-    .mem_wdata_o  (wdata),
-    .mem_strb_o   (be),
-    .mem_atop_o   (/* unused */),
-    .mem_we_o     (we),
-    .mem_rvalid_i (req_q),
-    .mem_rdata_i  (rdata)
+    .test_i             (1'b0),
+    .slv                (slv),
+    .mem_req_o          (mem_req),
+    .mem_gnt_i          ({N_PAR_CUTS{1'b1}}),
+    .mem_add_o          (mem_addr),
+    .mem_wen_o          (mem_wen),
+    .mem_wdata_o        (mem_wdata),
+    .mem_be_o           (mem_be),
+    .mem_atop_o         (/* unused */),
+    .mem_rdata_i        (mem_rdata),
+    .axi_to_mem_busy_o  (/* unused */)
   );
 
-  `ifdef TARGET_XILINX
-    // Synthesis for Xilinx FPGAs can optimize SRAM tiling itself.
-    localparam N_WORDS = N_BYTES / (AXI_DW/8);
-    localparam LINE_OFF = $clog2(AXI_DW/8);
-    sram #(
-      .DATA_WIDTH (AXI_DW),
-      .N_WORDS    (N_WORDS)
-    ) i_mem (
-      .clk_i,
-      .rst_ni,
-      .req_i    (req),
-      .we_i     (we),
-      .addr_i   (addr[LINE_OFF+:$clog2(N_WORDS)]), // SRAM is row-addressed
-      .wdata_i  (wdata),
-      .be_i     (be),
-      .rdata_o  (rdata)
-    );
+  // Interface from memory array to memory cuts
+  localparam int unsigned WORD_IDX_OFF = 0; // output of `axi_to_mem_banked` is word-addressed
+  localparam int unsigned WORD_IDX_WIDTH = $clog2(CUT_N_WORDS);
+  localparam int unsigned ROW_IDX_OFF = WORD_IDX_OFF + WORD_IDX_WIDTH;
+  localparam int unsigned ROW_IDX_WIDTH = $clog2(N_SER_CUTS);
 
-  `else
-    // Properties of one memory cut, keep synchronized with instantiated macro.
-    localparam int unsigned CUT_DW = 32;          // [bit], must be a power of 2 and >=8
-    localparam int unsigned CUT_N_WORDS = 2048;   // must be a power of 2
-    localparam int unsigned CUT_N_BITS = CUT_DW * CUT_N_WORDS;
+  // Types for memory cuts
+  typedef logic [$clog2(CUT_N_WORDS)-1:0] cut_addr_t;
+  typedef logic [CUT_DW-1:0]              cut_data_t;
 
-    // Derived properties of memory array
-    localparam int unsigned N_PAR_CUTS = AXI_DW / CUT_DW;
-    localparam int unsigned PAR_CUTS_N_BYTES = N_PAR_CUTS * CUT_N_BITS / 8;
-    localparam int unsigned N_SER_CUTS = N_BYTES / PAR_CUTS_N_BYTES;
+  logic       [N_PAR_CUTS-1:0][N_SER_CUTS-1:0]    cut_req;
+  cut_addr_t  [N_PAR_CUTS-1:0]                    cut_addr_d, cut_addr_q;
+  cut_data_t  [N_PAR_CUTS-1:0][N_SER_CUTS-1:0]    cut_rdata;
+  logic       [N_PAR_CUTS-1:0][ROW_IDX_WIDTH-1:0] row_idx_d,  row_idx_q;
 
-    // Types for one memory cut
-    typedef logic [$clog2(CUT_N_WORDS)-1:0] cut_addr_t;
-    typedef logic [CUT_DW-1:0]              cut_data_t;
-    typedef logic [CUT_DW/8-1:0]            cut_strb_t;
+  for (genvar iCol = 0; iCol < N_PAR_CUTS; iCol++) begin : gen_cols
+    assign cut_addr_d[iCol]
+        = mem_req[iCol] ? mem_addr[iCol][WORD_IDX_OFF+:WORD_IDX_WIDTH] : cut_addr_q[iCol];
 
-    // Interface from memory array to memory cuts
-    localparam int unsigned WORD_IDX_OFF = $clog2(AXI_DW/8);
-    localparam int unsigned WORD_IDX_WIDTH = $clog2(CUT_N_WORDS);
-    localparam int unsigned ROW_IDX_OFF = WORD_IDX_OFF + WORD_IDX_WIDTH;
-    localparam int unsigned ROW_IDX_WIDTH = $clog2(N_SER_CUTS);
-    logic       [N_SER_CUTS-1:0]                  cut_req;
-    cut_addr_t                                    cut_addr_d, cut_addr_q;
-    cut_data_t  [N_SER_CUTS-1:0][N_PAR_CUTS-1:0]  cut_rdata;
-    cut_data_t                  [N_PAR_CUTS-1:0]  cut_wdata;
-    cut_strb_t                  [N_PAR_CUTS-1:0]  cut_be;
-
-    assign cut_addr_d = req ? addr[ROW_IDX_OFF-1:WORD_IDX_OFF] : cut_addr_q;
-    if (ROW_IDX_WIDTH > 0) begin: gen_row_idx
-      logic [ROW_IDX_WIDTH-1:0]row_idx_d, row_idx_q;
-      assign row_idx_d = req ? addr[ROW_IDX_OFF+:ROW_IDX_WIDTH] : row_idx_q;
+    if (ROW_IDX_WIDTH > 0) begin : gen_row_idx
+      assign row_idx_d[iCol]
+          = mem_req[iCol] ? mem_addr[iCol][ROW_IDX_OFF+:ROW_IDX_WIDTH] : row_idx_q[iCol];
       always_comb begin
-        cut_req = '0;
-        cut_req[row_idx_d] = req;
+        cut_req[iCol] = '0;
+        cut_req[iCol][row_idx_d[iCol]] = mem_req[iCol];
       end
-      assign rdata = cut_rdata[row_idx_q];
-      always_ff @(posedge clk_i, negedge rst_ni) begin
-        if (!rst_ni) begin
-          row_idx_q <= '0;
-        end else begin
-          row_idx_q <= row_idx_d;
-        end
-      end
-    end else begin: gen_no_row_idx
-      assign cut_req = req;
-      assign rdata = cut_rdata;
-    end
-    assign cut_wdata = wdata;
-    assign cut_be = be;
+      assign mem_rdata[iCol] = cut_rdata[iCol][row_idx_q[iCol]];
 
-    for (genvar iRow = 0; iRow < N_SER_CUTS; iRow++) begin: gen_rows
-      for (genvar iCol = 0; iCol < N_PAR_CUTS; iCol++) begin: gen_cols
-        sram #(
-          .DATA_WIDTH (CUT_DW),
-          .N_WORDS    (CUT_N_WORDS)
-        ) i_mem_cut (
-          .clk_i,
-          .rst_ni,
-          .req_i    (cut_req[iRow]),
-          .we_i     (we),
-          .addr_i   (cut_addr_d),
-          .wdata_i  (cut_wdata[iCol]),
-          .be_i     (cut_be[iCol]),
-          .rdata_o  (cut_rdata[iRow][iCol])
-        );
-      end
+    end else begin : gen_no_row_idx
+      assign cut_req[iCol][0] = mem_req[iCol];
+      assign mem_rdata[iCol] = cut_rdata[iCol][0];
     end
 
-    `FFARN(cut_addr_q, cut_addr_d, '0, clk_i, rst_ni);
-  `endif
+    for (genvar iRow = 0; iRow < N_SER_CUTS; iRow++) begin : gen_rows
+      sram #(
+        .DATA_WIDTH (CUT_DW),
+        .N_WORDS    (CUT_N_WORDS)
+      ) i_mem_cut (
+        .clk_i,
+        .rst_ni,
+        .req_i    (cut_req[iCol][iRow]),
+        .we_i     (mem_wen[iCol]),
+        .addr_i   (cut_addr_d[iCol]),
+        .wdata_i  (mem_wdata[iCol]),
+        .be_i     (mem_be[iCol]),
+        .rdata_o  (cut_rdata[iCol][iRow])
+      );
+    end
+  end
 
-  `FFARN(req_q, req, 1'b0, clk_i, rst_ni);
+  `FFARN(cut_addr_q, cut_addr_d, '0, clk_i, rst_ni)
+  `FFARN(row_idx_q, row_idx_d, '0, clk_i, rst_ni)
 
   // Validate parameters and properties.
   // pragma translate_off

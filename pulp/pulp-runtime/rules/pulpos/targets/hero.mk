@@ -98,7 +98,7 @@ run: $(TARGETS) $(TARGET_BUILD_DIR)/modelsim.ini $(TARGET_BUILD_DIR)/run_pulp_ru
 	$(SLM_CONV) --swap-endianness -f "$(TARGET_BUILD_DIR)/main_l1.slm" \
 	    -w 32 -P 16 -S 1 -n 2048 -s 0x10000000 -F "$(TARGET_BUILD_DIR)/l1_%01S_%01P.slm"
 	$(SLM_CONV) --swap-endianness -f "$(TARGET_BUILD_DIR)/main_l2.slm" \
-	    -w 32 -P  2 -S 16 -n 2048 -s 0x1c000000 -F "$(TARGET_BUILD_DIR)/l2_%01S_%01P.slm"
+	    -w 32 -P  4 -S 4 -n 2048 -s 0x1c000000 -F "$(TARGET_BUILD_DIR)/l2_%01S_%01P.slm"
 
 ifdef gui
 	export VSIM_FLAGS=+slm_path=.; \

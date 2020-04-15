@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Update instruction cache (`hier-icache`) to improve timing.
+- Change L2 memory controller to multiple ports (banking factor of 2) to achieve full duplex
+  throughput of L2 AXI port.
 
 ### Fixed
 - `pulp_tb`: Tie unused `ext_evt_*_i` off.
