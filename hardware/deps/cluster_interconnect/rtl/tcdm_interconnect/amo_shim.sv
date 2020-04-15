@@ -58,12 +58,10 @@ module amo_shim #(
     logic [31:0] swap_value_q;
     logic [31:0] amo_result; // result of atomic memory operation
 
-    always_comb begin
-        if (DataWidth == 64 && upper_word_q) begin
-            amo_operand_a = out_rdata_i[63:32];
-        end else begin
-            amo_operand_a = out_rdata_i[31:0];
-        end
+    if (DataWidth == 64) begin : gen_dw_64
+        assign amo_operand_a = upper_word_q ? out_rdata_i[63:32] : out_rdata_i[31:0];
+    end else begin : gen_dw_32
+        assign amo_operand_a = out_rdata_i[31:0];
     end
 
     always_comb begin
@@ -114,32 +112,43 @@ module amo_shim #(
 
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin
-            state_q         <= Idle;
-            amo_op_q        <= amo_op_t'('0);
-            addr_q          <= '0;
-            amo_operand_b_q <= '0;
-            be_q            <= '0;
-            swap_value_q    <= '0;
-            upper_word_q    <= '0;
+            state_q     <= Idle;
+            amo_op_q    <= amo_op_t'('0);
+            addr_q      <= '0;
+            be_q        <= '0;
         end else begin
             if (load_amo) begin
-                amo_op_q        <= amo_op_t'(in_amo_i);
-                addr_q          <= in_add_i;
-                be_q            <= in_be_i;
-                if (DataWidth == 64) begin
-                    if (!in_be_i[0]) begin
-                        amo_operand_b_q <= in_wdata_i[63:32];
-                    end
-                    upper_word_q    <= in_be_i[4];
-                    // swap value is located in the upper word
-                    swap_value_q <= in_wdata_i[63:32];
-                end else begin
-                    amo_operand_b_q <= in_wdata_i[31:0];
-                end
-                state_q         <= DoAMO;
+                amo_op_q    <= amo_op_t'(in_amo_i);
+                addr_q      <= in_add_i;
+                be_q        <= in_be_i;
+                state_q     <= DoAMO;
             end else begin
-                amo_op_q        <= AMONone;
-                state_q         <= Idle;
+                amo_op_q    <= AMONone;
+                state_q     <= Idle;
+            end
+        end
+    end
+    if (DataWidth == 64) begin : gen_ff_64
+        always_ff @(posedge clk_i or negedge rst_ni) begin
+            if (!rst_ni) begin
+                amo_operand_b_q <= '0;
+                swap_value_q    <= '0;
+                upper_word_q    <= '0;
+            end else if (load_amo) begin
+                if (!in_be_i[0]) begin
+                    amo_operand_b_q <= in_wdata_i[63:32];
+                end
+                upper_word_q    <= in_be_i[4];
+                // swap value is located in the upper word
+                swap_value_q <= in_wdata_i[63:32];
+            end
+        end
+    end else begin : gen_ff_32
+        always_ff @(posedge clk_i or negedge rst_ni) begin
+            if (!rst_ni) begin
+                amo_operand_b_q <= '0;
+            end else if (load_amo) begin
+                amo_operand_b_q <= in_wdata_i[31:0];
             end
         end
     end
@@ -192,11 +201,13 @@ module amo_shim #(
                         amo_result =  swap_value_q;
                     // values are not euqal -> don't update
                     end else begin
-                        amo_result =  upper_word_q ? out_rdata_i[63:32] : out_rdata_i[31:0];
+                        amo_result =  upper_word_q ? out_rdata_i[(DataWidth-1)-:32] : out_rdata_i[31:0];
                     end
                 `ifndef TARGET_SYNTHESIS
+                // pragma translate_off
                 end else begin
                     $error("AMOCAS not supported for DataWidth = 32 bit");
+                // pragma translate_on
                 `endif
                 end
             end

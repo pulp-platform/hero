@@ -209,6 +209,7 @@ module cluster_interconnect_wrap
               riscv_defines::AMO_MAX[4:2]:  amo = 4'h6;
               riscv_defines::AMO_MINU[4:2]: amo = 4'h9;
               riscv_defines::AMO_MAXU[4:2]: amo = 4'h7;
+              default:                      amo = 4'h0;
             endcase
           end
         endcase

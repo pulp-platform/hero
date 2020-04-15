@@ -4,6 +4,7 @@ puts "${Green}--> compile hier-icache${NC}"
 analyze -format sverilog  -work work ${IPS_PATH}/hier-icache/RTL/TOP/icache_hier_top.sv
 analyze -format sverilog  -work work ${IPS_PATH}/hier-icache/RTL/L1_CACHE/pri_icache_controller.sv
 analyze -format sverilog  -work work ${IPS_PATH}/hier-icache/RTL/L1_CACHE/pri_icache.sv
+analyze -format sverilog  -work work ${IPS_PATH}/hier-icache/RTL/L1_CACHE/register_file_2r_2w_icache.sv
 analyze -format sverilog  -work work ${IPS_PATH}/hier-icache/RTL/L1.5_CACHE/AXI4_REFILL_Resp_Deserializer.sv
 analyze -format sverilog  -work work ${IPS_PATH}/hier-icache/RTL/L1.5_CACHE/share_icache.sv
 analyze -format sverilog  -work work ${IPS_PATH}/hier-icache/RTL/L1.5_CACHE/icache_controller.sv
