@@ -176,7 +176,7 @@ do_cl_boot:
     sw  x3, 8(x2)
 
 loop:
-    li x2, 0x1a109800
+    li x2, 0x1d109800
     sw x0, 0(x2)
     wfi
     j loop

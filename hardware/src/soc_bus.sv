@@ -80,7 +80,7 @@ module soc_bus #(
   `AXI_ASSIGN(debug_mst, masters[IDX_DEBUG_MST]);
 
   // Address Map
-  localparam int unsigned N_RULES = N_CLUSTERS + L2_N_PORTS + 1; // plus debug
+  localparam int unsigned N_RULES = N_CLUSTERS + L2_N_PORTS + 2; // plus debug and host
   axi_pkg::xbar_rule_32_t [N_RULES-1:0] addr_map;
   // Clusters
   for (genvar i = 0; i < N_CLUSTERS; i++) begin : gen_addr_map_clusters
@@ -88,7 +88,7 @@ module soc_bus #(
     assign addr_map[i] = '{
       idx:        i,
       start_addr: cluster_base_addr,
-      end_addr:   cluster_base_addr + 32'h0030_0000
+      end_addr:   cluster_base_addr + 32'h0040_0000
     };
   end
   for (genvar i = 0; i < L2_N_PORTS; i++) begin : gen_addr_map_l2
@@ -103,6 +103,11 @@ module soc_bus #(
     idx:        IDX_DEBUG_MST,
     start_addr: DEBUG_BASE_ADDR,
     end_addr:   DEBUG_BASE_ADDR + DEBUG_N_BYTES
+  };
+  assign addr_map[N_CLUSTERS + L2_N_PORTS + 1] = '{
+    idx:        IDX_EXT,
+    start_addr: DEBUG_BASE_ADDR + DEBUG_N_BYTES,
+    end_addr:   32'hFFFF_FFFF
   };
   // pragma translate_off
   `ifndef VERILATOR
@@ -129,8 +134,6 @@ module soc_bus #(
     AxiDataWidth:       AXI_DW,
     NoAddrRules:        N_RULES
   };
-  logic [$clog2(N_MASTERS)-1:0] default_mst_port;
-  assign default_mst_port = IDX_EXT; // use external port as default master port
   axi_xbar_intf #(
     .AXI_USER_WIDTH (AXI_UW),
     .Cfg            (xbar_cfg),
@@ -142,8 +145,8 @@ module soc_bus #(
     .slv_ports              (slaves),
     .mst_ports              (masters),
     .addr_map_i             (addr_map),
-    .en_default_mst_port_i  ({N_SLAVES{1'b1}}), // enable default master port for all slave ports
-    .default_mst_port_i     ({N_SLAVES{default_mst_port}})
+    .en_default_mst_port_i  ({N_SLAVES{1'b0}}), // disable default master port for all slave ports
+    .default_mst_port_i     ({N_SLAVES{{$clog2(N_MASTERS){1'b0}}}})
   );
 
 endmodule

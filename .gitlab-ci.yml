@@ -88,8 +88,8 @@ build_test_archive:
       cd -
     ### Build the virtual platform
     - make virtual-platform
-    - ./pulp/virtual-platform/run_vp.sh hello
-    - ./pulp/virtual-platform/run_vp.sh helloworld
+    #- ./pulp/virtual-platform/run_vp.sh hello
+    #- ./pulp/virtual-platform/run_vp.sh helloworld
   artifacts:
     paths:
     - hero_huawei.tar.gz
@@ -116,7 +116,7 @@ build_test_pulp-runtime:
       done
     ### Build the virtual platform
     - make virtual-platform
-    - ./pulp/virtual-platform/run_vp.sh hello
+    #- ./pulp/virtual-platform/run_vp.sh hello
   artifacts:
     paths:
       - example-apps
@@ -146,7 +146,7 @@ build_test_sdk:
       done
     ### Build the virtual platform
     - make virtual-platform
-    - ./pulp/virtual-platform/run_vp.sh helloworld
+    #- ./pulp/virtual-platform/run_vp.sh helloworld
   artifacts:
     paths:
       - example-apps

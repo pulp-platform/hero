@@ -18,15 +18,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update instruction cache (`hier-icache`) to improve timing.
 - Change L2 memory controller to multiple ports (banking factor of 2) to achieve full duplex
   throughput of L2 AXI port.
+- `pulp`:
+  - As the cluster never issues atomic operations (ATOPs) at its AXI master port (see below),
+    remove the ATOP filter between cluster and SoC bus.
+  - Move port types from parameters into package.
+  - Change ID width of external slave port to 8 bit.
+  - Change address of external peripherals to `0x1D10_0000`.
+- `pulp_cluster`:
+  - Disable ATOPs in `per2axi` and redirect transactions that would be ATOPs to error slave in SoC
+    bus (at address `0x1B00_....`).
+  - Reduce maximum size of a DMA burst to 128 B.
+  - Reduce maximum number of in-flight DMA transactions to 16.
+- `soc_bus`: Assign a single, contiguous address region to external port (to host), map all holes in
+  the address map of this bus to the error slave.
 
 ### Fixed
 - `pulp_tb`: Tie unused `ext_evt_*_i` off.
 - `pulp_cluster`:
   - `amo_shim`: Fix synthesis warnings (out of bounds) related to 64-bit support.
+  - `cluster_bus_wrap`: Fix TCDM address space to the full size of the TCDM.
   - `cluster_interconnect_wrap`:
     - Add missing `default` in `unique case` statement.
     - Remove gaps and aliases in address map of peripherals.  Requests to any address not matching a
       peripheral are now responded with errors.
+- `soc_bus`: Fix cluster address space to include the entire peripheral space.
 - Synthesis elaboration scripts: Add missing `axi_serializer`.
 
 

@@ -32,33 +32,14 @@ module pulp_tb #(
   timeunit 1ps;
   timeprecision 1ps;
 
-  localparam int unsigned AXI_IW = pulp_pkg::axi_iw_sb_oup(N_CLUSTERS);
-  localparam int unsigned AXI_SW = AXI_DW/8;  // width of strobe
+  import pulp_pkg::AXI_IW_MST;
+  import pulp_pkg::AXI_SW;
   localparam int unsigned NB_SLV = 2;
   localparam int unsigned NB_MST = 1;
-  typedef pulp_pkg::addr_t      axi_addr_t;
-  typedef logic [AXI_DW-1:0]    axi_data_t;
-  typedef logic [AXI_IW-1:0]    axi_id_t;
-  typedef logic [AXI_SW-1:0]    axi_strb_t;
-  typedef pulp_pkg::user_t      axi_user_t;
-  `AXI_TYPEDEF_AW_CHAN_T(       axi_aw_t,     axi_addr_t, axi_id_t, axi_user_t);
-  `AXI_TYPEDEF_W_CHAN_T(        axi_w_t,      axi_data_t, axi_strb_t, axi_user_t);
-  `AXI_TYPEDEF_B_CHAN_T(        axi_b_t,      axi_id_t, axi_user_t);
-  `AXI_TYPEDEF_AR_CHAN_T(       axi_ar_t,     axi_addr_t, axi_id_t, axi_user_t);
-  `AXI_TYPEDEF_R_CHAN_T(        axi_r_t,      axi_data_t, axi_id_t, axi_user_t);
-  `AXI_TYPEDEF_REQ_T(           axi_req_t,    axi_aw_t, axi_w_t, axi_ar_t);
-  `AXI_TYPEDEF_RESP_T(          axi_resp_t,   axi_b_t, axi_r_t);
-
-  typedef pulp_pkg::lite_addr_t axi_lite_addr_t;
-  typedef pulp_pkg::lite_data_t axi_lite_data_t;
-  typedef pulp_pkg::lite_strb_t axi_lite_strb_t;
-  `AXI_LITE_TYPEDEF_AW_CHAN_T(  axi_lite_aw_t,    axi_lite_addr_t);
-  `AXI_LITE_TYPEDEF_W_CHAN_T(   axi_lite_w_t,     axi_lite_data_t, axi_lite_strb_t);
-  `AXI_LITE_TYPEDEF_B_CHAN_T(   axi_lite_b_t);
-  `AXI_LITE_TYPEDEF_AR_CHAN_T(  axi_lite_ar_t,    axi_lite_addr_t);
-  `AXI_LITE_TYPEDEF_R_CHAN_T(   axi_lite_r_t,     axi_lite_data_t);
-  `AXI_LITE_TYPEDEF_REQ_T(      axi_lite_req_t,   axi_lite_aw_t, axi_lite_w_t, axi_lite_ar_t);
-  `AXI_LITE_TYPEDEF_RESP_T(     axi_lite_resp_t,  axi_lite_b_t, axi_lite_r_t);
+  import pulp_pkg::axi_req_mst_t;
+  import pulp_pkg::axi_req_slv_t;
+  import pulp_pkg::axi_resp_mst_t;
+  import pulp_pkg::axi_resp_slv_t;
 
   logic clk,
         rst_n;
@@ -67,10 +48,10 @@ module pulp_tb #(
                           cl_eoc,
                           cl_fetch_en;
 
-  axi_req_t   from_pulp_req,
-              to_pulp_req;
-  axi_resp_t  from_pulp_resp,
-              to_pulp_resp;
+  axi_req_mst_t   from_pulp_req;
+  axi_req_slv_t   to_pulp_req;
+  axi_resp_mst_t  from_pulp_resp;
+  axi_resp_slv_t  to_pulp_resp;
 
   logic jtag_tck;
   logic jtag_trst_n;
@@ -97,12 +78,7 @@ module pulp_tb #(
 
   pulp #(
     .N_CLUSTERS     (N_CLUSTERS),
-    .AXI_DW         (AXI_DW),
-    .L2_N_AXI_PORTS (L2_N_AXI_PORTS),
-    .axi_req_t      (axi_req_t),
-    .axi_resp_t     (axi_resp_t),
-    .axi_lite_req_t (axi_lite_req_t),
-    .axi_lite_resp_t(axi_lite_resp_t)
+    .L2_N_AXI_PORTS (L2_N_AXI_PORTS)
   ) dut (
     .clk_i          (clk),
     .rst_ni         (rst_n),
@@ -132,19 +108,19 @@ module pulp_tb #(
   AXI_BUS #(
     .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (AXI_IW),
+    .AXI_ID_WIDTH   (AXI_IW_MST),
     .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
   ) from_pulp[NB_MST-1:0] ();
   AXI_BUS #(
     .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (AXI_IW+1),
+    .AXI_ID_WIDTH   (AXI_IW_MST),
     .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
   ) from_xbar[NB_SLV-1:0] ();
   AXI_BUS #(
     .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
     .AXI_DATA_WIDTH (32),
-    .AXI_ID_WIDTH   (AXI_IW+1),
+    .AXI_ID_WIDTH   (AXI_IW_MST),
     .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
   ) to_periphs ();
   `AXI_ASSIGN_FROM_REQ(from_pulp[0], from_pulp_req);
@@ -172,8 +148,8 @@ module pulp_tb #(
     MaxSlvTrans:        N_CLUSTERS * MAX_TXNS_PER_CLUSTER,
     FallThrough:        1'b0,
     LatencyMode:        axi_pkg::NO_LATENCY,
-    AxiIdWidthSlvPorts: AXI_IW,
-    AxiIdUsedSlvPorts:  AXI_IW,
+    AxiIdWidthSlvPorts: AXI_IW_MST,
+    AxiIdUsedSlvPorts:  AXI_IW_MST,
     AxiAddrWidth:       pulp_pkg::AXI_AW,
     AxiDataWidth:       AXI_DW,
     NoAddrRules:        N_RULES
@@ -195,7 +171,7 @@ module pulp_tb #(
 
   // Peripherals
   axi_dw_converter_intf #(
-    .AXI_ID_WIDTH             (AXI_IW+1),
+    .AXI_ID_WIDTH             (AXI_IW_MST),
     .AXI_ADDR_WIDTH           (pulp_pkg::AXI_AW),
     .AXI_MST_PORT_DATA_WIDTH  (32),
     .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW),
@@ -209,7 +185,7 @@ module pulp_tb #(
 
   soc_peripherals #(
     .AXI_AW     (pulp_pkg::AXI_AW),
-    .AXI_IW     (AXI_IW+1),
+    .AXI_IW     (AXI_IW_MST),
     .AXI_UW     (pulp_pkg::AXI_UW),
     .AXI_DW     (32),
     .N_CORES    (pulp_cluster_cfg_pkg::N_CORES),
@@ -227,10 +203,10 @@ module pulp_tb #(
 
   // Emulate infinite memory with AXI slave port.
   initial begin
-    automatic logic [7:0] mem[axi_addr_t];
-    automatic axi_ar_t ar_queue[$];
-    automatic axi_aw_t aw_queue[$];
-    automatic axi_b_t b_queue[$];
+    automatic logic [7:0] mem[pulp_pkg::axi_addr_t];
+    automatic pulp_pkg::axi_ar_mst_t ar_queue[$];
+    automatic pulp_pkg::axi_aw_mst_t aw_queue[$];
+    automatic pulp_pkg::axi_b_mst_t b_queue[$];
     automatic shortint unsigned r_cnt = 0, w_cnt = 0;
     from_xbar[0].aw_ready = 1'b0;
     from_xbar[0].w_ready = 1'b0;
@@ -252,7 +228,7 @@ module pulp_tb #(
       forever begin
         from_xbar[0].aw_ready = 1'b1;
         if (from_xbar[0].aw_valid) begin
-          automatic axi_aw_t aw;
+          automatic pulp_pkg::axi_aw_mst_t aw;
           `AXI_SET_TO_AW(aw, from_xbar[0]);
           aw_queue.push_back(aw);
         end
@@ -264,18 +240,18 @@ module pulp_tb #(
           from_xbar[0].w_ready = 1'b1;
           if (from_xbar[0].w_valid) begin
             automatic axi_pkg::size_t size = aw_queue[0].size;
-            automatic axi_addr_t addr = axi_pkg::beat_addr(aw_queue[0].addr, size, w_cnt);
+            automatic pulp_pkg::axi_addr_t addr = axi_pkg::beat_addr(aw_queue[0].addr, size, w_cnt);
             for (shortint unsigned
                 i_byte = axi_pkg::beat_lower_byte(addr, size, AXI_SW, w_cnt);
                 i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, w_cnt);
                 i_byte++) begin
               if (from_xbar[0].w_strb[i_byte]) begin
-                automatic axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
+                automatic pulp_pkg::axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
                 mem[byte_addr] = from_xbar[0].w_data[i_byte*8+:8];
               end
             end
             if (w_cnt == aw_queue[0].len) begin
-              automatic axi_b_t b_beat = '0;
+              automatic pulp_pkg::axi_b_mst_t b_beat = '0;
               assert (from_xbar[0].w_last) else $error("Expected last beat of W burst!");
               b_beat.id = aw_queue[0].id;
               b_beat.resp = axi_pkg::RESP_OKAY;
@@ -310,7 +286,7 @@ module pulp_tb #(
       forever begin
         from_xbar[0].ar_ready = 1'b1;
         if (from_xbar[0].ar_valid) begin
-          automatic axi_ar_t ar;
+          automatic pulp_pkg::axi_ar_mst_t ar;
           `AXI_SET_TO_AR(ar, from_xbar[0]);
           ar_queue.push_back(ar);
         end
@@ -320,8 +296,8 @@ module pulp_tb #(
       forever begin
         if (ar_queue.size() != 0) begin
           automatic axi_pkg::size_t size = ar_queue[0].size;
-          automatic axi_addr_t addr = axi_pkg::beat_addr(ar_queue[0].addr, size, r_cnt);
-          automatic axi_r_t r_beat = '0;
+          automatic pulp_pkg::axi_addr_t addr = axi_pkg::beat_addr(ar_queue[0].addr, size, r_cnt);
+          automatic pulp_pkg::axi_r_mst_t r_beat = '0;
           r_beat.data = 'x;
           r_beat.id = ar_queue[0].id;
           r_beat.resp = axi_pkg::RESP_OKAY;
@@ -329,7 +305,7 @@ module pulp_tb #(
               i_byte = axi_pkg::beat_lower_byte(addr, size, AXI_SW, r_cnt);
               i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, r_cnt);
               i_byte++) begin
-            automatic axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
+            automatic pulp_pkg::axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
             if (!mem.exists(byte_addr)) begin
               $warning("Access to non-initialized byte at address 0x%016x by ID 0x%x.", byte_addr,
                   r_beat.id);
@@ -361,7 +337,7 @@ module pulp_tb #(
   end
 
   // AXI Write
-  task write_axi(input axi_addr_t addr, input axi_data_t data);
+  task write_axi(input pulp_pkg::axi_addr_t addr, input pulp_pkg::axi_data_t data);
     @(posedge clk);
     to_pulp_req.aw.addr  = addr;
     to_pulp_req.aw.size  = 3'h2;

@@ -99,31 +99,7 @@ module per2axi_req_channel
 
    integer                            i;
 
-   // AWATOP signal for AXI-5
-   // TODO: When upgrading to AXI-5 declare as output
-   logic [5:0]  awatop;
-
-   // Input data signal
-   logic [31:0] per_slave_wdata;
-   logic        inv_wdata;
-
-   // Atomic operation defines
-   parameter AWATOP_SWAP    = 6'b110000;
-   parameter AWATOP_COMPARE = 6'b110001;
-
-   parameter AWATOP_STORE   = 3'b010;
-   parameter AWATOP_LOAD    = 3'b100;
-
-   parameter AWATOP_ADD     = 3'b000;
-   parameter AWATOP_CLR     = 3'b001;
-   parameter AWATOP_XOR     = 3'b010;
-   parameter AWATOP_SET     = 3'b011;
-   parameter AWATOP_SMAX    = 3'b100;
-   parameter AWATOP_SMIN    = 3'b101;
-   parameter AWATOP_UMAX    = 3'b110;
-   parameter AWATOP_UMIN    = 3'b111;
-
-   assign axi_master_aw_atop_o = awatop;
+   assign axi_master_aw_atop_o = '0;
 
    // AXI REQUEST GENERATION
    always_comb
@@ -156,8 +132,7 @@ module per2axi_req_channel
     begin
         axi_master_aw_lock_o   = 1'b0;
         axi_master_ar_lock_o   = 1'b0;
-        awatop                 = 6'b000000;
-        inv_wdata              = 1'b0;
+        axi_master_aw_addr_o   = per_slave_add_i;
 
         if (per_slave_atop_i[5] == 1'b1) begin
             unique case (per_slave_atop_i[4:0])
@@ -167,35 +142,19 @@ module per2axi_req_channel
                 AMO_SC: begin                       // ATOMIC STORE-CONDITIONAL OPERATION
                     axi_master_aw_lock_o = 1'b1;
                 end
-                AMO_SWAP: begin
-                    awatop    = AWATOP_SWAP;
-                end
-                AMO_ADD: begin
-                    awatop    = {AWATOP_LOAD, AWATOP_ADD};
-                end
-                AMO_XOR: begin
-                    awatop    = {AWATOP_LOAD, AWATOP_XOR};
-                end
-                AMO_AND: begin
-                    awatop    = {AWATOP_LOAD, AWATOP_CLR};
-                    inv_wdata = 1'b1; // Invert data to emulate an AND with a clear
-                end
-                AMO_OR: begin
-                    awatop    = {AWATOP_LOAD, AWATOP_SET};
-                end
-                AMO_MIN: begin
-                    awatop    = {AWATOP_LOAD, AWATOP_SMIN};
-                end
-                AMO_MAX: begin
-                    awatop    = {AWATOP_LOAD, AWATOP_SMAX};
-                end
-                AMO_MINU: begin
-                    awatop    = {AWATOP_LOAD, AWATOP_UMIN};
-                end
+                AMO_SWAP,
+                AMO_ADD,
+                AMO_XOR,
+                AMO_AND,
+                AMO_OR,
+                AMO_MIN,
+                AMO_MAX,
+                AMO_MINU,
                 AMO_MAXU: begin
-                    awatop    = {AWATOP_LOAD, AWATOP_UMAX};
+                    // Redirect atomic operations to error slave in SoC bus.
+                    axi_master_aw_addr_o = 32'h1B00_0000 + per_slave_add_i[11:0];
                 end
-                default : begin end
+                default: ;
             endcase
         end
     end
@@ -219,21 +178,14 @@ module per2axi_req_channel
    // AXI WRITE DATA/STROBE GENERATION
    always_comb
      begin
-        if (inv_wdata == 1'b1) begin
-            per_slave_wdata = ~per_slave_wdata_i;
-        end
-        else begin
-            per_slave_wdata = per_slave_wdata_i;
-        end
-
         if ( per_slave_add_i[2] == 1'b0 )
           begin
-             axi_master_w_data_o = {32'b0,per_slave_wdata};
+             axi_master_w_data_o = {32'b0,per_slave_wdata_i};
              axi_master_w_strb_o = {4'b0,per_slave_be_i};
           end
         else
           begin
-             axi_master_w_data_o = {per_slave_wdata,32'b0};
+             axi_master_w_data_o = {per_slave_wdata_i,32'b0};
              axi_master_w_strb_o = {per_slave_be_i,4'b0};
           end
      end
@@ -281,18 +233,11 @@ module per2axi_req_channel
    assign trans_id_o  = axi_master_ar_id_o;
    assign trans_add_o = axi_master_ar_addr_o;
 
-   assign atop_req_o  = (axi_master_aw_atop_o[5:3] == AWATOP_STORE) ? 1'b0 : |axi_master_aw_atop_o;
-   assign atop_id_o   = axi_master_aw_id_o;
-   assign atop_add_o  = axi_master_aw_addr_o;
+   assign axi_master_ar_addr_o = per_slave_add_i;
 
-   // AXI ADDRESS GENERATION
-   if (EN_TRYX) begin : gen_tryx_addr
-      assign axi_master_aw_addr_o = {tryx_req_i[axi_master_aw_id_o].addrext, per_slave_add_i};
-      assign axi_master_ar_addr_o = {tryx_req_i[axi_master_ar_id_o].addrext, per_slave_add_i};
-   end else begin : gen_no_tryx_addr
-      assign axi_master_aw_addr_o = per_slave_add_i;
-      assign axi_master_ar_addr_o = per_slave_add_i;
-   end
+   assign atop_req_o  = 1'b0;
+   assign atop_id_o   = '0;
+   assign atop_add_o  = '0;
 
    // UNUSED SIGNALS
    assign axi_master_aw_prot_o   = '0;

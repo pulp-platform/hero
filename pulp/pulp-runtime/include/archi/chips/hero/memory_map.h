@@ -36,7 +36,7 @@
  * SOC PERIPHERALS
  */
 
-#define ARCHI_SOC_PERIPHERALS_ADDR    0x1A100000
+#define ARCHI_SOC_PERIPHERALS_ADDR    0x1D100000
 
 #define ARCHI_GPIO_OFFSET             0x00000000 // Not implemented
 #define ARCHI_UDMA_OFFSET             0x00000000 // Not implemented

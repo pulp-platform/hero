@@ -17,7 +17,7 @@ package pulp_cluster_cfg_pkg;
   localparam logic [31:0] ROM_BOOT_ADDR = 32'h1A00_0000;
   localparam logic [31:0] BOOT_ADDR = 32'h1C00_0080;
   // -- SoC peripherals
-  localparam logic [31:0] SOC_PERIPH_BASE_ADDR = 32'h1A10_0000; // begin of address space
+  localparam logic [31:0] SOC_PERIPH_BASE_ADDR = 32'h1D10_0000; // begin of address space
   localparam int unsigned SOC_PERIPH_SIZE = 32 * 1024; // 32kB
   // -- Debug module
   localparam logic [31:0] DM_BASE_ADDR = 32'h1D00_0000; // begin of address space
@@ -30,11 +30,11 @@ package pulp_cluster_cfg_pkg;
   localparam int unsigned AXI_IW_SLV = 3; // [bit]
   localparam int unsigned AXI_UW = 4; // [bit]
   // -- DMA
-  localparam int unsigned DMA_MAX_BURST_SIZE = 2048; // [B], must be a power of 2
+  localparam int unsigned DMA_MAX_BURST_SIZE = 128; // [B], must be a power of 2
   // Maximum number of beats in a DMA burst on the SoC bus
   localparam int unsigned DMA_MAX_BURST_LEN = DMA_MAX_BURST_SIZE / (AXI_DW/8);
   // Maximum number of transactions the DMA can have in flight
-  localparam int unsigned DMA_MAX_N_TXNS = 64;
+  localparam int unsigned DMA_MAX_N_TXNS = 16;
   localparam int unsigned N_DMAS = 4; // larger values seem to break the cluster
   // -- Instruction Cache
   localparam int unsigned ICACHE_SIZE = 4096; // [B], must be a power of 2

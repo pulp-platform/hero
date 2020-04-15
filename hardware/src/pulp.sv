@@ -22,6 +22,8 @@ package pulp_pkg;
   localparam int unsigned AXI_DW_CL = pulp_cluster_cfg_pkg::AXI_DW;
   localparam int unsigned AXI_IW_CL_OUP = pulp_cluster_cfg_pkg::AXI_IW_MST;
   localparam int unsigned AXI_IW_CL_INP = pulp_cluster_cfg_pkg::AXI_IW_SLV;
+  // If this is set, clusters must never apply atomic operations (ATOPs) at their AXI master port.
+  localparam logic CL_OUP_NO_ATOP = 1'b1;
   // SoC Bus
   localparam int unsigned AXI_IW_SB_INP = AXI_IW_CL_OUP;
   localparam int unsigned AXI_UW = pulp_cluster_cfg_pkg::AXI_UW;
@@ -36,27 +38,41 @@ package pulp_pkg;
   localparam int unsigned AXI_LITE_DW = 64;
   // AXI Interface Types
   typedef logic [AXI_AW-1:0]        addr_t;
-  typedef logic [AXI_IW_SB_INP-1:0] id_slv_t;
   typedef logic [AXI_UW-1:0]        user_t;
   // AXI-Lite Interface Types
   typedef logic [AXI_LITE_AW-1:0]   lite_addr_t;
   typedef logic [AXI_LITE_DW-1:0]   lite_data_t;
   typedef logic [AXI_LITE_DW/8-1:0] lite_strb_t;
+  `AXI_LITE_TYPEDEF_AW_CHAN_T(axi_lite_aw_t, lite_addr_t)
+  `AXI_LITE_TYPEDEF_W_CHAN_T(axi_lite_w_t, lite_data_t, lite_strb_t)
+  `AXI_LITE_TYPEDEF_B_CHAN_T(axi_lite_b_t)
+  `AXI_LITE_TYPEDEF_AR_CHAN_T(axi_lite_ar_t, lite_addr_t)
+  `AXI_LITE_TYPEDEF_R_CHAN_T(axi_lite_r_t, lite_data_t)
+  `AXI_LITE_TYPEDEF_REQ_T(axi_lite_req_t, axi_lite_aw_t, axi_lite_w_t, axi_lite_ar_t)
+  `AXI_LITE_TYPEDEF_RESP_T(axi_lite_resp_t, axi_lite_b_t, axi_lite_r_t)
 
-  localparam int unsigned AXI_IW = axi_iw_sb_oup(1);
+  localparam int unsigned AXI_IW_MST = axi_iw_sb_oup(1);
+  localparam int unsigned AXI_IW_SLV = 8;
   localparam int unsigned AXI_SW = AXI_DW/8;  // width of strobe
-  typedef addr_t                axi_addr_t;
-  typedef logic [AXI_DW-1:0]    axi_data_t;
-  typedef logic [AXI_IW-1:0]    axi_id_t;
-  typedef logic [AXI_SW-1:0]    axi_strb_t;
-  typedef user_t                axi_user_t;
-  `AXI_TYPEDEF_AW_CHAN_T(axi_aw_t,axi_addr_t, axi_id_t, axi_user_t)
+  typedef addr_t                  axi_addr_t;
+  typedef logic [AXI_DW-1:0]      axi_data_t;
+  typedef logic [AXI_IW_MST-1:0]  axi_id_mst_t;
+  typedef logic [AXI_IW_SLV-1:0]  axi_id_slv_t;
+  typedef logic [AXI_SW-1:0]      axi_strb_t;
+  typedef user_t                  axi_user_t;
+  `AXI_TYPEDEF_AW_CHAN_T(axi_aw_mst_t, axi_addr_t, axi_id_mst_t, axi_user_t)
+  `AXI_TYPEDEF_AW_CHAN_T(axi_aw_slv_t, axi_addr_t, axi_id_slv_t, axi_user_t)
   `AXI_TYPEDEF_W_CHAN_T(axi_w_t, axi_data_t, axi_strb_t, axi_user_t)
-  `AXI_TYPEDEF_B_CHAN_T(axi_b_t, axi_id_t, axi_user_t)
-  `AXI_TYPEDEF_AR_CHAN_T(axi_ar_t, axi_addr_t, axi_id_t, axi_user_t)
-  `AXI_TYPEDEF_R_CHAN_T(axi_r_t, axi_data_t, axi_id_t, axi_user_t)
-  `AXI_TYPEDEF_REQ_T(axi_req_t, axi_aw_t, axi_w_t, axi_ar_t)
-  `AXI_TYPEDEF_RESP_T(axi_resp_t, axi_b_t, axi_r_t)
+  `AXI_TYPEDEF_B_CHAN_T(axi_b_mst_t, axi_id_mst_t, axi_user_t)
+  `AXI_TYPEDEF_B_CHAN_T(axi_b_slv_t, axi_id_slv_t, axi_user_t)
+  `AXI_TYPEDEF_AR_CHAN_T(axi_ar_mst_t, axi_addr_t, axi_id_mst_t, axi_user_t)
+  `AXI_TYPEDEF_AR_CHAN_T(axi_ar_slv_t, axi_addr_t, axi_id_slv_t, axi_user_t)
+  `AXI_TYPEDEF_R_CHAN_T(axi_r_mst_t, axi_data_t, axi_id_mst_t, axi_user_t)
+  `AXI_TYPEDEF_R_CHAN_T(axi_r_slv_t, axi_data_t, axi_id_slv_t, axi_user_t)
+  `AXI_TYPEDEF_REQ_T(axi_req_mst_t, axi_aw_mst_t, axi_w_t, axi_ar_mst_t)
+  `AXI_TYPEDEF_REQ_T(axi_req_slv_t, axi_aw_slv_t, axi_w_t, axi_ar_slv_t)
+  `AXI_TYPEDEF_RESP_T(axi_resp_mst_t, axi_b_mst_t, axi_r_mst_t)
+  `AXI_TYPEDEF_RESP_T(axi_resp_slv_t, axi_b_slv_t, axi_r_slv_t)
 
   // Debug module
   localparam logic [31:0] JTAG_IDCODE = 32'h249511C3; //TODO: do we have a sane value for this?
@@ -69,12 +85,7 @@ import pulp_pkg::*;
 module pulp #(
   // SoC Parameters
   parameter int unsigned  N_CLUSTERS = 1,           // must be a power of 2
-  parameter int unsigned  AXI_DW = 64,              // [bit]
-  parameter int unsigned  L2_N_AXI_PORTS = 1,       // must be a power of 2
-  parameter type          axi_req_t = axi_req_t,
-  parameter type          axi_resp_t = axi_resp_t,
-  parameter type          axi_lite_req_t = logic,
-  parameter type          axi_lite_resp_t = logic
+  parameter int unsigned  L2_N_AXI_PORTS = 1        // must be a power of 2
 ) (
   // Clocks and Resets
   input  logic                  clk_i,
@@ -90,10 +101,10 @@ module pulp #(
   input logic                   ext_evt_2_i,
   input logic                   ext_evt_3_i,
 
-  output axi_req_t              ext_req_o,
-  input  axi_resp_t             ext_resp_i,
-  input  axi_req_t              ext_req_i,
-  output axi_resp_t             ext_resp_o,
+  output axi_req_mst_t          ext_req_o,
+  input  axi_resp_mst_t         ext_resp_i,
+  input  axi_req_slv_t          ext_req_i,
+  output axi_resp_slv_t         ext_resp_o,
 
   //JTAG
   input  logic                  jtag_tck_i,
@@ -224,7 +235,7 @@ module pulp #(
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
+    .AXI_ID_WIDTH   (AXI_IW_SLV),
     .AXI_USER_WIDTH (AXI_UW)
   ) ext_slv();
   `AXI_ASSIGN_FROM_REQ(ext_slv, ext_req_i)
@@ -373,18 +384,22 @@ module pulp #(
       );
     end
 
-    axi_atop_filter_intf #(
-      .AXI_ID_WIDTH       (AXI_IW_CL_OUP),
-      .AXI_ADDR_WIDTH     (AXI_AW),
-      .AXI_DATA_WIDTH     (AXI_DW_CL),
-      .AXI_USER_WIDTH     (AXI_UW),
-      .AXI_MAX_WRITE_TXNS (pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS)
-    ) i_atop_filter_cl_oup (
-      .clk_i,
-      .rst_ni (ndmreset_n),
-      .slv  (cl_oup_prefilter[i]),
-      .mst  (cl_oup_predwc[i])
-    );
+    if (!CL_OUP_NO_ATOP) begin : gen_axi_atop_filter_cl_oup
+      axi_atop_filter_intf #(
+        .AXI_ID_WIDTH       (AXI_IW_CL_OUP),
+        .AXI_ADDR_WIDTH     (AXI_AW),
+        .AXI_DATA_WIDTH     (AXI_DW_CL),
+        .AXI_USER_WIDTH     (AXI_UW),
+        .AXI_MAX_WRITE_TXNS (pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS)
+      ) i_atop_filter_cl_oup (
+        .clk_i,
+        .rst_ni (ndmreset_n),
+        .slv  (cl_oup_prefilter[i]),
+        .mst  (cl_oup_predwc[i])
+      );
+    end else begin : gen_no_axi_atop_filter_cl_oup
+      `AXI_ASSIGN(cl_oup_predwc[i], cl_oup_prefilter[i])
+    end
 
     if (AXI_DW_CL != AXI_DW) begin : gen_dwc_cl_oup
       axi_dw_converter_intf #(
@@ -458,7 +473,7 @@ module pulp #(
     .ADDR_WIDTH   (AXI_AW),
     .DATA_WIDTH   (AXI_DW),
     .USER_WIDTH   (AXI_UW),
-    .ID_WIDTH_IN  (AXI_IW_SB_OUP),
+    .ID_WIDTH_IN  (AXI_IW_SLV),
     .ID_WIDTH_OUT (AXI_IW_SB_INP),
     .TABLE_SIZE   (4)
   ) i_id_resize_ext_slv (
