@@ -44,7 +44,7 @@ module axi_id_resize #(
       .out    ( out    )
     );
   end else begin : gen_join
-    axi_join i_join (in, out);
+    axi_join_intf i_join (in, out);
   end
 
 endmodule
