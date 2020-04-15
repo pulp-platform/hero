@@ -296,11 +296,11 @@ module cluster_peripherals
     assign hwpe_cfg_master.be    = speriph_slave[SPER_HWPE_ID].be;
     assign hwpe_cfg_master.id    = speriph_slave[SPER_HWPE_ID].id;
 
-    assign speriph_slave[SPER_DECOMP_ID].gnt     =    '0;
-    assign speriph_slave[SPER_DECOMP_ID].r_rdata =  '0;
-    assign speriph_slave[SPER_DECOMP_ID].r_opc   = '0;
-    assign speriph_slave[SPER_DECOMP_ID].r_id    = '0;
-    assign speriph_slave[SPER_DECOMP_ID].r_valid = '0;
+    assign speriph_slave[SPER_ERROR_ID].gnt     = 1'b1;
+    assign speriph_slave[SPER_ERROR_ID].r_rdata = 32'hBADCAB7E;
+    assign speriph_slave[SPER_ERROR_ID].r_opc   = '0;
+    assign speriph_slave[SPER_ERROR_ID].r_id    = '0;
+    assign speriph_slave[SPER_ERROR_ID].r_valid = 1'b1;
 
   if (!FEATURE_DEMUX_MAPPED) begin : gen_eu_not_demux_mapped
     for (genvar i=0;i< NB_CORES; i++) begin : gen_eu_not_demux_mapped_cores
