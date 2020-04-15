@@ -43,6 +43,13 @@ package pulp_pkg;
   typedef logic [AXI_LITE_AW-1:0]   lite_addr_t;
   typedef logic [AXI_LITE_DW-1:0]   lite_data_t;
   typedef logic [AXI_LITE_DW/8-1:0] lite_strb_t;
+  `AXI_LITE_TYPEDEF_AW_CHAN_T(axi_lite_aw_t, lite_addr_t)
+  `AXI_LITE_TYPEDEF_W_CHAN_T(axi_lite_w_t, lite_data_t, lite_strb_t)
+  `AXI_LITE_TYPEDEF_B_CHAN_T(axi_lite_b_t)
+  `AXI_LITE_TYPEDEF_AR_CHAN_T(axi_lite_ar_t, lite_addr_t)
+  `AXI_LITE_TYPEDEF_R_CHAN_T(axi_lite_r_t, lite_data_t)
+  `AXI_LITE_TYPEDEF_REQ_T(axi_lite_req_t, axi_lite_aw_t, axi_lite_w_t, axi_lite_ar_t)
+  `AXI_LITE_TYPEDEF_RESP_T(axi_lite_resp_t, axi_lite_b_t, axi_lite_r_t)
 
   localparam int unsigned AXI_IW = axi_iw_sb_oup(1);
   localparam int unsigned AXI_SW = AXI_DW/8;  // width of strobe
@@ -70,12 +77,7 @@ import pulp_pkg::*;
 module pulp #(
   // SoC Parameters
   parameter int unsigned  N_CLUSTERS = 1,           // must be a power of 2
-  parameter int unsigned  AXI_DW = 64,              // [bit]
-  parameter int unsigned  L2_N_AXI_PORTS = 1,       // must be a power of 2
-  parameter type          axi_req_t = axi_req_t,
-  parameter type          axi_resp_t = axi_resp_t,
-  parameter type          axi_lite_req_t = logic,
-  parameter type          axi_lite_resp_t = logic
+  parameter int unsigned  L2_N_AXI_PORTS = 1        // must be a power of 2
 ) (
   // Clocks and Resets
   input  logic                  clk_i,
