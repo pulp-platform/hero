@@ -30,11 +30,11 @@ source scripts/analyze_auto/ips/tech_cells_generic.tcl
 #source scripts/analyze_auto/ips/udma_filter.tcl
 #source scripts/analyze_auto/ips/udma_external_per.tcl
 source scripts/analyze_auto/ips/riscv-dbg.tcl
-source scripts/analyze_auto/ips/axi2mem.tcl
 source scripts/analyze_auto/ips/axi2per.tcl
 source scripts/analyze_auto/ips/per2axi.tcl
 source scripts/analyze_auto/ips/axi_size_conv.tcl
 source scripts/analyze_auto/ips/cluster_interconnect.tcl
+source scripts/analyze_auto/ips/axi2mem.tcl
 source scripts/analyze_auto/ips/event_unit_flex.tcl
 source scripts/analyze_auto/ips/mchan.tcl
 source scripts/analyze_auto/ips/hier-icache.tcl
