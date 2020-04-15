@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Assuming the cluster never issues atomic operations (ATOPs) at its AXI master port, remove the
     ATOP filter between cluster and SoC bus.
   - Move port types from parameters into package.
+  - Change ID width of external slave port to 8 bit.
 - `pulp_cluster`:
   - Reduce maximum size of a DMA burst to 128 B.
   - Reduce maximum number of in-flight DMA transactions to 16.

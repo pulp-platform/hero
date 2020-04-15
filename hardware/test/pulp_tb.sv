@@ -32,12 +32,14 @@ module pulp_tb #(
   timeunit 1ps;
   timeprecision 1ps;
 
-  import pulp_pkg::AXI_IW;
+  import pulp_pkg::AXI_IW_MST;
   import pulp_pkg::AXI_SW;
   localparam int unsigned NB_SLV = 2;
   localparam int unsigned NB_MST = 1;
-  import pulp_pkg::axi_req_t;
-  import pulp_pkg::axi_resp_t;
+  import pulp_pkg::axi_req_mst_t;
+  import pulp_pkg::axi_req_slv_t;
+  import pulp_pkg::axi_resp_mst_t;
+  import pulp_pkg::axi_resp_slv_t;
 
   logic clk,
         rst_n;
@@ -46,10 +48,10 @@ module pulp_tb #(
                           cl_eoc,
                           cl_fetch_en;
 
-  axi_req_t   from_pulp_req,
-              to_pulp_req;
-  axi_resp_t  from_pulp_resp,
-              to_pulp_resp;
+  axi_req_mst_t   from_pulp_req;
+  axi_req_slv_t   to_pulp_req;
+  axi_resp_mst_t  from_pulp_resp;
+  axi_resp_slv_t  to_pulp_resp;
 
   logic jtag_tck;
   logic jtag_trst_n;
@@ -106,19 +108,19 @@ module pulp_tb #(
   AXI_BUS #(
     .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (AXI_IW),
+    .AXI_ID_WIDTH   (AXI_IW_MST),
     .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
   ) from_pulp[NB_MST-1:0] ();
   AXI_BUS #(
     .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (AXI_IW+1),
+    .AXI_ID_WIDTH   (AXI_IW_MST+1),
     .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
   ) from_xbar[NB_SLV-1:0] ();
   AXI_BUS #(
     .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
     .AXI_DATA_WIDTH (32),
-    .AXI_ID_WIDTH   (AXI_IW+1),
+    .AXI_ID_WIDTH   (AXI_IW_MST+1),
     .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
   ) to_periphs ();
   `AXI_ASSIGN_FROM_REQ(from_pulp[0], from_pulp_req);
@@ -146,8 +148,8 @@ module pulp_tb #(
     MaxSlvTrans:        N_CLUSTERS * MAX_TXNS_PER_CLUSTER,
     FallThrough:        1'b0,
     LatencyMode:        axi_pkg::NO_LATENCY,
-    AxiIdWidthSlvPorts: AXI_IW,
-    AxiIdUsedSlvPorts:  AXI_IW,
+    AxiIdWidthSlvPorts: AXI_IW_MST,
+    AxiIdUsedSlvPorts:  AXI_IW_MST,
     AxiAddrWidth:       pulp_pkg::AXI_AW,
     AxiDataWidth:       AXI_DW,
     NoAddrRules:        N_RULES
@@ -169,7 +171,7 @@ module pulp_tb #(
 
   // Peripherals
   axi_dw_converter_intf #(
-    .AXI_ID_WIDTH             (AXI_IW+1),
+    .AXI_ID_WIDTH             (AXI_IW_MST+1),
     .AXI_ADDR_WIDTH           (pulp_pkg::AXI_AW),
     .AXI_MST_PORT_DATA_WIDTH  (32),
     .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW),
@@ -183,7 +185,7 @@ module pulp_tb #(
 
   soc_peripherals #(
     .AXI_AW     (pulp_pkg::AXI_AW),
-    .AXI_IW     (AXI_IW+1),
+    .AXI_IW     (AXI_IW_MST+1),
     .AXI_UW     (pulp_pkg::AXI_UW),
     .AXI_DW     (32),
     .N_CORES    (pulp_cluster_cfg_pkg::N_CORES),
