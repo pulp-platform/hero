@@ -38,7 +38,6 @@ package pulp_pkg;
   localparam int unsigned AXI_LITE_DW = 64;
   // AXI Interface Types
   typedef logic [AXI_AW-1:0]        addr_t;
-  typedef logic [AXI_IW_SB_INP-1:0] id_slv_t;
   typedef logic [AXI_UW-1:0]        user_t;
   // AXI-Lite Interface Types
   typedef logic [AXI_LITE_AW-1:0]   lite_addr_t;
