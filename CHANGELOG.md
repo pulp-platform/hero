@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     remove the ATOP filter between cluster and SoC bus.
   - Move port types from parameters into package.
   - Change ID width of external slave port to 8 bit.
+  - Change address of external peripherals to `0x1D10_0000`.
 - `pulp_cluster`:
   - Disable ATOPs in `per2axi` and redirect transactions that would be ATOPs to error slave in SoC
     bus (at address `0x1B00_....`).
