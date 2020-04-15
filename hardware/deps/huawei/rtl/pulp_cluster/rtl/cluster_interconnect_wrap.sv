@@ -278,7 +278,9 @@ module cluster_interconnect_wrap
                                   pe_inp_gnt,
                                   pe_inp_rvalid;
   localparam pe_idx_t PE_IDX_EXT = pulp_cluster_package::SPER_EXT_ID;
+  localparam pe_idx_t PE_IDX_ERR = pulp_cluster_package::SPER_ERROR_ID;
   function automatic pe_idx_t addr_to_pe_idx(input pe_addr_t addr, input logic [31:0] addrext);
+    pe_idx_t pe_idx;
     if (ADDREXT && addrext != '0) begin
       return PE_IDX_EXT;
     end else begin
@@ -289,7 +291,13 @@ module cluster_interconnect_wrap
         && (addr[23:20] >= 4'h2 && addr[23:20] <= 4'h3)
       ) begin
         // decode peripheral to access
-        return addr[PE_ROUTING_MSB:PE_ROUTING_LSB];
+        pe_idx = addr[PE_ROUTING_MSB:PE_ROUTING_LSB];
+        if (addr[23:20] == 4'h2 && addr[19:PE_ROUTING_MSB+1] == '0 && pe_idx < NB_SPERIPHS) begin
+          return pe_idx;
+        // .. or, if the address does not decode to a peripheral, decode to error slave
+        end else begin
+          return PE_IDX_ERR;
+        end
       end else begin
         // otherwise decode to 'external' peripheral
         return PE_IDX_EXT;
