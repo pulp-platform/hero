@@ -99,6 +99,9 @@ module pulp_tb #(
     .cl_busy_o      (cl_busy),
 
     .mailbox_evt_i  (1'b0), // not connected yet
+    .ext_evt_1_i    (1'b0), // not connected yet
+    .ext_evt_2_i    (1'b0), // not connected yet
+    .ext_evt_3_i    (1'b0), // not connected yet
 
     .ext_req_o      (from_pulp_req),
     .ext_resp_i     (from_pulp_resp),

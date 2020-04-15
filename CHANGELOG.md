@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update instruction cache (`hier-icache`) to improve timing.
 
 ### Fixed
+- `pulp_tb`: Tie unused `ext_evt_*_i` off.
 
 
 ## 2020-04-13
