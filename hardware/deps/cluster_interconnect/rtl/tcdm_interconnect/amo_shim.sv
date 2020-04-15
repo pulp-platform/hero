@@ -195,8 +195,10 @@ module amo_shim #(
                         amo_result =  upper_word_q ? out_rdata_i[63:32] : out_rdata_i[31:0];
                     end
                 `ifndef TARGET_SYNTHESIS
+                // pragma translate_off
                 end else begin
                     $error("AMOCAS not supported for DataWidth = 32 bit");
+                // pragma translate_on
                 `endif
                 end
             end
