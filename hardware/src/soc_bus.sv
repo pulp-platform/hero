@@ -146,7 +146,7 @@ module soc_bus #(
     .mst_ports              (masters),
     .addr_map_i             (addr_map),
     .en_default_mst_port_i  ({N_SLAVES{1'b0}}), // disable default master port for all slave ports
-    .default_mst_port_i     ({N_SLAVES{'0}})
+    .default_mst_port_i     ({N_SLAVES{{$clog2(N_MASTERS){1'b0}}}})
   );
 
 endmodule
