@@ -214,8 +214,10 @@ module axi_to_mem #(
         // Decide requests with identical QoS.
         end else if (wr_meta.qos == rd_meta.qos) begin
           // 1. Priorize individual writes over read bursts.
-          // Rationale: Read bursts can be interleaved on AXI but write bursts cannot.
-          if (wr_meta.last && !rd_meta.last) begin
+          // Rationale: Read bursts can be interleaved on AXI but write bursts cannot.  However,
+          // progress of read bursts must still be guaranteed, so this condition only applies if the
+          // last beat granted was a read.
+          if (wr_meta.last && !rd_meta.last && !meta_sel_q) begin
             meta_sel_d = 1'b1;
           // 2. Prioritize ongoing burst.
           // Rationale: Stalled bursts create backpressure or require costly buffers.
