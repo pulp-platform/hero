@@ -1,4 +1,4 @@
-// Copyright 2018 ETH Zurich and University of Bologna.
+// Copyright 2020 ETH Zurich and University of Bologna.
 // Copyright and related rights are licensed under the Solderpad Hardware
 // License, Version 0.51 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
@@ -10,16 +10,16 @@
 
 // Andreas Kurth <akurth@iis.ee.ethz.ch>
 
-module axi2mem #(
-  parameter type axi_req_t = logic,     // AXI request type
-  parameter type axi_resp_t = logic,    // AXI response type
-  parameter int unsigned AddrWidth = 0, // address width
-  parameter int unsigned DataWidth = 0, // AXI data width
-  parameter int unsigned IdWidth = 0,   // AXI ID width
-  parameter int unsigned NumBanks = 0,  // number of banks at output
-  parameter int unsigned BufDepth = 1,  // depth of memory response buffer
+module axi_to_mem #(
+  parameter type         axi_req_t  = logic, // AXI request type
+  parameter type         axi_resp_t = logic, // AXI response type
+  parameter int unsigned AddrWidth  = 0,     // address width
+  parameter int unsigned DataWidth  = 0,     // AXI data width
+  parameter int unsigned IdWidth    = 0,     // AXI ID width
+  parameter int unsigned NumBanks   = 0,     // number of banks at output
+  parameter int unsigned BufDepth   = 1,     // depth of memory response buffer
   // Dependent parameters, do not override.
-  localparam type addr_t = logic [AddrWidth-1:0],
+  localparam type addr_t     = logic [AddrWidth-1:0],
   localparam type mem_atop_t = logic [5:0],
   localparam type mem_data_t = logic [DataWidth/NumBanks-1:0],
   localparam type mem_strb_t = logic [DataWidth/NumBanks/8-1:0]
@@ -214,10 +214,8 @@ module axi2mem #(
         // Decide requests with identical QoS.
         end else if (wr_meta.qos == rd_meta.qos) begin
           // 1. Priorize individual writes over read bursts.
-          // Rationale: Read bursts can be interleaved on AXI but write bursts cannot.  However,
-          // progress of read bursts must still be guaranteed, so this condition only applies if the
-          // last beat granted was a read.
-          if (wr_meta.last && !rd_meta.last && !meta_sel_q) begin
+          // Rationale: Read bursts can be interleaved on AXI but write bursts cannot.
+          if (wr_meta.last && !rd_meta.last) begin
             meta_sel_d = 1'b1;
           // 2. Prioritize ongoing burst.
           // Rationale: Stalled bursts create backpressure or require costly buffers.
@@ -254,7 +252,7 @@ module axi2mem #(
   assign sel_r = ~meta.write | meta.atop[5];
 
   stream_fifo #(
-    .FALL_THROUGH (1'b0),
+    .FALL_THROUGH (1'b1),
     .DEPTH        (1 + BufDepth),
     .T            (logic[1:0])
   ) i_sel_buf (
@@ -272,7 +270,7 @@ module axi2mem #(
   );
 
   stream_fifo #(
-    .FALL_THROUGH (1'b0),
+    .FALL_THROUGH (1'b1),
     .DEPTH        (1 + BufDepth),
     .T            (meta_t)
   ) i_meta_buf (
@@ -293,7 +291,7 @@ module axi2mem #(
   always_comb begin
     m2s_req.atop = '0;
     m2s_req.wdata = axi_req_i.w.data;
-    if (arb_valid && meta.atop[5:4] != axi_pkg::ATOP_NONE) begin
+    if (meta_valid && meta.atop[5:4] != axi_pkg::ATOP_NONE) begin
       m2s_req.atop[5] = 1'b1;
       if (meta.atop == axi_pkg::ATOP_ATOMICSWAP) begin
         m2s_req.atop[4:0] = riscv_defines::AMO_SWAP;
@@ -323,7 +321,7 @@ module axi2mem #(
     .mem_req_t  (mem_req_t),
     .mem_resp_t (axi_data_t),
     .BufDepth   (BufDepth)
-  ) i_mem2stream (
+  ) i_mem_to_stream (
     .clk_i,
     .rst_ni,
     .req_i            (m2s_req),
@@ -340,11 +338,11 @@ module axi2mem #(
   );
 
   // Split single memory request to desired number of banks.
-  mem2banks #(
+  mem_to_banks #(
     .AddrWidth  (AddrWidth),
     .DataWidth  (DataWidth),
     .NumBanks   (NumBanks)
-  ) i_mem2banks (
+  ) i_mem_to_banks (
     .clk_i,
     .rst_ni,
     .req_i          (mem_req_valid),
@@ -463,8 +461,8 @@ endmodule
 
 `include "axi/assign.svh"
 `include "axi/typedef.svh"
-// Interface wrapper for axi2mem
-module axi2mem_wrap #(
+// Interface wrapper for axi_to_mem
+module axi_to_mem_intf #(
   parameter int unsigned AddrWidth = 0,
   parameter int unsigned DataWidth = 0,
   parameter int unsigned IdWidth = 0,
@@ -498,18 +496,18 @@ module axi2mem_wrap #(
   typedef logic [DataWidth-1:0]   data_t;
   typedef logic [DataWidth/8-1:0] strb_t;
   typedef logic [UserWidth-1:0]   user_t;
-  `AXI_TYPEDEF_AW_CHAN_T ( aw_chan_t, addr_t, id_t,         user_t);
-  `AXI_TYPEDEF_W_CHAN_T  (  w_chan_t, data_t,       strb_t, user_t);
-  `AXI_TYPEDEF_B_CHAN_T  (  b_chan_t,         id_t,         user_t);
-  `AXI_TYPEDEF_AR_CHAN_T ( ar_chan_t, addr_t, id_t,         user_t);
-  `AXI_TYPEDEF_R_CHAN_T  (  r_chan_t, data_t, id_t,         user_t);
-  `AXI_TYPEDEF_REQ_T     (     req_t, aw_chan_t, w_chan_t, ar_chan_t);
-  `AXI_TYPEDEF_RESP_T    (    resp_t,  b_chan_t, r_chan_t);
+  `AXI_TYPEDEF_AW_CHAN_T(aw_chan_t, addr_t, id_t, user_t)
+  `AXI_TYPEDEF_W_CHAN_T(w_chan_t, data_t, strb_t, user_t)
+  `AXI_TYPEDEF_B_CHAN_T(b_chan_t, id_t, user_t)
+  `AXI_TYPEDEF_AR_CHAN_T(ar_chan_t, addr_t, id_t, user_t)
+  `AXI_TYPEDEF_R_CHAN_T(r_chan_t, data_t, id_t, user_t)
+  `AXI_TYPEDEF_REQ_T(req_t, aw_chan_t, w_chan_t, ar_chan_t)
+  `AXI_TYPEDEF_RESP_T(resp_t, b_chan_t, r_chan_t)
   req_t   req;
   resp_t  resp;
-  `AXI_ASSIGN_TO_REQ    (req, slv);
-  `AXI_ASSIGN_FROM_RESP (slv, resp);
-  axi2mem #(
+  `AXI_ASSIGN_TO_REQ(req, slv)
+  `AXI_ASSIGN_FROM_RESP(slv, resp)
+  axi_to_mem #(
     .axi_req_t  (req_t),
     .axi_resp_t (resp_t),
     .AddrWidth  (AddrWidth),
@@ -517,7 +515,7 @@ module axi2mem_wrap #(
     .IdWidth    (IdWidth),
     .NumBanks   (NumBanks),
     .BufDepth   (BufDepth)
-  ) i_axi2mem (
+  ) i_axi_to_mem (
     .clk_i,
     .rst_ni,
     .busy_o,
@@ -538,7 +536,7 @@ endmodule
 
 // Split memory access over multiple parallel banks, where each bank has its own req/gnt request and
 // valid response direction.
-module mem2banks #(
+module mem_to_banks #(
   parameter int unsigned AddrWidth = 0, // input address width
   parameter int unsigned DataWidth = 0, // input data width, must be a power of two
   parameter int unsigned NumBanks = 0,  // number of banks at output, must evenly divide the data
