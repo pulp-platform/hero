@@ -213,27 +213,27 @@
 
     "peripherals": {
 
-      "base": "0x1A100000",
+      "base": "0x1D100000",
       "size": "0x00100000",
 
       "flls": {
         "fll": {
           "version"      : 1,
-          "base"         : "0x1A100000",
+          "base"         : "0x1D100000",
           "size"         : "0x00000010",
           "targets"      : [ "soc" ]
         },
 
         "fll_periph": {
           "version"      : 1,
-          "base"         : "0x1A100010",
+          "base"         : "0x1D100010",
           "size"         : "0x00000010",
           "targets"      : [ "periph" ]
         },
 
         "fll_cluster": {
           "version"      : 1,
-          "base"         : "0x1A100020",
+          "base"         : "0x1D100020",
           "size"         : "0x00000010",
           "targets"      : [ "cluster" ]
         }
@@ -245,31 +245,31 @@
 
       "gpio": {
         "version"      : 3,
-        "base"         : "0x1A101000",
+        "base"         : "0x1D101000",
         "size"         : "0x00001000"
       },
 
       "udma": {
         "content"      : "chips/pulp/udma.json",
-        "base"         : "0x1A102000",
+        "base"         : "0x1D102000",
         "size"         : "0x00002000"
       },
 
       "apb_soc_ctrl": {
-        "base"         : "0x1A103000",
+        "base"         : "0x1D103000",
         "size"         : "0x00001000",
         "has_jtag_reg" : true
       },
 
       "soc_eu": {
         "version"      : 2,
-        "base"         : "0x1A106000",
+        "base"         : "0x1D106000",
         "size"         : "0x00001000"
       },
 
       "fc_itc": {
         "version"      : 1,
-        "base"         : "0x1A109800",
+        "base"         : "0x1D109800",
         "size"         : "0x00000800",
         "irq": {
           "evt_sw_event0"       : 0,
@@ -306,25 +306,25 @@
 
       "fc_timer": {
         "version"      : 2,
-        "base"         : "0x1A10B000",
+        "base"         : "0x1D10B000",
         "size"         : "0x00001000"
       },
 
       "stdout": {
         "version"      : 3,
-        "base"         : "0x1A104000",
+        "base"         : "0x1D104000",
         "size"         : "0x00001000"
       },
 
       "fc_dbg_unit": {
         "version"      : 1,
-        "base"         : "0x1A110000",
+        "base"         : "0x1D110000",
         "size"         : "0x00008000"
       },
 
       "debug_rom": {
         "version": 2,
-        "base": "0x1A190800",
+        "base": "0x1D190800",
         "size": "0x00000800",
         "config": {
           "stim_file": "os.path.join(os.environ.get('INSTALL_DIR'), 'python', 'pulp', 'chips', 'pulp', 'debug_rom.bin')"
