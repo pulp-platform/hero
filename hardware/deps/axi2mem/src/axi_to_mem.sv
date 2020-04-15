@@ -293,7 +293,7 @@ module axi_to_mem #(
   always_comb begin
     m2s_req.atop = '0;
     m2s_req.wdata = axi_req_i.w.data;
-    if (meta_valid && meta.atop[5:4] != axi_pkg::ATOP_NONE) begin
+    if (arb_valid && meta.atop[5:4] != axi_pkg::ATOP_NONE) begin
       m2s_req.atop[5] = 1'b1;
       if (meta.atop == axi_pkg::ATOP_ATOMICSWAP) begin
         m2s_req.atop[4:0] = riscv_defines::AMO_SWAP;
