@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - `pulp_tb`: Tie unused `ext_evt_*_i` off.
 - `cluster_interconnect_wrap`: Add missing `default` in `unique case` statement.
+- Synthesis elaboration scripts: Add missing `axi_serializer`.
 
 
 ## 2020-04-13

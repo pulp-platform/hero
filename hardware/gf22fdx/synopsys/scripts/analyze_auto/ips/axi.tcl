@@ -23,16 +23,18 @@ analyze -format sv -work work \
         "${IPS_PATH}/axi/src/axi_join.sv" \
         "${IPS_PATH}/axi/src/axi_lite_demux.sv" \
         "${IPS_PATH}/axi/src/axi_lite_join.sv" \
+        "${IPS_PATH}/axi/src/axi_lite_mailbox.sv" \
         "${IPS_PATH}/axi/src/axi_lite_mux.sv" \
         "${IPS_PATH}/axi/src/axi_lite_to_apb.sv" \
         "${IPS_PATH}/axi/src/axi_lite_to_axi.sv" \
         "${IPS_PATH}/axi/src/axi_modify_address.sv" \
         "${IPS_PATH}/axi/src/axi_mux.sv" \
         "${IPS_PATH}/axi/src/axi_read_burst_buffer.sv" \
-        "${IPS_PATH}/axi/src/axi_to_axi_lite.sv" \
-        "${IPS_PATH}/axi/src/axi_dw_converter.sv" \
+        "${IPS_PATH}/axi/src/axi_serializer.sv" \
         "${IPS_PATH}/axi/src/axi_err_slv.sv" \
+        "${IPS_PATH}/axi/src/axi_dw_converter.sv" \
         "${IPS_PATH}/axi/src/axi_multicut.sv" \
+        "${IPS_PATH}/axi/src/axi_to_axi_lite.sv" \
         "${IPS_PATH}/axi/src/axi_lite_xbar.sv" \
         "${IPS_PATH}/axi/src/axi_xbar.sv" \
     ]
