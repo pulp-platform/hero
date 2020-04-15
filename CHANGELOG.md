@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
+- Add support for custom `hua20` RISC-V machine architecture extension in GCC.  This comprises all
+  the custom instructions of the `gap9` extension plus pipeline scheduling for two cycles FPU
+  latency.
 
 ### Changed
 - Update instruction cache (`hier-icache`) to improve timing.

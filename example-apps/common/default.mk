@@ -25,7 +25,7 @@ CFLAGS_COMMON += $(cflags) -O$(opt)
 LDFLAGS_COMMON ?= $(ldflags)
 
 CFLAGS_COMMON += -D__device= -D__PULP__ -fopenmp
-CFLAGS_PULP   += $(CFLAGS_COMMON) -march=rv32imacXgap9
+CFLAGS_PULP   += $(CFLAGS_COMMON) -march=rv32imacXhua20
 LDFLAGS_PULP  += $(LDFLAGS_COMMON)
 LDFLAGS_PULP  += $(PULP_SDK_INSTALL)/lib/$(CURRENT_CONFIG_NAME)/rt/crt0.o
 LDFLAGS_PULP  += $(PULP_SDK_INSTALL)/hero/$(CURRENT_CONFIG_NAME)/rt_conf.o
