@@ -114,13 +114,13 @@ module pulp_tb #(
   AXI_BUS #(
     .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (AXI_IW_MST+1),
+    .AXI_ID_WIDTH   (AXI_IW_MST),
     .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
   ) from_xbar[NB_SLV-1:0] ();
   AXI_BUS #(
     .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
     .AXI_DATA_WIDTH (32),
-    .AXI_ID_WIDTH   (AXI_IW_MST+1),
+    .AXI_ID_WIDTH   (AXI_IW_MST),
     .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
   ) to_periphs ();
   `AXI_ASSIGN_FROM_REQ(from_pulp[0], from_pulp_req);
@@ -171,7 +171,7 @@ module pulp_tb #(
 
   // Peripherals
   axi_dw_converter_intf #(
-    .AXI_ID_WIDTH             (AXI_IW_MST+1),
+    .AXI_ID_WIDTH             (AXI_IW_MST),
     .AXI_ADDR_WIDTH           (pulp_pkg::AXI_AW),
     .AXI_MST_PORT_DATA_WIDTH  (32),
     .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW),
@@ -185,7 +185,7 @@ module pulp_tb #(
 
   soc_peripherals #(
     .AXI_AW     (pulp_pkg::AXI_AW),
-    .AXI_IW     (AXI_IW_MST+1),
+    .AXI_IW     (AXI_IW_MST),
     .AXI_UW     (pulp_pkg::AXI_UW),
     .AXI_DW     (32),
     .N_CORES    (pulp_cluster_cfg_pkg::N_CORES),
