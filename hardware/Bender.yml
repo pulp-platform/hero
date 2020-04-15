@@ -50,6 +50,7 @@ sources:
       - test/riscv_pkg.sv
       - test/jtag_test.sv
       - test/dm_test.sv
+      # Level 1
       - test/SimJTAG.sv
       # Level 2
       - test/pulp_tb.sv
