@@ -6,7 +6,7 @@ VCS_ARGS += -nc
 VLOGAN_ARGS += $(VCS_ARGS) -timescale=1ps/1ps -assert svaext
 
 .PHONY: vsim/compile.tcl
-vsim/compile.tcl: bender
+vsim/compile.tcl: bender test/remote_bitbang/librbs.so
 	echo 'set ROOT [file normalize [file dirname [info script]]/..]' > $@
 	./bender script vsim \
 		--vlog-arg="$(VLOG_ARGS)" \
@@ -14,7 +14,7 @@ vsim/compile.tcl: bender
 		| grep -v "set ROOT" >> $@
 
 .PHONY: vcs/compile.sh
-vcs/compile.sh: bender
+vcs/compile.sh: bender test/remote_bitbang/librbs.so
 	./bender script vcs \
 		--vlogan-bin="$(VCS) vlogan" \
 		--vhdlan-bin="$(VCS) vhdlan" \
@@ -32,3 +32,6 @@ bender: Makefile
 	curl --proto '=https' --tlsv1.2 -sSf https://iis-people.ee.ethz.ch/~andkurt/bender-init \
 		| bash -s -- 0.16.0
 	touch bender
+
+test/remote_bitbang/librbs.so: test/remote_bitbang/*.c test/remote_bitbang/*.h
+	$(MAKE) -C test/remote_bitbang all

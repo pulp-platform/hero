@@ -47,9 +47,11 @@ sources:
     files:
       # Level 0
       - src/apb/apb_stdout.sv
-      - test/riscv_pkg.sv
+      - test/SimJTAG.sv
       - test/jtag_test.sv
-      - test/dm_test.sv
+      - test/riscv_pkg.sv
       # Level 1
+      - test/dm_test.sv
+      # Level 2
       - test/pulp_tb.sv
       # - test/debug_system_tb.sv

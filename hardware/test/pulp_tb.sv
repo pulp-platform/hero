@@ -18,7 +18,11 @@
 module pulp_tb #(
   // TB Parameters
   parameter time          CLK_PERIOD = 1000ps,
-  parameter bit           RUN_DM_TESTS = 0,
+  parameter string        RUN_CUSTOM_TESTS = "none",
+                          // "none"    - run regular testbench
+                          // "dm"      - run SystemVerilog debug module testbench
+                          // "openocd" - run OpenOCD compliance tests
+  parameter int unsigned  OPENOCD_PORT = 9999,
   // SoC Parameters
   parameter int unsigned  N_CLUSTERS = 1,
   parameter int unsigned  AXI_DW = 64,
@@ -73,6 +77,15 @@ module pulp_tb #(
   logic jtag_tdi;
   logic jtag_tms;
   logic jtag_tdo;
+
+  // jtag openocd bridge signals
+  logic         sim_jtag_tck;
+  logic         sim_jtag_tms;
+  logic         sim_jtag_tdi;
+  logic         sim_jtag_trst_n;
+  logic         sim_jtag_tdo;
+  logic [31:0]  sim_jtag_exit;
+  logic         sim_jtag_enable;
 
   clk_rst_gen #(
     .CLK_PERIOD     (CLK_PERIOD),
@@ -207,6 +220,10 @@ module pulp_tb #(
     .test_en_i  ('0),
     .axi        (to_periphs)
   );
+
+  initial begin: timing_format
+    $timeformat(-9, 0, "ns", 9);
+  end: timing_format
 
   // Emulate infinite memory with AXI slave port.
   initial begin
@@ -373,27 +390,54 @@ module pulp_tb #(
     automatic logic error;
     automatic int unsigned return_val;
 
+    sim_jtag_enable = 1'b0;
+
     cl_fetch_en = '0;
     to_pulp_req = '0;
     // Wait for reset.
     wait (rst_n);
     @(posedge clk);
+    // wait for the reset to propagate through the reset synchronizer in debug_system
+    for (int i = 0; i < 10; i++)
+      @(posedge clk);
+
+    // run openocd tests instead of regular software tests
+    if (RUN_CUSTOM_TESTS == "openocd") begin //TODO: make this plusargs
+    `ifndef USE_JTAG_DPI
+      $fatal(1, "JTAG DPI support was not compiled in. Add +define+USE_JTAG_DPI to VLOG_ARGS.");
+    `endif
+      // disable icache (not needed, already default)
+      write_axi(32'h1020_1400, 128'h00000000_00000000_00000000_00000000);
+
+      // TODO: make core loop on boot addr. We don't have a bootrom so we assume
+      // the user initialized the ram already somehow
+      write_axi(32'h1c00_0080, 128'h00000000_00000000_00000000_0000006f);
+
+      // enable jtag bridge. The dpi model will start blocking on the first jtag clock tick
+      sim_jtag_enable = 1'b1;
+      // Start cluster 0.
+      cl_fetch_en[0] = 1'b1;
+    end
 
     // run dm tests instead of regular software tests
-    if (RUN_DM_TESTS) begin
-      // TODO: multiple write_axi seem to get stuck.
+    if (RUN_CUSTOM_TESTS == "dm") begin
       // make cores loop on boot addr
-      // disable icache for debug module test
-      // write_axi(32'h1020_1400, 128'h00000000_00000000_00000000_00000000);
-      // 1c008080
-      //write_axi(32'h1c00_8080, 128'h00000000_00000000_00000000_1c008080);
-      // enable all cores (TODO: what to do when multiple clusters)
-      //write_axi(32'h1020_0008, 128'h00000000_000000ff_00000000_00000000);
-      // TODO: remove this workaround when write_axi is fixed
-      write_axi(32'h1020_0008, 64'h00000000_00000001);
 
-      dm_if.run_dm_tests(N_CLUSTERS, pulp_cluster_cfg_pkg::N_CORES, error,
+      // disable icache for debug module test
+      write_axi(32'h1020_1400, 128'h00000000_00000000_00000000_00000000);
+      // loop forever on entry
+      write_axi(32'h1c00_0080, 128'h00000000_00000000_00000000_0000006f);
+      //// enable all cores (TODO: what to do when multiple clusters)
+      write_axi(32'h1020_0008, 128'h00000000_000000ff_00000000_00000000);
+      // let core 0 go
+      // write_axi(32'h1020_0008, 128'h00000000_00000001_00000000_00000000);
+
+      // dm_if.run_dm_tests(N_CLUSTERS, pulp_cluster_cfg_pkg::N_CORES, error,
+      //                      jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+      // just run tests on core0 otherwise we wait all day
+      dm_if.run_dm_tests(N_CLUSTERS, 1, error,
                            jtag_tck, jtag_tms, jtag_trst_n, jtag_tdi, jtag_tdo);
+
       $finish();
     end
 
@@ -460,5 +504,31 @@ module pulp_tb #(
         |-> dut.cl_oup[iCluster].b_resp != 2'b11)
       else $warning("B resp decode error at cl_oup[%01d]", iCluster);
   end
+
+`ifdef USE_JTAG_DPI
+  // JTAG DPI bridge
+  SimJTAG #(
+    .TICK_DELAY (1),
+    .PORT       (OPENOCD_PORT)
+  ) i_sim_jtag (
+    .clock           ( clk             ),
+    .reset           ( ~rst_n          ),
+    .enable          ( sim_jtag_enable ),
+    .init_done       ( rst_n           ),
+    .jtag_TCK        ( sim_jtag_tck    ),
+    .jtag_TMS        ( sim_jtag_tms    ),
+    .jtag_TDI        ( sim_jtag_tdi    ),
+    .jtag_TRSTn      ( sim_jtag_trst_n ),
+    .jtag_TDO_data   ( sim_jtag_tdo    ),
+    .jtag_TDO_driven ( 1'b1            ),
+    .exit            ( sim_jtag_exit   ) //TODO: abort simulation
+  );
+
+  assign jtag_tck = sim_jtag_tck;
+  assign jtag_trst_n = sim_jtag_trst_n;
+  assign jtag_tdi = sim_jtag_tdi;
+  assign jtag_tms = sim_jtag_tms;
+  assign sim_jtag_tdo = jtag_tdo;
+`endif
 
 endmodule

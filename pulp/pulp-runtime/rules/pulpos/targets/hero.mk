@@ -61,11 +61,20 @@ $(TARGET_BUILD_DIR)/modelsim.ini:
 $(TARGET_BUILD_DIR)/run_pulp_runtime.tcl:
 	ln -s $(VSIM_PATH)/run_pulp_runtime.tcl $@
 
+$(TARGET_BUILD_DIR)/run_common_pre.tcl:
+	ln -s $(VSIM_PATH)/run_common_pre.tcl $@
+
+$(TARGET_BUILD_DIR)/run_common_post.tcl:
+	ln -s $(VSIM_PATH)/run_common_post.tcl $@
+
 $(TARGET_BUILD_DIR)/compile.tcl:
 	ln -s $(VSIM_PATH)/compile.tcl $@
 
 $(TARGET_BUILD_DIR)/start_sim_pulp_runtime.sh:
 	ln -s $(VSIM_PATH)/start_sim_pulp_runtime.sh $@
+
+$(TARGET_BUILD_DIR)/sim_common_post.sh:
+	ln -s $(VSIM_PATH)/sim_common_post.sh $@
 
 $(TARGET_BUILD_DIR)/compile.sh:
 	ln -s $(VSIM_PATH)/compile.sh $@
@@ -79,6 +88,8 @@ $(TARGET_BUILD_DIR)/pulp_tb.wave.do:
 
 run: $(TARGETS) $(TARGET_BUILD_DIR)/modelsim.ini $(TARGET_BUILD_DIR)/run_pulp_runtime.tcl \
 	$(TARGET_BUILD_DIR)/compile.tcl  $(TARGET_BUILD_DIR)/start_sim_pulp_runtime.sh \
+	$(TARGET_BUILD_DIR)/sim_common_post.sh $(TARGET_BUILD_DIR)/run_common_pre.tcl \
+	$(TARGET_BUILD_DIR)/run_common_post.tcl \
 	$(TARGET_BUILD_DIR)/compile.sh $(TARGET_BUILD_DIR)/pulp_tb.wave.do \
 	$(TARGET_BUILD_DIR)/work
 # Create L1 SLM

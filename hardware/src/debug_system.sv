@@ -24,6 +24,7 @@ module debug_system #(
   input logic  clk_i,
   input logic  rst_ni,
   input logic  test_en_i,
+  output logic ndmreset_no,
   // JTAG
   input logic  jtag_tck_i,
   input logic  jtag_trst_ni,
@@ -69,6 +70,8 @@ module debug_system #(
   logic                   dmi_resp_ready;
   logic                   dmi_resp_valid;
 
+  // non-debug moduel reset
+  logic                   ndmreset;
   // we assume the following hartspace:
   // logic [5:0] cluster_id = 0...N_CLUSTERS-1
   // logic [3:0] core_id = 0...N_CORES-1
@@ -133,7 +136,7 @@ module debug_system #(
     .REGISTERED_GRANT   ("FALSE")           // "TRUE"|"FALSE"
   ) i_debug_core2axi (
     .clk_i,
-    .rst_ni,
+    .rst_ni                (ndmreset_no),
     .data_req_i            (system_bus_req),
     .data_gnt_o            (system_bus_gnt),
     .data_rvalid_o         (system_bus_r_valid),
@@ -203,7 +206,7 @@ module debug_system #(
     .AXI_ID_WIDTH         (AXI_IW)
   ) i_debug_axi_tcdm_if (
     .clk_i,
-    .rst_ni,
+    .rst_ni                (ndmreset_no),
     .slave                 (dm_slave),
 
     .tcdm_master_req_o     (tcdm_slave_req),
@@ -250,7 +253,7 @@ module debug_system #(
     .clk_i,
     .rst_ni,
     .testmode_i        (test_en_i),
-    .ndmreset_o        (), // TODO: allow global reset
+    .ndmreset_o        (ndmreset),
     .dmactive_o        (), // active debug session
     .debug_req_o       (core_debug_req_o),
     .unavailable_i     (~SELECTABLE_HARTS),
@@ -290,5 +293,14 @@ module debug_system #(
       tcdm_slave_r_valid <= tcdm_slave_gnt;
     end
   end
+
+  // generate clean system reset signal
+  rstgen i_rstgen_main (
+    .clk_i        (clk_i),
+    .rst_ni       (rst_ni & (~ndmreset)),
+    .test_mode_i  (test_en_i),
+    .rst_no       (ndmreset_no),
+    .init_no      () // keep open
+  );
 
 endmodule // debug_system
