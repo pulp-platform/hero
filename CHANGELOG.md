@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     bus (at address `0x1B00_....`).
   - Reduce maximum size of a DMA burst to 128 B.
   - Reduce maximum number of in-flight DMA transactions to 16.
+- `soc_bus`: Assign a single, contiguous address region to external port (to host), map all holes in
+  the address map of this bus to the error slave.
 
 ### Fixed
 - `pulp_tb`: Tie unused `ext_evt_*_i` off.
