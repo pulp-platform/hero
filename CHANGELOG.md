@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Virtual Platform: Fix changed address of SoC peripherals in Boot ROM.
 
 
 ## 2020-04-15
