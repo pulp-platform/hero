@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
   n_errors += report_n_errors(test_floats, "floating-point calculations");
   n_errors += report_n_errors(test_atomic, "atomic memory accesses");
   n_errors += report_n_errors(test_intrinsics, "PULP intrinsics");
+  n_errors += report_n_errors(test_memory, "various memory ranges");
 
   n_errors += report_pass_fail(
       gcc_omp_parallel_for_schedule_static,
