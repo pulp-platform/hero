@@ -1011,7 +1011,7 @@ add wave -noupdate -group {dma[0]/ext_master} {/pulp_tb/dut/gen_clusters[0]/gen_
 add wave -noupdate -group {dma[0]/ext_master} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/dmac_wrap_i/ext_master/r_valid}
 add wave -noupdate -group {dma[0]/ext_master} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/dmac_wrap_i/ext_master/r_ready}
 set i 0
-foreach grp [list EOC TIMER EVENTU EVENTU2 HWPE ICACHE_CTRL DMA EXT] {
+foreach grp [list EOC TIMER EVENTU EVENTU2 HWPE ICACHE_CTRL DMA EXT ERROR] {
     foreach sig [list req add wen wdata be gnt id r_valid r_opc r_id r_rdata] {
         add wave -noupdate -group [format "speriph_master\[%s\]" $grp] \
             /pulp_tb/dut/gen_clusters\[0\]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master\[$i\]/$sig
