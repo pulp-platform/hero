@@ -1010,13 +1010,11 @@ add wave -noupdate -group {dma[0]/ext_master} {/pulp_tb/dut/gen_clusters[0]/gen_
 add wave -noupdate -group {dma[0]/ext_master} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/dmac_wrap_i/ext_master/r_user}
 add wave -noupdate -group {dma[0]/ext_master} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/dmac_wrap_i/ext_master/r_valid}
 add wave -noupdate -group {dma[0]/ext_master} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/dmac_wrap_i/ext_master/r_ready}
-set i 0
-foreach grp [list EOC TIMER EVENTU EVENTU2 HWPE ICACHE_CTRL DMA EXT ERROR] {
+foreach {grp idx} [list EOC 0 TIMER 1 EVENTU 2 ICACHE_CTRL 5 DMA 6 EXT 7 ERROR 8] {
     foreach sig [list req add wen wdata be gnt id r_valid r_opc r_id r_rdata] {
         add wave -noupdate -group [format "speriph_master\[%s\]" $grp] \
-            /pulp_tb/dut/gen_clusters\[0\]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master\[$i\]/$sig
+            /pulp_tb/dut/gen_clusters\[0\]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/speriph_master\[$idx\]/$sig
     }
-    incr i
 }
 add wave -noupdate -group {core_periph_slave[0]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[0]/req}
 add wave -noupdate -group {core_periph_slave[0]} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/cluster_interconnect_wrap_i/core_periph_slave[0]/gnt}
