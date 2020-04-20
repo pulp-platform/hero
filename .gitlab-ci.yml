@@ -34,6 +34,15 @@ stages:
   - build_toolchain
   - build_test_rest
 
+lint_whitespace:
+  stage: build_toolchain
+  script:
+    - git config --local core.whitespace 'blank-at-eol,space-before-tab,-indent-with-non-tab,
+        -tab-in-indent,blank-at-eof,-cr-at-eol'
+    - git diff --check origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+
 build_test_archive:
   stage: build_test_rest
   script:
