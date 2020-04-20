@@ -133,9 +133,6 @@ module cluster_peripherals
   logic                           err_r_valid_q;
   logic [$clog2(NB_SPERIPHS)-1:0] err_r_id_q;
 
-  // internal speriph bus to combine multiple plugs to new event unit
-  XBAR_PERIPH_BUS speriph_slave_eu_comb();
-  
   // decide between common or core-specific event sources
   generate
     for (genvar I=0; I<NB_CORES; I++) begin
@@ -200,30 +197,14 @@ module cluster_peripherals
   //******************** NEW EVENT UNIT ********************
   //********************************************************
 
-  // combine number of required slave ports for event unit
-  generate
-    for (genvar I = 0; I < NB_SPERIPH_PLUGS_EU; I++ ) begin
-      assign speriph_slave[SPER_EVENT_U_ID+I].gnt     = speriph_slave_eu_comb.gnt;
-      assign speriph_slave[SPER_EVENT_U_ID+I].r_valid = speriph_slave_eu_comb.r_valid;
-      assign speriph_slave[SPER_EVENT_U_ID+I].r_opc   = speriph_slave_eu_comb.r_opc;
-      assign speriph_slave[SPER_EVENT_U_ID+I].r_id    = speriph_slave_eu_comb.r_id;
-      assign speriph_slave[SPER_EVENT_U_ID+I].r_rdata = speriph_slave_eu_comb.r_rdata;
-      assign eu_speriph_plug_req[I]   = speriph_slave[SPER_EVENT_U_ID+I].req;
-      assign eu_speriph_plug_add[I]   = speriph_slave[SPER_EVENT_U_ID+I].add;
-      assign eu_speriph_plug_wen[I]   = speriph_slave[SPER_EVENT_U_ID+I].wen;
-      assign eu_speriph_plug_wdata[I] = speriph_slave[SPER_EVENT_U_ID+I].wdata;
-      assign eu_speriph_plug_be[I]    = speriph_slave[SPER_EVENT_U_ID+I].be;
-      assign eu_speriph_plug_id[I]    = speriph_slave[SPER_EVENT_U_ID+I].id;
-    end
-  endgenerate
-
-  assign speriph_slave_eu_comb.req   = |eu_speriph_plug_req;
-  assign speriph_slave_eu_comb.add   = (eu_speriph_plug_req == 2'b10) ? eu_speriph_plug_add[1]   : eu_speriph_plug_add[0];
-  assign speriph_slave_eu_comb.wen   = (eu_speriph_plug_req == 2'b10) ? eu_speriph_plug_wen[1]   : eu_speriph_plug_wen[0];
-  assign speriph_slave_eu_comb.wdata = (eu_speriph_plug_req == 2'b10) ? eu_speriph_plug_wdata[1] : eu_speriph_plug_wdata[0];
-  assign speriph_slave_eu_comb.be    = (eu_speriph_plug_req == 2'b10) ? eu_speriph_plug_be[1]    : eu_speriph_plug_be[0];
-  assign speriph_slave_eu_comb.id    = (eu_speriph_plug_req == 2'b10) ? eu_speriph_plug_id[1]    : eu_speriph_plug_id[0];
-
+  // Tie physically unused event unit plugs off (all multiplexed to first plug).
+  for (genvar i = 1; i < NB_SPERIPH_PLUGS_EU; i++) begin : gen_eu_unused_tie_off
+    assign speriph_slave[i+SPER_EVENT_U_ID].gnt = 1'b0;
+    assign speriph_slave[i+SPER_EVENT_U_ID].r_valid = 1'b0;
+    assign speriph_slave[i+SPER_EVENT_U_ID].r_id = '0;
+    assign speriph_slave[i+SPER_EVENT_U_ID].r_rdata = 32'hDEADB33F;
+    assign speriph_slave[i+SPER_EVENT_U_ID].r_opc = 1'b0;
+  end
 
   event_unit_top #(
     .NB_CORES     ( NB_CORES   ),
@@ -257,7 +238,7 @@ module cluster_peripherals
     .core_busy_i            ( core_busy_i            ),
     .core_clock_en_o        ( core_clk_en_o          ),
     
-    .speriph_slave          ( speriph_slave_eu_comb  ),
+    .speriph_slave          ( speriph_slave[SPER_EVENT_U_ID] ),
     .eu_direct_link         ( core_eu_direct_link    ),
     
     .soc_periph_evt_valid_i ( soc_periph_evt_valid_i ),
