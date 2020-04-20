@@ -130,6 +130,9 @@ module cluster_peripherals
   logic soc_periph_evt_valid, soc_periph_evt_ready;
   logic [7:0] soc_periph_evt_data;
    
+  logic                           err_r_valid_q;
+  logic [$clog2(NB_SPERIPHS)-1:0] err_r_id_q;
+
   // internal speriph bus to combine multiple plugs to new event unit
   XBAR_PERIPH_BUS speriph_slave_eu_comb();
   
@@ -299,8 +302,22 @@ module cluster_peripherals
     assign speriph_slave[SPER_ERROR_ID].gnt     = 1'b1;
     assign speriph_slave[SPER_ERROR_ID].r_rdata = 32'hBADCAB7E;
     assign speriph_slave[SPER_ERROR_ID].r_opc   = '0;
-    assign speriph_slave[SPER_ERROR_ID].r_id    = '0;
-    assign speriph_slave[SPER_ERROR_ID].r_valid = 1'b1;
+    assign speriph_slave[SPER_ERROR_ID].r_id    = err_r_id_q;
+    assign speriph_slave[SPER_ERROR_ID].r_valid = err_r_valid_q;
+
+    always_ff @(posedge clk_i, negedge rst_ni) begin
+      if (!rst_ni) begin
+        err_r_id_q <= '0;
+        err_r_valid_q <= 1'b0;
+      end else begin
+        if (speriph_slave[SPER_ERROR_ID].req) begin
+          err_r_id_q <= speriph_slave[SPER_ERROR_ID].id;
+          err_r_valid_q <= 1'b1;
+        end else begin
+          err_r_valid_q <= 1'b0;
+        end
+      end
+    end
 
   if (!FEATURE_DEMUX_MAPPED) begin : gen_eu_not_demux_mapped
     for (genvar i=0;i< NB_CORES; i++) begin : gen_eu_not_demux_mapped_cores
