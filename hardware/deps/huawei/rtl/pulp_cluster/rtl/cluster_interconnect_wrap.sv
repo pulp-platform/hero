@@ -294,11 +294,12 @@ module cluster_interconnect_wrap
         // decode peripheral to access
         pe_idx = addr[PE_ROUTING_MSB:PE_ROUTING_LSB];
         if (addr[23:20] == 4'h2 && addr[19:PE_ROUTING_MSB+1] == '0 && pe_idx < NB_SPERIPHS) begin
-          import pulp_cluster_package::SPER_EVENT_U_ID;
-          import pulp_cluster_package::NB_SPERIPH_PLUGS_EU;
-          if (pe_idx >= SPER_EVENT_U_ID && pe_idx < SPER_EVENT_U_ID + NB_SPERIPH_PLUGS_EU) begin
+          if (pe_idx >= pulp_cluster_package::SPER_EVENT_U_ID &&
+              pe_idx < pulp_cluster_package::SPER_EVENT_U_ID
+                        + pulp_cluster_package::NB_SPERIPH_PLUGS_EU
+          ) begin
             // Index is in event unit range, so return unified event unit port.
-            return SPER_EVENT_U_ID;
+            return pulp_cluster_package::SPER_EVENT_U_ID;
           end else if (!HWPE_PRESENT && pe_idx == pulp_cluster_package::SPER_HWPE_ID) begin
             // Decode non-present HWPE to error slave.
             return PE_IDX_ERR;
