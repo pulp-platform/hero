@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     on two ports of the peripheral interconnect upon an access to one of the ports.  This has been
     changed so that all event unit addresses on the peripheral interconnect are decoded to the first
     port and the second port is tied off.
+  - Decode accesses to non-present HWPE to the error slave so they properly return errors instead of
+    never handling requests.
 
 
 ## 2020-04-15

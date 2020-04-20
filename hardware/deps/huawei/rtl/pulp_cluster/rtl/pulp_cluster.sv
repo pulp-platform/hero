@@ -721,6 +721,7 @@ module pulp_cluster
   cluster_interconnect_wrap #(
     .NB_CORES           ( NB_CORES           ),
     .NB_HWPE_PORTS      ( NB_HWPE_PORTS      ),
+    .HWPE_PRESENT       ( HWPE_PRESENT       ),
     .NB_DMAS            ( NB_DMAS            ),
     .NB_EXT             ( NB_EXT2MEM         ),
     .NB_MPERIPHS        ( NB_MPERIPHS        ),

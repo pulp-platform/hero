@@ -60,8 +60,8 @@ unsigned test_memory()
   n_errors += condition_or_printf(*err_periph == 0xBADCAB7E,
       "Peripheral out-of-range did not return error");
 
-  volatile uint32_t* const err_periph = (volatile uint32_t*)0x10201000;
-  n_errors += condition_or_printf(*err_periph == 0xBADCAB7E,
+  volatile uint32_t* const hwpe_periph = (volatile uint32_t*)0x10201000;
+  n_errors += condition_or_printf(*hwpe_periph == 0xBADCAB7E,
       "Disabled HWPE did not return error");
 
   printf("Memory access tests completed.\n");

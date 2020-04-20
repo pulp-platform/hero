@@ -20,6 +20,7 @@ module cluster_interconnect_wrap
 #(
   parameter NB_CORES        = 8,
   parameter NB_HWPE_PORTS   = 4,
+  parameter bit HWPE_PRESENT = 1'b1,
   parameter NB_DMAS         = 4,
   parameter NB_EXT          = 4,
   parameter NB_MPERIPHS     = 1,
@@ -298,6 +299,9 @@ module cluster_interconnect_wrap
           if (pe_idx >= SPER_EVENT_U_ID && pe_idx < SPER_EVENT_U_ID + NB_SPERIPH_PLUGS_EU) begin
             // Index is in event unit range, so return unified event unit port.
             return SPER_EVENT_U_ID;
+          end else if (!HWPE_PRESENT && pe_idx == pulp_cluster_package::SPER_HWPE_ID) begin
+            // Decode non-present HWPE to error slave.
+            return PE_IDX_ERR;
           end else begin
             // Return index of other peripheral.
             return pe_idx;
