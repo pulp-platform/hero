@@ -21,6 +21,7 @@ unsigned test_atomic();
 unsigned test_dma();
 unsigned test_floats();
 unsigned test_m_instrs();
+unsigned test_memory();
 unsigned test_intrinsics();
 
 int test_omp_atomic();
