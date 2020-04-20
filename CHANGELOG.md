@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Virtual Platform: Fix changed address of SoC peripherals in Boot ROM.
+- `pulp_cluster`: Fix signal assignments when there is no `priv_icache`.
 
 
 ## 2020-04-15

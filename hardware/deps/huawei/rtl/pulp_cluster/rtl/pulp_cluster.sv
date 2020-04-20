@@ -1123,11 +1123,15 @@ module pulp_cluster
       assign IC_ctrl_unit_bus_pri[i].ctrl_hit_count = '0;
       assign IC_ctrl_unit_bus_pri[i].ctrl_trans_count = '0;
       assign IC_ctrl_unit_bus_pri[i].ctrl_miss_count = '0;
+      assign IC_ctrl_unit_bus_pri[i].ctrl_cong_count = '0;
+      assign IC_ctrl_unit_bus_pri[i].sel_flush_ack = 1'b0;
     end
     for (genvar i = 0; i < NB_CACHE_BANKS; i++) begin : gen_banks
-      assign IC_ctrl_unit_bus_main[i].flush_ack = 1'b0;
+      assign IC_ctrl_unit_bus_main[i].ctrl_flush_ack = 1'b0;
       assign IC_ctrl_unit_bus_main[i].ctrl_ack_enable = 1'b0;
+      assign IC_ctrl_unit_bus_main[i].ctrl_ack_disable = 1'b0;
       assign IC_ctrl_unit_bus_main[i].ctrl_pending_trans = 1'b0;
+      assign IC_ctrl_unit_bus_main[i].sel_flush_ack = 1'b0;
       assign IC_ctrl_unit_bus_main[i].ctrl_hit_count = '0;
       assign IC_ctrl_unit_bus_main[i].ctrl_trans_count = '0;
       assign IC_ctrl_unit_bus_main[i].ctrl_miss_count = '0;
