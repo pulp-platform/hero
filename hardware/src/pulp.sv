@@ -111,7 +111,13 @@ module pulp #(
   input  logic                  jtag_trst_ni,
   input  logic                  jtag_tdi_i,
   input  logic                  jtag_tms_i,
-  output logic                  jtag_tdo_o
+  output logic                  jtag_tdo_o,
+
+  // DFT (no direction suffixes due to customer request)
+  input  logic [25:0]           mem_ctrl,
+  input  logic                  dft_ram_gt_se,
+  input  logic                  dft_ram_bypass,
+  input  logic                  dft_ram_bp_clk_en
 );
 
   // Derived Constants
