@@ -350,6 +350,10 @@ module pulp #(
         .ext_evt_1_i,
         .ext_evt_2_i,
         .ext_evt_3_i,
+        .mem_ctrl,
+        .dft_ram_gt_se,
+        .dft_ram_bypass,
+        .dft_ram_bp_clk_en,
         .slv          (cl_inp_async[i]),
         .mst          (cl_oup_async[i])
       );
@@ -385,6 +389,10 @@ module pulp #(
         .ext_evt_1_i,
         .ext_evt_2_i,
         .ext_evt_3_i,
+        .mem_ctrl,
+        .dft_ram_gt_se,
+        .dft_ram_bypass,
+        .dft_ram_bp_clk_en,
         .slv          (cl_inp_dwced[i]),
         .mst          (cl_oup_prefilter[i])
       );
