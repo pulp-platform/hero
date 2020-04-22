@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     never handling requests.
   - `per2axi`: Fix handshake on `per_slave` port that could cause transactions to be lost.
 
+### Removed
+- `pulp_cluster`: `rstgen` has been removed from the synchronous cluster.
+
 
 ## 2020-04-15
 ### Added

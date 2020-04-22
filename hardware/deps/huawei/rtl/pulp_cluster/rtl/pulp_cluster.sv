@@ -543,13 +543,19 @@ module pulp_cluster
   logic [NB_CORES-1:0][APU_NUSFLAGS_CPU-1:0]    s_apu_master_rflags;
 
   /* reset generator */
-  rstgen rstgen_i (
-    .clk_i      ( clk_i       ),
-    .rst_ni     ( rst_ni      ),
-    .test_mode_i( test_mode_i ),
-    .rst_no     ( s_rst_n     ),
-    .init_no    ( s_init_n    )
-  );
+  if (ASYNC_INTF) begin : gen_rstgen
+    rstgen rstgen_i (
+      .clk_i      ( clk_i       ),
+      .rst_ni     ( rst_ni      ),
+      .test_mode_i( test_mode_i ),
+      .rst_no     ( s_rst_n     ),
+      .init_no    ( s_init_n    )
+    );
+  end else begin : gen_no_rstgen
+    // The reset is synchronized outside the cluster.
+    assign s_rst_n = rst_ni;
+    assign s_init_n = rst_ni;
+  end
 
   /* fetch & busy genertion */
   assign s_cluster_int_busy = s_cluster_periphs_busy | s_per2axi_busy | s_axi2per_busy | s_axi_to_mem_busy | s_dmac_busy | s_hwpe_busy;
