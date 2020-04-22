@@ -56,7 +56,7 @@ module register_file_1r_1w
     localparam    NUM_WORDS = 2**ADDR_WIDTH;
 
     // Read address register, located at the input of the address decoder
-    logic [ADDR_WIDTH-1:0]                        RAddrRegxDP; 
+    logic [ADDR_WIDTH-1:0]                        RAddrRegxDP;
     logic [NUM_WORDS-1:0]                         RAddrOneHotxD;
 
 
@@ -97,7 +97,7 @@ module register_file_1r_1w
 
     //-----------------------------------------------------------------------------
     //-- READ : Read address decoder RAD
-    //-----------------------------------------------------------------------------  
+    //-----------------------------------------------------------------------------
     always_comb
     begin : p_RAD
         RAddrOneHotxD = '0;
@@ -138,7 +138,7 @@ module register_file_1r_1w
 
     //-----------------------------------------------------------------------------
     // WRITE : SAMPLE INPUT DATA
-    //---------------------------------------------------------------------------  
+    //---------------------------------------------------------------------------
     always_ff @(posedge clk)
     begin : sample_waddr
         if(WriteEnable)
@@ -148,7 +148,7 @@ module register_file_1r_1w
 
     //-----------------------------------------------------------------------------
     //-- WRITE : Write operation
-    //-----------------------------------------------------------------------------  
+    //-----------------------------------------------------------------------------
     //-- Generate M = WORDS sequential processes, each of which describes one
     //-- word of the memory. The processes are synchronized with the clocks
     //-- ClocksxC(i), i = 0, 1, ..., M-1
