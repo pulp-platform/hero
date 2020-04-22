@@ -542,7 +542,7 @@ module pulp #(
   ) i_debug_system (
     .clk_i,
     .rst_ni,
-    .test_en_i        ('0),
+    .test_en_i        (dft_mode),
     .ndmreset_no      (ndmreset_n),
     .jtag_tck_i,
     .jtag_trst_ni,
