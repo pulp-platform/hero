@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - `soc_bus`: Map `0x0000_0000..0x0FFF_FFFF` address region to external port (to host).
+- If `dft_mode` is set, reset can only be triggered by the `rst_ni` input and not by the `dm_top`
+  debug module.
 
 ### Fixed
 - Virtual Platform: Fix changed address of SoC peripherals in Boot ROM.

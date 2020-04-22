@@ -72,6 +72,7 @@ module debug_system #(
 
   // non-debug module reset
   logic                   ndmreset;
+  logic                   rst_n;
   // we assume the following hartspace:
   // logic [5:0] cluster_id = 0...N_CLUSTERS-1
   // logic [3:0] core_id = 0...N_CORES-1
@@ -294,10 +295,16 @@ module debug_system #(
     end
   end
 
+  always_comb begin
+    rst_n = rst_ni & (~ndmreset);
+    if (test_en_i) begin
+      rst_n = rst_ni;
+    end
+  end
   // generate clean system reset signal
   rstgen i_rstgen_main (
     .clk_i        (clk_i),
-    .rst_ni       (rst_ni & (~ndmreset)),
+    .rst_ni       (rst_n),
     .test_mode_i  (test_en_i),
     .rst_no       (ndmreset_no),
     .init_no      () // keep open
