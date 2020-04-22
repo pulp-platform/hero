@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     port and the second port is tied off.
   - Decode accesses to non-present HWPE to the error slave so they properly return errors instead of
     never handling requests.
+  - `per2axi`: Fix handshake on `per_slave` port that could cause transactions to be lost.
 
 
 ## 2020-04-15

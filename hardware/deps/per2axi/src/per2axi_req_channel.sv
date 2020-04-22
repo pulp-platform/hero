@@ -191,7 +191,7 @@ module per2axi_req_channel
      end
 
    // PERIPHERAL INTERCONNECT GRANT GENERATION
-   assign per_slave_gnt_o = axi_master_aw_ready_i && axi_master_ar_ready_i;
+   assign per_slave_gnt_o = axi_master_aw_ready_i && axi_master_ar_ready_i && axi_master_w_ready_i;
 
    always_comb begin
       if (per_slave_be_i == (1 << per_slave_add_i[1:0])) begin
