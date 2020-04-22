@@ -115,6 +115,7 @@ module pulp #(
 
   // DFT (no direction suffixes due to customer request)
   input  logic [25:0]           mem_ctrl,
+  input  logic                  dft_mode,
   input  logic                  dft_ram_gt_se,
   input  logic                  dft_ram_bypass,
   input  logic                  dft_ram_bp_clk_en
