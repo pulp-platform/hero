@@ -70,7 +70,7 @@ module debug_system #(
   logic                   dmi_resp_ready;
   logic                   dmi_resp_valid;
 
-  // non-debug moduel reset
+  // non-debug module reset
   logic                   ndmreset;
   // we assume the following hartspace:
   // logic [5:0] cluster_id = 0...N_CLUSTERS-1
