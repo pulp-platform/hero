@@ -471,7 +471,11 @@ module pulp #(
     ) i_l2_mem (
       .clk_i,
       .rst_ni (ndmreset_n),
-      .slv    (l2_mst[i])
+      .slv    (l2_mst[i]),
+      .mem_ctrl,
+      .dft_ram_gt_se,
+      .dft_ram_bypass,
+      .dft_ram_bp_clk_en
     );
   end
 
