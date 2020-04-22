@@ -298,6 +298,8 @@ module pri_icache
             .rst_n       ( rst_n        ),
          `endif
 
+            .test_en_i,
+
             // Read port
             .ReadEnable  ( DATA_rd_req_int[i]    ),
             .ReadAddr    ( DATA_addr_int         ),

@@ -41,6 +41,8 @@ module register_file_1r_1w
 (
     input  logic                                  clk,
 
+    input  logic                                  test_en_i,
+
     // Read port
     input  logic                                  ReadEnable,
     input  logic [ADDR_WIDTH-1:0]                 ReadAddr,
@@ -81,7 +83,7 @@ module register_file_1r_1w
     (
         .clk_o     ( clk_int       ),
         .en_i      ( WriteEnable   ),
-        .test_en_i ( 1'b0          ),
+        .test_en_i,
         .clk_i     ( clk           )
     );
 
@@ -130,7 +132,7 @@ module register_file_1r_1w
         (
             .clk_o     ( ClocksxC[x]      ),
             .en_i      ( WAddrOneHotxD[x] ),
-            .test_en_i ( 1'b0             ),
+            .test_en_i,
             .clk_i     ( clk_int          )
         );
     end
