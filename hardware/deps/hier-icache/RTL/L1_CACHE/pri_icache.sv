@@ -249,6 +249,7 @@ module pri_icache
          (
             .clk         ( clk          ),
             .rst_n       ( rst_n        ),
+            .test_en_i   ( test_en_i    ),
 
             // Read port
             .ren_a_i     ( TAG_rd_req_int[0][i]),

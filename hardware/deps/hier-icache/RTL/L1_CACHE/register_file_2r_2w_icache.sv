@@ -43,6 +43,8 @@ module register_file_2r_2w_icache
     input  logic                        clk,
     input  logic                        rst_n,
 
+    input  logic                        test_en_i,
+
     //Read port R1
     input  logic                        ren_a_i,
     input  logic [ADDR_WIDTH-1:0]       raddr_a_i,
@@ -102,7 +104,7 @@ module register_file_2r_2w_icache
     (
         .clk_o(clk_int),
         .en_i(we_int),
-        .test_en_i(1'b0),
+        .test_en_i,
         .clk_i(clk)
     );
 
@@ -172,7 +174,7 @@ module register_file_2r_2w_icache
         (
             .clk_o(ClocksxC[x]),
             .en_i(WAddrOneHotxDa[x] | WAddrOneHotxDb[x]),
-            .test_en_i(1'b0),
+            .test_en_i,
             .clk_i(clk_int)
         );
     end
