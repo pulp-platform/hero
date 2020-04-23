@@ -249,6 +249,7 @@ module pri_icache
          (
             .clk         ( clk          ),
             .rst_n       ( rst_n        ),
+            .test_en_i   ( test_en_i    ),
 
             // Read port
             .ren_a_i     ( TAG_rd_req_int[0][i]),
@@ -296,6 +297,8 @@ module pri_icache
          `ifdef PULP_FPGA_EMUL
             .rst_n       ( rst_n        ),
          `endif
+
+            .test_en_i,
 
             // Read port
             .ReadEnable  ( DATA_rd_req_int[i]    ),

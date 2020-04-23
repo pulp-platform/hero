@@ -18,8 +18,8 @@
 //                 Michael Gautschi                                           //
 //                 Antonio Pullini                                            //
 //                                                                            //
-// Create Date:    12/03/2015                                                 // 
-// Design Name:    scm memory multiport                                       // 
+// Create Date:    12/03/2015                                                 //
+// Design Name:    scm memory multiport                                       //
 // Module Name:    register_file_2r_2w                                        //
 // Project Name:   PULP                                                       //
 // Language:       SystemVerilog                                              //
@@ -42,6 +42,8 @@ module register_file_2r_2w_icache
     // Clock and Reset
     input  logic                        clk,
     input  logic                        rst_n,
+
+    input  logic                        test_en_i,
 
     //Read port R1
     input  logic                        ren_a_i,
@@ -67,8 +69,8 @@ module register_file_2r_2w_icache
     localparam    NUM_WORDS = 2**ADDR_WIDTH;
 
     // Read address register, located at the input of the address decoder
-    logic [ADDR_WIDTH-1:0]                         RAddrRegxDPa; 
-    logic [ADDR_WIDTH-1:0]                         RAddrRegxDPb; 
+    logic [ADDR_WIDTH-1:0]                         RAddrRegxDPa;
+    logic [ADDR_WIDTH-1:0]                         RAddrRegxDPb;
     logic [NUM_WORDS-1:0]                          RAddrOneHotxD;
 
 
@@ -102,7 +104,7 @@ module register_file_2r_2w_icache
     (
         .clk_o(clk_int),
         .en_i(we_int),
-        .test_en_i(1'b0),
+        .test_en_i,
         .clk_i(clk)
     );
 
@@ -124,7 +126,7 @@ module register_file_2r_2w_icache
 
     //-----------------------------------------------------------------------------
     //-- READ : Read address decoder RAD
-    //-----------------------------------------------------------------------------  
+    //-----------------------------------------------------------------------------
     assign rdata_a_o = MemContentxDP[RAddrRegxDPa];
     assign rdata_b_o = MemContentxDP[RAddrRegxDPb];
     // assign rdata_a_o = MemContentxDP[raddr_a_i];
@@ -157,7 +159,7 @@ module register_file_2r_2w_icache
     end
 
     always_ff @(posedge clk_int)
-    begin 
+    begin
         if(we_a_i | we_b_i)
             WAddrOneHotxDb_reg <= WAddrOneHotxDb;
     end
@@ -172,7 +174,7 @@ module register_file_2r_2w_icache
         (
             .clk_o(ClocksxC[x]),
             .en_i(WAddrOneHotxDa[x] | WAddrOneHotxDb[x]),
-            .test_en_i(1'b0),
+            .test_en_i,
             .clk_i(clk_int)
         );
     end
@@ -180,7 +182,7 @@ module register_file_2r_2w_icache
 
     //-----------------------------------------------------------------------------
     // WRITE : SAMPLE INPUT DATA
-    //---------------------------------------------------------------------------  
+    //---------------------------------------------------------------------------
     always_ff @(posedge clk)
     begin : sample_waddr
         if(we_a_i)
@@ -191,7 +193,7 @@ module register_file_2r_2w_icache
 
     //-----------------------------------------------------------------------------
     //-- WRITE : Write operation
-    //-----------------------------------------------------------------------------  
+    //-----------------------------------------------------------------------------
     //-- Generate M = WORDS sequential processes, each of which describes one
     //-- word of the memory. The processes are synchronized with the clocks
     //-- ClocksxC(i), i = 0, 1, ..., M-1

@@ -19,7 +19,13 @@ module l2_mem #(
 ) (
   input  logic  clk_i,
   input  logic  rst_ni,
-  AXI_BUS.Slave slv
+  AXI_BUS.Slave slv,
+
+  // DFT (no direction suffixes due to customer request)
+  input  logic [25:0] mem_ctrl,
+  input  logic        dft_ram_gt_se,
+  input  logic        dft_ram_bypass,
+  input  logic        dft_ram_bp_clk_en
 );
 
   // Properties of one memory cut, keep synchronized with instantiated macro.

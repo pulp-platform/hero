@@ -16,6 +16,8 @@ module register_file_1r_1w_test_wrap
 (
     input  logic                                  clk,
 
+    input  logic                                  test_en_i,
+
     // Read port
     input  logic                                  ReadEnable,
     input  logic [ADDR_WIDTH-1:0]                 ReadAddr,
@@ -77,6 +79,8 @@ module register_file_1r_1w_test_wrap
    register_file_1r_1w_i
    (
       .clk          ( clk ),
+
+      .test_en_i,
 
       .ReadEnable   ( ReadEnable_muxed  ),
       .ReadAddr     ( ReadAddr_muxed    ),

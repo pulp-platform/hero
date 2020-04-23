@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
+- Add DFT input signals `mem_ctrl`, `dft_ram_gt_se`, `dft_ram_bypass`, `dft_ram_bp_clk_en` to
+  top-level `pulp` module and propagate the inputs to all modules instantiating `sram`s.
+- Add DFT input signal `dft_mode` to top-level `pulp` module and connect it to the debug system
+  (`i_debug_system`).
+- Add DFT input signal `dft_glb_gt_se` to top-level `pulp` module and connect it to the test mode or
+  test enable pin of clock gates.
 
 ### Changed
 - `soc_bus`: Map `0x0000_0000..0x0FFF_FFFF` address region to external port (to host).
+- If `dft_mode` is set, reset can only be triggered by the `rst_ni` input and not by the `dm_top`
+  debug module.
 
 ### Fixed
 - Virtual Platform: Fix changed address of SoC peripherals in Boot ROM.
@@ -22,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Decode accesses to non-present HWPE to the error slave so they properly return errors instead of
     never handling requests.
   - `per2axi`: Fix handshake on `per_slave` port that could cause transactions to be lost.
+
+### Removed
+- `pulp_cluster`: `rstgen` has been removed from the synchronous cluster.
 
 
 ## 2020-04-15

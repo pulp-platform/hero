@@ -18,6 +18,7 @@ module pulp_cluster_ooc (
   input  logic          clk_i,
   input  logic          rst_ni,
   input  logic          ref_clk_i,
+  input  logic          test_mode_i,
   input  cluster_id_t   cluster_id_i,
   input  logic          fetch_en_i,
   output logic          eoc_o,
@@ -29,6 +30,12 @@ module pulp_cluster_ooc (
   input  logic          ext_evt_1_i,
   input  logic          ext_evt_2_i,
   input  logic          ext_evt_3_i,
+
+  // DFT (no direction suffixes due to customer request)
+  input  logic [25:0]   mem_ctrl,
+  input  logic          dft_ram_gt_se,
+  input  logic          dft_ram_bypass,
+  input  logic          dft_ram_bp_clk_en,
 
   // Slave Port
   // AW
@@ -222,7 +229,7 @@ module pulp_cluster_ooc (
 
     .pmu_mem_pwdn_i               (1'b0),
     .base_addr_i                  ('0),
-    .test_mode_i                  ('0),
+    .test_mode_i,
     .en_sa_boot_i                 ('0),
 
     .cluster_id_i,
@@ -248,6 +255,11 @@ module pulp_cluster_ooc (
     .ext_evt_1_i,
     .ext_evt_2_i,
     .ext_evt_3_i,
+
+    .mem_ctrl,
+    .dft_ram_gt_se,
+    .dft_ram_bypass,
+    .dft_ram_bp_clk_en,
 
     .data_slave_aw_addr_i         (slv_aw_addr_i),
     .data_slave_aw_prot_i         (slv_aw_prot_i),
@@ -369,6 +381,7 @@ module pulp_cluster_sync (
   input  logic        clk_i,
   input  logic        rst_ni,
   input  logic        ref_clk_i,
+  input  logic        test_mode_i,
   input  cluster_id_t cluster_id_i,
   input  logic        fetch_en_i,
   output logic        eoc_o,
@@ -378,6 +391,13 @@ module pulp_cluster_sync (
   input  logic        ext_evt_1_i,
   input  logic        ext_evt_2_i,
   input  logic        ext_evt_3_i,
+
+  // DFT (no direction suffixes due to customer request)
+  input  logic [25:0] mem_ctrl,
+  input  logic        dft_ram_gt_se,
+  input  logic        dft_ram_bypass,
+  input  logic        dft_ram_bp_clk_en,
+
   AXI_BUS.Slave       slv,
   AXI_BUS.Master      mst
 );
@@ -386,6 +406,7 @@ module pulp_cluster_sync (
     .clk_i,
     .rst_ni,
     .ref_clk_i,
+    .test_mode_i,
     .cluster_id_i,
     .fetch_en_i,
     .eoc_o,
@@ -396,6 +417,11 @@ module pulp_cluster_sync (
     .ext_evt_1_i,
     .ext_evt_2_i,
     .ext_evt_3_i,
+
+    .mem_ctrl,
+    .dft_ram_gt_se,
+    .dft_ram_bypass,
+    .dft_ram_bp_clk_en,
 
     .slv_aw_addr_i        (slv.aw_addr),
     .slv_aw_prot_i        (slv.aw_prot),
@@ -516,6 +542,7 @@ module pulp_cluster_async (
   input  logic          clk_i,
   input  logic          rst_ni,
   input  logic          ref_clk_i,
+  input  logic          test_mode_i,
   input  cluster_id_t   cluster_id_i,
   input  logic          fetch_en_i,
   output logic          eoc_o,
@@ -525,6 +552,13 @@ module pulp_cluster_async (
   input  logic          ext_evt_1_i,
   input  logic          ext_evt_2_i,
   input  logic          ext_evt_3_i,
+
+  // DFT (no direction suffixes due to customer request)
+  input  logic [25:0]   mem_ctrl,
+  input  logic          dft_ram_gt_se,
+  input  logic          dft_ram_bypass,
+  input  logic          dft_ram_bp_clk_en,
+
   AXI_BUS_ASYNC.Slave   slv,
   AXI_BUS_ASYNC.Master  mst
 );
@@ -533,6 +567,7 @@ module pulp_cluster_async (
     .clk_i,
     .rst_ni,
     .ref_clk_i,
+    .test_mode_i,
     .cluster_id_i,
     .fetch_en_i,
     .eoc_o,
@@ -543,6 +578,11 @@ module pulp_cluster_async (
     .ext_evt_1_i          (ext_evt_1_i),
     .ext_evt_2_i          (ext_evt_2_i),
     .ext_evt_3_i          (ext_evt_3_i),
+
+    .mem_ctrl,
+    .dft_ram_gt_se,
+    .dft_ram_bypass,
+    .dft_ram_bp_clk_en,
 
     .slv_aw_addr_i        (slv.aw_addr),
     .slv_aw_prot_i        (slv.aw_prot),

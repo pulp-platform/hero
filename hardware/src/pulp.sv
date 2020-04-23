@@ -111,7 +111,15 @@ module pulp #(
   input  logic                  jtag_trst_ni,
   input  logic                  jtag_tdi_i,
   input  logic                  jtag_tms_i,
-  output logic                  jtag_tdo_o
+  output logic                  jtag_tdo_o,
+
+  // DFT (no direction suffixes due to customer request)
+  input  logic [25:0]           mem_ctrl,
+  input  logic                  dft_mode,
+  input  logic                  dft_glb_gt_se,
+  input  logic                  dft_ram_gt_se,
+  input  logic                  dft_ram_bypass,
+  input  logic                  dft_ram_bp_clk_en
 );
 
   // Derived Constants
@@ -326,7 +334,7 @@ module pulp #(
       ) i_dc_slice_cl_inp (
         .clk_i,
         .rst_ni (ndmreset_n),
-        .test_cgbypass_i  (1'b0),
+        .test_cgbypass_i  (dft_glb_gt_se),
         .isolate_i        (1'b0),
         .axi_slave        (cl_inp_dwced[i]),
         .axi_master_async (cl_inp_async[i])
@@ -335,6 +343,7 @@ module pulp #(
         .clk_i,
         .rst_ni (ndmreset_n),
         .ref_clk_i    (clk_i),
+        .test_mode_i  (dft_glb_gt_se),
         .cluster_id_i (cluster_id),
         .fetch_en_i   (cl_fetch_en_i[i]),
         .eoc_o        (cl_eoc_o[i]),
@@ -344,6 +353,10 @@ module pulp #(
         .ext_evt_1_i,
         .ext_evt_2_i,
         .ext_evt_3_i,
+        .mem_ctrl,
+        .dft_ram_gt_se,
+        .dft_ram_bypass,
+        .dft_ram_bp_clk_en,
         .slv          (cl_inp_async[i]),
         .mst          (cl_oup_async[i])
       );
@@ -356,7 +369,7 @@ module pulp #(
       ) i_dc_slice_cl_oup (
         .clk_i,
         .rst_ni (ndmreset_n),
-        .test_cgbypass_i  (1'b0),
+        .test_cgbypass_i  (dft_glb_gt_se),
         .clock_down_i     (1'b0),
         .isolate_i        (1'b0),
         .incoming_req_o   (),
@@ -370,6 +383,7 @@ module pulp #(
         .clk_i,
         .rst_ni (ndmreset_n),
         .ref_clk_i    (clk_i),
+        .test_mode_i  (dft_glb_gt_se),
         .cluster_id_i (cluster_id),
         .fetch_en_i   (cl_fetch_en_i[i]),
         .eoc_o        (cl_eoc_o[i]),
@@ -379,6 +393,10 @@ module pulp #(
         .ext_evt_1_i,
         .ext_evt_2_i,
         .ext_evt_3_i,
+        .mem_ctrl,
+        .dft_ram_gt_se,
+        .dft_ram_bypass,
+        .dft_ram_bp_clk_en,
         .slv          (cl_inp_dwced[i]),
         .mst          (cl_oup_prefilter[i])
       );
@@ -465,7 +483,11 @@ module pulp #(
     ) i_l2_mem (
       .clk_i,
       .rst_ni (ndmreset_n),
-      .slv    (l2_mst[i])
+      .slv    (l2_mst[i]),
+      .mem_ctrl,
+      .dft_ram_gt_se,
+      .dft_ram_bypass,
+      .dft_ram_bp_clk_en
     );
   end
 
@@ -523,7 +545,7 @@ module pulp #(
   ) i_debug_system (
     .clk_i,
     .rst_ni,
-    .test_en_i        ('0),
+    .test_en_i        (dft_mode),
     .ndmreset_no      (ndmreset_n),
     .jtag_tck_i,
     .jtag_trst_ni,

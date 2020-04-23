@@ -41,6 +41,8 @@ module register_file_1r_1w
 (
     input  logic                                  clk,
 
+    input  logic                                  test_en_i,
+
     // Read port
     input  logic                                  ReadEnable,
     input  logic [ADDR_WIDTH-1:0]                 ReadAddr,
@@ -56,7 +58,7 @@ module register_file_1r_1w
     localparam    NUM_WORDS = 2**ADDR_WIDTH;
 
     // Read address register, located at the input of the address decoder
-    logic [ADDR_WIDTH-1:0]                        RAddrRegxDP; 
+    logic [ADDR_WIDTH-1:0]                        RAddrRegxDP;
     logic [NUM_WORDS-1:0]                         RAddrOneHotxD;
 
 
@@ -81,7 +83,7 @@ module register_file_1r_1w
     (
         .clk_o     ( clk_int       ),
         .en_i      ( WriteEnable   ),
-        .test_en_i ( 1'b0          ),
+        .test_en_i,
         .clk_i     ( clk           )
     );
 
@@ -97,7 +99,7 @@ module register_file_1r_1w
 
     //-----------------------------------------------------------------------------
     //-- READ : Read address decoder RAD
-    //-----------------------------------------------------------------------------  
+    //-----------------------------------------------------------------------------
     always_comb
     begin : p_RAD
         RAddrOneHotxD = '0;
@@ -130,7 +132,7 @@ module register_file_1r_1w
         (
             .clk_o     ( ClocksxC[x]      ),
             .en_i      ( WAddrOneHotxD[x] ),
-            .test_en_i ( 1'b0             ),
+            .test_en_i,
             .clk_i     ( clk_int          )
         );
     end
@@ -138,7 +140,7 @@ module register_file_1r_1w
 
     //-----------------------------------------------------------------------------
     // WRITE : SAMPLE INPUT DATA
-    //---------------------------------------------------------------------------  
+    //---------------------------------------------------------------------------
     always_ff @(posedge clk)
     begin : sample_waddr
         if(WriteEnable)
@@ -148,7 +150,7 @@ module register_file_1r_1w
 
     //-----------------------------------------------------------------------------
     //-- WRITE : Write operation
-    //-----------------------------------------------------------------------------  
+    //-----------------------------------------------------------------------------
     //-- Generate M = WORDS sequential processes, each of which describes one
     //-- word of the memory. The processes are synchronized with the clocks
     //-- ClocksxC(i), i = 0, 1, ..., M-1

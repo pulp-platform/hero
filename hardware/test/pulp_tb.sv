@@ -101,7 +101,15 @@ module pulp_tb #(
     .jtag_trst_ni   (jtag_trst_n),
     .jtag_tdi_i     (jtag_tdi),
     .jtag_tms_i     (jtag_tms),
-    .jtag_tdo_o     (jtag_tdo)
+    .jtag_tdo_o     (jtag_tdo),
+
+    // DFT signals tied off in this testbench.
+    .mem_ctrl           ('0),
+    .dft_mode           (1'b0),
+    .dft_glb_gt_se      (1'b0),
+    .dft_ram_gt_se      (1'b0),
+    .dft_ram_bypass     (1'b0),
+    .dft_ram_bp_clk_en  (1'b0)
   );
 
   // AXI Node for Memory (slave 0) and Peripherals (slave 1)
