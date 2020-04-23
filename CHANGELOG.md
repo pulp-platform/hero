@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   top-level `pulp` module and propagate the inputs to all modules instantiating `sram`s.
 - Add DFT input signal `dft_mode` to top-level `pulp` module and connect it to the debug system
   (`i_debug_system`).
+- Add DFT input signal `dft_glb_gt_se` to top-level `pulp` module and connect it to the test mode or
+  test enable pin of clock gates.
 
 ### Changed
 - `soc_bus`: Map `0x0000_0000..0x0FFF_FFFF` address region to external port (to host).

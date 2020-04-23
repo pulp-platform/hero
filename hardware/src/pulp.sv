@@ -116,6 +116,7 @@ module pulp #(
   // DFT (no direction suffixes due to customer request)
   input  logic [25:0]           mem_ctrl,
   input  logic                  dft_mode,
+  input  logic                  dft_glb_gt_se,
   input  logic                  dft_ram_gt_se,
   input  logic                  dft_ram_bypass,
   input  logic                  dft_ram_bp_clk_en
@@ -333,7 +334,7 @@ module pulp #(
       ) i_dc_slice_cl_inp (
         .clk_i,
         .rst_ni (ndmreset_n),
-        .test_cgbypass_i  (1'b0),
+        .test_cgbypass_i  (dft_glb_gt_se),
         .isolate_i        (1'b0),
         .axi_slave        (cl_inp_dwced[i]),
         .axi_master_async (cl_inp_async[i])
@@ -342,6 +343,7 @@ module pulp #(
         .clk_i,
         .rst_ni (ndmreset_n),
         .ref_clk_i    (clk_i),
+        .test_mode_i  (dft_glb_gt_se),
         .cluster_id_i (cluster_id),
         .fetch_en_i   (cl_fetch_en_i[i]),
         .eoc_o        (cl_eoc_o[i]),
@@ -367,7 +369,7 @@ module pulp #(
       ) i_dc_slice_cl_oup (
         .clk_i,
         .rst_ni (ndmreset_n),
-        .test_cgbypass_i  (1'b0),
+        .test_cgbypass_i  (dft_glb_gt_se),
         .clock_down_i     (1'b0),
         .isolate_i        (1'b0),
         .incoming_req_o   (),
@@ -381,6 +383,7 @@ module pulp #(
         .clk_i,
         .rst_ni (ndmreset_n),
         .ref_clk_i    (clk_i),
+        .test_mode_i  (dft_glb_gt_se),
         .cluster_id_i (cluster_id),
         .fetch_en_i   (cl_fetch_en_i[i]),
         .eoc_o        (cl_eoc_o[i]),
