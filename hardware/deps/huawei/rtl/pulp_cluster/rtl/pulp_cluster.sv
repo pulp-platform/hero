@@ -1374,7 +1374,7 @@ module pulp_cluster
     ) data_master_slice_i (
       .clk_i            ( clk_cluster         ),
       .rst_ni           ( s_rst_n             ),
-      .test_cgbypass_i  ( 1'b0                ),
+      .test_cgbypass_i  ( test_mode_i         ),
       .isolate_i        ( 1'b0                ),
       .axi_slave        ( s_data_master       ),
       .axi_master_async ( s_data_master_async )
@@ -1388,7 +1388,7 @@ module pulp_cluster
     ) data_slave_slice_i (
       .clk_i           ( clk_i              ),
       .rst_ni          ( s_rst_n            ),
-      .test_cgbypass_i ( 1'b0               ),
+      .test_cgbypass_i ( test_mode_i        ),
       .isolate_i       ( 1'b0               ),
       .clock_down_i    ( s_isolate_cluster  ),
       .incoming_req_o  ( s_incoming_req     ),
