@@ -69,13 +69,18 @@ module soc_bus #(
     .AXI_ID_WIDTH   (soc_bus_pkg::oup_id_w(N_SLAVES, AXI_IW_INP)),
     .AXI_USER_WIDTH (AXI_UW)
   ) masters [N_MASTERS-1:0]();
-//  TODO: FIXING ISSUE IN SYNTHESIS
-//  for (genvar i = 0; i < N_CLUSTERS; i++) begin: gen_bind_clusters
-    `AXI_ASSIGN(cl_mst[0], masters[0]);
-//  end
-//  for (genvar i = 0; i < L2_N_PORTS; i++) begin: gen_bind_l2
-    `AXI_ASSIGN(l2_mst[0], masters[IDX_L2_MEM]);
-//  end
+  `AXI_ASSIGN(cl_mst[0], masters[0]);
+  `AXI_ASSIGN(l2_mst[0], masters[IDX_L2_MEM]);
+  `ifndef TARGET_SYNTHESIS
+  // pragma translate_off
+  initial begin
+    assert (N_CLUSTERS == 1)
+      else $fatal(1, "Assignment hardcoded to single cluster to work around synthesis limitation!");
+    assert (L2_N_PORTS == 1)
+      else $fatal(1, "Assignment hardcoded to single L2 port to work around synthesis limitation!");
+  end
+  // pragma translate_on
+  `endif
   `AXI_ASSIGN(ext_mst, masters[IDX_EXT]);
   `AXI_ASSIGN(debug_mst, masters[IDX_DEBUG_MST]);
 
