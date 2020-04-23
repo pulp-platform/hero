@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- `soc_bus`: Map `0x0000_0000..0x0FFF_FFFF` address region to external port (to host).
 
 ### Fixed
 - Virtual Platform: Fix changed address of SoC peripherals in Boot ROM.

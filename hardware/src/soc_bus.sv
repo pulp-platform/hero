@@ -69,18 +69,23 @@ module soc_bus #(
     .AXI_ID_WIDTH   (soc_bus_pkg::oup_id_w(N_SLAVES, AXI_IW_INP)),
     .AXI_USER_WIDTH (AXI_UW)
   ) masters [N_MASTERS-1:0]();
-//  TODO: FIXING ISSUE IN SYNTHESIS
-//  for (genvar i = 0; i < N_CLUSTERS; i++) begin: gen_bind_clusters
-    `AXI_ASSIGN(cl_mst[0], masters[0]);
-//  end
-//  for (genvar i = 0; i < L2_N_PORTS; i++) begin: gen_bind_l2
-    `AXI_ASSIGN(l2_mst[0], masters[IDX_L2_MEM]);
-//  end
+  `AXI_ASSIGN(cl_mst[0], masters[0]);
+  `AXI_ASSIGN(l2_mst[0], masters[IDX_L2_MEM]);
+  `ifndef TARGET_SYNTHESIS
+  // pragma translate_off
+  initial begin
+    assert (N_CLUSTERS == 1)
+      else $fatal(1, "Assignment hardcoded to single cluster to work around synthesis limitation!");
+    assert (L2_N_PORTS == 1)
+      else $fatal(1, "Assignment hardcoded to single L2 port to work around synthesis limitation!");
+  end
+  // pragma translate_on
+  `endif
   `AXI_ASSIGN(ext_mst, masters[IDX_EXT]);
   `AXI_ASSIGN(debug_mst, masters[IDX_DEBUG_MST]);
 
   // Address Map
-  localparam int unsigned N_RULES = N_CLUSTERS + L2_N_PORTS + 2; // plus debug and host
+  localparam int unsigned N_RULES = N_CLUSTERS + L2_N_PORTS + 3; // plus debug and 2x host
   axi_pkg::xbar_rule_32_t [N_RULES-1:0] addr_map;
   // Clusters
   for (genvar i = 0; i < N_CLUSTERS; i++) begin : gen_addr_map_clusters
@@ -105,6 +110,11 @@ module soc_bus #(
     end_addr:   DEBUG_BASE_ADDR + DEBUG_N_BYTES
   };
   assign addr_map[N_CLUSTERS + L2_N_PORTS + 1] = '{
+    idx:        IDX_EXT,
+    start_addr: 32'h0000_0000,
+    end_addr:   32'h0FFF_FFFF
+  };
+  assign addr_map[N_CLUSTERS + L2_N_PORTS + 2] = '{
     idx:        IDX_EXT,
     start_addr: DEBUG_BASE_ADDR + DEBUG_N_BYTES,
     end_addr:   32'hFFFF_FFFF
