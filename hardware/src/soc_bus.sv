@@ -85,7 +85,7 @@ module soc_bus #(
   `AXI_ASSIGN(debug_mst, masters[IDX_DEBUG_MST]);
 
   // Address Map
-  localparam int unsigned N_RULES = N_CLUSTERS + L2_N_PORTS + 2; // plus debug and host
+  localparam int unsigned N_RULES = N_CLUSTERS + L2_N_PORTS + 3; // plus debug and 2x host
   axi_pkg::xbar_rule_32_t [N_RULES-1:0] addr_map;
   // Clusters
   for (genvar i = 0; i < N_CLUSTERS; i++) begin : gen_addr_map_clusters
@@ -110,6 +110,11 @@ module soc_bus #(
     end_addr:   DEBUG_BASE_ADDR + DEBUG_N_BYTES
   };
   assign addr_map[N_CLUSTERS + L2_N_PORTS + 1] = '{
+    idx:        IDX_EXT,
+    start_addr: 32'h0000_0000,
+    end_addr:   32'h0FFF_FFFF
+  };
+  assign addr_map[N_CLUSTERS + L2_N_PORTS + 2] = '{
     idx:        IDX_EXT,
     start_addr: DEBUG_BASE_ADDR + DEBUG_N_BYTES,
     end_addr:   32'hFFFF_FFFF
