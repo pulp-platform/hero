@@ -394,20 +394,16 @@ module axi_to_mem #(
   );
 
   // Compose B responses.
-  assign axi_resp_o.b = '{
-    id: meta_buf.id,
-    resp: axi_pkg::RESP_OKAY,
-    user: '0
-  };
+  assign axi_resp_o.b.id    = meta_buf.id;
+  assign axi_resp_o.b.resp  = axi_pkg::RESP_OKAY;
+  assign axi_resp_o.b.user  = '0;
 
   // Compose R responses.
-  assign axi_resp_o.r = '{
-    data: m2s_resp,
-    id: meta_buf.id,
-    last: meta_buf.last,
-    resp: axi_pkg::RESP_OKAY,
-    user: '0
-  };
+  assign axi_resp_o.r.data  = m2s_resp;
+  assign axi_resp_o.r.id    = meta_buf.id;
+  assign axi_resp_o.r.last  = meta_buf.last;
+  assign axi_resp_o.r.resp  = axi_pkg::RESP_OKAY;
+  assign axi_resp_o.r.user  = '0;
 
   // Registers
   always_ff @(posedge clk_i, negedge rst_ni) begin
