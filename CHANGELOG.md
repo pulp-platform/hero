@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Decode accesses to non-present HWPE to the error slave so they properly return errors instead of
     never handling requests.
   - `per2axi`: Fix handshake on `per_slave` port that could cause transactions to be lost.
+- `riscv`: Fix clearing of performance counter (PC) control and status registers (CSRs).
 
 ### Removed
 - `pulp_cluster`: `rstgen` has been removed from the synchronous cluster.
