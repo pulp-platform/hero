@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
+
+### Changed
+
+### Fixed
+
+
+## 2020-04-24
+### Added
 - Add DFT input signals `mem_ctrl`, `dft_ram_gt_se`, `dft_ram_bypass`, `dft_ram_bp_clk_en` to
   top-level `pulp` module and propagate the inputs to all modules instantiating `sram`s.
 - Add DFT input signal `dft_mode` to top-level `pulp` module and connect it to the debug system
