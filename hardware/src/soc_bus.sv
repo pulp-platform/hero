@@ -112,7 +112,7 @@ module soc_bus #(
   assign addr_map[N_CLUSTERS + L2_N_PORTS + 1] = '{
     idx:        IDX_EXT,
     start_addr: 32'h0000_0000,
-    end_addr:   32'h0FFF_FFFF
+    end_addr:   32'h1000_0000
   };
   assign addr_map[N_CLUSTERS + L2_N_PORTS + 2] = '{
     idx:        IDX_EXT,
