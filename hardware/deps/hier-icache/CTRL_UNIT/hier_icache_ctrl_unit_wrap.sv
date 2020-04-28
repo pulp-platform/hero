@@ -75,7 +75,7 @@ module hier_icache_ctrl_unit_wrap
          assign  IC_ctrl_unit_bus_pri_flush_ack[i]      = IC_ctrl_unit_bus_pri[i].flush_ack;
 
          assign  IC_ctrl_unit_bus_pri[i].sel_flush_req  = IC_ctrl_unit_bus_pri_sel_flush_req  [i] ;
-         assign  IC_ctrl_unit_bus_pri[i].sel_flush_addr = IC_ctrl_unit_bus_pri_sel_flush_addr [i] ;
+         assign  IC_ctrl_unit_bus_pri[i].sel_flush_addr = IC_ctrl_unit_bus_pri_sel_flush_addr ;
          assign  IC_ctrl_unit_bus_pri_sel_flush_ack[i]  = IC_ctrl_unit_bus_pri[i].sel_flush_ack;
 `ifdef FEATURE_ICACHE_STAT
          assign IC_ctrl_unit_bus_pri_L1_hit_count   [i]   = IC_ctrl_unit_bus_pri[i].ctrl_hit_count;
@@ -102,7 +102,7 @@ module hier_icache_ctrl_unit_wrap
          assign  IC_ctrl_unit_bus_main[i].icache_is_private = 1'b1;
 
          assign  IC_ctrl_unit_bus_main[i].sel_flush_req     = IC_ctrl_unit_bus_main_sel_flush_req  [i];
-         assign  IC_ctrl_unit_bus_main[i].sel_flush_addr    = IC_ctrl_unit_bus_main_sel_flush_addr [i];
+         assign  IC_ctrl_unit_bus_main[i].sel_flush_addr    = IC_ctrl_unit_bus_main_sel_flush_addr;
          assign  IC_ctrl_unit_bus_main_sel_flush_ack[i]     = IC_ctrl_unit_bus_main[i].sel_flush_ack;
 
 `ifdef FEATURE_ICACHE_STAT
