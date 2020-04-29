@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- `fpnew_pkg`: Remove enums from `typedef` source type to improve compatibility with Cadence VXE.
 
 
 ## 2020-04-24
