@@ -35,6 +35,7 @@ package fpnew_pkg;
   localparam int unsigned FP_FORMAT_BITS = $clog2(NUM_FP_FORMATS);
 
   // FP formats
+  typedef logic [FP_FORMAT_BITS-1:0] fmtbit_logic_t;
   typedef enum logic [FP_FORMAT_BITS-1:0] {
     FP32    = 'd0,
     FP64    = 'd1,
@@ -74,6 +75,7 @@ package fpnew_pkg;
   localparam int unsigned INT_FORMAT_BITS = $clog2(NUM_INT_FORMATS);
 
   // Int formats
+  typedef logic [INT_FORMAT_BITS-1:0] ifmtbit_logic_t;
   typedef enum logic [INT_FORMAT_BITS-1:0] {
     INT8,
     INT16,
@@ -100,12 +102,14 @@ package fpnew_pkg;
   localparam int unsigned NUM_OPGROUPS = 4;
 
   // Each FP operation belongs to an operation group
+  typedef logic [1:0] twobit_logic_t;
   typedef enum logic [1:0] {
     ADDMUL, DIVSQRT, NONCOMP, CONV
   } opgroup_e;
 
   localparam int unsigned OP_BITS = 4;
 
+  typedef logic [OP_BITS-1:0] opbit_logic_t;
   typedef enum logic [OP_BITS-1:0] {
     FMADD, FNMSUB, ADD, MUL,     // ADDMUL operation group
     DIV, SQRT,                   // DIVSQRT operation group
@@ -117,6 +121,7 @@ package fpnew_pkg;
   // RISC-V FP-SPECIFIC
   // -------------------
   // Rounding modes
+  typedef logic [2:0] threebit_logic_t;
   typedef enum logic [2:0] {
     RNE = 3'b000,
     RTZ = 3'b001,
@@ -180,7 +185,7 @@ package fpnew_pkg;
   } unit_type_t;
 
   // Array of unit types indexed by format
-  typedef unit_type_t [0:NUM_FP_FORMATS-1] fmt_unit_types_t;
+  typedef twobit_logic_t [0:NUM_FP_FORMATS-1] fmt_unit_types_t;
 
   // Array of format-specific unit types by opgroup
   typedef fmt_unit_types_t [0:NUM_OPGROUPS-1] opgrp_fmt_unit_types_t;
