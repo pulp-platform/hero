@@ -318,7 +318,6 @@ module pulp_cluster
   logic [NB_CORES-1:0][31:0]          boot_addr;
   logic [NB_CORES-1:0]                dbg_core_halt;
   logic [NB_CORES-1:0]                dbg_core_resume;
-  logic [NB_CORES-1:0]                dbg_core_halted;
   logic                               s_hwpe_sel;
   logic                               s_hwpe_en;
 
@@ -836,7 +835,7 @@ module pulp_cluster
     .soc_periph_evt_valid_i ( s_events_valid                     ),
     .soc_periph_evt_data_i  ( s_events_data                      ),
     .dbg_core_halt_o        ( dbg_core_halt                      ),
-    .dbg_core_halted_i      ( dbg_core_halted                    ),
+    .dbg_core_halted_i      ( '0                                 ),
     .dbg_core_resume_o      ( dbg_core_resume                    ),
     .eoc_o                  ( eoc_o                              ),
     .cluster_cg_en_o        ( s_cluster_cg_en                    ),
