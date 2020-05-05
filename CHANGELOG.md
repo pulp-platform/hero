@@ -9,10 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- `pulp_cluster`
+  - `core_region`: Remove `periph_demux`, which is no longer used.
+  - Remove `s_core_dmactrl_bus`, which is no longer used.
+  - Register `dbg_irq_valid` before synchronizer.
 
 ### Fixed
 - `fpnew_pkg`: Remove enums from `typedef` source type to improve compatibility with Cadence VXE.
 - `gf22fdx/synopsys`: Fix synthesis constraints of instruction cache.
+- `hier-icache`:
+  - Fix connection of `perf_cnt_L1[0..7`].
+  - Fix writing of `sel_flush` register.
+- `pulp_cluster`: Tie `core_halted_i` input off and remove `dbg_core_halted`, which is no longer
+  used.
 
 
 ## 2020-04-24

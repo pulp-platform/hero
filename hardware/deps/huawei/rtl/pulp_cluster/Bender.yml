@@ -34,7 +34,6 @@ sources:
   - rtl/per2axi_wrap.sv
   - rtl/per_demux_wrap.sv
   - rtl/periph_FIFO.sv
-  - rtl/periph_demux.sv
   # Level 1
   - rtl/cluster_peripherals.sv
   - rtl/core_demux.sv

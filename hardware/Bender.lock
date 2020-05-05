@@ -116,8 +116,8 @@ packages:
     dependencies:
       - common_cells
   hier-icache:
-    revision: 5e4e363a00a2dc772efbb9de4b670cb26d39acbd
-    version: 1.0.1
+    revision: e68b60b0f6ffe58c90422816e95bead91766d1f8
+    version: 1.1.0
     source:
       Git: "https://github.com/pulp-platform/hier-icache.git"
     dependencies: []

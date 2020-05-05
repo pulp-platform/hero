@@ -318,8 +318,6 @@ module pulp_cluster
   logic [NB_CORES-1:0][31:0]          boot_addr;
   logic [NB_CORES-1:0]                dbg_core_halt;
   logic [NB_CORES-1:0]                dbg_core_resume;
-  logic [NB_CORES-1:0]                dbg_core_halted;
-  logic [NB_CORES-1:0]                s_dbg_irq;
   logic                               s_hwpe_sel;
   logic                               s_hwpe_en;
 
@@ -377,6 +375,8 @@ module pulp_cluster
   logic[NB_CORES-1:0]      irq_ack;
 
   logic [NB_CORES-1:0]    s_core_dbg_irq;
+  logic [NB_CORES-1:0]    dbq_irq_valid_q;
+  logic [NB_CORES-1:0]    s_dbg_irq;
 
   logic                   s_dma_cl_event,
                           s_dma_cl_irq;
@@ -502,10 +502,6 @@ module pulp_cluster
 
   // debug
   XBAR_TCDM_BUS s_debug_bus[NB_CORES-1:0]();
-
-  /* other interfaces */
-  // cores -> DMA ctrl
-  XBAR_TCDM_BUS s_core_dmactrl_bus[NB_CORES-1:0]();
 
   // cores -> event unit ctrl
   XBAR_PERIPH_BUS s_core_euctrl_bus[NB_CORES-1:0]();
@@ -839,7 +835,7 @@ module pulp_cluster
     .soc_periph_evt_valid_i ( s_events_valid                     ),
     .soc_periph_evt_data_i  ( s_events_data                      ),
     .dbg_core_halt_o        ( dbg_core_halt                      ),
-    .dbg_core_halted_i      ( dbg_core_halted                    ),
+    .dbg_core_halted_i      ( '0                                 ),
     .dbg_core_resume_o      ( dbg_core_resume                    ),
     .eoc_o                  ( eoc_o                              ),
     .cluster_cg_en_o        ( s_cluster_cg_en                    ),
@@ -869,10 +865,17 @@ module pulp_cluster
   generate
     for (genvar i=0; i<NB_CORES; i++) begin : CORE
 
+      always_ff@(posedge clk_cluster, negedge s_rst_n) begin: dbg_irq_presync
+        if(!s_rst_n)
+          dbq_irq_valid_q[i] <= '0;
+        else
+          dbq_irq_valid_q[i] <= dbg_irq_valid_i[i];
+      end
+
       pulp_sync dbg_irq_sync (
         .clk_i(clk_cluster),
         .rstn_i(s_rst_n),
-        .serial_i(dbg_irq_valid_i[i]),
+        .serial_i(dbq_irq_valid_q[i]),
         .serial_o(s_dbg_irq[i])
       );
 
@@ -922,7 +925,6 @@ module pulp_cluster
         .addrext_i                ( '0 /* unused */           ),
         .tcdm_data_master         ( s_core_xbar_bus[i]        ),
         .tcdm_data_master_atop    ( s_core_xbar_bus_atop[i]   ),
-        .dma_ctrl_master          ( s_core_dmactrl_bus[i]     ),
         .eu_ctrl_master           ( s_core_euctrl_bus[i]      ),
         .periph_data_master       ( s_core_periph_bus[i]      ),
         .periph_data_master_atop  ( s_core_periph_bus_atop[i] ),
