@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- `pulp_cluster/core_region`: Remove `periph_demux`, which is no longer used.
 
 ### Fixed
 - `fpnew_pkg`: Remove enums from `typedef` source type to improve compatibility with Cadence VXE.
