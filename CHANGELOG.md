@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - `fpnew_pkg`: Remove enums from `typedef` source type to improve compatibility with Cadence VXE.
+- `gf22fdx/synopsys`: Fix synthesis constraints of instruction cache.
 
 
 ## 2020-04-24
