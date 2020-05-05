@@ -56,6 +56,10 @@ unsigned test_memory()
   n_errors += condition_or_printf(*dma_periph == 0,
       "Load from cluster DMA control (STATUS register) failed");
 
+  volatile uint32_t* const per2axi_periph = (volatile uint32_t*)0x10201C00;
+  n_errors += condition_or_printf(*per2axi_periph == 0xBADCAB7E,
+      "Direct access to per2axi did not return error");
+
   volatile uint32_t* const err_periph = (volatile uint32_t*)0x10270000;
   n_errors += condition_or_printf(*err_periph == 0xBADCAB7E,
       "Peripheral out-of-range did not return error");
