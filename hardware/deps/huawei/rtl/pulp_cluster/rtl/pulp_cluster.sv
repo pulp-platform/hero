@@ -319,7 +319,6 @@ module pulp_cluster
   logic [NB_CORES-1:0]                dbg_core_halt;
   logic [NB_CORES-1:0]                dbg_core_resume;
   logic [NB_CORES-1:0]                dbg_core_halted;
-  logic [NB_CORES-1:0]                s_dbg_irq;
   logic                               s_hwpe_sel;
   logic                               s_hwpe_en;
 
@@ -377,6 +376,8 @@ module pulp_cluster
   logic[NB_CORES-1:0]      irq_ack;
 
   logic [NB_CORES-1:0]    s_core_dbg_irq;
+  logic [NB_CORES-1:0]    dbq_irq_valid_q;
+  logic [NB_CORES-1:0]    s_dbg_irq;
 
   logic                   s_dma_cl_event,
                           s_dma_cl_irq;
@@ -869,10 +870,17 @@ module pulp_cluster
   generate
     for (genvar i=0; i<NB_CORES; i++) begin : CORE
 
+      always_ff@(posedge clk_cluster, negedge s_rst_n) begin: dbg_irq_presync
+        if(!s_rst_n)
+          dbq_irq_valid_q[i] <= '0;
+        else
+          dbq_irq_valid_q[i] <= dbg_irq_valid_i[i];
+      end
+
       pulp_sync dbg_irq_sync (
         .clk_i(clk_cluster),
         .rstn_i(s_rst_n),
-        .serial_i(dbg_irq_valid_i[i]),
+        .serial_i(dbq_irq_valid_q[i]),
         .serial_o(s_dbg_irq[i])
       );
 
