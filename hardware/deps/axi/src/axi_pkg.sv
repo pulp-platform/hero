@@ -248,7 +248,7 @@ package axi_pkg;
   // Ussage eg: if (req_i.aw.atop[axi_pkg::ATOP_R_RESP]) begin
   localparam ATOP_R_RESP = 32'd5;
 
-  // `xbar_latency_e` and `xbar_cfg_t` are documented in `doc/axi_xbar.md`.
+  // `xbar_latency_e` is documented in `doc/axi_xbar.md`.
   /// Slice on Demux AW channel.
   localparam logic [9:0] DemuxAw = (1 << 9);
   /// Slice on Demux W channel.
@@ -279,21 +279,6 @@ package axi_pkg;
     CUT_MST_PORTS = MuxAw | MuxW | MuxB | MuxAr | MuxR,
     CUT_ALL_PORTS = 10'b111_11_111_11
   } xbar_latency_e;
-
-  /// Configuration for `axi_xbar`.
-  typedef struct packed {
-    int unsigned   NoSlvPorts;
-    int unsigned   NoMstPorts;
-    int unsigned   MaxMstTrans;
-    int unsigned   MaxSlvTrans;
-    bit            FallThrough;
-    xbar_latency_e LatencyMode;
-    int unsigned   AxiIdWidthSlvPorts;
-    int unsigned   AxiIdUsedSlvPorts;
-    int unsigned   AxiAddrWidth;
-    int unsigned   AxiDataWidth;
-    int unsigned   NoAddrRules;
-  } xbar_cfg_t;
 
   /// Commonly used rule types for `axi_xbar` (64-bit addresses).
   typedef struct packed {

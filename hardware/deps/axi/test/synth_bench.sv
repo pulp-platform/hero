@@ -324,18 +324,6 @@ module synth_axi_lite_xbar #(
   `AXI_LITE_TYPEDEF_R_CHAN_T(r_chan_t, data_t)
   `AXI_LITE_TYPEDEF_REQ_T(req_t, aw_chan_t, w_chan_t, ar_chan_t)
   `AXI_LITE_TYPEDEF_RESP_T(resp_t, b_chan_t, r_chan_t)
-  localparam axi_pkg::xbar_cfg_t XbarCfg = '{
-    NoSlvPorts:         NoSlvMst,
-    NoMstPorts:         NoSlvMst,
-    MaxMstTrans:        32'd5,
-    MaxSlvTrans:        32'd5,
-    FallThrough:        1'b1,
-    LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-    AxiAddrWidth:       32'd32,
-    AxiDataWidth:       32'd32,
-    NoAddrRules:        NoSlvMst,
-    default:            '0
-  };
 
   axi_pkg::xbar_rule_32_t [NoSlvMst-1:0] addr_map;
   logic                                  test;
@@ -343,15 +331,23 @@ module synth_axi_lite_xbar #(
   resp_t                  [NoSlvMst-1:0] mst_resps, slv_resps;
 
   axi_lite_xbar #(
-    .Cfg       ( XbarCfg                 ),
-    .aw_chan_t ( aw_chan_t               ),
-    .w_chan_t  (  w_chan_t               ),
-    .b_chan_t  (  b_chan_t               ),
-    .ar_chan_t ( ar_chan_t               ),
-    .r_chan_t  (  r_chan_t               ),
-    .req_t     (     req_t               ),
-    .resp_t    (    resp_t               ),
-    .rule_t    ( axi_pkg::xbar_rule_32_t )
+    .NoSlvPorts   ( NoSlvMst                ),
+    .NoMstPorts   ( NoSlvMst                ),
+    .MaxMstTrans  ( 32'd5                   ),
+    .MaxSlvTrans  ( 32'd5                   ),
+    .FallThrough  ( 1'b1                    ),
+    .LatencyMode  ( axi_pkg::CUT_ALL_PORTS  ),
+    .AxiAddrWidth ( 32'd32                  ),
+    .AxiDataWidth ( 32'd32                  ),
+    .NoAddrRules  ( NoSlvMst                ),
+    .aw_chan_t    ( aw_chan_t               ),
+    .w_chan_t     (  w_chan_t               ),
+    .b_chan_t     (  b_chan_t               ),
+    .ar_chan_t    ( ar_chan_t               ),
+    .r_chan_t     (  r_chan_t               ),
+    .req_t        (     req_t               ),
+    .resp_t       (    resp_t               ),
+    .rule_t       ( axi_pkg::xbar_rule_32_t )
   ) i_xbar_dut (
     .clk_i                 ( clk_i     ),
     .rst_ni                ( rst_ni    ),
