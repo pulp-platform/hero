@@ -23,3 +23,4 @@ assert_not_in_logfile() {
 spyglass-2019.06 sg_shell -tcl spyglass.tcl
 
 assert_not_in_logfile 'FATAL'
+assert_not_in_logfile 'completed with errors'
