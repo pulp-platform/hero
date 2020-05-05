@@ -17,4 +17,3 @@ sources:
   - src/dc_token_ring.v
   - src/axi_slice_dc_master_wrap.sv
   - src/axi_slice_dc_slave_wrap.sv
-  - src/axi_cdc.sv

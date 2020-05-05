@@ -11,4 +11,3 @@ analyze -format verilog   -work work ${IPS_PATH}/axi_slice_dc/src/dc_token_ring_
 analyze -format verilog   -work work ${IPS_PATH}/axi_slice_dc/src/dc_token_ring.v
 analyze -format sverilog  -work work ${IPS_PATH}/axi_slice_dc/src/axi_slice_dc_master_wrap.sv
 analyze -format sverilog  -work work ${IPS_PATH}/axi_slice_dc/src/axi_slice_dc_slave_wrap.sv
-analyze -format sverilog  -work work ${IPS_PATH}/axi_slice_dc/src/axi_cdc.sv

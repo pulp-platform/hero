@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pulp_cluster`:
   - Tie `core_halted_i` input off and remove `dbg_core_halted`, which is no longer used.
   - `periph_interconnect`: Fix addressing loop in `0x1020_1C00..0x1020_1FFF` memory range.
+- `axi_slice_dc`: Remove duplicate definition of `axi_cdc` module.
 
 
 ## 2020-04-24
