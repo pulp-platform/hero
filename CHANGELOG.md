@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `hier-icache`:
   - Fix connection of `perf_cnt_L1[0..7`].
   - Fix writing of `sel_flush` register.
+  - Add missing DFT inputs to `ram_ws_rs_data_scm`.
 - `pulp_cluster`: Tie `core_halted_i` input off and remove `dbg_core_halted`, which is no longer
   used.
 

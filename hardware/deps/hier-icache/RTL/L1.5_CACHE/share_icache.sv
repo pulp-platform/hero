@@ -44,6 +44,14 @@ module share_icache
    input logic                                                rst_n,
    input logic                                                test_en_i,
    // -------------------------------------------------------------------------------------
+   // DFT Port Declarations (no direction suffixes due to customer request) ---------------
+   // -------------------------------------------------------------------------------------
+   input logic [25:0]                                          mem_ctrl,
+   input logic                                                 dft_ram_gt_se,
+   input logic                                                 dft_ram_bypass,
+   input logic                                                 dft_ram_bp_clk_en,
+   // -------------------------------------------------------------------------------------
+   // -------------------------------------------------------------------------------------
    // SHARED_ICACHE_INTERCONNECT Port Declarations ----------------------------------------
    // -------------------------------------------------------------------------------------
    input  logic                                                fetch_req_i,
@@ -522,6 +530,10 @@ endgenerate
             (
                 .clk     (   clk            ),
                 .rst_n   (   rst_n          ),
+                .mem_ctrl,
+                .dft_ram_gt_se,
+                .dft_ram_bypass,
+                .dft_ram_bp_clk_en,
                 .addr    (   DATA_addr      ),
                 .req     (   DATA_req[i]    ),
                 .write   (   DATA_write     ),

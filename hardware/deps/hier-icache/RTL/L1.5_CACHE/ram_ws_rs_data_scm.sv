@@ -23,6 +23,10 @@ module ram_ws_rs_data_scm
 (
     input  logic                        clk,
     input  logic                        rst_n,
+    input  logic [25:0]                 mem_ctrl,
+    input  logic                        dft_ram_gt_se,
+    input  logic                        dft_ram_bypass,
+    input  logic                        dft_ram_bp_clk_en,
     input  logic [addr_width-1:0]       addr,
     input  logic                        req,
     input  logic                        write,

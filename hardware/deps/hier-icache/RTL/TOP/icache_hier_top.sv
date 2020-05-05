@@ -71,6 +71,12 @@ module icache_hier_top
    input logic                                          rst_n,
    input logic                                          test_en_i,
 
+   // DFT ports (no suffixes due to customer request)
+   input logic [25:0]                                   mem_ctrl,
+   input logic                                          dft_ram_gt_se,
+   input logic                                          dft_ram_bypass,
+   input logic                                          dft_ram_bp_clk_en,
+
    // interface with processors
    input  logic [NB_CORES-1:0]                          fetch_req_i,
    input  logic [NB_CORES-1:0][FETCH_ADDR_WIDTH-1:0]    fetch_addr_i,
@@ -467,6 +473,12 @@ module icache_hier_top
       .clk                           ( clk                        ),
       .rst_n                         ( rst_n                      ),
       .test_en_i                     ( test_en_i                  ),
+
+      // DFT ports
+      .mem_ctrl,
+      .dft_ram_gt_se,
+      .dft_ram_bypass,
+      .dft_ram_bp_clk_en,
 
       // ---------------------------------------------------------------
       // SHARED_ICACHE_INTERCONNECT Port Declarations -----------------------------------------
