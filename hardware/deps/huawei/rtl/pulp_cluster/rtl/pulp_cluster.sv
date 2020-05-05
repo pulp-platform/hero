@@ -504,10 +504,6 @@ module pulp_cluster
   // debug
   XBAR_TCDM_BUS s_debug_bus[NB_CORES-1:0]();
 
-  /* other interfaces */
-  // cores -> DMA ctrl
-  XBAR_TCDM_BUS s_core_dmactrl_bus[NB_CORES-1:0]();
-
   // cores -> event unit ctrl
   XBAR_PERIPH_BUS s_core_euctrl_bus[NB_CORES-1:0]();
 
@@ -930,7 +926,6 @@ module pulp_cluster
         .addrext_i                ( '0 /* unused */           ),
         .tcdm_data_master         ( s_core_xbar_bus[i]        ),
         .tcdm_data_master_atop    ( s_core_xbar_bus_atop[i]   ),
-        .dma_ctrl_master          ( s_core_dmactrl_bus[i]     ),
         .eu_ctrl_master           ( s_core_euctrl_bus[i]      ),
         .periph_data_master       ( s_core_periph_bus[i]      ),
         .periph_data_master_atop  ( s_core_periph_bus_atop[i] ),

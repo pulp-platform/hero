@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `pulp_cluster`
   - `core_region`: Remove `periph_demux`, which is no longer used.
+  - Remove `s_core_dmactrl_bus`, which is no longer used.
   - Register `dbg_irq_valid` before synchronizer.
 
 ### Fixed
