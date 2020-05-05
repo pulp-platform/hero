@@ -530,6 +530,7 @@ endgenerate
             (
                 .clk     (   clk            ),
                 .rst_n   (   rst_n          ),
+                .test_en_i,
                 .mem_ctrl,
                 .dft_ram_gt_se,
                 .dft_ram_bypass,
@@ -556,6 +557,7 @@ endgenerate
             (
                 .clk     (   clk            ),
                 .rst_n   (   rst_n          ),
+                .test_en_i,
                 .addr    (   TAG_addr       ),
                 .req     (   TAG_req[i]     ),
                 .write   (   TAG_write      ),
