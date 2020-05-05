@@ -37,8 +37,6 @@ __rt_debug_init_config = DEFINED(__rt_debug_init_config) ? __rt_debug_init_confi
 __rt_debug_init_config_trace = DEFINED(__rt_debug_init_config_trace) ? __rt_debug_init_config_trace : 0x0;
 __rt_sim = DEFINED(__rt_sim) ? __rt_sim : 0x0;
 
-__omp_64bit = DEFINED(__omp_64bit) ? __omp_64bit : 0x0;
-
 __pulp_l1_base        = ORIGIN(L1);
 __pulp_l1_end         = __pulp_l1_base + LENGTH(L1);
 __pulp_l1_alias_base  = ORIGIN(L1_aliased);
