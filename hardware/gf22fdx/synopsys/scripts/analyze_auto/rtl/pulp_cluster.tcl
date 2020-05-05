@@ -16,7 +16,6 @@ analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/rt
 analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/rtl/dmac_wrap.sv
 #analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/rtl/hwpe_subsystem.sv
 analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/rtl/cluster_bus_wrap.sv
-analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/rtl/axi_slice_wrap.sv
 #analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/rtl/axi2mem_wrap.sv
 analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/rtl/axi2per_wrap.sv
 analyze -format sverilog  -define INVECAS -work work ${IPS_PATH}/pulp_cluster/rtl/per2axi_wrap.sv
