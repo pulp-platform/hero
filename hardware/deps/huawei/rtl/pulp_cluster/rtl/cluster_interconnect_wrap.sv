@@ -303,6 +303,10 @@ module cluster_interconnect_wrap
           end else if (!HWPE_PRESENT && pe_idx == pulp_cluster_package::SPER_HWPE_ID) begin
             // Decode non-present HWPE to error slave.
             return PE_IDX_ERR;
+          end else if (pe_idx == PE_IDX_EXT) begin
+            // Decode direct accesses to external peripheral to error slave to break addressing
+            // loop.
+            return PE_IDX_ERR;
           end else begin
             // Return index of other peripheral.
             return pe_idx;
