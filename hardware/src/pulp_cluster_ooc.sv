@@ -7,190 +7,194 @@
 // work. Any reuse/redistribution is strictly forbidden without written
 // permission from ETH Zurich.
 
-import axi_pkg::*;
-import pulp_cluster_cfg_pkg::*;
-import pulp_cluster_cfg_pkg::addr_t;
-import pulp_cluster_cfg_pkg::id_slv_t;
-import pulp_cluster_cfg_pkg::user_t;
-
 // Stub of PULP Cluster for out-of-context synthesis
-module pulp_cluster_ooc (
-  input  logic          clk_i,
-  input  logic          rst_ni,
-  input  logic          ref_clk_i,
-  input  logic          test_mode_i,
-  input  cluster_id_t   cluster_id_i,
-  input  logic          fetch_en_i,
-  output logic          eoc_o,
-  output logic          busy_o,
-  input  logic [N_CORES-1:0] dbg_irq_i,
+module pulp_cluster_ooc
+  import pulp_cluster_cfg_pkg::N_CORES;
+  import pulp_cluster_cfg_pkg::addr_t;
+  import pulp_cluster_cfg_pkg::cluster_id_t;
+  import pulp_cluster_cfg_pkg::data_t;
+  import pulp_cluster_cfg_pkg::dc_buf_t;
+  import pulp_cluster_cfg_pkg::id_slv_t;
+  import pulp_cluster_cfg_pkg::id_mst_t;
+  import pulp_cluster_cfg_pkg::strb_t;
+  import pulp_cluster_cfg_pkg::user_t;
+(
+  input  logic                clk_i,
+  input  logic                rst_ni,
+  input  logic                ref_clk_i,
+  input  logic                test_mode_i,
+  input  cluster_id_t         cluster_id_i,
+  input  logic                fetch_en_i,
+  output logic                eoc_o,
+  output logic                busy_o,
+  input  logic [N_CORES-1:0]  dbg_irq_i,
 
   // External Events
-  input  logic          mailbox_evt_i,
-  input  logic          ext_evt_1_i,
-  input  logic          ext_evt_2_i,
-  input  logic          ext_evt_3_i,
+  input  logic                mailbox_evt_i,
+  input  logic                ext_evt_1_i,
+  input  logic                ext_evt_2_i,
+  input  logic                ext_evt_3_i,
 
   // DFT (no direction suffixes due to customer request)
-  input  logic [25:0]   mem_ctrl,
-  input  logic          dft_ram_gt_se,
-  input  logic          dft_ram_bypass,
-  input  logic          dft_ram_bp_clk_en,
+  input  logic [25:0]         mem_ctrl,
+  input  logic                dft_ram_gt_se,
+  input  logic                dft_ram_bypass,
+  input  logic                dft_ram_bp_clk_en,
 
   // Slave Port
   // AW
-  input  addr_t         slv_aw_addr_i,
-  input  prot_t         slv_aw_prot_i,
-  input  region_t       slv_aw_region_i,
-  input  len_t          slv_aw_len_i,
-  input  size_t         slv_aw_size_i,
-  input  burst_t        slv_aw_burst_i,
-  input  logic          slv_aw_lock_i,
-  input  atop_t         slv_aw_atop_i,
-  input  cache_t        slv_aw_cache_i,
-  input  qos_t          slv_aw_qos_i,
-  input  id_slv_t       slv_aw_id_i,
-  input  user_t         slv_aw_user_i,
+  input  addr_t               slv_aw_addr_i,
+  input  axi_pkg::prot_t      slv_aw_prot_i,
+  input  axi_pkg::region_t    slv_aw_region_i,
+  input  axi_pkg::len_t       slv_aw_len_i,
+  input  axi_pkg::size_t      slv_aw_size_i,
+  input  axi_pkg::burst_t     slv_aw_burst_i,
+  input  logic                slv_aw_lock_i,
+  input  axi_pkg::atop_t      slv_aw_atop_i,
+  input  axi_pkg::cache_t     slv_aw_cache_i,
+  input  axi_pkg::qos_t       slv_aw_qos_i,
+  input  id_slv_t             slv_aw_id_i,
+  input  user_t               slv_aw_user_i,
   // used if ASYNC_INTF
-  input  dc_buf_t       slv_aw_writetoken_i,
-  output dc_buf_t       slv_aw_readpointer_o,
+  input  dc_buf_t             slv_aw_writetoken_i,
+  output dc_buf_t             slv_aw_readpointer_o,
   // used if !ASYNC_INTF
-  input  logic          slv_aw_valid_i,
-  output logic          slv_aw_ready_o,
+  input  logic                slv_aw_valid_i,
+  output logic                slv_aw_ready_o,
   // AR
-  input  addr_t         slv_ar_addr_i,
-  input  prot_t         slv_ar_prot_i,
-  input  region_t       slv_ar_region_i,
-  input  len_t          slv_ar_len_i,
-  input  size_t         slv_ar_size_i,
-  input  burst_t        slv_ar_burst_i,
-  input  logic          slv_ar_lock_i,
-  input  cache_t        slv_ar_cache_i,
-  input  qos_t          slv_ar_qos_i,
-  input  id_slv_t       slv_ar_id_i,
-  input  user_t         slv_ar_user_i,
+  input  addr_t               slv_ar_addr_i,
+  input  axi_pkg::prot_t      slv_ar_prot_i,
+  input  axi_pkg::region_t    slv_ar_region_i,
+  input  axi_pkg::len_t       slv_ar_len_i,
+  input  axi_pkg::size_t      slv_ar_size_i,
+  input  axi_pkg::burst_t     slv_ar_burst_i,
+  input  logic                slv_ar_lock_i,
+  input  axi_pkg::cache_t     slv_ar_cache_i,
+  input  axi_pkg::qos_t       slv_ar_qos_i,
+  input  id_slv_t             slv_ar_id_i,
+  input  user_t               slv_ar_user_i,
   // used if ASYNC_INTF
-  input  dc_buf_t       slv_ar_writetoken_i,
-  output dc_buf_t       slv_ar_readpointer_o,
+  input  dc_buf_t             slv_ar_writetoken_i,
+  output dc_buf_t             slv_ar_readpointer_o,
   // used if !ASYNC_INTF
-  input  logic          slv_ar_valid_i,
-  output logic          slv_ar_ready_o,
+  input  logic                slv_ar_valid_i,
+  output logic                slv_ar_ready_o,
   // W
-  input  data_t         slv_w_data_i,
-  input  strb_t         slv_w_strb_i,
-  input  user_t         slv_w_user_i,
-  input  logic          slv_w_last_i,
+  input  data_t               slv_w_data_i,
+  input  strb_t               slv_w_strb_i,
+  input  user_t               slv_w_user_i,
+  input  logic                slv_w_last_i,
   // used if ASYNC_INTF
-  input  dc_buf_t       slv_w_writetoken_i,
-  output dc_buf_t       slv_w_readpointer_o,
+  input  dc_buf_t             slv_w_writetoken_i,
+  output dc_buf_t             slv_w_readpointer_o,
   // used if !ASYNC_INTF
-  input  logic          slv_w_valid_i,
-  output logic          slv_w_ready_o,
+  input  logic                slv_w_valid_i,
+  output logic                slv_w_ready_o,
   // R
-  output data_t         slv_r_data_o,
-  output resp_t         slv_r_resp_o,
-  output logic          slv_r_last_o,
-  output id_slv_t       slv_r_id_o,
-  output user_t         slv_r_user_o,
+  output data_t               slv_r_data_o,
+  output axi_pkg::resp_t      slv_r_resp_o,
+  output logic                slv_r_last_o,
+  output id_slv_t             slv_r_id_o,
+  output user_t               slv_r_user_o,
   // used if ASYNC_INTF
-  output dc_buf_t       slv_r_writetoken_o,
-  input  dc_buf_t       slv_r_readpointer_i,
+  output dc_buf_t             slv_r_writetoken_o,
+  input  dc_buf_t             slv_r_readpointer_i,
   // used if !ASYNC_INTF
-  output logic          slv_r_valid_o,
-  input  logic          slv_r_ready_i,
+  output logic                slv_r_valid_o,
+  input  logic                slv_r_ready_i,
   // B
-  output resp_t         slv_b_resp_o,
-  output id_slv_t       slv_b_id_o,
-  output user_t         slv_b_user_o,
+  output axi_pkg::resp_t      slv_b_resp_o,
+  output id_slv_t             slv_b_id_o,
+  output user_t               slv_b_user_o,
   // used if ASYNC_INTF
-  output dc_buf_t       slv_b_writetoken_o,
-  input  dc_buf_t       slv_b_readpointer_i,
+  output dc_buf_t             slv_b_writetoken_o,
+  input  dc_buf_t             slv_b_readpointer_i,
   // used if !ASYNC_INTF
-  output logic          slv_b_valid_o,
-  input  logic          slv_b_ready_i,
+  output logic                slv_b_valid_o,
+  input  logic                slv_b_ready_i,
 
   // Master Port
   // AW
-  output addr_t         mst_aw_addr_o,
-  output prot_t         mst_aw_prot_o,
-  output region_t       mst_aw_region_o,
-  output len_t          mst_aw_len_o,
-  output size_t         mst_aw_size_o,
-  output burst_t        mst_aw_burst_o,
-  output logic          mst_aw_lock_o,
-  output atop_t         mst_aw_atop_o,
-  output cache_t        mst_aw_cache_o,
-  output qos_t          mst_aw_qos_o,
-  output id_mst_t       mst_aw_id_o,
-  output user_t         mst_aw_user_o,
+  output addr_t               mst_aw_addr_o,
+  output axi_pkg::prot_t      mst_aw_prot_o,
+  output axi_pkg::region_t    mst_aw_region_o,
+  output axi_pkg::len_t       mst_aw_len_o,
+  output axi_pkg::size_t      mst_aw_size_o,
+  output axi_pkg::burst_t     mst_aw_burst_o,
+  output logic                mst_aw_lock_o,
+  output axi_pkg::atop_t      mst_aw_atop_o,
+  output axi_pkg::cache_t     mst_aw_cache_o,
+  output axi_pkg::qos_t       mst_aw_qos_o,
+  output id_mst_t             mst_aw_id_o,
+  output user_t               mst_aw_user_o,
   // used if ASYNC_INTF
-  output dc_buf_t       mst_aw_writetoken_o,
-  input  dc_buf_t       mst_aw_readpointer_i,
+  output dc_buf_t             mst_aw_writetoken_o,
+  input  dc_buf_t             mst_aw_readpointer_i,
   // used if !ASYNC_INTF
-  output logic          mst_aw_valid_o,
-  input  logic          mst_aw_ready_i,
+  output logic                mst_aw_valid_o,
+  input  logic                mst_aw_ready_i,
   // AR
-  output addr_t         mst_ar_addr_o,
-  output prot_t         mst_ar_prot_o,
-  output region_t       mst_ar_region_o,
-  output len_t          mst_ar_len_o,
-  output size_t         mst_ar_size_o,
-  output burst_t        mst_ar_burst_o,
-  output logic          mst_ar_lock_o,
-  output cache_t        mst_ar_cache_o,
-  output qos_t          mst_ar_qos_o,
-  output id_mst_t       mst_ar_id_o,
-  output user_t         mst_ar_user_o,
+  output addr_t               mst_ar_addr_o,
+  output axi_pkg::prot_t      mst_ar_prot_o,
+  output axi_pkg::region_t    mst_ar_region_o,
+  output axi_pkg::len_t       mst_ar_len_o,
+  output axi_pkg::size_t      mst_ar_size_o,
+  output axi_pkg::burst_t     mst_ar_burst_o,
+  output logic                mst_ar_lock_o,
+  output axi_pkg::cache_t     mst_ar_cache_o,
+  output axi_pkg::qos_t       mst_ar_qos_o,
+  output id_mst_t             mst_ar_id_o,
+  output user_t               mst_ar_user_o,
   // used if ASYNC_INTF
-  output dc_buf_t       mst_ar_writetoken_o,
-  input  dc_buf_t       mst_ar_readpointer_i,
+  output dc_buf_t             mst_ar_writetoken_o,
+  input  dc_buf_t             mst_ar_readpointer_i,
   // used if !ASYNC_INTF
-  output logic          mst_ar_valid_o,
-  input  logic          mst_ar_ready_i,
+  output logic                mst_ar_valid_o,
+  input  logic                mst_ar_ready_i,
   // W
-  output data_t         mst_w_data_o,
-  output strb_t         mst_w_strb_o,
-  output user_t         mst_w_user_o,
-  output logic          mst_w_last_o,
+  output data_t               mst_w_data_o,
+  output strb_t               mst_w_strb_o,
+  output user_t               mst_w_user_o,
+  output logic                mst_w_last_o,
   // used if ASYNC_INTF
-  output dc_buf_t       mst_w_writetoken_o,
-  input  dc_buf_t       mst_w_readpointer_i,
+  output dc_buf_t             mst_w_writetoken_o,
+  input  dc_buf_t             mst_w_readpointer_i,
   // used if !ASYNC_INTF
-  output logic          mst_w_valid_o,
-  input  logic          mst_w_ready_i,
+  output logic                mst_w_valid_o,
+  input  logic                mst_w_ready_i,
   // R
-  input  data_t         mst_r_data_i,
-  input  resp_t         mst_r_resp_i,
-  input  logic          mst_r_last_i,
-  input  id_mst_t       mst_r_id_i,
-  input  user_t         mst_r_user_i,
+  input  data_t               mst_r_data_i,
+  input  axi_pkg::resp_t      mst_r_resp_i,
+  input  logic                mst_r_last_i,
+  input  id_mst_t             mst_r_id_i,
+  input  user_t               mst_r_user_i,
   // used if ASYNC_INTF
-  input  dc_buf_t       mst_r_writetoken_i,
-  output dc_buf_t       mst_r_readpointer_o,
+  input  dc_buf_t             mst_r_writetoken_i,
+  output dc_buf_t             mst_r_readpointer_o,
   // used if !ASYNC_INTF
-  input  logic          mst_r_valid_i,
-  output logic          mst_r_ready_o,
+  input  logic                mst_r_valid_i,
+  output logic                mst_r_ready_o,
   // B
-  input  resp_t         mst_b_resp_i,
-  input  id_mst_t       mst_b_id_i,
-  input  user_t         mst_b_user_i,
+  input  axi_pkg::resp_t      mst_b_resp_i,
+  input  id_mst_t             mst_b_id_i,
+  input  user_t               mst_b_user_i,
   // used if ASYNC_INTF
-  input  dc_buf_t       mst_b_writetoken_i,
-  output dc_buf_t       mst_b_readpointer_o,
+  input  dc_buf_t             mst_b_writetoken_i,
+  output dc_buf_t             mst_b_readpointer_o,
   // used if !ASYNC_INTF
-  input  logic          mst_b_valid_i,
-  output logic          mst_b_ready_o
+  input  logic                mst_b_valid_i,
+  output logic                mst_b_ready_o
 );
 
   pulp_cluster #(
-    .ASYNC_INTF               (ASYNC),
-    .NB_CORES                 (N_CORES),
+    .ASYNC_INTF               (pulp_cluster_cfg_pkg::ASYNC),
+    .NB_CORES                 (pulp_cluster_cfg_pkg::N_CORES),
     .NB_HWPE_PORTS            (0),
-    .NB_DMAS                  (N_DMAS),
+    .NB_DMAS                  (pulp_cluster_cfg_pkg::N_DMAS),
     .CLUSTER_ALIAS            (1'b1),
     .CLUSTER_ALIAS_BASE       (12'h1B0),
-    .TCDM_SIZE                (TCDM_SIZE),
-    .NB_TCDM_BANKS            (N_TCDM_BANKS),
+    .TCDM_SIZE                (pulp_cluster_cfg_pkg::TCDM_SIZE),
+    .NB_TCDM_BANKS            (pulp_cluster_cfg_pkg::N_TCDM_BANKS),
     .HWPE_PRESENT             (1'b0),
     .SHARED_FPU               (1'b1),
     // FPU params
@@ -200,28 +204,28 @@ module pulp_cluster_ooc (
     .CLUST_SHARED_FP_DIVSQRT  (32'h00000002),
     // I$ Parameters
     .NB_CACHE_BANKS           (2),
-    .CACHE_SIZE               (ICACHE_SIZE),
-    .L2_SIZE                  (L2_SIZE),
+    .CACHE_SIZE               (pulp_cluster_cfg_pkg::ICACHE_SIZE),
+    .L2_SIZE                  (pulp_cluster_cfg_pkg::L2_SIZE),
     // Core Parameters
     .DEM_PER_BEFORE_TCDM_TS   (1'b0),
-    .ROM_BOOT_ADDR            (ROM_BOOT_ADDR),
-    .BOOT_ADDR                (BOOT_ADDR),
-    .DEBUG_HALT_ADDR          (DM_ROM_ADDR),
+    .ROM_BOOT_ADDR            (pulp_cluster_cfg_pkg::ROM_BOOT_ADDR),
+    .BOOT_ADDR                (pulp_cluster_cfg_pkg::BOOT_ADDR),
+    .DEBUG_HALT_ADDR          (pulp_cluster_cfg_pkg::DM_ROM_ADDR),
     // AXI Parameters
-    .AXI_ADDR_WIDTH           (AXI_AW),
-    .AXI_DATA_C2S_WIDTH       (AXI_DW),
-    .AXI_DATA_S2C_WIDTH       (AXI_DW),
-    .AXI_USER_WIDTH           (AXI_UW),
-    .AXI_ID_IN_WIDTH          (AXI_IW_SLV),
-    .AXI_ID_OUT_WIDTH         (AXI_IW_MST),
-    .DC_SLICE_BUFFER_WIDTH    (DC_BUF_W),
+    .AXI_ADDR_WIDTH           (pulp_cluster_cfg_pkg::AXI_AW),
+    .AXI_DATA_C2S_WIDTH       (pulp_cluster_cfg_pkg::AXI_DW),
+    .AXI_DATA_S2C_WIDTH       (pulp_cluster_cfg_pkg::AXI_DW),
+    .AXI_USER_WIDTH           (pulp_cluster_cfg_pkg::AXI_UW),
+    .AXI_ID_IN_WIDTH          (pulp_cluster_cfg_pkg::AXI_IW_SLV),
+    .AXI_ID_OUT_WIDTH         (pulp_cluster_cfg_pkg::AXI_IW_MST),
+    .DC_SLICE_BUFFER_WIDTH    (pulp_cluster_cfg_pkg::DC_BUF_W),
     // TCDM and Interconnect Parameters
     .DATA_WIDTH               (32),
     .ADDR_WIDTH               (32),
     .TEST_SET_BIT             (20),
     // DMA Parameters
-    .NB_OUTSND_BURSTS         (DMA_MAX_N_TXNS),
-    .MCHAN_BURST_LENGTH       (DMA_MAX_BURST_SIZE)
+    .NB_OUTSND_BURSTS         (pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS),
+    .MCHAN_BURST_LENGTH       (pulp_cluster_cfg_pkg::DMA_MAX_BURST_SIZE)
   ) i_bound (
     .clk_i,
     .rst_ni,
@@ -377,7 +381,10 @@ module pulp_cluster_ooc (
 endmodule
 
 // Interface wrapper for OOC-synthesized synchronous PULP cluster
-module pulp_cluster_sync (
+module pulp_cluster_sync
+  import pulp_cluster_cfg_pkg::N_CORES;
+  import pulp_cluster_cfg_pkg::cluster_id_t;
+(
   input  logic        clk_i,
   input  logic        rst_ni,
   input  logic        ref_clk_i,
@@ -538,7 +545,10 @@ module pulp_cluster_sync (
 endmodule
 
 // Interface wrapper for OOC-synthesized asynchronous PULP cluster
-module pulp_cluster_async (
+module pulp_cluster_async
+  import pulp_cluster_cfg_pkg::N_CORES;
+  import pulp_cluster_cfg_pkg::cluster_id_t;
+(
   input  logic          clk_i,
   input  logic          rst_ni,
   input  logic          ref_clk_i,
