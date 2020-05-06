@@ -131,23 +131,20 @@ module soc_bus #(
   localparam int unsigned MAX_TXNS_PER_CLUSTER =  pulp_cluster_cfg_pkg::N_CORES +
                                                   pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS;
 
-  localparam axi_pkg::xbar_cfg_t xbar_cfg = '{
-    NoSlvPorts:         N_SLAVES,
-    NoMstPorts:         N_MASTERS,
-    MaxMstTrans:        MAX_TXNS_PER_CLUSTER,
-    MaxSlvTrans:        N_CLUSTERS * MAX_TXNS_PER_CLUSTER,
-    FallThrough:        1'b0,
-    LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-    AxiIdWidthSlvPorts: AXI_IW_INP,
-    AxiIdUsedSlvPorts:  AXI_IW_INP,
-    AxiAddrWidth:       AXI_AW,
-    AxiDataWidth:       AXI_DW,
-    NoAddrRules:        N_RULES
-  };
   axi_xbar_intf #(
-    .AXI_USER_WIDTH (AXI_UW),
-    .Cfg            (xbar_cfg),
-    .rule_t         (axi_pkg::xbar_rule_32_t)
+    .AXI_USER_WIDTH         (AXI_UW),
+    .NO_SLV_PORTS           (N_SLAVES),
+    .NO_MST_PORTS           (N_MASTERS),
+    .MAX_MST_TRANS          (MAX_TXNS_PER_CLUSTER),
+    .MAX_SLV_TRANS          (N_CLUSTERS * MAX_TXNS_PER_CLUSTER),
+    .FALL_THROUGH           (1'b0),
+    .LATENCY_MODE           (axi_pkg::CUT_ALL_PORTS),
+    .AXI_ID_WIDTH_SLV_PORTS (AXI_IW_INP),
+    .AXI_ID_USED_SLV_PORTS  (AXI_IW_INP),
+    .AXI_ADDR_WIDTH         (AXI_AW),
+    .AXI_DATA_WIDTH         (AXI_DW),
+    .NO_ADDR_RULES          (N_RULES),
+    .rule_t                 (axi_pkg::xbar_rule_32_t)
   ) i_axi_xbar (
     .clk_i,
     .rst_ni,

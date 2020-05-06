@@ -33,19 +33,6 @@ module tb_axi_lite_xbar;
   localparam int unsigned AxiAddrWidth      =  32'd32;    // Axi Address Width
   localparam int unsigned AxiDataWidth      =  32'd64;    // Axi Data Width
   localparam int unsigned AxiStrbWidth      =  AxiDataWidth / 32'd8;
-  // in the bench can change this variables which are set here freely
-  localparam axi_pkg::xbar_cfg_t xbar_cfg = '{
-    NoSlvPorts:         NoMasters,
-    NoMstPorts:         NoSlaves,
-    MaxMstTrans:        32'd10,
-    MaxSlvTrans:        32'd6,
-    FallThrough:        1'b0,
-    LatencyMode:        axi_pkg::CUT_ALL_AX,
-    AxiAddrWidth:       AxiAddrWidth,
-    AxiDataWidth:       AxiDataWidth,
-    NoAddrRules:        32'd8,
-    default:            '0
-  };
   typedef logic [AxiAddrWidth-1:0]      addr_t;
   typedef axi_pkg::xbar_rule_32_t       rule_t; // Has to be the same width as axi addr
   typedef logic [AxiDataWidth-1:0]      data_t;
@@ -61,7 +48,8 @@ module tb_axi_lite_xbar;
   `AXI_LITE_TYPEDEF_REQ_T(req_lite_t, aw_chan_lite_t, w_chan_lite_t, ar_chan_lite_t)
   `AXI_LITE_TYPEDEF_RESP_T(resp_lite_t, b_chan_lite_t, r_chan_lite_t)
 
-  localparam rule_t [xbar_cfg.NoAddrRules-1:0] AddrMap = '{
+  localparam int unsigned NoAddrRules = 8;
+  localparam rule_t [NoAddrRules-1:0] AddrMap = '{
     '{idx: 32'd7, start_addr: 32'h0001_0000, end_addr: 32'h0001_1000},
     '{idx: 32'd6, start_addr: 32'h0000_9000, end_addr: 32'h0001_0000},
     '{idx: 32'd5, start_addr: 32'h0000_8000, end_addr: 32'h0000_9000},
@@ -189,15 +177,23 @@ module tb_axi_lite_xbar;
   // DUT
   //-----------------------------------
   axi_lite_xbar #(
-    .Cfg       ( xbar_cfg       ),
-    .aw_chan_t ( aw_chan_lite_t ),
-    .w_chan_t  (  w_chan_lite_t ),
-    .b_chan_t  (  b_chan_lite_t ),
-    .ar_chan_t ( ar_chan_lite_t ),
-    .r_chan_t  (  r_chan_lite_t ),
-    .req_t     (  req_lite_t    ),
-    .resp_t    ( resp_lite_t    ),
-    .rule_t    ( rule_t         )
+    .NoSlvPorts   ( NoMasters           ),
+    .NoMstPorts   ( NoSlaves            ),
+    .MaxMstTrans  ( 32'd10              ),
+    .MaxSlvTrans  ( 32'd6               ),
+    .FallThrough  ( 1'b0                ),
+    .LatencyMode  ( axi_pkg::CUT_ALL_AX ),
+    .AxiAddrWidth ( AxiAddrWidth        ),
+    .AxiDataWidth ( AxiDataWidth        ),
+    .NoAddrRules  ( NoAddrRules         ),
+    .aw_chan_t    ( aw_chan_lite_t      ),
+    .w_chan_t     (  w_chan_lite_t      ),
+    .b_chan_t     (  b_chan_lite_t      ),
+    .ar_chan_t    ( ar_chan_lite_t      ),
+    .r_chan_t     (  r_chan_lite_t      ),
+    .req_t        (  req_lite_t         ),
+    .resp_t       ( resp_lite_t         ),
+    .rule_t       ( rule_t              )
   ) i_xbar_dut (
     .clk_i      ( clk      ),
     .rst_ni     ( rst_n    ),

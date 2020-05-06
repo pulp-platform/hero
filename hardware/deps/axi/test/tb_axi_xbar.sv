@@ -42,20 +42,6 @@ module tb_axi_xbar;
   localparam int unsigned AxiDataWidth      =  64;    // Axi Data Width
   localparam int unsigned AxiStrbWidth      =  AxiDataWidth / 8;
   localparam int unsigned AxiUserWidth      =  5;
-  // in the bench can change this variables which are set here freely
-  localparam axi_pkg::xbar_cfg_t xbar_cfg = '{
-    NoSlvPorts:         NoMasters,
-    NoMstPorts:         NoSlaves,
-    MaxMstTrans:        10,
-    MaxSlvTrans:        6,
-    FallThrough:        1'b0,
-    LatencyMode:        axi_pkg::CUT_ALL_AX,
-    AxiIdWidthSlvPorts: AxiIdWidthMasters,
-    AxiIdUsedSlvPorts:  AxiIdUsed,
-    AxiAddrWidth:       AxiAddrWidth,
-    AxiDataWidth:       AxiDataWidth,
-    NoAddrRules:        8
-  };
   typedef logic [AxiIdWidthMasters-1:0] id_mst_t;
   typedef logic [AxiIdWidthSlaves-1:0]  id_slv_t;
   typedef logic [AxiAddrWidth-1:0]      addr_t;
@@ -80,7 +66,8 @@ module tb_axi_xbar;
   `AXI_TYPEDEF_REQ_T(slv_req_t, aw_chan_slv_t, w_chan_t, ar_chan_slv_t)
   `AXI_TYPEDEF_RESP_T(slv_resp_t, b_chan_slv_t, r_chan_slv_t)
 
-  localparam rule_t [xbar_cfg.NoAddrRules-1:0] AddrMap = '{
+  localparam int unsigned NoAddrRules = 8;
+  localparam rule_t [NoAddrRules-1:0] AddrMap = '{
     '{idx: 32'd7, start_addr: 32'h0001_0000, end_addr: 32'h0001_1000},
     '{idx: 32'd6, start_addr: 32'h0000_9000, end_addr: 32'h0001_0000},
     '{idx: 32'd5, start_addr: 32'h0000_8000, end_addr: 32'h0000_9000},
@@ -191,7 +178,7 @@ module tb_axi_xbar;
       static rand_axi_master_t rand_axi_master = new ( master_dv[i] );
       end_of_sim[i] <= 1'b0;
       rand_axi_master.add_memory_region(AddrMap[0].start_addr,
-                                      AddrMap[xbar_cfg.NoAddrRules-1].end_addr,
+                                      AddrMap[NoAddrRules-1].end_addr,
                                       axi_pkg::DEVICE_NONBUFFERABLE);
       rand_axi_master.reset();
       @(posedge rst_n);
@@ -211,17 +198,17 @@ module tb_axi_xbar;
 
   initial begin : proc_monitor
     static tb_axi_xbar_pkg::axi_xbar_monitor #(
-      .AxiAddrWidth      ( AxiAddrWidth         ),
-      .AxiDataWidth      ( AxiDataWidth         ),
-      .AxiIdWidthMasters ( AxiIdWidthMasters    ),
-      .AxiIdWidthSlaves  ( AxiIdWidthSlaves     ),
-      .AxiUserWidth      ( AxiUserWidth         ),
-      .NoMasters         ( NoMasters            ),
-      .NoSlaves          ( NoSlaves             ),
-      .NoAddrRules       ( xbar_cfg.NoAddrRules ),
-      .rule_t            ( rule_t               ),
-      .AddrMap           ( AddrMap              ),
-      .TimeTest          ( TestTime             )
+      .AxiAddrWidth      ( AxiAddrWidth       ),
+      .AxiDataWidth      ( AxiDataWidth       ),
+      .AxiIdWidthMasters ( AxiIdWidthMasters  ),
+      .AxiIdWidthSlaves  ( AxiIdWidthSlaves   ),
+      .AxiUserWidth      ( AxiUserWidth       ),
+      .NoMasters         ( NoMasters          ),
+      .NoSlaves          ( NoSlaves           ),
+      .NoAddrRules       ( NoAddrRules        ),
+      .rule_t            ( rule_t             ),
+      .AddrMap           ( AddrMap            ),
+      .TimeTest          ( TestTime           )
     ) monitor = new( master_monitor_dv, slave_monitor_dv );
     fork
       monitor.run();
@@ -251,21 +238,31 @@ module tb_axi_xbar;
   // DUT
   //-----------------------------------
   axi_xbar #(
-    .Cfg          ( xbar_cfg ),
-    .slv_aw_chan_t( aw_chan_mst_t ),
-    .mst_aw_chan_t( aw_chan_slv_t ),
-    .w_chan_t     (  w_chan_t     ),
-    .slv_b_chan_t (  b_chan_mst_t ),
-    .mst_b_chan_t (  b_chan_slv_t ),
-    .slv_ar_chan_t( ar_chan_mst_t ),
-    .mst_ar_chan_t( ar_chan_slv_t ),
-    .slv_r_chan_t (  r_chan_mst_t ),
-    .mst_r_chan_t (  r_chan_slv_t ),
-    .slv_req_t    ( mst_req_t     ),
-    .slv_resp_t   ( mst_resp_t    ),
-    .mst_req_t    ( slv_req_t     ),
-    .mst_resp_t   ( slv_resp_t    ),
-    .rule_t       (rule_t         )
+    .NoSlvPorts         ( NoMasters           ),
+    .NoMstPorts         ( NoSlaves            ),
+    .MaxMstTrans        ( 10                  ),
+    .MaxSlvTrans        ( 6                   ),
+    .FallThrough        ( 1'b0                ),
+    .LatencyMode        ( axi_pkg::CUT_ALL_AX ),
+    .AxiIdWidthSlvPorts ( AxiIdWidthMasters   ),
+    .AxiIdUsedSlvPorts  ( AxiIdUsed           ),
+    .AxiAddrWidth       ( AxiAddrWidth        ),
+    .AxiDataWidth       ( AxiDataWidth        ),
+    .NoAddrRules        ( NoAddrRules         ),
+    .slv_aw_chan_t      ( aw_chan_mst_t       ),
+    .mst_aw_chan_t      ( aw_chan_slv_t       ),
+    .w_chan_t           (  w_chan_t           ),
+    .slv_b_chan_t       (  b_chan_mst_t       ),
+    .mst_b_chan_t       (  b_chan_slv_t       ),
+    .slv_ar_chan_t      ( ar_chan_mst_t       ),
+    .mst_ar_chan_t      ( ar_chan_slv_t       ),
+    .slv_r_chan_t       (  r_chan_mst_t       ),
+    .mst_r_chan_t       (  r_chan_slv_t       ),
+    .slv_req_t          ( mst_req_t           ),
+    .slv_resp_t         ( mst_resp_t          ),
+    .mst_req_t          ( slv_req_t           ),
+    .mst_resp_t         ( slv_resp_t          ),
+    .rule_t             ( rule_t              )
   ) i_xbar_dut (
     .clk_i      ( clk      ),
     .rst_ni     ( rst_n    ),

@@ -149,23 +149,20 @@ module pulp_tb #(
   `endif
   localparam int unsigned MAX_TXNS_PER_CLUSTER =  pulp_cluster_cfg_pkg::N_CORES +
                                                   pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS;
-  localparam axi_pkg::xbar_cfg_t xbar_cfg = '{
-    NoSlvPorts:         NB_MST,
-    NoMstPorts:         NB_SLV,
-    MaxMstTrans:        MAX_TXNS_PER_CLUSTER,
-    MaxSlvTrans:        N_CLUSTERS * MAX_TXNS_PER_CLUSTER,
-    FallThrough:        1'b0,
-    LatencyMode:        axi_pkg::NO_LATENCY,
-    AxiIdWidthSlvPorts: AXI_IW_MST,
-    AxiIdUsedSlvPorts:  AXI_IW_MST,
-    AxiAddrWidth:       pulp_pkg::AXI_AW,
-    AxiDataWidth:       AXI_DW,
-    NoAddrRules:        N_RULES
-  };
   axi_xbar_intf #(
-    .AXI_USER_WIDTH (pulp_pkg::AXI_UW),
-    .Cfg            (xbar_cfg),
-    .rule_t         (axi_pkg::xbar_rule_32_t)
+    .AXI_USER_WIDTH         (pulp_pkg::AXI_UW),
+    .NO_SLV_PORTS           (NB_MST),
+    .NO_MST_PORTS           (NB_SLV),
+    .MAX_MST_TRANS          (MAX_TXNS_PER_CLUSTER),
+    .MAX_SLV_TRANS          (N_CLUSTERS * MAX_TXNS_PER_CLUSTER),
+    .FALL_THROUGH           (1'b0),
+    .LATENCY_MODE           (axi_pkg::NO_LATENCY),
+    .AXI_ID_WIDTH_SLV_PORTS (AXI_IW_MST),
+    .AXI_ID_USED_SLV_PORTS  (AXI_IW_MST),
+    .AXI_ADDR_WIDTH         (pulp_pkg::AXI_AW),
+    .AXI_DATA_WIDTH         (AXI_DW),
+    .NO_ADDR_RULES          (N_RULES),
+    .rule_t                 (axi_pkg::xbar_rule_32_t)
   ) i_axi_xbar (
     .clk_i                  (clk),
     .rst_ni                 (rst_n),

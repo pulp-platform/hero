@@ -48,6 +48,12 @@ lint_whitespace:
   rules:
     - if: $CI_MERGE_REQUEST_ID
 
+lint_spyglass:
+  stage: build_toolchain
+  script:
+    - cd hardware/spyglass
+    - ./run_spyglass.sh
+
 build_test_archive:
   stage: build_test_rest
   script:
