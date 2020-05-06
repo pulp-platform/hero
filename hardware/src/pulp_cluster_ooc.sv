@@ -7,13 +7,18 @@
 // work. Any reuse/redistribution is strictly forbidden without written
 // permission from ETH Zurich.
 
-import pulp_cluster_cfg_pkg::*;
-import pulp_cluster_cfg_pkg::addr_t;
-import pulp_cluster_cfg_pkg::id_slv_t;
-import pulp_cluster_cfg_pkg::user_t;
-
 // Stub of PULP Cluster for out-of-context synthesis
-module pulp_cluster_ooc (
+module pulp_cluster_ooc
+  import pulp_cluster_cfg_pkg::N_CORES;
+  import pulp_cluster_cfg_pkg::addr_t;
+  import pulp_cluster_cfg_pkg::cluster_id_t;
+  import pulp_cluster_cfg_pkg::data_t;
+  import pulp_cluster_cfg_pkg::dc_buf_t;
+  import pulp_cluster_cfg_pkg::id_slv_t;
+  import pulp_cluster_cfg_pkg::id_mst_t;
+  import pulp_cluster_cfg_pkg::strb_t;
+  import pulp_cluster_cfg_pkg::user_t;
+(
   input  logic                clk_i,
   input  logic                rst_ni,
   input  logic                ref_clk_i,
@@ -182,14 +187,14 @@ module pulp_cluster_ooc (
 );
 
   pulp_cluster #(
-    .ASYNC_INTF               (ASYNC),
-    .NB_CORES                 (N_CORES),
+    .ASYNC_INTF               (pulp_cluster_cfg_pkg::ASYNC),
+    .NB_CORES                 (pulp_cluster_cfg_pkg::N_CORES),
     .NB_HWPE_PORTS            (0),
-    .NB_DMAS                  (N_DMAS),
+    .NB_DMAS                  (pulp_cluster_cfg_pkg::N_DMAS),
     .CLUSTER_ALIAS            (1'b1),
     .CLUSTER_ALIAS_BASE       (12'h1B0),
-    .TCDM_SIZE                (TCDM_SIZE),
-    .NB_TCDM_BANKS            (N_TCDM_BANKS),
+    .TCDM_SIZE                (pulp_cluster_cfg_pkg::TCDM_SIZE),
+    .NB_TCDM_BANKS            (pulp_cluster_cfg_pkg::N_TCDM_BANKS),
     .HWPE_PRESENT             (1'b0),
     .SHARED_FPU               (1'b1),
     // FPU params
@@ -199,28 +204,28 @@ module pulp_cluster_ooc (
     .CLUST_SHARED_FP_DIVSQRT  (32'h00000002),
     // I$ Parameters
     .NB_CACHE_BANKS           (2),
-    .CACHE_SIZE               (ICACHE_SIZE),
-    .L2_SIZE                  (L2_SIZE),
+    .CACHE_SIZE               (pulp_cluster_cfg_pkg::ICACHE_SIZE),
+    .L2_SIZE                  (pulp_cluster_cfg_pkg::L2_SIZE),
     // Core Parameters
     .DEM_PER_BEFORE_TCDM_TS   (1'b0),
-    .ROM_BOOT_ADDR            (ROM_BOOT_ADDR),
-    .BOOT_ADDR                (BOOT_ADDR),
-    .DEBUG_HALT_ADDR          (DM_ROM_ADDR),
+    .ROM_BOOT_ADDR            (pulp_cluster_cfg_pkg::ROM_BOOT_ADDR),
+    .BOOT_ADDR                (pulp_cluster_cfg_pkg::BOOT_ADDR),
+    .DEBUG_HALT_ADDR          (pulp_cluster_cfg_pkg::DM_ROM_ADDR),
     // AXI Parameters
-    .AXI_ADDR_WIDTH           (AXI_AW),
-    .AXI_DATA_C2S_WIDTH       (AXI_DW),
-    .AXI_DATA_S2C_WIDTH       (AXI_DW),
-    .AXI_USER_WIDTH           (AXI_UW),
-    .AXI_ID_IN_WIDTH          (AXI_IW_SLV),
-    .AXI_ID_OUT_WIDTH         (AXI_IW_MST),
-    .DC_SLICE_BUFFER_WIDTH    (DC_BUF_W),
+    .AXI_ADDR_WIDTH           (pulp_cluster_cfg_pkg::AXI_AW),
+    .AXI_DATA_C2S_WIDTH       (pulp_cluster_cfg_pkg::AXI_DW),
+    .AXI_DATA_S2C_WIDTH       (pulp_cluster_cfg_pkg::AXI_DW),
+    .AXI_USER_WIDTH           (pulp_cluster_cfg_pkg::AXI_UW),
+    .AXI_ID_IN_WIDTH          (pulp_cluster_cfg_pkg::AXI_IW_SLV),
+    .AXI_ID_OUT_WIDTH         (pulp_cluster_cfg_pkg::AXI_IW_MST),
+    .DC_SLICE_BUFFER_WIDTH    (pulp_cluster_cfg_pkg::DC_BUF_W),
     // TCDM and Interconnect Parameters
     .DATA_WIDTH               (32),
     .ADDR_WIDTH               (32),
     .TEST_SET_BIT             (20),
     // DMA Parameters
-    .NB_OUTSND_BURSTS         (DMA_MAX_N_TXNS),
-    .MCHAN_BURST_LENGTH       (DMA_MAX_BURST_SIZE)
+    .NB_OUTSND_BURSTS         (pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS),
+    .MCHAN_BURST_LENGTH       (pulp_cluster_cfg_pkg::DMA_MAX_BURST_SIZE)
   ) i_bound (
     .clk_i,
     .rst_ni,
@@ -376,7 +381,10 @@ module pulp_cluster_ooc (
 endmodule
 
 // Interface wrapper for OOC-synthesized synchronous PULP cluster
-module pulp_cluster_sync (
+module pulp_cluster_sync
+  import pulp_cluster_cfg_pkg::N_CORES;
+  import pulp_cluster_cfg_pkg::cluster_id_t;
+(
   input  logic        clk_i,
   input  logic        rst_ni,
   input  logic        ref_clk_i,
@@ -537,7 +545,10 @@ module pulp_cluster_sync (
 endmodule
 
 // Interface wrapper for OOC-synthesized asynchronous PULP cluster
-module pulp_cluster_async (
+module pulp_cluster_async
+  import pulp_cluster_cfg_pkg::N_CORES;
+  import pulp_cluster_cfg_pkg::cluster_id_t;
+(
   input  logic          clk_i,
   input  logic          rst_ni,
   input  logic          ref_clk_i,
