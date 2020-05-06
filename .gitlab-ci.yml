@@ -6,6 +6,8 @@ variables:
   DEPLOY_USER: 'hero'
   DEPLOY_HOST: 'localhost'
   DEPLOY_PATH: 'builds/$CI_COMMIT_REF_NAME'
+  TEST_PULP_SDK_EXAMPLES: 'helloworld tests-pulp'
+  TEST_MIN_RT_EXAMPLES: 'hello parMatrixMul'
 
 workflow:
   rules:
@@ -75,7 +77,7 @@ build_test_archive:
         # Compile testbench
         cd hardware/$sim
         ./compile.sh
-        for d in hello parMatrixMul; do
+        for d in $TEST_MIN_RT_EXAMPLES; do
           make -C ../../example-apps/$d clean all
           ../test/gen_slm_files.sh $d
           ./start_sim.sh
@@ -90,7 +92,7 @@ build_test_archive:
         # Compile testbench
         cd hardware/$sim
         ./compile.sh
-        for d in helloworld tests-pulp; do
+        for d in $TEST_PULP_SDK_EXAMPLES; do
           make -C ../../example-apps/$d clean all
           ../test/gen_slm_files.sh $d
           ./start_sim.sh
@@ -133,7 +135,7 @@ build_test_pulp-runtime:
         # Compile testbench
         cd hardware/$sim
         ./compile.sh
-        for d in hello parMatrixMul; do
+        for d in $TEST_MIN_RT_EXAMPLES; do
           make -C ../../example-apps/$d clean all
           ../test/gen_slm_files.sh $d
           ./start_sim.sh
@@ -163,7 +165,7 @@ build_test_sdk:
         # Compile testbench
         cd hardware/$sim
         ./compile.sh
-        for d in helloworld tests-pulp; do
+        for d in $TEST_PULP_SDK_EXAMPLES; do
           make -C ../../example-apps/$d clean all
           ../test/gen_slm_files.sh $d
           ./start_sim.sh
