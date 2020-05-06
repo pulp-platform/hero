@@ -597,7 +597,7 @@ module fpnew_cast_multi #(
     localparam int unsigned EXP_BITS = fpnew_pkg::exp_bits(fpnew_pkg::fp_format_e'(fmt));
     localparam int unsigned MAN_BITS = fpnew_pkg::man_bits(fpnew_pkg::fp_format_e'(fmt));
 
-    localparam logic [EXP_BITS-1:0] QNAN_EXPONENT = '1;
+    localparam logic [EXP_BITS-1:0] QNAN_EXPONENT = 2**EXP_BITS - 1;
     localparam logic [MAN_BITS-1:0] QNAN_MANTISSA = 2**(MAN_BITS-1);
 
     if (FpFmtConfig[fmt]) begin : active_format
