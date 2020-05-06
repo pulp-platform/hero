@@ -97,9 +97,9 @@ module pulp #(
   output logic [N_CLUSTERS-1:0] cl_busy_o,
 
   input  logic                  mailbox_evt_i, //mailbox event dedicated signal
-  input logic                   ext_evt_1_i,
-  input logic                   ext_evt_2_i,
-  input logic                   ext_evt_3_i,
+  input  logic                  ext_evt_1_i,
+  input  logic                  ext_evt_2_i,
+  input  logic                  ext_evt_3_i,
 
   output axi_req_mst_t          ext_req_o,
   input  axi_resp_mst_t         ext_resp_i,
