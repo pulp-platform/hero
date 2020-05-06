@@ -6,8 +6,10 @@ variables:
   DEPLOY_USER: 'hero'
   DEPLOY_HOST: 'localhost'
   DEPLOY_PATH: 'builds/$CI_COMMIT_REF_NAME'
-  TEST_PULP_SDK_EXAMPLES: 'helloworld tests-pulp'
-  TEST_MIN_RT_EXAMPLES: 'hello parMatrixMul'
+  TEST_VP_PULP_SDK_EXAMPLES: 'helloworld'
+  TEST_PULP_SDK_EXAMPLES: '$TEST_VP_PULP_SDK_EXAMPLES tests-pulp'
+  TEST_VP_MIN_RT_EXAMPLES: 'hello'
+  TEST_MIN_RT_EXAMPLES: '$TEST_VP_MIN_RT_EXAMPLES parMatrixMul'
 
 workflow:
   rules:
@@ -116,8 +118,10 @@ build_test_archive:
       cd -
     ### Build the virtual platform
     - make virtual-platform
-    - ./pulp/virtual-platform/run_vp.sh hello
-    - ./pulp/virtual-platform/run_vp.sh helloworld
+    - >
+      for t in $TEST_VP_PULP_SDK_EXAMPLES $TEST_VP_MIN_RT_EXAMPLES; do
+        ./pulp/virtual-platform/run_vp.sh $t
+      done
   artifacts:
     paths:
     - hero_huawei.tar.gz
@@ -144,7 +148,10 @@ build_test_pulp-runtime:
       done
     ### Build the virtual platform
     - make virtual-platform
-    - ./pulp/virtual-platform/run_vp.sh hello
+    - >
+      for t in $TEST_VP_MIN_RT_EXAMPLES; do
+        ./pulp/virtual-platform/run_vp.sh $t
+      done
   artifacts:
     paths:
       - example-apps
@@ -174,7 +181,10 @@ build_test_sdk:
       done
     ### Build the virtual platform
     - make virtual-platform
-    - ./pulp/virtual-platform/run_vp.sh helloworld
+    - >
+      for t in $TEST_VP_PULP_SDK_EXAMPLES; do
+        ./pulp/virtual-platform/run_vp.sh $t
+      done
   artifacts:
     paths:
       - example-apps
