@@ -133,42 +133,48 @@ module cluster_bus_wrap
   // pragma translate_on
 
   // Crossbar
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH  ),
+    .AXI_DATA_WIDTH ( AXI_DATA_WIDTH  ),
+    .AXI_ID_WIDTH   ( AXI_ID_IN_WIDTH ),
+    .AXI_USER_WIDTH ( AXI_USER_WIDTH  )
+  ) slv_intf [NB_SLAVE-1:0]();
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH    ),
+    .AXI_DATA_WIDTH ( AXI_DATA_WIDTH    ),
+    .AXI_ID_WIDTH   ( AXI_ID_OUT_WIDTH  ),
+    .AXI_USER_WIDTH ( AXI_USER_WIDTH    )
+  ) mst_intf [NB_MASTER-1:0]();
+  for (genvar i = 0; i < NB_SLAVE; i++) begin : gen_assign_slv
+    `AXI_ASSIGN_FROM_REQ(slv_intf[i], slv_reqs[i])
+    `AXI_ASSIGN_TO_RESP(slv_resps[i], slv_intf[i])
+  end
+  for (genvar i = 0; i < NB_MASTER; i++) begin : gen_assign_mst
+    `AXI_ASSIGN_TO_REQ(mst_reqs[i], mst_intf[i])
+    `AXI_ASSIGN_FROM_RESP(mst_intf[i], mst_resps[i])
+  end
   localparam int unsigned MAX_TXNS_PER_SLV_PORT = (DMA_NB_OUTSND_BURSTS > NB_CORES) ?
                                                     DMA_NB_OUTSND_BURSTS : NB_CORES;
-  axi_xbar #(
-    .NoSlvPorts         ( NB_SLAVE                        ),
-    .NoMstPorts         ( NB_MASTER                       ),
-    .MaxMstTrans        ( MAX_TXNS_PER_SLV_PORT           ),
-    .MaxSlvTrans        ( DMA_NB_OUTSND_BURSTS + NB_CORES ),
-    .FallThrough        ( 1'b0                            ),
-    .LatencyMode        ( axi_pkg::CUT_ALL_AX             ),
-    .AxiIdWidthSlvPorts ( AXI_ID_IN_WIDTH                 ),
-    .AxiIdUsedSlvPorts  ( AXI_ID_IN_WIDTH                 ),
-    .AxiAddrWidth       ( AXI_ADDR_WIDTH                  ),
-    .AxiDataWidth       ( AXI_DATA_WIDTH                  ),
-    .NoAddrRules        ( N_RULES                         ),
-    .slv_aw_chan_t      ( slv_aw_chan_t                   ),
-    .mst_aw_chan_t      ( mst_aw_chan_t                   ),
-    .w_chan_t           ( w_chan_t                        ),
-    .slv_b_chan_t       ( slv_b_chan_t                    ),
-    .mst_b_chan_t       ( mst_b_chan_t                    ),
-    .slv_ar_chan_t      ( slv_ar_chan_t                   ),
-    .mst_ar_chan_t      ( mst_ar_chan_t                   ),
-    .slv_r_chan_t       ( slv_r_chan_t                    ),
-    .mst_r_chan_t       ( mst_r_chan_t                    ),
-    .slv_req_t          ( slv_req_t                       ),
-    .slv_resp_t         ( slv_resp_t                      ),
-    .mst_req_t          ( mst_req_t                       ),
-    .mst_resp_t         ( mst_resp_t                      ),
-    .rule_t             ( axi_pkg::xbar_rule_32_t         )
+  axi_xbar_intf #(
+    .AXI_USER_WIDTH         ( AXI_USER_WIDTH                  ),
+    .NO_SLV_PORTS           ( NB_SLAVE                        ),
+    .NO_MST_PORTS           ( NB_MASTER                       ),
+    .MAX_MST_TRANS          ( MAX_TXNS_PER_SLV_PORT           ),
+    .MAX_SLV_TRANS          ( DMA_NB_OUTSND_BURSTS + NB_CORES ),
+    .FALL_THROUGH           ( 1'b0                            ),
+    .LATENCY_MODE           ( axi_pkg::CUT_ALL_AX             ),
+    .AXI_ID_WIDTH_SLV_PORTS ( AXI_ID_IN_WIDTH                 ),
+    .AXI_ID_USED_SLV_PORTS  ( AXI_ID_IN_WIDTH                 ),
+    .AXI_ADDR_WIDTH         ( AXI_ADDR_WIDTH                  ),
+    .AXI_DATA_WIDTH         ( AXI_DATA_WIDTH                  ),
+    .NO_ADDR_RULES          ( N_RULES                         ),
+    .rule_t                 ( axi_pkg::xbar_rule_32_t         )
   ) i_xbar (
     .clk_i,
     .rst_ni,
     .test_i                 (test_en_i),
-    .slv_ports_req_i        (slv_reqs),
-    .slv_ports_resp_o       (slv_resps),
-    .mst_ports_req_o        (mst_reqs),
-    .mst_ports_resp_i       (mst_resps),
+    .slv_ports              (slv_intf),
+    .mst_ports              (mst_intf),
     .addr_map_i             (addr_map),
     .en_default_mst_port_i  ('0), // disable default master port for all slave ports
     .default_mst_port_i     ('0)
