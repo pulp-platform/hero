@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `periph_interconnect`: Fix addressing loop in `0x1020_1C00..0x1020_1FFF` memory range.
   - Remove duplicate definition of `axi_slice_wrap` module.
 - `axi_slice_dc`: Remove duplicate definition of `axi_cdc` module.
+- Remove wildcard imports in `pulp` and `pulp_cluster_ooc` to improve compatibility with tools that
+  cannot correctly resolve import symbol conflicts.
 
 
 ## 2020-04-24
