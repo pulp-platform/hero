@@ -78,7 +78,7 @@ static inline void __prem_dma_memcpy_from_spm_1d(void* ram, void* spm, size_t le
 /////////////////////////////////////////////////
 
 void* global_buffer = NULL;
-DMA_DATA_TYPE alloc_spm(void) {
+DEVICE_PTR alloc_spm(void) {
     void* buffer;
     if (global_buffer == NULL) {
         rt_alloc_t* allocator = rt_alloc_l1(0);
@@ -89,20 +89,28 @@ DMA_DATA_TYPE alloc_spm(void) {
     }
     return buffer;
 }
-void dealloc_spm(DMA_DATA_TYPE ptr) {
+void dealloc_spm(DEVICE_PTR ptr) {
     if(global_buffer == NULL) {
         rt_alloc_t* allocator = rt_alloc_l1(0);
         rt_user_free(allocator, ptr, SPM_SIZE * sizeof(int));
     }
 }
 
-void memcpy_to_spm(DMA_DATA_TYPE spm, void* ram, size_t len) {
-    __prem_dma_memcpy_to_spm_1d(spm, ram, len*4);
+void memcpy_to_spm(DEVICE_PTR spm, HOST_PTR ram, uint32_t len) {
+    if (ram > UINT32_MAX) {
+        printf("DMA cannot handle addresses this wide!\n");
+    } else {
+        __prem_dma_memcpy_to_spm_1d(spm, ram, len*4);
+    }
 }
 
 
-void memcpy_from_spm(void* ram, DMA_DATA_TYPE spm, size_t len) {
-    __prem_dma_memcpy_from_spm_1d(ram, spm, len*4);
+void memcpy_from_spm(HOST_PTR ram, DEVICE_PTR spm, uint32_t len) {
+    if (ram > UINT32_MAX) {
+        printf("DMA cannot handle addresses this wide!\n");
+    } else {
+        __prem_dma_memcpy_from_spm_1d(ram, spm, len*4);
+    }
 }
 
 void dma_flush(void) {

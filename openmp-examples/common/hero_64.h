@@ -128,7 +128,7 @@ inline static void __loop_forever()
   inline static int hero_load_uint ## bits ## _noblock(\
       const uint64_t addr, __device uint ## bits ## _t* const val) { \
     __hero_64_noblock_pre(uint ## bits ## _t) \
-      printf("# loading 0x%llx\n", addr);   \
+    /*printf("# loading 0x%llx\n", addr); */  \
     /*val = *(__device uint ## bits ##_t *)addr; */              \
     /*printf("# value 0x%llx\n", 0);              */              \
     /*return 0; */                                                      \
@@ -210,7 +210,7 @@ uint64_t hero_load_uint64(const uint64_t addr)
   const uint32_t lower = hero_load_uint32(addr);
   const uint32_t upper = hero_load_uint32(addr+4);
   uint64_t ret_val = ((uint64_t)upper << 32) | lower;
-  printf("RET: %x %x %llx\n", lower, upper, ret_val);
+  //printf("RET: %x %x %llx\n", lower, upper, ret_val);
   return ret_val;
 }
 
