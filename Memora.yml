@@ -1,0 +1,149 @@
+cache_root_dir: /usr/scratch/dolent1/gitlabci/buildcache/hero
+
+artifacts:
+  tc-pulp:
+    inputs:
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/pulp.config
+    outputs:
+      - install
+
+  tc-har-olinux:
+    inputs:
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/har-olinux.config
+    outputs:
+      - install
+
+  tc-hrv-olinux:
+    inputs:
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/hrv-olinux.config
+    outputs:
+      - install
+
+  vsim-pulp:
+    inputs:
+      - .gitlab-ci.yml
+      - hardware/Bender.lock
+      - hardware/Bender.yml
+      - hardware/Makefile
+      - hardware/deps
+      - hardware/src
+      - hardware/test
+      - hardware/vsim
+    outputs:
+      - hardware/vsim/work
+
+  sdk-pulp-har-and-sdk-har:
+    inputs:
+      - Makefile
+      # sdk-pulp
+      - pulp
+      # sdk-har
+      - board
+      - buildroot
+      - configs/har_defconfig
+      - package
+      - support
+      - toolchain/install-sdk.sh
+    outputs:
+      - install
+
+  sdk-pulp-hrv-and-sdk-hrv:
+    inputs:
+      - Makefile
+      # sdk-pulp
+      - pulp
+      # sdk-hrv
+      - board
+      - buildroot
+      - configs/hrv_defconfig
+      - package
+      - support
+      - toolchain/install-sdk.sh
+    outputs:
+      - install
+
+  tc-llvm:
+    inputs:
+      - Makefile
+      - toolchain/hc-omp-pass
+      - toolchain/hercules
+      - toolchain/llvm-project
+      - toolchain/setup-llvm.sh
+    outputs:
+      - install
+
+  bitstream-zcu102:
+    inputs:
+      - hardware/Bender.lock
+      - hardware/Bender.yml
+      - hardware/Makefile
+      - hardware/deps
+      - hardware/fpga
+      - hardware/src
+    outputs:
+      - hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1/hero_exilzcu102_wrapper.bit
+      - hardware/fpga/hero_exilzcu102/hero_exilzcu102.sdk/hero_exilzcu102_wrapper.hwdef
+
+  br-har-exilzcu102:
+    inputs:
+      - Makefile
+      - board
+      - buildroot
+      - configs/har_exilzcu102_defconfig
+      - package
+      - support
+      # bitstream-zcu102
+      - hardware/Bender.lock
+      - hardware/Bender.yml
+      - hardware/Makefile
+      - hardware/deps
+      - hardware/fpga
+      - hardware/src
+      # tc-har-olinux
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/har-olinux.config
+    outputs:
+      - output/br-har-exilzcu102/images
+
+  br-hrv-ediggenesys2:
+    inputs:
+      - Makefile
+      - board
+      - buildroot
+      - configs/hrv_ediggenesys2_defconfig
+      - package
+      - support
+      # tc-hrv-olinux
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/hrv-olinux.config
+    outputs:
+      - output/br-hrv-ediggenesys2/images
+
+  br-hrv-eqemu:
+    inputs:
+      - Makefile
+      - board
+      - buildroot
+      - configs/hrv_eqemu_defconfig
+      - package
+      - support
+      # tc-hrv-olinux
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/hrv-olinux.config
+    outputs:
+      - output/br-hrv-eqemu/images
