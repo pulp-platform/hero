@@ -1,6 +1,7 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   HERO_INSTALL: '$CI_PROJECT_DIR/install'
+  RUST_LOG: 'memora=debug'
 
 before_script:
   - env
