@@ -32,28 +32,24 @@
 //                 control for special cases                                  //
 ////////////////////////////////////////////////////////////////////////////////
 
-import defs_div_sqrt_mvp::*;
-
 module div_sqrt_top_mvp
 
   (//Input
-   input logic                            Clk_CI,
-   input logic                            Rst_RBI,
-   input logic                            Div_start_SI,
-   input logic                            Sqrt_start_SI,
-
+   input logic                                     Clk_CI,
+   input logic                                     Rst_RBI,
+   input logic                                     Div_start_SI,
+   input logic                                     Sqrt_start_SI,
    //Input Operands
-   input logic [C_OP_FP64-1:0]            Operand_a_DI,
-   input logic [C_OP_FP64-1:0]            Operand_b_DI,
-
+   input logic [defs_div_sqrt_mvp::C_OP_FP64-1:0]  Operand_a_DI,
+   input logic [defs_div_sqrt_mvp::C_OP_FP64-1:0]  Operand_b_DI,
    // Input Control
-   input logic [C_RM-1:0]                 RM_SI,    //Rounding Mode
-   input logic [C_PC-1:0]                 Precision_ctl_SI, // Precision Control
-   input logic [C_FS-1:0]                 Format_sel_SI,  // Format Selection,
-   input logic                            Kill_SI,
+   input logic [defs_div_sqrt_mvp::C_RM-1:0]       RM_SI,    //Rounding Mode
+   input logic [defs_div_sqrt_mvp::C_PC-1:0]       Precision_ctl_SI, // Precision Control
+   input logic [defs_div_sqrt_mvp::C_FS-1:0]       Format_sel_SI,  // Format Selection,
+   input logic                                     Kill_SI,
 
    //Output Result
-   output logic [C_OP_FP64-1:0]           Result_DO,
+   output logic [defs_div_sqrt_mvp::C_OP_FP64-1:0] Result_DO,
 
    //Output-Flags
    output logic [4:0]                     Fflags_SO,
@@ -66,26 +62,25 @@ module div_sqrt_top_mvp
 
 
    //Operand components
-   logic [C_EXP_FP64:0]                 Exp_a_D;
-   logic [C_EXP_FP64:0]                 Exp_b_D;
-   logic [C_MANT_FP64:0]                Mant_a_D;
-   logic [C_MANT_FP64:0]                Mant_b_D;
-
-   logic [C_EXP_FP64+1:0]               Exp_z_D;
-   logic [C_MANT_FP64+4:0]              Mant_z_D;
-   logic                                Sign_z_D;
-   logic                                Start_S;
-   logic [C_RM-1:0]                     RM_dly_S;
-   logic                                Div_enable_S;
-   logic                                Sqrt_enable_S;
-   logic                                Inf_a_S;
-   logic                                Inf_b_S;
-   logic                                Zero_a_S;
-   logic                                Zero_b_S;
-   logic                                NaN_a_S;
-   logic                                NaN_b_S;
-   logic                                SNaN_S;
-   logic                                Special_case_SB,Special_case_dly_SB;
+   logic [defs_div_sqrt_mvp::C_EXP_FP64:0]    Exp_a_D;
+   logic [defs_div_sqrt_mvp::C_EXP_FP64:0]    Exp_b_D;
+   logic [defs_div_sqrt_mvp::C_MANT_FP64:0]   Mant_a_D;
+   logic [defs_div_sqrt_mvp::C_MANT_FP64:0]   Mant_b_D;
+   logic [defs_div_sqrt_mvp::C_EXP_FP64+1:0]  Exp_z_D;
+   logic [defs_div_sqrt_mvp::C_MANT_FP64+4:0] Mant_z_D;
+   logic                                      Sign_z_D;
+   logic                                      Start_S;
+   logic [defs_div_sqrt_mvp::C_RM-1:0]        RM_dly_S;
+   logic                                      Div_enable_S;
+   logic                                      Sqrt_enable_S;
+   logic                                      Inf_a_S;
+   logic                                      Inf_b_S;
+   logic                                      Zero_a_S;
+   logic                                      Zero_b_S;
+   logic                                      NaN_a_S;
+   logic                                      NaN_b_S;
+   logic                                      SNaN_S;
+   logic                                      Special_case_SB,Special_case_dly_SB;
 
    logic Full_precision_S;
    logic FP32_S;

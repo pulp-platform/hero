@@ -31,38 +31,35 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-import defs_div_sqrt_mvp::*;
-
 module nrbd_nrsc_mvp
 
   (//Input
-   input logic                                 Clk_CI,
-   input logic                                 Rst_RBI,
-   input logic                                 Div_start_SI,
-   input logic                                 Sqrt_start_SI,
-   input logic                                 Start_SI,
-   input logic                                 Kill_SI,
-   input logic                                 Special_case_SBI,
-   input logic                                 Special_case_dly_SBI,
-   input logic [C_PC-1:0]                      Precision_ctl_SI,
-   input logic [1:0]                           Format_sel_SI,
-   input logic [C_MANT_FP64:0]                 Mant_a_DI,
-   input logic [C_MANT_FP64:0]                 Mant_b_DI,
-   input logic [C_EXP_FP64:0]                  Exp_a_DI,
-   input logic [C_EXP_FP64:0]                  Exp_b_DI,
+   input logic                                        Clk_CI,
+   input logic                                        Rst_RBI,
+   input logic                                        Div_start_SI,
+   input logic                                        Sqrt_start_SI,
+   input logic                                        Start_SI,
+   input logic                                        Kill_SI,
+   input logic                                        Special_case_SBI,
+   input logic                                        Special_case_dly_SBI,
+   input logic [defs_div_sqrt_mvp::C_PC-1:0]          Precision_ctl_SI,
+   input logic [1:0]                                  Format_sel_SI,
+   input logic [defs_div_sqrt_mvp::C_MANT_FP64:0]     Mant_a_DI,
+   input logic [defs_div_sqrt_mvp::C_MANT_FP64:0]     Mant_b_DI,
+   input logic [defs_div_sqrt_mvp::C_EXP_FP64:0]      Exp_a_DI,
+   input logic [defs_div_sqrt_mvp::C_EXP_FP64:0]      Exp_b_DI,
   //output
-   output logic                                Div_enable_SO,
-   output logic                                Sqrt_enable_SO,
-
-   output logic                                Full_precision_SO,
-   output logic                                FP32_SO,
-   output logic                                FP64_SO,
-   output logic                                FP16_SO,
-   output logic                                FP16ALT_SO,
-   output logic                                Ready_SO,
-   output logic                                Done_SO,
-   output logic  [C_MANT_FP64+4:0]             Mant_z_DO,
-   output logic [C_EXP_FP64+1:0]               Exp_z_DO
+   output logic                                       Div_enable_SO,
+   output logic                                       Sqrt_enable_SO,
+   output logic                                       Full_precision_SO,
+   output logic                                       FP32_SO,
+   output logic                                       FP64_SO,
+   output logic                                       FP16_SO,
+   output logic                                       FP16ALT_SO,
+   output logic                                       Ready_SO,
+   output logic                                       Done_SO,
+   output logic  [defs_div_sqrt_mvp::C_MANT_FP64+4:0] Mant_z_DO,
+   output logic [defs_div_sqrt_mvp::C_EXP_FP64+1:0]   Exp_z_DO
     );
 
 
