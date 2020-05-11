@@ -23,6 +23,7 @@ tc-pulp:
     - >
       if ! memora lookup tc-pulp; then
         make tc-pulp
+        chmod -R u+w $HERO_INSTALL
         memora insert tc-pulp
       fi
 
@@ -32,6 +33,7 @@ tc-har-olinux:
     - >
       if ! memora lookup tc-har-olinux; then
         make tc-har-olinux
+        chmod -R u+w $HERO_INSTALL
         memora insert tc-har-olinux
       fi
 
@@ -41,6 +43,7 @@ tc-hrv-olinux:
     - >
       if ! memora lookup tc-hrv-olinux; then
         make tc-hrv-olinux
+        chmod -R u+w $HERO_INSTALL
         memora insert tc-hrv-olinux
       fi
 
