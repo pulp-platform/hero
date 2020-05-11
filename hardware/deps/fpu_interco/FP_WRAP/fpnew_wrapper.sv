@@ -40,9 +40,6 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-
-
-import riscv_defines::*;
 // `define DUMMY_FPNEW
 
 module fpnew_wrapper
@@ -122,20 +119,20 @@ module fpnew_wrapper
         // -----------
         // Features (enabled formats, vectors etc.)
         localparam fpnew_pkg::fpu_features_t FPU_FEATURES = '{
-          Width:         C_FLEN,
-          EnableVectors: C_XFVEC,
+          Width:         riscv_defines::C_FLEN,
+          EnableVectors: riscv_defines::C_XFVEC,
           EnableNanBox:  1'b0,
-          FpFmtMask:     {C_RVF, C_RVD, C_XF16, C_XF8, C_XF16ALT},
-          IntFmtMask:    {C_XFVEC && C_XF8, C_XFVEC && (C_XF16 || C_XF16ALT), 1'b1, 1'b0}
+          FpFmtMask:     {riscv_defines::C_RVF, riscv_defines::C_RVD, riscv_defines::C_XF16, riscv_defines::C_XF8, riscv_defines::C_XF16ALT},
+          IntFmtMask:    {riscv_defines::C_XFVEC && riscv_defines::C_XF8, riscv_defines::C_XFVEC && (riscv_defines::C_XF16 || riscv_defines::C_XF16ALT), 1'b1, 1'b0}
         };
 
         // Implementation (number of registers etc)
         localparam fpnew_pkg::fpu_implementation_t FPU_IMPLEMENTATION = '{
           PipeRegs:  '{// FP32, FP64, FP16, FP8, FP16alt
-                       '{C_LAT_FP32, C_LAT_FP64, C_LAT_FP16, C_LAT_FP8, C_LAT_FP16ALT}, // ADDMUL
-                       '{default: C_LAT_DIVSQRT}, // DIVSQRT
-                       '{default: C_LAT_NONCOMP}, // NONCOMP
-                       '{default: C_LAT_CONV}},   // CONV
+                       '{riscv_defines::C_LAT_FP32, riscv_defines::C_LAT_FP64, riscv_defines::C_LAT_FP16, riscv_defines::C_LAT_FP8, riscv_defines::C_LAT_FP16ALT}, // ADDMUL
+                       '{default: riscv_defines::C_LAT_DIVSQRT}, // DIVSQRT
+                       '{default: riscv_defines::C_LAT_NONCOMP}, // NONCOMP
+                       '{default: riscv_defines::C_LAT_CONV}},   // CONV
           UnitTypes: '{'{default: fpnew_pkg::PARALLEL}, // ADDMUL
                        '{default: C_DIV},               // DIVSQRT
                        '{default: fpnew_pkg::PARALLEL}, // NONCOMP
