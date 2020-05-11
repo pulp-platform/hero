@@ -69,7 +69,7 @@ sdk-pulp-and-sdk-har:
       fi
     - memora get tc-pulp
     - memora get tc-har-olinux
-    - make sdk-pulp-har
+    - make sdk-pulp # TODO: `sdk-pulp-har` does not seem to work?
     - make sdk-har
     - memora insert sdk-pulp-har-and-sdk-har
 
