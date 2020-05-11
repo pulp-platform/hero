@@ -91,6 +91,7 @@ package fpnew_pkg;
       INT16: return 16;
       INT32: return 32;
       INT64: return 64;
+      default: 32;
     endcase
   endfunction
 
