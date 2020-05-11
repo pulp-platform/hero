@@ -840,7 +840,7 @@ artifacts:
       - hardware/src
     outputs:
       - hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1/hero_exilzcu102_wrapper.bit
-      - hardware/fpga/hero_exilzcu102/hero_exilzcu102.sdk/hero_exilzcu102_wrapper.hwdef
+      - hardware/fpga/hero_exilzcu102/hero_exilzcu102.sdk/hero_exilzcu102_wrapper.hdf
 
   br-har-exilzcu102:
     inputs:
