@@ -241,7 +241,7 @@ generate
 
 `ifdef FEATURE_ICACHE_STAT
      assign perf_cnt_enable = { {(32-NB_CACHE_BANKS-NB_CORES){1'b0}}, {r_enable_cnt} };
-     for(index=0; index<16; index++)
+     for(index=0; index<NB_CORES; index++)
      begin : PERF_CNT_BINDING
 
         always @(*)
