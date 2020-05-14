@@ -233,7 +233,7 @@ module core_demux
 
             {1'bx, DEM_PER},
             {1'b1, CLUSTER_ALIAS_DEM_PER}: begin
-              if (data_add_int[14]) begin // DEMUX PERIPHERALS
+              if (data_add_int[19:10] == 10'b0000010000) begin // DEMUX PERIPHERALS
                 request_destination <= EXT;
               end else begin
                 request_destination <= PE;
@@ -290,7 +290,7 @@ module core_demux
 
           {1'bx, DEM_PER},
           {1'b1, CLUSTER_ALIAS_DEM_PER}: begin
-            if(data_add_int[14]) begin // DEMUX PERIPHERALS
+            if(data_add_int[19:10] == 10'b0000010000) begin // DEMUX PERIPHERALS
               destination  = EXT;
             end else begin
               destination  = PE;
@@ -383,7 +383,7 @@ module core_demux
           data_gnt_from_L2 = s_data_gnt_PE;
         end
       end else begin
-        if (data_add_int[14] && (
+        if ((data_add_int[19:10] == 10'b0000010000) && (
           data_add_int[31:20] == DEM_PER ||
           (CLUSTER_ALIAS && data_add_int[31:20] == CLUSTER_ALIAS_DEM_PER)
         )) begin: _TO_DEMUX_PERIPH_ //Peripheral --> add_i[31:0] --> 0x1020_4000 to 0x1020_7FFF
