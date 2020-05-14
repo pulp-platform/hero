@@ -1006,17 +1006,7 @@ module riscv_id_stage
     // Write port b
     .waddr_b_i          ( regfile_alu_waddr_fw_i ),
     .wdata_b_i          ( regfile_alu_wdata_fw_i ),
-    .we_b_i             ( regfile_alu_we_fw_i ),
-
-     // BIST ENABLE
-     .BIST        ( 1'b0                ), // PLEASE CONNECT ME;
-
-     // BIST ports
-     .CSN_T       (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-     .WEN_T       (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-     .A_T         (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-     .D_T         (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-     .Q_T         (                     )
+    .we_b_i             ( regfile_alu_we_fw_i    )
   );
 
 
