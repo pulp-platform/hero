@@ -51,7 +51,7 @@ module cluster_peripherals
 
   output logic                        busy_o,
 
-  XBAR_PERIPH_BUS.Slave               speriph_slave[NB_SPERIPHS-1:0],
+  XBAR_PERIPH_BUS.Slave               speriph_slave[NB_SPERIPHS-2:0],
   XBAR_PERIPH_BUS.Slave               core_eu_direct_link[NB_CORES-1:0],
 
   XBAR_PERIPH_BUS.Master              dma_cfg_master,

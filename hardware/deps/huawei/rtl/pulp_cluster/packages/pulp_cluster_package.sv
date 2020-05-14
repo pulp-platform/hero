@@ -29,8 +29,8 @@ package pulp_cluster_package;
   parameter SPER_HWPE_ID     = 4;
   parameter SPER_ICACHE_CTRL = 5;
   parameter SPER_DMA_CL_ID   = 6;
-  parameter SPER_EXT_ID      = 7;
-  parameter SPER_ERROR_ID    = 8;
+  parameter SPER_ERROR_ID    = 7;
+  parameter SPER_EXT_ID      = 8;
   // // if set to 1, the 0x0000_0000 to 0x0040_0000 is the alias of the current cluster address space (eg cluster 0 is from  0x1000_0000 to 0x1040_0000)
   // parameter CLUSTER_ALIAS = 1;
   
