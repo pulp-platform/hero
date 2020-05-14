@@ -79,6 +79,7 @@ artifacts:
       - toolchain/patches
       - toolchain/har-olinux.config
     outputs:
+      - install/aarch64-none-linux-gnu
       - install/bin/aarch64-hero-linux-gnu-addr2line
       - install/bin/aarch64-hero-linux-gnu-addr2line.br_real
       - install/bin/aarch64-hero-linux-gnu-ar
@@ -87,10 +88,10 @@ artifacts:
       - install/bin/aarch64-hero-linux-gnu-as.br_real
       - install/bin/aarch64-hero-linux-gnu-c++
       - install/bin/aarch64-hero-linux-gnu-c++.br_real
-      - install/bin/aarch64-hero-linux-gnu-cc
-      - install/bin/aarch64-hero-linux-gnu-cc.br_real
       - install/bin/aarch64-hero-linux-gnu-c++filt
       - install/bin/aarch64-hero-linux-gnu-c++filt.br_real
+      - install/bin/aarch64-hero-linux-gnu-cc
+      - install/bin/aarch64-hero-linux-gnu-cc.br_real
       - install/bin/aarch64-hero-linux-gnu-cpp
       - install/bin/aarch64-hero-linux-gnu-cpp.br_real
       - install/bin/aarch64-hero-linux-gnu-ct-ng.config
@@ -104,17 +105,17 @@ artifacts:
       - install/bin/aarch64-hero-linux-gnu-gcc-8.3.0.br_real
       - install/bin/aarch64-hero-linux-gnu-gcc-ar
       - install/bin/aarch64-hero-linux-gnu-gcc-ar.br_real
-      - install/bin/aarch64-hero-linux-gnu-gcc.br_real
       - install/bin/aarch64-hero-linux-gnu-gcc-nm
       - install/bin/aarch64-hero-linux-gnu-gcc-nm.br_real
       - install/bin/aarch64-hero-linux-gnu-gcc-ranlib
       - install/bin/aarch64-hero-linux-gnu-gcc-ranlib.br_real
+      - install/bin/aarch64-hero-linux-gnu-gcc.br_real
       - install/bin/aarch64-hero-linux-gnu-gcov
-      - install/bin/aarch64-hero-linux-gnu-gcov.br_real
       - install/bin/aarch64-hero-linux-gnu-gcov-dump
       - install/bin/aarch64-hero-linux-gnu-gcov-dump.br_real
       - install/bin/aarch64-hero-linux-gnu-gcov-tool
       - install/bin/aarch64-hero-linux-gnu-gcov-tool.br_real
+      - install/bin/aarch64-hero-linux-gnu-gcov.br_real
       - install/bin/aarch64-hero-linux-gnu-gprof
       - install/bin/aarch64-hero-linux-gnu-gprof.br_real
       - install/bin/aarch64-hero-linux-gnu-ld
@@ -149,10 +150,10 @@ artifacts:
       - install/bin/aarch64-none-linux-gnu-as.br_real
       - install/bin/aarch64-none-linux-gnu-c++
       - install/bin/aarch64-none-linux-gnu-c++.br_real
-      - install/bin/aarch64-none-linux-gnu-cc
-      - install/bin/aarch64-none-linux-gnu-cc.br_real
       - install/bin/aarch64-none-linux-gnu-c++filt
       - install/bin/aarch64-none-linux-gnu-c++filt.br_real
+      - install/bin/aarch64-none-linux-gnu-cc
+      - install/bin/aarch64-none-linux-gnu-cc.br_real
       - install/bin/aarch64-none-linux-gnu-cpp
       - install/bin/aarch64-none-linux-gnu-cpp.br_real
       - install/bin/aarch64-none-linux-gnu-ct-ng.config
@@ -166,17 +167,17 @@ artifacts:
       - install/bin/aarch64-none-linux-gnu-gcc-8.3.0.br_real
       - install/bin/aarch64-none-linux-gnu-gcc-ar
       - install/bin/aarch64-none-linux-gnu-gcc-ar.br_real
-      - install/bin/aarch64-none-linux-gnu-gcc.br_real
       - install/bin/aarch64-none-linux-gnu-gcc-nm
       - install/bin/aarch64-none-linux-gnu-gcc-nm.br_real
       - install/bin/aarch64-none-linux-gnu-gcc-ranlib
       - install/bin/aarch64-none-linux-gnu-gcc-ranlib.br_real
+      - install/bin/aarch64-none-linux-gnu-gcc.br_real
       - install/bin/aarch64-none-linux-gnu-gcov
-      - install/bin/aarch64-none-linux-gnu-gcov.br_real
       - install/bin/aarch64-none-linux-gnu-gcov-dump
       - install/bin/aarch64-none-linux-gnu-gcov-dump.br_real
       - install/bin/aarch64-none-linux-gnu-gcov-tool
       - install/bin/aarch64-none-linux-gnu-gcov-tool.br_real
+      - install/bin/aarch64-none-linux-gnu-gcov.br_real
       - install/bin/aarch64-none-linux-gnu-gprof
       - install/bin/aarch64-none-linux-gnu-gprof.br_real
       - install/bin/aarch64-none-linux-gnu-ld
@@ -204,73 +205,6 @@ artifacts:
       - install/bin/aarch64-none-linux-gnu-strip
       - install/bin/aarch64-none-linux-gnu-strip.br_real
       - install/lib/gcc/aarch64-none-linux-gnu
-      - install/libexec/gcc/aarch64-none-linux-gnu
-      - install/lib/ldscripts/aarch64elf32b.x
-      - install/lib/ldscripts/aarch64elf32b.xbn
-      - install/lib/ldscripts/aarch64elf32b.xc
-      - install/lib/ldscripts/aarch64elf32b.xce
-      - install/lib/ldscripts/aarch64elf32b.xd
-      - install/lib/ldscripts/aarch64elf32b.xdc
-      - install/lib/ldscripts/aarch64elf32b.xdce
-      - install/lib/ldscripts/aarch64elf32b.xde
-      - install/lib/ldscripts/aarch64elf32b.xdw
-      - install/lib/ldscripts/aarch64elf32b.xdwe
-      - install/lib/ldscripts/aarch64elf32b.xe
-      - install/lib/ldscripts/aarch64elf32b.xn
-      - install/lib/ldscripts/aarch64elf32b.xr
-      - install/lib/ldscripts/aarch64elf32b.xs
-      - install/lib/ldscripts/aarch64elf32b.xsc
-      - install/lib/ldscripts/aarch64elf32b.xsce
-      - install/lib/ldscripts/aarch64elf32b.xse
-      - install/lib/ldscripts/aarch64elf32b.xsw
-      - install/lib/ldscripts/aarch64elf32b.xswe
-      - install/lib/ldscripts/aarch64elf32b.xu
-      - install/lib/ldscripts/aarch64elf32b.xw
-      - install/lib/ldscripts/aarch64elf32b.xwe
-      - install/lib/ldscripts/aarch64elf32.x
-      - install/lib/ldscripts/aarch64elf32.xbn
-      - install/lib/ldscripts/aarch64elf32.xc
-      - install/lib/ldscripts/aarch64elf32.xce
-      - install/lib/ldscripts/aarch64elf32.xd
-      - install/lib/ldscripts/aarch64elf32.xdc
-      - install/lib/ldscripts/aarch64elf32.xdce
-      - install/lib/ldscripts/aarch64elf32.xde
-      - install/lib/ldscripts/aarch64elf32.xdw
-      - install/lib/ldscripts/aarch64elf32.xdwe
-      - install/lib/ldscripts/aarch64elf32.xe
-      - install/lib/ldscripts/aarch64elf32.xn
-      - install/lib/ldscripts/aarch64elf32.xr
-      - install/lib/ldscripts/aarch64elf32.xs
-      - install/lib/ldscripts/aarch64elf32.xsc
-      - install/lib/ldscripts/aarch64elf32.xsce
-      - install/lib/ldscripts/aarch64elf32.xse
-      - install/lib/ldscripts/aarch64elf32.xsw
-      - install/lib/ldscripts/aarch64elf32.xswe
-      - install/lib/ldscripts/aarch64elf32.xu
-      - install/lib/ldscripts/aarch64elf32.xw
-      - install/lib/ldscripts/aarch64elf32.xwe
-      - install/lib/ldscripts/aarch64elfb.x
-      - install/lib/ldscripts/aarch64elfb.xbn
-      - install/lib/ldscripts/aarch64elfb.xc
-      - install/lib/ldscripts/aarch64elfb.xce
-      - install/lib/ldscripts/aarch64elfb.xd
-      - install/lib/ldscripts/aarch64elfb.xdc
-      - install/lib/ldscripts/aarch64elfb.xdce
-      - install/lib/ldscripts/aarch64elfb.xde
-      - install/lib/ldscripts/aarch64elfb.xdw
-      - install/lib/ldscripts/aarch64elfb.xdwe
-      - install/lib/ldscripts/aarch64elfb.xe
-      - install/lib/ldscripts/aarch64elfb.xn
-      - install/lib/ldscripts/aarch64elfb.xr
-      - install/lib/ldscripts/aarch64elfb.xs
-      - install/lib/ldscripts/aarch64elfb.xsc
-      - install/lib/ldscripts/aarch64elfb.xsce
-      - install/lib/ldscripts/aarch64elfb.xse
-      - install/lib/ldscripts/aarch64elfb.xsw
-      - install/lib/ldscripts/aarch64elfb.xswe
-      - install/lib/ldscripts/aarch64elfb.xu
-      - install/lib/ldscripts/aarch64elfb.xw
-      - install/lib/ldscripts/aarch64elfb.xwe
       - install/lib/ldscripts/aarch64elf.x
       - install/lib/ldscripts/aarch64elf.xbn
       - install/lib/ldscripts/aarch64elf.xc
@@ -293,72 +227,72 @@ artifacts:
       - install/lib/ldscripts/aarch64elf.xu
       - install/lib/ldscripts/aarch64elf.xw
       - install/lib/ldscripts/aarch64elf.xwe
-      - install/lib/ldscripts/aarch64linux32b.x
-      - install/lib/ldscripts/aarch64linux32b.xbn
-      - install/lib/ldscripts/aarch64linux32b.xc
-      - install/lib/ldscripts/aarch64linux32b.xce
-      - install/lib/ldscripts/aarch64linux32b.xd
-      - install/lib/ldscripts/aarch64linux32b.xdc
-      - install/lib/ldscripts/aarch64linux32b.xdce
-      - install/lib/ldscripts/aarch64linux32b.xde
-      - install/lib/ldscripts/aarch64linux32b.xdw
-      - install/lib/ldscripts/aarch64linux32b.xdwe
-      - install/lib/ldscripts/aarch64linux32b.xe
-      - install/lib/ldscripts/aarch64linux32b.xn
-      - install/lib/ldscripts/aarch64linux32b.xr
-      - install/lib/ldscripts/aarch64linux32b.xs
-      - install/lib/ldscripts/aarch64linux32b.xsc
-      - install/lib/ldscripts/aarch64linux32b.xsce
-      - install/lib/ldscripts/aarch64linux32b.xse
-      - install/lib/ldscripts/aarch64linux32b.xsw
-      - install/lib/ldscripts/aarch64linux32b.xswe
-      - install/lib/ldscripts/aarch64linux32b.xu
-      - install/lib/ldscripts/aarch64linux32b.xw
-      - install/lib/ldscripts/aarch64linux32b.xwe
-      - install/lib/ldscripts/aarch64linux32.x
-      - install/lib/ldscripts/aarch64linux32.xbn
-      - install/lib/ldscripts/aarch64linux32.xc
-      - install/lib/ldscripts/aarch64linux32.xce
-      - install/lib/ldscripts/aarch64linux32.xd
-      - install/lib/ldscripts/aarch64linux32.xdc
-      - install/lib/ldscripts/aarch64linux32.xdce
-      - install/lib/ldscripts/aarch64linux32.xde
-      - install/lib/ldscripts/aarch64linux32.xdw
-      - install/lib/ldscripts/aarch64linux32.xdwe
-      - install/lib/ldscripts/aarch64linux32.xe
-      - install/lib/ldscripts/aarch64linux32.xn
-      - install/lib/ldscripts/aarch64linux32.xr
-      - install/lib/ldscripts/aarch64linux32.xs
-      - install/lib/ldscripts/aarch64linux32.xsc
-      - install/lib/ldscripts/aarch64linux32.xsce
-      - install/lib/ldscripts/aarch64linux32.xse
-      - install/lib/ldscripts/aarch64linux32.xsw
-      - install/lib/ldscripts/aarch64linux32.xswe
-      - install/lib/ldscripts/aarch64linux32.xu
-      - install/lib/ldscripts/aarch64linux32.xw
-      - install/lib/ldscripts/aarch64linux32.xwe
-      - install/lib/ldscripts/aarch64linuxb.x
-      - install/lib/ldscripts/aarch64linuxb.xbn
-      - install/lib/ldscripts/aarch64linuxb.xc
-      - install/lib/ldscripts/aarch64linuxb.xce
-      - install/lib/ldscripts/aarch64linuxb.xd
-      - install/lib/ldscripts/aarch64linuxb.xdc
-      - install/lib/ldscripts/aarch64linuxb.xdce
-      - install/lib/ldscripts/aarch64linuxb.xde
-      - install/lib/ldscripts/aarch64linuxb.xdw
-      - install/lib/ldscripts/aarch64linuxb.xdwe
-      - install/lib/ldscripts/aarch64linuxb.xe
-      - install/lib/ldscripts/aarch64linuxb.xn
-      - install/lib/ldscripts/aarch64linuxb.xr
-      - install/lib/ldscripts/aarch64linuxb.xs
-      - install/lib/ldscripts/aarch64linuxb.xsc
-      - install/lib/ldscripts/aarch64linuxb.xsce
-      - install/lib/ldscripts/aarch64linuxb.xse
-      - install/lib/ldscripts/aarch64linuxb.xsw
-      - install/lib/ldscripts/aarch64linuxb.xswe
-      - install/lib/ldscripts/aarch64linuxb.xu
-      - install/lib/ldscripts/aarch64linuxb.xw
-      - install/lib/ldscripts/aarch64linuxb.xwe
+      - install/lib/ldscripts/aarch64elf32.x
+      - install/lib/ldscripts/aarch64elf32.xbn
+      - install/lib/ldscripts/aarch64elf32.xc
+      - install/lib/ldscripts/aarch64elf32.xce
+      - install/lib/ldscripts/aarch64elf32.xd
+      - install/lib/ldscripts/aarch64elf32.xdc
+      - install/lib/ldscripts/aarch64elf32.xdce
+      - install/lib/ldscripts/aarch64elf32.xde
+      - install/lib/ldscripts/aarch64elf32.xdw
+      - install/lib/ldscripts/aarch64elf32.xdwe
+      - install/lib/ldscripts/aarch64elf32.xe
+      - install/lib/ldscripts/aarch64elf32.xn
+      - install/lib/ldscripts/aarch64elf32.xr
+      - install/lib/ldscripts/aarch64elf32.xs
+      - install/lib/ldscripts/aarch64elf32.xsc
+      - install/lib/ldscripts/aarch64elf32.xsce
+      - install/lib/ldscripts/aarch64elf32.xse
+      - install/lib/ldscripts/aarch64elf32.xsw
+      - install/lib/ldscripts/aarch64elf32.xswe
+      - install/lib/ldscripts/aarch64elf32.xu
+      - install/lib/ldscripts/aarch64elf32.xw
+      - install/lib/ldscripts/aarch64elf32.xwe
+      - install/lib/ldscripts/aarch64elf32b.x
+      - install/lib/ldscripts/aarch64elf32b.xbn
+      - install/lib/ldscripts/aarch64elf32b.xc
+      - install/lib/ldscripts/aarch64elf32b.xce
+      - install/lib/ldscripts/aarch64elf32b.xd
+      - install/lib/ldscripts/aarch64elf32b.xdc
+      - install/lib/ldscripts/aarch64elf32b.xdce
+      - install/lib/ldscripts/aarch64elf32b.xde
+      - install/lib/ldscripts/aarch64elf32b.xdw
+      - install/lib/ldscripts/aarch64elf32b.xdwe
+      - install/lib/ldscripts/aarch64elf32b.xe
+      - install/lib/ldscripts/aarch64elf32b.xn
+      - install/lib/ldscripts/aarch64elf32b.xr
+      - install/lib/ldscripts/aarch64elf32b.xs
+      - install/lib/ldscripts/aarch64elf32b.xsc
+      - install/lib/ldscripts/aarch64elf32b.xsce
+      - install/lib/ldscripts/aarch64elf32b.xse
+      - install/lib/ldscripts/aarch64elf32b.xsw
+      - install/lib/ldscripts/aarch64elf32b.xswe
+      - install/lib/ldscripts/aarch64elf32b.xu
+      - install/lib/ldscripts/aarch64elf32b.xw
+      - install/lib/ldscripts/aarch64elf32b.xwe
+      - install/lib/ldscripts/aarch64elfb.x
+      - install/lib/ldscripts/aarch64elfb.xbn
+      - install/lib/ldscripts/aarch64elfb.xc
+      - install/lib/ldscripts/aarch64elfb.xce
+      - install/lib/ldscripts/aarch64elfb.xd
+      - install/lib/ldscripts/aarch64elfb.xdc
+      - install/lib/ldscripts/aarch64elfb.xdce
+      - install/lib/ldscripts/aarch64elfb.xde
+      - install/lib/ldscripts/aarch64elfb.xdw
+      - install/lib/ldscripts/aarch64elfb.xdwe
+      - install/lib/ldscripts/aarch64elfb.xe
+      - install/lib/ldscripts/aarch64elfb.xn
+      - install/lib/ldscripts/aarch64elfb.xr
+      - install/lib/ldscripts/aarch64elfb.xs
+      - install/lib/ldscripts/aarch64elfb.xsc
+      - install/lib/ldscripts/aarch64elfb.xsce
+      - install/lib/ldscripts/aarch64elfb.xse
+      - install/lib/ldscripts/aarch64elfb.xsw
+      - install/lib/ldscripts/aarch64elfb.xswe
+      - install/lib/ldscripts/aarch64elfb.xu
+      - install/lib/ldscripts/aarch64elfb.xw
+      - install/lib/ldscripts/aarch64elfb.xwe
       - install/lib/ldscripts/aarch64linux.x
       - install/lib/ldscripts/aarch64linux.xbn
       - install/lib/ldscripts/aarch64linux.xc
@@ -381,72 +315,72 @@ artifacts:
       - install/lib/ldscripts/aarch64linux.xu
       - install/lib/ldscripts/aarch64linux.xw
       - install/lib/ldscripts/aarch64linux.xwe
-      - install/lib/ldscripts/armelfb_linux_eabi.x
-      - install/lib/ldscripts/armelfb_linux_eabi.xbn
-      - install/lib/ldscripts/armelfb_linux_eabi.xc
-      - install/lib/ldscripts/armelfb_linux_eabi.xce
-      - install/lib/ldscripts/armelfb_linux_eabi.xd
-      - install/lib/ldscripts/armelfb_linux_eabi.xdc
-      - install/lib/ldscripts/armelfb_linux_eabi.xdce
-      - install/lib/ldscripts/armelfb_linux_eabi.xde
-      - install/lib/ldscripts/armelfb_linux_eabi.xdw
-      - install/lib/ldscripts/armelfb_linux_eabi.xdwe
-      - install/lib/ldscripts/armelfb_linux_eabi.xe
-      - install/lib/ldscripts/armelfb_linux_eabi.xn
-      - install/lib/ldscripts/armelfb_linux_eabi.xr
-      - install/lib/ldscripts/armelfb_linux_eabi.xs
-      - install/lib/ldscripts/armelfb_linux_eabi.xsc
-      - install/lib/ldscripts/armelfb_linux_eabi.xsce
-      - install/lib/ldscripts/armelfb_linux_eabi.xse
-      - install/lib/ldscripts/armelfb_linux_eabi.xsw
-      - install/lib/ldscripts/armelfb_linux_eabi.xswe
-      - install/lib/ldscripts/armelfb_linux_eabi.xu
-      - install/lib/ldscripts/armelfb_linux_eabi.xw
-      - install/lib/ldscripts/armelfb_linux_eabi.xwe
-      - install/lib/ldscripts/armelfb.x
-      - install/lib/ldscripts/armelfb.xbn
-      - install/lib/ldscripts/armelfb.xc
-      - install/lib/ldscripts/armelfb.xce
-      - install/lib/ldscripts/armelfb.xd
-      - install/lib/ldscripts/armelfb.xdc
-      - install/lib/ldscripts/armelfb.xdce
-      - install/lib/ldscripts/armelfb.xde
-      - install/lib/ldscripts/armelfb.xdw
-      - install/lib/ldscripts/armelfb.xdwe
-      - install/lib/ldscripts/armelfb.xe
-      - install/lib/ldscripts/armelfb.xn
-      - install/lib/ldscripts/armelfb.xr
-      - install/lib/ldscripts/armelfb.xs
-      - install/lib/ldscripts/armelfb.xsc
-      - install/lib/ldscripts/armelfb.xsce
-      - install/lib/ldscripts/armelfb.xse
-      - install/lib/ldscripts/armelfb.xsw
-      - install/lib/ldscripts/armelfb.xswe
-      - install/lib/ldscripts/armelfb.xu
-      - install/lib/ldscripts/armelfb.xw
-      - install/lib/ldscripts/armelfb.xwe
-      - install/lib/ldscripts/armelf_linux_eabi.x
-      - install/lib/ldscripts/armelf_linux_eabi.xbn
-      - install/lib/ldscripts/armelf_linux_eabi.xc
-      - install/lib/ldscripts/armelf_linux_eabi.xce
-      - install/lib/ldscripts/armelf_linux_eabi.xd
-      - install/lib/ldscripts/armelf_linux_eabi.xdc
-      - install/lib/ldscripts/armelf_linux_eabi.xdce
-      - install/lib/ldscripts/armelf_linux_eabi.xde
-      - install/lib/ldscripts/armelf_linux_eabi.xdw
-      - install/lib/ldscripts/armelf_linux_eabi.xdwe
-      - install/lib/ldscripts/armelf_linux_eabi.xe
-      - install/lib/ldscripts/armelf_linux_eabi.xn
-      - install/lib/ldscripts/armelf_linux_eabi.xr
-      - install/lib/ldscripts/armelf_linux_eabi.xs
-      - install/lib/ldscripts/armelf_linux_eabi.xsc
-      - install/lib/ldscripts/armelf_linux_eabi.xsce
-      - install/lib/ldscripts/armelf_linux_eabi.xse
-      - install/lib/ldscripts/armelf_linux_eabi.xsw
-      - install/lib/ldscripts/armelf_linux_eabi.xswe
-      - install/lib/ldscripts/armelf_linux_eabi.xu
-      - install/lib/ldscripts/armelf_linux_eabi.xw
-      - install/lib/ldscripts/armelf_linux_eabi.xwe
+      - install/lib/ldscripts/aarch64linux32.x
+      - install/lib/ldscripts/aarch64linux32.xbn
+      - install/lib/ldscripts/aarch64linux32.xc
+      - install/lib/ldscripts/aarch64linux32.xce
+      - install/lib/ldscripts/aarch64linux32.xd
+      - install/lib/ldscripts/aarch64linux32.xdc
+      - install/lib/ldscripts/aarch64linux32.xdce
+      - install/lib/ldscripts/aarch64linux32.xde
+      - install/lib/ldscripts/aarch64linux32.xdw
+      - install/lib/ldscripts/aarch64linux32.xdwe
+      - install/lib/ldscripts/aarch64linux32.xe
+      - install/lib/ldscripts/aarch64linux32.xn
+      - install/lib/ldscripts/aarch64linux32.xr
+      - install/lib/ldscripts/aarch64linux32.xs
+      - install/lib/ldscripts/aarch64linux32.xsc
+      - install/lib/ldscripts/aarch64linux32.xsce
+      - install/lib/ldscripts/aarch64linux32.xse
+      - install/lib/ldscripts/aarch64linux32.xsw
+      - install/lib/ldscripts/aarch64linux32.xswe
+      - install/lib/ldscripts/aarch64linux32.xu
+      - install/lib/ldscripts/aarch64linux32.xw
+      - install/lib/ldscripts/aarch64linux32.xwe
+      - install/lib/ldscripts/aarch64linux32b.x
+      - install/lib/ldscripts/aarch64linux32b.xbn
+      - install/lib/ldscripts/aarch64linux32b.xc
+      - install/lib/ldscripts/aarch64linux32b.xce
+      - install/lib/ldscripts/aarch64linux32b.xd
+      - install/lib/ldscripts/aarch64linux32b.xdc
+      - install/lib/ldscripts/aarch64linux32b.xdce
+      - install/lib/ldscripts/aarch64linux32b.xde
+      - install/lib/ldscripts/aarch64linux32b.xdw
+      - install/lib/ldscripts/aarch64linux32b.xdwe
+      - install/lib/ldscripts/aarch64linux32b.xe
+      - install/lib/ldscripts/aarch64linux32b.xn
+      - install/lib/ldscripts/aarch64linux32b.xr
+      - install/lib/ldscripts/aarch64linux32b.xs
+      - install/lib/ldscripts/aarch64linux32b.xsc
+      - install/lib/ldscripts/aarch64linux32b.xsce
+      - install/lib/ldscripts/aarch64linux32b.xse
+      - install/lib/ldscripts/aarch64linux32b.xsw
+      - install/lib/ldscripts/aarch64linux32b.xswe
+      - install/lib/ldscripts/aarch64linux32b.xu
+      - install/lib/ldscripts/aarch64linux32b.xw
+      - install/lib/ldscripts/aarch64linux32b.xwe
+      - install/lib/ldscripts/aarch64linuxb.x
+      - install/lib/ldscripts/aarch64linuxb.xbn
+      - install/lib/ldscripts/aarch64linuxb.xc
+      - install/lib/ldscripts/aarch64linuxb.xce
+      - install/lib/ldscripts/aarch64linuxb.xd
+      - install/lib/ldscripts/aarch64linuxb.xdc
+      - install/lib/ldscripts/aarch64linuxb.xdce
+      - install/lib/ldscripts/aarch64linuxb.xde
+      - install/lib/ldscripts/aarch64linuxb.xdw
+      - install/lib/ldscripts/aarch64linuxb.xdwe
+      - install/lib/ldscripts/aarch64linuxb.xe
+      - install/lib/ldscripts/aarch64linuxb.xn
+      - install/lib/ldscripts/aarch64linuxb.xr
+      - install/lib/ldscripts/aarch64linuxb.xs
+      - install/lib/ldscripts/aarch64linuxb.xsc
+      - install/lib/ldscripts/aarch64linuxb.xsce
+      - install/lib/ldscripts/aarch64linuxb.xse
+      - install/lib/ldscripts/aarch64linuxb.xsw
+      - install/lib/ldscripts/aarch64linuxb.xswe
+      - install/lib/ldscripts/aarch64linuxb.xu
+      - install/lib/ldscripts/aarch64linuxb.xw
+      - install/lib/ldscripts/aarch64linuxb.xwe
       - install/lib/ldscripts/armelf.x
       - install/lib/ldscripts/armelf.xbn
       - install/lib/ldscripts/armelf.xc
@@ -469,6 +403,73 @@ artifacts:
       - install/lib/ldscripts/armelf.xu
       - install/lib/ldscripts/armelf.xw
       - install/lib/ldscripts/armelf.xwe
+      - install/lib/ldscripts/armelf_linux_eabi.x
+      - install/lib/ldscripts/armelf_linux_eabi.xbn
+      - install/lib/ldscripts/armelf_linux_eabi.xc
+      - install/lib/ldscripts/armelf_linux_eabi.xce
+      - install/lib/ldscripts/armelf_linux_eabi.xd
+      - install/lib/ldscripts/armelf_linux_eabi.xdc
+      - install/lib/ldscripts/armelf_linux_eabi.xdce
+      - install/lib/ldscripts/armelf_linux_eabi.xde
+      - install/lib/ldscripts/armelf_linux_eabi.xdw
+      - install/lib/ldscripts/armelf_linux_eabi.xdwe
+      - install/lib/ldscripts/armelf_linux_eabi.xe
+      - install/lib/ldscripts/armelf_linux_eabi.xn
+      - install/lib/ldscripts/armelf_linux_eabi.xr
+      - install/lib/ldscripts/armelf_linux_eabi.xs
+      - install/lib/ldscripts/armelf_linux_eabi.xsc
+      - install/lib/ldscripts/armelf_linux_eabi.xsce
+      - install/lib/ldscripts/armelf_linux_eabi.xse
+      - install/lib/ldscripts/armelf_linux_eabi.xsw
+      - install/lib/ldscripts/armelf_linux_eabi.xswe
+      - install/lib/ldscripts/armelf_linux_eabi.xu
+      - install/lib/ldscripts/armelf_linux_eabi.xw
+      - install/lib/ldscripts/armelf_linux_eabi.xwe
+      - install/lib/ldscripts/armelfb.x
+      - install/lib/ldscripts/armelfb.xbn
+      - install/lib/ldscripts/armelfb.xc
+      - install/lib/ldscripts/armelfb.xce
+      - install/lib/ldscripts/armelfb.xd
+      - install/lib/ldscripts/armelfb.xdc
+      - install/lib/ldscripts/armelfb.xdce
+      - install/lib/ldscripts/armelfb.xde
+      - install/lib/ldscripts/armelfb.xdw
+      - install/lib/ldscripts/armelfb.xdwe
+      - install/lib/ldscripts/armelfb.xe
+      - install/lib/ldscripts/armelfb.xn
+      - install/lib/ldscripts/armelfb.xr
+      - install/lib/ldscripts/armelfb.xs
+      - install/lib/ldscripts/armelfb.xsc
+      - install/lib/ldscripts/armelfb.xsce
+      - install/lib/ldscripts/armelfb.xse
+      - install/lib/ldscripts/armelfb.xsw
+      - install/lib/ldscripts/armelfb.xswe
+      - install/lib/ldscripts/armelfb.xu
+      - install/lib/ldscripts/armelfb.xw
+      - install/lib/ldscripts/armelfb.xwe
+      - install/lib/ldscripts/armelfb_linux_eabi.x
+      - install/lib/ldscripts/armelfb_linux_eabi.xbn
+      - install/lib/ldscripts/armelfb_linux_eabi.xc
+      - install/lib/ldscripts/armelfb_linux_eabi.xce
+      - install/lib/ldscripts/armelfb_linux_eabi.xd
+      - install/lib/ldscripts/armelfb_linux_eabi.xdc
+      - install/lib/ldscripts/armelfb_linux_eabi.xdce
+      - install/lib/ldscripts/armelfb_linux_eabi.xde
+      - install/lib/ldscripts/armelfb_linux_eabi.xdw
+      - install/lib/ldscripts/armelfb_linux_eabi.xdwe
+      - install/lib/ldscripts/armelfb_linux_eabi.xe
+      - install/lib/ldscripts/armelfb_linux_eabi.xn
+      - install/lib/ldscripts/armelfb_linux_eabi.xr
+      - install/lib/ldscripts/armelfb_linux_eabi.xs
+      - install/lib/ldscripts/armelfb_linux_eabi.xsc
+      - install/lib/ldscripts/armelfb_linux_eabi.xsce
+      - install/lib/ldscripts/armelfb_linux_eabi.xse
+      - install/lib/ldscripts/armelfb_linux_eabi.xsw
+      - install/lib/ldscripts/armelfb_linux_eabi.xswe
+      - install/lib/ldscripts/armelfb_linux_eabi.xu
+      - install/lib/ldscripts/armelfb_linux_eabi.xw
+      - install/lib/ldscripts/armelfb_linux_eabi.xwe
+      - install/libexec/gcc/aarch64-none-linux-gnu
 
   tc-hrv-olinux:
     inputs:
