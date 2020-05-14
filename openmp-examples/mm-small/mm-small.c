@@ -115,8 +115,9 @@ int main(int argc, char *argv[])
   tmp_1 = tmp_2;
 
   bench_start("PULP: Single-threaded, copy-based, no DMA");
-  #pragma omp target device(BIGPULP_MEMCPY)
-  // map(to: a[0:width*height], b[0:width*height], width, height) map(from: c[0:width*height])
+  #pragma omp target device(BIGPULP_MEMCPY)                        \
+      map(to: a[0:width*height], b[0:width*height], width, height) \
+      map(from: c[0:width*height])
   {
     // #pragma omp parallel for collapse(2) num_threads(1) firstprivate(a, b, c, width, height)
     for (unsigned i=0; i<width; i++) {
@@ -134,10 +135,11 @@ int main(int argc, char *argv[])
 
   // omp_set_num_threads(omp_get_thread_limit());
   bench_start("PULP: Parallel, copy-based, no DMA");
-  #pragma omp target device(BIGPULP_MEMCPY)
-  // map(to: a[0:width*height], b[0:width*height], width, height) map(from: c[0:width*height])
+  #pragma omp target device(BIGPULP_MEMCPY)                        \
+      map(to: a[0:width*height], b[0:width*height], width, height) \
+      map(from: c[0:width*height])
   {
-    #pragma omp parallel for collapse(2) firstprivate(a, b, c, width, height)
+    #pragma omp parallel for collapse(2) firstprivate(width, height)
       for (unsigned i=0; i<width; i++) {
         for (unsigned j=0; j<height; j++) {
           uint32_t sum = 0;
