@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pulp_cluster`:
   - Disconnect external bus from cluster peripherals.
   - Tie unused `s_hwpe_cfg_bus.r_opc` off.
+  - Tie unused `debug_bus` signals off.
 - `riscv`:
   - Remove unused BIST ports from register file.
   - Remove wildcard imports to improve tool compatibility.

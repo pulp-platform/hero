@@ -706,6 +706,12 @@ module pulp_cluster
     .slave   ( s_mperiph_demux_bus[1] ),
     .masters ( s_debug_bus            )
   );
+  for (genvar i = 0; i < NB_CORES; i++) begin : gen_tie_debug_bus_off
+    assign s_debug_bus[i].gnt = 1'b0;
+    assign s_debug_bus[i].r_rdata = '0;
+    assign s_debug_bus[i].r_opc = '0;
+    assign s_debug_bus[i].r_valid = 1'b0;
+  end
 
   per2axi_wrap #(
     .NB_CORES       ( NB_CORES             ),
