@@ -263,6 +263,7 @@
 ../deps/scm/latch_scm/register_file_multi_way_1w_multi_port_read.sv
 ../deps/axi2mem/src/axi_to_mem.sv
 ../deps/axi2mem/src/axi_to_mem_banked.sv
+../deps/axi2mem/src/axi_to_mem_intf.sv
 ../deps/axi2per/axi2per_req_channel.sv
 ../deps/axi2per/axi2per_res_channel.sv
 ../deps/axi2per/axi2per.sv

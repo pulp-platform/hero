@@ -17,3 +17,4 @@ sources:
   - src/axi_to_mem.sv
   # Level 1
   - src/axi_to_mem_banked.sv
+  - src/axi_to_mem_intf.sv
