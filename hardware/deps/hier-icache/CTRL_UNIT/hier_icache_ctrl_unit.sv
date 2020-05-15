@@ -624,14 +624,16 @@ endgenerate
                         `endif
 
                             8'h18: // Enable BYPASS
-                            begin
-                              NS = IDLE;
-                            end
+                              begin
+                                deliver_response = 1'b1;
+                                NS = IDLE;
+                              end
 
                             8'h1C: // Enable L1_L15
-                            begin
-                              NS = IDLE;
-                            end
+                              begin
+                                deliver_response = 1'b1;
+                                NS = IDLE;
+                              end
                       endcase
 
                 end
