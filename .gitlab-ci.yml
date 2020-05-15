@@ -147,6 +147,7 @@ test-zcu102-examples:
   script:
     - memora get tc-pulp
     - memora get tc-har-olinux
+    - memora get tc-llvm
     - memora get sdk-pulp-and-sdk-har
     - make sdk-pulp # PULP SDK is not relocatable
     - source env/exilzcu102.sh
