@@ -51,7 +51,7 @@ module cluster_peripherals
 
   output logic                        busy_o,
 
-  XBAR_PERIPH_BUS.Slave               speriph_slave[NB_SPERIPHS-1:0],
+  XBAR_PERIPH_BUS.Slave               speriph_slave[NB_SPERIPHS-2:0],
   XBAR_PERIPH_BUS.Slave               core_eu_direct_link[NB_CORES-1:0],
 
   XBAR_PERIPH_BUS.Master              dma_cfg_master,
@@ -61,7 +61,7 @@ module cluster_peripherals
   output logic                        soc_periph_evt_ready_o,
   input  logic                        soc_periph_evt_valid_i,
   input  logic [EVNT_WIDTH-1:0]       soc_periph_evt_data_i,
-  
+
 
   input  logic [NB_CORES-1:0]         dbg_core_halted_i,
   output logic [NB_CORES-1:0]         dbg_core_halt_o,
@@ -106,17 +106,17 @@ module cluster_peripherals
   // for MP I$
   MP_PF_ICACHE_CTRL_UNIT_BUS.Master   IC_ctrl_unit_bus_mp
 );
-   
+
   logic                      s_timer_out_lo_event;
   logic                      s_timer_out_hi_event;
   logic                      s_timer_in_lo_event;
   logic                      s_timer_in_hi_event;
-  
+
   logic [NB_CORES-1:0][31:0] s_cluster_events;
   logic [NB_CORES-1:0][3:0]  s_acc_events;
   logic [NB_CORES-1:0][1:0]  s_timer_events;
   logic [NB_CORES-1:0][1:0]  s_dma_events;
-  
+
 
   logic [NB_CORES-1:0]  s_fetch_en_cc;
 
@@ -129,7 +129,7 @@ module cluster_peripherals
 
   logic soc_periph_evt_valid, soc_periph_evt_ready;
   logic [7:0] soc_periph_evt_data;
-   
+
   logic                           err_r_valid_q;
   logic [$clog2(NB_SPERIPHS)-1:0] err_r_id_q;
 
@@ -144,7 +144,7 @@ module cluster_peripherals
 
     end
   endgenerate
-  
+
   assign fetch_enable_reg_o = s_fetch_en_cc;
 
   //********************************************************
@@ -178,7 +178,7 @@ module cluster_peripherals
   //********************************************************
   //******************** TIMER *****************************
   //********************************************************
-  
+
   cluster_timer_wrap #(
     .ID_WIDTH(NB_CORES+NB_MPERIPHS)
   ) cluster_timer_wrap_i (
@@ -192,7 +192,7 @@ module cluster_peripherals
     .irq_hi_o     ( s_timer_out_hi_event         ),
     .busy_o       ( busy_o                       )
   );
-   
+
   //********************************************************
   //******************** NEW EVENT UNIT ********************
   //********************************************************
@@ -216,7 +216,7 @@ module cluster_peripherals
     .rst_ni                 ( rst_ni                 ),
     .test_mode_i            ( test_mode_i            ),
 
-    .mailbox_evt_i          ( mailbox_evt_i          ),  
+    .mailbox_evt_i          ( mailbox_evt_i          ),
     .ext_evt_1_i            ( ext_evt_1_i            ),
     .ext_evt_2_i            ( ext_evt_2_i            ),
     .ext_evt_3_i            ( ext_evt_3_i            ),
@@ -237,10 +237,10 @@ module cluster_peripherals
 
     .core_busy_i            ( core_busy_i            ),
     .core_clock_en_o        ( core_clk_en_o          ),
-    
+
     .speriph_slave          ( speriph_slave[SPER_EVENT_U_ID] ),
     .eu_direct_link         ( core_eu_direct_link    ),
-    
+
     .soc_periph_evt_valid_i ( soc_periph_evt_valid_i ),
     .soc_periph_evt_ready_o ( soc_periph_evt_ready_o ),
     .soc_periph_evt_data_i  ( soc_periph_evt_data_i  )

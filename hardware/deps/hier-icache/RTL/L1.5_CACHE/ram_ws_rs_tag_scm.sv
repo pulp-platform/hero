@@ -108,18 +108,6 @@ module ram_ws_rs_tag_scm
         .WriteEnable ( req & write  ),
         .WriteAddr   ( addr         ),
         .WriteData   ( wdata        )
-    `ifndef PULP_FPGA_EMUL
-        ,
-        // BIST ENABLE
-        .BIST        ( 1'b0                ), // PLEASE CONNECT ME;
-
-        // BIST ports
-        .CSN_T       (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-        .WEN_T       (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-        .A_T         (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-        .D_T         (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-        .Q_T         (                     )
-    `endif
       );
 `endif
 

@@ -309,18 +309,6 @@ module pri_icache
             .WriteEnable ( DATA_wr_req_int[i]    ),
             .WriteAddr   ( DATA_addr_int         ),
             .WriteData   ( DATA_wdata_int        )
-        `ifndef PULP_FPGA_EMUL
-            ,
-            // BIST ENABLE
-            .BIST        ( 1'b0                ), // PLEASE CONNECT ME;
-
-            // BIST ports
-            .CSN_T       (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-            .WEN_T       (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-            .A_T         (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-            .D_T         (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-            .Q_T         (                     )
-        `endif
          );
       end
    endgenerate

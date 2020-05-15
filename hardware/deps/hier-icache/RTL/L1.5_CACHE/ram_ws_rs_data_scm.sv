@@ -58,7 +58,7 @@ module ram_ws_rs_data_scm
 
                 IN22FDX_R1PH_NFHN_W00032B128M02C256 sram_data //
                 (
-                
+
                     .CLK          ( clk              ),
                     .CEN          ( cs_n             ),
                     .RDWEN        ( write            ),
@@ -66,47 +66,16 @@ module ram_ws_rs_data_scm
                     .AC           ( addr[0]          ),
                     .D            ( wdata            ),
                     .BW           ( bw               ),
-                    .Q            ( rdata            ),   
+                    .Q            ( rdata            ),
                     .T_LOGIC      ( 1'b0             ),
                     .MA_SAWL      ( '0               ),
                     .MA_WL        ( '0               ),
                     .MA_WRAS      ( '0               ),
                     .MA_WRASD     ( '0               ),
                     .OBSV_CTL     (                  )
-                
+
                 );
 
-                // GF22
-                // SPREG_32w_128b sram_data
-                // (
-
-                //     .CLK      ( clk   ), // input
-                //     .CEN      ( cs_n  ), // input
-                //     .RDWEN    ( we_n  ), // input
-                //     .AW       ( n_aw  ), // input [3:0]
-                //     .AC       ( n_ac  ), // input
-                //     .D        ( wdata ), // input [127:0]
-                //     .BW       ( '1    ), // input [127:0]
-                //     .T_LOGIC  ( 1'b0  ), // input
-                //     .MA_SAWL  ( '0    ), // input
-                //     .MA_WL    ( '0    ), // input
-                //     .MA_WRAS  ( '0    ), // input
-                //     .MA_WRASD ( '0    ), // input
-                //     .Q        ( rdata ), // output [127:0]
-                //     .OBSV_CTL (       )  // output
-                // );
-
-                // TSMC55
-                // SRAM_SP_32w_128b sram_data
-                // (
-                //     .CS_N    ( cs_n  ),
-                //     .CLK     ( clk   ),
-                //     .WR_N    ( we_n  ),
-                //     .RW_ADDR ( addr  ),
-                //     .RST_N   ( rst_n ),
-                //     .DATA_IN ( wdata ),
-                //     .DATA_OUT( rdata )
-                // );
             end
 
             6: begin
@@ -119,7 +88,7 @@ module ram_ws_rs_data_scm
 
                 IN22FDX_R1PH_NFHN_W00064B128M02C256 sram_data // /usr/pack/gf-22-kgf/dz/mem/R1PH/V03R01/model/verilog/
                 (
-                
+
                     .CLK          ( clk              ),
                     .CEN          ( cs_n             ),
                     .RDWEN        ( write            ),
@@ -127,48 +96,16 @@ module ram_ws_rs_data_scm
                     .AC           ( addr[0]          ),
                     .D            ( wdata            ),
                     .BW           ( bw               ),
-                    .Q            ( rdata            ),   
+                    .Q            ( rdata            ),
                     .T_LOGIC      ( 1'b0             ),
                     .MA_SAWL      ( '0               ),
                     .MA_WL        ( '0               ),
                     .MA_WRAS      ( '0               ),
                     .MA_WRASD     ( '0               ),
                     .OBSV_CTL     (                  )
-                
+
                 );
 
-                // SP1D_64w_128b sram_data
-                // (
-                //     .CLK         ( clk           ),
-                //     .CEN         ( cs_n          ),
-                //     .RDWEN       ( we_n          ),
-                //     .DEEPSLEEP   ( 1'b0          ),
-                //     .POWERGATE   ( 1'b0          ),
-                //     .AS          ( n_as          ),
-                //     .AW          ( n_aw          ),
-                //     .AC          ( n_ac          ),
-                //     .D           ( wdata         ),
-                //     .BW          ( bw            ),
-                //     .T_BIST      ( 1'b0          ),
-                //     .T_LOGIC     ( 1'b0          ),
-                //     .T_CEN       ( 1'b0          ),
-                //     .T_RDWEN     ( 1'b0          ),
-                //     .T_DEEPSLEEP ( 1'b0          ),
-                //     .T_POWERGATE ( 1'b0          ),
-                //     .T_STAB      ( '0            ),
-                //     .T_WBT       ( '0            ),
-                //     .T_AS        ( '0            ),
-                //     .T_AW        ( '0            ),
-                //     .T_AC        ( '0            ),
-                //     .T_D         ( '0            ),
-                //     .T_BW        ( '0            ),
-                //     .MA_SAWL     ( '0            ),
-                //     .MA_WL       ( '0            ),
-                //     .MA_WRAS     ( '0            ),
-                //     .MA_WRASD    ( '0            ),
-                //     .Q           ( rdata         ),
-                //     .OBSV_CTL    (               )
-                // );
             end
             default : /* default */;
         endcase
@@ -204,18 +141,6 @@ module ram_ws_rs_data_scm
         .WriteEnable ( req & write  ),
         .WriteAddr   ( addr         ),
         .WriteData   ( wdata        )
-    `ifndef PULP_FPGA_EMUL
-        ,
-        // BIST ENABLE
-        .BIST        ( 1'b0                ), // PLEASE CONNECT ME;
-
-        // BIST ports
-        .CSN_T       (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-        .WEN_T       (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-        .A_T         (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-        .D_T         (                     ), // PLEASE CONNECT ME; Synthesis will remove me if unconnected
-        .Q_T         (                     )
-    `endif
     );
 `endif
 

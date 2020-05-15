@@ -66,67 +66,10 @@ module register_file_test_wrap
    // Write port W2
    input  logic [ADDR_WIDTH-1:0]   waddr_b_i,
    input  logic [DATA_WIDTH-1:0]   wdata_b_i,
-   input  logic                    we_b_i,
-
-   // BIST ENABLE
-   input  logic                    BIST,
-   //BIST ports
-   input  logic                    CSN_T,
-   input  logic                    WEN_T,
-   input  logic [ADDR_WIDTH-1:0]   A_T,
-   input  logic [DATA_WIDTH-1:0]   D_T,
-   output logic [DATA_WIDTH-1:0]   Q_T
+   input  logic                    we_b_i
 );
 
 
-   logic [ADDR_WIDTH-1:0]        ReadAddr_a_muxed;
-
-   logic                         WriteEnable_a_muxed;
-   logic [ADDR_WIDTH-1:0]        WriteAddr_a_muxed;
-   logic [DATA_WIDTH-1:0]        WriteData_a_muxed;
-
-   logic                         WriteEnable_b_muxed;
-   logic [ADDR_WIDTH-1:0]        WriteAddr_b_muxed;
-   logic [DATA_WIDTH-1:0]        WriteData_b_muxed;
-
-
-   logic [ADDR_WIDTH-1:0]        TestReadAddr_Q;
-
-
-   // Multiplex This port during BIST
-   assign WriteData_a_muxed   = (BIST) ?  D_T                                       : wdata_a_i;
-   // FIX for CADENCE PMBIST : ignore Addr MSB (FPU=0) and internally invert address
-   // assign WriteAddr_a_muxed   = (BIST) ?  A_T                                       : waddr_a_i;
-   assign WriteAddr_a_muxed   = (BIST) ?  {1'b0,~A_T[ADDR_WIDTH-2:0]}              : waddr_a_i;
-   assign WriteEnable_a_muxed = (BIST) ? (( CSN_T == 1'b0 ) && ( WEN_T == 1'b0))    : we_a_i;
-
-   // Mask this port during TEST MODE (BIST == 1)
-   assign WriteData_b_muxed   = (BIST) ? '0    : wdata_b_i;
-   assign WriteAddr_b_muxed   = (BIST) ? '0    : waddr_b_i;
-   assign WriteEnable_b_muxed = (BIST) ? 1'b0  : we_b_i;
-
-
-   assign ReadAddr_a_muxed    = (BIST) ? TestReadAddr_Q   : raddr_a_i;
-
-
-   assign Q_T = rdata_a_o;
-
-   always_ff @(posedge clk or negedge rst_n)
-   begin : proc_
-      if(~rst_n)
-      begin
-         TestReadAddr_Q <= '0;
-      end
-      else
-      begin
-         if((CSN_T == 1'b0)&& ( WEN_T == 1'b1)) // Test Read
-         begin
-            // FIX for CADENCE PMBIST : ignore Addr MSB (FPU=0) and internally invert address
-            // TestReadAddr_Q <= A_T;
-            TestReadAddr_Q <= {1'b0,~A_T[ADDR_WIDTH-2:0]} ;
-         end
-      end
-   end
 
 
    riscv_register_file
@@ -143,7 +86,7 @@ module register_file_test_wrap
 
       .test_en_i  ( test_en_i           ),
 
-      .raddr_a_i  ( ReadAddr_a_muxed    ),
+      .raddr_a_i  ( raddr_a_i           ),
       .rdata_a_o  ( rdata_a_o           ),
 
       .raddr_b_i  ( raddr_b_i           ),
@@ -152,13 +95,13 @@ module register_file_test_wrap
       .raddr_c_i  ( raddr_c_i           ),
       .rdata_c_o  ( rdata_c_o           ),
 
-      .waddr_a_i  ( WriteAddr_a_muxed   ),
-      .wdata_a_i  ( WriteData_a_muxed   ),
-      .we_a_i     ( WriteEnable_a_muxed ),
+      .waddr_a_i  ( waddr_a_i           ),
+      .wdata_a_i  ( wdata_a_i           ),
+      .we_a_i     ( we_a_i              ),
 
-      .waddr_b_i  ( WriteAddr_b_muxed   ),
-      .wdata_b_i  ( WriteData_b_muxed   ),
-      .we_b_i     ( WriteEnable_b_muxed )
+      .waddr_b_i  ( waddr_b_i           ),
+      .wdata_b_i  ( wdata_b_i           ),
+      .we_b_i     ( we_b_i              )
    );
 
 

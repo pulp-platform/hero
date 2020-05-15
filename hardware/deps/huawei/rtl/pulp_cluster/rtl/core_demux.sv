@@ -50,7 +50,7 @@ module core_demux
   output logic [DATA_WIDTH - 1:0]      data_r_rdata_o,  // Data Response DATA (For LOAD commands)
   output logic                         data_r_opc_o,    // Data Response Error
 
-  // Low Latency log interconnect 
+  // Low Latency log interconnect
   output logic                         data_req_o_SH,
   output logic [ADDR_WIDTH - 1:0]      data_add_o_SH,
   output logic                         data_wen_o_SH,
@@ -71,7 +71,7 @@ module core_demux
   input logic                          data_r_valid_i_EXT,
   input logic [DATA_WIDTH - 1:0]       data_r_rdata_i_EXT,
   input logic                          data_r_opc_i_EXT,
-  
+
   // Peripheral interconnect
   output logic                         data_req_o_PE,
   output logic [ADDR_WIDTH - 1:0]      data_add_o_PE,
@@ -83,16 +83,16 @@ module core_demux
   input logic                          data_r_valid_i_PE,
   input logic                          data_r_opc_i_PE,
   input logic [DATA_WIDTH - 1:0]       data_r_rdata_i_PE,
-  
+
   // Performance Counters
   output logic                         perf_l2_ld_o, // nr of L2 loads
   output logic                         perf_l2_st_o, // nr of L2 stores
   output logic                         perf_l2_ld_cyc_o, // cycles used for L2 loads
   output logic                         perf_l2_st_cyc_o,  // cycles used for L2 stores
-  
+
   input  logic [5:0]                   CLUSTER_ID
 );
-   
+
   logic [10:0]  CLUSTER_ALIAS_BASE_11;
   logic [11:0]  CLUSTER_ALIAS_BASE_12,
                 CLUSTER_ALIAS_TCDM_RW,
@@ -100,7 +100,7 @@ module core_demux
                 CLUSTER_ALIAS_DEM_PER;
 
   logic                                  s_data_req_PE;
-  logic                                  s_data_gnt_PE;  
+  logic                                  s_data_gnt_PE;
   logic [DATA_WIDTH - 1:0]               s_data_r_data_PE;
   logic                                  s_data_r_valid_PE;
   logic                                  s_data_r_opc_PE;
@@ -117,11 +117,11 @@ module core_demux
   logic [DATA_WIDTH - 1:0]               data_wdata_to_L2;
   logic [BYTE_ENABLE_BIT - 1:0]          data_be_to_L2;
   logic                                  data_gnt_from_L2;
-  
+
   enum logic [1:0]                       {SH, PE, EXT } request_destination, destination;
 
   logic [ADDR_WIDTH - 1:0]                data_add_int;
-   
+
   // Signal to PERIPH FIFO
   logic                                   data_busy_PE_fifo;
   logic                                   data_req_PE_fifo;
@@ -131,7 +131,7 @@ module core_demux
   logic [DATA_WIDTH - 1:0]                data_wdata_PE_fifo;
   logic [BYTE_ENABLE_BIT - 1:0]           data_be_PE_fifo;
   logic                                   data_gnt_PE_fifo;
-  
+
   logic                                   data_r_valid_PE_fifo;
   logic                                   data_r_opc_PE_fifo;
   logic [DATA_WIDTH - 1:0]                data_r_rdata_PE_fifo;
@@ -149,8 +149,8 @@ module core_demux
   assign TCDM_RW = 12'h100 + (CLUSTER_ID << 2) + 0;
   assign TCDM_TS = 12'h100 + (CLUSTER_ID << 2) + 1;
   assign DEM_PER = 12'h100 + (CLUSTER_ID << 2) + 2;
- 
-  // This section is used to swap the 4 most significant bits of the address 
+
+  // This section is used to swap the 4 most significant bits of the address
   // with the ones that are provided by the base_addr_i
   // If data_add_i[31:28] == base_addr_i then data_add_i[31:28] are changed in 4'b0001
   // If data_add_i[31:28] == 4'b0001 --> then th data_add_i[31:28] is changed in base_addr_i
@@ -187,7 +187,7 @@ module core_demux
   assign data_add_to_L2   = data_add_int;
   assign data_wen_to_L2   = data_wen_i;
   assign data_wdata_to_L2 = data_wdata_i;
-  assign data_be_to_L2    = data_be_i;   
+  assign data_be_to_L2    = data_be_i;
 
   always_ff @(posedge clk, negedge rst_ni)
   begin : _UPDATE_RESPONSE_DESTINATION_
@@ -233,7 +233,7 @@ module core_demux
 
             {1'bx, DEM_PER},
             {1'b1, CLUSTER_ALIAS_DEM_PER}: begin
-              if (data_add_int[14]) begin // DEMUX PERIPHERALS
+              if (data_add_int[19:10] == 10'b0000010000) begin // DEMUX PERIPHERALS
                 request_destination <= EXT;
               end else begin
                 request_destination <= PE;
@@ -290,7 +290,7 @@ module core_demux
 
           {1'bx, DEM_PER},
           {1'b1, CLUSTER_ALIAS_DEM_PER}: begin
-            if(data_add_int[14]) begin // DEMUX PERIPHERALS
+            if(data_add_int[19:10] == 10'b0000010000) begin // DEMUX PERIPHERALS
               destination  = EXT;
             end else begin
               destination  = PE;
@@ -303,10 +303,10 @@ module core_demux
         endcase
       end
     end
-  end    
-   
+  end
+
   always_comb
-  begin : L1_REQUEST_ARBITER   
+  begin : L1_REQUEST_ARBITER
     if (ADDREXT && addrext_i != '0) begin
       // If the address extension is non-zero, all requests go to the L2 arbiter.
       data_req_o_SH = 1'b0;
@@ -346,7 +346,7 @@ module core_demux
       end
     end
   end
- 
+
   // level 2 request arbiter
   assign data_add_PE_fifo   = data_add_int;
   assign data_wen_PE_fifo   = data_wen_i;
@@ -383,7 +383,7 @@ module core_demux
           data_gnt_from_L2 = s_data_gnt_PE;
         end
       end else begin
-        if (data_add_int[14] && (
+        if ((data_add_int[19:10] == 10'b0000010000) && (
           data_add_int[31:20] == DEM_PER ||
           (CLUSTER_ALIAS && data_add_int[31:20] == CLUSTER_ALIAS_DEM_PER)
         )) begin: _TO_DEMUX_PERIPH_ //Peripheral --> add_i[31:0] --> 0x1020_4000 to 0x1020_7FFF
@@ -559,14 +559,14 @@ module core_demux
 
   logic clear_regs, enable_regs;
 
-  always_ff @(posedge clk or negedge rst_ni) 
+  always_ff @(posedge clk or negedge rst_ni)
   begin
     if(~rst_ni) begin
       STALL_TCDM <= '0;
       STALL_L2 <= '0;
-    end 
+    end
     else begin
-      if(clear_regs) begin 
+      if(clear_regs) begin
         STALL_TCDM <= '0;
         STALL_L2 <= '0;
       end

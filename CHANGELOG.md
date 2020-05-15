@@ -9,12 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- `pulp_cluster`:
+  - Reduce address range of event unit in `core_demux`.
+  - Swap peripheral IDs of error slave (now 7) and external port (now 8).
 
 ### Fixed
 - `pulp-runtime`: Enable RISC-V A extension in compilation flow.
 - `fpu_div_sqrt_mvp` and `fpu_interco`: Improve tool compatibility by removing wildcard imports.
 - `fpnew`: Add `default` to `unique case` that does not need a default to improve tool
   compatibility.
+- `hier-icache`:
+  - Remove unused BIST ports.
+  - Fix deadlock on write to `0x18` register (prefetch enable).
+  - Fix upper bound of `for` loop
+- `pulp_cluster`: Disconnect external bus from cluster peripherals.
+- `riscv`: Remove unused BIST ports from register file.
+- `scm`:
+  - Remove unused BIST ports.
+  - Fix blocking to non-blocking assignment in `register_file_1r_1w`.
 
 
 ## 2020-05-06
