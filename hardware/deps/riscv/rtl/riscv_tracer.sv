@@ -24,9 +24,6 @@
 
 `ifndef VERILATOR
 
-import riscv_defines::*;
-import riscv_tracer_defines::*;
-
 // Source/Destination register instruction index
 `define REG_S1 19:15
 `define REG_S2 24:20
@@ -138,7 +135,7 @@ module riscv_tracer (
       begin
         // TODO: use this function to also format the arguments to the
         // instructions
-        if (SymbolicRegs) begin // format according to RISC-V ABI
+        if (riscv_tracer_defines::SymbolicRegs) begin // format according to RISC-V ABI
           if (addr >= 42)
             return $sformatf(" f%0d", addr-32);
           else if (addr > 32)
@@ -404,7 +401,7 @@ module riscv_tracer (
         regs_read.push_back('{rs1, rs1_value});
         regs_read.push_back('{rs2, rs2_value});
         regs_write.push_back('{rd, 'x});
-        if (instr[31:27] == AMO_LR) begin
+        if (instr[31:27] == riscv_defines::AMO_LR) begin
           // Do not print rs2 for load-reserved
           str = $sformatf("%-16s x%0d, (x%0d)", mnemonic, rd, rs1);
         end else begin
@@ -440,7 +437,7 @@ module riscv_tracer (
 
         if (instr[14:12] != 3'b111) begin
           // regular load
-          if (instr[6:0] != OPCODE_LOAD_POST) begin
+          if (instr[6:0] != riscv_defines::OPCODE_LOAD_POST) begin
             regs_read.push_back('{rs1, rs1_value});
             str = $sformatf("%-16s x%0d, %0d(x%0d)", mnemonic, rd, $signed(imm_i_type), rs1);
           end else begin
@@ -450,7 +447,7 @@ module riscv_tracer (
           end
         end else begin
           // reg-reg load
-          if (instr[6:0] != OPCODE_LOAD_POST) begin
+          if (instr[6:0] != riscv_defines::OPCODE_LOAD_POST) begin
             regs_read.push_back('{rs2, rs2_value});
             regs_read.push_back('{rs1, rs1_value});
             str = $sformatf("%-16s x%0d, x%0d(x%0d)", mnemonic, rd, rs2, rs1);
@@ -480,7 +477,7 @@ module riscv_tracer (
 
         if (instr[14] == 1'b0) begin
           // regular store
-          if (instr[6:0] != OPCODE_STORE_POST) begin
+          if (instr[6:0] != riscv_defines::OPCODE_STORE_POST) begin
             regs_read.push_back('{rs2, rs2_value});
             regs_read.push_back('{rs1, rs1_value});
             str = $sformatf("%-16s x%0d, %0d(x%0d)", mnemonic, rs2, $signed(imm_s_type), rs1);
@@ -492,7 +489,7 @@ module riscv_tracer (
           end
         end else begin
           // reg-reg store
-          if (instr[6:0] != OPCODE_STORE_POST) begin
+          if (instr[6:0] != riscv_defines::OPCODE_STORE_POST) begin
             regs_read.push_back('{rs2, rs2_value});
             regs_read.push_back('{rs3, rs3_value});
             regs_read.push_back('{rs1, rs1_value});
@@ -855,192 +852,192 @@ module riscv_tracer (
         // Aliases
         32'h00_00_00_13:   trace.printMnemonic("nop");
         // Regular opcodes
-        INSTR_LUI:        trace.printUInstr("lui");
-        INSTR_AUIPC:      trace.printUInstr("auipc");
-        INSTR_JAL:        trace.printUJInstr("jal");
-        INSTR_JALR:       trace.printIInstr("jalr");
+        riscv_tracer_defines::INSTR_LUI:        trace.printUInstr("lui");
+        riscv_tracer_defines::INSTR_AUIPC:      trace.printUInstr("auipc");
+        riscv_tracer_defines::INSTR_JAL:        trace.printUJInstr("jal");
+        riscv_tracer_defines::INSTR_JALR:       trace.printIInstr("jalr");
         // BRANCH
-        INSTR_BEQ:        trace.printSBInstr("beq");
-        INSTR_BNE:        trace.printSBInstr("bne");
-        INSTR_BLT:        trace.printSBInstr("blt");
-        INSTR_BGE:        trace.printSBInstr("bge");
-        INSTR_BLTU:       trace.printSBInstr("bltu");
-        INSTR_BGEU:       trace.printSBInstr("bgeu");
-        INSTR_BEQIMM:     trace.printSBallInstr("p.beqimm");
-        INSTR_BNEIMM:     trace.printSBallInstr("p.bneimm");
+        riscv_tracer_defines::INSTR_BEQ:        trace.printSBInstr("beq");
+        riscv_tracer_defines::INSTR_BNE:        trace.printSBInstr("bne");
+        riscv_tracer_defines::INSTR_BLT:        trace.printSBInstr("blt");
+        riscv_tracer_defines::INSTR_BGE:        trace.printSBInstr("bge");
+        riscv_tracer_defines::INSTR_BLTU:       trace.printSBInstr("bltu");
+        riscv_tracer_defines::INSTR_BGEU:       trace.printSBInstr("bgeu");
+        riscv_tracer_defines::INSTR_BEQIMM:     trace.printSBallInstr("p.beqimm");
+        riscv_tracer_defines::INSTR_BNEIMM:     trace.printSBallInstr("p.bneimm");
         // OPIMM
-        INSTR_ADDI:       trace.printIInstr("addi");
-        INSTR_SLTI:       trace.printIInstr("slti");
-        INSTR_SLTIU:      trace.printIInstr("sltiu");
-        INSTR_XORI:       trace.printIInstr("xori");
-        INSTR_ORI:        trace.printIInstr("ori");
-        INSTR_ANDI:       trace.printIInstr("andi");
-        INSTR_SLLI:       trace.printIuInstr("slli");
-        INSTR_SRLI:       trace.printIuInstr("srli");
-        INSTR_SRAI:       trace.printIuInstr("srai");
+        riscv_tracer_defines::INSTR_ADDI:       trace.printIInstr("addi");
+        riscv_tracer_defines::INSTR_SLTI:       trace.printIInstr("slti");
+        riscv_tracer_defines::INSTR_SLTIU:      trace.printIInstr("sltiu");
+        riscv_tracer_defines::INSTR_XORI:       trace.printIInstr("xori");
+        riscv_tracer_defines::INSTR_ORI:        trace.printIInstr("ori");
+        riscv_tracer_defines::INSTR_ANDI:       trace.printIInstr("andi");
+        riscv_tracer_defines::INSTR_SLLI:       trace.printIuInstr("slli");
+        riscv_tracer_defines::INSTR_SRLI:       trace.printIuInstr("srli");
+        riscv_tracer_defines::INSTR_SRAI:       trace.printIuInstr("srai");
         // OP
-        INSTR_ADD:        trace.printRInstr("add");
-        INSTR_SUB:        trace.printRInstr("sub");
-        INSTR_SLL:        trace.printRInstr("sll");
-        INSTR_SLT:        trace.printRInstr("slt");
-        INSTR_SLTU:       trace.printRInstr("sltu");
-        INSTR_XOR:        trace.printRInstr("xor");
-        INSTR_SRL:        trace.printRInstr("srl");
-        INSTR_SRA:        trace.printRInstr("sra");
-        INSTR_OR:         trace.printRInstr("or");
-        INSTR_AND:        trace.printRInstr("and");
-        INSTR_EXTHS:      trace.printRInstr("p.exths");
-        INSTR_EXTHZ:      trace.printRInstr("p.exthz");
-        INSTR_EXTBS:      trace.printRInstr("p.extbs");
-        INSTR_EXTBZ:      trace.printRInstr("p.extbz");
-        INSTR_PAVG:       trace.printRInstr("p.avg");
-        INSTR_PAVGU:      trace.printRInstr("p.avgu");
+        riscv_tracer_defines::INSTR_ADD:        trace.printRInstr("add");
+        riscv_tracer_defines::INSTR_SUB:        trace.printRInstr("sub");
+        riscv_tracer_defines::INSTR_SLL:        trace.printRInstr("sll");
+        riscv_tracer_defines::INSTR_SLT:        trace.printRInstr("slt");
+        riscv_tracer_defines::INSTR_SLTU:       trace.printRInstr("sltu");
+        riscv_tracer_defines::INSTR_XOR:        trace.printRInstr("xor");
+        riscv_tracer_defines::INSTR_SRL:        trace.printRInstr("srl");
+        riscv_tracer_defines::INSTR_SRA:        trace.printRInstr("sra");
+        riscv_tracer_defines::INSTR_OR:         trace.printRInstr("or");
+        riscv_tracer_defines::INSTR_AND:        trace.printRInstr("and");
+        riscv_tracer_defines::INSTR_EXTHS:      trace.printRInstr("p.exths");
+        riscv_tracer_defines::INSTR_EXTHZ:      trace.printRInstr("p.exthz");
+        riscv_tracer_defines::INSTR_EXTBS:      trace.printRInstr("p.extbs");
+        riscv_tracer_defines::INSTR_EXTBZ:      trace.printRInstr("p.extbz");
+        riscv_tracer_defines::INSTR_PAVG:       trace.printRInstr("p.avg");
+        riscv_tracer_defines::INSTR_PAVGU:      trace.printRInstr("p.avgu");
 
-        INSTR_PADDN:      trace.printAddNInstr("p.addN");
-        INSTR_PADDUN:     trace.printAddNInstr("p.adduN");
-        INSTR_PADDRN:     trace.printAddNInstr("p.addRN");
-        INSTR_PADDURN:    trace.printAddNInstr("p.adduRN");
-        INSTR_PSUBN:      trace.printAddNInstr("p.subN");
-        INSTR_PSUBUN:     trace.printAddNInstr("p.subuN");
-        INSTR_PSUBRN:     trace.printAddNInstr("p.subRN");
-        INSTR_PSUBURN:    trace.printAddNInstr("p.subuRN");
+        riscv_tracer_defines::INSTR_PADDN:      trace.printAddNInstr("p.addN");
+        riscv_tracer_defines::INSTR_PADDUN:     trace.printAddNInstr("p.adduN");
+        riscv_tracer_defines::INSTR_PADDRN:     trace.printAddNInstr("p.addRN");
+        riscv_tracer_defines::INSTR_PADDURN:    trace.printAddNInstr("p.adduRN");
+        riscv_tracer_defines::INSTR_PSUBN:      trace.printAddNInstr("p.subN");
+        riscv_tracer_defines::INSTR_PSUBUN:     trace.printAddNInstr("p.subuN");
+        riscv_tracer_defines::INSTR_PSUBRN:     trace.printAddNInstr("p.subRN");
+        riscv_tracer_defines::INSTR_PSUBURN:    trace.printAddNInstr("p.subuRN");
 
-        INSTR_PADDNR:     trace.printR3Instr("p.addNr");
-        INSTR_PADDUNR:    trace.printR3Instr("p.adduNr");
-        INSTR_PADDRNR:    trace.printR3Instr("p.addRNr");
-        INSTR_PADDURNR:   trace.printR3Instr("p.adduRNr");
-        INSTR_PSUBNR:     trace.printR3Instr("p.subNr");
-        INSTR_PSUBUNR:    trace.printR3Instr("p.subuNr");
-        INSTR_PSUBRNR:    trace.printR3Instr("p.subRNr");
-        INSTR_PSUBURNR:   trace.printR3Instr("p.subuRNr");
+        riscv_tracer_defines::INSTR_PADDNR:     trace.printR3Instr("p.addNr");
+        riscv_tracer_defines::INSTR_PADDUNR:    trace.printR3Instr("p.adduNr");
+        riscv_tracer_defines::INSTR_PADDRNR:    trace.printR3Instr("p.addRNr");
+        riscv_tracer_defines::INSTR_PADDURNR:   trace.printR3Instr("p.adduRNr");
+        riscv_tracer_defines::INSTR_PSUBNR:     trace.printR3Instr("p.subNr");
+        riscv_tracer_defines::INSTR_PSUBUNR:    trace.printR3Instr("p.subuNr");
+        riscv_tracer_defines::INSTR_PSUBRNR:    trace.printR3Instr("p.subRNr");
+        riscv_tracer_defines::INSTR_PSUBURNR:   trace.printR3Instr("p.subuRNr");
 
-        INSTR_PSLET:      trace.printRInstr("p.slet");
-        INSTR_PSLETU:     trace.printRInstr("p.sletu");
-        INSTR_PMIN:       trace.printRInstr("p.min");
-        INSTR_PMINU:      trace.printRInstr("p.minu");
-        INSTR_PMAX:       trace.printRInstr("p.max");
-        INSTR_PMAXU:      trace.printRInstr("p.maxu");
-        INSTR_PABS:       trace.printR1Instr("p.abs");
-        INSTR_PCLIP:      trace.printClipInstr("p.clip");
-        INSTR_PCLIPU:     trace.printClipInstr("p.clipu");
-        INSTR_PBEXT:      trace.printBit1Instr("p.extract");
-        INSTR_PBEXTU:     trace.printBit1Instr("p.extractu");
-        INSTR_PBINS:      trace.printBit2Instr("p.insert");
-        INSTR_PBCLR:      trace.printBit1Instr("p.bclr");
-        INSTR_PBSET:      trace.printBit1Instr("p.bset");
-        INSTR_PBREV:      trace.printBitRevInstr("p.bitrev");
+        riscv_tracer_defines::INSTR_PSLET:      trace.printRInstr("p.slet");
+        riscv_tracer_defines::INSTR_PSLETU:     trace.printRInstr("p.sletu");
+        riscv_tracer_defines::INSTR_PMIN:       trace.printRInstr("p.min");
+        riscv_tracer_defines::INSTR_PMINU:      trace.printRInstr("p.minu");
+        riscv_tracer_defines::INSTR_PMAX:       trace.printRInstr("p.max");
+        riscv_tracer_defines::INSTR_PMAXU:      trace.printRInstr("p.maxu");
+        riscv_tracer_defines::INSTR_PABS:       trace.printR1Instr("p.abs");
+        riscv_tracer_defines::INSTR_PCLIP:      trace.printClipInstr("p.clip");
+        riscv_tracer_defines::INSTR_PCLIPU:     trace.printClipInstr("p.clipu");
+        riscv_tracer_defines::INSTR_PBEXT:      trace.printBit1Instr("p.extract");
+        riscv_tracer_defines::INSTR_PBEXTU:     trace.printBit1Instr("p.extractu");
+        riscv_tracer_defines::INSTR_PBINS:      trace.printBit2Instr("p.insert");
+        riscv_tracer_defines::INSTR_PBCLR:      trace.printBit1Instr("p.bclr");
+        riscv_tracer_defines::INSTR_PBSET:      trace.printBit1Instr("p.bset");
+        riscv_tracer_defines::INSTR_PBREV:      trace.printBitRevInstr("p.bitrev");
 
-        INSTR_PCLIPR:     trace.printRInstr("p.clipr");
-        INSTR_PCLIPUR:    trace.printRInstr("p.clipur");
-        INSTR_PBEXTR:     trace.printRInstr("p.extractr");
-        INSTR_PBEXTUR:    trace.printRInstr("p.extractur");
-        INSTR_PBINSR:     trace.printR3Instr("p.insertr");
-        INSTR_PBCLRR:     trace.printRInstr("p.bclrr");
-        INSTR_PBSETR:     trace.printRInstr("p.bsetr");
+        riscv_tracer_defines::INSTR_PCLIPR:     trace.printRInstr("p.clipr");
+        riscv_tracer_defines::INSTR_PCLIPUR:    trace.printRInstr("p.clipur");
+        riscv_tracer_defines::INSTR_PBEXTR:     trace.printRInstr("p.extractr");
+        riscv_tracer_defines::INSTR_PBEXTUR:    trace.printRInstr("p.extractur");
+        riscv_tracer_defines::INSTR_PBINSR:     trace.printR3Instr("p.insertr");
+        riscv_tracer_defines::INSTR_PBCLRR:     trace.printRInstr("p.bclrr");
+        riscv_tracer_defines::INSTR_PBSETR:     trace.printRInstr("p.bsetr");
 
 
-        INSTR_FF1:        trace.printR1Instr("p.ff1");
-        INSTR_FL1:        trace.printR1Instr("p.fl1");
-        INSTR_CLB:        trace.printR1Instr("p.clb");
-        INSTR_CNT:        trace.printR1Instr("p.cnt");
-        INSTR_ROR:        trace.printRInstr("p.ror");
+        riscv_tracer_defines::INSTR_FF1:        trace.printR1Instr("p.ff1");
+        riscv_tracer_defines::INSTR_FL1:        trace.printR1Instr("p.fl1");
+        riscv_tracer_defines::INSTR_CLB:        trace.printR1Instr("p.clb");
+        riscv_tracer_defines::INSTR_CNT:        trace.printR1Instr("p.cnt");
+        riscv_tracer_defines::INSTR_ROR:        trace.printRInstr("p.ror");
 
         // FENCE
-        INSTR_FENCE:      trace.printMnemonic("fence");
-        INSTR_FENCEI:     trace.printMnemonic("fencei");
+        riscv_tracer_defines::INSTR_FENCE:      trace.printMnemonic("fence");
+        riscv_tracer_defines::INSTR_FENCEI:     trace.printMnemonic("fencei");
         // SYSTEM (CSR manipulation)
-        INSTR_CSRRW:      trace.printCSRInstr("csrrw");
-        INSTR_CSRRS:      trace.printCSRInstr("csrrs");
-        INSTR_CSRRC:      trace.printCSRInstr("csrrc");
-        INSTR_CSRRWI:     trace.printCSRInstr("csrrwi");
-        INSTR_CSRRSI:     trace.printCSRInstr("csrrsi");
-        INSTR_CSRRCI:     trace.printCSRInstr("csrrci");
+        riscv_tracer_defines::INSTR_CSRRW:      trace.printCSRInstr("csrrw");
+        riscv_tracer_defines::INSTR_CSRRS:      trace.printCSRInstr("csrrs");
+        riscv_tracer_defines::INSTR_CSRRC:      trace.printCSRInstr("csrrc");
+        riscv_tracer_defines::INSTR_CSRRWI:     trace.printCSRInstr("csrrwi");
+        riscv_tracer_defines::INSTR_CSRRSI:     trace.printCSRInstr("csrrsi");
+        riscv_tracer_defines::INSTR_CSRRCI:     trace.printCSRInstr("csrrci");
         // SYSTEM (others)
-        INSTR_ECALL:      trace.printMnemonic("ecall");
-        INSTR_EBREAK:     trace.printMnemonic("ebreak");
-        INSTR_URET:       trace.printMnemonic("uret");
-        INSTR_MRET:       trace.printMnemonic("mret");
-        INSTR_WFI:        trace.printMnemonic("wfi");
+        riscv_tracer_defines::INSTR_ECALL:      trace.printMnemonic("ecall");
+        riscv_tracer_defines::INSTR_EBREAK:     trace.printMnemonic("ebreak");
+        riscv_tracer_defines::INSTR_URET:       trace.printMnemonic("uret");
+        riscv_tracer_defines::INSTR_MRET:       trace.printMnemonic("mret");
+        riscv_tracer_defines::INSTR_WFI:        trace.printMnemonic("wfi");
 
-        INSTR_DRET:       trace.printMnemonic("dret");
+        riscv_tracer_defines::INSTR_DRET:       trace.printMnemonic("dret");
 
         // RV32M
-        INSTR_PMUL:       trace.printRInstr("mul");
-        INSTR_PMUH:       trace.printRInstr("mulh");
-        INSTR_PMULHSU:    trace.printRInstr("mulhsu");
-        INSTR_PMULHU:     trace.printRInstr("mulhu");
-        INSTR_DIV:        trace.printRInstr("div");
-        INSTR_DIVU:       trace.printRInstr("divu");
-        INSTR_REM:        trace.printRInstr("rem");
-        INSTR_REMU:       trace.printRInstr("remu");
+        riscv_tracer_defines::INSTR_PMUL:       trace.printRInstr("mul");
+        riscv_tracer_defines::INSTR_PMUH:       trace.printRInstr("mulh");
+        riscv_tracer_defines::INSTR_PMULHSU:    trace.printRInstr("mulhsu");
+        riscv_tracer_defines::INSTR_PMULHU:     trace.printRInstr("mulhu");
+        riscv_tracer_defines::INSTR_DIV:        trace.printRInstr("div");
+        riscv_tracer_defines::INSTR_DIVU:       trace.printRInstr("divu");
+        riscv_tracer_defines::INSTR_REM:        trace.printRInstr("rem");
+        riscv_tracer_defines::INSTR_REMU:       trace.printRInstr("remu");
         // PULP MULTIPLIER
-        INSTR_PMAC:       trace.printR3Instr("p.mac");
-        INSTR_PMSU:       trace.printR3Instr("p.msu");
-        INSTR_PMULS     : trace.printMulInstr();
-        INSTR_PMULHLSN  : trace.printMulInstr();
-        INSTR_PMULRS    : trace.printMulInstr();
-        INSTR_PMULRHLSN : trace.printMulInstr();
-        INSTR_PMULU     : trace.printMulInstr();
-        INSTR_PMULUHLU  : trace.printMulInstr();
-        INSTR_PMULRU    : trace.printMulInstr();
-        INSTR_PMULRUHLU : trace.printMulInstr();
-        INSTR_PMACS     : trace.printMulInstr();
-        INSTR_PMACHLSN  : trace.printMulInstr();
-        INSTR_PMACRS    : trace.printMulInstr();
-        INSTR_PMACRHLSN : trace.printMulInstr();
-        INSTR_PMACU     : trace.printMulInstr();
-        INSTR_PMACUHLU  : trace.printMulInstr();
-        INSTR_PMACRU    : trace.printMulInstr();
-        INSTR_PMACRUHLU : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMAC:       trace.printR3Instr("p.mac");
+        riscv_tracer_defines::INSTR_PMSU:       trace.printR3Instr("p.msu");
+        riscv_tracer_defines::INSTR_PMULS     : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMULHLSN  : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMULRS    : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMULRHLSN : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMULU     : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMULUHLU  : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMULRU    : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMULRUHLU : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMACS     : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMACHLSN  : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMACRS    : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMACRHLSN : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMACU     : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMACUHLU  : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMACRU    : trace.printMulInstr();
+        riscv_tracer_defines::INSTR_PMACRUHLU : trace.printMulInstr();
 
         // FP-OP
-        INSTR_FMADD:      trace.printF3Instr("fmadd.s");
-        INSTR_FMSUB:      trace.printF3Instr("fmsub.s");
-        INSTR_FNMADD:     trace.printF3Instr("fnmadd.s");
-        INSTR_FNMSUB:     trace.printF3Instr("fnmsub.s");
-        INSTR_FADD:       trace.printF2Instr("fadd.s");
-        INSTR_FSUB:       trace.printF2Instr("fsub.s");
-        INSTR_FMUL:       trace.printF2Instr("fmul.s");
-        INSTR_FDIV:       trace.printF2Instr("fdiv.s");
-        INSTR_FSQRT:      trace.printFInstr("fsqrt.s");
-        INSTR_FSGNJS:     trace.printF2Instr("fsgnj.s");
-        INSTR_FSGNJNS:    trace.printF2Instr("fsgnjn.s");
-        INSTR_FSGNJXS:    trace.printF2Instr("fsgnjx.s");
-        INSTR_FMIN:       trace.printF2Instr("fmin.s");
-        INSTR_FMAX:       trace.printF2Instr("fmax.s");
-        INSTR_FCVTWS:     trace.printFIInstr("fcvt.w.s");
-        INSTR_FCVTWUS:    trace.printFIInstr("fcvt.wu.s");
-        INSTR_FMVXS:      trace.printFIInstr("fmv.x.s");
-        INSTR_FEQS:       trace.printF2IInstr("feq.s");
-        INSTR_FLTS:       trace.printF2IInstr("flt.s");
-        INSTR_FLES:       trace.printF2IInstr("fle.s");
-        INSTR_FCLASS:     trace.printFIInstr("fclass.s");
-        INSTR_FCVTSW:     trace.printIFInstr("fcvt.s.w");
-        INSTR_FCVTSWU:    trace.printIFInstr("fcvt.s.wu");
-        INSTR_FMVSX:      trace.printIFInstr("fmv.s.x");
+        riscv_tracer_defines::INSTR_FMADD:      trace.printF3Instr("fmadd.s");
+        riscv_tracer_defines::INSTR_FMSUB:      trace.printF3Instr("fmsub.s");
+        riscv_tracer_defines::INSTR_FNMADD:     trace.printF3Instr("fnmadd.s");
+        riscv_tracer_defines::INSTR_FNMSUB:     trace.printF3Instr("fnmsub.s");
+        riscv_tracer_defines::INSTR_FADD:       trace.printF2Instr("fadd.s");
+        riscv_tracer_defines::INSTR_FSUB:       trace.printF2Instr("fsub.s");
+        riscv_tracer_defines::INSTR_FMUL:       trace.printF2Instr("fmul.s");
+        riscv_tracer_defines::INSTR_FDIV:       trace.printF2Instr("fdiv.s");
+        riscv_tracer_defines::INSTR_FSQRT:      trace.printFInstr("fsqrt.s");
+        riscv_tracer_defines::INSTR_FSGNJS:     trace.printF2Instr("fsgnj.s");
+        riscv_tracer_defines::INSTR_FSGNJNS:    trace.printF2Instr("fsgnjn.s");
+        riscv_tracer_defines::INSTR_FSGNJXS:    trace.printF2Instr("fsgnjx.s");
+        riscv_tracer_defines::INSTR_FMIN:       trace.printF2Instr("fmin.s");
+        riscv_tracer_defines::INSTR_FMAX:       trace.printF2Instr("fmax.s");
+        riscv_tracer_defines::INSTR_FCVTWS:     trace.printFIInstr("fcvt.w.s");
+        riscv_tracer_defines::INSTR_FCVTWUS:    trace.printFIInstr("fcvt.wu.s");
+        riscv_tracer_defines::INSTR_FMVXS:      trace.printFIInstr("fmv.x.s");
+        riscv_tracer_defines::INSTR_FEQS:       trace.printF2IInstr("feq.s");
+        riscv_tracer_defines::INSTR_FLTS:       trace.printF2IInstr("flt.s");
+        riscv_tracer_defines::INSTR_FLES:       trace.printF2IInstr("fle.s");
+        riscv_tracer_defines::INSTR_FCLASS:     trace.printFIInstr("fclass.s");
+        riscv_tracer_defines::INSTR_FCVTSW:     trace.printIFInstr("fcvt.s.w");
+        riscv_tracer_defines::INSTR_FCVTSWU:    trace.printIFInstr("fcvt.s.wu");
+        riscv_tracer_defines::INSTR_FMVSX:      trace.printIFInstr("fmv.s.x");
 
         // RV32A
-        INSTR_LR:         trace.printAtomicInstr("lr.w");
-        INSTR_SC:         trace.printAtomicInstr("sc.w");
-        INSTR_AMOSWAP:    trace.printAtomicInstr("amoswap.w");
-        INSTR_AMOADD:     trace.printAtomicInstr("amoadd.w");
-        INSTR_AMOXOR:     trace.printAtomicInstr("amoxor.w");
-        INSTR_AMOAND:     trace.printAtomicInstr("amoand.w");
-        INSTR_AMOOR:      trace.printAtomicInstr("amoor.w");
-        INSTR_AMOMIN:     trace.printAtomicInstr("amomin.w");
-        INSTR_AMOMAX:     trace.printAtomicInstr("amomax.w");
-        INSTR_AMOMINU:    trace.printAtomicInstr("amominu.w");
-        INSTR_AMOMAXU:    trace.printAtomicInstr("amomaxu.w");
+        riscv_tracer_defines::INSTR_LR:         trace.printAtomicInstr("lr.w");
+        riscv_tracer_defines::INSTR_SC:         trace.printAtomicInstr("sc.w");
+        riscv_tracer_defines::INSTR_AMOSWAP:    trace.printAtomicInstr("amoswap.w");
+        riscv_tracer_defines::INSTR_AMOADD:     trace.printAtomicInstr("amoadd.w");
+        riscv_tracer_defines::INSTR_AMOXOR:     trace.printAtomicInstr("amoxor.w");
+        riscv_tracer_defines::INSTR_AMOAND:     trace.printAtomicInstr("amoand.w");
+        riscv_tracer_defines::INSTR_AMOOR:      trace.printAtomicInstr("amoor.w");
+        riscv_tracer_defines::INSTR_AMOMIN:     trace.printAtomicInstr("amomin.w");
+        riscv_tracer_defines::INSTR_AMOMAX:     trace.printAtomicInstr("amomax.w");
+        riscv_tracer_defines::INSTR_AMOMINU:    trace.printAtomicInstr("amominu.w");
+        riscv_tracer_defines::INSTR_AMOMAXU:    trace.printAtomicInstr("amomaxu.w");
 
         // opcodes with custom decoding
-        {25'b?, OPCODE_LOAD}:       trace.printLoadInstr();
-        {25'b?, OPCODE_LOAD_FP}:    trace.printLoadInstr();
-        {25'b?, OPCODE_LOAD_POST}:  trace.printLoadInstr();
-        {25'b?, OPCODE_STORE}:      trace.printStoreInstr();
-        {25'b?, OPCODE_STORE_FP}:   trace.printStoreInstr();
-        {25'b?, OPCODE_STORE_POST}: trace.printStoreInstr();
-        {25'b?, OPCODE_HWLOOP}:     trace.printHwloopInstr();
-        {25'b?, OPCODE_VECOP}:      trace.printVecInstr();
+        {25'b?, riscv_defines::OPCODE_LOAD}:       trace.printLoadInstr();
+        {25'b?, riscv_defines::OPCODE_LOAD_FP}:    trace.printLoadInstr();
+        {25'b?, riscv_defines::OPCODE_LOAD_POST}:  trace.printLoadInstr();
+        {25'b?, riscv_defines::OPCODE_STORE}:      trace.printStoreInstr();
+        {25'b?, riscv_defines::OPCODE_STORE_FP}:   trace.printStoreInstr();
+        {25'b?, riscv_defines::OPCODE_STORE_POST}: trace.printStoreInstr();
+        {25'b?, riscv_defines::OPCODE_HWLOOP}:     trace.printHwloopInstr();
+        {25'b?, riscv_defines::OPCODE_VECOP}:      trace.printVecInstr();
         default:           trace.printMnemonic("INVALID");
       endcase // unique case (instr)
 

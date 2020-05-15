@@ -12,8 +12,6 @@
 // that is implemented in the core into an APU with one line, and be auto-
 // deactivated when the corresponding APU is not implemented
 
-import apu_core_package::*;
-
 // Source/Destination register instruction index
 `define REG_S1 19:15
 `define REG_S2 24:20
@@ -27,16 +25,16 @@ import apu_core_package::*;
                             mult_dot_en     = 1'b0;\
                             apu_en          = 1'b1;\
                             apu_type_o      = APUTYPE_DSP_MULT;\
-                            apu_flags_src_o = APU_FLAGS_DSP_MULT;\
+                            apu_flags_src_o = apu_core_package::APU_FLAGS_DSP_MULT;\
                             apu_op_o        = mult_operator_o;\
-                            apu_lat_o       = (PIPE_REG_DSP_MULT==1) ? 2'h2 : 2'h1;\
+                            apu_lat_o       = (apu_core_package::PIPE_REG_DSP_MULT==1) ? 2'h2 : 2'h1;\
                          end
 
-`define USE_APU_INT_MULT if (SHARED_INT_MULT) begin\
+`define USE_APU_INT_MULT if (apu_core_package::SHARED_INT_MULT) begin\
                             mult_int_en     = 1'b0;\
                             mult_dot_en     = 1'b0;\
                             apu_en          = 1'b1;\
-                            apu_flags_src_o = APU_FLAGS_INT_MULT;\
+                            apu_flags_src_o = apu_core_package::APU_FLAGS_INT_MULT;\
                             apu_op_o        = mult_operator_o;\
                             apu_type_o      = APUTYPE_INT_MULT;\
                             apu_lat_o       = 2'h1;\
@@ -53,7 +51,7 @@ import apu_core_package::*;
 `define FP_2OP if (FPU==1) begin\
                  apu_en              = 1'b1;\
                  alu_en_o            = 1'b0;\
-                 apu_flags_src_o     = APU_FLAGS_FP;\
+                 apu_flags_src_o     = apu_core_package::APU_FLAGS_FP;\
                  rega_used_o         = 1'b1;\
                  regb_used_o         = 1'b1;\
                  reg_fp_a_o          = 1'b1;\
@@ -64,7 +62,7 @@ import apu_core_package::*;
 `define FP_3OP if (FPU==1) begin\
                  apu_en              = 1'b1;\
                  alu_en_o            = 1'b0;\
-                 apu_flags_src_o     = APU_FLAGS_FP;\
+                 apu_flags_src_o     = apu_core_package::APU_FLAGS_FP;\
                  rega_used_o         = 1'b1;\
                  regb_used_o         = 1'b1;\
                  regc_used_o         = 1'b1;\
@@ -72,6 +70,6 @@ import apu_core_package::*;
                  reg_fp_b_o          = 1'b1;\
                  reg_fp_c_o          = 1'b1;\
                  reg_fp_d_o          = 1'b1;\
-                 regc_mux_o          = REGC_S4;\
+                 regc_mux_o          = riscv_defines::REGC_S4;\
                end
 

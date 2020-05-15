@@ -21,8 +21,6 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-import riscv_defines::*;
-
 module riscv_int_controller
 #(
   parameter PULP_SECURE = 0
@@ -47,7 +45,7 @@ module riscv_int_controller
 
   input  logic        m_IE_i,         // interrupt enable bit from CSR (M mode)
   input  logic        u_IE_i,         // interrupt enable bit from CSR (U mode)
-  input  PrivLvl_t    current_priv_lvl_i
+  input  riscv_defines::PrivLvl_t    current_priv_lvl_i
 
 );
 
@@ -58,7 +56,7 @@ module riscv_int_controller
   logic irq_sec_q;
 
 if(PULP_SECURE)
-  assign irq_enable_ext =  ((u_IE_i | irq_sec_i) & current_priv_lvl_i == PRIV_LVL_U) | (m_IE_i & current_priv_lvl_i == PRIV_LVL_M);
+  assign irq_enable_ext =  ((u_IE_i | irq_sec_i) & current_priv_lvl_i == riscv_defines::PRIV_LVL_U) | (m_IE_i & current_priv_lvl_i == riscv_defines::PRIV_LVL_M);
 else
   assign irq_enable_ext =  m_IE_i;
 

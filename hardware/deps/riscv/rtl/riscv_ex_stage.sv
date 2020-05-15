@@ -34,9 +34,6 @@
 
 `include "apu_macros.sv"
 
-import apu_core_package::*;
-import riscv_defines::*;
-
 module riscv_ex_stage
 #(
   parameter FPU              =  0,
@@ -54,7 +51,7 @@ module riscv_ex_stage
   input  logic        rst_n,
 
   // ALU signals from ID stage
-  input  logic [ALU_OP_WIDTH-1:0] alu_operator_i,
+  input  logic [riscv_defines::ALU_OP_WIDTH-1:0] alu_operator_i,
   input  logic [31:0] alu_operand_a_i,
   input  logic [31:0] alu_operand_b_i,
   input  logic [31:0] alu_operand_c_i,
@@ -88,8 +85,8 @@ module riscv_ex_stage
   output logic        mult_multicycle_o,
 
   // FPU signals
-  input  logic [C_PC-1:0]             fpu_prec_i,
-  output logic [C_FFLAG-1:0]          fpu_fflags_o,
+  input  logic [riscv_defines::C_PC-1:0]             fpu_prec_i,
+  output logic [riscv_defines::C_FFLAG-1:0]          fpu_fflags_o,
   output logic                        fpu_fflags_we_o,
 
   // APU signals
@@ -408,14 +405,14 @@ module riscv_ex_stage
            //////////////////////////////
 
 
-           logic [C_FPNEW_OPBITS-1:0]   fpu_op;
+           logic [riscv_defines::C_FPNEW_OPBITS-1:0]   fpu_op;
            logic                        fpu_op_mod;
            logic                        fpu_vec_op;
 
-           logic [C_FPNEW_FMTBITS-1:0]  fpu_dst_fmt;
-           logic [C_FPNEW_FMTBITS-1:0]  fpu_src_fmt;
-           logic [C_FPNEW_IFMTBITS-1:0] fpu_int_fmt;
-           logic [C_RM-1:0]             fp_rnd_mode;
+           logic [riscv_defines::C_FPNEW_FMTBITS-1:0]  fpu_dst_fmt;
+           logic [riscv_defines::C_FPNEW_FMTBITS-1:0]  fpu_src_fmt;
+           logic [riscv_defines::C_FPNEW_IFMTBITS-1:0] fpu_int_fmt;
+           logic [riscv_defines::C_RM-1:0]             fp_rnd_mode;
 
            assign {fpu_vec_op, fpu_op_mod, fpu_op} = apu_op_i;
            assign {fpu_int_fmt, fpu_src_fmt, fpu_dst_fmt, fp_rnd_mode} = apu_flags_i;
@@ -429,20 +426,20 @@ module riscv_ex_stage
           // -----------
           // Features (enabled formats, vectors etc.)
           localparam fpnew_pkg::fpu_features_t FPU_FEATURES = '{
-            Width:         C_FLEN,
-            EnableVectors: C_XFVEC,
+            Width:         riscv_defines::C_FLEN,
+            EnableVectors: riscv_defines::C_XFVEC,
             EnableNanBox:  1'b0,
-            FpFmtMask:     {C_RVF, C_RVD, C_XF16, C_XF8, C_XF16ALT},
-            IntFmtMask:    {C_XFVEC && C_XF8, C_XFVEC && (C_XF16 || C_XF16ALT), 1'b1, 1'b0}
+            FpFmtMask:     {riscv_defines::C_RVF, riscv_defines::C_RVD, riscv_defines::C_XF16, riscv_defines::C_XF8, riscv_defines::C_XF16ALT},
+            IntFmtMask:    {riscv_defines::C_XFVEC && riscv_defines::C_XF8, riscv_defines::C_XFVEC && (riscv_defines::C_XF16 || riscv_defines::C_XF16ALT), 1'b1, 1'b0}
           };
 
           // Implementation (number of registers etc)
           localparam fpnew_pkg::fpu_implementation_t FPU_IMPLEMENTATION = '{
             PipeRegs:  '{// FP32, FP64, FP16, FP8, FP16alt
-                         '{C_LAT_FP32, C_LAT_FP64, C_LAT_FP16, C_LAT_FP8, C_LAT_FP16ALT}, // ADDMUL
-                         '{default: C_LAT_DIVSQRT}, // DIVSQRT
-                         '{default: C_LAT_NONCOMP}, // NONCOMP
-                         '{default: C_LAT_CONV}},   // CONV
+                         '{riscv_defines::C_LAT_FP32, riscv_defines::C_LAT_FP64, riscv_defines::C_LAT_FP16, riscv_defines::C_LAT_FP8, riscv_defines::C_LAT_FP16ALT}, // ADDMUL
+                         '{default: riscv_defines::C_LAT_DIVSQRT}, // DIVSQRT
+                         '{default: riscv_defines::C_LAT_NONCOMP}, // NONCOMP
+                         '{default: riscv_defines::C_LAT_CONV}},   // CONV
             UnitTypes: '{'{default: fpnew_pkg::PARALLEL}, // ADDMUL
                          '{default: C_DIV},               // DIVSQRT
                          '{default: fpnew_pkg::PARALLEL}, // NONCOMP

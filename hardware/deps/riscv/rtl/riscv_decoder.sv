@@ -27,8 +27,6 @@
 
 `include "apu_macros.sv"
 
-import riscv_defines::*;
-
 module riscv_decoder
 #(
   parameter FPU               = 0,
@@ -85,7 +83,7 @@ module riscv_decoder
 
   // ALU signals
   output logic        alu_en_o,                // ALU enable
-  output logic [ALU_OP_WIDTH-1:0] alu_operator_o, // ALU operation selection
+  output logic [riscv_defines::ALU_OP_WIDTH-1:0] alu_operator_o, // ALU operation selection
   output logic [2:0]  alu_op_a_mux_sel_o,      // operand a selection: reg value, PC, immediate or zero
   output logic [2:0]  alu_op_b_mux_sel_o,      // operand b selection: reg value or immediate
   output logic [1:0]  alu_op_c_mux_sel_o,      // operand c selection: reg value or jump target
@@ -108,11 +106,11 @@ module riscv_decoder
   output logic [1:0]  mult_dot_signed_o,       // Dot product in signed mode
 
   // FPU
-  input  logic [C_RM-1:0]             frm_i,   // Rounding mode from float CSR
+  input  logic [riscv_defines::C_RM-1:0]             frm_i,   // Rounding mode from float CSR
 
-  output logic [C_FPNEW_FMTBITS-1:0]  fpu_dst_fmt_o,   // fpu destination format
-  output logic [C_FPNEW_FMTBITS-1:0]  fpu_src_fmt_o,   // fpu source format
-  output logic [C_FPNEW_IFMTBITS-1:0] fpu_int_fmt_o,   // fpu integer format (for casts)
+  output logic [riscv_defines::C_FPNEW_FMTBITS-1:0]  fpu_dst_fmt_o,   // fpu destination format
+  output logic [riscv_defines::C_FPNEW_FMTBITS-1:0]  fpu_src_fmt_o,   // fpu source format
+  output logic [riscv_defines::C_FPNEW_IFMTBITS-1:0] fpu_int_fmt_o,   // fpu integer format (for casts)
 
   // APU
   output logic                apu_en_o,
@@ -132,7 +130,7 @@ module riscv_decoder
   output logic        csr_access_o,            // access to CSR
   output logic        csr_status_o,            // access to xstatus CSR
   output logic [1:0]  csr_op_o,                // operation to perform on CSR
-  input  PrivLvl_t    current_priv_lvl_i,      // The current privilege level
+  input  riscv_defines::PrivLvl_t    current_priv_lvl_i,      // The current privilege level
 
   // Stack protection
   output logic        stack_access_o,          // memory access through the stack pointer
@@ -197,7 +195,7 @@ module riscv_decoder
   // this instruction needs floating-point rounding-mode verification
   logic check_fprm;
 
-  logic [C_FPNEW_OPBITS-1:0] fpu_op;     // fpu operation
+  logic [riscv_defines::C_FPNEW_OPBITS-1:0] fpu_op;     // fpu operation
   logic                      fpu_op_mod; // fpu operation modifier
   logic                      fpu_vec_op; // fpu vectorial operation
   // unittypes for latencies to help us decode for APU
@@ -215,25 +213,25 @@ module riscv_decoder
 
   always_comb
   begin
-    jump_in_id                  = BRANCH_NONE;
-    jump_target_mux_sel_o       = JT_JAL;
+    jump_in_id                  = riscv_defines::BRANCH_NONE;
+    jump_target_mux_sel_o       = riscv_defines::JT_JAL;
 
     alu_en_o                    = 1'b1;
-    alu_operator_o              = ALU_SLTU;
-    alu_op_a_mux_sel_o          = OP_A_REGA_OR_FWD;
-    alu_op_b_mux_sel_o          = OP_B_REGB_OR_FWD;
-    alu_op_c_mux_sel_o          = OP_C_REGC_OR_FWD;
-    alu_vec_mode_o              = VEC_MODE32;
+    alu_operator_o              = riscv_defines::ALU_SLTU;
+    alu_op_a_mux_sel_o          = riscv_defines::OP_A_REGA_OR_FWD;
+    alu_op_b_mux_sel_o          = riscv_defines::OP_B_REGB_OR_FWD;
+    alu_op_c_mux_sel_o          = riscv_defines::OP_C_REGC_OR_FWD;
+    alu_vec_mode_o              = riscv_defines::VEC_MODE32;
     scalar_replication_o        = 1'b0;
     scalar_replication_c_o      = 1'b0;
-    regc_mux_o                  = REGC_ZERO;
-    imm_a_mux_sel_o             = IMMA_ZERO;
-    imm_b_mux_sel_o             = IMMB_I;
+    regc_mux_o                  = riscv_defines::REGC_ZERO;
+    imm_a_mux_sel_o             = riscv_defines::IMMA_ZERO;
+    imm_b_mux_sel_o             = riscv_defines::IMMB_I;
 
-    mult_operator_o             = MUL_I;
+    mult_operator_o             = riscv_defines::MUL_I;
     mult_int_en                 = 1'b0;
     mult_dot_en                 = 1'b0;
-    mult_imm_mux_o              = MIMM_ZERO;
+    mult_imm_mux_o              = riscv_defines::MIMM_ZERO;
     mult_signed_mode_o          = 2'b00;
     mult_sel_subword_o          = 1'b0;
     mult_dot_signed_o           = 2'b00;
@@ -267,7 +265,7 @@ module riscv_decoder
     csr_access_o                = 1'b0;
     csr_status_o                = 1'b0;
     csr_illegal                 = 1'b0;
-    csr_op                      = CSR_OP_NONE;
+    csr_op                      = riscv_defines::CSR_OP_NONE;
     mret_insn_o                 = 1'b0;
     uret_insn_o                 = 1'b0;
 
@@ -299,10 +297,10 @@ module riscv_decoder
     reg_fp_c_o                  = 1'b0;
     reg_fp_d_o                  = 1'b0;
 
-    bmask_a_mux_o               = BMASK_A_ZERO;
-    bmask_b_mux_o               = BMASK_B_ZERO;
-    alu_bmask_a_mux_sel_o       = BMASK_A_IMM;
-    alu_bmask_b_mux_sel_o       = BMASK_B_IMM;
+    bmask_a_mux_o               = riscv_defines::BMASK_A_ZERO;
+    bmask_b_mux_o               = riscv_defines::BMASK_B_ZERO;
+    alu_bmask_a_mux_sel_o       = riscv_defines::BMASK_A_IMM;
+    alu_bmask_b_mux_sel_o       = riscv_defines::BMASK_B_IMM;
 
     instr_multicycle_o          = 1'b0;
     is_clpx_o                   = 1'b0;
@@ -323,62 +321,62 @@ module riscv_decoder
       //                                  //
       //////////////////////////////////////
 
-      OPCODE_JAL: begin   // Jump and Link
-        jump_target_mux_sel_o = JT_JAL;
-        jump_in_id            = BRANCH_JAL;
+      riscv_defines::OPCODE_JAL: begin   // Jump and Link
+        jump_target_mux_sel_o = riscv_defines::JT_JAL;
+        jump_in_id            = riscv_defines::BRANCH_JAL;
         // Calculate and store PC+4
-        alu_op_a_mux_sel_o  = OP_A_CURRPC;
-        alu_op_b_mux_sel_o  = OP_B_IMM;
-        imm_b_mux_sel_o     = IMMB_PCINCR;
-        alu_operator_o      = ALU_ADD;
+        alu_op_a_mux_sel_o  = riscv_defines::OP_A_CURRPC;
+        alu_op_b_mux_sel_o  = riscv_defines::OP_B_IMM;
+        imm_b_mux_sel_o     = riscv_defines::IMMB_PCINCR;
+        alu_operator_o      = riscv_defines::ALU_ADD;
         regfile_alu_we      = 1'b1;
         // Calculate jump target (= PC + UJ imm)
       end
 
-      OPCODE_JALR: begin  // Jump and Link Register
-        jump_target_mux_sel_o = JT_JALR;
-        jump_in_id            = BRANCH_JALR;
+      riscv_defines::OPCODE_JALR: begin  // Jump and Link Register
+        jump_target_mux_sel_o = riscv_defines::JT_JALR;
+        jump_in_id            = riscv_defines::BRANCH_JALR;
         // Calculate and store PC+4
-        alu_op_a_mux_sel_o  = OP_A_CURRPC;
-        alu_op_b_mux_sel_o  = OP_B_IMM;
-        imm_b_mux_sel_o     = IMMB_PCINCR;
-        alu_operator_o      = ALU_ADD;
+        alu_op_a_mux_sel_o  = riscv_defines::OP_A_CURRPC;
+        alu_op_b_mux_sel_o  = riscv_defines::OP_B_IMM;
+        imm_b_mux_sel_o     = riscv_defines::IMMB_PCINCR;
+        alu_operator_o      = riscv_defines::ALU_ADD;
         regfile_alu_we      = 1'b1;
         // Calculate jump target (= RS1 + I imm)
         rega_used_o         = 1'b1;
 
         if (instr_rdata_i[14:12] != 3'b0) begin
-          jump_in_id       = BRANCH_NONE;
+          jump_in_id       = riscv_defines::BRANCH_NONE;
           regfile_alu_we   = 1'b0;
           illegal_insn_o   = 1'b1;
         end
       end
 
-      OPCODE_BRANCH: begin // Branch
-        jump_target_mux_sel_o = JT_COND;
-        jump_in_id            = BRANCH_COND;
-        alu_op_c_mux_sel_o    = OP_C_JT;
+      riscv_defines::OPCODE_BRANCH: begin // Branch
+        jump_target_mux_sel_o = riscv_defines::JT_COND;
+        jump_in_id            = riscv_defines::BRANCH_COND;
+        alu_op_c_mux_sel_o    = riscv_defines::OP_C_JT;
         rega_used_o           = 1'b1;
         regb_used_o           = 1'b1;
 
         unique case (instr_rdata_i[14:12])
-          3'b000: alu_operator_o = ALU_EQ;
-          3'b001: alu_operator_o = ALU_NE;
-          3'b100: alu_operator_o = ALU_LTS;
-          3'b101: alu_operator_o = ALU_GES;
-          3'b110: alu_operator_o = ALU_LTU;
-          3'b111: alu_operator_o = ALU_GEU;
+          3'b000: alu_operator_o = riscv_defines::ALU_EQ;
+          3'b001: alu_operator_o = riscv_defines::ALU_NE;
+          3'b100: alu_operator_o = riscv_defines::ALU_LTS;
+          3'b101: alu_operator_o = riscv_defines::ALU_GES;
+          3'b110: alu_operator_o = riscv_defines::ALU_LTU;
+          3'b111: alu_operator_o = riscv_defines::ALU_GEU;
           3'b010: begin
-            alu_operator_o      = ALU_EQ;
+            alu_operator_o      = riscv_defines::ALU_EQ;
             regb_used_o         = 1'b0;
-            alu_op_b_mux_sel_o  = OP_B_IMM;
-            imm_b_mux_sel_o     = IMMB_BI;
+            alu_op_b_mux_sel_o  = riscv_defines::OP_B_IMM;
+            imm_b_mux_sel_o     = riscv_defines::IMMB_BI;
           end
           3'b011: begin
-            alu_operator_o      = ALU_NE;
+            alu_operator_o      = riscv_defines::ALU_NE;
             regb_used_o         = 1'b0;
-            alu_op_b_mux_sel_o  = OP_B_IMM;
-            imm_b_mux_sel_o     = IMMB_BI;
+            alu_op_b_mux_sel_o  = riscv_defines::OP_B_IMM;
+            imm_b_mux_sel_o     = riscv_defines::IMMB_BI;
           end
         endcase
       end
@@ -393,19 +391,19 @@ module riscv_decoder
       //                              //
       //////////////////////////////////
 
-      OPCODE_STORE,
-      OPCODE_STORE_POST: begin
+      riscv_defines::OPCODE_STORE,
+      riscv_defines::OPCODE_STORE_POST: begin
         data_req       = 1'b1;
         data_we_o      = 1'b1;
         rega_used_o    = 1'b1;
         regb_used_o    = 1'b1;
-        alu_operator_o = ALU_ADD;
+        alu_operator_o = riscv_defines::ALU_ADD;
         instr_multicycle_o = 1'b1;
         // pass write data through ALU operand c
-        alu_op_c_mux_sel_o = OP_C_REGB_OR_FWD;
+        alu_op_c_mux_sel_o = riscv_defines::OP_C_REGB_OR_FWD;
 
         // post-increment setup
-        if (instr_rdata_i[6:0] == OPCODE_STORE_POST) begin
+        if (instr_rdata_i[6:0] == riscv_defines::OPCODE_STORE_POST) begin
           prepost_useincr_o       = 1'b0;
           regfile_alu_waddr_sel_o = 1'b0;
           regfile_alu_we          = 1'b1;
@@ -413,13 +411,13 @@ module riscv_decoder
 
         if (instr_rdata_i[14] == 1'b0) begin
           // offset from immediate
-          imm_b_mux_sel_o     = IMMB_S;
-          alu_op_b_mux_sel_o  = OP_B_IMM;
+          imm_b_mux_sel_o     = riscv_defines::IMMB_S;
+          alu_op_b_mux_sel_o  = riscv_defines::OP_B_IMM;
         end else begin
           // offset from register
           regc_used_o        = 1'b1;
-          alu_op_b_mux_sel_o = OP_B_REGC_OR_FWD;
-          regc_mux_o         = REGC_RD;
+          alu_op_b_mux_sel_o = riscv_defines::OP_B_REGC_OR_FWD;
+          regc_mux_o         = riscv_defines::REGC_RD;
         end
 
         // store size
@@ -437,20 +435,20 @@ module riscv_decoder
         stack_access_o = (instr_rdata_i[19:15] == 5'd2);
       end
 
-      OPCODE_LOAD,
-      OPCODE_LOAD_POST: begin
+      riscv_defines::OPCODE_LOAD,
+      riscv_defines::OPCODE_LOAD_POST: begin
         data_req        = 1'b1;
         regfile_mem_we  = 1'b1;
         rega_used_o     = 1'b1;
         data_type_o     = 2'b00;
         instr_multicycle_o = 1'b1;
         // offset from immediate
-        alu_operator_o      = ALU_ADD;
-        alu_op_b_mux_sel_o  = OP_B_IMM;
-        imm_b_mux_sel_o     = IMMB_I;
+        alu_operator_o      = riscv_defines::ALU_ADD;
+        alu_op_b_mux_sel_o  = riscv_defines::OP_B_IMM;
+        imm_b_mux_sel_o     = riscv_defines::IMMB_I;
 
         // post-increment setup
-        if (instr_rdata_i[6:0] == OPCODE_LOAD_POST) begin
+        if (instr_rdata_i[6:0] == riscv_defines::OPCODE_LOAD_POST) begin
           prepost_useincr_o       = 1'b0;
           regfile_alu_waddr_sel_o = 1'b0;
           regfile_alu_we          = 1'b1;
@@ -471,7 +469,7 @@ module riscv_decoder
         if (instr_rdata_i[14:12] == 3'b111) begin
           // offset from RS2
           regb_used_o        = 1'b1;
-          alu_op_b_mux_sel_o = OP_B_REGB_OR_FWD;
+          alu_op_b_mux_sel_o = riscv_defines::OP_B_REGB_OR_FWD;
 
           // sign/zero extension
           data_sign_extension_o = {1'b0, ~instr_rdata_i[30]};
@@ -501,7 +499,7 @@ module riscv_decoder
         stack_access_o = (instr_rdata_i[19:15] == 5'd2);
       end
 
-      OPCODE_AMO: begin
+      riscv_defines::OPCODE_AMO: begin
         if (instr_rdata_i[14:12] == 3'b010) begin // RV32A Extension (word)
           data_req          = 1'b1;
           // alu_en_o          = 1'b0;
@@ -509,10 +507,10 @@ module riscv_decoder
           rega_used_o       = 1'b1;
           regb_used_o       = 1'b1;
           // regc_used_o       = 1'b1;
-          // regc_mux_o        = REGC_RD;    // Set register c address to rd part of instruction
+          // regc_mux_o        = riscv_defines::REGC_RD;    // Set register c address to rd part of instruction
           regfile_mem_we    = 1'b1;
           prepost_useincr_o = 1'b0;       // Set to zero to only use alu_operand_a as address (not a+b)
-          alu_op_a_mux_sel_o = OP_A_REGA_OR_FWD;
+          alu_op_a_mux_sel_o = riscv_defines::OP_A_REGA_OR_FWD;
 
           data_sign_extension_o = 1'b1;
 
@@ -520,21 +518,21 @@ module riscv_decoder
           atop_o = {1'b1, instr_rdata_i[31:27]};
 
           unique case (instr_rdata_i[31:27])
-            AMO_LR: begin
+            riscv_defines::AMO_LR: begin
               data_we_o = 1'b0;
             end
-            AMO_SC,
-            AMO_SWAP,
-            AMO_ADD,
-            AMO_XOR,
-            AMO_AND,
-            AMO_OR,
-            AMO_MIN,
-            AMO_MAX,
-            AMO_MINU,
-            AMO_MAXU: begin
+            riscv_defines::AMO_SC,
+            riscv_defines::AMO_SWAP,
+            riscv_defines::AMO_ADD,
+            riscv_defines::AMO_XOR,
+            riscv_defines::AMO_AND,
+            riscv_defines::AMO_OR,
+            riscv_defines::AMO_MIN,
+            riscv_defines::AMO_MAX,
+            riscv_defines::AMO_MINU,
+            riscv_defines::AMO_MAXU: begin
               data_we_o = 1'b1;
-              alu_op_c_mux_sel_o = OP_C_REGB_OR_FWD;  // pass write data through ALU operand c
+              alu_op_c_mux_sel_o = riscv_defines::OP_C_REGB_OR_FWD;  // pass write data through ALU operand c
             end
             default : illegal_insn_o = 1'b1;
           endcase
@@ -554,48 +552,48 @@ module riscv_decoder
       //                      //
       //////////////////////////
 
-      OPCODE_LUI: begin  // Load Upper Immediate
-        alu_op_a_mux_sel_o  = OP_A_IMM;
-        alu_op_b_mux_sel_o  = OP_B_IMM;
-        imm_a_mux_sel_o     = IMMA_ZERO;
-        imm_b_mux_sel_o     = IMMB_U;
-        alu_operator_o      = ALU_ADD;
+      riscv_defines::OPCODE_LUI: begin  // Load Upper Immediate
+        alu_op_a_mux_sel_o  = riscv_defines::OP_A_IMM;
+        alu_op_b_mux_sel_o  = riscv_defines::OP_B_IMM;
+        imm_a_mux_sel_o     = riscv_defines::IMMA_ZERO;
+        imm_b_mux_sel_o     = riscv_defines::IMMB_U;
+        alu_operator_o      = riscv_defines::ALU_ADD;
         regfile_alu_we      = 1'b1;
       end
 
-      OPCODE_AUIPC: begin  // Add Upper Immediate to PC
-        alu_op_a_mux_sel_o  = OP_A_CURRPC;
-        alu_op_b_mux_sel_o  = OP_B_IMM;
-        imm_b_mux_sel_o     = IMMB_U;
-        alu_operator_o      = ALU_ADD;
+      riscv_defines::OPCODE_AUIPC: begin  // Add Upper Immediate to PC
+        alu_op_a_mux_sel_o  = riscv_defines::OP_A_CURRPC;
+        alu_op_b_mux_sel_o  = riscv_defines::OP_B_IMM;
+        imm_b_mux_sel_o     = riscv_defines::IMMB_U;
+        alu_operator_o      = riscv_defines::ALU_ADD;
         regfile_alu_we      = 1'b1;
       end
 
-      OPCODE_OPIMM: begin // Register-Immediate ALU Operations
-        alu_op_b_mux_sel_o  = OP_B_IMM;
-        imm_b_mux_sel_o     = IMMB_I;
+      riscv_defines::OPCODE_OPIMM: begin // Register-Immediate ALU Operations
+        alu_op_b_mux_sel_o  = riscv_defines::OP_B_IMM;
+        imm_b_mux_sel_o     = riscv_defines::IMMB_I;
         regfile_alu_we      = 1'b1;
         rega_used_o         = 1'b1;
 
         unique case (instr_rdata_i[14:12])
-          3'b000: alu_operator_o = ALU_ADD;  // Add Immediate
-          3'b010: alu_operator_o = ALU_SLTS; // Set to one if Lower Than Immediate
-          3'b011: alu_operator_o = ALU_SLTU; // Set to one if Lower Than Immediate Unsigned
-          3'b100: alu_operator_o = ALU_XOR;  // Exclusive Or with Immediate
-          3'b110: alu_operator_o = ALU_OR;   // Or with Immediate
-          3'b111: alu_operator_o = ALU_AND;  // And with Immediate
+          3'b000: alu_operator_o = riscv_defines::ALU_ADD;  // Add Immediate
+          3'b010: alu_operator_o = riscv_defines::ALU_SLTS; // Set to one if Lower Than Immediate
+          3'b011: alu_operator_o = riscv_defines::ALU_SLTU; // Set to one if Lower Than Immediate Unsigned
+          3'b100: alu_operator_o = riscv_defines::ALU_XOR;  // Exclusive Or with Immediate
+          3'b110: alu_operator_o = riscv_defines::ALU_OR;   // Or with Immediate
+          3'b111: alu_operator_o = riscv_defines::ALU_AND;  // And with Immediate
 
           3'b001: begin
-            alu_operator_o = ALU_SLL;  // Shift Left Logical by Immediate
+            alu_operator_o = riscv_defines::ALU_SLL;  // Shift Left Logical by Immediate
             if (instr_rdata_i[31:25] != 7'b0)
               illegal_insn_o = 1'b1;
           end
 
           3'b101: begin
             if (instr_rdata_i[31:25] == 7'b0)
-              alu_operator_o = ALU_SRL;  // Shift Right Logical by Immediate
+              alu_operator_o = riscv_defines::ALU_SRL;  // Shift Right Logical by Immediate
             else if (instr_rdata_i[31:25] == 7'b010_0000)
-              alu_operator_o = ALU_SRA;  // Shift Right Arithmetically by Immediate
+              alu_operator_o = riscv_defines::ALU_SRA;  // Shift Right Arithmetically by Immediate
             else
               illegal_insn_o = 1'b1;
           end
@@ -604,7 +602,7 @@ module riscv_decoder
         endcase
       end
 
-      OPCODE_OP: begin  // Register-Register ALU operation
+      riscv_defines::OPCODE_OP: begin  // Register-Register ALU operation
 
         // PREFIX 11
         if (instr_rdata_i[31:30] == 2'b11) begin
@@ -617,42 +615,42 @@ module riscv_decoder
           rega_used_o    = 1'b1;
 
           // bit-manipulation instructions
-          bmask_a_mux_o       = BMASK_A_S3;
-          bmask_b_mux_o       = BMASK_B_S2;
-          alu_op_b_mux_sel_o  = OP_B_IMM;
+          bmask_a_mux_o       = riscv_defines::BMASK_A_S3;
+          bmask_b_mux_o       = riscv_defines::BMASK_B_S2;
+          alu_op_b_mux_sel_o  = riscv_defines::OP_B_IMM;
 
           unique case (instr_rdata_i[14:12])
             3'b000: begin
-              alu_operator_o  = ALU_BEXT;
-              imm_b_mux_sel_o = IMMB_S2;
-              bmask_b_mux_o   = BMASK_B_ZERO;
+              alu_operator_o  = riscv_defines::ALU_BEXT;
+              imm_b_mux_sel_o = riscv_defines::IMMB_S2;
+              bmask_b_mux_o   = riscv_defines::BMASK_B_ZERO;
             end
             3'b001: begin
-              alu_operator_o  = ALU_BEXTU;
-              imm_b_mux_sel_o = IMMB_S2;
-              bmask_b_mux_o   = BMASK_B_ZERO;
+              alu_operator_o  = riscv_defines::ALU_BEXTU;
+              imm_b_mux_sel_o = riscv_defines::IMMB_S2;
+              bmask_b_mux_o   = riscv_defines::BMASK_B_ZERO;
             end
             3'b010: begin
-              alu_operator_o  = ALU_BINS;
-              imm_b_mux_sel_o = IMMB_S2;
+              alu_operator_o  = riscv_defines::ALU_BINS;
+              imm_b_mux_sel_o = riscv_defines::IMMB_S2;
               regc_used_o     = 1'b1;
-              regc_mux_o      = REGC_RD;
+              regc_mux_o      = riscv_defines::REGC_RD;
             end
             3'b011: begin
-              alu_operator_o = ALU_BCLR;
+              alu_operator_o = riscv_defines::ALU_BCLR;
             end
             3'b100: begin
-              alu_operator_o = ALU_BSET;
+              alu_operator_o = riscv_defines::ALU_BSET;
             end
             3'b101: begin
-              alu_operator_o        = ALU_BREV;
+              alu_operator_o        = riscv_defines::ALU_BREV;
               // Enable write back to RD
               regc_used_o           = 1'b1;
-              regc_mux_o            = REGC_RD;
+              regc_mux_o            = riscv_defines::REGC_RD;
               // Extract the source register on operand a
-              imm_b_mux_sel_o       = IMMB_S2;
+              imm_b_mux_sel_o       = riscv_defines::IMMB_S2;
               // Map the radix to bmask_a immediate
-              alu_bmask_a_mux_sel_o = BMASK_A_IMM;
+              alu_bmask_a_mux_sel_o = riscv_defines::BMASK_A_IMM;
             end
             default: illegal_insn_o = 1'b1;
           endcase
@@ -669,53 +667,53 @@ module riscv_decoder
             regfile_alu_we = 1'b1;
             rega_used_o    = 1'b1;
 
-            bmask_a_mux_o       = BMASK_A_S3;
-            bmask_b_mux_o       = BMASK_B_S2;
-            alu_op_b_mux_sel_o  = OP_B_IMM;
+            bmask_a_mux_o       = riscv_defines::BMASK_A_S3;
+            bmask_b_mux_o       = riscv_defines::BMASK_B_S2;
+            alu_op_b_mux_sel_o  = riscv_defines::OP_B_IMM;
 
             unique case (instr_rdata_i[14:12])
               3'b000: begin
-                alu_operator_o  = ALU_BEXT;
-                imm_b_mux_sel_o = IMMB_S2;
-                bmask_b_mux_o   = BMASK_B_ZERO;
+                alu_operator_o  = riscv_defines::ALU_BEXT;
+                imm_b_mux_sel_o = riscv_defines::IMMB_S2;
+                bmask_b_mux_o   = riscv_defines::BMASK_B_ZERO;
                 //register variant
-                alu_op_b_mux_sel_o     = OP_B_BMASK;
-                alu_bmask_a_mux_sel_o  = BMASK_A_REG;
+                alu_op_b_mux_sel_o     = riscv_defines::OP_B_BMASK;
+                alu_bmask_a_mux_sel_o  = riscv_defines::BMASK_A_REG;
                 regb_used_o            = 1'b1;
               end
               3'b001: begin
-                alu_operator_o  = ALU_BEXTU;
-                imm_b_mux_sel_o = IMMB_S2;
-                bmask_b_mux_o   = BMASK_B_ZERO;
+                alu_operator_o  = riscv_defines::ALU_BEXTU;
+                imm_b_mux_sel_o = riscv_defines::IMMB_S2;
+                bmask_b_mux_o   = riscv_defines::BMASK_B_ZERO;
                 //register variant
-                alu_op_b_mux_sel_o     = OP_B_BMASK;
-                alu_bmask_a_mux_sel_o  = BMASK_A_REG;
+                alu_op_b_mux_sel_o     = riscv_defines::OP_B_BMASK;
+                alu_bmask_a_mux_sel_o  = riscv_defines::BMASK_A_REG;
                 regb_used_o            = 1'b1;
               end
               3'b010: begin
-                alu_operator_o      = ALU_BINS;
-                imm_b_mux_sel_o     = IMMB_S2;
+                alu_operator_o      = riscv_defines::ALU_BINS;
+                imm_b_mux_sel_o     = riscv_defines::IMMB_S2;
                 regc_used_o         = 1'b1;
-                regc_mux_o          = REGC_RD;
+                regc_mux_o          = riscv_defines::REGC_RD;
                 //register variant
-                alu_op_b_mux_sel_o     = OP_B_BMASK;
-                alu_bmask_a_mux_sel_o  = BMASK_A_REG;
-                alu_bmask_b_mux_sel_o  = BMASK_B_REG;
+                alu_op_b_mux_sel_o     = riscv_defines::OP_B_BMASK;
+                alu_bmask_a_mux_sel_o  = riscv_defines::BMASK_A_REG;
+                alu_bmask_b_mux_sel_o  = riscv_defines::BMASK_B_REG;
                 regb_used_o            = 1'b1;
               end
               3'b011: begin
-                alu_operator_o = ALU_BCLR;
+                alu_operator_o = riscv_defines::ALU_BCLR;
                 //register variant
                 regb_used_o            = 1'b1;
-                alu_bmask_a_mux_sel_o  = BMASK_A_REG;
-                alu_bmask_b_mux_sel_o  = BMASK_B_REG;
+                alu_bmask_a_mux_sel_o  = riscv_defines::BMASK_A_REG;
+                alu_bmask_b_mux_sel_o  = riscv_defines::BMASK_B_REG;
               end
               3'b100: begin
-                alu_operator_o = ALU_BSET;
+                alu_operator_o = riscv_defines::ALU_BSET;
                 //register variant
                 regb_used_o            = 1'b1;
-                alu_bmask_a_mux_sel_o  = BMASK_A_REG;
-                alu_bmask_b_mux_sel_o  = BMASK_B_REG;
+                alu_bmask_a_mux_sel_o  = riscv_defines::BMASK_A_REG;
+                alu_bmask_b_mux_sel_o  = riscv_defines::BMASK_B_REG;
               end
               default: illegal_insn_o = 1'b1;
             endcase
@@ -725,12 +723,12 @@ module riscv_decoder
           ///////////////////////
           end else begin
             // Vectorial FP not available in 'old' shared FPU
-            if (FPU==1 && C_XFVEC && SHARED_FP!=1) begin
+            if (FPU==1 && riscv_defines::C_XFVEC && SHARED_FP!=1) begin
 
               // using APU instead of ALU
               apu_en           = 1'b1;
               alu_en_o         = 1'b0;
-              apu_flags_src_o  = APU_FLAGS_FPNEW;
+              apu_flags_src_o  = apu_core_package::APU_FLAGS_FPNEW;
               // by default, set all registers to FP registers and use 2
               rega_used_o      = 1'b1;
               regb_used_o      = 1'b1;
@@ -749,22 +747,22 @@ module riscv_decoder
                 // FP32
                 2'b00: begin
                   fpu_dst_fmt_o  = fpnew_pkg::FP32;
-                  alu_vec_mode_o = VEC_MODE32;
+                  alu_vec_mode_o = riscv_defines::VEC_MODE32;
                 end
                 // FP16ALT
                 2'b01: begin
                   fpu_dst_fmt_o  = fpnew_pkg::FP16ALT;
-                  alu_vec_mode_o = VEC_MODE16;
+                  alu_vec_mode_o = riscv_defines::VEC_MODE16;
                 end
                 // FP16
                 2'b10: begin
                   fpu_dst_fmt_o  = fpnew_pkg::FP16;
-                  alu_vec_mode_o = VEC_MODE16;
+                  alu_vec_mode_o = riscv_defines::VEC_MODE16;
                 end
                 // FP8
                 2'b11: begin
                   fpu_dst_fmt_o  = fpnew_pkg::FP8;
-                  alu_vec_mode_o = VEC_MODE8;
+                  alu_vec_mode_o = riscv_defines::VEC_MODE8;
                 end
               endcase
 
@@ -779,8 +777,8 @@ module riscv_decoder
                   fp_op_group = ADDMUL;
                   apu_type_o  = APUTYPE_ADDSUB;
                   // FPnew needs addition operands as operand B and C
-                  alu_op_b_mux_sel_o     = OP_B_REGA_OR_FWD;
-                  alu_op_c_mux_sel_o     = OP_C_REGB_OR_FWD;
+                  alu_op_b_mux_sel_o     = riscv_defines::OP_B_REGA_OR_FWD;
+                  alu_op_c_mux_sel_o     = riscv_defines::OP_C_REGB_OR_FWD;
                   scalar_replication_o   = 1'b0;
                   scalar_replication_c_o = instr_rdata_i[14];
                 end
@@ -791,8 +789,8 @@ module riscv_decoder
                   fp_op_group = ADDMUL;
                   apu_type_o  = APUTYPE_ADDSUB;
                   // FPnew needs addition operands as operand B and C
-                  alu_op_b_mux_sel_o     = OP_B_REGA_OR_FWD;
-                  alu_op_c_mux_sel_o     = OP_C_REGB_OR_FWD;
+                  alu_op_b_mux_sel_o     = riscv_defines::OP_B_REGA_OR_FWD;
+                  alu_op_c_mux_sel_o     = riscv_defines::OP_C_REGB_OR_FWD;
                   scalar_replication_o   = 1'b0;
                   scalar_replication_c_o = instr_rdata_i[14];
                 end
@@ -844,7 +842,7 @@ module riscv_decoder
                 // vfmac.vfmt - Vectorial FP Multiply-Accumulate
                 5'b01000: begin
                   regc_used_o = 1'b1;
-                  regc_mux_o  = REGC_RD; // third operand is rd
+                  regc_mux_o  = riscv_defines::REGC_RD; // third operand is rd
                   reg_fp_c_o  = 1'b1;
                   fpu_op      = fpnew_pkg::FMADD;
                   fp_op_group = ADDMUL;
@@ -853,7 +851,7 @@ module riscv_decoder
                 // vfmre.vfmt - Vectorial FP Multiply-Reduce
                 5'b01001: begin
                   regc_used_o = 1'b1;
-                  regc_mux_o  = REGC_RD; // third operand is rd
+                  regc_mux_o  = riscv_defines::REGC_RD; // third operand is rd
                   reg_fp_c_o  = 1'b1;
                   fpu_op      = fpnew_pkg::FMADD;
                   fpu_op_mod  = 1'b1;
@@ -868,7 +866,7 @@ module riscv_decoder
                   unique case (instr_rdata_i[24:20]) inside
                     // vfmv.{x.vfmt/vfmt.x} - Vectorial FP Reg <-> GP Reg Moves
                     5'b00000: begin
-                      alu_op_b_mux_sel_o = OP_B_REGA_OR_FWD; // set rs2 = rs1 so we can map FMV to SGNJ in the unit
+                      alu_op_b_mux_sel_o = riscv_defines::OP_B_REGA_OR_FWD; // set rs2 = rs1 so we can map FMV to SGNJ in the unit
                       fpu_op             = fpnew_pkg::SGNJ;
                       fp_rnd_mode_o      = 3'b011;  // passthrough without checking nan-box
                       fp_op_group        = NONCOMP;
@@ -932,19 +930,19 @@ module riscv_decoder
                         // Only process instruction if corresponding extension is active (static)
                         2'b00: begin
                           fpu_src_fmt_o = fpnew_pkg::FP32;
-                          if (~C_RVF) illegal_insn_o = 1'b1;
+                          if (~riscv_defines::C_RVF) illegal_insn_o = 1'b1;
                         end
                         2'b01: begin
                           fpu_src_fmt_o = fpnew_pkg::FP16ALT;
-                          if (~C_XF16ALT) illegal_insn_o = 1'b1;
+                          if (~riscv_defines::C_XF16ALT) illegal_insn_o = 1'b1;
                         end
                         2'b10: begin
                           fpu_src_fmt_o = fpnew_pkg::FP16;
-                          if (~C_XF16) illegal_insn_o = 1'b1;
+                          if (~riscv_defines::C_XF16) illegal_insn_o = 1'b1;
                         end
                         2'b11: begin
                           fpu_src_fmt_o = fpnew_pkg::FP8;
-                          if (~C_XF8) illegal_insn_o = 1'b1;
+                          if (~riscv_defines::C_XF8) illegal_insn_o = 1'b1;
                         end
                       endcase
                       // R must not be set
@@ -1049,22 +1047,22 @@ module riscv_decoder
                   // vfcpk{a-d}.vfmt.d - from double
                   if (instr_rdata_i[26]) begin
                     fpu_src_fmt_o  = fpnew_pkg::FP64;
-                    if (~C_RVD) illegal_insn_o = 1'b1;
+                    if (~riscv_defines::C_RVD) illegal_insn_o = 1'b1;
                   end
                   // vfcpk{a-d}.vfmt.s
                   else begin
                     fpu_src_fmt_o  = fpnew_pkg::FP32;
-                    if (~C_RVF) illegal_insn_o = 1'b1;
+                    if (~riscv_defines::C_RVF) illegal_insn_o = 1'b1;
                   end
                   // Resolve legal vfcpk / format combinations (mostly static)
                   if (fpu_op == fpnew_pkg::CPKCD) begin // vfcpk{c/d} not possible unless FP8 and FLEN>=64
-                    if (~C_XF8 || ~C_RVD) illegal_insn_o = 1'b1;
+                    if (~riscv_defines::C_XF8 || ~riscv_defines::C_RVD) illegal_insn_o = 1'b1;
                   end else begin
                     if (instr_rdata_i[14]) begin // vfcpkb
                       // vfcpkb not possible for FP32
                       if (fpu_dst_fmt_o == fpnew_pkg::FP32) illegal_insn_o = 1'b1;
                       // vfcpkb not possible for FP16[ALT] if not RVD
-                      if (~C_RVD && (fpu_dst_fmt_o != fpnew_pkg::FP8)) illegal_insn_o = 1'b1;
+                      if (~riscv_defines::C_RVD && (fpu_dst_fmt_o != fpnew_pkg::FP8)) illegal_insn_o = 1'b1;
                     end
                   end
                 end
@@ -1076,15 +1074,15 @@ module riscv_decoder
 
               // check enabled formats (static)
               // need RVD for F vectors
-              if ((~C_RVF || ~C_RVD) && fpu_dst_fmt_o == fpnew_pkg::FP32) illegal_insn_o = 1'b1;
+              if ((~riscv_defines::C_RVF || ~riscv_defines::C_RVD) && fpu_dst_fmt_o == fpnew_pkg::FP32) illegal_insn_o = 1'b1;
               // need RVF for F16 vectors
-              if ((~C_XF16 || ~C_RVF) && fpu_dst_fmt_o == fpnew_pkg::FP16) illegal_insn_o = 1'b1;
+              if ((~riscv_defines::C_XF16 || ~riscv_defines::C_RVF) && fpu_dst_fmt_o == fpnew_pkg::FP16) illegal_insn_o = 1'b1;
               // need RVF for F16 vectors
-              if ((~C_XF16ALT || ~C_RVF) && fpu_dst_fmt_o == fpnew_pkg::FP16ALT) begin
+              if ((~riscv_defines::C_XF16ALT || ~riscv_defines::C_RVF) && fpu_dst_fmt_o == fpnew_pkg::FP16ALT) begin
                 illegal_insn_o = 1'b1;
               end
               // need F16 for F8 vectors
-              if ((~C_XF8 || (~C_XF16 && ~C_XF16ALT)) && fpu_dst_fmt_o == fpnew_pkg::FP8) begin
+              if ((~riscv_defines::C_XF8 || (~riscv_defines::C_XF16 && ~riscv_defines::C_XF16ALT)) && fpu_dst_fmt_o == fpnew_pkg::FP8) begin
                 illegal_insn_o = 1'b1;
               end
 
@@ -1103,19 +1101,19 @@ module riscv_decoder
                 // ADDMUL has format dependent latency
                 ADDMUL : begin
                   unique case (fpu_dst_fmt_o)
-                    fpnew_pkg::FP32    : apu_lat_o = (C_LAT_FP32<3)    ? C_LAT_FP32+1    : 2'h0;
-                    fpnew_pkg::FP16    : apu_lat_o = (C_LAT_FP16<3)    ? C_LAT_FP16+1    : 2'h0;
-                    fpnew_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<3) ? C_LAT_FP16ALT+1 : 2'h0;
-                    fpnew_pkg::FP8     : apu_lat_o = (C_LAT_FP8<3)     ? C_LAT_FP8+1     : 2'h0;
+                    fpnew_pkg::FP32    : apu_lat_o = (riscv_defines::C_LAT_FP32<3)    ? riscv_defines::C_LAT_FP32+1    : 2'h0;
+                    fpnew_pkg::FP16    : apu_lat_o = (riscv_defines::C_LAT_FP16<3)    ? riscv_defines::C_LAT_FP16+1    : 2'h0;
+                    fpnew_pkg::FP16ALT : apu_lat_o = (riscv_defines::C_LAT_FP16ALT<3) ? riscv_defines::C_LAT_FP16ALT+1 : 2'h0;
+                    fpnew_pkg::FP8     : apu_lat_o = (riscv_defines::C_LAT_FP8<3)     ? riscv_defines::C_LAT_FP8+1     : 2'h0;
                     default : ;
                   endcase
                 end
                 // DIVSQRT is iterative and takes more than 2 cycles
                 DIVSQRT : apu_lat_o = 2'h0;
                 // NONCOMP uses the same latency for all formats
-                NONCOMP : apu_lat_o = (C_LAT_NONCOMP<3) ? C_LAT_NONCOMP+1 : 2'h0;
+                NONCOMP : apu_lat_o = (riscv_defines::C_LAT_NONCOMP<3) ? riscv_defines::C_LAT_NONCOMP+1 : 2'h0;
                 // CONV uses the same latency for all formats
-                CONV    : apu_lat_o = (C_LAT_CONV<3) ? C_LAT_CONV+1 : 2'h0;
+                CONV    : apu_lat_o = (riscv_defines::C_LAT_CONV<3) ? riscv_defines::C_LAT_CONV+1 : 2'h0;
               endcase
 
               // Set FPnew OP and OPMOD as the APU op
@@ -1139,92 +1137,92 @@ module riscv_decoder
 
           unique case ({instr_rdata_i[30:25], instr_rdata_i[14:12]})
             // RV32I ALU operations
-            {6'b00_0000, 3'b000}: alu_operator_o = ALU_ADD;   // Add
-            {6'b10_0000, 3'b000}: alu_operator_o = ALU_SUB;   // Sub
-            {6'b00_0000, 3'b010}: alu_operator_o = ALU_SLTS;  // Set Lower Than
-            {6'b00_0000, 3'b011}: alu_operator_o = ALU_SLTU;  // Set Lower Than Unsigned
-            {6'b00_0000, 3'b100}: alu_operator_o = ALU_XOR;   // Xor
-            {6'b00_0000, 3'b110}: alu_operator_o = ALU_OR;    // Or
-            {6'b00_0000, 3'b111}: alu_operator_o = ALU_AND;   // And
-            {6'b00_0000, 3'b001}: alu_operator_o = ALU_SLL;   // Shift Left Logical
-            {6'b00_0000, 3'b101}: alu_operator_o = ALU_SRL;   // Shift Right Logical
-            {6'b10_0000, 3'b101}: alu_operator_o = ALU_SRA;   // Shift Right Arithmetic
+            {6'b00_0000, 3'b000}: alu_operator_o = riscv_defines::ALU_ADD;   // Add
+            {6'b10_0000, 3'b000}: alu_operator_o = riscv_defines::ALU_SUB;   // Sub
+            {6'b00_0000, 3'b010}: alu_operator_o = riscv_defines::ALU_SLTS;  // Set Lower Than
+            {6'b00_0000, 3'b011}: alu_operator_o = riscv_defines::ALU_SLTU;  // Set Lower Than Unsigned
+            {6'b00_0000, 3'b100}: alu_operator_o = riscv_defines::ALU_XOR;   // Xor
+            {6'b00_0000, 3'b110}: alu_operator_o = riscv_defines::ALU_OR;    // Or
+            {6'b00_0000, 3'b111}: alu_operator_o = riscv_defines::ALU_AND;   // And
+            {6'b00_0000, 3'b001}: alu_operator_o = riscv_defines::ALU_SLL;   // Shift Left Logical
+            {6'b00_0000, 3'b101}: alu_operator_o = riscv_defines::ALU_SRL;   // Shift Right Logical
+            {6'b10_0000, 3'b101}: alu_operator_o = riscv_defines::ALU_SRA;   // Shift Right Arithmetic
 
             // supported RV32M instructions
             {6'b00_0001, 3'b000}: begin // mul
               alu_en_o        = 1'b0;
               mult_int_en     = 1'b1;
-              mult_operator_o = MUL_MAC32;
-              regc_mux_o      = REGC_ZERO;
+              mult_operator_o = riscv_defines::MUL_MAC32;
+              regc_mux_o      = riscv_defines::REGC_ZERO;
             end
             {6'b00_0001, 3'b001}: begin // mulh
               alu_en_o           = 1'b0;
               regc_used_o        = 1'b1;
-              regc_mux_o         = REGC_ZERO;
+              regc_mux_o         = riscv_defines::REGC_ZERO;
               mult_signed_mode_o = 2'b11;
               mult_int_en        = 1'b1;
-              mult_operator_o    = MUL_H;
+              mult_operator_o    = riscv_defines::MUL_H;
               instr_multicycle_o = 1'b1;
             end
             {6'b00_0001, 3'b010}: begin // mulhsu
               alu_en_o           = 1'b0;
               regc_used_o        = 1'b1;
-              regc_mux_o         = REGC_ZERO;
+              regc_mux_o         = riscv_defines::REGC_ZERO;
               mult_signed_mode_o = 2'b01;
               mult_int_en        = 1'b1;
-              mult_operator_o    = MUL_H;
+              mult_operator_o    = riscv_defines::MUL_H;
               instr_multicycle_o = 1'b1;
             end
             {6'b00_0001, 3'b011}: begin // mulhu
               alu_en_o           = 1'b0;
               regc_used_o        = 1'b1;
-              regc_mux_o         = REGC_ZERO;
+              regc_mux_o         = riscv_defines::REGC_ZERO;
               mult_signed_mode_o = 2'b00;
               mult_int_en        = 1'b1;
-              mult_operator_o    = MUL_H;
+              mult_operator_o    = riscv_defines::MUL_H;
               instr_multicycle_o = 1'b1;
             end
             {6'b00_0001, 3'b100}: begin // div
-              alu_op_a_mux_sel_o = OP_A_REGB_OR_FWD;
-              alu_op_b_mux_sel_o = OP_B_REGC_OR_FWD;
-              regc_mux_o         = REGC_S1;
+              alu_op_a_mux_sel_o = riscv_defines::OP_A_REGB_OR_FWD;
+              alu_op_b_mux_sel_o = riscv_defines::OP_B_REGC_OR_FWD;
+              regc_mux_o         = riscv_defines::REGC_S1;
               regc_used_o        = 1'b1;
               regb_used_o        = 1'b1;
               rega_used_o        = 1'b0;
-              alu_operator_o     = ALU_DIV;
+              alu_operator_o     = riscv_defines::ALU_DIV;
               instr_multicycle_o = 1'b1;
               `USE_APU_INT_DIV
             end
             {6'b00_0001, 3'b101}: begin // divu
-              alu_op_a_mux_sel_o = OP_A_REGB_OR_FWD;
-              alu_op_b_mux_sel_o = OP_B_REGC_OR_FWD;
-              regc_mux_o         = REGC_S1;
+              alu_op_a_mux_sel_o = riscv_defines::OP_A_REGB_OR_FWD;
+              alu_op_b_mux_sel_o = riscv_defines::OP_B_REGC_OR_FWD;
+              regc_mux_o         = riscv_defines::REGC_S1;
               regc_used_o        = 1'b1;
               regb_used_o        = 1'b1;
               rega_used_o        = 1'b0;
-              alu_operator_o     = ALU_DIVU;
+              alu_operator_o     = riscv_defines::ALU_DIVU;
               instr_multicycle_o = 1'b1;
               `USE_APU_INT_DIV
             end
             {6'b00_0001, 3'b110}: begin // rem
-              alu_op_a_mux_sel_o = OP_A_REGB_OR_FWD;
-              alu_op_b_mux_sel_o = OP_B_REGC_OR_FWD;
-              regc_mux_o         = REGC_S1;
+              alu_op_a_mux_sel_o = riscv_defines::OP_A_REGB_OR_FWD;
+              alu_op_b_mux_sel_o = riscv_defines::OP_B_REGC_OR_FWD;
+              regc_mux_o         = riscv_defines::REGC_S1;
               regc_used_o        = 1'b1;
               regb_used_o        = 1'b1;
               rega_used_o        = 1'b0;
-              alu_operator_o     = ALU_REM;
+              alu_operator_o     = riscv_defines::ALU_REM;
               instr_multicycle_o = 1'b1;
               `USE_APU_INT_DIV
             end
             {6'b00_0001, 3'b111}: begin // remu
-              alu_op_a_mux_sel_o = OP_A_REGB_OR_FWD;
-              alu_op_b_mux_sel_o = OP_B_REGC_OR_FWD;
-              regc_mux_o         = REGC_S1;
+              alu_op_a_mux_sel_o = riscv_defines::OP_A_REGB_OR_FWD;
+              alu_op_b_mux_sel_o = riscv_defines::OP_B_REGC_OR_FWD;
+              regc_mux_o         = riscv_defines::REGC_S1;
               regc_used_o        = 1'b1;
               regb_used_o        = 1'b1;
               rega_used_o        = 1'b0;
-              alu_operator_o     = ALU_REMU;
+              alu_operator_o     = riscv_defines::ALU_REMU;
               instr_multicycle_o = 1'b1;
               `USE_APU_INT_DIV
             end
@@ -1233,58 +1231,58 @@ module riscv_decoder
             {6'b10_0001, 3'b000}: begin // p.mac
               alu_en_o        = 1'b0;
               regc_used_o     = 1'b1;
-              regc_mux_o      = REGC_RD;
+              regc_mux_o      = riscv_defines::REGC_RD;
               mult_int_en     = 1'b1;
-              mult_operator_o = MUL_MAC32;
+              mult_operator_o = riscv_defines::MUL_MAC32;
               `USE_APU_INT_MULT
             end
             {6'b10_0001, 3'b001}: begin // p.msu
               alu_en_o        = 1'b0;
               regc_used_o     = 1'b1;
-              regc_mux_o      = REGC_RD;
+              regc_mux_o      = riscv_defines::REGC_RD;
               mult_int_en     = 1'b1;
-              mult_operator_o = MUL_MSU32;
+              mult_operator_o = riscv_defines::MUL_MSU32;
               `USE_APU_INT_MULT
             end
-            {6'b00_0010, 3'b010}: alu_operator_o = ALU_SLETS; // Set Lower Equal Than    p.slet
-            {6'b00_0010, 3'b011}: alu_operator_o = ALU_SLETU; // Set Lower Equal Than Unsigned   p.sletu
-            {6'b00_0010, 3'b100}: begin alu_operator_o = ALU_MIN;   end // Min   p.min
-            {6'b00_0010, 3'b101}: begin alu_operator_o = ALU_MINU;  end // Min Unsigned
-            {6'b00_0010, 3'b110}: begin alu_operator_o = ALU_MAX;   end // Max
-            {6'b00_0010, 3'b111}: begin alu_operator_o = ALU_MAXU;  end // Max Unsigned
-            {6'b00_0100, 3'b101}: begin alu_operator_o = ALU_ROR;   end // Rotate Right
+            {6'b00_0010, 3'b010}: alu_operator_o = riscv_defines::ALU_SLETS; // Set Lower Equal Than    p.slet
+            {6'b00_0010, 3'b011}: alu_operator_o = riscv_defines::ALU_SLETU; // Set Lower Equal Than Unsigned   p.sletu
+            {6'b00_0010, 3'b100}: begin alu_operator_o = riscv_defines::ALU_MIN;   end // Min   p.min
+            {6'b00_0010, 3'b101}: begin alu_operator_o = riscv_defines::ALU_MINU;  end // Min Unsigned
+            {6'b00_0010, 3'b110}: begin alu_operator_o = riscv_defines::ALU_MAX;   end // Max
+            {6'b00_0010, 3'b111}: begin alu_operator_o = riscv_defines::ALU_MAXU;  end // Max Unsigned
+            {6'b00_0100, 3'b101}: begin alu_operator_o = riscv_defines::ALU_ROR;   end // Rotate Right
 
             // PULP specific instructions using only one source register
-            {6'b00_1000, 3'b000}: begin alu_operator_o = ALU_FF1;  end // Find First 1
-            {6'b00_1000, 3'b001}: begin alu_operator_o = ALU_FL1;  end // Find Last 1
-            {6'b00_1000, 3'b010}: begin alu_operator_o = ALU_CLB;  end // Count Leading Bits
-            {6'b00_1000, 3'b011}: begin alu_operator_o = ALU_CNT;  end // Count set bits (popcount)
-            {6'b00_1000, 3'b100}: begin alu_operator_o = ALU_EXTS; alu_vec_mode_o = VEC_MODE16;  end // Sign-extend Half-word
-            {6'b00_1000, 3'b101}: begin alu_operator_o = ALU_EXT;  alu_vec_mode_o = VEC_MODE16;  end // Zero-extend Half-word
-            {6'b00_1000, 3'b110}: begin alu_operator_o = ALU_EXTS; alu_vec_mode_o = VEC_MODE8;   end // Sign-extend Byte
-            {6'b00_1000, 3'b111}: begin alu_operator_o = ALU_EXT;  alu_vec_mode_o = VEC_MODE8;   end // Zero-extend Byte
+            {6'b00_1000, 3'b000}: begin alu_operator_o = riscv_defines::ALU_FF1;  end // Find First 1
+            {6'b00_1000, 3'b001}: begin alu_operator_o = riscv_defines::ALU_FL1;  end // Find Last 1
+            {6'b00_1000, 3'b010}: begin alu_operator_o = riscv_defines::ALU_CLB;  end // Count Leading Bits
+            {6'b00_1000, 3'b011}: begin alu_operator_o = riscv_defines::ALU_CNT;  end // Count set bits (popcount)
+            {6'b00_1000, 3'b100}: begin alu_operator_o = riscv_defines::ALU_EXTS; alu_vec_mode_o = riscv_defines::VEC_MODE16;  end // Sign-extend Half-word
+            {6'b00_1000, 3'b101}: begin alu_operator_o = riscv_defines::ALU_EXT;  alu_vec_mode_o = riscv_defines::VEC_MODE16;  end // Zero-extend Half-word
+            {6'b00_1000, 3'b110}: begin alu_operator_o = riscv_defines::ALU_EXTS; alu_vec_mode_o = riscv_defines::VEC_MODE8;   end // Sign-extend Byte
+            {6'b00_1000, 3'b111}: begin alu_operator_o = riscv_defines::ALU_EXT;  alu_vec_mode_o = riscv_defines::VEC_MODE8;   end // Zero-extend Byte
 
-            {6'b00_0010, 3'b000}: begin alu_operator_o = ALU_ABS;  end // p.abs
+            {6'b00_0010, 3'b000}: begin alu_operator_o = riscv_defines::ALU_ABS;  end // p.abs
 
             {6'b00_1010, 3'b001}: begin // p.clip
-              alu_operator_o     = ALU_CLIP;
-              alu_op_b_mux_sel_o = OP_B_IMM;
-              imm_b_mux_sel_o    = IMMB_CLIP;
+              alu_operator_o     = riscv_defines::ALU_CLIP;
+              alu_op_b_mux_sel_o = riscv_defines::OP_B_IMM;
+              imm_b_mux_sel_o    = riscv_defines::IMMB_CLIP;
             end
 
             {6'b00_1010, 3'b010}: begin // p.clipu
-              alu_operator_o     = ALU_CLIPU;
-              alu_op_b_mux_sel_o = OP_B_IMM;
-              imm_b_mux_sel_o    = IMMB_CLIP;
+              alu_operator_o     = riscv_defines::ALU_CLIPU;
+              alu_op_b_mux_sel_o = riscv_defines::OP_B_IMM;
+              imm_b_mux_sel_o    = riscv_defines::IMMB_CLIP;
             end
 
             {6'b00_1010, 3'b101}: begin // p.clipr
-              alu_operator_o     = ALU_CLIP;
+              alu_operator_o     = riscv_defines::ALU_CLIP;
               regb_used_o        = 1'b1;
             end
 
             {6'b00_1010, 3'b110}: begin // p.clipur
-              alu_operator_o     = ALU_CLIPU;
+              alu_operator_o     = riscv_defines::ALU_CLIPU;
               regb_used_o        = 1'b1;
             end
 
@@ -1306,14 +1304,14 @@ module riscv_decoder
       ////////////////////////////
 
       // floating point arithmetic
-      OPCODE_OP_FP: begin
+      riscv_defines::OPCODE_OP_FP: begin
         if (FPU==1) begin
 
           // using APU instead of ALU
           apu_en           = 1'b1;
           alu_en_o         = 1'b0;
           // Private and new shared FP use FPnew
-          apu_flags_src_o  = (SHARED_FP==1) ? APU_FLAGS_FP : APU_FLAGS_FPNEW;
+          apu_flags_src_o  = (SHARED_FP==1) ? apu_core_package::APU_FLAGS_FP : apu_core_package::APU_FLAGS_FPNEW;
           // by default, set all registers to FP registers and use 2
           rega_used_o      = 1'b1;
           regb_used_o      = 1'b1;
@@ -1352,11 +1350,11 @@ module riscv_decoder
               fp_op_group   = ADDMUL;
               apu_type_o    = APUTYPE_ADDSUB;
               apu_op_o      = 2'b0;
-              apu_lat_o     = (PIPE_REG_ADDSUB==1) ? 2'h2 : 2'h1;
+              apu_lat_o     = (apu_core_package::PIPE_REG_ADDSUB==1) ? 2'h2 : 2'h1;
               // FPnew needs addition operands as operand B and C
               if (SHARED_FP!=1) begin
-                alu_op_b_mux_sel_o = OP_B_REGA_OR_FWD;
-                alu_op_c_mux_sel_o = OP_C_REGB_OR_FWD;
+                alu_op_b_mux_sel_o = riscv_defines::OP_B_REGA_OR_FWD;
+                alu_op_c_mux_sel_o = riscv_defines::OP_C_REGB_OR_FWD;
               end
             end
             // fsub.fmt - FP Subtraction
@@ -1366,10 +1364,10 @@ module riscv_decoder
               fp_op_group   = ADDMUL;
               apu_type_o    = APUTYPE_ADDSUB;
               apu_op_o      = 2'b1;
-              apu_lat_o     = (PIPE_REG_ADDSUB==1) ? 2'h2 : 2'h1;
+              apu_lat_o     = (apu_core_package::PIPE_REG_ADDSUB==1) ? 2'h2 : 2'h1;
               if (SHARED_FP!=1) begin
-                alu_op_b_mux_sel_o = OP_B_REGA_OR_FWD;
-                alu_op_c_mux_sel_o = OP_C_REGB_OR_FWD;
+                alu_op_b_mux_sel_o = riscv_defines::OP_B_REGA_OR_FWD;
+                alu_op_c_mux_sel_o = riscv_defines::OP_C_REGB_OR_FWD;
               end
             end
             // fmul.fmt - FP Multiplication
@@ -1377,7 +1375,7 @@ module riscv_decoder
               fpu_op        = fpnew_pkg::MUL;
               fp_op_group   = ADDMUL;
               apu_type_o    = APUTYPE_MULT;
-              apu_lat_o     = (PIPE_REG_MULT==1) ? 2'h2 : 2'h1;
+              apu_lat_o     = (apu_core_package::PIPE_REG_MULT==1) ? 2'h2 : 2'h1;
             end
             // fdiv.fmt - FP Division
             5'b00011: begin
@@ -1412,11 +1410,11 @@ module riscv_decoder
                 regfile_alu_we = 1'b1;
                 case (instr_rdata_i[14:12])
                   //fsgnj.s
-                  3'h0: alu_operator_o = ALU_FSGNJ;
+                  3'h0: alu_operator_o = riscv_defines::ALU_FSGNJ;
                   //fsgnjn.s
-                  3'h1: alu_operator_o = ALU_FSGNJN;
+                  3'h1: alu_operator_o = riscv_defines::ALU_FSGNJN;
                   //fsgnjx.s
-                  3'h2: alu_operator_o = ALU_FSGNJX;
+                  3'h2: alu_operator_o = riscv_defines::ALU_FSGNJX;
                   // illegal instruction
                   default: illegal_insn_o = 1'b1;
                 endcase
@@ -1426,7 +1424,7 @@ module riscv_decoder
                 fp_op_group   = NONCOMP;
                 apu_type_o    = APUTYPE_FP; // doesn't matter much as long as it's not div
                 check_fprm    = 1'b0; // instruction encoded in rm, do the check here
-                if (C_XF16ALT) begin  // FP16ALT instructions encoded in rm separately (static)
+                if (riscv_defines::C_XF16ALT) begin  // FP16ALT instructions encoded in rm separately (static)
                   if (!(instr_rdata_i[14:12] inside {[3'b000:3'b010], [3'b100:3'b110]})) begin
                     illegal_insn_o = 1'b1;
                   end
@@ -1451,9 +1449,9 @@ module riscv_decoder
                 regfile_alu_we = 1'b1;
                 case (instr_rdata_i[14:12])
                   //fmin.s
-                  3'h0:     alu_operator_o = ALU_FMIN;
+                  3'h0:     alu_operator_o = riscv_defines::ALU_FMIN;
                   //fmax.s
-                  3'h1:     alu_operator_o = ALU_FMAX;
+                  3'h1:     alu_operator_o = riscv_defines::ALU_FMAX;
                   default:  illegal_insn_o = 1'b1;
                 endcase
               // FPnew supports MIN-MAX
@@ -1462,7 +1460,7 @@ module riscv_decoder
                 fp_op_group   = NONCOMP;
                 apu_type_o    = APUTYPE_FP; // doesn't matter much as long as it's not div
                 check_fprm    = 1'b0; // instruction encoded in rm, do the check here
-                if (C_XF16ALT) begin  // FP16ALT instructions encoded in rm separately (static)
+                if (riscv_defines::C_XF16ALT) begin  // FP16ALT instructions encoded in rm separately (static)
                   if (!(instr_rdata_i[14:12] inside {[3'b000:3'b001], [3'b100:3'b101]})) begin
                     illegal_insn_o = 1'b1;
                   end
@@ -1486,7 +1484,7 @@ module riscv_decoder
                 alu_en_o       = 1'b1;
                 regfile_alu_we = 1'b1;
                 regb_used_o    = 1'b0;
-                alu_operator_o = ALU_FKEEP;
+                alu_operator_o = riscv_defines::ALU_FKEEP;
               // FPnew does proper casts
               end else begin
                 regb_used_o   = 1'b0;
@@ -1499,23 +1497,23 @@ module riscv_decoder
                 unique case (instr_rdata_i[22:20])
                   // Only process instruction if corresponding extension is active (static)
                   3'b000: begin
-                    if (~C_RVF) illegal_insn_o = 1'b1;
+                    if (~riscv_defines::C_RVF) illegal_insn_o = 1'b1;
                     fpu_src_fmt_o = fpnew_pkg::FP32;
                   end
                   3'b001: begin
-                    if (~C_RVD) illegal_insn_o = 1'b1;
+                    if (~riscv_defines::C_RVD) illegal_insn_o = 1'b1;
                     fpu_src_fmt_o = fpnew_pkg::FP64;
                   end
                   3'b010: begin
-                    if (~C_XF16) illegal_insn_o = 1'b1;
+                    if (~riscv_defines::C_XF16) illegal_insn_o = 1'b1;
                     fpu_src_fmt_o = fpnew_pkg::FP16;
                   end
                   3'b110: begin
-                    if (~C_XF16ALT) illegal_insn_o = 1'b1;
+                    if (~riscv_defines::C_XF16ALT) illegal_insn_o = 1'b1;
                     fpu_src_fmt_o = fpnew_pkg::FP16ALT;
                   end
                   3'b011: begin
-                    if (~C_XF8) illegal_insn_o = 1'b1;
+                    if (~riscv_defines::C_XF8) illegal_insn_o = 1'b1;
                     fpu_src_fmt_o = fpnew_pkg::FP8;
                   end
                   default: illegal_insn_o = 1'b1;
@@ -1527,19 +1525,19 @@ module riscv_decoder
               fpu_op        = fpnew_pkg::MUL;
               fp_op_group   = ADDMUL;
               apu_type_o    = APUTYPE_MULT;
-              apu_lat_o     = (PIPE_REG_MULT==1) ? 2'h2 : 2'h1;
+              apu_lat_o     = (apu_core_package::PIPE_REG_MULT==1) ? 2'h2 : 2'h1;
               // set dst format to FP32
               fpu_dst_fmt_o = fpnew_pkg::FP32;
             end
             // fmacex.s.fmt - FP Expanding Multipy-Accumulate to FP32
             5'b01010: begin
               regc_used_o = 1'b1;
-              regc_mux_o  = REGC_RD; // third operand is rd
+              regc_mux_o  = riscv_defines::REGC_RD; // third operand is rd
               reg_fp_c_o  = 1'b1;
               fpu_op      = fpnew_pkg::FMADD;
               fp_op_group = ADDMUL;
               apu_type_o  = APUTYPE_MAC;
-              apu_lat_o   = (PIPE_REG_MULT==1) ? 2'h2 : 2'h1;
+              apu_lat_o   = (apu_core_package::PIPE_REG_MULT==1) ? 2'h2 : 2'h1;
               // set dst format to FP32
               fpu_dst_fmt_o = fpnew_pkg::FP32;
             end
@@ -1553,11 +1551,11 @@ module riscv_decoder
                 reg_fp_d_o     = 1'b0;
                 case (instr_rdata_i[14:12])
                   //fle.s
-                  3'h0:     alu_operator_o = ALU_FLE;
+                  3'h0:     alu_operator_o = riscv_defines::ALU_FLE;
                   //flt.s
-                  3'h1:     alu_operator_o = ALU_FLT;
+                  3'h1:     alu_operator_o = riscv_defines::ALU_FLT;
                   //feq.s
-                  3'h2:     alu_operator_o = ALU_FEQ;
+                  3'h2:     alu_operator_o = riscv_defines::ALU_FEQ;
                   default:  illegal_insn_o = 1'b1;
                 endcase
               // FPnew supports comparisons
@@ -1567,7 +1565,7 @@ module riscv_decoder
                 reg_fp_d_o    = 1'b0; // go to integer regfile
                 apu_type_o    = APUTYPE_FP; // doesn't matter much as long as it's not div
                 check_fprm    = 1'b0; // instruction encoded in rm, do the check here
-                if (C_XF16ALT) begin  // FP16ALT instructions encoded in rm separately (static)
+                if (riscv_defines::C_XF16ALT) begin  // FP16ALT instructions encoded in rm separately (static)
                   if (!(instr_rdata_i[14:12] inside {[3'b000:3'b010], [3'b100:3'b110]})) begin
                     illegal_insn_o = 1'b1;
                   end
@@ -1592,29 +1590,29 @@ module riscv_decoder
               fpu_op_mod    = instr_rdata_i[20]; // signed/unsigned switch
               apu_type_o    = APUTYPE_CAST;
               apu_op_o      = 2'b1;
-              apu_lat_o     = (PIPE_REG_CAST==1) ? 2'h2 : 2'h1;
+              apu_lat_o     = (apu_core_package::PIPE_REG_CAST==1) ? 2'h2 : 2'h1;
 
               unique case (instr_rdata_i[26:25]) //fix for casting to different formats other than FP32
                 2'b00: begin
-                  if (~C_RVF) illegal_insn_o = 1;
+                  if (~riscv_defines::C_RVF) illegal_insn_o = 1;
                   else fpu_src_fmt_o = fpnew_pkg::FP32;
                 end
                 2'b01: begin
-                  if (~C_RVD) illegal_insn_o = 1;
+                  if (~riscv_defines::C_RVD) illegal_insn_o = 1;
                   else fpu_src_fmt_o = fpnew_pkg::FP64;
                 end
                 2'b10: begin
                   if (instr_rdata_i[14:12] == 3'b101) begin
-                    if (~C_XF16ALT) illegal_insn_o = 1;
+                    if (~riscv_defines::C_XF16ALT) illegal_insn_o = 1;
                     else fpu_src_fmt_o = fpnew_pkg::FP16ALT;
-                  end else if (~C_XF16) begin
+                  end else if (~riscv_defines::C_XF16) begin
                     illegal_insn_o = 1;
                   end else begin
                     fpu_src_fmt_o = fpnew_pkg::FP16;
                   end
                 end
                 2'b11: begin
-                  if (~C_XF8) illegal_insn_o = 1;
+                  if (~riscv_defines::C_XF8) illegal_insn_o = 1;
                   else fpu_src_fmt_o = fpnew_pkg::FP8;
                 end
               endcase // unique case (instr_rdata_i[26:25])
@@ -1630,7 +1628,7 @@ module riscv_decoder
               fpu_op_mod    = instr_rdata_i[20]; // signed/unsigned switch
               apu_type_o    = APUTYPE_CAST;
               apu_op_o      = 2'b0;
-              apu_lat_o     = (PIPE_REG_CAST==1) ? 2'h2 : 2'h1;
+              apu_lat_o     = (apu_core_package::PIPE_REG_CAST==1) ? 2'h2 : 2'h1;
               // bits [21:20] used, other bits must be 0
               if (instr_rdata_i[24:21]) illegal_insn_o = 1'b1;   // in RV32, no casts to L allowed.
             end
@@ -1645,13 +1643,13 @@ module riscv_decoder
                   // fmv.x.s - move from floating point to gp register
                   3'b000: begin
                      reg_fp_d_o     = 1'b0; // go to integer regfile
-                     alu_operator_o = ALU_ADD;
+                     alu_operator_o = riscv_defines::ALU_ADD;
                   end
                   // fclass - classify float
                   3'b001: begin
                      regb_used_o    = 1'b0;
                      reg_fp_d_o     = 1'b0; // go to integer regfile
-                     alu_operator_o = ALU_FCLASS;
+                     alu_operator_o = riscv_defines::ALU_FCLASS;
                   end
                   default: illegal_insn_o = 1'b1;
                 endcase
@@ -1663,8 +1661,8 @@ module riscv_decoder
                 apu_type_o  = APUTYPE_FP; // doesn't matter much as long as it's not div
                 check_fprm  = 1'b0; // instruction encoded in rm, do the check here
                 // fmv.x.fmt - FPR to GPR Move
-                if (instr_rdata_i[14:12] == 3'b000 || (C_XF16ALT && instr_rdata_i[14:12] == 3'b100)) begin
-                  alu_op_b_mux_sel_o  = OP_B_REGA_OR_FWD; // set rs2 = rs1 so we can map FMV to SGNJ in the unit
+                if (instr_rdata_i[14:12] == 3'b000 || (riscv_defines::C_XF16ALT && instr_rdata_i[14:12] == 3'b100)) begin
+                  alu_op_b_mux_sel_o  = riscv_defines::OP_B_REGA_OR_FWD; // set rs2 = rs1 so we can map FMV to SGNJ in the unit
                   fpu_op              = fpnew_pkg::SGNJ; // mapped to SGNJ-passthrough since no recoding
                   fpu_op_mod          = 1'b1;    // sign-extend result
                   fp_rnd_mode_o       = 3'b011;  // passthrough without checking nan-box
@@ -1674,7 +1672,7 @@ module riscv_decoder
                     fpu_src_fmt_o = fpnew_pkg::FP16ALT;
                   end
                 // fclass.fmt - FP Classify
-                end else if (instr_rdata_i[14:12] == 3'b001 || (C_XF16ALT && instr_rdata_i[14:12] == 3'b101)) begin
+                end else if (instr_rdata_i[14:12] == 3'b001 || (riscv_defines::C_XF16ALT && instr_rdata_i[14:12] == 3'b101)) begin
                   fpu_op        = fpnew_pkg::CLASSIFY;
                   fp_rnd_mode_o = 3'b000;
                   // FP16ALT uses special encoding here
@@ -1697,19 +1695,19 @@ module riscv_decoder
                 alu_en_o       = 1'b1;
                 regfile_alu_we = 1'b1;
                 reg_fp_a_o     = 1'b0; // go from integer regfile
-                alu_operator_o = ALU_ADD;
+                alu_operator_o = riscv_defines::ALU_ADD;
               // FPnew does proper NaN-Boxing
               end else begin
                 regb_used_o         = 1'b0;
                 reg_fp_a_o          = 1'b0; // go from integer regfile
-                alu_op_b_mux_sel_o  = OP_B_REGA_OR_FWD; // set rs2 = rs1 so we can map FMV to SGNJ in the unit
+                alu_op_b_mux_sel_o  = riscv_defines::OP_B_REGA_OR_FWD; // set rs2 = rs1 so we can map FMV to SGNJ in the unit
                 fpu_op              = fpnew_pkg::SGNJ; // mapped to SGNJ-passthrough since no recoding
                 fpu_op_mod          = 1'b0;    // nan-box result
                 fp_op_group         = NONCOMP;
                 fp_rnd_mode_o       = 3'b011;  // passthrough without checking nan-box
                 apu_type_o          = APUTYPE_FP; // doesn't matter much as long as it's not div
                 check_fprm          = 1'b0; // instruction encoded in rm, do the check here
-                if (instr_rdata_i[14:12] == 3'b000 || (C_XF16ALT && instr_rdata_i[14:12] == 3'b100)) begin
+                if (instr_rdata_i[14:12] == 3'b000 || (riscv_defines::C_XF16ALT && instr_rdata_i[14:12] == 3'b100)) begin
                   // FP16ALT uses special encoding here
                   if (instr_rdata_i[14]) begin
                     fpu_dst_fmt_o = fpnew_pkg::FP16ALT;
@@ -1729,20 +1727,20 @@ module riscv_decoder
           endcase
 
           // check enabled formats (static)
-          if (~C_RVF && fpu_dst_fmt_o == fpnew_pkg::FP32) illegal_insn_o = 1'b1;
-          if ((~C_RVD || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP64) illegal_insn_o = 1'b1;
-          if ((~C_XF16 || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP16) illegal_insn_o = 1'b1;
-          if ((~C_XF16ALT || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP16ALT) begin
+          if (~riscv_defines::C_RVF && fpu_dst_fmt_o == fpnew_pkg::FP32) illegal_insn_o = 1'b1;
+          if ((~riscv_defines::C_RVD || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP64) illegal_insn_o = 1'b1;
+          if ((~riscv_defines::C_XF16 || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP16) illegal_insn_o = 1'b1;
+          if ((~riscv_defines::C_XF16ALT || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP16ALT) begin
             illegal_insn_o = 1'b1;
           end
-          if ((~C_XF8 || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP8) illegal_insn_o = 1'b1;
+          if ((~riscv_defines::C_XF8 || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP8) illegal_insn_o = 1'b1;
 
           // check rounding mode
           if (check_fprm) begin
             unique case (instr_rdata_i[14:12]) inside
               [3'b000:3'b100]: ; //legal rounding modes
               3'b101: begin      // Alternative Half-Precsision encded as fmt=10 and rm=101
-                if (~C_XF16ALT || fpu_dst_fmt_o != fpnew_pkg::FP16ALT) illegal_insn_o = 1'b1;
+                if (~riscv_defines::C_XF16ALT || fpu_dst_fmt_o != fpnew_pkg::FP16ALT) illegal_insn_o = 1'b1;
                 // actual rounding mode from frm csr
                 unique case (frm_i) inside
                   [3'b000:3'b100] : fp_rnd_mode_o = frm_i; //legal rounding modes
@@ -1768,20 +1766,20 @@ module riscv_decoder
               // ADDMUL has format dependent latency
               ADDMUL : begin
                 unique case (fpu_dst_fmt_o)
-                  fpnew_pkg::FP32    : apu_lat_o = (C_LAT_FP32<3)    ? C_LAT_FP32+1    : 2'h0;
-                  fpnew_pkg::FP64    : apu_lat_o = (C_LAT_FP64<3)    ? C_LAT_FP64+1    : 2'h0;
-                  fpnew_pkg::FP16    : apu_lat_o = (C_LAT_FP16<3)    ? C_LAT_FP16+1    : 2'h0;
-                  fpnew_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<3) ? C_LAT_FP16ALT+1 : 2'h0;
-                  fpnew_pkg::FP8     : apu_lat_o = (C_LAT_FP8<3)     ? C_LAT_FP8+1     : 2'h0;
+                  fpnew_pkg::FP32    : apu_lat_o = (riscv_defines::C_LAT_FP32<3)    ? riscv_defines::C_LAT_FP32+1    : 2'h0;
+                  fpnew_pkg::FP64    : apu_lat_o = (riscv_defines::C_LAT_FP64<3)    ? riscv_defines::C_LAT_FP64+1    : 2'h0;
+                  fpnew_pkg::FP16    : apu_lat_o = (riscv_defines::C_LAT_FP16<3)    ? riscv_defines::C_LAT_FP16+1    : 2'h0;
+                  fpnew_pkg::FP16ALT : apu_lat_o = (riscv_defines::C_LAT_FP16ALT<3) ? riscv_defines::C_LAT_FP16ALT+1 : 2'h0;
+                  fpnew_pkg::FP8     : apu_lat_o = (riscv_defines::C_LAT_FP8<3)     ? riscv_defines::C_LAT_FP8+1     : 2'h0;
                   default : ;
                 endcase
               end
               // DIVSQRT is iterative and takes more than 2 cycles
               DIVSQRT : apu_lat_o = 2'h0;
               // NONCOMP uses the same latency for all formats
-              NONCOMP : apu_lat_o = (C_LAT_NONCOMP<3) ? C_LAT_NONCOMP+1 : 2'h0;
+              NONCOMP : apu_lat_o = (riscv_defines::C_LAT_NONCOMP<3) ? riscv_defines::C_LAT_NONCOMP+1 : 2'h0;
               // CONV uses the same latency for all formats
-              CONV    : apu_lat_o = (C_LAT_CONV<3) ? C_LAT_CONV+1 : 2'h0;
+              CONV    : apu_lat_o = (riscv_defines::C_LAT_CONV<3) ? riscv_defines::C_LAT_CONV+1 : 2'h0;
             endcase
           end
 
@@ -1795,23 +1793,23 @@ module riscv_decoder
       end
 
       // floating point fused arithmetic
-      OPCODE_OP_FMADD,
-      OPCODE_OP_FMSUB,
-      OPCODE_OP_FNMSUB,
-      OPCODE_OP_FNMADD : begin
+      riscv_defines::OPCODE_OP_FMADD,
+      riscv_defines::OPCODE_OP_FMSUB,
+      riscv_defines::OPCODE_OP_FNMSUB,
+      riscv_defines::OPCODE_OP_FNMADD : begin
         if (FPU==1) begin
           // using APU instead of ALU
           apu_en           = 1'b1;
           alu_en_o         = 1'b0;
           // Private and new shared FP use FPnew
-          apu_flags_src_o  = (SHARED_FP==1) ? APU_FLAGS_FP : APU_FLAGS_FPNEW;
+          apu_flags_src_o  = (SHARED_FP==1) ? apu_core_package::APU_FLAGS_FP : apu_core_package::APU_FLAGS_FPNEW;
           apu_type_o       = APUTYPE_MAC;
-          apu_lat_o        = (PIPE_REG_MAC>1) ? 2'h3 : 2'h2;
+          apu_lat_o        = (apu_core_package::PIPE_REG_MAC>1) ? 2'h3 : 2'h2;
           // all registers are FP registers and use three
           rega_used_o      = 1'b1;
           regb_used_o      = 1'b1;
           regc_used_o      = 1'b1;
-          regc_mux_o       = REGC_S4;
+          regc_mux_o       = riscv_defines::REGC_S4;
           reg_fp_a_o       = 1'b1;
           reg_fp_b_o       = 1'b1;
           reg_fp_c_o       = 1'b1;
@@ -1840,23 +1838,23 @@ module riscv_decoder
           // decode FP intstruction
           unique case (instr_rdata_i[6:0])
             // fmadd.fmt - FP Fused multiply-add
-            OPCODE_OP_FMADD : begin
+            riscv_defines::OPCODE_OP_FMADD : begin
               fpu_op      = fpnew_pkg::FMADD;
               apu_op_o    = 2'b00;
             end
             // fmsub.fmt - FP Fused multiply-subtract
-            OPCODE_OP_FMSUB : begin
+            riscv_defines::OPCODE_OP_FMSUB : begin
               fpu_op      = fpnew_pkg::FMADD;
               fpu_op_mod  = 1'b1;
               apu_op_o    = 2'b01;
             end
             // fnmsub.fmt - FP Negated fused multiply-subtract
-            OPCODE_OP_FNMSUB : begin
+            riscv_defines::OPCODE_OP_FNMSUB : begin
               fpu_op      = fpnew_pkg::FNMSUB;
               apu_op_o    = 2'b10;
             end
             // fnmadd.fmt - FP Negated fused multiply-add
-            OPCODE_OP_FNMADD : begin
+            riscv_defines::OPCODE_OP_FNMADD : begin
               fpu_op      = fpnew_pkg::FNMSUB;
               fpu_op_mod  = 1'b1;
               apu_op_o    = 2'b11;
@@ -1864,19 +1862,19 @@ module riscv_decoder
           endcase
 
           // check enabled formats (static)
-          if (~C_RVF && fpu_dst_fmt_o == fpnew_pkg::FP32) illegal_insn_o = 1'b1;
-          if ((~C_RVD || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP64) illegal_insn_o = 1'b1;
-          if ((~C_XF16 || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP16) illegal_insn_o = 1'b1;
-          if ((~C_XF16ALT || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP16ALT) begin
+          if (~riscv_defines::C_RVF && fpu_dst_fmt_o == fpnew_pkg::FP32) illegal_insn_o = 1'b1;
+          if ((~riscv_defines::C_RVD || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP64) illegal_insn_o = 1'b1;
+          if ((~riscv_defines::C_XF16 || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP16) illegal_insn_o = 1'b1;
+          if ((~riscv_defines::C_XF16ALT || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP16ALT) begin
             illegal_insn_o = 1'b1;
           end
-          if ((~C_XF8 || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP8) illegal_insn_o = 1'b1;
+          if ((~riscv_defines::C_XF8 || SHARED_FP==1) && fpu_dst_fmt_o == fpnew_pkg::FP8) illegal_insn_o = 1'b1;
 
           // check rounding mode
           unique case (instr_rdata_i[14:12]) inside
             [3'b000:3'b100]: ; //legal rounding modes
             3'b101: begin      // Alternative Half-Precsision encded as fmt=10 and rm=101
-              if (~C_XF16ALT || fpu_dst_fmt_o != fpnew_pkg::FP16ALT) illegal_insn_o = 1'b1;
+              if (~riscv_defines::C_XF16ALT || fpu_dst_fmt_o != fpnew_pkg::FP16ALT) illegal_insn_o = 1'b1;
               // actual rounding mode from frm csr
               unique case (frm_i) inside
                 [3'b000:3'b100] : fp_rnd_mode_o = frm_i; //legal rounding modes
@@ -1899,11 +1897,11 @@ module riscv_decoder
           if (SHARED_FP!=1) begin
             // format dependent latency
             unique case (fpu_dst_fmt_o)
-              fpnew_pkg::FP32    : apu_lat_o = (C_LAT_FP32<3)    ? C_LAT_FP32+1    : 2'h0;
-              fpnew_pkg::FP64    : apu_lat_o = (C_LAT_FP64<3)    ? C_LAT_FP64+1    : 2'h0;
-              fpnew_pkg::FP16    : apu_lat_o = (C_LAT_FP16<3)    ? C_LAT_FP16+1    : 2'h0;
-              fpnew_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<3) ? C_LAT_FP16ALT+1 : 2'h0;
-              fpnew_pkg::FP8     : apu_lat_o = (C_LAT_FP8<3)     ? C_LAT_FP8+1     : 2'h0;
+              fpnew_pkg::FP32    : apu_lat_o = (riscv_defines::C_LAT_FP32<3)    ? riscv_defines::C_LAT_FP32+1    : 2'h0;
+              fpnew_pkg::FP64    : apu_lat_o = (riscv_defines::C_LAT_FP64<3)    ? riscv_defines::C_LAT_FP64+1    : 2'h0;
+              fpnew_pkg::FP16    : apu_lat_o = (riscv_defines::C_LAT_FP16<3)    ? riscv_defines::C_LAT_FP16+1    : 2'h0;
+              fpnew_pkg::FP16ALT : apu_lat_o = (riscv_defines::C_LAT_FP16ALT<3) ? riscv_defines::C_LAT_FP16ALT+1 : 2'h0;
+              fpnew_pkg::FP8     : apu_lat_o = (riscv_defines::C_LAT_FP8<3)     ? riscv_defines::C_LAT_FP8+1     : 2'h0;
               default : ;
             endcase
           end
@@ -1917,36 +1915,36 @@ module riscv_decoder
         end
       end
 
-      OPCODE_STORE_FP: begin
+      riscv_defines::OPCODE_STORE_FP: begin
         if (FPU==1) begin
           data_req            = 1'b1;
           data_we_o           = 1'b1;
           rega_used_o         = 1'b1;
           regb_used_o         = 1'b1;
-          alu_operator_o      = ALU_ADD;
+          alu_operator_o      = riscv_defines::ALU_ADD;
           reg_fp_b_o          = 1'b1;
           instr_multicycle_o  = 1'b1;
 
           // offset from immediate
-          imm_b_mux_sel_o     = IMMB_S;
-          alu_op_b_mux_sel_o  = OP_B_IMM;
+          imm_b_mux_sel_o     = riscv_defines::IMMB_S;
+          alu_op_b_mux_sel_o  = riscv_defines::OP_B_IMM;
 
           // pass write data through ALU operand c
-          alu_op_c_mux_sel_o = OP_C_REGB_OR_FWD;
+          alu_op_c_mux_sel_o = riscv_defines::OP_C_REGB_OR_FWD;
 
           // Decode data type
           unique case (instr_rdata_i[14:12])
             // fsb - FP8 store
-            3'b000 : if (C_XF8) data_type_o = 2'b10;
+            3'b000 : if (riscv_defines::C_XF8) data_type_o = 2'b10;
                      else illegal_insn_o = 1'b1;
             // fsh - FP16 store
-            3'b001 : if (C_XF16 | C_XF16ALT) data_type_o = 2'b01;
+            3'b001 : if (riscv_defines::C_XF16 | riscv_defines::C_XF16ALT) data_type_o = 2'b01;
                      else illegal_insn_o = 1'b1;
             // fsw - FP32 store
-            3'b010 : if (C_RVF) data_type_o = 2'b00;
+            3'b010 : if (riscv_defines::C_RVF) data_type_o = 2'b00;
                      else illegal_insn_o = 1'b1;
             // fsd - FP64 store
-            3'b011 : if (C_RVD) data_type_o = 2'b00; // 64bit stores unsupported!
+            3'b011 : if (riscv_defines::C_RVD) data_type_o = 2'b00; // 64bit stores unsupported!
                      else illegal_insn_o = 1'b1;
             default: illegal_insn_o = 1'b1;
           endcase
@@ -1962,18 +1960,18 @@ module riscv_decoder
           illegal_insn_o = 1'b1;
       end
 
-      OPCODE_LOAD_FP: begin
+      riscv_defines::OPCODE_LOAD_FP: begin
         if (FPU==1) begin
           data_req            = 1'b1;
           regfile_mem_we      = 1'b1;
           reg_fp_d_o          = 1'b1;
           rega_used_o         = 1'b1;
-          alu_operator_o      = ALU_ADD;
+          alu_operator_o      = riscv_defines::ALU_ADD;
           instr_multicycle_o  = 1'b1;
 
           // offset from immediate
-          imm_b_mux_sel_o     = IMMB_I;
-          alu_op_b_mux_sel_o  = OP_B_IMM;
+          imm_b_mux_sel_o     = riscv_defines::IMMB_I;
+          alu_op_b_mux_sel_o  = riscv_defines::OP_B_IMM;
 
           // NaN boxing
           data_sign_extension_o = 2'b10;
@@ -1981,16 +1979,16 @@ module riscv_decoder
           // Decode data type
           unique case (instr_rdata_i[14:12])
             // flb - FP8 load
-            3'b000 : if (C_XF8) data_type_o = 2'b10;
+            3'b000 : if (riscv_defines::C_XF8) data_type_o = 2'b10;
                      else illegal_insn_o = 1'b1;
             // flh - FP16 load
-            3'b001 : if (C_XF16 | C_XF16ALT) data_type_o = 2'b01;
+            3'b001 : if (riscv_defines::C_XF16 | riscv_defines::C_XF16ALT) data_type_o = 2'b01;
                      else illegal_insn_o = 1'b1;
             // flw - FP32 load
-            3'b010 : if (C_RVF) data_type_o = 2'b00;
+            3'b010 : if (riscv_defines::C_RVF) data_type_o = 2'b00;
                      else illegal_insn_o = 1'b1;
             // fld - FP64 load
-            3'b011 : if (C_RVD) data_type_o = 2'b00; // 64bit loads unsupported!
+            3'b011 : if (riscv_defines::C_RVD) data_type_o = 2'b00; // 64bit loads unsupported!
                      else illegal_insn_o = 1'b1;
             default: illegal_insn_o = 1'b1;
           endcase
@@ -2000,7 +1998,7 @@ module riscv_decoder
           illegal_insn_o = 1'b1;
       end
 
-      OPCODE_PULP_OP: begin  // PULP specific ALU instructions with three source operands
+      riscv_defines::OPCODE_PULP_OP: begin  // PULP specific ALU instructions with three source operands
         regfile_alu_we = 1'b1;
         rega_used_o    = 1'b1;
         regb_used_o    = 1'b1;
@@ -2012,14 +2010,14 @@ module riscv_decoder
             mult_sel_subword_o = instr_rdata_i[30];
             mult_signed_mode_o = {2{instr_rdata_i[31]}};
 
-            mult_imm_mux_o = MIMM_S3;
-            regc_mux_o     = REGC_ZERO;
+            mult_imm_mux_o = riscv_defines::MIMM_S3;
+            regc_mux_o     = riscv_defines::REGC_ZERO;
             mult_int_en    = 1'b1;
 
             if (instr_rdata_i[14])
-              mult_operator_o = MUL_IR;
+              mult_operator_o = riscv_defines::MUL_IR;
             else
-              mult_operator_o = MUL_I;
+              mult_operator_o = riscv_defines::MUL_I;
 
             `USE_APU_INT_MULT
           end
@@ -2031,14 +2029,14 @@ module riscv_decoder
             mult_signed_mode_o = {2{instr_rdata_i[31]}};
 
             regc_used_o     = 1'b1;
-            regc_mux_o      = REGC_RD;
-            mult_imm_mux_o  = MIMM_S3;
+            regc_mux_o      = riscv_defines::REGC_RD;
+            mult_imm_mux_o  = riscv_defines::MIMM_S3;
             mult_int_en     = 1'b1;
 
             if (instr_rdata_i[14])
-              mult_operator_o = MUL_IR;
+              mult_operator_o = riscv_defines::MUL_IR;
             else
-              mult_operator_o = MUL_I;
+              mult_operator_o = riscv_defines::MUL_I;
 
             `USE_APU_INT_MULT
           end
@@ -2047,22 +2045,22 @@ module riscv_decoder
             // decide between using unsigned and rounding, and combinations
             // thereof
             case ({instr_rdata_i[31],instr_rdata_i[14]})
-              2'b00: alu_operator_o = ALU_ADD;
-              2'b01: alu_operator_o = ALU_ADDR;
-              2'b10: alu_operator_o = ALU_ADDU;
-              2'b11: alu_operator_o = ALU_ADDUR;
+              2'b00: alu_operator_o = riscv_defines::ALU_ADD;
+              2'b01: alu_operator_o = riscv_defines::ALU_ADDR;
+              2'b10: alu_operator_o = riscv_defines::ALU_ADDU;
+              2'b11: alu_operator_o = riscv_defines::ALU_ADDUR;
             endcase
 
-            bmask_a_mux_o = BMASK_A_ZERO;
-            bmask_b_mux_o = BMASK_B_S3;
+            bmask_a_mux_o = riscv_defines::BMASK_A_ZERO;
+            bmask_b_mux_o = riscv_defines::BMASK_B_S3;
 
             if (instr_rdata_i[30]) begin
               //register variant
               regc_used_o            = 1'b1;
-              regc_mux_o             = REGC_RD;
-              alu_bmask_b_mux_sel_o  = BMASK_B_REG;
-              alu_op_a_mux_sel_o     = OP_A_REGC_OR_FWD;
-              alu_op_b_mux_sel_o     = OP_B_REGA_OR_FWD;
+              regc_mux_o             = riscv_defines::REGC_RD;
+              alu_bmask_b_mux_sel_o  = riscv_defines::BMASK_B_REG;
+              alu_op_a_mux_sel_o     = riscv_defines::OP_A_REGC_OR_FWD;
+              alu_op_b_mux_sel_o     = riscv_defines::OP_B_REGA_OR_FWD;
             end
 
           end
@@ -2071,40 +2069,40 @@ module riscv_decoder
             // decide between using unsigned and rounding, and combinations
             // thereof
             case ({instr_rdata_i[31],instr_rdata_i[14]})
-              2'b00: alu_operator_o = ALU_SUB;
-              2'b01: alu_operator_o = ALU_SUBR;
-              2'b10: alu_operator_o = ALU_SUBU;
-              2'b11: alu_operator_o = ALU_SUBUR;
+              2'b00: alu_operator_o = riscv_defines::ALU_SUB;
+              2'b01: alu_operator_o = riscv_defines::ALU_SUBR;
+              2'b10: alu_operator_o = riscv_defines::ALU_SUBU;
+              2'b11: alu_operator_o = riscv_defines::ALU_SUBUR;
             endcase
 
-            bmask_a_mux_o = BMASK_A_ZERO;
-            bmask_b_mux_o = BMASK_B_S3;
+            bmask_a_mux_o = riscv_defines::BMASK_A_ZERO;
+            bmask_b_mux_o = riscv_defines::BMASK_B_S3;
 
             if (instr_rdata_i[30]) begin
               //register variant
               regc_used_o            = 1'b1;
-              regc_mux_o             = REGC_RD;
-              alu_bmask_b_mux_sel_o  = BMASK_B_REG;
-              alu_op_a_mux_sel_o     = OP_A_REGC_OR_FWD;
-              alu_op_b_mux_sel_o     = OP_B_REGA_OR_FWD;
+              regc_mux_o             = riscv_defines::REGC_RD;
+              alu_bmask_b_mux_sel_o  = riscv_defines::BMASK_B_REG;
+              alu_op_a_mux_sel_o     = riscv_defines::OP_A_REGC_OR_FWD;
+              alu_op_b_mux_sel_o     = riscv_defines::OP_B_REGA_OR_FWD;
             end
 
           end
         endcase
       end
 
-      OPCODE_VECOP: begin
+      riscv_defines::OPCODE_VECOP: begin
         regfile_alu_we      = 1'b1;
         rega_used_o         = 1'b1;
-        imm_b_mux_sel_o     = IMMB_VS;
+        imm_b_mux_sel_o     = riscv_defines::IMMB_VS;
 
         // vector size
         if (instr_rdata_i[12]) begin
-          alu_vec_mode_o  = VEC_MODE8;
-          mult_operator_o = MUL_DOT8;
+          alu_vec_mode_o  = riscv_defines::VEC_MODE8;
+          mult_operator_o = riscv_defines::MUL_DOT8;
         end else begin
-          alu_vec_mode_o = VEC_MODE16;
-          mult_operator_o = MUL_DOT16;
+          alu_vec_mode_o = riscv_defines::VEC_MODE16;
+          mult_operator_o = riscv_defines::MUL_DOT16;
         end
 
         // distinguish normal vector, sc and sci modes
@@ -2113,7 +2111,7 @@ module riscv_decoder
 
           if (instr_rdata_i[13]) begin
             // immediate scalar replication, .sci
-            alu_op_b_mux_sel_o = OP_B_IMM;
+            alu_op_b_mux_sel_o = riscv_defines::OP_B_IMM;
           end else begin
             // register scalar replication, .sc
             regb_used_o = 1'b1;
@@ -2125,76 +2123,76 @@ module riscv_decoder
 
         // now decode the instruction
         unique case (instr_rdata_i[31:26])
-          6'b00000_0: begin alu_operator_o = ALU_ADD;  imm_b_mux_sel_o = IMMB_VS;  end // pv.add
-          6'b00001_0: begin alu_operator_o = ALU_SUB;  imm_b_mux_sel_o = IMMB_VS;  end // pv.sub
-          6'b00010_0: begin alu_operator_o = ALU_ADD;  imm_b_mux_sel_o = IMMB_VS; bmask_b_mux_o = BMASK_B_ONE;  end // pv.avg
-          6'b00011_0: begin alu_operator_o = ALU_ADDU; imm_b_mux_sel_o = IMMB_VU; bmask_b_mux_o = BMASK_B_ONE;  end // pv.avgu
-          6'b00100_0: begin alu_operator_o = ALU_MIN;  imm_b_mux_sel_o = IMMB_VS;  end // pv.min
-          6'b00101_0: begin alu_operator_o = ALU_MINU; imm_b_mux_sel_o = IMMB_VU;  end // pv.minu
-          6'b00110_0: begin alu_operator_o = ALU_MAX;  imm_b_mux_sel_o = IMMB_VS;  end // pv.max
-          6'b00111_0: begin alu_operator_o = ALU_MAXU; imm_b_mux_sel_o = IMMB_VU;  end // pv.maxu
-          6'b01000_0: begin alu_operator_o = ALU_SRL;  imm_b_mux_sel_o = IMMB_VS;  end // pv.srl
-          6'b01001_0: begin alu_operator_o = ALU_SRA;  imm_b_mux_sel_o = IMMB_VS;  end // pv.sra
-          6'b01010_0: begin alu_operator_o = ALU_SLL;  imm_b_mux_sel_o = IMMB_VS;  end // pv.sll
-          6'b01011_0: begin alu_operator_o = ALU_OR;   imm_b_mux_sel_o = IMMB_VS;  end // pv.or
-          6'b01100_0: begin alu_operator_o = ALU_XOR;  imm_b_mux_sel_o = IMMB_VS;  end // pv.xor
-          6'b01101_0: begin alu_operator_o = ALU_AND;  imm_b_mux_sel_o = IMMB_VS;  end // pv.and
-          6'b01110_0: begin alu_operator_o = ALU_ABS;  imm_b_mux_sel_o = IMMB_VS;  end // pv.abs
+          6'b00000_0: begin alu_operator_o = riscv_defines::ALU_ADD;  imm_b_mux_sel_o = riscv_defines::IMMB_VS;  end // pv.add
+          6'b00001_0: begin alu_operator_o = riscv_defines::ALU_SUB;  imm_b_mux_sel_o = riscv_defines::IMMB_VS;  end // pv.sub
+          6'b00010_0: begin alu_operator_o = riscv_defines::ALU_ADD;  imm_b_mux_sel_o = riscv_defines::IMMB_VS; bmask_b_mux_o = riscv_defines::BMASK_B_ONE;  end // pv.avg
+          6'b00011_0: begin alu_operator_o = riscv_defines::ALU_ADDU; imm_b_mux_sel_o = riscv_defines::IMMB_VU; bmask_b_mux_o = riscv_defines::BMASK_B_ONE;  end // pv.avgu
+          6'b00100_0: begin alu_operator_o = riscv_defines::ALU_MIN;  imm_b_mux_sel_o = riscv_defines::IMMB_VS;  end // pv.min
+          6'b00101_0: begin alu_operator_o = riscv_defines::ALU_MINU; imm_b_mux_sel_o = riscv_defines::IMMB_VU;  end // pv.minu
+          6'b00110_0: begin alu_operator_o = riscv_defines::ALU_MAX;  imm_b_mux_sel_o = riscv_defines::IMMB_VS;  end // pv.max
+          6'b00111_0: begin alu_operator_o = riscv_defines::ALU_MAXU; imm_b_mux_sel_o = riscv_defines::IMMB_VU;  end // pv.maxu
+          6'b01000_0: begin alu_operator_o = riscv_defines::ALU_SRL;  imm_b_mux_sel_o = riscv_defines::IMMB_VS;  end // pv.srl
+          6'b01001_0: begin alu_operator_o = riscv_defines::ALU_SRA;  imm_b_mux_sel_o = riscv_defines::IMMB_VS;  end // pv.sra
+          6'b01010_0: begin alu_operator_o = riscv_defines::ALU_SLL;  imm_b_mux_sel_o = riscv_defines::IMMB_VS;  end // pv.sll
+          6'b01011_0: begin alu_operator_o = riscv_defines::ALU_OR;   imm_b_mux_sel_o = riscv_defines::IMMB_VS;  end // pv.or
+          6'b01100_0: begin alu_operator_o = riscv_defines::ALU_XOR;  imm_b_mux_sel_o = riscv_defines::IMMB_VS;  end // pv.xor
+          6'b01101_0: begin alu_operator_o = riscv_defines::ALU_AND;  imm_b_mux_sel_o = riscv_defines::IMMB_VS;  end // pv.and
+          6'b01110_0: begin alu_operator_o = riscv_defines::ALU_ABS;  imm_b_mux_sel_o = riscv_defines::IMMB_VS;  end // pv.abs
 
           // shuffle/pack
           6'b11101_0,       // pv.shuffleI1
           6'b11110_0,       // pv.shuffleI2
           6'b11111_0,       // pv.shuffleI3
           6'b11000_0: begin // pv.shuffle, pv.shuffleI0
-            alu_operator_o       = ALU_SHUF;
-            imm_b_mux_sel_o      = IMMB_SHUF;
+            alu_operator_o       = riscv_defines::ALU_SHUF;
+            imm_b_mux_sel_o      = riscv_defines::IMMB_SHUF;
             regb_used_o          = 1'b1;
             scalar_replication_o = 1'b0;
           end
           6'b11001_0: begin // pv.shuffle2
-            alu_operator_o       = ALU_SHUF2;
+            alu_operator_o       = riscv_defines::ALU_SHUF2;
             regb_used_o          = 1'b1;
             regc_used_o          = 1'b1;
-            regc_mux_o           = REGC_RD;
+            regc_mux_o           = riscv_defines::REGC_RD;
             scalar_replication_o = 1'b0;
           end
           6'b11010_0: begin // pv.pack
-            alu_operator_o = instr_rdata_i[25] ? ALU_PCKHI : ALU_PCKLO;
+            alu_operator_o = instr_rdata_i[25] ? riscv_defines::ALU_PCKHI : riscv_defines::ALU_PCKLO;
             regb_used_o    = 1'b1;
           end
           6'b11011_0: begin // pv.packhi
-            alu_operator_o = ALU_PCKHI;
+            alu_operator_o = riscv_defines::ALU_PCKHI;
             regb_used_o    = 1'b1;
             regc_used_o    = 1'b1;
-            regc_mux_o     = REGC_RD;
+            regc_mux_o     = riscv_defines::REGC_RD;
           end
           6'b11100_0: begin // pv.packlo
-            alu_operator_o = ALU_PCKLO;
+            alu_operator_o = riscv_defines::ALU_PCKLO;
             regb_used_o    = 1'b1;
             regc_used_o    = 1'b1;
-            regc_mux_o     = REGC_RD;
+            regc_mux_o     = riscv_defines::REGC_RD;
           end
 
           6'b01111_0: begin // pv.extract
-            alu_operator_o = ALU_EXTS;
+            alu_operator_o = riscv_defines::ALU_EXTS;
           end
 
           6'b10010_0: begin // pv.extractu
-            alu_operator_o = ALU_EXT;
+            alu_operator_o = riscv_defines::ALU_EXT;
           end
 
           6'b10110_0: begin // pv.insert
-            alu_operator_o     = ALU_INS;
+            alu_operator_o     = riscv_defines::ALU_INS;
             regc_used_o        = 1'b1;
-            regc_mux_o         = REGC_RD;
-            alu_op_b_mux_sel_o = OP_B_REGC_OR_FWD;
+            regc_mux_o         = riscv_defines::REGC_RD;
+            alu_op_b_mux_sel_o = riscv_defines::OP_B_REGC_OR_FWD;
           end
 
           6'b10000_0: begin // pv.dotup
             alu_en_o          = 1'b0;
             mult_dot_en       = 1'b1;
             mult_dot_signed_o = 2'b00;
-            imm_b_mux_sel_o   = IMMB_VU;
+            imm_b_mux_sel_o   = riscv_defines::IMMB_VU;
             `USE_APU_DSP_MULT
           end
           6'b10001_0: begin // pv.dotusp
@@ -2214,8 +2212,8 @@ module riscv_decoder
             mult_dot_en       = 1'b1;
             mult_dot_signed_o = 2'b00;
             regc_used_o       = 1'b1;
-            regc_mux_o        = REGC_RD;
-            imm_b_mux_sel_o   = IMMB_VU;
+            regc_mux_o        = riscv_defines::REGC_RD;
+            imm_b_mux_sel_o   = riscv_defines::IMMB_VU;
             `USE_APU_DSP_MULT
           end
           6'b10101_0: begin // pv.sdotusp
@@ -2223,7 +2221,7 @@ module riscv_decoder
             mult_dot_en       = 1'b1;
             mult_dot_signed_o = 2'b01;
             regc_used_o       = 1'b1;
-            regc_mux_o        = REGC_RD;
+            regc_mux_o        = riscv_defines::REGC_RD;
             `USE_APU_DSP_MULT
           end
           6'b10111_0: begin // pv.sdotsp
@@ -2231,7 +2229,7 @@ module riscv_decoder
             mult_dot_en       = 1'b1;
             mult_dot_signed_o = 2'b11;
             regc_used_o       = 1'b1;
-            regc_mux_o        = REGC_RD;
+            regc_mux_o        = riscv_defines::REGC_RD;
             `USE_APU_DSP_MULT
           end
 
@@ -2243,56 +2241,56 @@ module riscv_decoder
             mult_dot_signed_o    = 2'b11;
             is_clpx_o            = 1'b1;
             regc_used_o          = 1'b1;
-            regc_mux_o           = REGC_RD;
+            regc_mux_o           = riscv_defines::REGC_RD;
             scalar_replication_o = 1'b0;
-            alu_op_b_mux_sel_o   = OP_B_REGB_OR_FWD;
+            alu_op_b_mux_sel_o   = riscv_defines::OP_B_REGB_OR_FWD;
             regb_used_o          = 1'b1;
             `USE_APU_DSP_MULT
           end
 
           6'b01101_1: begin // pv.subrotmj.h.{/,div2,div4,div8}
-            alu_operator_o       = ALU_SUB;
+            alu_operator_o       = riscv_defines::ALU_SUB;
             is_clpx_o            = 1'b1;
             scalar_replication_o = 1'b0;
-            alu_op_b_mux_sel_o   = OP_B_REGB_OR_FWD;
+            alu_op_b_mux_sel_o   = riscv_defines::OP_B_REGB_OR_FWD;
             regb_used_o          = 1'b1;
             is_subrot_o          = 1'b1;
           end
 
           6'b01011_1: begin // pv.cplxconj.h
-            alu_operator_o       = ALU_ABS;
+            alu_operator_o       = riscv_defines::ALU_ABS;
             is_clpx_o            = 1'b1;
             scalar_replication_o = 1'b0;
             regb_used_o          = 1'b0;
           end
 
           6'b01110_1: begin // pv.add.h.{div2,div4,div8}
-            alu_operator_o       = ALU_ADD;
+            alu_operator_o       = riscv_defines::ALU_ADD;
             is_clpx_o            = 1'b1;
             scalar_replication_o = 1'b0;
-            alu_op_b_mux_sel_o   = OP_B_REGB_OR_FWD;
+            alu_op_b_mux_sel_o   = riscv_defines::OP_B_REGB_OR_FWD;
             regb_used_o          = 1'b1;
           end
 
           6'b01100_1: begin // pv.sub.h.{div2,div4,div8}
-            alu_operator_o       = ALU_SUB;
+            alu_operator_o       = riscv_defines::ALU_SUB;
             is_clpx_o            = 1'b1;
             scalar_replication_o = 1'b0;
-            alu_op_b_mux_sel_o   = OP_B_REGB_OR_FWD;
+            alu_op_b_mux_sel_o   = riscv_defines::OP_B_REGB_OR_FWD;
             regb_used_o          = 1'b1;
           end
 
           // comparisons, always have bit 26 set
-          6'b00000_1: begin alu_operator_o = ALU_EQ;  imm_b_mux_sel_o     = IMMB_VS; end // pv.cmpeq
-          6'b00001_1: begin alu_operator_o = ALU_NE;  imm_b_mux_sel_o     = IMMB_VS; end // pv.cmpne
-          6'b00010_1: begin alu_operator_o = ALU_GTS; imm_b_mux_sel_o     = IMMB_VS; end // pv.cmpgt
-          6'b00011_1: begin alu_operator_o = ALU_GES; imm_b_mux_sel_o     = IMMB_VS; end // pv.cmpge
-          6'b00100_1: begin alu_operator_o = ALU_LTS; imm_b_mux_sel_o     = IMMB_VS; end // pv.cmplt
-          6'b00101_1: begin alu_operator_o = ALU_LES; imm_b_mux_sel_o     = IMMB_VS; end // pv.cmple
-          6'b00110_1: begin alu_operator_o = ALU_GTU; imm_b_mux_sel_o     = IMMB_VU; end // pv.cmpgtu
-          6'b00111_1: begin alu_operator_o = ALU_GEU; imm_b_mux_sel_o     = IMMB_VU; end // pv.cmpgeu
-          6'b01000_1: begin alu_operator_o = ALU_LTU; imm_b_mux_sel_o     = IMMB_VU; end // pv.cmpltu
-          6'b01001_1: begin alu_operator_o = ALU_LEU; imm_b_mux_sel_o     = IMMB_VU; end // pv.cmpleu
+          6'b00000_1: begin alu_operator_o = riscv_defines::ALU_EQ;  imm_b_mux_sel_o     = riscv_defines::IMMB_VS; end // pv.cmpeq
+          6'b00001_1: begin alu_operator_o = riscv_defines::ALU_NE;  imm_b_mux_sel_o     = riscv_defines::IMMB_VS; end // pv.cmpne
+          6'b00010_1: begin alu_operator_o = riscv_defines::ALU_GTS; imm_b_mux_sel_o     = riscv_defines::IMMB_VS; end // pv.cmpgt
+          6'b00011_1: begin alu_operator_o = riscv_defines::ALU_GES; imm_b_mux_sel_o     = riscv_defines::IMMB_VS; end // pv.cmpge
+          6'b00100_1: begin alu_operator_o = riscv_defines::ALU_LTS; imm_b_mux_sel_o     = riscv_defines::IMMB_VS; end // pv.cmplt
+          6'b00101_1: begin alu_operator_o = riscv_defines::ALU_LES; imm_b_mux_sel_o     = riscv_defines::IMMB_VS; end // pv.cmple
+          6'b00110_1: begin alu_operator_o = riscv_defines::ALU_GTU; imm_b_mux_sel_o     = riscv_defines::IMMB_VU; end // pv.cmpgtu
+          6'b00111_1: begin alu_operator_o = riscv_defines::ALU_GEU; imm_b_mux_sel_o     = riscv_defines::IMMB_VU; end // pv.cmpgeu
+          6'b01000_1: begin alu_operator_o = riscv_defines::ALU_LTU; imm_b_mux_sel_o     = riscv_defines::IMMB_VU; end // pv.cmpltu
+          6'b01001_1: begin alu_operator_o = riscv_defines::ALU_LEU; imm_b_mux_sel_o     = riscv_defines::IMMB_VU; end // pv.cmpleu
 
           default: illegal_insn_o = 1'b1;
         endcase
@@ -2308,7 +2306,7 @@ module riscv_decoder
       //                                            //
       ////////////////////////////////////////////////
 
-      OPCODE_FENCE: begin
+      riscv_defines::OPCODE_FENCE: begin
         unique case (instr_rdata_i[14:12])
           3'b000: begin // FENCE (FENCE.I instead, a bit more conservative)
             // flush pipeline
@@ -2326,7 +2324,7 @@ module riscv_decoder
         endcase
       end
 
-      OPCODE_SYSTEM: begin
+      riscv_defines::OPCODE_SYSTEM: begin
         if (instr_rdata_i[14:12] == 3'b000)
         begin
           // non CSR related SYSTEM instructions
@@ -2347,7 +2345,7 @@ module riscv_decoder
 
               12'h302:  // mret
               begin
-                illegal_insn_o = (PULP_SECURE) ? current_priv_lvl_i != PRIV_LVL_M : 1'b0;
+                illegal_insn_o = (PULP_SECURE) ? current_priv_lvl_i != riscv_defines::PRIV_LVL_M : 1'b0;
                 mret_insn_o    = ~illegal_insn_o;
                 mret_dec_o     = 1'b1;
               end
@@ -2360,7 +2358,7 @@ module riscv_decoder
 
               12'h7b2:  // dret
               begin
-                illegal_insn_o = (PULP_SECURE) ? current_priv_lvl_i != PRIV_LVL_M : 1'b0;
+                illegal_insn_o = (PULP_SECURE) ? current_priv_lvl_i != riscv_defines::PRIV_LVL_M : 1'b0;
                 dret_insn_o    = ~illegal_insn_o;
                 dret_dec_o     = 1'b1;
               end
@@ -2383,23 +2381,23 @@ module riscv_decoder
           // instruction to read/modify CSR
           csr_access_o        = 1'b1;
           regfile_alu_we      = 1'b1;
-          alu_op_b_mux_sel_o  = OP_B_IMM;
-          imm_a_mux_sel_o     = IMMA_Z;
-          imm_b_mux_sel_o     = IMMB_I;    // CSR address is encoded in I imm
+          alu_op_b_mux_sel_o  = riscv_defines::OP_B_IMM;
+          imm_a_mux_sel_o     = riscv_defines::IMMA_Z;
+          imm_b_mux_sel_o     = riscv_defines::IMMB_I;    // CSR address is encoded in I imm
           instr_multicycle_o  = 1'b1;
 
           if (instr_rdata_i[14] == 1'b1) begin
             // rs1 field is used as immediate
-            alu_op_a_mux_sel_o = OP_A_IMM;
+            alu_op_a_mux_sel_o = riscv_defines::OP_A_IMM;
           end else begin
             rega_used_o        = 1'b1;
-            alu_op_a_mux_sel_o = OP_A_REGA_OR_FWD;
+            alu_op_a_mux_sel_o = riscv_defines::OP_A_REGA_OR_FWD;
           end
 
           unique case (instr_rdata_i[13:12])
-            2'b01:   csr_op   = CSR_OP_WRITE;
-            2'b10:   csr_op   = CSR_OP_SET;
-            2'b11:   csr_op   = CSR_OP_CLEAR;
+            2'b01:   csr_op   = riscv_defines::CSR_OP_WRITE;
+            2'b10:   csr_op   = riscv_defines::CSR_OP_SET;
+            2'b11:   csr_op   = riscv_defines::CSR_OP_CLEAR;
             default: csr_illegal = 1'b1;
           endcase
 
@@ -2430,7 +2428,7 @@ module riscv_decoder
       //                                           //
       ///////////////////////////////////////////////
 
-      OPCODE_HWLOOP: begin
+      riscv_defines::OPCODE_HWLOOP: begin
         hwloop_target_mux_sel_o = 1'b0;
 
         unique case (instr_rdata_i[14:12])
@@ -2498,9 +2496,9 @@ module riscv_decoder
     begin
       // only part of the pipeline is unstalled, make sure that the
       // correct operands are sent to the AGU
-      alu_op_a_mux_sel_o  = OP_A_REGA_OR_FWD;
-      alu_op_b_mux_sel_o  = OP_B_IMM;
-      imm_b_mux_sel_o     = IMMB_PCINCR;
+      alu_op_a_mux_sel_o  = riscv_defines::OP_A_REGA_OR_FWD;
+      alu_op_b_mux_sel_o  = riscv_defines::OP_B_IMM;
+      imm_b_mux_sel_o     = riscv_defines::IMMB_PCINCR;
 
       // if prepost increments are used, we do not write back the
       // second address since the first calculated address was
@@ -2513,7 +2511,7 @@ module riscv_decoder
       // we do not want to replicate operand_b
       scalar_replication_o = 1'b0;
     end else if (mult_multicycle_i) begin
-      alu_op_c_mux_sel_o = OP_C_REGC_OR_FWD;
+      alu_op_c_mux_sel_o = riscv_defines::OP_C_REGC_OR_FWD;
     end
   end
 
@@ -2525,8 +2523,8 @@ module riscv_decoder
   assign regfile_alu_we_o  = (deassert_we_i) ? 1'b0          : regfile_alu_we;
   assign data_req_o        = (deassert_we_i) ? 1'b0          : data_req;
   assign hwloop_we_o       = (deassert_we_i) ? 3'b0          : hwloop_we;
-  assign csr_op_o          = (deassert_we_i) ? CSR_OP_NONE   : csr_op;
-  assign jump_in_id_o      = (deassert_we_i) ? BRANCH_NONE   : jump_in_id;
+  assign csr_op_o          = (deassert_we_i) ? riscv_defines::CSR_OP_NONE   : csr_op;
+  assign jump_in_id_o      = (deassert_we_i) ? riscv_defines::BRANCH_NONE   : jump_in_id;
 
   assign jump_in_dec_o         = jump_in_id;
   assign regfile_alu_we_dec_o  = regfile_alu_we;

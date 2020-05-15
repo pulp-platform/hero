@@ -25,14 +25,12 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-import riscv_defines::*;
-
 module riscv_alu_basic
 (
   input  logic                     clk,
   input  logic                     rst_n,
 
-  input  logic [ALU_OP_WIDTH-1:0]  operator_i,
+  input  logic [riscv_defines::ALU_OP_WIDTH-1:0]  operator_i,
   input  logic [31:0]              operand_a_i,
   input  logic [31:0]              operand_b_i,
   input  logic [31:0]              operand_c_i,
@@ -96,11 +94,11 @@ module riscv_alu_basic
   logic [31:0] adder_result;
   logic [35:0] adder_result_expanded;
 
-  assign adder_op_b_negate = (operator_i == ALU_SUB) || (operator_i == ALU_SUBR) ||
-                             (operator_i == ALU_SUBU) || (operator_i == ALU_SUBR);
+  assign adder_op_b_negate = (operator_i == riscv_defines::ALU_SUB) || (operator_i == riscv_defines::ALU_SUBR) ||
+                             (operator_i == riscv_defines::ALU_SUBU) || (operator_i == riscv_defines::ALU_SUBR);
 
   // prepare operand a
-  assign adder_op_a = (operator_i == ALU_ABS) ? operand_a_neg : operand_a_i;
+  assign adder_op_a = (operator_i == riscv_defines::ALU_ABS) ? operand_a_neg : operand_a_i;
 
   // prepare operand b
   assign adder_op_b = adder_op_b_negate ? operand_b_neg : operand_b_i;
@@ -133,10 +131,10 @@ module riscv_alu_basic
   // by reversing the bits of the input, we also have to reverse the order of shift amounts
   assign shift_amt_left[31: 0] = shift_amt[31: 0];
 
-  // ALU_FL1 and ALU_CBL are used for the bit counting ops later
-  assign shift_left = (operator_i == ALU_SLL);
+  // riscv_defines::ALU_FL1 and ALU_CBL are used for the bit counting ops later
+  assign shift_left = (operator_i == riscv_defines::ALU_SLL);
 
-  assign shift_arithmetic = (operator_i == ALU_SRA);
+  assign shift_arithmetic = (operator_i == riscv_defines::ALU_SRA);
 
   // choose the bit reversed or the normal input for shift operand a
   assign shift_op_a    = shift_left ? operand_a_rev : operand_a_i;
@@ -180,20 +178,20 @@ module riscv_alu_basic
     cmp_signed = 4'b0;
 
     unique case (operator_i)
-      ALU_GTS,
-      ALU_GES,
-      ALU_LTS,
-      ALU_LES,
-      ALU_SLTS,
-      ALU_SLETS,
-      ALU_MIN,
-      ALU_MAX,
-      ALU_ABS,
-      ALU_CLIP,
-      ALU_CLIPU: begin
+      riscv_defines::ALU_GTS,
+      riscv_defines::ALU_GES,
+      riscv_defines::ALU_LTS,
+      riscv_defines::ALU_LES,
+      riscv_defines::ALU_SLTS,
+      riscv_defines::ALU_SLETS,
+      riscv_defines::ALU_MIN,
+      riscv_defines::ALU_MAX,
+      riscv_defines::ALU_ABS,
+      riscv_defines::ALU_CLIP,
+      riscv_defines::ALU_CLIPU: begin
         case (vector_mode_i)
-          VEC_MODE8:  cmp_signed[3:0] = 4'b1111;
-          VEC_MODE16: cmp_signed[3:0] = 4'b1010;
+          riscv_defines::VEC_MODE8:  cmp_signed[3:0] = 4'b1111;
+          riscv_defines::VEC_MODE16: cmp_signed[3:0] = 4'b1010;
           default:     cmp_signed[3:0] = 4'b1000;
         endcase
       end
@@ -226,7 +224,7 @@ module riscv_alu_basic
                                              | (is_equal_vec[1] & (is_greater_vec[0]))))))}};
 
     case(vector_mode_i)
-      VEC_MODE16:
+      riscv_defines::VEC_MODE16:
       begin
         is_equal[1:0]   = {2{is_equal_vec[0]   & is_equal_vec[1]}};
         is_equal[3:2]   = {2{is_equal_vec[2]   & is_equal_vec[3]}};
@@ -234,7 +232,7 @@ module riscv_alu_basic
         is_greater[3:2] = {2{is_greater_vec[3] | (is_equal_vec[3] & is_greater_vec[2])}};
       end
 
-      VEC_MODE8:
+      riscv_defines::VEC_MODE8:
       begin
         is_equal[3:0]   = is_equal_vec[3:0];
         is_greater[3:0] = is_greater_vec[3:0];
@@ -252,15 +250,15 @@ module riscv_alu_basic
     cmp_result = is_equal;
 
     unique case (operator_i)
-      ALU_EQ:            cmp_result = is_equal;
-      ALU_NE:            cmp_result = ~is_equal;
-      ALU_GTS, ALU_GTU:  cmp_result = is_greater;
-      ALU_GES, ALU_GEU:  cmp_result = is_greater | is_equal;
-      ALU_LTS, ALU_SLTS,
-      ALU_LTU, ALU_SLTU: cmp_result = ~(is_greater | is_equal);
-      ALU_SLETS,
-      ALU_SLETU,
-      ALU_LES, ALU_LEU:  cmp_result = ~is_greater;
+      riscv_defines::ALU_EQ:            cmp_result = is_equal;
+      riscv_defines::ALU_NE:            cmp_result = ~is_equal;
+      riscv_defines::ALU_GTS, riscv_defines::ALU_GTU:  cmp_result = is_greater;
+      riscv_defines::ALU_GES, riscv_defines::ALU_GEU:  cmp_result = is_greater | is_equal;
+      riscv_defines::ALU_LTS, riscv_defines::ALU_SLTS,
+      riscv_defines::ALU_LTU, riscv_defines::ALU_SLTU: cmp_result = ~(is_greater | is_equal);
+      riscv_defines::ALU_SLETS,
+      riscv_defines::ALU_SLETU,
+      riscv_defines::ALU_LES, riscv_defines::ALU_LEU:  cmp_result = ~is_greater;
 
       default: ;
     endcase
@@ -283,30 +281,30 @@ module riscv_alu_basic
 
     unique case (operator_i)
       // Standard Operations
-      ALU_AND:  result_o = operand_a_i & operand_b_i;
-      ALU_OR:   result_o = operand_a_i | operand_b_i;
-      ALU_XOR:  result_o = operand_a_i ^ operand_b_i;
+      riscv_defines::ALU_AND:  result_o = operand_a_i & operand_b_i;
+      riscv_defines::ALU_OR:   result_o = operand_a_i | operand_b_i;
+      riscv_defines::ALU_XOR:  result_o = operand_a_i ^ operand_b_i;
 
       // Shift Operations
-      ALU_ADD,
-      ALU_SUB: result_o = adder_result;
+      riscv_defines::ALU_ADD,
+      riscv_defines::ALU_SUB: result_o = adder_result;
 
-      ALU_SLL,
-      ALU_SRL, ALU_SRA:  result_o = shift_result;
+      riscv_defines::ALU_SLL,
+      riscv_defines::ALU_SRL, riscv_defines::ALU_SRA:  result_o = shift_result;
 
       // Comparison Operations
-      ALU_EQ,    ALU_NE,
-      ALU_GTU,   ALU_GEU,
-      ALU_LTU,   ALU_LEU,
-      ALU_GTS,   ALU_GES,
-      ALU_LTS,   ALU_LES: begin
+      riscv_defines::ALU_EQ,    riscv_defines::ALU_NE,
+      riscv_defines::ALU_GTU,   riscv_defines::ALU_GEU,
+      riscv_defines::ALU_LTU,   riscv_defines::ALU_LEU,
+      riscv_defines::ALU_GTS,   riscv_defines::ALU_GES,
+      riscv_defines::ALU_LTS,   riscv_defines::ALU_LES: begin
           result_o[31:24] = {8{cmp_result[3]}};
           result_o[23:16] = {8{cmp_result[2]}};
           result_o[15: 8] = {8{cmp_result[1]}};
           result_o[ 7: 0] = {8{cmp_result[0]}};
        end
-      ALU_SLTS,  ALU_SLTU,
-      ALU_SLETS, ALU_SLETU: result_o = {31'b0, comparison_result_o};
+      riscv_defines::ALU_SLTS,  riscv_defines::ALU_SLTU,
+      riscv_defines::ALU_SLETS, riscv_defines::ALU_SLETU: result_o = {31'b0, comparison_result_o};
 
       default:
       `ifndef SYNTHESIS

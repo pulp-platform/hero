@@ -26,8 +26,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-import riscv_defines::*;
-
 module riscv_if_stage
 #(
   parameter N_HWLP          = 2,
@@ -132,15 +130,15 @@ module riscv_if_stage
     exc_pc = '0;
 
     unique case (trap_addr_mux_i)
-      TRAP_MACHINE: trap_base_addr = m_trap_base_addr_i;
-      TRAP_USER:    trap_base_addr = u_trap_base_addr_i;
+      riscv_defines::TRAP_MACHINE: trap_base_addr = m_trap_base_addr_i;
+      riscv_defines::TRAP_USER:    trap_base_addr = u_trap_base_addr_i;
       default:;
     endcase
 
     unique case (exc_pc_mux_i)
-      EXC_PC_EXCEPTION:                        exc_pc = { trap_base_addr, 8'h0 }; //1.10 all the exceptions go to base address
-      EXC_PC_IRQ:                              exc_pc = { trap_base_addr, 1'b0, exc_vec_pc_mux_i[4:0], 2'b0 };
-      EXC_PC_DBD:                              exc_pc = { DM_HaltAddress       };
+      riscv_defines::EXC_PC_EXCEPTION:                        exc_pc = { trap_base_addr, 8'h0 }; //1.10 all the exceptions go to base address
+      riscv_defines::EXC_PC_IRQ:                              exc_pc = { trap_base_addr, 1'b0, exc_vec_pc_mux_i[4:0], 2'b0 };
+      riscv_defines::EXC_PC_DBD:                              exc_pc = { DM_HaltAddress       };
       default:;
     endcase
   end
@@ -151,14 +149,14 @@ module riscv_if_stage
     fetch_addr_n = '0;
 
     unique case (pc_mux_i)
-      PC_BOOT:      fetch_addr_n = {boot_addr_i, 1'b0};
-      PC_JUMP:      fetch_addr_n = jump_target_id_i;
-      PC_BRANCH:    fetch_addr_n = jump_target_ex_i;
-      PC_EXCEPTION: fetch_addr_n = exc_pc;             // set PC to exception handler
-      PC_MRET:      fetch_addr_n = mepc_i; // PC is restored when returning from IRQ/exception
-      PC_URET:      fetch_addr_n = uepc_i; // PC is restored when returning from IRQ/exception
-      PC_DRET:      fetch_addr_n = depc_i; //
-      PC_FENCEI:    fetch_addr_n = pc_id_o + 4; // jump to next instr forces prefetch buffer reload
+      riscv_defines::PC_BOOT:      fetch_addr_n = {boot_addr_i, 1'b0};
+      riscv_defines::PC_JUMP:      fetch_addr_n = jump_target_id_i;
+      riscv_defines::PC_BRANCH:    fetch_addr_n = jump_target_ex_i;
+      riscv_defines::PC_EXCEPTION: fetch_addr_n = exc_pc;             // set PC to exception handler
+      riscv_defines::PC_MRET:      fetch_addr_n = mepc_i; // PC is restored when returning from IRQ/exception
+      riscv_defines::PC_URET:      fetch_addr_n = uepc_i; // PC is restored when returning from IRQ/exception
+      riscv_defines::PC_DRET:      fetch_addr_n = depc_i; //
+      riscv_defines::PC_FENCEI:    fetch_addr_n = pc_id_o + 4; // jump to next instr forces prefetch buffer reload
       default:;
     endcase
   end

@@ -27,8 +27,6 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-import riscv_defines::*;
-
 module riscv_controller
 #(
   parameter FPU               = 0
@@ -107,7 +105,7 @@ module riscv_controller
   input  logic [4:0]  irq_id_ctrl_i,
   input  logic        m_IE_i,                     // interrupt enable bit from CSR (M mode)
   input  logic        u_IE_i,                     // interrupt enable bit from CSR (U mode)
-  input  PrivLvl_t    current_priv_lvl_i,
+  input  riscv_defines::PrivLvl_t    current_priv_lvl_i,
 
   output logic        irq_ack_o,
   output logic [4:0]  irq_id_o,
@@ -234,13 +232,13 @@ module riscv_controller
     csr_save_cause_o       = 1'b0;
 
     exc_cause_o            = '0;
-    exc_pc_mux_o           = EXC_PC_IRQ;
-    trap_addr_mux_o        = TRAP_MACHINE;
+    exc_pc_mux_o           = riscv_defines::EXC_PC_IRQ;
+    trap_addr_mux_o        = riscv_defines::TRAP_MACHINE;
 
     csr_cause_o            = '0;
     csr_irq_sec_o          = 1'b0;
 
-    pc_mux_o               = PC_BOOT;
+    pc_mux_o               = riscv_defines::PC_BOOT;
     pc_set_o               = 1'b0;
     jump_done              = jump_done_q;
 
@@ -254,14 +252,14 @@ module riscv_controller
     irq_ack_o              = 1'b0;
     irq_id_o               = irq_id_ctrl_i;
     boot_done              = 1'b0;
-    jump_in_dec            = jump_in_dec_i == BRANCH_JALR || jump_in_dec_i == BRANCH_JAL;
-    branch_in_id           = jump_in_id_i == BRANCH_COND;
-    irq_enable_int         =  ((u_IE_i | irq_sec_ctrl_i) & current_priv_lvl_i == PRIV_LVL_U) | (m_IE_i & current_priv_lvl_i == PRIV_LVL_M);
+    jump_in_dec            = jump_in_dec_i == riscv_defines::BRANCH_JALR || jump_in_dec_i == riscv_defines::BRANCH_JAL;
+    branch_in_id           = jump_in_id_i == riscv_defines::BRANCH_COND;
+    irq_enable_int         =  ((u_IE_i | irq_sec_ctrl_i) & current_priv_lvl_i == riscv_defines::PRIV_LVL_U) | (m_IE_i & current_priv_lvl_i == riscv_defines::PRIV_LVL_M);
 
-    ebrk_force_debug_mode  = (debug_ebreakm_i && current_priv_lvl_i == PRIV_LVL_M) ||
-                             (debug_ebreaku_i && current_priv_lvl_i == PRIV_LVL_U);
+    ebrk_force_debug_mode  = (debug_ebreakm_i && current_priv_lvl_i == riscv_defines::PRIV_LVL_M) ||
+                             (debug_ebreaku_i && current_priv_lvl_i == riscv_defines::PRIV_LVL_U);
     debug_csr_save_o       = 1'b0;
-    debug_cause_o          = DBG_CAUSE_EBREAK;
+    debug_cause_o          = riscv_defines::DBG_CAUSE_EBREAK;
     debug_mode_n           = debug_mode_q;
 
     illegal_insn_n         = illegal_insn_q;
@@ -299,7 +297,7 @@ module riscv_controller
       begin
         is_decoding_o = 1'b0;
         instr_req_o   = 1'b1;
-        pc_mux_o      = PC_BOOT;
+        pc_mux_o      = riscv_defines::PC_BOOT;
         pc_set_o      = 1'b1;
         boot_done     = 1'b1;
         ctrl_fsm_ns   = FIRST_FETCH;
@@ -372,7 +370,7 @@ module riscv_controller
 
             is_decoding_o = 1'b0;
 
-            pc_mux_o      = PC_BRANCH;
+            pc_mux_o      = riscv_defines::PC_BRANCH;
             pc_set_o      = 1'b1;
 
             // if we want to debug, flush the pipeline
@@ -393,7 +391,7 @@ module riscv_controller
             data_err_ack_o    = 1'b1;
             //no jump in this stage as we have to wait one cycle to go to Machine Mode
 
-            csr_cause_o       = data_we_ex_i ? EXC_CAUSE_STORE_FAULT : EXC_CAUSE_LOAD_FAULT;
+            csr_cause_o       = data_we_ex_i ? riscv_defines::EXC_CAUSE_STORE_FAULT : riscv_defines::EXC_CAUSE_LOAD_FAULT;
             ctrl_fsm_ns       = FLUSH_WB;
 
           end  //data error
@@ -411,7 +409,7 @@ module riscv_controller
 
             //no jump in this stage as we have to wait one cycle to go to Machine Mode
 
-            csr_cause_o       = EXC_CAUSE_INSTR_FAULT;
+            csr_cause_o       = riscv_defines::EXC_CAUSE_INSTR_FAULT;
             ctrl_fsm_ns       = FLUSH_WB;
 
 
@@ -459,7 +457,7 @@ module riscv_controller
                   halt_id_o         = 1'b1;
                   csr_save_id_o     = 1'b1;
                   csr_save_cause_o  = 1'b1;
-                  csr_cause_o       = EXC_CAUSE_ILLEGAL_INSN;
+                  csr_cause_o       = riscv_defines::EXC_CAUSE_ILLEGAL_INSN;
                   ctrl_fsm_ns       = FLUSH_EX;
                   illegal_insn_n    = 1'b1;
                 end else begin
@@ -472,7 +470,7 @@ module riscv_controller
                     // we can jump directly since we know the address already
                     // we don't need to worry about conditional branches here as they
                     // will be evaluated in the EX stage
-                      pc_mux_o = PC_JUMP;
+                      pc_mux_o = riscv_defines::PC_JUMP;
                       // if there is a jr stall, wait for it to be gone
                       if ((~jr_stall_o) && (~jump_done_q)) begin
                         pc_set_o    = 1'b1;
@@ -498,7 +496,7 @@ module riscv_controller
                         csr_save_cause_o  = 1'b1;
 
                         ctrl_fsm_ns = FLUSH_EX;
-                        csr_cause_o = EXC_CAUSE_BREAKPOINT;
+                        csr_cause_o = riscv_defines::EXC_CAUSE_BREAKPOINT;
                       end
 
                     end
@@ -512,7 +510,7 @@ module riscv_controller
                       halt_id_o     = 1'b1;
                       csr_save_id_o     = 1'b1;
                       csr_save_cause_o  = 1'b1;
-                      csr_cause_o   = current_priv_lvl_i == PRIV_LVL_U ? EXC_CAUSE_ECALL_UMODE : EXC_CAUSE_ECALL_MMODE;
+                      csr_cause_o   = current_priv_lvl_i == riscv_defines::PRIV_LVL_U ? riscv_defines::EXC_CAUSE_ECALL_UMODE : riscv_defines::EXC_CAUSE_ECALL_MMODE;
                       ctrl_fsm_ns   = FLUSH_EX;
                     end
                     fencei_insn_i: begin
@@ -593,7 +591,7 @@ module riscv_controller
             csr_save_cause_o  = 1'b1;
             data_err_ack_o    = 1'b1;
             //no jump in this stage as we have to wait one cycle to go to Machine Mode
-            csr_cause_o       = data_we_ex_i ? EXC_CAUSE_STORE_FAULT : EXC_CAUSE_LOAD_FAULT;
+            csr_cause_o       = data_we_ex_i ? riscv_defines::EXC_CAUSE_STORE_FAULT : riscv_defines::EXC_CAUSE_LOAD_FAULT;
             ctrl_fsm_ns       = FLUSH_WB;
             //putting illegal to 0 as if it was 1, the core is going to jump to the exception of the EX stage,
             //so the illegal was never executed
@@ -619,7 +617,7 @@ module riscv_controller
             csr_save_cause_o  = 1'b1;
             data_err_ack_o    = 1'b1;
             //no jump in this stage as we have to wait one cycle to go to Machine Mode
-            csr_cause_o       = data_we_ex_i ? EXC_CAUSE_STORE_FAULT : EXC_CAUSE_LOAD_FAULT;
+            csr_cause_o       = data_we_ex_i ? riscv_defines::EXC_CAUSE_STORE_FAULT : riscv_defines::EXC_CAUSE_LOAD_FAULT;
             ctrl_fsm_ns       = FLUSH_WB;
 
         end  //data error
@@ -681,8 +679,8 @@ module riscv_controller
         is_decoding_o = 1'b0;
 
         pc_set_o          = 1'b1;
-        pc_mux_o          = PC_EXCEPTION;
-        exc_pc_mux_o      = EXC_PC_IRQ;
+        pc_mux_o          = riscv_defines::PC_EXCEPTION;
+        exc_pc_mux_o      = riscv_defines::EXC_PC_IRQ;
         exc_cause_o       = {1'b0,irq_id_ctrl_i};
 
         csr_irq_sec_o     = irq_sec_ctrl_i;
@@ -692,9 +690,9 @@ module riscv_controller
         csr_save_id_o     = 1'b1;
 
         if(irq_sec_ctrl_i)
-          trap_addr_mux_o  = TRAP_MACHINE;
+          trap_addr_mux_o  = riscv_defines::TRAP_MACHINE;
         else
-          trap_addr_mux_o  = current_priv_lvl_i == PRIV_LVL_U ? TRAP_USER : TRAP_MACHINE;
+          trap_addr_mux_o  = current_priv_lvl_i == riscv_defines::PRIV_LVL_U ? riscv_defines::TRAP_USER : riscv_defines::TRAP_MACHINE;
 
         irq_ack_o         = 1'b1;
         exc_ack_o         = 1'b1;
@@ -707,8 +705,8 @@ module riscv_controller
         is_decoding_o = 1'b0;
 
         pc_set_o          = 1'b1;
-        pc_mux_o          = PC_EXCEPTION;
-        exc_pc_mux_o      = EXC_PC_IRQ;
+        pc_mux_o          = riscv_defines::PC_EXCEPTION;
+        exc_pc_mux_o      = riscv_defines::EXC_PC_IRQ;
         exc_cause_o       = {1'b0,irq_id_ctrl_i};
 
         csr_irq_sec_o     = irq_sec_ctrl_i;
@@ -718,9 +716,9 @@ module riscv_controller
         csr_save_if_o     = 1'b1;
 
         if(irq_sec_ctrl_i)
-          trap_addr_mux_o  = TRAP_MACHINE;
+          trap_addr_mux_o  = riscv_defines::TRAP_MACHINE;
         else
-          trap_addr_mux_o  = current_priv_lvl_i == PRIV_LVL_U ? TRAP_USER : TRAP_MACHINE;
+          trap_addr_mux_o  = current_priv_lvl_i == riscv_defines::PRIV_LVL_U ? riscv_defines::TRAP_USER : riscv_defines::TRAP_MACHINE;
 
         irq_ack_o         = 1'b1;
         exc_ack_o         = 1'b1;
@@ -740,30 +738,30 @@ module riscv_controller
 
         if(data_err_q) begin
             //data_error
-            pc_mux_o              = PC_EXCEPTION;
+            pc_mux_o              = riscv_defines::PC_EXCEPTION;
             pc_set_o              = 1'b1;
-            trap_addr_mux_o       = TRAP_MACHINE;
+            trap_addr_mux_o       = riscv_defines::TRAP_MACHINE;
             //little hack during testing
-            exc_pc_mux_o          = EXC_PC_EXCEPTION;
-            exc_cause_o           = data_we_ex_i ? EXC_CAUSE_LOAD_FAULT : EXC_CAUSE_STORE_FAULT;
+            exc_pc_mux_o          = riscv_defines::EXC_PC_EXCEPTION;
+            exc_cause_o           = data_we_ex_i ? riscv_defines::EXC_CAUSE_LOAD_FAULT : riscv_defines::EXC_CAUSE_STORE_FAULT;
 
         end
         else if (is_fetch_failed_i) begin
             //data_error
-            pc_mux_o              = PC_EXCEPTION;
+            pc_mux_o              = riscv_defines::PC_EXCEPTION;
             pc_set_o              = 1'b1;
-            trap_addr_mux_o       = TRAP_MACHINE;
-            exc_pc_mux_o          = EXC_PC_EXCEPTION;
-            exc_cause_o           = EXC_CAUSE_INSTR_FAULT;
+            trap_addr_mux_o       = riscv_defines::TRAP_MACHINE;
+            exc_pc_mux_o          = riscv_defines::EXC_PC_EXCEPTION;
+            exc_cause_o           = riscv_defines::EXC_CAUSE_INSTR_FAULT;
 
         end
         else begin
           if(illegal_insn_q) begin
               //exceptions
-              pc_mux_o              = PC_EXCEPTION;
+              pc_mux_o              = riscv_defines::PC_EXCEPTION;
               pc_set_o              = 1'b1;
-              trap_addr_mux_o       = TRAP_MACHINE;
-              exc_pc_mux_o          = EXC_PC_EXCEPTION;
+              trap_addr_mux_o       = riscv_defines::TRAP_MACHINE;
+              exc_pc_mux_o          = riscv_defines::EXC_PC_EXCEPTION;
               illegal_insn_n        = 1'b0;
               if (debug_single_step_i && ~debug_mode_q)
                   ctrl_fsm_ns = DBG_TAKEN_IF;
@@ -771,22 +769,22 @@ module riscv_controller
             unique case(1'b1)
               ebrk_insn_i: begin
                   //ebreak
-                  pc_mux_o              = PC_EXCEPTION;
+                  pc_mux_o              = riscv_defines::PC_EXCEPTION;
                   pc_set_o              = 1'b1;
-                  trap_addr_mux_o       = TRAP_MACHINE;
-                  exc_pc_mux_o          = EXC_PC_EXCEPTION;
+                  trap_addr_mux_o       = riscv_defines::TRAP_MACHINE;
+                  exc_pc_mux_o          = riscv_defines::EXC_PC_EXCEPTION;
 
                   if (debug_single_step_i && ~debug_mode_q)
                       ctrl_fsm_ns = DBG_TAKEN_IF;
               end
               ecall_insn_i: begin
                   //ecall
-                  pc_mux_o              = PC_EXCEPTION;
+                  pc_mux_o              = riscv_defines::PC_EXCEPTION;
                   pc_set_o              = 1'b1;
-                  trap_addr_mux_o       = TRAP_MACHINE;
-                  exc_pc_mux_o          = EXC_PC_EXCEPTION;
+                  trap_addr_mux_o       = riscv_defines::TRAP_MACHINE;
+                  exc_pc_mux_o          = riscv_defines::EXC_PC_EXCEPTION;
                   // TODO: why is this here, signal only needed for async exceptions
-                  exc_cause_o           = EXC_CAUSE_ECALL_MMODE;
+                  exc_cause_o           = riscv_defines::EXC_CAUSE_ECALL_MMODE;
 
                   if (debug_single_step_i && ~debug_mode_q)
                       ctrl_fsm_ns = DBG_TAKEN_IF;
@@ -814,7 +812,7 @@ module riscv_controller
               fencei_insn_i: begin
                   // we just jump to instruction after the fence.i since that
                   // forces the instruction cache to refetch
-                  pc_mux_o              = PC_FENCEI;
+                  pc_mux_o              = riscv_defines::PC_FENCEI;
                   pc_set_o              = 1'b1;
               end
               default:;
@@ -831,18 +829,18 @@ module riscv_controller
         unique case(1'b1)
           mret_dec_i: begin
               //mret
-              pc_mux_o              = PC_MRET;
+              pc_mux_o              = riscv_defines::PC_MRET;
               pc_set_o              = 1'b1;
           end
           uret_dec_i: begin
               //uret
-              pc_mux_o              = PC_URET;
+              pc_mux_o              = riscv_defines::PC_URET;
               pc_set_o              = 1'b1;
           end
           dret_dec_i: begin
               //dret
               //TODO: is illegal when not in debug mode
-              pc_mux_o              = PC_DRET;
+              pc_mux_o              = riscv_defines::PC_DRET;
               pc_set_o              = 1'b1;
               debug_mode_n          = 1'b0;
           end
@@ -863,7 +861,7 @@ module riscv_controller
 
         if (branch_taken_ex_i) begin
           // there is a branch in the EX stage that is taken
-          pc_mux_o = PC_BRANCH;
+          pc_mux_o = riscv_defines::PC_BRANCH;
           pc_set_o = 1'b1;
         end
 
@@ -882,17 +880,17 @@ module riscv_controller
       begin
         is_decoding_o     = 1'b0;
         pc_set_o          = 1'b1;
-        pc_mux_o          = PC_EXCEPTION;
-        exc_pc_mux_o      = EXC_PC_DBD;
+        pc_mux_o          = riscv_defines::PC_EXCEPTION;
+        exc_pc_mux_o      = riscv_defines::EXC_PC_DBD;
         if ((debug_req_i && (~debug_mode_q)) ||
             (ebrk_insn_i && ebrk_force_debug_mode && (~debug_mode_q))) begin
             csr_save_cause_o = 1'b1;
             csr_save_id_o    = 1'b1;
             debug_csr_save_o = 1'b1;
             if (debug_req_i)
-                debug_cause_o = DBG_CAUSE_HALTREQ;
+                debug_cause_o = riscv_defines::DBG_CAUSE_HALTREQ;
             if (ebrk_insn_i)
-                debug_cause_o = DBG_CAUSE_EBREAK;
+                debug_cause_o = riscv_defines::DBG_CAUSE_EBREAK;
         end
         ctrl_fsm_ns  = DECODE;
         debug_mode_n = 1'b1;
@@ -902,16 +900,16 @@ module riscv_controller
       begin
         is_decoding_o     = 1'b0;
         pc_set_o          = 1'b1;
-        pc_mux_o          = PC_EXCEPTION;
-        exc_pc_mux_o      = EXC_PC_DBD;
+        pc_mux_o          = riscv_defines::PC_EXCEPTION;
+        exc_pc_mux_o      = riscv_defines::EXC_PC_DBD;
         csr_save_cause_o  = 1'b1;
         debug_csr_save_o  = 1'b1;
         if (debug_single_step_i)
-            debug_cause_o = DBG_CAUSE_STEP;
+            debug_cause_o = riscv_defines::DBG_CAUSE_STEP;
         if (debug_req_i)
-            debug_cause_o = DBG_CAUSE_HALTREQ;
+            debug_cause_o = riscv_defines::DBG_CAUSE_HALTREQ;
         if (ebrk_insn_i)
-            debug_cause_o = DBG_CAUSE_EBREAK;
+            debug_cause_o = riscv_defines::DBG_CAUSE_EBREAK;
         csr_save_if_o   = 1'b1;
         ctrl_fsm_ns     = DECODE;
         debug_mode_n    = 1'b1;
@@ -933,7 +931,7 @@ module riscv_controller
             csr_save_cause_o  = 1'b1;
             data_err_ack_o    = 1'b1;
             //no jump in this stage as we have to wait one cycle to go to Machine Mode
-            csr_cause_o       = data_we_ex_i ? EXC_CAUSE_STORE_FAULT : EXC_CAUSE_LOAD_FAULT;
+            csr_cause_o       = data_we_ex_i ? riscv_defines::EXC_CAUSE_STORE_FAULT : riscv_defines::EXC_CAUSE_LOAD_FAULT;
             ctrl_fsm_ns       = FLUSH_WB;
 
         end  //data error
@@ -999,7 +997,7 @@ module riscv_controller
     // - always stall if a result is to be forwarded to the PC
     // we don't care about in which state the ctrl_fsm is as we deassert_we
     // anyway when we are not in DECODE
-    if ((jump_in_dec_i == BRANCH_JALR) &&
+    if ((jump_in_dec_i == riscv_defines::BRANCH_JALR) &&
         (((regfile_we_wb_i == 1'b1) && (reg_d_wb_is_reg_a_i == 1'b1)) ||
          ((regfile_we_ex_i == 1'b1) && (reg_d_ex_is_reg_a_i == 1'b1)) ||
          ((regfile_alu_we_fw_i == 1'b1) && (reg_d_alu_is_reg_a_i == 1'b1))) )
@@ -1020,39 +1018,39 @@ module riscv_controller
   always_comb
   begin
     // default assignements
-    operand_a_fw_mux_sel_o = SEL_REGFILE;
-    operand_b_fw_mux_sel_o = SEL_REGFILE;
-    operand_c_fw_mux_sel_o = SEL_REGFILE;
+    operand_a_fw_mux_sel_o = riscv_defines::SEL_REGFILE;
+    operand_b_fw_mux_sel_o = riscv_defines::SEL_REGFILE;
+    operand_c_fw_mux_sel_o = riscv_defines::SEL_REGFILE;
 
     // Forwarding WB -> ID
     if (regfile_we_wb_i == 1'b1)
     begin
       if (reg_d_wb_is_reg_a_i == 1'b1)
-        operand_a_fw_mux_sel_o = SEL_FW_WB;
+        operand_a_fw_mux_sel_o = riscv_defines::SEL_FW_WB;
       if (reg_d_wb_is_reg_b_i == 1'b1)
-        operand_b_fw_mux_sel_o = SEL_FW_WB;
+        operand_b_fw_mux_sel_o = riscv_defines::SEL_FW_WB;
       if (reg_d_wb_is_reg_c_i == 1'b1)
-        operand_c_fw_mux_sel_o = SEL_FW_WB;
+        operand_c_fw_mux_sel_o = riscv_defines::SEL_FW_WB;
     end
 
     // Forwarding EX -> ID
     if (regfile_alu_we_fw_i == 1'b1)
     begin
      if (reg_d_alu_is_reg_a_i == 1'b1)
-       operand_a_fw_mux_sel_o = SEL_FW_EX;
+       operand_a_fw_mux_sel_o = riscv_defines::SEL_FW_EX;
      if (reg_d_alu_is_reg_b_i == 1'b1)
-       operand_b_fw_mux_sel_o = SEL_FW_EX;
+       operand_b_fw_mux_sel_o = riscv_defines::SEL_FW_EX;
      if (reg_d_alu_is_reg_c_i == 1'b1)
-       operand_c_fw_mux_sel_o = SEL_FW_EX;
+       operand_c_fw_mux_sel_o = riscv_defines::SEL_FW_EX;
     end
 
     // for misaligned memory accesses
     if (data_misaligned_i)
     begin
-      operand_a_fw_mux_sel_o  = SEL_FW_EX;
-      operand_b_fw_mux_sel_o  = SEL_REGFILE;
+      operand_a_fw_mux_sel_o  = riscv_defines::SEL_FW_EX;
+      operand_b_fw_mux_sel_o  = riscv_defines::SEL_REGFILE;
     end else if (mult_multicycle_i) begin
-      operand_c_fw_mux_sel_o  = SEL_FW_EX;
+      operand_c_fw_mux_sel_o  = riscv_defines::SEL_FW_EX;
     end
   end
 
@@ -1090,7 +1088,7 @@ module riscv_controller
   end
 
   // Performance Counters
-  assign perf_jump_o      = (jump_in_id_i == BRANCH_JAL || jump_in_id_i == BRANCH_JALR);
+  assign perf_jump_o      = (jump_in_id_i == riscv_defines::BRANCH_JAL || jump_in_id_i == riscv_defines::BRANCH_JALR);
   assign perf_jr_stall_o  = jr_stall_o;
   assign perf_ld_stall_o  = load_stall_o;
 
