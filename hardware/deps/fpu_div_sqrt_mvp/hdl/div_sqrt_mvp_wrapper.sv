@@ -36,54 +36,47 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-import defs_div_sqrt_mvp::*;
-
 module div_sqrt_mvp_wrapper
 #(
    parameter   PrePipeline_depth_S             =        0,  // If you want to add a flip/flop stage before preprocess, set it to 1.
    parameter   PostPipeline_depth_S            =        2  // The output delay stages
 )
   (//Input
-   input logic                            Clk_CI,
-   input logic                            Rst_RBI,
-   input logic                            Div_start_SI,
-   input logic                            Sqrt_start_SI,
-
+   input logic                                     Clk_CI,
+   input logic                                     Rst_RBI,
+   input logic                                     Div_start_SI,
+   input logic                                     Sqrt_start_SI,
    //Input Operands
-   input logic [C_OP_FP64-1:0]            Operand_a_DI,
-   input logic [C_OP_FP64-1:0]            Operand_b_DI,
-
+   input logic [defs_div_sqrt_mvp::C_OP_FP64-1:0]  Operand_a_DI,
+   input logic [defs_div_sqrt_mvp::C_OP_FP64-1:0]  Operand_b_DI,
    // Input Control
-   input logic [C_RM-1:0]                 RM_SI,    //Rounding Mode
-   input logic [C_PC-1:0]                 Precision_ctl_SI, // Precision Control
-   input logic [C_FS-1:0]                 Format_sel_SI,  // Format Selection,
-   input logic                            Kill_SI,
-
+   input logic [defs_div_sqrt_mvp::C_RM-1:0]       RM_SI,    //Rounding Mode
+   input logic [defs_div_sqrt_mvp::C_PC-1:0]       Precision_ctl_SI, // Precision Control
+   input logic [defs_div_sqrt_mvp::C_FS-1:0]       Format_sel_SI,  // Format Selection,
+   input logic                                     Kill_SI,
    //Output Result
-   output logic [C_OP_FP64-1:0]           Result_DO,
-
+   output logic [defs_div_sqrt_mvp::C_OP_FP64-1:0] Result_DO,
    //Output-Flags
-   output logic [4:0]                     Fflags_SO,
-   output logic                           Ready_SO,
-   output logic                           Done_SO
- );
+   output logic [4:0]                              Fflags_SO,
+   output logic                                    Ready_SO,
+   output logic                                    Done_SO
+);
 
 
-   logic                                 Div_start_S_S,Sqrt_start_S_S;
-   logic [C_OP_FP64-1:0]                 Operand_a_S_D;
-   logic [C_OP_FP64-1:0]                 Operand_b_S_D;
+  logic                                    Div_start_S_S,Sqrt_start_S_S;
+  logic [defs_div_sqrt_mvp::C_OP_FP64-1:0] Operand_a_S_D;
+  logic [defs_div_sqrt_mvp::C_OP_FP64-1:0] Operand_b_S_D;
 
-   // Input Control
-   logic [C_RM-1:0]                      RM_S_S;    //Rounding Mode
-   logic [C_PC-1:0]                      Precision_ctl_S_S; // Precision Control
-   logic [C_FS-1:0]                      Format_sel_S_S;  // Format Selection,
-   logic                                 Kill_S_S;
+  // Input Control
+  logic [defs_div_sqrt_mvp::C_RM-1:0] RM_S_S;    //Rounding Mode
+  logic [defs_div_sqrt_mvp::C_PC-1:0] Precision_ctl_S_S; // Precision Control
+  logic [defs_div_sqrt_mvp::C_FS-1:0] Format_sel_S_S;  // Format Selection,
+  logic                               Kill_S_S;
 
-
-  logic [C_OP_FP64-1:0]                  Result_D;
-  logic                                  Ready_S;
-  logic                                  Done_S;
-  logic [4:0]                            Fflags_S;
+  logic [defs_div_sqrt_mvp::C_OP_FP64-1:0] Result_D;
+  logic                                    Ready_S;
+  logic                                    Done_S;
+  logic [4:0]                              Fflags_S;
 
 
   generate
@@ -163,10 +156,10 @@ module div_sqrt_mvp_wrapper
    /////////////////////////////////////////////////////////////////////////////
    // First Stage of Outputs
    /////////////////////////////////////////////////////////////////////////////
-  logic [C_OP_FP64-1:0]         Result_dly_S_D;
-  logic                         Ready_dly_S_S;
-  logic                         Done_dly_S_S;
-  logic [4:0]                   Fflags_dly_S_S;
+  logic [defs_div_sqrt_mvp::C_OP_FP64-1:0] Result_dly_S_D;
+  logic                                    Ready_dly_S_S;
+  logic                                    Done_dly_S_S;
+  logic [4:0]                              Fflags_dly_S_S;
    always_ff @(posedge Clk_CI, negedge Rst_RBI)
      begin
         if(~Rst_RBI)
@@ -189,10 +182,10 @@ module div_sqrt_mvp_wrapper
    // Second Stage of Outputs
    /////////////////////////////////////////////////////////////////////////////
 
-  logic [C_OP_FP64-1:0]         Result_dly_D_D;
-  logic                         Ready_dly_D_S;
-  logic                         Done_dly_D_S;
-  logic [4:0]                   Fflags_dly_D_S;
+  logic [defs_div_sqrt_mvp::C_OP_FP64-1:0] Result_dly_D_D;
+  logic                                    Ready_dly_D_S;
+  logic                                    Done_dly_D_S;
+  logic [4:0]                              Fflags_dly_D_S;
   generate
     if(PostPipeline_depth_S==2)
       begin
