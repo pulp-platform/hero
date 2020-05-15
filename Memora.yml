@@ -791,7 +791,7 @@ artifacts:
     outputs:
       - hardware/vsim/work
 
-  sdk-pulp-har-and-sdk-har:
+  sdk-pulp-and-sdk-har:
     inputs:
       - Makefile
       # sdk-pulp
@@ -1099,7 +1099,7 @@ artifacts:
       - install/share/ss
       - install/usr
 
-  sdk-pulp-hrv-and-sdk-hrv:
+  sdk-pulp-and-sdk-hrv:
     inputs:
       - Makefile
       # sdk-pulp

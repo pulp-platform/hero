@@ -65,27 +65,27 @@ sdk-pulp-and-sdk-har:
   stage: build2
   script:
     - >
-      if memora lookup sdk-pulp-har-and-sdk-har; then
+      if memora lookup sdk-pulp-and-sdk-har; then
         exit 0
       fi
     - memora get tc-pulp
     - memora get tc-har-olinux
     - make sdk-pulp # TODO: `sdk-pulp-har` does not seem to work?
     - make sdk-har
-    - memora insert sdk-pulp-har-and-sdk-har
+    - memora insert sdk-pulp-and-sdk-har
 
 sdk-pulp-and-sdk-hrv:
   stage: build2
   script:
     - >
-      if memora lookup sdk-pulp-hrv-and-sdk-hrv; then
+      if memora lookup sdk-pulp-and-sdk-hrv; then
         exit 0
       fi
     - memora get tc-pulp
     - memora get tc-hrv-olinux
     - make sdk-pulp-hrv
     - make sdk-hrv
-    - memora insert sdk-pulp-hrv-and-sdk-hrv
+    - memora insert sdk-pulp-and-sdk-hrv
 
 tc-llvm:
   stage: build3
@@ -94,7 +94,7 @@ tc-llvm:
       if memora lookup tc-llvm; then
         exit 0
       fi
-    - memora get sdk-pulp-har-and-sdk-har
+    - memora get sdk-pulp-and-sdk-har
     - make tc-llvm
     - memora insert tc-llvm
 
