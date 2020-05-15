@@ -28,8 +28,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import riscv_defines::*;
-import apu_core_package::*;
-
 
 // Source/Destination register instruction index
 `define REG_S1 19:15
@@ -851,16 +849,16 @@ module riscv_id_stage
       // flags
       always_comb begin
         unique case (apu_flags_src)
-          APU_FLAGS_INT_MULT:
+          apu_core_package::APU_FLAGS_INT_MULT:
             apu_flags = {7'h0 , mult_imm_id, mult_signed_mode, mult_sel_subword};
-          APU_FLAGS_DSP_MULT:
+          apu_core_package::APU_FLAGS_DSP_MULT:
             apu_flags = {13'h0, mult_dot_signed};
-          APU_FLAGS_FP:
+          apu_core_package::APU_FLAGS_FP:
             if (FPU == 1)
               apu_flags = fp_rnd_mode;
             else
               apu_flags = '0;
-          APU_FLAGS_FPNEW:
+          apu_core_package::APU_FLAGS_FPNEW:
             if (FPU == 1)
               apu_flags = {fpu_int_fmt, fpu_src_fmt, fpu_dst_fmt, fp_rnd_mode};
             else

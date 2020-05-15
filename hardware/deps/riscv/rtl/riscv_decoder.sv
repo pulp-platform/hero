@@ -730,7 +730,7 @@ module riscv_decoder
               // using APU instead of ALU
               apu_en           = 1'b1;
               alu_en_o         = 1'b0;
-              apu_flags_src_o  = APU_FLAGS_FPNEW;
+              apu_flags_src_o  = apu_core_package::APU_FLAGS_FPNEW;
               // by default, set all registers to FP registers and use 2
               rega_used_o      = 1'b1;
               regb_used_o      = 1'b1;
@@ -1313,7 +1313,7 @@ module riscv_decoder
           apu_en           = 1'b1;
           alu_en_o         = 1'b0;
           // Private and new shared FP use FPnew
-          apu_flags_src_o  = (SHARED_FP==1) ? APU_FLAGS_FP : APU_FLAGS_FPNEW;
+          apu_flags_src_o  = (SHARED_FP==1) ? apu_core_package::APU_FLAGS_FP : apu_core_package::APU_FLAGS_FPNEW;
           // by default, set all registers to FP registers and use 2
           rega_used_o      = 1'b1;
           regb_used_o      = 1'b1;
@@ -1352,7 +1352,7 @@ module riscv_decoder
               fp_op_group   = ADDMUL;
               apu_type_o    = APUTYPE_ADDSUB;
               apu_op_o      = 2'b0;
-              apu_lat_o     = (PIPE_REG_ADDSUB==1) ? 2'h2 : 2'h1;
+              apu_lat_o     = (apu_core_package::PIPE_REG_ADDSUB==1) ? 2'h2 : 2'h1;
               // FPnew needs addition operands as operand B and C
               if (SHARED_FP!=1) begin
                 alu_op_b_mux_sel_o = OP_B_REGA_OR_FWD;
@@ -1366,7 +1366,7 @@ module riscv_decoder
               fp_op_group   = ADDMUL;
               apu_type_o    = APUTYPE_ADDSUB;
               apu_op_o      = 2'b1;
-              apu_lat_o     = (PIPE_REG_ADDSUB==1) ? 2'h2 : 2'h1;
+              apu_lat_o     = (apu_core_package::PIPE_REG_ADDSUB==1) ? 2'h2 : 2'h1;
               if (SHARED_FP!=1) begin
                 alu_op_b_mux_sel_o = OP_B_REGA_OR_FWD;
                 alu_op_c_mux_sel_o = OP_C_REGB_OR_FWD;
@@ -1377,7 +1377,7 @@ module riscv_decoder
               fpu_op        = fpnew_pkg::MUL;
               fp_op_group   = ADDMUL;
               apu_type_o    = APUTYPE_MULT;
-              apu_lat_o     = (PIPE_REG_MULT==1) ? 2'h2 : 2'h1;
+              apu_lat_o     = (apu_core_package::PIPE_REG_MULT==1) ? 2'h2 : 2'h1;
             end
             // fdiv.fmt - FP Division
             5'b00011: begin
@@ -1527,7 +1527,7 @@ module riscv_decoder
               fpu_op        = fpnew_pkg::MUL;
               fp_op_group   = ADDMUL;
               apu_type_o    = APUTYPE_MULT;
-              apu_lat_o     = (PIPE_REG_MULT==1) ? 2'h2 : 2'h1;
+              apu_lat_o     = (apu_core_package::PIPE_REG_MULT==1) ? 2'h2 : 2'h1;
               // set dst format to FP32
               fpu_dst_fmt_o = fpnew_pkg::FP32;
             end
@@ -1539,7 +1539,7 @@ module riscv_decoder
               fpu_op      = fpnew_pkg::FMADD;
               fp_op_group = ADDMUL;
               apu_type_o  = APUTYPE_MAC;
-              apu_lat_o   = (PIPE_REG_MULT==1) ? 2'h2 : 2'h1;
+              apu_lat_o   = (apu_core_package::PIPE_REG_MULT==1) ? 2'h2 : 2'h1;
               // set dst format to FP32
               fpu_dst_fmt_o = fpnew_pkg::FP32;
             end
@@ -1592,7 +1592,7 @@ module riscv_decoder
               fpu_op_mod    = instr_rdata_i[20]; // signed/unsigned switch
               apu_type_o    = APUTYPE_CAST;
               apu_op_o      = 2'b1;
-              apu_lat_o     = (PIPE_REG_CAST==1) ? 2'h2 : 2'h1;
+              apu_lat_o     = (apu_core_package::PIPE_REG_CAST==1) ? 2'h2 : 2'h1;
 
               unique case (instr_rdata_i[26:25]) //fix for casting to different formats other than FP32
                 2'b00: begin
@@ -1630,7 +1630,7 @@ module riscv_decoder
               fpu_op_mod    = instr_rdata_i[20]; // signed/unsigned switch
               apu_type_o    = APUTYPE_CAST;
               apu_op_o      = 2'b0;
-              apu_lat_o     = (PIPE_REG_CAST==1) ? 2'h2 : 2'h1;
+              apu_lat_o     = (apu_core_package::PIPE_REG_CAST==1) ? 2'h2 : 2'h1;
               // bits [21:20] used, other bits must be 0
               if (instr_rdata_i[24:21]) illegal_insn_o = 1'b1;   // in RV32, no casts to L allowed.
             end
@@ -1804,9 +1804,9 @@ module riscv_decoder
           apu_en           = 1'b1;
           alu_en_o         = 1'b0;
           // Private and new shared FP use FPnew
-          apu_flags_src_o  = (SHARED_FP==1) ? APU_FLAGS_FP : APU_FLAGS_FPNEW;
+          apu_flags_src_o  = (SHARED_FP==1) ? apu_core_package::APU_FLAGS_FP : apu_core_package::APU_FLAGS_FPNEW;
           apu_type_o       = APUTYPE_MAC;
-          apu_lat_o        = (PIPE_REG_MAC>1) ? 2'h3 : 2'h2;
+          apu_lat_o        = (apu_core_package::PIPE_REG_MAC>1) ? 2'h3 : 2'h2;
           // all registers are FP registers and use three
           rega_used_o      = 1'b1;
           regb_used_o      = 1'b1;
