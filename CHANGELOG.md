@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- `fpu_div_sqrt_mvp` and `fpu_interco`: Improve tool compatibility by removing wildcard imports.
+- `fpnew`: Add `default` to `unique case` that does not need a default to improve tool
+  compatibility.
 
 
 ## 2020-05-06
