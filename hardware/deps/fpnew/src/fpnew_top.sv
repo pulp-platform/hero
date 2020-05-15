@@ -17,8 +17,8 @@ module fpnew_top #(
   parameter fpnew_pkg::fpu_implementation_t Implementation = fpnew_pkg::DEFAULT_NOREGS,
   parameter type                            TagType        = logic,
   // Do not change
-  localparam int unsigned WIDTH        = Features.Width,
-  localparam int unsigned NUM_OPERANDS = 3
+  parameter int unsigned WIDTH        = Features.Width,
+  parameter int unsigned NUM_OPERANDS = 3
 ) (
   input logic                               clk_i,
   input logic                               rst_ni,

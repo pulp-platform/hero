@@ -17,10 +17,10 @@ module axi_id_remap_table #(
   // Maximum number of AXI read and write bursts outstanding at the same time
   parameter int unsigned MAX_TXNS = 0,
   // Derived Parameters (do NOT change manually!)
-  localparam type field_t = logic [MAX_TXNS-1:0],
-  localparam type id_inp_t = logic [ID_WIDTH_INP-1:0],
-  localparam int unsigned IDX_WIDTH = $clog2(MAX_TXNS) > 0 ? $clog2(MAX_TXNS) : 1,
-  localparam type idx_t = logic [IDX_WIDTH-1:0]
+  parameter type field_t = logic [MAX_TXNS-1:0],
+  parameter type id_inp_t = logic [ID_WIDTH_INP-1:0],
+  parameter int unsigned IDX_WIDTH = $clog2(MAX_TXNS) > 0 ? $clog2(MAX_TXNS) : 1,
+  parameter type idx_t = logic [IDX_WIDTH-1:0]
 ) (
   input  logic    clk_i,
   input  logic    rst_ni,

@@ -20,7 +20,7 @@ module fpnew_noncomp #(
   parameter type                     TagType     = logic,
   parameter type                     AuxType     = logic,
 
-  localparam int unsigned WIDTH = fpnew_pkg::fp_width(FpFormat) // do not change
+  parameter int unsigned WIDTH = fpnew_pkg::fp_width(FpFormat) // do not change
 ) (
   input logic                  clk_i,
   input logic                  rst_ni,

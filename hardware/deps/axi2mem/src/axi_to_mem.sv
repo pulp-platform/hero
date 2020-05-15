@@ -19,10 +19,10 @@ module axi_to_mem #(
   parameter int unsigned NumBanks   = 0,     // number of banks at output
   parameter int unsigned BufDepth   = 1,     // depth of memory response buffer
   // Dependent parameters, do not override.
-  localparam type addr_t     = logic [AddrWidth-1:0],
-  localparam type mem_atop_t = logic [5:0],
-  localparam type mem_data_t = logic [DataWidth/NumBanks-1:0],
-  localparam type mem_strb_t = logic [DataWidth/NumBanks/8-1:0]
+  parameter type addr_t     = logic [AddrWidth-1:0],
+  parameter type mem_atop_t = logic [5:0],
+  parameter type mem_data_t = logic [DataWidth/NumBanks-1:0],
+  parameter type mem_strb_t = logic [DataWidth/NumBanks/8-1:0]
 ) (
   input  logic                      clk_i,
   input  logic                      rst_ni,

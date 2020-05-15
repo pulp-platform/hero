@@ -20,12 +20,12 @@ module axi_id_resize_ports #(
   parameter int unsigned ID_WIDTH_IN  = 0,
   parameter int unsigned ID_WIDTH_OUT = 0,
   parameter int unsigned TABLE_SIZE   = 0,
-  localparam type addr_t = logic [ADDR_WIDTH-1:0],
-  localparam type data_t = logic [DATA_WIDTH-1:0],
-  localparam type id_in_t = logic [ID_WIDTH_IN-1:0],
-  localparam type id_out_t = logic [ID_WIDTH_OUT-1:0],
-  localparam type strb_t = logic [DATA_WIDTH/8-1:0],
-  localparam type user_t = logic [USER_WIDTH-1:0]
+  parameter type addr_t = logic [ADDR_WIDTH-1:0],
+  parameter type data_t = logic [DATA_WIDTH-1:0],
+  parameter type id_in_t = logic [ID_WIDTH_IN-1:0],
+  parameter type id_out_t = logic [ID_WIDTH_OUT-1:0],
+  parameter type strb_t = logic [DATA_WIDTH/8-1:0],
+  parameter type user_t = logic [USER_WIDTH-1:0]
 ) (
   input logic     clk_i,
   input logic     rst_ni,

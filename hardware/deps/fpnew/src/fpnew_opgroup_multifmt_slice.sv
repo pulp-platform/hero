@@ -24,8 +24,8 @@ module fpnew_opgroup_multifmt_slice #(
   parameter fpnew_pkg::pipe_config_t PipeConfig    = fpnew_pkg::BEFORE,
   parameter type                     TagType       = logic,
   // Do not change
-  localparam int unsigned NUM_OPERANDS = fpnew_pkg::num_operands(OpGroup),
-  localparam int unsigned NUM_FORMATS  = fpnew_pkg::NUM_FP_FORMATS
+  parameter int unsigned NUM_OPERANDS = fpnew_pkg::num_operands(OpGroup),
+  parameter int unsigned NUM_FORMATS  = fpnew_pkg::NUM_FP_FORMATS
 ) (
   input logic                                     clk_i,
   input logic                                     rst_ni,
