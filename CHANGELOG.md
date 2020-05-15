@@ -22,7 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Remove unused BIST ports.
   - Fix deadlock on write to `0x18` register (prefetch enable).
   - Fix upper bound of `for` loop
-- `pulp_cluster`: Disconnect external bus from cluster peripherals.
+- `pulp_cluster`:
+  - Disconnect external bus from cluster peripherals.
+  - Tie unused `s_hwpe_cfg_bus.r_opc` off.
 - `riscv`:
   - Remove unused BIST ports from register file.
   - Remove wildcard imports to improve tool compatibility.

@@ -1009,6 +1009,7 @@ module pulp_cluster
       assign s_hwpe_cfg_bus.gnt     = '1;
       assign s_hwpe_cfg_bus.r_rdata = 32'hdeadbeef;
       assign s_hwpe_cfg_bus.r_id    = '0;
+      assign s_hwpe_cfg_bus.r_opc   = '0;
       for (genvar i=NB_CORES; i<NB_CORES+NB_HWPE_PORTS; i++) begin : no_hwpe_bias
         assign s_core_xbar_bus[i].req = '0;
         assign s_core_xbar_bus[i].wen = '0;
