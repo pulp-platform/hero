@@ -26,8 +26,6 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-import riscv_defines::*;
-
 `ifndef PULP_FPGA_EMUL
  `ifdef SYNTHESIS
   `define ASIC_SYNTHESIS
@@ -68,8 +66,8 @@ module riscv_cs_registers
   output logic [31:0]     csr_rdata_o,
 
   output logic [2:0]         frm_o,
-  output logic [C_PC-1:0]    fprec_o,
-  input  logic [C_FFLAG-1:0] fflags_i,
+  output logic [riscv_defines::C_PC-1:0]    fprec_o,
+  input  logic [riscv_defines::C_FFLAG-1:0] fflags_i,
   input  logic               fflags_we_i,
 
   // Interrupts
@@ -95,7 +93,7 @@ module riscv_cs_registers
   output logic  [N_PMP_ENTRIES-1:0] [31:0] pmp_addr_o,
   output logic  [N_PMP_ENTRIES-1:0] [7:0]  pmp_cfg_o,
 
-  output PrivLvl_t        priv_lvl_o,
+  output riscv_defines::PrivLvl_t        priv_lvl_o,
 
   input  logic [31:0]     pc_if_i,
   input  logic [31:0]     pc_id_i,
@@ -206,7 +204,7 @@ module riscv_cs_registers
     logic mpie;
     // logic spp;      - unimplemented, hardwired to '0
     // logic[1:0] hpp; - unimplemented, hardwired to '0
-    PrivLvl_t mpp;
+    riscv_defines::PrivLvl_t mpp;
     logic mprv;
   } Status_t;
 
@@ -226,7 +224,7 @@ module riscv_cs_registers
       logic         mprven;
       logic         nmip;
       logic         step;
-      PrivLvl_t     prv;
+      riscv_defines::PrivLvl_t     prv;
   } Dcsr_t;
 
   typedef struct packed {
@@ -240,9 +238,9 @@ module riscv_cs_registers
   logic [31:0] csr_wdata_int;
   logic [31:0] csr_rdata_int;
   logic        csr_we_int;
-  logic [C_RM-1:0]     frm_q, frm_n;
-  logic [C_FFLAG-1:0]  fflags_q, fflags_n;
-  logic [C_PC-1:0]     fprec_q, fprec_n;
+  logic [riscv_defines::C_RM-1:0]     frm_q, frm_n;
+  logic [riscv_defines::C_FFLAG-1:0]  fflags_q, fflags_n;
+  logic [riscv_defines::C_PC-1:0]     fprec_q, fprec_n;
 
   // Interrupt control signals
   logic [31:0] mepc_q, mepc_n;
@@ -264,7 +262,7 @@ module riscv_cs_registers
   logic [23:0] utvec_n, utvec_q;
 
   logic is_irq;
-  PrivLvl_t priv_lvl_n, priv_lvl_q, priv_lvl_reg_q;
+  riscv_defines::PrivLvl_t priv_lvl_n, priv_lvl_q, priv_lvl_reg_q;
   Pmp_t pmp_reg_q, pmp_reg_n;
   //clock gating for pmp regs
   logic [MAX_N_PMP_ENTRIES-1:0] pmpaddr_we;
@@ -343,22 +341,22 @@ if(PULP_SECURE==1) begin
       // mhartid: unique hardware thread id
       12'hF14: csr_rdata_int = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]};
 
-      CSR_DCSR:
+      riscv_defines::CSR_DCSR:
                csr_rdata_int = dcsr_q;//
-      CSR_DPC:
+      riscv_defines::CSR_DPC:
                csr_rdata_int = depc_q;
-      CSR_DSCRATCH0:
+      riscv_defines::CSR_DSCRATCH0:
                csr_rdata_int = dscratch0_q;//
-      CSR_DSCRATCH1:
+      riscv_defines::CSR_DSCRATCH1:
                csr_rdata_int = dscratch1_q;//
 
       // hardware loops  (not official)
-      HWLoop0_START: csr_rdata_int = hwlp_start_i[0];
-      HWLoop0_END: csr_rdata_int = hwlp_end_i[0];
-      HWLoop0_COUNTER: csr_rdata_int = hwlp_cnt_i[0];
-      HWLoop1_START: csr_rdata_int = hwlp_start_i[1];
-      HWLoop1_END: csr_rdata_int = hwlp_end_i[1];
-      HWLoop1_COUNTER: csr_rdata_int = hwlp_cnt_i[1];
+      riscv_defines::HWLoop0_START: csr_rdata_int = hwlp_start_i[0];
+      riscv_defines::HWLoop0_END: csr_rdata_int = hwlp_end_i[0];
+      riscv_defines::HWLoop0_COUNTER: csr_rdata_int = hwlp_cnt_i[0];
+      riscv_defines::HWLoop1_START: csr_rdata_int = hwlp_start_i[1];
+      riscv_defines::HWLoop1_END: csr_rdata_int = hwlp_end_i[1];
+      riscv_defines::HWLoop1_COUNTER: csr_rdata_int = hwlp_cnt_i[1];
 
       // PMP config registers
       12'h3A0: csr_rdata_int = USE_PMP ? pmp_reg_q.pmpcfg_packed[0] : '0;
@@ -431,22 +429,22 @@ end else begin //PULP_SECURE == 0
       // mhartid: unique hardware thread id
       12'hF14: csr_rdata_int = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]};
 
-      CSR_DCSR:
+      riscv_defines::CSR_DCSR:
                csr_rdata_int = dcsr_q;//
-      CSR_DPC:
+      riscv_defines::CSR_DPC:
                csr_rdata_int = depc_q;
-      CSR_DSCRATCH0:
+      riscv_defines::CSR_DSCRATCH0:
                csr_rdata_int = dscratch0_q;//
-      CSR_DSCRATCH1:
+      riscv_defines::CSR_DSCRATCH1:
                csr_rdata_int = dscratch1_q;//
 
       // hardware loops  (not official)
-      HWLoop0_START: csr_rdata_int = hwlp_start_i[0];
-      HWLoop0_END: csr_rdata_int = hwlp_end_i[0];
-      HWLoop0_COUNTER: csr_rdata_int = hwlp_cnt_i[0];
-      HWLoop1_START: csr_rdata_int = hwlp_start_i[1];
-      HWLoop1_END: csr_rdata_int = hwlp_end_i[1];
-      HWLoop1_COUNTER: csr_rdata_int = hwlp_cnt_i[1];
+      riscv_defines::HWLoop0_START: csr_rdata_int = hwlp_start_i[0];
+      riscv_defines::HWLoop0_END: csr_rdata_int = hwlp_end_i[0];
+      riscv_defines::HWLoop0_COUNTER: csr_rdata_int = hwlp_cnt_i[0];
+      riscv_defines::HWLoop1_START: csr_rdata_int = hwlp_start_i[1];
+      riscv_defines::HWLoop1_END: csr_rdata_int = hwlp_end_i[1];
+      riscv_defines::HWLoop1_COUNTER: csr_rdata_int = hwlp_cnt_i[1];
       /* USER CSR */
       // dublicated mhartid: unique hardware thread id (not official)
       12'h014: csr_rdata_int = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]};
@@ -493,13 +491,13 @@ if(PULP_SECURE==1) begin
 
     casex (csr_addr_i)
       // fcsr: Floating-Point Control and Status Register (frm, fflags, fprec).
-      12'h001: if (csr_we_int) fflags_n = (FPU == 1) ? csr_wdata_int[C_FFLAG-1:0] : '0;
-      12'h002: if (csr_we_int) frm_n    = (FPU == 1) ? csr_wdata_int[C_RM-1:0]    : '0;
+      12'h001: if (csr_we_int) fflags_n = (FPU == 1) ? csr_wdata_int[riscv_defines::C_FFLAG-1:0] : '0;
+      12'h002: if (csr_we_int) frm_n    = (FPU == 1) ? csr_wdata_int[riscv_defines::C_RM-1:0]    : '0;
       12'h003: if (csr_we_int) begin
-         fflags_n = (FPU == 1) ? csr_wdata_int[C_FFLAG-1:0]            : '0;
-         frm_n    = (FPU == 1) ? csr_wdata_int[C_RM+C_FFLAG-1:C_FFLAG] : '0;
+         fflags_n = (FPU == 1) ? csr_wdata_int[riscv_defines::C_FFLAG-1:0]            : '0;
+         frm_n    = (FPU == 1) ? csr_wdata_int[riscv_defines::C_RM+riscv_defines::C_FFLAG-1:riscv_defines::C_FFLAG] : '0;
       end
-      12'h006: if (csr_we_int) fprec_n = (FPU == 1) ? csr_wdata_int[C_PC-1:0]    : '0;
+      12'h006: if (csr_we_int) fprec_n = (FPU == 1) ? csr_wdata_int[riscv_defines::C_PC-1:0]    : '0;
 
       // mstatus: IE bit
       12'h300: if (csr_we_int) begin
@@ -508,7 +506,7 @@ if(PULP_SECURE==1) begin
           mie:  csr_wdata_int[`MSTATUS_MIE_BITS],
           upie: csr_wdata_int[`MSTATUS_UPIE_BITS],
           mpie: csr_wdata_int[`MSTATUS_MPIE_BITS],
-          mpp:  PrivLvl_t'(csr_wdata_int[`MSTATUS_MPP_BITS]),
+          mpp:  riscv_defines::PrivLvl_t'(csr_wdata_int[`MSTATUS_MPP_BITS]),
           mprv: csr_wdata_int[`MSTATUS_MPRV_BITS]
         };
       end
@@ -527,7 +525,7 @@ if(PULP_SECURE==1) begin
       // mcause
       12'h342: if (csr_we_int) mcause_n = {csr_wdata_int[31], csr_wdata_int[4:0]};
 
-      CSR_DCSR:
+      riscv_defines::CSR_DCSR:
                if (csr_we_int)
                begin
                     dcsr_n = csr_wdata_int;
@@ -541,19 +539,19 @@ if(PULP_SECURE==1) begin
                     dcsr_n.stopcount=1'b0;   //stopcount
                     dcsr_n.stoptime=1'b0;  //stoptime
                end
-      CSR_DPC:
+      riscv_defines::CSR_DPC:
                if (csr_we_int)
                begin
                     depc_n = csr_wdata_int & ~32'b1; // force 16-bit alignment
                end
 
-      CSR_DSCRATCH0:
+      riscv_defines::CSR_DSCRATCH0:
                if (csr_we_int)
                begin
                     dscratch0_n = csr_wdata_int;
                end
 
-      CSR_DSCRATCH1:
+      riscv_defines::CSR_DSCRATCH1:
                if (csr_we_int)
                begin
                     dscratch1_n = csr_wdata_int;
@@ -564,12 +562,12 @@ if(PULP_SECURE==1) begin
       12'h404: if (csr_we_int) stack_size_n = csr_wdata_int;
 
       // hardware loops
-      HWLoop0_START:   if (csr_we_int) begin hwlp_we_o = 3'b001; hwlp_regid_o = 1'b0; end
-      HWLoop0_END:     if (csr_we_int) begin hwlp_we_o = 3'b010; hwlp_regid_o = 1'b0; end
-      HWLoop0_COUNTER: if (csr_we_int) begin hwlp_we_o = 3'b100; hwlp_regid_o = 1'b0; end
-      HWLoop1_START:   if (csr_we_int) begin hwlp_we_o = 3'b001; hwlp_regid_o = 1'b1; end
-      HWLoop1_END:     if (csr_we_int) begin hwlp_we_o = 3'b010; hwlp_regid_o = 1'b1; end
-      HWLoop1_COUNTER: if (csr_we_int) begin hwlp_we_o = 3'b100; hwlp_regid_o = 1'b1; end
+      riscv_defines::HWLoop0_START:   if (csr_we_int) begin hwlp_we_o = 3'b001; hwlp_regid_o = 1'b0; end
+      riscv_defines::HWLoop0_END:     if (csr_we_int) begin hwlp_we_o = 3'b010; hwlp_regid_o = 1'b0; end
+      riscv_defines::HWLoop0_COUNTER: if (csr_we_int) begin hwlp_we_o = 3'b100; hwlp_regid_o = 1'b0; end
+      riscv_defines::HWLoop1_START:   if (csr_we_int) begin hwlp_we_o = 3'b001; hwlp_regid_o = 1'b1; end
+      riscv_defines::HWLoop1_END:     if (csr_we_int) begin hwlp_we_o = 3'b010; hwlp_regid_o = 1'b1; end
+      riscv_defines::HWLoop1_COUNTER: if (csr_we_int) begin hwlp_we_o = 3'b100; hwlp_regid_o = 1'b1; end
 
 
       // PMP config registers
@@ -622,13 +620,13 @@ if(PULP_SECURE==1) begin
 
         unique case (priv_lvl_q)
 
-          PRIV_LVL_U: begin
+          riscv_defines::PRIV_LVL_U: begin
             if(~is_irq) begin
               //Exceptions, Ecall U --> M
-              priv_lvl_n     = PRIV_LVL_M;
+              priv_lvl_n     = riscv_defines::PRIV_LVL_M;
               mstatus_n.mpie = mstatus_q.uie;
               mstatus_n.mie  = 1'b0;
-              mstatus_n.mpp  = PRIV_LVL_U;
+              mstatus_n.mpp  = riscv_defines::PRIV_LVL_U;
               // TODO: correctly handled?
               if (debug_csr_save_i)
                   depc_n = exception_pc;
@@ -640,7 +638,7 @@ if(PULP_SECURE==1) begin
             else begin
               if(~csr_irq_sec_i) begin
               //U --> U
-                priv_lvl_n     = PRIV_LVL_U;
+                priv_lvl_n     = riscv_defines::PRIV_LVL_U;
                 mstatus_n.upie = mstatus_q.uie;
                 mstatus_n.uie  = 1'b0;
                 // TODO: correctly handled?
@@ -652,10 +650,10 @@ if(PULP_SECURE==1) begin
 
               end else begin
               //U --> M
-                priv_lvl_n     = PRIV_LVL_M;
+                priv_lvl_n     = riscv_defines::PRIV_LVL_M;
                 mstatus_n.mpie = mstatus_q.uie;
                 mstatus_n.mie  = 1'b0;
-                mstatus_n.mpp  = PRIV_LVL_U;
+                mstatus_n.mpp  = riscv_defines::PRIV_LVL_U;
                 // TODO: correctly handled?
                 if (debug_csr_save_i)
                     depc_n = exception_pc;
@@ -664,25 +662,25 @@ if(PULP_SECURE==1) begin
                 mcause_n       = csr_cause_i;
               end
             end
-          end //PRIV_LVL_U
+          end //riscv_defines::PRIV_LVL_U
 
-          PRIV_LVL_M: begin
+          riscv_defines::PRIV_LVL_M: begin
             if (debug_csr_save_i) begin
                 // all interrupts are masked, don't update cause, epc, tval dpc
                 // and mpstatus
-                dcsr_n.prv   = PRIV_LVL_M;
+                dcsr_n.prv   = riscv_defines::PRIV_LVL_M;
                 dcsr_n.cause = debug_cause_i;
                 depc_n       = exception_pc;
             end else begin
-                //Exceptions or Interrupts from PRIV_LVL_M always do M --> M
-                priv_lvl_n     = PRIV_LVL_M;
+                //Exceptions or Interrupts from riscv_defines::PRIV_LVL_M always do M --> M
+                priv_lvl_n     = riscv_defines::PRIV_LVL_M;
                 mstatus_n.mpie = mstatus_q.mie;
                 mstatus_n.mie  = 1'b0;
-                mstatus_n.mpp  = PRIV_LVL_M;
+                mstatus_n.mpp  = riscv_defines::PRIV_LVL_M;
                 mepc_n         = exception_pc;
                 mcause_n       = csr_cause_i;
             end
-          end //PRIV_LVL_M
+          end //riscv_defines::PRIV_LVL_M
           default:;
 
         endcase
@@ -690,25 +688,25 @@ if(PULP_SECURE==1) begin
       end //csr_save_cause_i
 
       csr_restore_uret_i: begin //URET
-        //mstatus_q.upp is implicitly 0, i.e PRIV_LVL_U
+        //mstatus_q.upp is implicitly 0, i.e riscv_defines::PRIV_LVL_U
         mstatus_n.uie  = mstatus_q.upie;
-        priv_lvl_n     = PRIV_LVL_U;
+        priv_lvl_n     = riscv_defines::PRIV_LVL_U;
         mstatus_n.upie = 1'b1;
       end //csr_restore_uret_i
 
       csr_restore_mret_i: begin //MRET
         unique case (mstatus_q.mpp)
-          PRIV_LVL_U: begin
+          riscv_defines::PRIV_LVL_U: begin
             mstatus_n.uie  = mstatus_q.mpie;
-            priv_lvl_n     = PRIV_LVL_U;
+            priv_lvl_n     = riscv_defines::PRIV_LVL_U;
             mstatus_n.mpie = 1'b1;
-            mstatus_n.mpp  = PRIV_LVL_U;
+            mstatus_n.mpp  = riscv_defines::PRIV_LVL_U;
           end
-          PRIV_LVL_M: begin
+          riscv_defines::PRIV_LVL_M: begin
             mstatus_n.mie  = mstatus_q.mpie;
-            priv_lvl_n     = PRIV_LVL_M;
+            priv_lvl_n     = riscv_defines::PRIV_LVL_M;
             mstatus_n.mpie = 1'b1;
-            mstatus_n.mpp  = PRIV_LVL_U;
+            mstatus_n.mpp  = riscv_defines::PRIV_LVL_U;
           end
           default:;
         endcase
@@ -758,13 +756,13 @@ end else begin //PULP_SECURE == 0
 
     case (csr_addr_i)
       // fcsr: Floating-Point Control and Status Register (frm, fflags, fprec).
-      12'h001: if (csr_we_int) fflags_n = (FPU == 1) ? csr_wdata_int[C_FFLAG-1:0] : '0;
-      12'h002: if (csr_we_int) frm_n    = (FPU == 1) ? csr_wdata_int[C_RM-1:0]    : '0;
+      12'h001: if (csr_we_int) fflags_n = (FPU == 1) ? csr_wdata_int[riscv_defines::C_FFLAG-1:0] : '0;
+      12'h002: if (csr_we_int) frm_n    = (FPU == 1) ? csr_wdata_int[riscv_defines::C_RM-1:0]    : '0;
       12'h003: if (csr_we_int) begin
-         fflags_n = (FPU == 1) ? csr_wdata_int[C_FFLAG-1:0]            : '0;
-         frm_n    = (FPU == 1) ? csr_wdata_int[C_RM+C_FFLAG-1:C_FFLAG] : '0;
+         fflags_n = (FPU == 1) ? csr_wdata_int[riscv_defines::C_FFLAG-1:0]            : '0;
+         frm_n    = (FPU == 1) ? csr_wdata_int[riscv_defines::C_RM+riscv_defines::C_FFLAG-1:riscv_defines::C_FFLAG] : '0;
       end
-      12'h006: if (csr_we_int) fprec_n = (FPU == 1) ? csr_wdata_int[C_PC-1:0]    : '0;
+      12'h006: if (csr_we_int) fprec_n = (FPU == 1) ? csr_wdata_int[riscv_defines::C_PC-1:0]    : '0;
 
       // mstatus: IE bit
       12'h300: if (csr_we_int) begin
@@ -773,7 +771,7 @@ end else begin //PULP_SECURE == 0
           mie:  csr_wdata_int[`MSTATUS_MIE_BITS],
           upie: csr_wdata_int[`MSTATUS_UPIE_BITS],
           mpie: csr_wdata_int[`MSTATUS_MPIE_BITS],
-          mpp:  PrivLvl_t'(csr_wdata_int[`MSTATUS_MPP_BITS]),
+          mpp:  riscv_defines::PrivLvl_t'(csr_wdata_int[`MSTATUS_MPP_BITS]),
           mprv: csr_wdata_int[`MSTATUS_MPRV_BITS]
         };
       end
@@ -788,7 +786,7 @@ end else begin //PULP_SECURE == 0
       // mcause
       12'h342: if (csr_we_int) mcause_n = {csr_wdata_int[31], csr_wdata_int[4:0]};
 
-      CSR_DCSR:
+      riscv_defines::CSR_DCSR:
                if (csr_we_int)
                begin
                     dcsr_n = csr_wdata_int;
@@ -802,19 +800,19 @@ end else begin //PULP_SECURE == 0
                     dcsr_n.stopcount=1'b0;   //stopcount
                     dcsr_n.stoptime=1'b0;  //stoptime
                end
-      CSR_DPC:
+      riscv_defines::CSR_DPC:
                if (csr_we_int)
                begin
                     depc_n = csr_wdata_int & ~32'b1; // force 16-bit alignment
                end
 
-      CSR_DSCRATCH0:
+      riscv_defines::CSR_DSCRATCH0:
                if (csr_we_int)
                begin
                     dscratch0_n = csr_wdata_int;
                end
 
-      CSR_DSCRATCH1:
+      riscv_defines::CSR_DSCRATCH1:
                if (csr_we_int)
                begin
                     dscratch1_n = csr_wdata_int;
@@ -825,12 +823,12 @@ end else begin //PULP_SECURE == 0
       12'h404: if (csr_we_int) stack_size_n = csr_wdata_int;
 
       // hardware loops
-      HWLoop0_START: if (csr_we_int) begin hwlp_we_o = 3'b001; hwlp_regid_o = 1'b0; end
-      HWLoop0_END: if (csr_we_int) begin hwlp_we_o = 3'b010; hwlp_regid_o = 1'b0; end
-      HWLoop0_COUNTER: if (csr_we_int) begin hwlp_we_o = 3'b100; hwlp_regid_o = 1'b0; end
-      HWLoop1_START: if (csr_we_int) begin hwlp_we_o = 3'b001; hwlp_regid_o = 1'b1; end
-      HWLoop1_END: if (csr_we_int) begin hwlp_we_o = 3'b010; hwlp_regid_o = 1'b1; end
-      HWLoop1_COUNTER: if (csr_we_int) begin hwlp_we_o = 3'b100; hwlp_regid_o = 1'b1; end
+      riscv_defines::HWLoop0_START: if (csr_we_int) begin hwlp_we_o = 3'b001; hwlp_regid_o = 1'b0; end
+      riscv_defines::HWLoop0_END: if (csr_we_int) begin hwlp_we_o = 3'b010; hwlp_regid_o = 1'b0; end
+      riscv_defines::HWLoop0_COUNTER: if (csr_we_int) begin hwlp_we_o = 3'b100; hwlp_regid_o = 1'b0; end
+      riscv_defines::HWLoop1_START: if (csr_we_int) begin hwlp_we_o = 3'b001; hwlp_regid_o = 1'b1; end
+      riscv_defines::HWLoop1_END: if (csr_we_int) begin hwlp_we_o = 3'b010; hwlp_regid_o = 1'b1; end
+      riscv_defines::HWLoop1_COUNTER: if (csr_we_int) begin hwlp_we_o = 3'b100; hwlp_regid_o = 1'b1; end
     endcase
 
     // exception controller gets priority over other writes
@@ -848,14 +846,14 @@ end else begin //PULP_SECURE == 0
         if (debug_csr_save_i) begin
             // all interrupts are masked, don't update cause, epc, tval dpc and
             // mpstatus
-            dcsr_n.prv   = PRIV_LVL_M;
+            dcsr_n.prv   = riscv_defines::PRIV_LVL_M;
             dcsr_n.cause = debug_cause_i;
             depc_n       = exception_pc;
         end else begin
-            priv_lvl_n     = PRIV_LVL_M;
+            priv_lvl_n     = riscv_defines::PRIV_LVL_M;
             mstatus_n.mpie = mstatus_q.mie;
             mstatus_n.mie  = 1'b0;
-            mstatus_n.mpp  = PRIV_LVL_M;
+            mstatus_n.mpp  = riscv_defines::PRIV_LVL_M;
             mepc_n = exception_pc;
             mcause_n       = csr_cause_i;
         end
@@ -863,9 +861,9 @@ end else begin //PULP_SECURE == 0
 
       csr_restore_mret_i: begin //MRET
         mstatus_n.mie  = mstatus_q.mpie;
-        priv_lvl_n     = PRIV_LVL_M;
+        priv_lvl_n     = riscv_defines::PRIV_LVL_M;
         mstatus_n.mpie = 1'b1;
-        mstatus_n.mpp  = PRIV_LVL_M;
+        mstatus_n.mpp  = riscv_defines::PRIV_LVL_M;
       end //csr_restore_mret_i
 
       csr_restore_dret_i: begin //DRET
@@ -888,11 +886,11 @@ end //PULP_SECURE
     csr_we_int    = 1'b1;
 
     unique case (csr_op_i)
-      CSR_OP_WRITE: csr_wdata_int = csr_wdata_i;
-      CSR_OP_SET:   csr_wdata_int = csr_wdata_i | csr_rdata_o;
-      CSR_OP_CLEAR: csr_wdata_int = (~csr_wdata_i) & csr_rdata_o;
+      riscv_defines::CSR_OP_WRITE: csr_wdata_int = csr_wdata_i;
+      riscv_defines::CSR_OP_SET:   csr_wdata_int = csr_wdata_i | csr_rdata_o;
+      riscv_defines::CSR_OP_CLEAR: csr_wdata_int = (~csr_wdata_i) & csr_rdata_o;
 
-      CSR_OP_NONE: begin
+      riscv_defines::CSR_OP_NONE: begin
         csr_wdata_int = csr_wdata_i;
         csr_we_int    = 1'b0;
       end
@@ -914,8 +912,8 @@ end //PULP_SECURE
 
 
   // directly output some registers
-  assign m_irq_enable_o  = mstatus_q.mie & priv_lvl_q == PRIV_LVL_M;
-  assign u_irq_enable_o  = mstatus_q.uie & priv_lvl_q == PRIV_LVL_U;
+  assign m_irq_enable_o  = mstatus_q.mie & priv_lvl_q == riscv_defines::PRIV_LVL_M;
+  assign u_irq_enable_o  = mstatus_q.uie & priv_lvl_q == riscv_defines::PRIV_LVL_U;
   assign priv_lvl_o      = priv_lvl_q;
   assign sec_lvl_o       = priv_lvl_q[0];
   assign frm_o           = (FPU == 1) ? frm_q : '0;
@@ -975,7 +973,7 @@ end //PULP_SECURE
             ucause_q       <= '0;
             mtvec_q        <= '0;
             utvec_q        <= '0;
-            priv_lvl_q     <= PRIV_LVL_M;
+            priv_lvl_q     <= riscv_defines::PRIV_LVL_M;
 
           end
           else
@@ -995,7 +993,7 @@ end //PULP_SECURE
         assign ucause_q     = '0;
         assign mtvec_q      = boot_addr_i[30:7];
         assign utvec_q      = '0;
-        assign priv_lvl_q   = PRIV_LVL_M;
+        assign priv_lvl_q   = riscv_defines::PRIV_LVL_M;
 
   end
   endgenerate
@@ -1016,7 +1014,7 @@ end //PULP_SECURE
               mie:  1'b0,
               upie: 1'b0,
               mpie: 1'b0,
-              mpp:  PRIV_LVL_M,
+              mpp:  riscv_defines::PRIV_LVL_M,
               mprv: 1'b0
             };
       mepc_q      <= '0;
@@ -1026,7 +1024,7 @@ end //PULP_SECURE
 
       depc_q      <= '0;
       dcsr_q      <= '0;
-      dcsr_q.prv  <= PRIV_LVL_M;
+      dcsr_q.prv  <= riscv_defines::PRIV_LVL_M;
       dscratch0_q <= '0;
       dscratch1_q <= '0;
       mscratch_q  <= '0;
@@ -1047,7 +1045,7 @@ end //PULP_SECURE
                 mie:  mstatus_n.mie,
                 upie: 1'b0,
                 mpie: mstatus_n.mpie,
-                mpp:  PRIV_LVL_M,
+                mpp:  riscv_defines::PRIV_LVL_M,
                 mprv: 1'b0
               };
       end
@@ -1118,11 +1116,11 @@ end //PULP_SECURE
     // only perform csr access if we actually care about the read data
     if (csr_access_i) begin
       unique case (csr_addr_i)
-        PCER_USER, PCER_MACHINE: begin
+        riscv_defines::PCER_USER, riscv_defines::PCER_MACHINE: begin
           is_pcer = 1'b1;
           perf_rdata[N_PERF_COUNTERS-1:0] = PCER_q;
         end
-        PCMR_USER, PCMR_MACHINE: begin
+        riscv_defines::PCMR_USER, riscv_defines::PCMR_MACHINE: begin
           is_pcmr = 1'b1;
           perf_rdata[1:0] = PCMR_q;
         end
@@ -1162,10 +1160,10 @@ end //PULP_SECURE
 
     if (is_pccr == 1'b1) begin
       unique case (csr_op_i)
-        CSR_OP_NONE:   ;
-        CSR_OP_WRITE:  PCCR_n[0] = csr_wdata_i;
-        CSR_OP_SET:    PCCR_n[0] = csr_wdata_i | PCCR_q[0];
-        CSR_OP_CLEAR:  PCCR_n[0] = ~(csr_wdata_i) & PCCR_q[0];
+        riscv_defines::CSR_OP_NONE:   ;
+        riscv_defines::CSR_OP_WRITE:  PCCR_n[0] = csr_wdata_i;
+        riscv_defines::CSR_OP_SET:    PCCR_n[0] = csr_wdata_i | PCCR_q[0];
+        riscv_defines::CSR_OP_CLEAR:  PCCR_n[0] = ~(csr_wdata_i) & PCCR_q[0];
       endcase
     end
   end
@@ -1183,10 +1181,10 @@ end //PULP_SECURE
 
       if (is_pccr == 1'b1 && (pccr_all_sel == 1'b1 || pccr_index == i)) begin
         unique case (csr_op_i)
-          CSR_OP_NONE:   ;
-          CSR_OP_WRITE:  PCCR_n[i] = csr_wdata_i;
-          CSR_OP_SET:    PCCR_n[i] = csr_wdata_i | PCCR_q[i];
-          CSR_OP_CLEAR:  PCCR_n[i] = ~(csr_wdata_i) & PCCR_q[i];
+          riscv_defines::CSR_OP_NONE:   ;
+          riscv_defines::CSR_OP_WRITE:  PCCR_n[i] = csr_wdata_i;
+          riscv_defines::CSR_OP_SET:    PCCR_n[i] = csr_wdata_i | PCCR_q[i];
+          riscv_defines::CSR_OP_CLEAR:  PCCR_n[i] = ~(csr_wdata_i) & PCCR_q[i];
         endcase
       end
     end
@@ -1201,19 +1199,19 @@ end //PULP_SECURE
 
     if (is_pcmr) begin
       unique case (csr_op_i)
-        CSR_OP_NONE:   ;
-        CSR_OP_WRITE:  PCMR_n = csr_wdata_i[1:0];
-        CSR_OP_SET:    PCMR_n = csr_wdata_i[1:0] | PCMR_q;
-        CSR_OP_CLEAR:  PCMR_n = ~(csr_wdata_i[1:0]) & PCMR_q;
+        riscv_defines::CSR_OP_NONE:   ;
+        riscv_defines::CSR_OP_WRITE:  PCMR_n = csr_wdata_i[1:0];
+        riscv_defines::CSR_OP_SET:    PCMR_n = csr_wdata_i[1:0] | PCMR_q;
+        riscv_defines::CSR_OP_CLEAR:  PCMR_n = ~(csr_wdata_i[1:0]) & PCMR_q;
       endcase
     end
 
     if (is_pcer) begin
       unique case (csr_op_i)
-        CSR_OP_NONE:   ;
-        CSR_OP_WRITE:  PCER_n = csr_wdata_i[N_PERF_COUNTERS-1:0];
-        CSR_OP_SET:    PCER_n = csr_wdata_i[N_PERF_COUNTERS-1:0] | PCER_q;
-        CSR_OP_CLEAR:  PCER_n = ~(csr_wdata_i[N_PERF_COUNTERS-1:0]) & PCER_q;
+        riscv_defines::CSR_OP_NONE:   ;
+        riscv_defines::CSR_OP_WRITE:  PCER_n = csr_wdata_i[N_PERF_COUNTERS-1:0];
+        riscv_defines::CSR_OP_SET:    PCER_n = csr_wdata_i[N_PERF_COUNTERS-1:0] | PCER_q;
+        riscv_defines::CSR_OP_CLEAR:  PCER_n = ~(csr_wdata_i[N_PERF_COUNTERS-1:0]) & PCER_q;
       endcase
     end
   end

@@ -70,6 +70,6 @@
                  reg_fp_b_o          = 1'b1;\
                  reg_fp_c_o          = 1'b1;\
                  reg_fp_d_o          = 1'b1;\
-                 regc_mux_o          = REGC_S4;\
+                 regc_mux_o          = riscv_defines::REGC_S4;\
                end
 

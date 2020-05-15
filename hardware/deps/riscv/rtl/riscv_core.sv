@@ -31,8 +31,6 @@
 
 `include "riscv_config.sv"
 
-import riscv_defines::*;
-
 module riscv_core
 #(
   parameter N_EXT_PERF_COUNTERS =  0,
@@ -172,7 +170,7 @@ module riscv_core
 
   // ALU Control
   logic        alu_en_ex;
-  logic [ALU_OP_WIDTH-1:0] alu_operator_ex;
+  logic [riscv_defines::ALU_OP_WIDTH-1:0] alu_operator_ex;
   logic [31:0] alu_operand_a_ex;
   logic [31:0] alu_operand_b_ex;
   logic [31:0] alu_operand_c_ex;
@@ -201,10 +199,10 @@ module riscv_core
   logic        mult_clpx_img_ex;
 
   // FPU
-  logic [C_PC-1:0]            fprec_csr;
-  logic [C_RM-1:0]            frm_csr;
-  logic [C_FFLAG-1:0]         fflags;
-  logic [C_FFLAG-1:0]         fflags_csr;
+  logic [riscv_defines::C_PC-1:0]            fprec_csr;
+  logic [riscv_defines::C_RM-1:0]            frm_csr;
+  logic [riscv_defines::C_FFLAG-1:0]         fflags;
+  logic [riscv_defines::C_FFLAG-1:0]         fflags_csr;
   logic                       fflags_we;
 
 
@@ -254,7 +252,7 @@ module riscv_core
   logic [11:0] csr_addr_int;
   logic [31:0] csr_rdata;
   logic [31:0] csr_wdata;
-  PrivLvl_t    current_priv_lvl;
+  riscv_defines::PrivLvl_t    current_priv_lvl;
 
   // Stack Protection
   logic        stack_access;
@@ -353,7 +351,7 @@ module riscv_core
 
   //Simchecker signal
   logic is_interrupt;
-  assign is_interrupt = (pc_mux_id == PC_EXCEPTION) && (exc_pc_mux_id == EXC_PC_IRQ);
+  assign is_interrupt = (pc_mux_id == riscv_defines::PC_EXCEPTION) && (exc_pc_mux_id == riscv_defines::EXC_PC_IRQ);
 
   // APU master signals
    generate
@@ -940,7 +938,7 @@ module riscv_core
     .data_misaligned_o     ( data_misaligned    ),
 
     // stack protection
-    .stack_access_i        ( stack_access       ), 
+    .stack_access_i        ( stack_access       ),
     .stack_base_i          ( stack_base         ),
     .stack_limit_i         ( stack_limit        ),
 

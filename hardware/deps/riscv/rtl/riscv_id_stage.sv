@@ -27,8 +27,6 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-import riscv_defines::*;
-
 // Source/Destination register instruction index
 `define REG_S1 19:15
 `define REG_S2 24:20
@@ -123,7 +121,7 @@ module riscv_id_stage
 
     // ALU
     output logic        alu_en_ex_o,
-    output logic [ALU_OP_WIDTH-1:0] alu_operator_ex_o,
+    output logic [riscv_defines::ALU_OP_WIDTH-1:0] alu_operator_ex_o,
     output logic        alu_is_clpx_ex_o,
     output logic        alu_is_subrot_ex_o,
     output logic [ 1:0] alu_clpx_shift_ex_o,
@@ -164,12 +162,12 @@ module riscv_id_stage
     input  logic                       apu_write_dep_i,
     output logic                       apu_perf_dep_o,
     input  logic                       apu_busy_i,
-    input  logic [C_RM-1:0]            frm_i,
+    input  logic [riscv_defines::C_RM-1:0]            frm_i,
 
     // CSR ID/EX
     output logic        csr_access_ex_o,
     output logic [1:0]  csr_op_ex_o,
-    input  PrivLvl_t    current_priv_lvl_i,
+    input  riscv_defines::PrivLvl_t    current_priv_lvl_i,
     output logic        csr_irq_sec_o,
     output logic [5:0]  csr_cause_o,
     output logic        csr_save_if_o,
@@ -336,7 +334,7 @@ module riscv_id_stage
 
   // ALU Control
   logic        alu_en;
-  logic [ALU_OP_WIDTH-1:0] alu_operator;
+  logic [riscv_defines::ALU_OP_WIDTH-1:0] alu_operator;
   logic [2:0]  alu_op_a_mux_sel;
   logic [2:0]  alu_op_b_mux_sel;
   logic [1:0]  alu_op_c_mux_sel;
@@ -356,9 +354,9 @@ module riscv_id_stage
   logic [1:0]  mult_dot_signed;  // Signed mode dot products (can be mixed types)
 
   // FPU signals
-  logic [C_FPNEW_FMTBITS-1:0]  fpu_src_fmt;
-  logic [C_FPNEW_FMTBITS-1:0]  fpu_dst_fmt;
-  logic [C_FPNEW_IFMTBITS-1:0] fpu_int_fmt;
+  logic [riscv_defines::C_FPNEW_FMTBITS-1:0]  fpu_src_fmt;
+  logic [riscv_defines::C_FPNEW_FMTBITS-1:0]  fpu_dst_fmt;
+  logic [riscv_defines::C_FPNEW_IFMTBITS-1:0] fpu_int_fmt;
 
   // APU signals
   logic                        apu_en;
@@ -510,10 +508,10 @@ module riscv_id_stage
   // register C mux
   always_comb begin
     unique case (regc_mux)
-      REGC_ZERO:  regfile_addr_rc_id = '0;
-      REGC_RD:    regfile_addr_rc_id = {fregfile_ena & regfile_fp_c, instr[`REG_D]};
-      REGC_S1:    regfile_addr_rc_id = {fregfile_ena & regfile_fp_c, instr[`REG_S1]};
-      REGC_S4:    regfile_addr_rc_id = {fregfile_ena & regfile_fp_c, instr[`REG_S4]};
+      riscv_defines::REGC_ZERO:  regfile_addr_rc_id = '0;
+      riscv_defines::REGC_RD:    regfile_addr_rc_id = {fregfile_ena & regfile_fp_c, instr[`REG_D]};
+      riscv_defines::REGC_S1:    regfile_addr_rc_id = {fregfile_ena & regfile_fp_c, instr[`REG_S1]};
+      riscv_defines::REGC_S4:    regfile_addr_rc_id = {fregfile_ena & regfile_fp_c, instr[`REG_S4]};
       default:    regfile_addr_rc_id = '0;
     endcase
   end
@@ -614,11 +612,11 @@ module riscv_id_stage
 
   always_comb begin : jump_target_mux
     unique case (jump_target_mux_sel)
-      JT_JAL:  jump_target = pc_id_i + imm_uj_type;
-      JT_COND: jump_target = pc_id_i + imm_sb_type;
+      riscv_defines::JT_JAL:  jump_target = pc_id_i + imm_uj_type;
+      riscv_defines::JT_COND: jump_target = pc_id_i + imm_sb_type;
 
       // JALR: Cannot forward RS1, since the path is too long
-      JT_JALR: jump_target = regfile_data_ra_id + imm_i_type;
+      riscv_defines::JT_JALR: jump_target = regfile_data_ra_id + imm_i_type;
       default:  jump_target = regfile_data_ra_id + imm_i_type;
     endcase
   end
@@ -638,19 +636,19 @@ module riscv_id_stage
   // ALU_Op_a Mux
   always_comb begin : alu_operand_a_mux
     case (alu_op_a_mux_sel)
-      OP_A_REGA_OR_FWD:  alu_operand_a = operand_a_fw_id;
-      OP_A_REGB_OR_FWD:  alu_operand_a = operand_b_fw_id;
-      OP_A_REGC_OR_FWD:  alu_operand_a = operand_c_fw_id;
-      OP_A_CURRPC:       alu_operand_a = pc_id_i;
-      OP_A_IMM:          alu_operand_a = imm_a;
+      riscv_defines::OP_A_REGA_OR_FWD:  alu_operand_a = operand_a_fw_id;
+      riscv_defines::OP_A_REGB_OR_FWD:  alu_operand_a = operand_b_fw_id;
+      riscv_defines::OP_A_REGC_OR_FWD:  alu_operand_a = operand_c_fw_id;
+      riscv_defines::OP_A_CURRPC:       alu_operand_a = pc_id_i;
+      riscv_defines::OP_A_IMM:          alu_operand_a = imm_a;
       default:           alu_operand_a = operand_a_fw_id;
     endcase; // case (alu_op_a_mux_sel)
   end
 
   always_comb begin : immediate_a_mux
     unique case (imm_a_mux_sel)
-      IMMA_Z:      imm_a = imm_z_type;
-      IMMA_ZERO:   imm_a = '0;
+      riscv_defines::IMMA_Z:      imm_a = imm_z_type;
+      riscv_defines::IMMA_ZERO:   imm_a = '0;
       default:     imm_a = '0;
     endcase
   end
@@ -658,9 +656,9 @@ module riscv_id_stage
   // Operand a forwarding mux
   always_comb begin : operand_a_fw_mux
     case (operand_a_fw_mux_sel)
-      SEL_FW_EX:    operand_a_fw_id = regfile_alu_wdata_fw_i;
-      SEL_FW_WB:    operand_a_fw_id = regfile_wdata_wb_i;
-      SEL_REGFILE:  operand_a_fw_id = regfile_data_ra_id;
+      riscv_defines::SEL_FW_EX:    operand_a_fw_id = regfile_alu_wdata_fw_i;
+      riscv_defines::SEL_FW_WB:    operand_a_fw_id = regfile_wdata_wb_i;
+      riscv_defines::SEL_REGFILE:  operand_a_fw_id = regfile_data_ra_id;
       default:      operand_a_fw_id = regfile_data_ra_id;
     endcase; // case (operand_a_fw_mux_sel)
   end
@@ -679,17 +677,17 @@ module riscv_id_stage
   // some area here
   always_comb begin : immediate_b_mux
     unique case (imm_b_mux_sel)
-      IMMB_I:      imm_b = imm_i_type;
-      IMMB_S:      imm_b = imm_s_type;
-      IMMB_U:      imm_b = imm_u_type;
-      IMMB_PCINCR: imm_b = (is_compressed_i && (~data_misaligned_i)) ? 32'h2 : 32'h4;
-      IMMB_S2:     imm_b = imm_s2_type;
-      IMMB_BI:     imm_b = imm_bi_type;
-      IMMB_S3:     imm_b = imm_s3_type;
-      IMMB_VS:     imm_b = imm_vs_type;
-      IMMB_VU:     imm_b = imm_vu_type;
-      IMMB_SHUF:   imm_b = imm_shuffle_type;
-      IMMB_CLIP:   imm_b = {1'b0, imm_clip_type[31:1]};
+      riscv_defines::IMMB_I:      imm_b = imm_i_type;
+      riscv_defines::IMMB_S:      imm_b = imm_s_type;
+      riscv_defines::IMMB_U:      imm_b = imm_u_type;
+      riscv_defines::IMMB_PCINCR: imm_b = (is_compressed_i && (~data_misaligned_i)) ? 32'h2 : 32'h4;
+      riscv_defines::IMMB_S2:     imm_b = imm_s2_type;
+      riscv_defines::IMMB_BI:     imm_b = imm_bi_type;
+      riscv_defines::IMMB_S3:     imm_b = imm_s3_type;
+      riscv_defines::IMMB_VS:     imm_b = imm_vs_type;
+      riscv_defines::IMMB_VU:     imm_b = imm_vu_type;
+      riscv_defines::IMMB_SHUF:   imm_b = imm_shuffle_type;
+      riscv_defines::IMMB_CLIP:   imm_b = {1'b0, imm_clip_type[31:1]};
       default:     imm_b = imm_i_type;
     endcase
   end
@@ -697,11 +695,11 @@ module riscv_id_stage
   // ALU_Op_b Mux
   always_comb begin : alu_operand_b_mux
     case (alu_op_b_mux_sel)
-      OP_B_REGA_OR_FWD:  operand_b = operand_a_fw_id;
-      OP_B_REGB_OR_FWD:  operand_b = operand_b_fw_id;
-      OP_B_REGC_OR_FWD:  operand_b = operand_c_fw_id;
-      OP_B_IMM:          operand_b = imm_b;
-      OP_B_BMASK:        operand_b = $unsigned(operand_b_fw_id[4:0]);
+      riscv_defines::OP_B_REGA_OR_FWD:  operand_b = operand_a_fw_id;
+      riscv_defines::OP_B_REGB_OR_FWD:  operand_b = operand_b_fw_id;
+      riscv_defines::OP_B_REGC_OR_FWD:  operand_b = operand_c_fw_id;
+      riscv_defines::OP_B_IMM:          operand_b = imm_b;
+      riscv_defines::OP_B_BMASK:        operand_b = $unsigned(operand_b_fw_id[4:0]);
       default:           operand_b = operand_b_fw_id;
     endcase // case (alu_op_b_mux_sel)
   end
@@ -709,7 +707,7 @@ module riscv_id_stage
 
   // scalar replication for operand B and shuffle type
   always_comb begin
-    if (alu_vec_mode == VEC_MODE8) begin
+    if (alu_vec_mode == riscv_defines::VEC_MODE8) begin
       operand_b_vec    = {4{operand_b[7:0]}};
       imm_shuffle_type = imm_shuffleb_type;
     end else begin
@@ -725,9 +723,9 @@ module riscv_id_stage
   // Operand b forwarding mux
   always_comb begin : operand_b_fw_mux
     case (operand_b_fw_mux_sel)
-      SEL_FW_EX:    operand_b_fw_id = regfile_alu_wdata_fw_i;
-      SEL_FW_WB:    operand_b_fw_id = regfile_wdata_wb_i;
-      SEL_REGFILE:  operand_b_fw_id = regfile_data_rb_id;
+      riscv_defines::SEL_FW_EX:    operand_b_fw_id = regfile_alu_wdata_fw_i;
+      riscv_defines::SEL_FW_WB:    operand_b_fw_id = regfile_wdata_wb_i;
+      riscv_defines::SEL_REGFILE:  operand_b_fw_id = regfile_data_rb_id;
       default:      operand_b_fw_id = regfile_data_rb_id;
     endcase; // case (operand_b_fw_mux_sel)
   end
@@ -745,9 +743,9 @@ module riscv_id_stage
   // ALU OP C Mux
   always_comb begin : alu_operand_c_mux
     case (alu_op_c_mux_sel)
-      OP_C_REGC_OR_FWD:  operand_c = operand_c_fw_id;
-      OP_C_REGB_OR_FWD:  operand_c = operand_b_fw_id;
-      OP_C_JT:           operand_c = jump_target;
+      riscv_defines::OP_C_REGC_OR_FWD:  operand_c = operand_c_fw_id;
+      riscv_defines::OP_C_REGB_OR_FWD:  operand_c = operand_b_fw_id;
+      riscv_defines::OP_C_JT:           operand_c = jump_target;
       default:           operand_c = operand_c_fw_id;
     endcase // case (alu_op_c_mux_sel)
   end
@@ -755,7 +753,7 @@ module riscv_id_stage
 
   // scalar replication for operand C and shuffle type
   always_comb begin
-    if (alu_vec_mode == VEC_MODE8) begin
+    if (alu_vec_mode == riscv_defines::VEC_MODE8) begin
       operand_c_vec    = {4{operand_c[7:0]}};
     end else begin
       operand_c_vec    = {2{operand_c[15:0]}};
@@ -769,9 +767,9 @@ module riscv_id_stage
   // Operand c forwarding mux
   always_comb begin : operand_c_fw_mux
     case (operand_c_fw_mux_sel)
-      SEL_FW_EX:    operand_c_fw_id = regfile_alu_wdata_fw_i;
-      SEL_FW_WB:    operand_c_fw_id = regfile_wdata_wb_i;
-      SEL_REGFILE:  operand_c_fw_id = regfile_data_rc_id;
+      riscv_defines::SEL_FW_EX:    operand_c_fw_id = regfile_alu_wdata_fw_i;
+      riscv_defines::SEL_FW_WB:    operand_c_fw_id = regfile_wdata_wb_i;
+      riscv_defines::SEL_REGFILE:  operand_c_fw_id = regfile_data_rc_id;
       default:      operand_c_fw_id = regfile_data_rc_id;
     endcase; // case (operand_c_fw_mux_sel)
   end
@@ -788,32 +786,32 @@ module riscv_id_stage
 
   always_comb begin
     unique case (bmask_a_mux)
-      BMASK_A_ZERO: bmask_a_id_imm = '0;
-      BMASK_A_S3:   bmask_a_id_imm = imm_s3_type[4:0];
+      riscv_defines::BMASK_A_ZERO: bmask_a_id_imm = '0;
+      riscv_defines::BMASK_A_S3:   bmask_a_id_imm = imm_s3_type[4:0];
       default:      bmask_a_id_imm = '0;
     endcase
   end
   always_comb begin
     unique case (bmask_b_mux)
-      BMASK_B_ZERO: bmask_b_id_imm = '0;
-      BMASK_B_ONE:  bmask_b_id_imm = 5'd1;
-      BMASK_B_S2:   bmask_b_id_imm = imm_s2_type[4:0];
-      BMASK_B_S3:   bmask_b_id_imm = imm_s3_type[4:0];
+      riscv_defines::BMASK_B_ZERO: bmask_b_id_imm = '0;
+      riscv_defines::BMASK_B_ONE:  bmask_b_id_imm = 5'd1;
+      riscv_defines::BMASK_B_S2:   bmask_b_id_imm = imm_s2_type[4:0];
+      riscv_defines::BMASK_B_S3:   bmask_b_id_imm = imm_s3_type[4:0];
       default:      bmask_b_id_imm = '0;
     endcase
   end
 
   always_comb begin
     unique case (alu_bmask_a_mux_sel)
-      BMASK_A_IMM: bmask_a_id = bmask_a_id_imm;
-      BMASK_A_REG: bmask_a_id = operand_b_fw_id[9:5];
+      riscv_defines::BMASK_A_IMM: bmask_a_id = bmask_a_id_imm;
+      riscv_defines::BMASK_A_REG: bmask_a_id = operand_b_fw_id[9:5];
       default:     bmask_a_id = bmask_a_id_imm;
     endcase
   end
   always_comb begin
     unique case (alu_bmask_b_mux_sel)
-      BMASK_B_IMM: bmask_b_id = bmask_b_id_imm;
-      BMASK_B_REG: bmask_b_id = operand_b_fw_id[4:0];
+      riscv_defines::BMASK_B_IMM: bmask_b_id = bmask_b_id_imm;
+      riscv_defines::BMASK_B_REG: bmask_b_id = operand_b_fw_id[4:0];
       default:     bmask_b_id = bmask_b_id_imm;
     endcase
   end
@@ -823,8 +821,8 @@ module riscv_id_stage
 
   always_comb begin
     unique case (mult_imm_mux)
-      MIMM_ZERO: mult_imm_id = '0;
-      MIMM_S3:   mult_imm_id = imm_s3_type[4:0];
+      riscv_defines::MIMM_ZERO: mult_imm_id = '0;
+      riscv_defines::MIMM_S3:   mult_imm_id = imm_s3_type[4:0];
       default:   mult_imm_id = '0;
     endcase
   end
@@ -871,11 +869,11 @@ module riscv_id_stage
       // dependency checks
       always_comb begin
         unique case (alu_op_a_mux_sel)
-          OP_A_REGA_OR_FWD: begin
+          riscv_defines::OP_A_REGA_OR_FWD: begin
              apu_read_regs[0]        = regfile_addr_ra_id;
              apu_read_regs_valid [0] = 1'b1;
-          end // OP_A_REGA_OR_FWD:
-          OP_A_REGB_OR_FWD: begin
+          end // riscv_defines::OP_A_REGA_OR_FWD:
+          riscv_defines::OP_A_REGB_OR_FWD: begin
              apu_read_regs[0]        = regfile_addr_rb_id;
              apu_read_regs_valid[0]  = 1'b1;
           end
@@ -888,15 +886,15 @@ module riscv_id_stage
 
       always_comb begin
         unique case (alu_op_b_mux_sel)
-          OP_B_REGA_OR_FWD: begin
+          riscv_defines::OP_B_REGA_OR_FWD: begin
              apu_read_regs[1]       = regfile_addr_ra_id;
              apu_read_regs_valid[1] = 1'b1;
           end
-          OP_B_REGB_OR_FWD: begin
+          riscv_defines::OP_B_REGB_OR_FWD: begin
              apu_read_regs[1]       = regfile_addr_rb_id;
              apu_read_regs_valid[1] = 1'b1;
           end
-          OP_B_REGC_OR_FWD: begin
+          riscv_defines::OP_B_REGC_OR_FWD: begin
              apu_read_regs[1]       = regfile_addr_rc_id;
              apu_read_regs_valid[1] = 1'b1;
           end
@@ -909,11 +907,11 @@ module riscv_id_stage
 
       always_comb begin
         unique case (alu_op_c_mux_sel)
-          OP_C_REGB_OR_FWD: begin
+          riscv_defines::OP_C_REGB_OR_FWD: begin
              apu_read_regs[2]       = regfile_addr_rb_id;
              apu_read_regs_valid[2] = 1'b1;
           end
-          OP_C_REGC_OR_FWD: begin
+          riscv_defines::OP_C_REGC_OR_FWD: begin
              apu_read_regs[2]       = regfile_addr_rc_id;
              apu_read_regs_valid[2] = 1'b1;
           end
@@ -955,8 +953,8 @@ module riscv_id_stage
 `ifndef SYNTHESIS
   always_comb begin
     if (FPU==1 && SHARED_FP!=1) begin
-      assert (APU_NDSFLAGS_CPU >= C_RM+2*C_FPNEW_FMTBITS+C_FPNEW_IFMTBITS)
-        else $error("[apu] APU_NDSFLAGS_CPU APU flagbits is smaller than %0d", C_RM+2*C_FPNEW_FMTBITS+C_FPNEW_IFMTBITS);
+      assert (APU_NDSFLAGS_CPU >= riscv_defines::C_RM+2*riscv_defines::C_FPNEW_FMTBITS+riscv_defines::C_FPNEW_IFMTBITS)
+        else $error("[apu] APU_NDSFLAGS_CPU APU flagbits is smaller than %0d", riscv_defines::C_RM+2*riscv_defines::C_FPNEW_FMTBITS+riscv_defines::C_FPNEW_IFMTBITS);
     end
   end
 `endif
@@ -1413,7 +1411,7 @@ module riscv_id_stage
     if (rst_n == 1'b0)
     begin
       alu_en_ex_o                 <= '0;
-      alu_operator_ex_o           <= ALU_SLTU;
+      alu_operator_ex_o           <= riscv_defines::ALU_SLTU;
       alu_operand_a_ex_o          <= '0;
       alu_operand_b_ex_o          <= '0;
       alu_operand_c_ex_o          <= '0;
@@ -1461,7 +1459,7 @@ module riscv_id_stage
       prepost_useincr_ex_o        <= 1'b0;
 
       csr_access_ex_o             <= 1'b0;
-      csr_op_ex_o                 <= CSR_OP_NONE;
+      csr_op_ex_o                 <= riscv_defines::CSR_OP_NONE;
 
       data_we_ex_o                <= 1'b0;
       data_type_ex_o              <= 2'b0;
@@ -1512,7 +1510,7 @@ module riscv_id_stage
         if (alu_en | branch_taken_ex)
         begin
           //this prevents divisions or multicycle instructions to keep the EX stage busy
-          alu_operator_ex_o           <= branch_taken_ex ? ALU_SLTU : alu_operator;
+          alu_operator_ex_o           <= branch_taken_ex ? riscv_defines::ALU_SLTU : alu_operator;
           if(~branch_taken_ex) begin
             alu_operand_a_ex_o        <= alu_operand_a;
             alu_operand_b_ex_o        <= alu_operand_b;
@@ -1590,11 +1588,11 @@ module riscv_id_stage
         data_misaligned_ex_o        <= 1'b0;
         stack_access_o              <= stack_access;
 
-        if ((jump_in_id == BRANCH_COND) || data_req_id) begin
+        if ((jump_in_id == riscv_defines::BRANCH_COND) || data_req_id) begin
           pc_ex_o                   <= pc_id_i;
         end
 
-        branch_in_ex_o              <= jump_in_id == BRANCH_COND;
+        branch_in_ex_o              <= jump_in_id == riscv_defines::BRANCH_COND;
       end else if(ex_ready_i) begin
         // EX stage is ready but we don't have a new instruction for it,
         // so we set all write enables to 0, but unstall the pipe
@@ -1603,7 +1601,7 @@ module riscv_id_stage
 
         regfile_alu_we_ex_o         <= 1'b0;
 
-        csr_op_ex_o                 <= CSR_OP_NONE;
+        csr_op_ex_o                 <= riscv_defines::CSR_OP_NONE;
 
         data_req_ex_o               <= 1'b0;
 
@@ -1616,7 +1614,7 @@ module riscv_id_stage
 
         apu_en_ex_o                 <= 1'b0;
 
-        alu_operator_ex_o           <= ALU_SLTU;
+        alu_operator_ex_o           <= riscv_defines::ALU_SLTU;
 
         mult_en_ex_o                <= 1'b0;
 

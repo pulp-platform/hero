@@ -24,7 +24,6 @@
 
 `ifndef VERILATOR
 
-import riscv_defines::*;
 import riscv_tracer_defines::*;
 
 // Source/Destination register instruction index
@@ -404,7 +403,7 @@ module riscv_tracer (
         regs_read.push_back('{rs1, rs1_value});
         regs_read.push_back('{rs2, rs2_value});
         regs_write.push_back('{rd, 'x});
-        if (instr[31:27] == AMO_LR) begin
+        if (instr[31:27] == riscv_defines::AMO_LR) begin
           // Do not print rs2 for load-reserved
           str = $sformatf("%-16s x%0d, (x%0d)", mnemonic, rd, rs1);
         end else begin
@@ -440,7 +439,7 @@ module riscv_tracer (
 
         if (instr[14:12] != 3'b111) begin
           // regular load
-          if (instr[6:0] != OPCODE_LOAD_POST) begin
+          if (instr[6:0] != riscv_defines::OPCODE_LOAD_POST) begin
             regs_read.push_back('{rs1, rs1_value});
             str = $sformatf("%-16s x%0d, %0d(x%0d)", mnemonic, rd, $signed(imm_i_type), rs1);
           end else begin
@@ -450,7 +449,7 @@ module riscv_tracer (
           end
         end else begin
           // reg-reg load
-          if (instr[6:0] != OPCODE_LOAD_POST) begin
+          if (instr[6:0] != riscv_defines::OPCODE_LOAD_POST) begin
             regs_read.push_back('{rs2, rs2_value});
             regs_read.push_back('{rs1, rs1_value});
             str = $sformatf("%-16s x%0d, x%0d(x%0d)", mnemonic, rd, rs2, rs1);
@@ -480,7 +479,7 @@ module riscv_tracer (
 
         if (instr[14] == 1'b0) begin
           // regular store
-          if (instr[6:0] != OPCODE_STORE_POST) begin
+          if (instr[6:0] != riscv_defines::OPCODE_STORE_POST) begin
             regs_read.push_back('{rs2, rs2_value});
             regs_read.push_back('{rs1, rs1_value});
             str = $sformatf("%-16s x%0d, %0d(x%0d)", mnemonic, rs2, $signed(imm_s_type), rs1);
@@ -492,7 +491,7 @@ module riscv_tracer (
           end
         end else begin
           // reg-reg store
-          if (instr[6:0] != OPCODE_STORE_POST) begin
+          if (instr[6:0] != riscv_defines::OPCODE_STORE_POST) begin
             regs_read.push_back('{rs2, rs2_value});
             regs_read.push_back('{rs3, rs3_value});
             regs_read.push_back('{rs1, rs1_value});
@@ -1033,14 +1032,14 @@ module riscv_tracer (
         INSTR_AMOMAXU:    trace.printAtomicInstr("amomaxu.w");
 
         // opcodes with custom decoding
-        {25'b?, OPCODE_LOAD}:       trace.printLoadInstr();
-        {25'b?, OPCODE_LOAD_FP}:    trace.printLoadInstr();
-        {25'b?, OPCODE_LOAD_POST}:  trace.printLoadInstr();
-        {25'b?, OPCODE_STORE}:      trace.printStoreInstr();
-        {25'b?, OPCODE_STORE_FP}:   trace.printStoreInstr();
-        {25'b?, OPCODE_STORE_POST}: trace.printStoreInstr();
-        {25'b?, OPCODE_HWLOOP}:     trace.printHwloopInstr();
-        {25'b?, OPCODE_VECOP}:      trace.printVecInstr();
+        {25'b?, riscv_defines::OPCODE_LOAD}:       trace.printLoadInstr();
+        {25'b?, riscv_defines::OPCODE_LOAD_FP}:    trace.printLoadInstr();
+        {25'b?, riscv_defines::OPCODE_LOAD_POST}:  trace.printLoadInstr();
+        {25'b?, riscv_defines::OPCODE_STORE}:      trace.printStoreInstr();
+        {25'b?, riscv_defines::OPCODE_STORE_FP}:   trace.printStoreInstr();
+        {25'b?, riscv_defines::OPCODE_STORE_POST}: trace.printStoreInstr();
+        {25'b?, riscv_defines::OPCODE_HWLOOP}:     trace.printHwloopInstr();
+        {25'b?, riscv_defines::OPCODE_VECOP}:      trace.printVecInstr();
         default:           trace.printMnemonic("INVALID");
       endcase // unique case (instr)
 
