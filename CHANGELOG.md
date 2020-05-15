@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `scm`:
   - Remove unused BIST ports.
   - Fix blocking to non-blocking assignment in `register_file_1r_1w`.
+- `soc_bus`: Fix number of slave ports.
 
 
 ## 2020-05-06

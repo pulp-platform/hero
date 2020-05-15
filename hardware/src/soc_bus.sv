@@ -9,7 +9,7 @@
 
 package soc_bus_pkg;
   function automatic int unsigned n_slaves(input int unsigned n_clusters);
-    return n_clusters + 1;
+    return n_clusters + 2; // ext and debug
   endfunction
 
   function automatic int unsigned oup_id_w(input int unsigned n_clusters, inp_id_w);
@@ -42,7 +42,7 @@ module soc_bus #(
 );
 
   localparam int unsigned N_MASTERS = N_CLUSTERS + L2_N_PORTS + 2; // ext, debug
-  localparam int unsigned N_SLAVES = soc_bus_pkg::n_slaves(N_CLUSTERS) + 2; // ext and debug
+  localparam int unsigned N_SLAVES = soc_bus_pkg::n_slaves(N_CLUSTERS);
   localparam int unsigned IDX_L2_MEM = N_CLUSTERS;
   localparam int unsigned IDX_EXT = IDX_L2_MEM + 1;
   localparam int unsigned IDX_DEBUG_MST = IDX_EXT + 1;
