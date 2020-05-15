@@ -58,7 +58,7 @@ module ram_ws_rs_data_scm
 
                 IN22FDX_R1PH_NFHN_W00032B128M02C256 sram_data //
                 (
-                
+
                     .CLK          ( clk              ),
                     .CEN          ( cs_n             ),
                     .RDWEN        ( write            ),
@@ -66,14 +66,14 @@ module ram_ws_rs_data_scm
                     .AC           ( addr[0]          ),
                     .D            ( wdata            ),
                     .BW           ( bw               ),
-                    .Q            ( rdata            ),   
+                    .Q            ( rdata            ),
                     .T_LOGIC      ( 1'b0             ),
                     .MA_SAWL      ( '0               ),
                     .MA_WL        ( '0               ),
                     .MA_WRAS      ( '0               ),
                     .MA_WRASD     ( '0               ),
                     .OBSV_CTL     (                  )
-                
+
                 );
 
             end
@@ -88,7 +88,7 @@ module ram_ws_rs_data_scm
 
                 IN22FDX_R1PH_NFHN_W00064B128M02C256 sram_data // /usr/pack/gf-22-kgf/dz/mem/R1PH/V03R01/model/verilog/
                 (
-                
+
                     .CLK          ( clk              ),
                     .CEN          ( cs_n             ),
                     .RDWEN        ( write            ),
@@ -96,14 +96,14 @@ module ram_ws_rs_data_scm
                     .AC           ( addr[0]          ),
                     .D            ( wdata            ),
                     .BW           ( bw               ),
-                    .Q            ( rdata            ),   
+                    .Q            ( rdata            ),
                     .T_LOGIC      ( 1'b0             ),
                     .MA_SAWL      ( '0               ),
                     .MA_WL        ( '0               ),
                     .MA_WRAS      ( '0               ),
                     .MA_WRASD     ( '0               ),
                     .OBSV_CTL     (                  )
-                
+
                 );
 
             end

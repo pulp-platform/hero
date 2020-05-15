@@ -23,8 +23,8 @@
 //                                                                               //
 //                                                                               //
 //                                                                               //
-// Create Date:    18/08/2014                                                    // 
-// Design Name:    icache_ctrl_unit                                              // 
+// Create Date:    18/08/2014                                                    //
+// Design Name:    icache_ctrl_unit                                              //
 // Module Name:    icache_ctrl_unit                                              //
 // Project Name:   ULPSoC                                                        //
 // Language:       SystemVerilog                                                 //
