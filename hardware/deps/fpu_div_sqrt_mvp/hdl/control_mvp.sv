@@ -3353,40 +3353,40 @@ module control_mvp
    logic   [defs_div_sqrt_mvp::C_EXP_FP64+1:0]                                Exp_add_b_D;
    logic   [defs_div_sqrt_mvp::C_EXP_FP64+1:0]                                Exp_add_c_D;
 
-  integer                                                 defs_div_sqrt_mvp::C_BIAS_AONE, defs_div_sqrt_mvp::C_HALF_BIAS;
+  integer                                                 C_BIAS_AONE, C_HALF_BIAS;
   always_comb
     begin  //
       case (Format_sel_S)
         2'b00:
           begin
-            defs_div_sqrt_mvp::C_BIAS_AONE =defs_div_sqrt_mvp::C_BIAS_AONE_FP32;
-            defs_div_sqrt_mvp::C_HALF_BIAS =defs_div_sqrt_mvp::C_HALF_BIAS_FP32;
+            C_BIAS_AONE =defs_div_sqrt_mvp::C_BIAS_AONE_FP32;
+            C_HALF_BIAS =defs_div_sqrt_mvp::C_HALF_BIAS_FP32;
           end
         2'b01:
           begin
-            defs_div_sqrt_mvp::C_BIAS_AONE =defs_div_sqrt_mvp::C_BIAS_AONE_FP64;
-            defs_div_sqrt_mvp::C_HALF_BIAS =defs_div_sqrt_mvp::C_HALF_BIAS_FP64;
+            C_BIAS_AONE =defs_div_sqrt_mvp::C_BIAS_AONE_FP64;
+            C_HALF_BIAS =defs_div_sqrt_mvp::C_HALF_BIAS_FP64;
           end
         2'b10:
           begin
-            defs_div_sqrt_mvp::C_BIAS_AONE =defs_div_sqrt_mvp::C_BIAS_AONE_FP16;
-            defs_div_sqrt_mvp::C_HALF_BIAS =defs_div_sqrt_mvp::C_HALF_BIAS_FP16;
+            C_BIAS_AONE =defs_div_sqrt_mvp::C_BIAS_AONE_FP16;
+            C_HALF_BIAS =defs_div_sqrt_mvp::C_HALF_BIAS_FP16;
           end
         2'b11:
           begin
-            defs_div_sqrt_mvp::C_BIAS_AONE =defs_div_sqrt_mvp::C_BIAS_AONE_FP16ALT;
-            defs_div_sqrt_mvp::C_HALF_BIAS =defs_div_sqrt_mvp::C_HALF_BIAS_FP16ALT;
+            C_BIAS_AONE =defs_div_sqrt_mvp::C_BIAS_AONE_FP16ALT;
+            C_HALF_BIAS =defs_div_sqrt_mvp::C_HALF_BIAS_FP16ALT;
           end
         endcase
     end
 
 //For division, exponent=(Exp_a_D-LZ1)-(Exp_b_D-LZ2)+BIAS
-//For square root, exponent=(Exp_a_D-LZ1)/2+(Exp_a_D-LZ1)%2+defs_div_sqrt_mvp::C_HALF_BIAS
+//For square root, exponent=(Exp_a_D-LZ1)/2+(Exp_a_D-LZ1)%2+C_HALF_BIAS
 //For exponent, in preprorces module, (Exp_a_D-LZ1) and (Exp_b_D-LZ2) have been processed with the corresponding process for denormal numbers.
 
   assign Exp_add_a_D = {Sqrt_start_dly_S?{Exp_num_DI[defs_div_sqrt_mvp::C_EXP_FP64],Exp_num_DI[defs_div_sqrt_mvp::C_EXP_FP64],Exp_num_DI[defs_div_sqrt_mvp::C_EXP_FP64],Exp_num_DI[defs_div_sqrt_mvp::C_EXP_FP64:1]}:{Exp_num_DI[defs_div_sqrt_mvp::C_EXP_FP64],Exp_num_DI[defs_div_sqrt_mvp::C_EXP_FP64],Exp_num_DI}};
   assign Exp_add_b_D = {Sqrt_start_dly_S?{1'b0,{defs_div_sqrt_mvp::C_EXP_ZERO_FP64},Exp_num_DI[0]}:{~Exp_den_DI[defs_div_sqrt_mvp::C_EXP_FP64],~Exp_den_DI[defs_div_sqrt_mvp::C_EXP_FP64],~Exp_den_DI}};
-  assign Exp_add_c_D = {Div_start_dly_S?{{defs_div_sqrt_mvp::C_BIAS_AONE}}:{{defs_div_sqrt_mvp::C_HALF_BIAS}}};
+  assign Exp_add_c_D = {Div_start_dly_S?{{C_BIAS_AONE}}:{{C_HALF_BIAS}}};
   assign Exp_result_prenorm_DN  = (Start_dly_S)?{Exp_add_a_D + Exp_add_b_D + Exp_add_c_D}:Exp_result_prenorm_DP;
 
 
