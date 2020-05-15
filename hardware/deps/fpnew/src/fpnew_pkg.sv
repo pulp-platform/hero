@@ -189,7 +189,7 @@ package fpnew_pkg;
   typedef twobit_logic_t [0:NUM_FP_FORMATS-1] fmt_unit_types_t;
 
   // Array of format-specific unit types by opgroup
-  typedef fmt_unit_types_t [0:NUM_OPGROUPS-1] opgrp_fmt_unit_types_t;
+  typedef fmt_unit_types_t [0:NUM_OPGROUPS-1][0:NUM_FP_FORMATS-1][1:0] opgrp_fmt_unit_types_t;
   // same with unsigned
   typedef fmt_unsigned_t [0:NUM_OPGROUPS-1] opgrp_fmt_unsigned_t;
 

@@ -13,12 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pulp_cluster`:
   - Reduce address range of event unit in `core_demux`.
   - Swap peripheral IDs of error slave (now 7) and external port (now 8).
+- `fpnew`:
+  - Add `default` to `unique case` that does not need a default to improve tool compatibility.
+  - Flatten `opgrp_fmt_unit_types_t` to improve tool compatibility.
 
 ### Fixed
 - `pulp-runtime`: Enable RISC-V A extension in compilation flow.
 - `fpu_div_sqrt_mvp` and `fpu_interco`: Improve tool compatibility by removing wildcard imports.
-- `fpnew`: Add `default` to `unique case` that does not need a default to improve tool
-  compatibility.
 - `hier-icache`:
   - Remove unused BIST ports.
   - Fix deadlock on write to `0x18` register (prefetch enable).
