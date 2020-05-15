@@ -1366,6 +1366,10 @@ module pulp_cluster
       .NB_CUTS    (5),
       .MORE_CUTS  (1)
     ) i_mem (
+      .mem_ctrl,
+      .dft_ram_gt_se,
+      .dft_ram_bypass,
+      .dft_ram_bp_clk_en,
       .clk_i    (clk_cluster),
       .rst_ni   (rst_ni),
       .req_i    (s_tcdm_bus_sram[i].req),
