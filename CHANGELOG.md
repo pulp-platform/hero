@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add `default` to `unique case` that does not need a default to improve tool compatibility.
   - Flatten `opgrp_fmt_unit_types_t` to improve tool compatibility.
 - Replace `localparam` in parameters by `parameter` to improve tool compatibility.
+- `axi2mem`: Improve tool compatibility by separating modules into individual files.
 
 ### Fixed
 - `pulp-runtime`: Enable RISC-V A extension in compilation flow.
