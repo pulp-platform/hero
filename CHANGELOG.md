@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pulp_cluster`:
   - Reduce address range of event unit in `core_demux`.
   - Swap peripheral IDs of error slave (now 7) and external port (now 8).
+  - Prefix AXI channel and request/response types to prevent type collisions in some tools.
 - `fpnew`:
   - Add `default` to `unique case` that does not need a default to improve tool compatibility.
   - Flatten `opgrp_fmt_unit_types_t` to improve tool compatibility.

@@ -597,26 +597,26 @@ module pulp_cluster
   typedef logic [AXI_ID_OUT_WIDTH-1:0] id_oup_t;
   typedef logic [AXI_DATA_C2S_WIDTH/8-1:0] strb_t;
   typedef logic [AXI_USER_WIDTH-1:0] user_t;
-  `AXI_TYPEDEF_AW_CHAN_T(aw_chan_t, addr_t, id_oup_t, user_t);
-  `AXI_TYPEDEF_W_CHAN_T (w_chan_t, data_t, strb_t, user_t);
-  `AXI_TYPEDEF_B_CHAN_T (b_chan_t, id_oup_t, user_t);
-  `AXI_TYPEDEF_AR_CHAN_T(ar_chan_t, addr_t, id_oup_t, user_t);
-  `AXI_TYPEDEF_R_CHAN_T (r_chan_t, data_t, id_oup_t, user_t);
-  `AXI_TYPEDEF_REQ_T    (axi_req_t, aw_chan_t, w_chan_t, ar_chan_t);
-  `AXI_TYPEDEF_RESP_T   (axi_resp_t, b_chan_t, r_chan_t);
-  axi_req_t   ext_tcdm_req,   ext_tcdm_req_buf;
-  axi_resp_t  ext_tcdm_resp,  ext_tcdm_resp_buf;
+  `AXI_TYPEDEF_AW_CHAN_T(cl_aw_chan_t, addr_t, id_oup_t, user_t);
+  `AXI_TYPEDEF_W_CHAN_T (cl_w_chan_t, data_t, strb_t, user_t);
+  `AXI_TYPEDEF_B_CHAN_T (cl_b_chan_t, id_oup_t, user_t);
+  `AXI_TYPEDEF_AR_CHAN_T(cl_ar_chan_t, addr_t, id_oup_t, user_t);
+  `AXI_TYPEDEF_R_CHAN_T (cl_r_chan_t, data_t, id_oup_t, user_t);
+  `AXI_TYPEDEF_REQ_T    (cl_axi_req_t, cl_aw_chan_t, cl_w_chan_t, cl_ar_chan_t);
+  `AXI_TYPEDEF_RESP_T   (cl_axi_resp_t, cl_b_chan_t, cl_r_chan_t);
+  cl_axi_req_t    ext_tcdm_req,   ext_tcdm_req_buf;
+  cl_axi_resp_t   ext_tcdm_resp,  ext_tcdm_resp_buf;
   `AXI_ASSIGN_TO_REQ(ext_tcdm_req, s_ext_tcdm_bus);
   `AXI_ASSIGN_FROM_RESP(s_ext_tcdm_bus, ext_tcdm_resp);
   axi_cut #(
     .Bypass     (1'b0),
-    .aw_chan_t  (aw_chan_t),
-    .w_chan_t   (w_chan_t),
-    .b_chan_t   (b_chan_t),
-    .ar_chan_t  (ar_chan_t),
-    .r_chan_t   (r_chan_t),
-    .req_t      (axi_req_t),
-    .resp_t     (axi_resp_t)
+    .aw_chan_t  (cl_aw_chan_t),
+    .w_chan_t   (cl_w_chan_t),
+    .b_chan_t   (cl_b_chan_t),
+    .ar_chan_t  (cl_ar_chan_t),
+    .r_chan_t   (cl_r_chan_t),
+    .req_t      (cl_axi_req_t),
+    .resp_t     (cl_axi_resp_t)
   ) i_axi_to_mem_cut (
     .clk_i      (clk_cluster),
     .rst_ni,
@@ -627,8 +627,8 @@ module pulp_cluster
   );
 
   axi_to_mem #(
-    .axi_req_t  ( axi_req_t           ),
-    .axi_resp_t ( axi_resp_t          ),
+    .axi_req_t  ( cl_axi_req_t        ),
+    .axi_resp_t ( cl_axi_resp_t       ),
     .AddrWidth  ( 32                  ),
     .DataWidth  ( AXI_DATA_C2S_WIDTH  ),
     .IdWidth    ( AXI_ID_OUT_WIDTH    ),
