@@ -20,3 +20,5 @@ sources:
   # Level 2
   - src/axi_to_mem_banked.sv
   - src/axi_to_mem_intf.sv
+  # Level 3
+  - src/axi_to_mem_banked_intf.sv

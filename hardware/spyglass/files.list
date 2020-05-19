@@ -265,6 +265,7 @@
 ../deps/axi2mem/src/axi_to_mem.sv
 ../deps/axi2mem/src/axi_to_mem_banked.sv
 ../deps/axi2mem/src/axi_to_mem_intf.sv
+../deps/axi2mem/src/axi_to_mem_banked_intf.sv
 ../deps/axi2per/axi2per_req_channel.sv
 ../deps/axi2per/axi2per_res_channel.sv
 ../deps/axi2per/axi2per.sv
