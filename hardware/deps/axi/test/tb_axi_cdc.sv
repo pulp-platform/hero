@@ -10,8 +10,8 @@
 
 // Testbench for axi_cdc
 
-`include "axi/typedef.svh"
-`include "axi/assign.svh"
+`include "typedef.svh"
+`include "assign.svh"
 
 module tb_axi_cdc #(
   // AXI Parameters

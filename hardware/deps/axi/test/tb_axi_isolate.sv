@@ -10,8 +10,8 @@
 
 // Author: Wolfgang Roenninger <wroennin@ethz.ch>
 
-`include "axi/typedef.svh"
-`include "axi/assign.svh"
+`include "typedef.svh"
+`include "assign.svh"
 
 module tb_axi_isolate #(
     parameter int unsigned NoWrites = 50000,  // How many writes per master

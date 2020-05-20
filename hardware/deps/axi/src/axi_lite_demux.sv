@@ -381,8 +381,8 @@ module axi_lite_demux #(
   // pragma translate_on
 endmodule
 
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 
 module axi_lite_demux_intf #(
   parameter int unsigned AxiAddrWidth = 32'd0,

@@ -8,8 +8,8 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
-`include "apb/assign.svh"
-`include "axi/assign.svh"
+`include "assign.svh"
+`include "assign.svh"
 
 `define max(a, b) a > b ? a : b;
 

@@ -78,8 +78,8 @@ module axi_modify_address #(
   assign slv_resp_o = mst_resp_i;
 endmodule
 
-`include "axi/typedef.svh"
-`include "axi/assign.svh"
+`include "typedef.svh"
+`include "assign.svh"
 
 // interface wrapper
 module axi_modify_address_intf #(

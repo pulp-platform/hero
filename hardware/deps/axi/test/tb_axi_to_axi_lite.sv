@@ -12,7 +12,7 @@
 // Andreas Kurth      <akurth@iis.ee.ethz.ch>
 // Wolfgang Ronninger <wroennin@iis.ee.ethz.ch>
 
-`include "axi/assign.svh"
+`include "assign.svh"
 
 module tb_axi_to_axi_lite;
 

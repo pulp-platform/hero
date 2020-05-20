@@ -1,4 +1,4 @@
-`include "axi/typedef.svh"
+`include "typedef.svh"
 
 module pulp_ooc #(
   parameter int unsigned  N_CLUSTERS = 4,

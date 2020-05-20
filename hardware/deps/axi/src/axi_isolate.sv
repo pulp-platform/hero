@@ -275,8 +275,8 @@ module axi_isolate #(
 // pragma translate_on
 endmodule
 
-`include "axi/typedef.svh"
-`include "axi/assign.svh"
+`include "typedef.svh"
+`include "assign.svh"
 
 module axi_isolate_intf #(
   parameter int unsigned NUM_PENDING    = 32'd16, // Number of pending requests

@@ -359,8 +359,8 @@ module axi_atop_filter #(
 // pragma translate_on
 endmodule
 
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 
 // interface wrapper
 module axi_atop_filter_intf #(

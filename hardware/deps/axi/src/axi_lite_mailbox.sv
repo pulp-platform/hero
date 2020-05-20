@@ -196,7 +196,7 @@ module axi_lite_mailbox #(
   // pragma translate_on
 endmodule
 
-`include "axi/typedef.svh"
+`include "typedef.svh"
 
 // slave port module
 module axi_lite_mailbox_slave #(
@@ -551,7 +551,7 @@ module axi_lite_mailbox_slave #(
   // pragma translate_on
 endmodule
 
-`include "axi/assign.svh"
+`include "assign.svh"
 
 module axi_lite_mailbox_intf #(
   parameter int unsigned MAILBOX_DEPTH  = 32'd0,

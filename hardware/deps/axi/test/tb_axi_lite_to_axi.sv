@@ -11,7 +11,7 @@
 // Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 // Andreas Kurth  <akurth@iis.ee.ethz.ch>
 
-`include "axi/assign.svh"
+`include "assign.svh"
 
 module tb_axi_lite_to_axi;
 

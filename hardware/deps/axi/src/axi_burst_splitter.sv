@@ -19,7 +19,7 @@
 //              required before this module if a master upstream is capable of generating
 //              atomic operations.
 
-`include "axi/typedef.svh"
+`include "typedef.svh"
 `include "common_cells/registers.svh"
 
 module axi_burst_splitter #(

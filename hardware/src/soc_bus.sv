@@ -17,7 +17,7 @@ package soc_bus_pkg;
   endfunction
 endpackage
 
-`include "axi/assign.svh"
+`include "assign.svh"
 
 module soc_bus #(
   parameter int unsigned  AXI_AW = 0,               // [bit]

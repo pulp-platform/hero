@@ -238,8 +238,8 @@ module axi_xbar #(
   // pragma translate_on
 endmodule
 
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 
 module axi_xbar_intf #(
   parameter int unsigned            AXI_USER_WIDTH = 0,

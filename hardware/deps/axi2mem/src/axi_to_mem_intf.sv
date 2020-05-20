@@ -11,8 +11,8 @@
 // Andreas Kurth <akurth@iis.ee.ethz.ch>
 
 
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 // Interface wrapper for axi_to_mem
 module axi_to_mem_intf #(
   parameter int unsigned AddrWidth = 0,

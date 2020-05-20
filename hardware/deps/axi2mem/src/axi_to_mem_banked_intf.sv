@@ -10,8 +10,8 @@
 
 // Wolfgang Rönninger <wroennin@iis.ee.ethz.ch>
 
-`include "axi/typedef.svh"
-`include "axi/assign.svh"
+`include "typedef.svh"
+`include "assign.svh"
 /// AXI4+ATOP interface wrapper for `axi_to_mem`
 module axi_to_mem_banked_intf #(
   /// AXI4+ATOP ID width

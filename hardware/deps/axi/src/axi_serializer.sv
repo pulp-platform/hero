@@ -10,7 +10,7 @@
 //
 // Author: Andreas Kurth <akurth@iis.ee.ethz.ch>
 
-`include "axi/assign.svh"
+`include "assign.svh"
 
 /// Serialize all AXI transactions to a single ID (zero).
 module axi_serializer #(
@@ -104,7 +104,7 @@ module axi_serializer #(
 
 endmodule
 
-`include "axi/typedef.svh"
+`include "typedef.svh"
 
 module axi_serializer_intf #(
   parameter int unsigned AXI_ADDR_WIDTH = 0,

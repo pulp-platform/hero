@@ -385,8 +385,8 @@ module axi_lite_mux #(
 endmodule
 
 // interface wrap
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 
 module axi_lite_mux_intf #(
   parameter int unsigned AxiAddrWidth  = 32'd0,

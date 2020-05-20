@@ -117,8 +117,8 @@ module axi_delayer #(
   );
 endmodule
 
-`include "axi/typedef.svh"
-`include "axi/assign.svh"
+`include "typedef.svh"
+`include "assign.svh"
 
 // interface wrapper
 module axi_delayer_intf #(

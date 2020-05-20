@@ -14,7 +14,7 @@
 // See `doc/axi_lite_xbar.md` for the documentation,
 // including the definition of parameters and ports.
 
-`include "axi/typedef.svh"
+`include "typedef.svh"
 
 module axi_lite_xbar #(
   parameter int unsigned            NoSlvPorts    = 0,

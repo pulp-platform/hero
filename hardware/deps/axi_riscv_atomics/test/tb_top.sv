@@ -1,6 +1,6 @@
 `timescale 10ps/10ps
 
-`include "axi/assign.svh"
+`include "assign.svh"
 
 module automatic tb_top;
 
