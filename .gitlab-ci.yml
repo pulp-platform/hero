@@ -145,6 +145,7 @@ br-hrv-eqemu:
 test-zcu102-examples:
   stage: test
   script:
+    - memora get vsim-pulp
     - memora get tc-pulp
     - memora get tc-har-olinux
     - memora get tc-llvm
