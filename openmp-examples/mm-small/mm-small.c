@@ -53,14 +53,10 @@ int main(int argc, char *argv[])
   unsigned height = width;
 
   // Allocate memory
-  uint32_t * a = (uint32_t *)hero_l1malloc(sizeof(uint32_t)*width*height);
-  // uint32_t * a = (uint32_t *)hero_l2malloc(sizeof(uint32_t)*width*height);
-  uint32_t * b = (uint32_t *)hero_l1malloc(sizeof(uint32_t)*width*height);
-  // uint32_t * b = (uint32_t *)hero_l2malloc(sizeof(uint32_t)*width*height);
-  uint32_t * c = (uint32_t *)hero_l1malloc(sizeof(uint32_t)*width*height);
-  // uint32_t * c = (uint32_t *)hero_l2malloc(sizeof(uint32_t)*width*height);
-  uint32_t * d = (uint32_t *)hero_l1malloc(sizeof(uint32_t)*width*height);
-  // uint32_t * d = (uint32_t *)hero_l2malloc(sizeof(uint32_t)*width*height);
+  uint32_t * a = hero_l1malloc(sizeof(uint32_t)*width*height);
+  uint32_t * b = hero_l1malloc(sizeof(uint32_t)*width*height);
+  uint32_t * c = hero_l1malloc(sizeof(uint32_t)*width*height);
+  uint32_t * d = hero_l1malloc(sizeof(uint32_t)*width*height);
   if ( (a == NULL) || (b == NULL) || (c == NULL) || (d == NULL) ) {
     printf("ERROR: malloc() failed!\n");
     return -ENOMEM;
@@ -154,11 +150,13 @@ int main(int argc, char *argv[])
   memset((void *)c, 0, (size_t)(width*height));
 
   bench_start("PULP: Parallel, copy-based, DMA");
-  #pragma omp target device(BIGPULP_MEMCPY) map(to: a[0:width*height], b[0:width*height], width, height) map(from: c[0:width*height])
+  #pragma omp target device(BIGPULP_MEMCPY)                        \
+      map(to: a[0:width*height], b[0:width*height], width, height) \
+      map(from: c[0:width*height])
   {
-    uint32_t * a_local = (uint32_t *)hero_l1malloc(width*height*sizeof(uint32_t));
-    uint32_t * b_local = (uint32_t *)hero_l1malloc(width*height*sizeof(uint32_t));
-    uint32_t * c_local = (uint32_t *)hero_l1malloc(width*height*sizeof(uint32_t));
+    uint32_t * a_local = (__device uint32_t *)hero_l1malloc(width*height*sizeof(uint32_t));
+    uint32_t * b_local = (__device uint32_t *)hero_l1malloc(width*height*sizeof(uint32_t));
+    uint32_t * c_local = (__device uint32_t *)hero_l1malloc(width*height*sizeof(uint32_t));
     if ( (a_local == NULL) || (b_local == NULL) || (c_local == NULL) ) {
       printf("ERROR: Memory allocation failed!\n");
     }
@@ -168,7 +166,8 @@ int main(int argc, char *argv[])
     hero_dma_wait(dma0);
     hero_dma_wait(dma1);
 
-    #pragma omp parallel for collapse(2) firstprivate(a_local, b_local, c_local, width, height)
+    #pragma omp parallel for collapse(2) \
+        firstprivate(a_local, b_local, c_local, width, height)
       for (unsigned i=0; i<width; i++) {
         for (unsigned j=0; j<height; j++) {
           uint32_t sum = 0;
@@ -206,9 +205,9 @@ int main(int argc, char *argv[])
     unsigned width_local  = hero_tryread((unsigned int *)&width);
     unsigned height_local = hero_tryread((unsigned int *)&height);
 
-    uint32_t * a_local = (uint32_t *)hero_l1malloc(width_local*height_local*sizeof(uint32_t));
-    uint32_t * b_local = (uint32_t *)hero_l1malloc(width_local*height_local*sizeof(uint32_t));
-    uint32_t * c_local = (uint32_t *)hero_l1malloc(width_local*height_local*sizeof(uint32_t));
+    uint32_t * a_local = (__device uint32_t *)hero_l1malloc(width_local*height_local*sizeof(uint32_t));
+    uint32_t * b_local = (__device uint32_t *)hero_l1malloc(width_local*height_local*sizeof(uint32_t));
+    uint32_t * c_local = (__device uint32_t *)hero_l1malloc(width_local*height_local*sizeof(uint32_t));
     if ( (a_local == NULL) || (b_local == NULL) || (c_local == NULL) ) {
       printf("ERROR: Memory allocation failed!\n");
     }
