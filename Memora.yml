@@ -1119,12 +1119,17 @@ artifacts:
       # sdk-pulp
       - pulp
       # sdk-hrv
+      - apps/ariane # package `ariane-support`
+      - apps/hero # package `hero-apps`
       - board
       - buildroot
       - configs/hrv_defconfig
       - package
-      - support
+      - support/libhero-target # package `libhero-target`
+      - support/libpulp # package `libpulp`
+      - support/pulp-driver # package `pulp-driver`
       - toolchain/install-sdk.sh
+      - toolchain/llvm-project/openmp # package `hero-openmp`
     outputs:
       - install
 
