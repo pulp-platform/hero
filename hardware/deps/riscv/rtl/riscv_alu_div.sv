@@ -213,7 +213,7 @@ module riscv_alu_div
   // assertions
   ///////////////////////////////////////////////////////////////////////////////
 
-`ifndef SYNTHESIS
+`ifndef TARGET_SYNTHESIS
   initial
   begin : p_assertions
     assert (C_LOG_WIDTH == $clog2(C_WIDTH+1)) else $error("C_LOG_WIDTH must be $clog2(C_WIDTH+1)");

@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `soc_bus`: Fix number of slave ports.
 - `common_cells`: Add missing synthesis guard around assertion in `rstgen_bypass`.
 - `soc_bus`: Fix contiguous assignment to `cluster_base_addr` and `l2_port_base_addr`.
+- Rename `SYNTHESIS` define to `TARGET_SYNTHESIS` to prevent collisions in some synthesizers.
 
 
 ## 2020-05-06

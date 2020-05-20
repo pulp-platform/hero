@@ -154,7 +154,7 @@ module fc_demux (
         be_port1    = be_slave   & {32{port_sel_i}};
         wdata_port1 = wdata_slave  & {32{port_sel_i}};
 
-`ifndef SYNTHESIS
+`ifndef TARGET_SYNTHESIS
     `ifdef  XBAR_DEMUX_VERBOSE
         unique case(1'b1)
             req_port0 : $display("Request towards port0 (addr %x) at %t",addr_port0, $time);

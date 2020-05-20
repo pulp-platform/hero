@@ -65,7 +65,7 @@ module tcdm_tx_if
    logic                               s_sample_tx_data, s_forward_tx_data;
    
    // FSM STATES SIGNALS
-   enum              `ifdef SYNTHESIS logic [1:0] `endif { TRANS_RUN, TRANS_STALLED } CS, NS;
+   enum              `ifdef TARGET_SYNTHESIS logic [1:0] `endif { TRANS_RUN, TRANS_STALLED } CS, NS;
    
    // SAMPLES tcdm_r_rdata WHEN A STALL CONDITION OCCOURS
    always_ff @ (posedge clk_i, negedge rst_ni)

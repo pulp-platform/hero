@@ -416,7 +416,7 @@ generate
     endcase
 endgenerate
 
-   `ifndef SYNTHESIS
+   `ifndef TARGET_SYNTHESIS
    property valid_2_ready;
       @(posedge clk)
         disable iff (~rst_n)

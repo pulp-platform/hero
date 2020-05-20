@@ -10,7 +10,7 @@
 
 
 // `define  USE_SRAM
-`ifdef SYNTHESIS
+`ifdef TARGET_SYNTHESIS
 `define USE_DATA_SRAM
 `endif
 

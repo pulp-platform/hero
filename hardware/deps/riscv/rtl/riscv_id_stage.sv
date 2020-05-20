@@ -950,7 +950,7 @@ module riscv_id_stage
   // stall when we access the CSR after a multicycle APU instruction
   assign csr_apu_stall       = (csr_access & (apu_en_ex_o & (apu_lat_ex_o != 1'b1) | apu_busy_i));
 
-`ifndef SYNTHESIS
+`ifndef TARGET_SYNTHESIS
   always_comb begin
     if (FPU==1 && SHARED_FP!=1) begin
       assert (APU_NDSFLAGS_CPU >= riscv_defines::C_RM+2*riscv_defines::C_FPNEW_FMTBITS+riscv_defines::C_FPNEW_IFMTBITS)

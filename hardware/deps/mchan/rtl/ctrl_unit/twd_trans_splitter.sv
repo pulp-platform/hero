@@ -81,7 +81,7 @@ module twd_trans_splitter
    logic 				  s_trans_complete;
    
    // FSM STATES SIGNALS
-   enum 				  `ifdef SYNTHESIS logic [1:0] `endif { TRANS_IDLE, TRANS_RUN, TRANS_TWD } CS, NS;
+   enum 				  `ifdef TARGET_SYNTHESIS logic [1:0] `endif { TRANS_IDLE, TRANS_RUN, TRANS_TWD } CS, NS;
    
    //**********************************************************
    //***** SAMPLES THE OPCODE, SID OF CURRENT TRANSFER ********

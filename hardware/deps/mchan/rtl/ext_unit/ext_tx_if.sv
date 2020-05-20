@@ -86,7 +86,7 @@ module ext_tx_if
     );
    
    // FSM STATES SIGNALS
-   enum 			      `ifdef SYNTHESIS logic [1:0] `endif { TRANS_IDLE, TRANS_ACK, TRANS_RUN } CS, NS;
+   enum 			      `ifdef TARGET_SYNTHESIS logic [1:0] `endif { TRANS_IDLE, TRANS_ACK, TRANS_RUN } CS, NS;
    
    logic [7:0] 			      s_beats_nb,
                                       s_beats_nb_align,

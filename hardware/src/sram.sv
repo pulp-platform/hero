@@ -38,7 +38,7 @@ module sram #(
 
 
 
-`ifdef SYNTHESIS
+`ifdef TARGET_SYNTHESIS
   `ifdef TARGET_XILINX
     strb_t we;
     for (genvar p = 0; p < STRB_WIDTH; p++) begin : gen_we

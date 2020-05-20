@@ -290,7 +290,7 @@ module soc_peripherals #(
         .stdout_master       ( s_stdout_bus       )
     );
 
-    `ifdef SYNTHESIS
+    `ifdef TARGET_SYNTHESIS
         assign s_stdout_bus.pready  = 'h0;
         assign s_stdout_bus.pslverr = 'h0;
         assign s_stdout_bus.prdata  = 'h0;
@@ -615,7 +615,7 @@ module soc_peripherals #(
     );
 
 `ifdef PULP_TRAINING
-`ifndef SYNTHESIS
+`ifndef TARGET_SYNTHESIS
 
     apb_dummy_registers  #(.APB_ADDR_WIDTH(APB_ADDR_WIDTH)) i_apb_dummy_reg_unit (
         .HCLK       ( clk_i                   ),

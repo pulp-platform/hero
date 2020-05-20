@@ -34,7 +34,7 @@ module trans_aligner
     output logic                       data_push_gnt_o
     );
    
-   enum                                `ifdef SYNTHESIS logic [3:0] `endif { TRANS_IDLE, TRANS_FIRST, TRANS_SECOND, TRANS_THIRD, TRANS_RUN, PUSH_STALL, POP_STALL, TRANS_SSLAST, TRANS_SLAST, TRANS_LAST } CS, NS;
+   enum                                `ifdef TARGET_SYNTHESIS logic [3:0] `endif { TRANS_IDLE, TRANS_FIRST, TRANS_SECOND, TRANS_THIRD, TRANS_RUN, PUSH_STALL, POP_STALL, TRANS_SSLAST, TRANS_SLAST, TRANS_LAST } CS, NS;
    
    logic [15:0][7:0]                   s_align_buffer;
    logic [7:0][3:0]                    s_even_align_matrix, s_odd_align_matrix, s_align_matrix;

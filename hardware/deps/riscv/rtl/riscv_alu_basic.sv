@@ -307,7 +307,7 @@ module riscv_alu_basic
       riscv_defines::ALU_SLETS, riscv_defines::ALU_SLETU: result_o = {31'b0, comparison_result_o};
 
       default:
-      `ifndef SYNTHESIS
+      `ifndef TARGET_SYNTHESIS
         $warning("instruction not supported in basic alu")// default case to suppress unique warning
       `endif
         ;

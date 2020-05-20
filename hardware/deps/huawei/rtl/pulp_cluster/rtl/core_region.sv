@@ -47,7 +47,7 @@ module core_region
   parameter        SHARED_FPU             = 0,
   parameter        SHARED_FP_DIVSQRT      = 0,
   parameter bit    DEM_PER_BEFORE_TCDM_TS = 1'b0
-`ifndef SYNTHESIS
+`ifndef TARGET_SYNTHESIS
   ,
   parameter string L2_SLM_FILE            = "./slm_files/l2_stim.slm",
   parameter string ROM_SLM_FILE           = "../sw/apps/boot/slm_files/l2_stim.slm"

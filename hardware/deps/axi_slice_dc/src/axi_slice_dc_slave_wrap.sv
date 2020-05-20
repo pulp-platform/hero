@@ -163,7 +163,7 @@ module axi_slice_dc_slave_wrap
       .axi_master_b_readpointer(axi_master_async.b_readpointer)
     );
 /*
-`ifndef SYNTHESIS
+`ifndef TARGET_SYNTHESIS
 
     Axi4PC #(
         .ADDR_WIDTH( AXI_ADDR_WIDTH ),
