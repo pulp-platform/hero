@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `axi` and `common_cells`: Export include directory `include/axi` and `include/common_cells`,
   respectively, to improve compatibility with tools that do not support directories in SystemVerilog
   ```include``.
+- Rename `fifo` to `pulp_fifo` to prevent naming collisions with external modules.
 
 ### Fixed
 - `pulp-runtime`: Enable RISC-V A extension in compilation flow.
@@ -47,6 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `common_cells`: Add missing synthesis guard around assertion in `rstgen_bypass`.
 - `soc_bus`: Fix contiguous assignment to `cluster_base_addr` and `l2_port_base_addr`.
 - Rename `SYNTHESIS` define to `TARGET_SYNTHESIS` to prevent collisions in some synthesizers.
+- Rename `fifo` module to `pulp_fifo` to prevent collisions with external `fifo` modules.
 
 
 ## 2020-05-06

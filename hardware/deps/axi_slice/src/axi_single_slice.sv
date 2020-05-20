@@ -30,7 +30,7 @@ module axi_single_slice #(
     assign ready_o = ~full;
     assign valid_o = ~empty;
 
-    fifo #(
+    pulp_fifo #(
         .FALL_THROUGH ( 1'b0         ),
         .DATA_WIDTH   ( DATA_WIDTH   ),
         .DEPTH        ( BUFFER_DEPTH )
