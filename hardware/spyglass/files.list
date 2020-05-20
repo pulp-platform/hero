@@ -1,5 +1,5 @@
-+incdir+../deps/common_cells/include
-+incdir+../deps/axi/include
++incdir+../deps/common_cells/include/common_cells
++incdir+../deps/axi/include/axi
 +incdir+../src/apb/include
 +incdir+../deps/cluster_interconnect/rtl/low_latency_interco
 +incdir+../deps/cluster_interconnect/rtl/peripheral_interco
@@ -261,9 +261,11 @@
 ../deps/scm/latch_scm/register_file_3r_2w_be.sv
 ../deps/scm/latch_scm/register_file_multi_way_1w_64b_multi_port_read_32b.sv
 ../deps/scm/latch_scm/register_file_multi_way_1w_multi_port_read.sv
+../deps/axi2mem/src/mem_to_banks.sv
 ../deps/axi2mem/src/axi_to_mem.sv
 ../deps/axi2mem/src/axi_to_mem_banked.sv
 ../deps/axi2mem/src/axi_to_mem_intf.sv
+../deps/axi2mem/src/axi_to_mem_banked_intf.sv
 ../deps/axi2per/axi2per_req_channel.sv
 ../deps/axi2per/axi2per_res_channel.sv
 ../deps/axi2per/axi2per.sv

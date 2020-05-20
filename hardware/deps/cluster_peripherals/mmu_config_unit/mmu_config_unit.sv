@@ -26,7 +26,7 @@ module mmu_config_unit (
        
 `ifdef MMU_IMPLEMENTED
 
-  enum `ifdef SYNTHESIS logic [1:0] `endif
+  enum `ifdef TARGET_SYNTHESIS logic [1:0] `endif
     { TRANS_IDLE,
       TRANS_WRITE, TRANS_READ }
     trans_state_n, trans_state_r;

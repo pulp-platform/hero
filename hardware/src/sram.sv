@@ -20,19 +20,25 @@ module sram #(
   parameter int unsigned MORE_CUTS   = (NB_CUTS > 1) ? 1: 0,
   parameter type strb_t = logic[STRB_WIDTH-1:0]
 ) (
-  input  logic  clk_i,
-  input  logic  rst_ni,
-  input  logic  req_i,
-  input  logic  we_i,
-  input  addr_t addr_i,
-  input  data_t wdata_i,
-  input  strb_t be_i,
-  output data_t rdata_o
+  // DFT (no direction suffixes due to customer request)
+  input  logic [25:0] mem_ctrl,
+  input  logic        dft_ram_gt_se,
+  input  logic        dft_ram_bypass,
+  input  logic        dft_ram_bp_clk_en,
+
+  input  logic        clk_i,
+  input  logic        rst_ni,
+  input  logic        req_i,
+  input  logic        we_i,
+  input  addr_t       addr_i,
+  input  data_t       wdata_i,
+  input  strb_t       be_i,
+  output data_t       rdata_o
 );
 
 
 
-`ifdef SYNTHESIS
+`ifdef TARGET_SYNTHESIS
   `ifdef TARGET_XILINX
     strb_t we;
     for (genvar p = 0; p < STRB_WIDTH; p++) begin : gen_we
@@ -106,7 +112,7 @@ module sram #(
 
   genvar i;
   generate
-    for(i=0;i<NB_CUTS; i++) begin : CUT 
+    for(i=0;i<NB_CUTS; i++) begin : CUT
       assign CEN_int[i] = ~req_i| ~(addr_i[10 +$clog2(NB_CUTS)-1:10 ] == i) ;
       logic [31: 0] BE_BW;
       assign BE_BW      = { {8{be_i[3]}}, {8{be_i[2]}}, {8{be_i[1]}}, {8{be_i[0]}} };
@@ -120,7 +126,7 @@ module sram #(
         .AC           ( addr_i[1:0]      ),
         .D            ( wdata_i          ),
         .BW           ( BE_BW            ),
-        .Q            ( Q_int[i]         ),   //rdata_o 
+        .Q            ( Q_int[i]         ),   //rdata_o
         .T_LOGIC      ( 1'b0             ),
         .MA_SAWL      ( '0               ),
         .MA_WL        ( '0               ),

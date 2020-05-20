@@ -121,7 +121,7 @@
 `endif
 
 // Comment to use bheavioral memories, uncomment to use stdcell latches. If uncommented, simulations slowdown occuor
-`ifdef SYNTHESIS
+`ifdef TARGET_SYNTHESIS
  `define SCM_IMPLEMENTED
  `define SCM_BASED_ICACHE
 `endif

@@ -19,8 +19,8 @@
 //              required before this module if a master upstream is capable of generating
 //              atomic operations.
 
-`include "axi/typedef.svh"
-`include "common_cells/registers.svh"
+`include "typedef.svh"
+`include "registers.svh"
 
 module axi_burst_splitter #(
   // Maximum number of AXI read bursts outstanding at the same time

@@ -11,8 +11,8 @@
 // these values to hierarchically design your system, though.
 
 
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 
 package pulp_pkg;
 

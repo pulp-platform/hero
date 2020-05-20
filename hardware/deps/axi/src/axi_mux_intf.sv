@@ -20,8 +20,8 @@
 // a response with ID `6'b100110` will be forwarded to slave port 2 (`2'b10`).
 
 // interface wrap
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 module axi_mux_intf #(
   parameter int unsigned SLV_AXI_ID_WIDTH = 32'd0, // Synopsys DC requires default value for params
   parameter int unsigned MST_AXI_ID_WIDTH = 32'd0,

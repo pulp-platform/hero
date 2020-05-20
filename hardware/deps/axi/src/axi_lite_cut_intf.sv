@@ -12,8 +12,8 @@
 // Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 // Andreas Kurth  <akurth@iis.ee.ethz.ch>
 
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 
 module axi_lite_cut_intf #(
   // bypass enable

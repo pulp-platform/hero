@@ -15,7 +15,7 @@ module fpnew_classifier #(
   parameter fpnew_pkg::fp_format_e   FpFormat = fpnew_pkg::fp_format_e'(0),
   parameter int unsigned             NumOperands = 1,
   // Do not change
-  localparam int unsigned WIDTH = fpnew_pkg::fp_width(FpFormat)
+  parameter int unsigned WIDTH = fpnew_pkg::fp_width(FpFormat)
 ) (
   input  logic                [NumOperands-1:0][WIDTH-1:0] operands_i,
   input  logic                [NumOperands-1:0]            is_boxed_i,

@@ -80,7 +80,7 @@ module register_file_3r_2w_be
     genvar k;
     genvar l;
 
-   `ifndef SYNTHESIS
+   `ifndef TARGET_SYNTHESIS
     always_ff @(negedge clk)
     begin
         if(WriteEnable_A && WriteEnable_B)

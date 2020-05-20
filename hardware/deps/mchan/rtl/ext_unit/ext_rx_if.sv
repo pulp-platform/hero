@@ -84,7 +84,7 @@ module ext_rx_if
     
     );
    
-   enum 			      `ifdef SYNTHESIS logic [1:0] `endif { TRANS_IDLE, TRANS_STALLED, TRANS_RUN } CS, NS;
+   enum 			      `ifdef TARGET_SYNTHESIS logic [1:0] `endif { TRANS_IDLE, TRANS_STALLED, TRANS_RUN } CS, NS;
    logic [AXI_ID_WIDTH+4-1:0]	      s_axi_master_ar_id;
    
    logic [7:0] 			      s_beats_nb,s_beats_nb_align;

@@ -115,7 +115,7 @@ module debug_system #(
       hartinfo[i] = RI5CY_HARTINFO;
   end
 
-`ifndef SYNTHESIS
+`ifndef TARGET_SYNTHESIS
   initial begin
     assert (AXI_DW == 32)
       else $fatal("debug module doesn't not support AXI_DW value");

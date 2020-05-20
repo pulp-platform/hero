@@ -17,8 +17,8 @@
  * Andreas Kurth <akurth@iis.ee.ethz.ch>
  */
 
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 
 module cluster_bus_wrap
 #(

@@ -17,8 +17,8 @@
 // master and slave port and models the crossbar with a network of FIFOs, checks whether each
 // transaction follows the expected route.
 
-`include "axi/typedef.svh"
-`include "axi/assign.svh"
+`include "typedef.svh"
+`include "assign.svh"
 
 module tb_axi_xbar;
   // Dut parameters

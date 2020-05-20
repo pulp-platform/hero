@@ -23,7 +23,7 @@ set reAnalyzeRTL "TRUE"
 set DESIGN_NAME  "pulp_cluster"
 
 # Set VERILOG defines
-set DEFINES "SYNTHESIS=1"
+set DEFINES "TARGET_SYNTHESIS=1"
 set DEFINE "INVECAS=1"
 
 file delete -force -- ./work

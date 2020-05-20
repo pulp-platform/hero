@@ -187,7 +187,7 @@ module axi_slice_dc_master_wrap
       );
 
 /*
-`ifndef SYNTHESIS
+`ifndef TARGET_SYNTHESIS
     Axi4PC #(
         .ADDR_WIDTH   ( AXI_ADDR_WIDTH ),
         .DATA_WIDTH   ( AXI_DATA_WIDTH ),

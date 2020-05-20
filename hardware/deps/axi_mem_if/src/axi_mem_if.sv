@@ -263,7 +263,7 @@ module axi_mem_if #(
         endcase
     end
 
-    `ifndef SYNTHESIS
+    `ifndef TARGET_SYNTHESIS
     `ifndef VERILATOR
     // assert that only full data lane transfers allowed
     // assert property (

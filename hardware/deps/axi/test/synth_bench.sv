@@ -197,7 +197,7 @@ module synth_axi_atop_filter #(
   );
 endmodule
 
-`include "axi/typedef.svh"
+`include "typedef.svh"
 
 module synth_axi_lite_to_apb #(
   parameter int unsigned NoApbSlaves = 0,
@@ -305,7 +305,7 @@ module synth_axi_cdc #(
 
 endmodule
 
-`include "axi/typedef.svh"
+`include "typedef.svh"
 
 module synth_axi_lite_xbar #(
   parameter int unsigned NoSlvMst = 32'd1

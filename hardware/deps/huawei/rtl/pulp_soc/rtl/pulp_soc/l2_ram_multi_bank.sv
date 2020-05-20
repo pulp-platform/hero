@@ -48,7 +48,7 @@ module l2_ram_multi_bank #(
                   This model the hybrid SRAM and SCM configuration
                   that has been tape-out.
                   */
-                  `ifndef SYNTHESIS
+                  `ifndef TARGET_SYNTHESIS
                   
                     model_sram_28672x32_scm_512x32 bank_i (
                                                         .CLK   ( clk_i                                ),
@@ -183,7 +183,7 @@ module l2_ram_multi_bank #(
       */
       `ifndef PULP_FPGA_EMUL
 
-        `ifndef SYNTHESIS
+        `ifndef TARGET_SYNTHESIS
             generic_memory #(
                .ADDR_WIDTH ( MEM_ADDR_WIDTH_PRI  ),
                .DATA_WIDTH ( 32                  )
@@ -226,7 +226,7 @@ module l2_ram_multi_bank #(
       `endif
 
     `ifndef PULP_FPGA_EMUL
-      `ifdef SYNTHESIS  
+      `ifdef TARGET_SYNTHESIS
         `ifdef INVECAS
               l2_mem_bank_8192x32 bank_sram_pri0_i (
              .CLK  ( clk_i                      ),

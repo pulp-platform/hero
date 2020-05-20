@@ -86,8 +86,8 @@ module axi_multicut #(
   // pragma translate_on
 endmodule
 
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 
 // interface wrapper
 module axi_multicut_intf #(

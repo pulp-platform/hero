@@ -359,7 +359,7 @@ module apb_soc_ctrl
                 `REG_CLUSTER_BOOT_ADDR1:
                     r_cluster_boot[63:32] <= PWDATA;
                 default: begin
-                `ifndef SYNTHESIS
+                `ifndef TARGET_SYNTHESIS
                   `ifdef MSG_VERBOSE
                   $display("[APB SOC CTRL] INVALID WRITE ACCESS to %x at time %t\n",PADDR, $time);
                   `endif
@@ -463,7 +463,7 @@ module apb_soc_ctrl
           default:
             begin
             PRDATA = 'h0;
-            `ifndef SYNTHESIS
+            `ifndef TARGET_SYNTHESIS
               `ifdef MSG_VERBOSE
               $display("[APB SOC CTRL] INVALID READ ACCESS to %x at time %t\n",PADDR, $time);
               `endif

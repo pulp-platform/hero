@@ -21,8 +21,8 @@ import pulp_cluster_package::*;
 import apu_package::*;
 import apu_core_package::*;
 
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 
 module pulp_cluster
 #(
@@ -597,26 +597,26 @@ module pulp_cluster
   typedef logic [AXI_ID_OUT_WIDTH-1:0] id_oup_t;
   typedef logic [AXI_DATA_C2S_WIDTH/8-1:0] strb_t;
   typedef logic [AXI_USER_WIDTH-1:0] user_t;
-  `AXI_TYPEDEF_AW_CHAN_T(aw_chan_t, addr_t, id_oup_t, user_t);
-  `AXI_TYPEDEF_W_CHAN_T (w_chan_t, data_t, strb_t, user_t);
-  `AXI_TYPEDEF_B_CHAN_T (b_chan_t, id_oup_t, user_t);
-  `AXI_TYPEDEF_AR_CHAN_T(ar_chan_t, addr_t, id_oup_t, user_t);
-  `AXI_TYPEDEF_R_CHAN_T (r_chan_t, data_t, id_oup_t, user_t);
-  `AXI_TYPEDEF_REQ_T    (axi_req_t, aw_chan_t, w_chan_t, ar_chan_t);
-  `AXI_TYPEDEF_RESP_T   (axi_resp_t, b_chan_t, r_chan_t);
-  axi_req_t   ext_tcdm_req,   ext_tcdm_req_buf;
-  axi_resp_t  ext_tcdm_resp,  ext_tcdm_resp_buf;
+  `AXI_TYPEDEF_AW_CHAN_T(cl_aw_chan_t, addr_t, id_oup_t, user_t);
+  `AXI_TYPEDEF_W_CHAN_T (cl_w_chan_t, data_t, strb_t, user_t);
+  `AXI_TYPEDEF_B_CHAN_T (cl_b_chan_t, id_oup_t, user_t);
+  `AXI_TYPEDEF_AR_CHAN_T(cl_ar_chan_t, addr_t, id_oup_t, user_t);
+  `AXI_TYPEDEF_R_CHAN_T (cl_r_chan_t, data_t, id_oup_t, user_t);
+  `AXI_TYPEDEF_REQ_T    (cl_axi_req_t, cl_aw_chan_t, cl_w_chan_t, cl_ar_chan_t);
+  `AXI_TYPEDEF_RESP_T   (cl_axi_resp_t, cl_b_chan_t, cl_r_chan_t);
+  cl_axi_req_t    ext_tcdm_req,   ext_tcdm_req_buf;
+  cl_axi_resp_t   ext_tcdm_resp,  ext_tcdm_resp_buf;
   `AXI_ASSIGN_TO_REQ(ext_tcdm_req, s_ext_tcdm_bus);
   `AXI_ASSIGN_FROM_RESP(s_ext_tcdm_bus, ext_tcdm_resp);
   axi_cut #(
     .Bypass     (1'b0),
-    .aw_chan_t  (aw_chan_t),
-    .w_chan_t   (w_chan_t),
-    .b_chan_t   (b_chan_t),
-    .ar_chan_t  (ar_chan_t),
-    .r_chan_t   (r_chan_t),
-    .req_t      (axi_req_t),
-    .resp_t     (axi_resp_t)
+    .aw_chan_t  (cl_aw_chan_t),
+    .w_chan_t   (cl_w_chan_t),
+    .b_chan_t   (cl_b_chan_t),
+    .ar_chan_t  (cl_ar_chan_t),
+    .r_chan_t   (cl_r_chan_t),
+    .req_t      (cl_axi_req_t),
+    .resp_t     (cl_axi_resp_t)
   ) i_axi_to_mem_cut (
     .clk_i      (clk_cluster),
     .rst_ni,
@@ -627,8 +627,8 @@ module pulp_cluster
   );
 
   axi_to_mem #(
-    .axi_req_t  ( axi_req_t           ),
-    .axi_resp_t ( axi_resp_t          ),
+    .axi_req_t  ( cl_axi_req_t        ),
+    .axi_resp_t ( cl_axi_resp_t       ),
     .AddrWidth  ( 32                  ),
     .DataWidth  ( AXI_DATA_C2S_WIDTH  ),
     .IdWidth    ( AXI_ID_OUT_WIDTH    ),
@@ -706,6 +706,12 @@ module pulp_cluster
     .slave   ( s_mperiph_demux_bus[1] ),
     .masters ( s_debug_bus            )
   );
+  for (genvar i = 0; i < NB_CORES; i++) begin : gen_tie_debug_bus_off
+    assign s_debug_bus[i].gnt = 1'b0;
+    assign s_debug_bus[i].r_rdata = '0;
+    assign s_debug_bus[i].r_opc = '0;
+    assign s_debug_bus[i].r_valid = 1'b0;
+  end
 
   per2axi_wrap #(
     .NB_CORES       ( NB_CORES             ),
@@ -1009,6 +1015,7 @@ module pulp_cluster
       assign s_hwpe_cfg_bus.gnt     = '1;
       assign s_hwpe_cfg_bus.r_rdata = 32'hdeadbeef;
       assign s_hwpe_cfg_bus.r_id    = '0;
+      assign s_hwpe_cfg_bus.r_opc   = '0;
       for (genvar i=NB_CORES; i<NB_CORES+NB_HWPE_PORTS; i++) begin : no_hwpe_bias
         assign s_core_xbar_bus[i].req = '0;
         assign s_core_xbar_bus[i].wen = '0;
@@ -1359,6 +1366,10 @@ module pulp_cluster
       .NB_CUTS    (5),
       .MORE_CUTS  (1)
     ) i_mem (
+      .mem_ctrl,
+      .dft_ram_gt_se,
+      .dft_ram_bypass,
+      .dft_ram_bp_clk_en,
       .clk_i    (clk_cluster),
       .rst_ni   (rst_ni),
       .req_i    (s_tcdm_bus_sram[i].req),

@@ -11,7 +11,7 @@
 
 // Author: Stefan Mach <smach@iis.ee.ethz.ch>
 
-`include "common_cells/registers.svh"
+`include "registers.svh"
 
 module fpnew_cast_multi #(
   parameter fpnew_pkg::fmt_logic_t   FpFmtConfig  = '1,
@@ -22,9 +22,9 @@ module fpnew_cast_multi #(
   parameter type                     TagType     = logic,
   parameter type                     AuxType     = logic,
   // Do not change
-  localparam int unsigned WIDTH = fpnew_pkg::maximum(fpnew_pkg::max_fp_width(FpFmtConfig),
+  parameter int unsigned WIDTH = fpnew_pkg::maximum(fpnew_pkg::max_fp_width(FpFmtConfig),
                                                      fpnew_pkg::max_int_width(IntFmtConfig)),
-  localparam int unsigned NUM_FORMATS = fpnew_pkg::NUM_FP_FORMATS
+  parameter int unsigned NUM_FORMATS = fpnew_pkg::NUM_FP_FORMATS
 ) (
   input  logic                   clk_i,
   input  logic                   rst_ni,

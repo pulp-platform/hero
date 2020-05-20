@@ -248,7 +248,7 @@ module core2axi
 
       assign rdata = addr_q[0] ? r_data_i[63:32] : r_data_i[31:0];
     end else begin
-      `ifndef SYNTHESIS
+      `ifndef TARGET_SYNTHESIS
       initial $error("AXI4_WDATA_WIDTH has an invalid value");
       `endif
     end
@@ -268,7 +268,7 @@ module core2axi
     end else if (AXI4_WDATA_WIDTH == 64) begin
       assign w_strb_o = data_addr_i[2] ? {data_be_i, 4'b0000} : {4'b0000, data_be_i};
     end else begin
-      `ifndef SYNTHESIS
+      `ifndef TARGET_SYNTHESIS
       initial $error("AXI4_WDATA_WIDTH has an invalid value");
       `endif
     end

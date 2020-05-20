@@ -24,7 +24,7 @@ module boot_rom #(
 
     `ifndef PULP_FPGA_EMUL
 
-        `ifndef SYNTHESIS
+        `ifndef TARGET_SYNTHESIS
 
             generic_rom #(
                 .ADDR_WIDTH(ROM_ADDR_WIDTH-2),

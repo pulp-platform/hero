@@ -243,8 +243,8 @@ module axi_to_axi_lite_id_reflect #(
 endmodule
 
 // interface wrapper
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 module axi_to_axi_lite_intf #(
   /// AXI bus parameters
   parameter int unsigned AXI_ADDR_WIDTH     = 32'd0,

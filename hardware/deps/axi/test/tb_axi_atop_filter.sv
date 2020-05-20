@@ -13,7 +13,7 @@
 
 // Testbench for axi_atop_filter
 
-`include "axi/assign.svh"
+`include "assign.svh"
 
 import axi_pkg::ATOP_ATOMICCMP;
 import axi_pkg::ATOP_ATOMICLOAD;

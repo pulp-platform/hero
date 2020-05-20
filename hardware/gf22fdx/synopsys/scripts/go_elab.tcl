@@ -28,7 +28,7 @@ set reAnalyzeRTL "TRUE"
 set DESIGN_NAME  "pulp"
 
 # Set VERILOG defines
-set DEFINE "SYNTHESIS=1"
+set DEFINE "TARGET_SYNTHESIS=1"
 set DEFINE "INVECAS=1"
 
 sh mkdir -p unmapped

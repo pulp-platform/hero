@@ -11,8 +11,8 @@
 // Author: Wolfgang Roenninger <wroennin@ethz.ch>
 
 // Interface variant of `axi_demux`.
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 module axi_demux_intf #(
   parameter int unsigned AXI_ID_WIDTH     = 32'd0, // Synopsys DC requires default value for params
   parameter int unsigned AXI_ADDR_WIDTH   = 32'd0,

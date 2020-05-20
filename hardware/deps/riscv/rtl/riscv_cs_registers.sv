@@ -27,7 +27,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 `ifndef PULP_FPGA_EMUL
- `ifdef SYNTHESIS
+ `ifdef TARGET_SYNTHESIS
   `define ASIC_SYNTHESIS
  `endif
 `endif

@@ -71,13 +71,13 @@ set search_path [ join "$IPS_PATH/axi/per2axi
                         $IPS_PATH/axi/axi2mem
                         $IPS_PATH/axi/axi_node
                         $IPS_PATH/axi/axi/src
-                        $IPS_PATH/axi/include
+                        $IPS_PATH/axi/include/axi
                         $IPS_PATH/apb_periph/apb_i2c
                         $IPS_PATH/mchan/rtl/include
                         $IPS_PATH/cluster_peripherals/include
                         $IPS_PATH/cluster_peripherals/event_unit/include
                         $IPS_PATH/riscv/rtl/include
-                        $IPS_PATH/common_cells/include
+                        $IPS_PATH/common_cells/include/common_cells
                         $IPS_PATH/fpu_interco/
                         $IPS_PATH/pulp_cluster/packages
                         $IPS_PATH/hwpe-ctrl/rtl

@@ -10,7 +10,7 @@
 //
 // Author: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
-`include "axi/assign.svh"
+`include "assign.svh"
 
 module tb_axi_id_remap;
 

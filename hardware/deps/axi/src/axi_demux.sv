@@ -10,7 +10,7 @@
 
 // Author: Wolfgang Roenninger <wroennin@ethz.ch>
 
-`include "common_cells/registers.svh"
+`include "registers.svh"
 
 // axi_demux: Demultiplex an AXI bus from one slave port to multiple master ports.
 // See `doc/axi_demux.md` for the documentation, including the definition of parameters and ports.

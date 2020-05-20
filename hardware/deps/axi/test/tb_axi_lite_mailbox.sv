@@ -29,8 +29,8 @@
 // Each of these tests has the respective AXI Lite transaction asserted in the expected output.
 // Simulation end tells the number of failed assertions.
 
-`include "axi/typedef.svh"
-`include "axi/assign.svh"
+`include "typedef.svh"
+`include "assign.svh"
 
 module tb_axi_lite_mailbox;
   // timing parameters

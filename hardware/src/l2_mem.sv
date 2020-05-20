@@ -7,7 +7,7 @@
 // work. Any reuse/redistribution is strictly forbidden without written
 // permission from ETH Zurich.
 
-`include "common_cells/registers.svh"
+`include "registers.svh"
 
 module l2_mem #(
   parameter int unsigned  AXI_AW = 0,   // [bit], must be a power of 2
@@ -115,6 +115,10 @@ module l2_mem #(
         .DATA_WIDTH (CUT_DW),
         .N_WORDS    (CUT_N_WORDS)
       ) i_mem_cut (
+        .mem_ctrl,
+        .dft_ram_gt_se,
+        .dft_ram_bypass,
+        .dft_ram_bp_clk_en,
         .clk_i,
         .rst_ni,
         .req_i    (cut_req[iCol][iRow]),

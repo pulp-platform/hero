@@ -12,7 +12,7 @@
 // Andreas Kurth  <akurth@iis.ee.ethz.ch>
 // Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 
-`include "axi/assign.svh"
+`include "assign.svh"
 
 /// A connector that joins two AXI interfaces.
 module axi_join_intf (

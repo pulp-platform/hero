@@ -110,8 +110,8 @@ endmodule : axi_dw_converter
 
 // Interface wrapper
 
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 
 module axi_dw_converter_intf #(
     parameter int unsigned AXI_ID_WIDTH            = 1,

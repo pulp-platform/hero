@@ -15,8 +15,8 @@
 // writes and reads over the whole addess map. All masters simultaneously issue transactions
 // through the crossbar, thereby fully saturating all its bandwidth.
 
-`include "axi/typedef.svh"
-`include "axi/assign.svh"
+`include "typedef.svh"
+`include "assign.svh"
 
 module tb_axi_lite_xbar;
   // Dut parameters

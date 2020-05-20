@@ -10,7 +10,7 @@
 
 // Author: Wolfgang Roenninger <wroennin@ethz.ch>
 
-`include "common_cells/registers.svh"
+`include "registers.svh"
 
 // axi_lite_demux: Demultiplex an AXI4-Lite bus from one slave port to multiple master ports.
 //                 The selection signal at the AW and AR channel has to follow the same
@@ -381,8 +381,8 @@ module axi_lite_demux #(
   // pragma translate_on
 endmodule
 
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 
 module axi_lite_demux_intf #(
   parameter int unsigned AxiAddrWidth = 32'd0,

@@ -14,7 +14,11 @@ dependencies:
 
 sources:
   # Level 0
-  - src/axi_to_mem.sv
+  - src/mem_to_banks.sv
   # Level 1
+  - src/axi_to_mem.sv
+  # Level 2
   - src/axi_to_mem_banked.sv
   - src/axi_to_mem_intf.sv
+  # Level 3
+  - src/axi_to_mem_banked_intf.sv

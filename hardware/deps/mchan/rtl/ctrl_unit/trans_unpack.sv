@@ -93,7 +93,7 @@ module trans_unpack
    logic 			       s_trans_complete;
    
    // FSM STATES SIGNALS
-   enum 			       `ifdef SYNTHESIS logic [1:0] `endif { TRANS_IDLE, TRANS_RUN } CS, NS;
+   enum 			       `ifdef TARGET_SYNTHESIS logic [1:0] `endif { TRANS_IDLE, TRANS_RUN } CS, NS;
    
    //**********************************************************
    //***** COMPUTE NUMBER OF COMMANDS *************************

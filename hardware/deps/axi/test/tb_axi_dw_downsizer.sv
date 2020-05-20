@@ -15,8 +15,8 @@
 // Copyright (C) 2020 ETH Zurich, University of Bologna
 // All rights reserved.
 
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 
 module tb_axi_dw_downsizer;
 

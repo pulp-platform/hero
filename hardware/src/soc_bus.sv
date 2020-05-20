@@ -9,7 +9,7 @@
 
 package soc_bus_pkg;
   function automatic int unsigned n_slaves(input int unsigned n_clusters);
-    return n_clusters + 1;
+    return n_clusters + 2; // ext and debug
   endfunction
 
   function automatic int unsigned oup_id_w(input int unsigned n_clusters, inp_id_w);
@@ -17,7 +17,7 @@ package soc_bus_pkg;
   endfunction
 endpackage
 
-`include "axi/assign.svh"
+`include "assign.svh"
 
 module soc_bus #(
   parameter int unsigned  AXI_AW = 0,               // [bit]
@@ -42,7 +42,7 @@ module soc_bus #(
 );
 
   localparam int unsigned N_MASTERS = N_CLUSTERS + L2_N_PORTS + 2; // ext, debug
-  localparam int unsigned N_SLAVES = soc_bus_pkg::n_slaves(N_CLUSTERS) + 2; // ext and debug
+  localparam int unsigned N_SLAVES = soc_bus_pkg::n_slaves(N_CLUSTERS);
   localparam int unsigned IDX_L2_MEM = N_CLUSTERS;
   localparam int unsigned IDX_EXT = IDX_L2_MEM + 1;
   localparam int unsigned IDX_DEBUG_MST = IDX_EXT + 1;
@@ -89,7 +89,8 @@ module soc_bus #(
   axi_pkg::xbar_rule_32_t [N_RULES-1:0] addr_map;
   // Clusters
   for (genvar i = 0; i < N_CLUSTERS; i++) begin : gen_addr_map_clusters
-    logic [AXI_AW-1:0] cluster_base_addr = 32'h1000_0000 + i * 32'h0040_0000;
+    logic [AXI_AW-1:0] cluster_base_addr;
+    assign cluster_base_addr = 32'h1000_0000 + i * 32'h0040_0000;
     assign addr_map[i] = '{
       idx:        i,
       start_addr: cluster_base_addr,
@@ -97,7 +98,8 @@ module soc_bus #(
     };
   end
   for (genvar i = 0; i < L2_N_PORTS; i++) begin : gen_addr_map_l2
-    logic [AXI_AW-1:0] l2_port_base_addr = 32'h1C00_0000 + i*L2_N_BYTES_PER_PORT;
+    logic [AXI_AW-1:0] l2_port_base_addr;
+    assign l2_port_base_addr = 32'h1C00_0000 + i*L2_N_BYTES_PER_PORT;
     assign addr_map[N_CLUSTERS + i] = '{
       idx:        IDX_L2_MEM + i,
       start_addr: l2_port_base_addr,

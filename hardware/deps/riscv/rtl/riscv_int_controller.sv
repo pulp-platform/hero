@@ -109,7 +109,7 @@ else
   end
 
 
-`ifndef SYNTHESIS
+`ifndef TARGET_SYNTHESIS
   // synopsys translate_off
   // evaluate at falling edge to avoid duplicates during glitches
   // Removed this message as it pollutes too much the output and makes tests fail

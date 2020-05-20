@@ -13,7 +13,7 @@
 // Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 // Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
-`include "axi/assign.svh"
+`include "assign.svh"
 
 /// A clock domain crossing on an AXI interface.
 ///
@@ -126,8 +126,8 @@ module axi_cdc #(
 
 endmodule
 
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
+`include "assign.svh"
+`include "typedef.svh"
 
 // interface wrapper
 module axi_cdc_intf #(
