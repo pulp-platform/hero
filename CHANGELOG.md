@@ -45,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fix blocking to non-blocking assignment in `register_file_1r_1w`.
 - `soc_bus`: Fix number of slave ports.
 - `common_cells`: Add missing synthesis guard around assertion in `rstgen_bypass`.
+- `soc_bus`: Fix contiguous assignment to `cluster_base_addr` and `l2_port_base_addr`.
 
 
 ## 2020-05-06

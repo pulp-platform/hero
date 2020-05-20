@@ -89,7 +89,8 @@ module soc_bus #(
   axi_pkg::xbar_rule_32_t [N_RULES-1:0] addr_map;
   // Clusters
   for (genvar i = 0; i < N_CLUSTERS; i++) begin : gen_addr_map_clusters
-    logic [AXI_AW-1:0] cluster_base_addr = 32'h1000_0000 + i * 32'h0040_0000;
+    logic [AXI_AW-1:0] cluster_base_addr;
+    assign cluster_base_addr = 32'h1000_0000 + i * 32'h0040_0000;
     assign addr_map[i] = '{
       idx:        i,
       start_addr: cluster_base_addr,
@@ -97,7 +98,8 @@ module soc_bus #(
     };
   end
   for (genvar i = 0; i < L2_N_PORTS; i++) begin : gen_addr_map_l2
-    logic [AXI_AW-1:0] l2_port_base_addr = 32'h1C00_0000 + i*L2_N_BYTES_PER_PORT;
+    logic [AXI_AW-1:0] l2_port_base_addr;
+    assign l2_port_base_addr = 32'h1C00_0000 + i*L2_N_BYTES_PER_PORT;
     assign addr_map[N_CLUSTERS + i] = '{
       idx:        IDX_L2_MEM + i,
       start_addr: l2_port_base_addr,
