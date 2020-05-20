@@ -10,24 +10,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sram`: Add DFT ports.
 
 ### Changed
-- `pulp_cluster`:
-  - Reduce address range of event unit in `core_demux`.
-  - Swap peripheral IDs of error slave (now 7) and external port (now 8).
-  - Prefix AXI channel and request/response types to prevent type collisions in some tools.
-- `fpnew`:
-  - Add `default` to `unique case` that does not need a default to improve tool compatibility.
-  - Flatten `opgrp_fmt_unit_types_t` to improve tool compatibility.
-- Replace `localparam` in parameters by `parameter` to improve tool compatibility.
-- `axi2mem`: Improve tool compatibility by separating modules into individual files.
 - `axi`: Export include directory `include/axi` to improve compatibility with tools that do not
   support directories in SystemVerilog ```include``.
 - `axi` and `common_cells`: Export include directory `include/axi` and `include/common_cells`,
   respectively, to improve compatibility with tools that do not support directories in SystemVerilog
   ```include``.
+- `axi2mem`: Improve tool compatibility by separating modules into individual files.
+- `fpnew`:
+  - Add `default` to `unique case` that does not need a default to improve tool compatibility.
+  - Flatten `opgrp_fmt_unit_types_t` to improve tool compatibility.
+- `pulp_cluster`:
+  - Reduce address range of event unit in `core_demux`.
+  - Swap peripheral IDs of error slave (now 7) and external port (now 8).
+  - Prefix AXI channel and request/response types to prevent type collisions in some tools.
 - Rename `fifo` to `pulp_fifo` to prevent naming collisions with external modules.
+- Replace `localparam` in parameters of all modules by `parameter` to improve tool compatibility.
+- Rename `SYNTHESIS` define to `TARGET_SYNTHESIS` to prevent collisions in some synthesizers.
 
 ### Fixed
-- `pulp-runtime`: Enable RISC-V A extension in compilation flow.
+- `common_cells`: Add missing synthesis guard around assertion in `rstgen_bypass`.
 - `fpu_div_sqrt_mvp` and `fpu_interco`: Improve tool compatibility by removing wildcard imports.
 - `hier-icache`:
   - Remove unused BIST ports.
@@ -38,17 +39,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Tie unused `s_hwpe_cfg_bus.r_opc` off.
   - Tie unused `debug_bus` signals off.
 - `pulp_cluster_ooc`: Tie unused ports off.
+- `pulp-runtime`: Enable RISC-V A extension in compilation flow.
 - `riscv`:
   - Remove unused BIST ports from register file.
   - Remove wildcard imports to improve tool compatibility.
 - `scm`:
   - Remove unused BIST ports.
   - Fix blocking to non-blocking assignment in `register_file_1r_1w`.
-- `soc_bus`: Fix number of slave ports.
-- `common_cells`: Add missing synthesis guard around assertion in `rstgen_bypass`.
-- `soc_bus`: Fix contiguous assignment to `cluster_base_addr` and `l2_port_base_addr`.
-- Rename `SYNTHESIS` define to `TARGET_SYNTHESIS` to prevent collisions in some synthesizers.
-- Rename `fifo` module to `pulp_fifo` to prevent collisions with external `fifo` modules.
+- `soc_bus`:
+  - Fix number of slave ports.
+  - Fix contiguous assignment to `cluster_base_addr` and `l2_port_base_addr`.
 
 
 ## 2020-05-06
