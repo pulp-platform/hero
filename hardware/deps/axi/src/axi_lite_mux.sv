@@ -16,7 +16,7 @@
 //                        sent back in order.
 
 // register macros
-`include "common_cells/registers.svh"
+`include "registers.svh"
 
 module axi_lite_mux #(
   // AXI4-Lite parameter and channel types

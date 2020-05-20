@@ -42,7 +42,7 @@
 // routes the response depending on the `apb_req.psel` bit and `apb_req.pwrite` either to the
 // AXI4Lite B channel for writes and to the R channel for reads.
 
-`include "common_cells/registers.svh"
+`include "registers.svh"
 
 module axi_lite_to_apb #(
   parameter int unsigned NoApbSlaves = 32'd1,  // Number of connected APB slaves

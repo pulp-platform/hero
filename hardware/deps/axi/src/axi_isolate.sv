@@ -28,7 +28,7 @@
 // signals in `mst_req_o` are silenced to `'0`. When isolated, new transactions initiated on the
 // slave port are stalled until the isolation is terminated by deasserting `isolate_i`.
 
-`include "common_cells/registers.svh"
+`include "registers.svh"
 
 module axi_isolate #(
   parameter int unsigned NumPending = 32'd16, // Number of pending requests per channel

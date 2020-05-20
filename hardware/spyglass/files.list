@@ -1,4 +1,4 @@
-+incdir+../deps/common_cells/include
++incdir+../deps/common_cells/include/common_cells
 +incdir+../deps/axi/include/axi
 +incdir+../src/apb/include
 +incdir+../deps/cluster_interconnect/rtl/low_latency_interco

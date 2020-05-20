@@ -20,7 +20,7 @@
 //              atomic operations.
 
 `include "typedef.svh"
-`include "common_cells/registers.svh"
+`include "registers.svh"
 
 module axi_burst_splitter #(
   // Maximum number of AXI read bursts outstanding at the same time

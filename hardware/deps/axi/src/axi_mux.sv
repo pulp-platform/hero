@@ -20,7 +20,7 @@
 // a response with ID `6'b100110` will be forwarded to slave port 2 (`2'b10`).
 
 // register macros
-`include "common_cells/registers.svh"
+`include "registers.svh"
 
 module axi_mux #(
   // AXI parameter and channel types

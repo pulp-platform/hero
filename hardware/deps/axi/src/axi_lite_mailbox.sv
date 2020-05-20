@@ -14,7 +14,7 @@
 //              See `doc/axi_lite_mailbox.md` for the documentation, including the definition
 //              of parameters and ports.
 
-`include "common_cells/registers.svh"
+`include "registers.svh"
 
 module axi_lite_mailbox #(
   parameter int unsigned MailboxDepth = 32'd0,

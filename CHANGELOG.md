@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `axi2mem`: Improve tool compatibility by separating modules into individual files.
 - `axi`: Export include directory `include/axi` to improve compatibility with tools that do not
   support directories in SystemVerilog ```include``.
+- `axi` and `common_cells`: Export include directory `include/axi` and `include/common_cells`,
+  respectively, to improve compatibility with tools that do not support directories in SystemVerilog
+  ```include``.
 
 ### Fixed
 - `pulp-runtime`: Enable RISC-V A extension in compilation flow.

@@ -10,7 +10,7 @@
 
 // Author: Wolfgang Roenninger <wroennin@ethz.ch>
 
-`include "common_cells/registers.svh"
+`include "registers.svh"
 
 module axi_demux_id_counters #(
   // the lower bits of the AXI ID that should be considered, results in 2**AXI_ID_BITS counters
