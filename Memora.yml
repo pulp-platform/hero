@@ -807,12 +807,16 @@ artifacts:
       # sdk-pulp
       - pulp
       # sdk-har
+      - apps/hero # package `hero-apps`
       - board
       - buildroot
       - configs/har_defconfig
       - package
-      - support
+      - support/libhero-target # package `libhero-target`
+      - support/libpulp # package `libpulp`
+      - support/pulp-driver # package `pulp-driver`
       - toolchain/install-sdk.sh
+      - toolchain/llvm-project/openmp # package `hero-openmp`
     outputs:
       - install/aarch64-buildroot-linux-gnu
       - install/aarch64-hero-linux-gnu
