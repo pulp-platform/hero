@@ -48,7 +48,9 @@ module rstgen_bypass #(
         end
     end
 
+    // pragma translate_off
     initial begin : p_assertions
         if (NumRegs < 1) $fatal(1, "At least one register is required.");
     end
+    // pragma translate_on
 endmodule
