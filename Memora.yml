@@ -1131,6 +1131,23 @@ artifacts:
       - toolchain/hercules
       - toolchain/llvm-project
       - toolchain/setup-llvm.sh
+      # sdk-pulp-and-sdk-har
+      - Makefile
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/pulp.config
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/har-olinux.config
+      - pulp
+      - board
+      - buildroot
+      - configs/har_defconfig
+      - package
+      - support
+      - toolchain/install-sdk.sh
     outputs:
       - install/bin/bugpoint
       - install/bin/c-index-test
