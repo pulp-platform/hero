@@ -70,8 +70,10 @@ sdk-pulp-and-sdk-har:
       fi
     - memora get tc-pulp
     - memora get tc-har-olinux
+    - chmod -R u-w $HERO_INSTALL
     - make sdk-pulp # TODO: `sdk-pulp-har` does not seem to work?
     - make sdk-har
+    - chmod -R u+w $HERO_INSTALL
     - memora insert sdk-pulp-and-sdk-har
 
 sdk-pulp-and-sdk-hrv:
@@ -83,8 +85,10 @@ sdk-pulp-and-sdk-hrv:
       fi
     - memora get tc-pulp
     - memora get tc-hrv-olinux
+    - chmod -R u-w $HERO_INSTALL
     - make sdk-pulp-hrv
     - make sdk-hrv
+    - chmod -R u+w $HERO_INSTALL
     - memora insert sdk-pulp-and-sdk-hrv
 
 tc-llvm:
@@ -95,7 +99,9 @@ tc-llvm:
         exit 0
       fi
     - memora get sdk-pulp-and-sdk-har
+    - chmod -R u-w $HERO_INSTALL
     - make tc-llvm
+    - chmod -R u+w $HERO_INSTALL
     - memora insert tc-llvm
 
 bitstream-zcu102:
@@ -117,6 +123,7 @@ br-har-exilzcu102:
       fi
     - memora get bitstream-zcu102
     - memora get tc-har-olinux
+    - chmod -R u-w $HERO_INSTALL
     - make br-har-exilzcu102
     - memora insert br-har-exilzcu102
 
@@ -128,6 +135,7 @@ br-hrv-ediggenesys2:
         exit 0
       fi
     - memora get tc-hrv-olinux
+    - chmod -R u-w $HERO_INSTALL
     - make br-hrv-ediggenesys2
     - memora insert br-hrv-ediggenesys2
 
@@ -139,6 +147,7 @@ br-hrv-eqemu:
         exit 0
       fi
     - memora get tc-hrv-olinux
+    - chmod -R u-w $HERO_INSTALL
     - make br-hrv-eqemu
     - memora insert br-hrv-eqemu
 
@@ -150,6 +159,7 @@ test-zcu102-examples:
     - memora get tc-har-olinux
     - memora get tc-llvm
     - memora get sdk-pulp-and-sdk-har
+    - chmod -R u-w $HERO_INSTALL
     - make sdk-pulp # PULP SDK is not relocatable
     - source env/exilzcu102.sh
     ## build examples
