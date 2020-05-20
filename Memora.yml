@@ -1516,6 +1516,7 @@ artifacts:
   br-hrv-ediggenesys2:
     inputs:
       - Makefile
+      - apps/ariane # package `ariane-support`
       - board
       - buildroot
       - configs/hrv_ediggenesys2_defconfig
