@@ -794,6 +794,16 @@ artifacts:
   sdk-pulp-and-sdk-har:
     inputs:
       - Makefile
+      # tc-pulp
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/pulp.config
+      # tc-har-olinux
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/har-olinux.config
       # sdk-pulp
       - pulp
       # sdk-har
