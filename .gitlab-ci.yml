@@ -188,3 +188,15 @@ test-zcu102-examples:
         make -C $d only=pulp clean all
         .gitlab-ci.d/verify-bench.sh $(basename $d)
       done
+
+compiler-smoketest:
+  stage: test
+  script:
+    - memora get tc-pulp
+    - memora get tc-har-olinux
+    - memora get tc-llvm
+    - memora get sdk-pulp-and-sdk-har
+    - chmod -R u-w $HERO_INSTALL
+    - make sdk-pulp # PULP SDK is not relocatable
+    - source env/exilzcu102.sh
+    - .gitlab-ci.d/compiler-smoketest.sh
