@@ -2,7 +2,6 @@
 #
 # HEROv3 Compiler Smoke Test
 # bjoernf@iis.ee.ethz.ch
-# May 2020.
 #
 # This script tries to compile the benchmarks in the openmp-examples
 # subdirectory using a lot of different flags, and all of their combinations. It
