@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # HEROv3 Compiler Smoke Test
 # bjoernf@iis.ee.ethz.ch
