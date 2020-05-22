@@ -14,7 +14,8 @@
 # Usage:
 #   1. Set HERO_INSTALL environment variable to your HERO install path.
 #   2. cd to the root of the repository.
-#   3. Run script without arguments.
+#   3. Source an environment.
+#   4. Run script without arguments.
 # This script does not build the infrastructure, so that must be done before, in
 # accordance with the README.
 #
@@ -37,8 +38,6 @@ unroll_cflags=( "" "-mllvm -unroll-count=1 -mllvm -unroll-full-max-count=1" )
 # macro. This vector will compile each benchmark (and combination of other
 # vector values) once with DMA, and once without.
 polydma_cflags=( "" "-DPOLYBENCH_DMA")
-
-source env/exilzcu102.sh
 
 # Try the relevant combinations for the classic openmp-examples.
 makeflags=""
