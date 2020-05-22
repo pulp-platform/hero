@@ -17,7 +17,10 @@
 #   4. Run script without arguments.
 # This script does not build the infrastructure, so that must be done before, in
 # accordance with the README.
-#
+
+# Abort on first non-zero exit code.
+set -e
+
 # Below are the CFLAGS and MAKE flags that we should try all combinations of.
 # ONLY: Selects the benchmarks to be compiled heterogeneously, or only for PULP.
 # If only=pulp is given, then also the main function etc. is compiled with the
@@ -51,10 +54,7 @@ for defas in "${defas_makeflags[@]}"; do
         continue
       fi
       echo "TEST: $d    $makeflags    $cflags"
-      # FIXME: If this is ever included in the CI, I think we have to remove the
-      # " || exit", because I think that will cause the overall statement to
-      # have return code 0 and thus not properly failing the test.
-      make V=1 -C openmp-examples/$d clean all $makeflags cflags="$cflags" || exit
+      make V=1 -C openmp-examples/$d clean all $makeflags cflags="$cflags"
     done
   done
 done
@@ -72,11 +72,7 @@ for only in "${only_makeflags[@]}"; do
             continue
           fi
           echo "TEST: $d    $makeflags    $cflags"
-          # FIXME: If this is ever included in the CI, I think we have to remove
-          # the " || exit", because I think that will cause the overall
-          # statement to have return code 0 and thus not properly failing the
-          # test.
-          make V=1 -C $d clean all $makeflags cflags="$cflags" || exit
+          make V=1 -C $d clean all $makeflags cflags="$cflags"
         done
       done
     done
