@@ -70,12 +70,9 @@ all : $(DEPS) $(EXE) $(EXE).dis slm
 	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS_PULP) $(INCPATHS) $<
 
 %.OMP.ll: %.ll
-	hc-omp-pass $< OmpAddressSpaceAssigner "HERCULES-omp-address-space-assigner" $(<:.ll=.TMP.1.ll) $(AS_ANNOTATE_ARGS)
+	cp $< $(<:.ll=.TMP.1.ll)
 	hc-omp-pass $(<:.ll=.TMP.1.ll) OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(<:.ll=.TMP.2.ll)
 	hc-omp-pass $(<:.ll=.TMP.2.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(<:.ll=.TMP.3.ll)
-    #hc-omp-pass $< OmpAddressSpaceAssigner "HERCULES-omp-address-space-assigner" $(<:.ll=.TMP.1.ll) $(AS_ANNOTATE_ARGS)
-	#hc-omp-pass $< OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(<:.ll=.TMP.3.ll)
-	#hc-omp-pass $(<:.ll=.TMP.2.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(<:.ll=.TMP.3.ll)
 	cp $(<:.ll=.TMP.3.ll) $(<:.ll=.OMP.ll)
 
 $(EXE): $(SRC:.c=.OMP.ll)
@@ -100,19 +97,16 @@ $(EXE).dis: $(EXE)
 	$(DEV_OBJDUMP) -d $^ > $@
 
 else
-all: $(DEPS) $(EXE) $(EXE).dis
+all: $(DEPS) $(EXE) $(EXE).dis $(EXE).pulp.dis
 
 %.ll: %.c $(DEPDIR)/%.d | $(DEPDIR)
 	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS) $(INCPATHS) $<
 	$(COB) -inputs=$@ -outputs="$(<:.c=-host.ll),$(<:.c=-dev.ll)" -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)" -unbundle
 
 %-dev.OMP.ll: %.ll
-	hc-omp-pass $(<:.ll=-dev.ll) OmpAddressSpaceAssigner "HERCULES-omp-address-space-assigner" $(@:.OMP.ll=.TMP.1.ll)
+	cp $(<:.ll=-dev.ll) $(@:.OMP.ll=.TMP.1.ll)
 	hc-omp-pass $(@:.OMP.ll=.TMP.1.ll) OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(@:.OMP.ll=.TMP.2.ll)
 	hc-omp-pass $(@:.OMP.ll=.TMP.2.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(@:.OMP.ll=.TMP.3.ll)
-    # #hc-omp-pass $(<:.ll=-dev.ll) OmpAddressSpaceAssigner "HERCULES-omp-address-space-assigner" $(@:.OMP.ll=.TMP.1.ll)
-	# hc-omp-pass $(<:.ll=-dev.ll) OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(@:.OMP.ll=.TMP.3.ll)
-	# #hc-omp-pass $(@:.OMP.ll=.TMP.2.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(@:.OMP.ll=.TMP.3.ll)
 	cp $(@:.OMP.ll=.TMP.3.ll) $@
 
 %-host.OMP.ll: %.ll
@@ -128,6 +122,9 @@ $(EXE): $(exeobjs)
 
 $(EXE).dis: $(EXE)
 	$(HOST_OBJDUMP) -d $^ > $@
+
+$(EXE).pulp.dis: $(EXE)
+	$(HOST_OBJDUMP) -h $^ | grep .riscv32 | awk '{print "dd if=$^ of=$^_riscv.elf bs=1 count=$$[0x" $$3 "] skip=$$[0x" $$6 "]"}' | bash && $(DEV_OBJDUMP) -d $^_riscv.elf > $@
 
 endif
 

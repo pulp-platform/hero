@@ -18,8 +18,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#pragma omp declare target
 #include <math.h>
+#pragma omp declare target
 #include "sobel.h"
 #include "macros.h"
 
@@ -27,7 +27,7 @@
  * Transforms the rgb information of an image stored in buffer to it's gray
  * representation
  */
-int rgbToGray(byte * __restrict__ rgb, byte * __restrict__ gray, int buffer_size) {
+int rgbToGray(__host byte * __restrict__ rgb, __host byte * __restrict__ gray, int buffer_size) {
     // Take size for gray image and allocate memory
     int gray_size = buffer_size / 3;
 
@@ -42,7 +42,7 @@ int rgbToGray(byte * __restrict__ rgb, byte * __restrict__ gray, int buffer_size
 /*
  * Make the operation memory for iterative convolution
  */
-void makeOpMem(byte *buffer, int buffer_size, int width, int cindex, byte *op_mem) {
+void makeOpMem(__host byte *buffer, int buffer_size, int width, int cindex, byte *op_mem) {
     int bottom = cindex-width < 0;
     int top = cindex+width >= buffer_size;
     int left = cindex % width == 0;
@@ -78,7 +78,7 @@ int convolution(byte * __restrict__ X, int * __restrict__ Y, int c_size) {
  * Iterate Convolution
  */
 
-void itConv(byte *buffer, int buffer_size, int width, int *op, byte * __restrict__ res) {
+__attribute__((noinline)) void itConv(__host byte *buffer, int buffer_size, int width, int *op, __host byte * __restrict__ res) {
     // Temporary memory for each pixel operation
     byte op_mem[SOBEL_OP_SIZE];
     memset(op_mem, 0, SOBEL_OP_SIZE);
@@ -104,7 +104,7 @@ void itConv(byte *buffer, int buffer_size, int width, int *op, byte * __restrict
 /*
  * Contour
  */
-void contour(byte * __restrict__ sobel_h, byte * __restrict__ sobel_v, int gray_size, byte * __restrict__ contour_img) {
+void contour(__host byte * __restrict__ sobel_h, __host byte * __restrict__ sobel_v, int gray_size, __host byte * __restrict__ contour_img) {
     // Iterate through every pixel to calculate the contour image
     #pragma omp parallel for
     for(int i=0; i<gray_size; i++) {
@@ -112,7 +112,7 @@ void contour(byte * __restrict__ sobel_h, byte * __restrict__ sobel_v, int gray_
     }
 }
 
-int sobelFilter(byte *rgb, byte *gray, byte *sobel_h_res, byte *sobel_v_res, byte *contour_img, int width, int height) {
+int sobelFilter(__host byte *rgb, __host byte *gray, __host byte *sobel_h_res, __host byte *sobel_v_res, __host byte *contour_img, int width, int height) {
     int sobel_h[] = {-1, 0, 1, -2, 0, 2, -1, 0, 1},
         sobel_v[] = {1, 2, 1, 0, 0, 0, -1, -2, -1};
 
