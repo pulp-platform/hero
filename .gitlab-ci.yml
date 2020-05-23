@@ -22,7 +22,7 @@ tc-pulp:
   stage: build1
   script:
     - >
-      if ! memora lookup tc-pulp; then
+      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-pulp; then
         make tc-pulp
         chmod -R u+w $HERO_INSTALL
         $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-pulp
@@ -32,7 +32,7 @@ tc-har-olinux:
   stage: build1
   script:
     - >
-      if ! memora lookup tc-har-olinux; then
+      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-har-olinux; then
         make tc-har-olinux
         chmod -R u+w $HERO_INSTALL
         $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-har-olinux
@@ -42,7 +42,7 @@ tc-hrv-olinux:
   stage: build1
   script:
     - >
-      if ! memora lookup tc-hrv-olinux; then
+      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-hrv-olinux; then
         make tc-hrv-olinux
         chmod -R u+w $HERO_INSTALL
         $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-hrv-olinux
@@ -52,7 +52,7 @@ vsim-pulp:
   stage: build1
   script:
     - >
-      if memora lookup vsim-pulp; then
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup vsim-pulp; then
         exit 0
       fi
     - cd hardware
@@ -65,7 +65,7 @@ sdk-pulp-and-sdk-har:
   stage: build2
   script:
     - >
-      if memora lookup sdk-pulp-and-sdk-har; then
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup sdk-pulp-and-sdk-har; then
         exit 0
       fi
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
@@ -80,7 +80,7 @@ sdk-pulp-and-sdk-hrv:
   stage: build2
   script:
     - >
-      if memora lookup sdk-pulp-and-sdk-hrv; then
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup sdk-pulp-and-sdk-hrv; then
         exit 0
       fi
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
@@ -95,7 +95,7 @@ tc-llvm:
   stage: build3
   script:
     - >
-      if memora lookup tc-llvm; then
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-llvm; then
         exit 0
       fi
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get sdk-pulp-and-sdk-har
@@ -108,7 +108,7 @@ bitstream-zcu102:
   stage: build3
   script:
     - >
-      if ! memora lookup bitstream-zcu102; then
+      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup bitstream-zcu102; then
         cd hardware/fpga
         make hero_exilzcu102
         $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert bitstream-zcu102
@@ -118,7 +118,7 @@ br-har-exilzcu102:
   stage: build4
   script:
     - >
-      if memora lookup br-har-exilzcu102; then
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-har-exilzcu102; then
         exit 0
       fi
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get bitstream-zcu102
@@ -131,7 +131,7 @@ br-hrv-ediggenesys2:
   stage: build4
   script:
     - >
-      if memora lookup br-hrv-ediggenesys2; then
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-hrv-ediggenesys2; then
         exit 0
       fi
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-olinux
@@ -143,7 +143,7 @@ br-hrv-eqemu:
   stage: build4
   script:
     - >
-      if memora lookup br-hrv-eqemu; then
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-hrv-eqemu; then
         exit 0
       fi
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-olinux
