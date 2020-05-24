@@ -4,16 +4,21 @@ DEFINE_TCLS := \
     vivado_ips/define_defines_includes.tcl \
     vivado_ips/define_defines_includes_no_simset.tcl \
     vivado_ips/define_sources.tcl
-VIVADO := vivado-2019.1.1 vivado -mode batch
+
+ifeq ($(VIVADO),)
+VIVADO := vivado-2019.1.1 vivado
+endif
+
+VIVADO_OPT :=-mode batch
 
 .PHONY: all
 all: hero_exilzcu102
 
 hero_exilzcu102: vivado_ips/pulp_txilzu9eg ${DEFINE_TCLS}
-	${VIVADO} -source hero_exilzcu102.tcl
+	${VIVADO} ${VIVADO_OPT} -source hero_exilzcu102.tcl
 
 vivado_ips/pulp_txilzu9eg: ${DEFINE_TCLS}
-	cd vivado_ips && ${VIVADO} -source pulp_txilzu9eg.tcl
+	cd vivado_ips && ${VIVADO} ${VIVADO_OPT} -source pulp_txilzu9eg.tcl
 
 vivado_ips/pulp_txilzu9eg.v: src/pulp.py src/pulp.template_v
 	cd src && ./pulp.py > ../$@

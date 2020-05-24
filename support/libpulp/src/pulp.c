@@ -59,40 +59,86 @@ void pulp_write32(uint32_t *base_addr, uint32_t off, char off_type, uint32_t val
     *(base_addr + off) = value;
 }
 
+/* int pulp_mbox_read(const PulpDev *pulp, uint32_t *buffer, size_t n_words) */
+/* { */
+/*   int n_char, n_char_left, ret; */
+/*   ret = 1; */
+/*   n_char = 0; */
+/*   n_char_left = n_words * sizeof(buffer[0]); */
+
+/*   // read n_words words or until error */
+/*   while (n_char_left) { */
+/*     ret = read(pulp->fd, (char *)&buffer[n_char], n_char_left * sizeof(char)); */
+/*     if (ret < 0) { */
+/*       printf("ERROR: Could not read mbox.\n"); */
+/*       return ret; */
+/*     } */
+/*     n_char += ret; */
+/*     n_char_left -= ret; */
+/*   } */
+
+/*   return 0; */
+/* } */
+
 int pulp_mbox_read(const PulpDev *pulp, uint32_t *buffer, size_t n_words)
 {
-  int n_char, n_char_left, ret;
-  ret = 1;
-  n_char = 0;
-  n_char_left = n_words * sizeof(buffer[0]);
+  int i;
+  unsigned us_delay = 100;
+  unsigned tot_delay = 0;
 
-  // read n_words words or until error
-  while (n_char_left) {
-    ret = read(pulp->fd, (char *)&buffer[n_char], n_char_left * sizeof(char));
-    if (ret < 0) {
-      printf("ERROR: Could not read mbox.\n");
-      return ret;
+  for(i=0; i<n_words; ++i) {
+    while(!pulp_read32(pulp->mbox.v_addr, 0x4, 'b')) {
+      usleep(us_delay);
+      tot_delay += us_delay;
+      if(tot_delay > 100000) {
+        return 1;
+      }
     }
-    n_char += ret;
-    n_char_left -= ret;
+    buffer[i] = pulp_read32(pulp->mbox.v_addr, 0x0, 'b');
+    pulp_write32(pulp->mbox.v_addr, 0x4, 'b', 0);
   }
+
+  if (DEBUG_LEVEL > 3)
+    printf("Read %#x to mbox [%ld].\n", buffer[0], n_words);
 
   return 0;
 }
 
+/* int pulp_mbox_write(PulpDev *pulp, uint32_t word) */
+/* { */
+/*   unsigned status = 1; */
+/*   unsigned us_delay = 100; */
+
+/*   // wait for not full */
+/*   while (status) { */
+/*     usleep(us_delay); */
+/*     status = pulp_read32(pulp->mbox.v_addr, MBOX_STATUS_OFFSET_B, 'b') & 0x2; */
+/*   } */
+
+/*   // mbox is ready to receive */
+/*   pulp_write32(pulp->mbox.v_addr, MBOX_WRDATA_OFFSET_B, 'b', word); */
+/*   if (DEBUG_LEVEL > 3) */
+/*     printf("Wrote %#x to mbox.\n", word); */
+
+/*   return 0; */
+/* } */
+
 int pulp_mbox_write(PulpDev *pulp, uint32_t word)
 {
-  unsigned status = 1;
   unsigned us_delay = 100;
+  unsigned tot_delay = 0;
 
-  // wait for not full
-  while (status) {
+  while(pulp_read32(pulp->mbox.v_addr, 0xc, 'b')) {
     usleep(us_delay);
-    status = pulp_read32(pulp->mbox.v_addr, MBOX_STATUS_OFFSET_B, 'b') & 0x2;
+    tot_delay += us_delay;
+    if(tot_delay > 100000) {
+      return 1;
+    }
   }
 
-  // mbox is ready to receive
-  pulp_write32(pulp->mbox.v_addr, MBOX_WRDATA_OFFSET_B, 'b', word);
+  pulp_write32(pulp->mbox.v_addr, 0x8, 'b', word);
+  pulp_write32(pulp->mbox.v_addr, 0xc, 'b', 1);
+
   if (DEBUG_LEVEL > 3)
     printf("Wrote %#x to mbox.\n", word);
 

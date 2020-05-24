@@ -27,7 +27,7 @@ struct timespec start, stop;
 double start_ns, stop_ns, exe_time;
 
 #pragma omp declare target
-void helloworld ()
+void helloworld (void)
 {
 	#pragma omp parallel
 	printf("Hello World, I am thread %d of %d\n", omp_get_thread_num(), omp_get_num_threads());
@@ -36,12 +36,13 @@ void helloworld ()
 
 int main(int argc, char *argv[])
 {
-	omp_set_default_device(BIGPULP_MEMCPY);
+  omp_set_default_device(BIGPULP_MEMCPY);
 
-	#pragma omp target
-	helloworld();
-
-	helloworld();
-	return 0;
+  uint64_t k = (uint64_t)&argc;
+  #pragma omp target map(tofrom: k)
+  {
+    printf("POINTER: 0x%llx\n", (uint64_t)k);
+  }
+  printf("POINTER: 0x%llx\n", (uint64_t)k);
+  return 0;
 }
-

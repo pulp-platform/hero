@@ -72,7 +72,7 @@ void kernel_covariance_dma(int m, int n,
     map(alloc: mean[0:M]) \
     map(from: symmat[0:M][0:M])
   {
-    DATA_TYPE* const spm = (DATA_TYPE*)alloc_spm();
+    DATA_TYPE* const spm = (__device DATA_TYPE*)alloc_spm();
     DATA_TYPE* const data_spm = spm;
     DATA_TYPE* const symmat_spm = data_spm + M*N;
     DATA_TYPE* const mean_spm = symmat_spm + M*M;
@@ -162,6 +162,8 @@ void kernel_covariance(int m, int n,
 
 int main(int argc, char** argv)
 {
+  omp_set_default_device(BIGPULP_MEMCPY);
+
   /* Retrieve problem size. */
   int n = N;
   int m = M;

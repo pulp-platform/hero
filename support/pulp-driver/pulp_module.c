@@ -585,6 +585,12 @@ static int __init pulp_init(void)
 #endif
   iowrite32(gpio_value, (void *)((unsigned long)my_dev.gpio + GPIO_HOST2PULP_OFFSET));
 
+#ifdef GPIO_EXT_RESET_ADDR
+  my_dev.gpio_reset = ioremap_nocache(GPIO_EXT_RESET_ADDR, GPIO_EXT_RESET_SIZE_B);
+  if (DEBUG_LEVEL_PULP > 0)
+    printk(KERN_INFO "PULP: Reset GPIO mapped to virtual kernel space @ %#lx.\n", (long unsigned int)my_dev.gpio_reset);
+#endif
+
 #if CLKING_BASE_ADDR
   my_dev.clking = ioremap_nocache(CLKING_BASE_ADDR, CLKING_SIZE_B);
   if (DEBUG_LEVEL_PULP > 0)
@@ -834,6 +840,9 @@ fail_smmu_init:
   iounmap(my_dev.clking);
 #endif
   iounmap(my_dev.mbox);
+#ifdef GPIO_EXT_RESET_ADDR
+  iounmap(my_dev.gpio_reset);
+#endif
   iounmap(my_dev.gpio);
 fail_ioremap:
   cdev_del(&my_dev.cdev);
@@ -1447,9 +1456,11 @@ long pulp_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
     pulp_rab_release(true);
 
 #if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX
-    retval = pulp_reset(my_dev.gpio, my_dev.slcr, &gpio_value, arg);
+    retval = pulp_reset(my_dev.gpio, NULL, my_dev.slcr, &gpio_value, arg);
+#elif defined(GPIO_EXT_RESET_ADDR)
+    retval = pulp_reset(my_dev.gpio, my_dev.gpio_reset, NULL, &gpio_value, arg);
 #else
-    retval = pulp_reset(my_dev.gpio, NULL, &gpio_value, arg);
+    retval = pulp_reset(my_dev.gpio, NULL, NULL, &gpio_value, arg);
 #endif
 
     if (retval) {

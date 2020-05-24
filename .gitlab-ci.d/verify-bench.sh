@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 curdir=$(dirname "$(readlink -f "$0")")
 cd $curdir/../hardware/vsim
 ../test/gen_slm_files.sh polybench-acc/$1

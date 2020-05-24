@@ -76,7 +76,7 @@ tc-har-olinux:
 tc-pulp:
 	mkdir -p $(CURDIR)/output/tc-pulp/
 	cd $(CURDIR)/output/tc-pulp/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/pulp.config hero-unknown
-	chmod -R u+w $(HERO_INSTALL) && ln -sf $(HERO_INSTALL)/riscv32-unknown-elf $(HERO_INSTALL)/riscv32-hero-unknown-elf && chmod -R u-w $(HERO_INSTALL)
+	chmod -R u+w $(HERO_INSTALL) && ln -sf riscv32-unknown-elf $(HERO_INSTALL)/riscv32-hero-unknown-elf && chmod -R u-w $(HERO_INSTALL)
 
 # llvm
 tc-llvm:
@@ -90,8 +90,12 @@ tc-llvm-debug:
 # SDK
 .PHONY: sdk-pulp sdk-hrv sdk-har
 
-sdk-pulp:
+sdk-pulp-hrv:
 	$(ROOT)/pulp/setup-sdk.sh hero-urania
+sdk-pulp: sdk-pulp-hrv
+
+sdk-pulp-har:
+	$(ROOT)/pulp/setup-sdk.sh hero-arm64
 
 sdk-hrv: br-hrv
 	cd $(CURDIR)/output/br-hrv && $(ROOT)/toolchain/install-sdk.sh

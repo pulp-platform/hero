@@ -59,7 +59,7 @@
 */
 # ifndef POLYBENCH_STACK_ARRAYS
 #  define POLYBENCH_ARRAY(x) *x
-#  define POLYBENCH_FREE_ARRAY(x) polybench_dealloc_data((void*)x);
+#  define POLYBENCH_FREE_ARRAY(x) polybench_dealloc_data(x);
 #  define POLYBENCH_DECL_VAR(x) (*x)
 # else
 #  define POLYBENCH_ARRAY(x) x
@@ -80,15 +80,15 @@
 					  and returns a pointer to the 2d array
  */
 # define POLYBENCH_ALLOC_1D_ARRAY(n1, type)	\
-  (type(*)[n1 + POLYBENCH_PADDING_FACTOR])polybench_alloc_data (n1 + POLYBENCH_PADDING_FACTOR, sizeof(type))
+  polybench_alloc_data (n1 + POLYBENCH_PADDING_FACTOR, sizeof(type))
 # define POLYBENCH_ALLOC_2D_ARRAY(n1, n2, type)		\
-  (type(*)[n1 + POLYBENCH_PADDING_FACTOR][n2 + POLYBENCH_PADDING_FACTOR])polybench_alloc_data ((n1 + POLYBENCH_PADDING_FACTOR) * (n2 + POLYBENCH_PADDING_FACTOR), sizeof(type))
+  polybench_alloc_data ((n1 + POLYBENCH_PADDING_FACTOR) * (n2 + POLYBENCH_PADDING_FACTOR), sizeof(type))
 # define POLYBENCH_ALLOC_3D_ARRAY(n1, n2, n3, type)		\
-  (type(*)[n1 + POLYBENCH_PADDING_FACTOR][n2 + POLYBENCH_PADDING_FACTOR][n3 + POLYBENCH_PADDING_FACTOR])polybench_alloc_data ((n1 + POLYBENCH_PADDING_FACTOR) * (n2 + POLYBENCH_PADDING_FACTOR) * (n3 + POLYBENCH_PADDING_FACTOR), sizeof(type))
+  polybench_alloc_data ((n1 + POLYBENCH_PADDING_FACTOR) * (n2 + POLYBENCH_PADDING_FACTOR) * (n3 + POLYBENCH_PADDING_FACTOR), sizeof(type))
 # define POLYBENCH_ALLOC_4D_ARRAY(n1, n2, n3, n4, type)			\
-  (type(*)[n1 + POLYBENCH_PADDING_FACTOR][n2 + POLYBENCH_PADDING_FACTOR][n3 + POLYBENCH_PADDING_FACTOR][n4 + POLYBENCH_PADDING_FACTOR])polybench_alloc_data ((n1 + POLYBENCH_PADDING_FACTOR) * (n2 + POLYBENCH_PADDING_FACTOR) * (n3 + POLYBENCH_PADDING_FACTOR) * (n4 + POLYBENCH_PADDING_FACTOR), sizeof(type))
+  polybench_alloc_data ((n1 + POLYBENCH_PADDING_FACTOR) * (n2 + POLYBENCH_PADDING_FACTOR) * (n3 + POLYBENCH_PADDING_FACTOR) * (n4 + POLYBENCH_PADDING_FACTOR), sizeof(type))
 # define POLYBENCH_ALLOC_5D_ARRAY(n1, n2, n3, n4, n5, type)		\
-  (type(*)[n1 + POLYBENCH_PADDING_FACTOR][n2 + POLYBENCH_PADDING_FACTOR][n3 + POLYBENCH_PADDING_FACTOR][n4 + POLYBENCH_PADDING_FACTOR][n5 + POLYBENCH_PADDING_FACTOR])polybench_alloc_data ((n1 + POLYBENCH_PADDING_FACTOR) * (n2 + POLYBENCH_PADDING_FACTOR) * (n3 + POLYBENCH_PADDING_FACTOR) * (n4 + POLYBENCH_PADDING_FACTOR) * (n5 + POLYBENCH_PADDING_FACTOR), sizeof(type))
+  polybench_alloc_data ((n1 + POLYBENCH_PADDING_FACTOR) * (n2 + POLYBENCH_PADDING_FACTOR) * (n3 + POLYBENCH_PADDING_FACTOR) * (n4 + POLYBENCH_PADDING_FACTOR) * (n5 + POLYBENCH_PADDING_FACTOR), sizeof(type))
 
 /* Macros for array declaration. */
 # ifndef POLYBENCH_STACK_ARRAYS
@@ -200,7 +200,7 @@ extern void* polybench_alloc_data(unsigned long long int n, int elt_size);
 extern void polybench_dealloc_data(void*);
 
 /* HERO customizations */
-#include <hero-target.h>
+#include <libhero-target/hero-target.h>
 #ifndef POLYBENCH_HERO_MEM_LEVEL
     #define POLYBENCH_HERO_MEM_LEVEL 2
 #endif

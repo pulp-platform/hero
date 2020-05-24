@@ -13,9 +13,9 @@
 
 ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
-CSRCS=src/main.c src/sobel.c src/file_operations.c
+CSRCS=main.c sobel.c file_operations.c
 EXE=sobel
-CFLAGS=-foffload="-lm"
+#CFLAGS=-foffload="-lm"
 LDFLAGS=-lm
 
 IMG_DIR      = imgs

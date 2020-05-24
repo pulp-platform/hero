@@ -30,13 +30,14 @@
     NOTE: This function sleeps while performing the reset
 
     \param    gpio_config virtual addres of the GPIO configuration
-    \param    gpio_config virtual addres of the SLCR configuration (NULL if not used)
+    \param    gpio_ext_reset virtual addres of the external GPIO reset (NULL if not used)
+    \param    slcr_config virtual addres of the SLCR configuration (NULL if not used)
     \param    gpio_value pointer to the current gpio value
     \param    full if full reset has to be performed (only used with slcr)
 
     \return   zero if succesful, negative value with errno on errors
 */
-int pulp_reset(void *gpio_config, void *slcr_config, unsigned *gpio_value, bool full);
+int pulp_reset(void *gpio_config, void *gpio_ext_reset, void *slcr_config, unsigned *gpio_value, bool full);
 
 /** Configures the clock speed of the accelerator
 

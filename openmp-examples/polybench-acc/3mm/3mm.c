@@ -200,7 +200,6 @@ void kernel_3mm(int ni, int nj, int nk, int nl, int nm,
                 DATA_TYPE POLYBENCH_2D(D,NM,NL,nm,nl),
                 DATA_TYPE POLYBENCH_2D(G,NI,NL,ni,nl))
 {
-
   #pragma omp target data \
     map(to: A[0:NI][0:NK], B[0:NK][0:NJ], C[0:NJ][0:NM], D[0:NM][0:NL]) \
     map(from: E[0:NI][0:NJ], F[0:NJ][0:NL], G[0:NI][0:NL])
@@ -246,6 +245,8 @@ void kernel_3mm(int ni, int nj, int nk, int nl, int nm,
 
 int main(int argc, char** argv)
 {
+  omp_set_default_device(BIGPULP_MEMCPY);
+
   /* Retrieve problem size. */
   int ni = NI;
   int nj = NJ;

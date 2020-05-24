@@ -39,28 +39,37 @@ DECLARE_WAIT_QUEUE_HEAD(mbox_wq);
 
 void pulp_mbox_init(void *mbox)
 {
-  // initialize the pointer for pulp_mbox_read
-  pulp_mbox = mbox;
+  // temporary mailbox implementation
+  int i;
+  for(i=0; i<4; ++i) {
+    *((int32_t*)(mbox + i*4)) = 0;
+  }
 
-  mbox_mode = MBOX_OFF;
-  mbox_fifo_full = 0;
+  /* // initialize the pointer for pulp_mbox_read */
+  /* pulp_mbox = mbox; */
 
-  pulp_mbox_clear();
+  /* mbox_mode = MBOX_OFF; */
+  /* mbox_fifo_full = 0; */
 
-  return;
+  /* pulp_mbox_clear(); */
+
+  /* return; */
 }
 
 int pulp_mbox_set_mode(MailboxMode mode)
 {
-  mbox_mode = mode;
+  /* if(mbox_mode == mode) return 0; */
+  /* if(!pulp_mbox) return -1; */
 
-  if (mode == MBOX_OFF) {
-    // disable mailbox interrupt
-    iowrite32(0x0, pulp_mbox + MBOX_IE_OFFSET_B);
-  } else {
-    // enable mailbox interrupt
-    iowrite32(0x6, pulp_mbox + MBOX_IE_OFFSET_B);
-  }
+  /* mbox_mode = mode; */
+
+  /* if (mode == MBOX_OFF) { */
+  /*   // disable mailbox interrupt */
+  /*   iowrite32(0x0, pulp_mbox + MBOX_IE_OFFSET_B); */
+  /* } else { */
+  /*   // enable mailbox interrupt */
+  /*   iowrite32(0x6, pulp_mbox + MBOX_IE_OFFSET_B); */
+  /* } */
 
   return 0;
 }
@@ -71,27 +80,29 @@ MailboxMode pulp_mbox_get_mode(void)
 
 void pulp_mbox_clear(void)
 {
-  int i;
-  unsigned long flags;
+  /* int i; */
+  /* unsigned long flags; */
 
-  spin_lock_irqsave(&mbox_fifo_lock, flags);
+  /* if(!pulp_mbox) return; */
 
-  // empty mbox_fifo
-  if ((mbox_fifo_wr != mbox_fifo_rd) || mbox_fifo_full) {
-    for (i = 0; i < 2 * MBOX_FIFO_DEPTH; i++) {
-      printk(KERN_INFO "mbox_fifo[%d]: %d %d %#x \n", i, (&mbox_fifo[i] == mbox_fifo_wr) ? 1 : 0,
-             (&mbox_fifo[i] == mbox_fifo_rd) ? 1 : 0, mbox_fifo[i]);
-    }
-  }
-  mbox_fifo_wr = mbox_fifo;
-  mbox_fifo_rd = mbox_fifo;
-  mbox_fifo_full = 0;
-  n_words_written = 0;
-  n_words_to_write = 0;
+  /* spin_lock_irqsave(&mbox_fifo_lock, flags); */
 
-  spin_unlock_irqrestore(&mbox_fifo_lock, flags); // release the spinlock
+  /* // empty mbox_fifo */
+  /* if ((mbox_fifo_wr != mbox_fifo_rd) || mbox_fifo_full) { */
+  /*   for (i = 0; i < 2 * MBOX_FIFO_DEPTH; i++) { */
+  /*     printk(KERN_INFO "mbox_fifo[%d]: %d %d %#x \n", i, (&mbox_fifo[i] == mbox_fifo_wr) ? 1 : 0, */
+  /*            (&mbox_fifo[i] == mbox_fifo_rd) ? 1 : 0, mbox_fifo[i]); */
+  /*   } */
+  /* } */
+  /* mbox_fifo_wr = mbox_fifo; */
+  /* mbox_fifo_rd = mbox_fifo; */
+  /* mbox_fifo_full = 0; */
+  /* n_words_written = 0; */
+  /* n_words_to_write = 0; */
 
-  return;
+  /* spin_unlock_irqrestore(&mbox_fifo_lock, flags); // release the spinlock */
+
+  /* return; */
 }
 
 void pulp_mbox_intr(void *mbox)
@@ -279,7 +290,6 @@ ssize_t pulp_mbox_read(struct file *filp, char __user *buf, size_t count, loff_t
           spin_lock_irqsave(&mbox_fifo_lock, flags);
         }
       } else { // write to mailbox FIFO buffer
-
         // write to mbox_fifo
         *mbox_fifo_wr = mbox_data;
 

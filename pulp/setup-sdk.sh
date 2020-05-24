@@ -60,3 +60,6 @@ cp -r refs/* ${PULP_SDK_HOME}/install/hero/
 # FIXME: remove the special logic for hero-sim after unifying this further
 ln -sf ${pulp_chip} ${PULP_SDK_HOME}/install/lib/hero-sim
 ln -sf ../${pulp_chip}/rt_conf.o ${PULP_SDK_HOME}/install/hero/hero-sim/
+
+# Build libhero-target
+make -C "${THIS_DIR}/../support/libhero-target/pulp" header build install

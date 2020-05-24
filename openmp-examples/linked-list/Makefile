@@ -1,7 +1,6 @@
 ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 CSRCS = linked-list.c
-CFLAGS= -foffload=riscv32-unknown-elf
 
 prepare::
 ifndef HERO_TARGET_HOST
