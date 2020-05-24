@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # install native GDB from cross-toolchain to target if we have it
 TARGET_TUPLE=$(grep BR2_TOOLCHAIN_EXTERNAL_CUSTOM_PREFIX ${BR2_CONFIG} | sed 's/.*=//' | tr -d '"')
 DEBUG_ROOT=$HERO_INSTALL/$TARGET_TUPLE/debug-root

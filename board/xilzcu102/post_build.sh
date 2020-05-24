@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 mkdir -p ${TARGET_DIR}/lib/firmware
 eval BR2_HERO_BITSTREAM=$(grep BR2_HERO_BITSTREAM ${BR2_CONFIG} | sed 's/.*=//' | tr -d '"')
 if [ -z "$BR2_HERO_BITSTREAM" ]; then

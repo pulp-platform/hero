@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env bash
+
 # set system from hero device tree
 #ln -sf hero.dtb ${BINARIES_DIR}/system.dtb
 
