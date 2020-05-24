@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 ### BUILDS A TOOLCHAIN USING CROSSTOOL-NG ###
 
 # stop on errors
@@ -47,19 +49,20 @@ mkdir -p $HERO_INSTALL
 if [ ! -x "$HERO_INSTALL/bin/ct-ng" ]; then
     chmod -R u+w $HERO_INSTALL
     echo "No crosstool-ng found, installing..."
-    curl http://crosstool-ng.org/download/crosstool-ng/crosstool-ng-$CROSSTOOL_VERSION.tar.xz | tar -xJp
-    cd crosstool-ng-$CROSSTOOL_VERSION
+    curl https://codeload.github.com/crosstool-ng/crosstool-ng/tar.gz/crosstool-ng-$CROSSTOOL_VERSION | tar -xzp
+    cd crosstool-ng-crosstool-ng-$CROSSTOOL_VERSION
     for f in $conf_dir/patches/crosstool-ng/*.patch; do
         patch -p1 < $f
     done
+    ./bootstrap
     ./configure --prefix=$HERO_INSTALL
     if [ ! $? -eq 0 ]; then
         echo "Fatal error: failed to configure crosstool-ng"
 	      exit
     fi
     cd ..
-    make -C crosstool-ng-$CROSSTOOL_VERSION
-    make -C crosstool-ng-$CROSSTOOL_VERSION install
+    make -C crosstool-ng-crosstool-ng-$CROSSTOOL_VERSION
+    make -C crosstool-ng-crosstool-ng-$CROSSTOOL_VERSION install
 fi
 
 # symlink the local patches directory in the configs to be used during build

@@ -189,15 +189,18 @@ module cluster_interconnect_wrap
     logic [3:0] amo;
     assign atop = iconn_oup_wdata[i].atop;
     always_comb begin
+      amo = '0;
       data = iconn_oup_wdata[i].data;
       if (atop[5]) begin
         unique casez (atop[4:0])
           riscv_defines::AMO_ADD:   amo = 4'h2;
           riscv_defines::AMO_SWAP:  amo = 4'h1;
-          riscv_defines::AMO_LR:    $error("Unsupported LR on L1!");
-          riscv_defines::AMO_SC:    $error("Unsupported SC on L1!");
+          riscv_defines::AMO_LR:    `ifndef TARGET_SYNTHESIS $error("Unsupported LR on L1!") `endif;
+          riscv_defines::AMO_SC:    `ifndef TARGET_SYNTHESIS $error("Unsupported SC on L1!") `endif;
           default: begin
-            assert (atop[1:0] == '0) else $error("Illegal AMO!");
+            `ifndef TARGET_SYNTHESIS
+              assert (atop[1:0] == '0) else $error("Illegal AMO!");
+            `endif
             unique case (atop[4:2])
               riscv_defines::AMO_XOR[4:2]:  amo = 4'h5;
               riscv_defines::AMO_OR[4:2]:   amo = 4'h4;
@@ -302,7 +305,7 @@ module cluster_interconnect_wrap
     assign pe_inp_wdata[i].be   = core_periph_slave[i].be;
     assign pe_inp_wdata[i].atop = core_periph_slave_atop[i];
     assign core_periph_slave[i].gnt     = pe_inp_gnt[i];
-    assign core_periph_slave[i].r_id    = pe_inp_rdata[i+NB_CORES].id;
+    assign core_periph_slave[i].r_id    = pe_inp_rdata[i].id;
     assign core_periph_slave[i].r_rdata = pe_inp_rdata[i].data;
     assign core_periph_slave[i].r_opc   = pe_inp_rdata[i].opc;
     assign core_periph_slave[i].r_valid = pe_inp_rvalid[i];

@@ -115,7 +115,7 @@
 /*
  * Macros
  */
-#if PLATFORM == JUNO || PLATFORM == TE0808 || PLATFORM == ZYNQMP
+#if PLATFORM == JUNO || PLATFORM == TE0808
   #define IOWRITE_L(value, addr) (iowrite64(value, addr))
   #define IOREAD_L(addr) (ioread64(addr))
 #else
@@ -146,6 +146,9 @@ typedef struct {
   void *mbox;
   void *rab_config;
   void *gpio;
+#ifdef GPIO_EXT_RESET_ADDR
+  void *gpio_reset;
+#endif
   void *soc_periph;
   void *clusters;
   void *l3_mem;

@@ -14,24 +14,10 @@ LIBHERO_TARGET_INSTALL_TARGET = YES
 
 LIBHERO_TARGET_MAKE_ENV = $(TARGET_MAKE_ENV) CROSS_COMPILE=$(TARGET_CROSS)
 
-# FIXME: find more reliable way to work with pulp-sdk from here
-LIBHERO_TARGET_PULP_SDK_HOME = $(shell source $(BR2_EXTERNAL_HERO_PATH)/pulp/sdk/sourceme.sh > /dev/null 2>&1 && echo $$PULP_SDK_HOME)
-LIBHERO_ACCEL_MAKE_ENV = PATH=$(PATH):$(LIBHERO_TARGET_PULP_SDK_HOME)/install/ws/bin \
-		LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(PULP_SDK_HOME)/install/ws/lib \
-		PULP_RISCV_GCC_TOOLCHAIN=$(HERO_INSTALL) \
-
 define LIBHERO_TARGET_BUILD_CMDS
 	cd $(@D)/host/ && $(LIBHERO_TARGET_MAKE_ENV) $(MAKE) clean
 	cd $(@D)/host/ && $(LIBHERO_TARGET_MAKE_ENV) $(MAKE) build
 endef
-
-define LIBHERO_TARGET_BUILD_ACCEL_CMDS
-	(source $(BR2_EXTERNAL_HERO_PATH)/pulp/sdk/sourceme.sh; \
-		cd $(@D)/pulp; \
-		$(LIBHERO_ACCEL_MAKE_ENV) $(MAKE) header build; \
-	)
-endef
-LIBHERO_TARGET_POST_BUILD_HOOKS += LIBHERO_TARGET_BUILD_ACCEL_CMDS
 
 define LIBHERO_TARGET_INSTALL_STAGING_CMDS
 	$(INSTALL) -D -m 0644 $(@D)/inc/hero-target.h $(STAGING_DIR)/usr/include/hero-target.h
@@ -42,13 +28,5 @@ endef
 define LIBHERO_TARGET_INSTALL_TARGET_CMDS
 	$(INSTALL) -D -m 0755 $(@D)/lib/libhero-target.so $(TARGET_DIR)/usr/lib/libhero-target.so
 endef
-
-define LIBHERO_TARGET_INSTALL_ACCEL_CMDS
-	(source $(BR2_EXTERNAL_HERO_PATH)/pulp/sdk/sourceme.sh; \
-		cd $(@D)/pulp; \
-		$(LIBHERO_ACCEL_MAKE_ENV) $(MAKE) install; \
-	)
-endef
-LIBHERO_TARGET_POST_INSTALL_TARGET_HOOKS += LIBHERO_TARGET_INSTALL_ACCEL_CMDS
 
 $(eval $(generic-package))

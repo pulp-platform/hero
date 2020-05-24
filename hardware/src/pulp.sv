@@ -7,9 +7,9 @@
 // work. Any reuse/redistribution is strictly forbidden without written
 // permission from ETH Zurich.
 
-// This package makes internal constants of HERO accessible, e.g., in test environments.  Do not use
+// This package makes internal constants of PULP accessible, e.g., in test environments.  Do not use
 // these values to hierarchically design your system, though.
-package automatic hero_pkg;
+package automatic pulp_pkg;
   // Addressing
   localparam int unsigned AXI_AW = pulp_cluster_cfg_pkg::AXI_AW;
   // Clusters
@@ -36,11 +36,11 @@ package automatic hero_pkg;
   typedef logic [AXI_LITE_DW-1:0]   lite_data_t;
   typedef logic [AXI_LITE_DW/8-1:0] lite_strb_t;
 endpackage
-import hero_pkg::*;
+import pulp_pkg::*;
 
 `include "axi/assign.svh"
 
-module hero #(
+module pulp #(
   // SoC Parameters
   parameter int unsigned  N_CLUSTERS = 4,           // must be a power of 2
   parameter int unsigned  AXI_DW = 256,             // [bit]
@@ -59,8 +59,19 @@ module hero #(
   output logic [N_CLUSTERS-1:0] cl_eoc_o,
   output logic [N_CLUSTERS-1:0] cl_busy_o,
 
-  output axi_req_t              dram_req_o,
-  input  axi_resp_t             dram_resp_i,
+  // RAB IRQs
+  output logic                  rab_from_pulp_miss_irq_o,
+  output logic                  rab_from_pulp_multi_irq_o,
+  output logic                  rab_from_pulp_prot_irq_o,
+  output logic                  rab_from_host_miss_irq_o,
+  output logic                  rab_from_host_multi_irq_o,
+  output logic                  rab_from_host_prot_irq_o,
+  output logic                  rab_miss_fifo_full_irq_o,
+
+  output axi_req_t              ext_req_o,
+  input  axi_resp_t             ext_resp_i,
+  input  axi_req_t              ext_req_i,
+  output axi_resp_t             ext_resp_o,
   input  axi_lite_req_t         rab_conf_req_i,
   output axi_lite_resp_t        rab_conf_resp_o
 );
@@ -163,7 +174,7 @@ module hero #(
   // i_soc_bus.rab_mst -> [rab_mst] -> [rab_mst_{req,resp}]
   // -> i_rab.from_pulp_{req_i,resp_o}
   // -> i_rab.to_host_{req_o,resp_i}
-  // -> [dram_{req_o,resp_i}]
+  // -> [ext_{req_o,resp_i}]
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
@@ -176,7 +187,7 @@ module hero #(
   `AXI_ASSIGN_FROM_RESP(rab_mst, rab_mst_resp);
 
   // Interfaces from Host through RAB to PULP
-  // TODO -> i_rab.from_host_{req_i,resp_o}
+  // [ext_{req_i,resp_o}] -> i_rab.from_host_{req_i,resp_o}
   // -> i_rab.to_pulp_{req_o,resp_i} -> [rab_slv_{req,resp}] -> [rab_slv]
   // -> i_id_remap_rab_slv -> [rab_slv_remapped]
   // -> i_soc_bus.rab_slv
@@ -317,18 +328,18 @@ module hero #(
       .mst    (cl_oup_prepacker[i])
     );
 
-    axi_write_burst_packer_wrap #(
-      .ADDR_WIDTH   (AXI_AW),
-      .DATA_WIDTH   (AXI_DW),
-      .ID_WIDTH     (AXI_IW_CL_OUP),
-      .USER_WIDTH   (AXI_UW),
-      .BUF_DEPTH    (pulp_cluster_cfg_pkg::DMA_MAX_BURST_LEN)
-    ) i_packer_cl_oup (
-      .clk_i,
-      .rst_ni,
-      .slv    (cl_oup_prepacker[i]),
-      .mst    (cl_oup_prebuf[i])
-    );
+    //axi_write_burst_packer_wrap #(
+    //  .ADDR_WIDTH   (AXI_AW),
+    //  .DATA_WIDTH   (AXI_DW),
+    //  .ID_WIDTH     (AXI_IW_CL_OUP),
+    //  .USER_WIDTH   (AXI_UW),
+    //  .BUF_DEPTH    (pulp_cluster_cfg_pkg::DMA_MAX_BURST_LEN)
+    //) i_packer_cl_oup (
+    //  .clk_i,
+    //  .rst_ni,
+    //  .slv    (cl_oup_prepacker[i]),
+    //  .mst    (cl_oup_prebuf[i])
+    //);
 
     axi_read_burst_buffer_wrap #(
       .ADDR_WIDTH   (AXI_AW),
@@ -339,7 +350,7 @@ module hero #(
     ) i_r_buf_cl_oup (
       .clk_i,
       .rst_ni,
-      .slv    (cl_oup_prebuf[i]),
+      .slv    (cl_oup_prepacker[i]),
       .mst    (cl_oup[i])
     );
   end
@@ -415,19 +426,19 @@ module hero #(
     .rst_ni,
     .from_pulp_req_i        (rab_mst_req),
     .from_pulp_resp_o       (rab_mst_resp),
-    .from_pulp_miss_irq_o   (/* TODO */),
-    .from_pulp_multi_irq_o  (/* TODO */),
-    .from_pulp_prot_irq_o   (/* TODO */),
-    .to_host_req_o          (dram_req_o),
-    .to_host_resp_i         (dram_resp_i),
-    .from_host_req_i        ('0/* TODO */),
-    .from_host_resp_o       (/* TODO */),
-    .from_host_miss_irq_o   (/* TODO */),
-    .from_host_multi_irq_o  (/* TODO */),
-    .from_host_prot_irq_o   (/* TODO */),
+    .from_pulp_miss_irq_o   (rab_from_pulp_miss_irq_o),
+    .from_pulp_multi_irq_o  (rab_from_pulp_multi_irq_o),
+    .from_pulp_prot_irq_o   (rab_from_pulp_prot_irq_o),
+    .to_host_req_o          (ext_req_o),
+    .to_host_resp_i         (ext_resp_i),
+    .from_host_req_i        (ext_req_i),
+    .from_host_resp_o       (ext_resp_o),
+    .from_host_miss_irq_o   (rab_from_host_miss_irq_o),
+    .from_host_multi_irq_o  (rab_from_host_multi_irq_o),
+    .from_host_prot_irq_o   (rab_from_host_prot_irq_o),
     .to_pulp_req_o          (rab_slv_req),
     .to_pulp_resp_i         (rab_slv_resp),
-    .mh_fifo_full_irq_o     (/* TODO */),
+    .mh_fifo_full_irq_o     (rab_miss_fifo_full_irq_o),
     .conf_req_i             (rab_conf_req_i),
     .conf_resp_o            (rab_conf_resp_o)
   );

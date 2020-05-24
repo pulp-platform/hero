@@ -4,3 +4,4 @@
 output/*
 local.mk
 local.cfg
+*.swp

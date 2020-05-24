@@ -36,13 +36,13 @@ sources:
   - src/pulp_cluster_ooc.sv
   - src/soc_peripherals.sv
   # Level 2
-  - src/hero.sv
+  - src/pulp.sv
   # Level 3
-  - src/hero_ooc.sv
+  - src/pulp_ooc.sv
 
   - target: test
     files:
       # Level 0
       - src/apb/apb_stdout.sv
       # Level 1
-      - test/hero_tb.sv
+      - test/pulp_tb.sv

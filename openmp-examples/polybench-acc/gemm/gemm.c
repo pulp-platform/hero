@@ -148,6 +148,8 @@ void kernel_gemm(int ni, int nj, int nk,
 
 int main(int argc, char** argv)
 {
+  omp_set_default_device(BIGPULP_MEMCPY);
+
   /* Retrieve problem size. */
   int ni = NI;
   int nj = NJ;

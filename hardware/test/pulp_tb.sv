@@ -7,6 +7,7 @@
 // work. Any reuse/redistribution is strictly forbidden without written
 // permission from ETH Zurich.
 
+`include "axi/assign.svh"
 `include "axi/typedef.svh"
 
 `define wait_for(signal) \
@@ -14,7 +15,7 @@
     @(posedge clk); \
   while (!signal);
 
-module hero_tb #(
+module pulp_tb #(
   // TB Parameters
   parameter time          CLK_PERIOD = 1000ps,
   // SoC Parameters
@@ -26,13 +27,13 @@ module hero_tb #(
   timeunit 1ps;
   timeprecision 1ps;
 
-  localparam int unsigned AXI_IW = hero_pkg::axi_iw_sb_oup(N_CLUSTERS);
+  localparam int unsigned AXI_IW = pulp_pkg::axi_iw_sb_oup(N_CLUSTERS);
   localparam int unsigned AXI_SW = AXI_DW/8;  // width of strobe
-  typedef hero_pkg::addr_t      axi_addr_t;
+  typedef pulp_pkg::addr_t      axi_addr_t;
   typedef logic [AXI_DW-1:0]    axi_data_t;
   typedef logic [AXI_IW-1:0]    axi_id_t;
   typedef logic [AXI_SW-1:0]    axi_strb_t;
-  typedef hero_pkg::user_t      axi_user_t;
+  typedef pulp_pkg::user_t      axi_user_t;
   `AXI_TYPEDEF_AW_CHAN_T(       axi_aw_t,     axi_addr_t, axi_id_t, axi_user_t);
   `AXI_TYPEDEF_W_CHAN_T(        axi_w_t,      axi_data_t, axi_strb_t, axi_user_t);
   `AXI_TYPEDEF_B_CHAN_T(        axi_b_t,      axi_id_t, axi_user_t);
@@ -41,9 +42,9 @@ module hero_tb #(
   `AXI_TYPEDEF_REQ_T(           axi_req_t,    axi_aw_t, axi_w_t, axi_ar_t);
   `AXI_TYPEDEF_RESP_T(          axi_resp_t,   axi_b_t, axi_r_t);
 
-  typedef hero_pkg::lite_addr_t axi_lite_addr_t;
-  typedef hero_pkg::lite_data_t axi_lite_data_t;
-  typedef hero_pkg::lite_strb_t axi_lite_strb_t;
+  typedef pulp_pkg::lite_addr_t axi_lite_addr_t;
+  typedef pulp_pkg::lite_data_t axi_lite_data_t;
+  typedef pulp_pkg::lite_strb_t axi_lite_strb_t;
   `AXI_LITE_TYPEDEF_AX_CHAN_T(  axi_lite_ax_t,    axi_lite_addr_t, axi_id_t, axi_user_t);
   `AXI_LITE_TYPEDEF_W_CHAN_T(   axi_lite_w_t,     axi_lite_data_t, axi_lite_strb_t, axi_user_t);
   `AXI_LITE_TYPEDEF_B_CHAN_T(   axi_lite_b_t,     axi_id_t, axi_user_t);
@@ -58,8 +59,10 @@ module hero_tb #(
                           cl_eoc,
                           cl_fetch_en;
 
-  axi_req_t   dram_req;
-  axi_resp_t  dram_resp;
+  axi_req_t   from_pulp_req,
+              to_pulp_req;
+  axi_resp_t  from_pulp_resp,
+              to_pulp_resp;
 
   axi_lite_req_t  rab_conf_req;
   axi_lite_resp_t rab_conf_resp;
@@ -72,7 +75,7 @@ module hero_tb #(
     .rst_no (rst_n)
   );
 
-  hero #(
+  pulp #(
     .N_CLUSTERS     (N_CLUSTERS),
     .AXI_DW         (AXI_DW),
     .L2_N_AXI_PORTS (L2_N_AXI_PORTS),
@@ -88,10 +91,96 @@ module hero_tb #(
     .cl_eoc_o       (cl_eoc),
     .cl_busy_o      (cl_busy),
 
-    .dram_req_o     (dram_req),
-    .dram_resp_i    (dram_resp),
+    .ext_req_o      (from_pulp_req),
+    .ext_resp_i     (from_pulp_resp),
+    .ext_req_i      (to_pulp_req),
+    .ext_resp_o     (to_pulp_resp),
     .rab_conf_req_i (rab_conf_req),
     .rab_conf_resp_o(rab_conf_resp)
+  );
+
+  // AXI Node for Memory (slave 0) and Peripherals (slave 1)
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW),
+    .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
+  ) from_pulp[1:0] ();
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW+1),
+    .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
+  ) from_xbar[1:0] ();
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
+    .AXI_DATA_WIDTH (64),
+    .AXI_ID_WIDTH   (AXI_IW+1),
+    .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
+  ) to_periphs ();
+  `AXI_ASSIGN_FROM_REQ(from_pulp[0], from_pulp_req);
+  `AXI_ASSIGN_TO_RESP (from_pulp_resp, from_pulp[0]);
+  localparam int unsigned NODE_REGIONS = 2;
+  logic [NODE_REGIONS-1:0][1:0][pulp_pkg::AXI_AW-1:0] node_start, node_end;
+  logic [NODE_REGIONS-1:0][1:0]                       node_valid;
+  always_comb begin
+    node_start = '0;
+    node_end = '0;
+    node_valid = '0;
+
+    node_start[0][1] = 64'h0000_0000_1a10_0000;
+    node_end  [0][1] = 64'h0000_0000_1a10_ffff;
+    node_valid[0][1] = 1'b1;
+    node_start[0][0] = 64'h0000_0000_0000_0000;
+    node_end  [0][0] = node_start[0][1] - 1;
+    node_valid[0][0] = 1'b1;
+    node_start[1][0] = node_end[0][1] + 1;
+    node_end  [1][0] = 64'hffff_ffff_ffff_ffff;
+    node_valid[1][0] = 1'b1;
+  end
+  axi_node_intf_wrap #(
+    .NB_MASTER      (2),
+    .NB_SLAVE       (2), // actually only 1 but then vsim cannot handle axi_node
+    .NB_REGION      (2),
+    .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW),
+    .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
+  ) i_xbar (
+    .clk          (clk),
+    .rst_n        (rst_n),
+    .test_en_i    (1'b0),
+    .slave        (from_pulp),
+    .master       (from_xbar),
+    .start_addr_i (node_start),
+    .end_addr_i   (node_end),
+    .valid_rule_i (node_valid)
+  );
+
+  // Peripherals
+  axi_data_width_converter #(
+    .ADDR_WIDTH     (pulp_pkg::AXI_AW),
+    .SI_DATA_WIDTH  (AXI_DW),
+    .MI_DATA_WIDTH  (64),
+    .ID_WIDTH       (AXI_IW+1),
+    .USER_WIDTH     (pulp_pkg::AXI_UW)
+  ) i_dwc_peripherals (
+    .clk_i  (clk),
+    .rst_ni (rst_n),
+    .slv    (from_xbar[1]),
+    .mst    (to_periphs)
+  );
+  soc_peripherals #(
+    .AXI_AW     (pulp_pkg::AXI_AW),
+    .AXI_IW     (AXI_IW+1),
+    .AXI_UW     (pulp_pkg::AXI_UW),
+    .N_CORES    (8),
+    .N_CLUSTERS (N_CLUSTERS)
+  ) i_peripherals (
+    .clk_i      (clk),
+    .rst_ni     (rst_n),
+    .test_en_i  (1'b0),
+    .axi        (to_periphs)
   );
 
   // Emulate infinite memory with AXI slave port.
@@ -101,70 +190,87 @@ module hero_tb #(
     automatic axi_aw_t aw_queue[$];
     automatic axi_b_t b_queue[$];
     automatic shortint unsigned r_cnt = 0, w_cnt = 0;
-    dram_resp = '0;
+    from_xbar[0].aw_ready = 1'b0;
+    from_xbar[0].w_ready = 1'b0;
+    from_xbar[0].b_id = '0;
+    from_xbar[0].b_resp = '0;
+    from_xbar[0].b_user = '0;
+    from_xbar[0].b_valid = 1'b0;
+    from_xbar[0].ar_ready = 1'b0;
+    from_xbar[0].r_id = '0;
+    from_xbar[0].r_data = '0;
+    from_xbar[0].r_resp = '0;
+    from_xbar[0].r_last = 1'b0;
+    from_xbar[0].r_user = '0;
+    from_xbar[0].r_valid = 1'b0;
     wait (rst_n);
     @(posedge clk);
     fork
       // AW
       forever begin
-        dram_resp.aw_ready = 1'b1;
-        if (dram_req.aw_valid) begin
-          aw_queue.push_back(dram_req.aw);
+        from_xbar[0].aw_ready = 1'b1;
+        if (from_xbar[0].aw_valid) begin
+          automatic axi_aw_t aw;
+          `AXI_SET_TO_AW(aw, from_xbar[0]);
+          aw_queue.push_back(aw);
         end
         @(posedge clk);
       end
       // W
       forever begin
         if (aw_queue.size() != 0) begin
-          dram_resp.w_ready = 1'b1;
-          if (dram_req.w_valid) begin
+          from_xbar[0].w_ready = 1'b1;
+          if (from_xbar[0].w_valid) begin
             automatic axi_pkg::size_t size = aw_queue[0].size;
             automatic axi_addr_t addr = axi_pkg::beat_addr(aw_queue[0].addr, size, w_cnt);
             for (shortint unsigned
                 i_byte = axi_pkg::beat_lower_byte(addr, size, AXI_SW, w_cnt);
                 i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, w_cnt);
                 i_byte++) begin
-              if (dram_req.w.strb[i_byte]) begin
+              if (from_xbar[0].w_strb[i_byte]) begin
                 automatic axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
-                mem[byte_addr] = dram_req.w.data[i_byte*8+:8];
+                mem[byte_addr] = from_xbar[0].w_data[i_byte*8+:8];
               end
             end
             if (w_cnt == aw_queue[0].len) begin
               automatic axi_b_t b_beat = '0;
-              assert (dram_req.w.last) else $error("Expected last beat of W burst!");
+              assert (from_xbar[0].w_last) else $error("Expected last beat of W burst!");
               b_beat.id = aw_queue[0].id;
               b_beat.resp = axi_pkg::RESP_OKAY;
               b_queue.push_back(b_beat);
               w_cnt = 0;
               void'(aw_queue.pop_front());
             end else begin
-              assert (!dram_req.w.last) else $error("Did not expect last beat of W burst!");
+              assert (!from_xbar[0].w_last) else $error("Did not expect last beat of W burst!");
               w_cnt++;
             end
           end
         end else begin
-          dram_resp.w_ready = 1'b0;
+          from_xbar[0].w_ready = 1'b0;
         end
         @(posedge clk);
       end
       // B
       forever begin
         if (b_queue.size() != 0) begin
-          dram_resp.b = b_queue[0];
-          dram_resp.b_valid = 1'b1;
-          if (dram_req.b_ready) begin
+          `AXI_SET_FROM_B(from_xbar[0], b_queue[0]);
+          from_xbar[0].b_valid = 1'b1;
+          @(posedge clk);
+          if (from_xbar[0].b_ready) begin
             void'(b_queue.pop_front());
           end
         end else begin
-          dram_resp.b_valid = 1'b0;
+          @(posedge clk);
         end
-        @(posedge clk);
+        from_xbar[0].b_valid = 1'b0;
       end
       // AR
       forever begin
-        dram_resp.ar_ready = 1'b1;
-        if (dram_req.ar_valid) begin
-          ar_queue.push_back(dram_req.ar);
+        from_xbar[0].ar_ready = 1'b1;
+        if (from_xbar[0].ar_valid) begin
+          automatic axi_ar_t ar;
+          `AXI_SET_TO_AR(ar, from_xbar[0]);
+          ar_queue.push_back(ar);
         end
         @(posedge clk);
       end
@@ -182,14 +288,21 @@ module hero_tb #(
               i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, r_cnt);
               i_byte++) begin
             automatic axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
-            r_beat.data[i_byte*8+:8] = mem[byte_addr];
+            if (!mem.exists(byte_addr)) begin
+              $warning("Access to non-initialized byte at address 0x%016x by ID 0x%x.", byte_addr,
+                  r_beat.id);
+              r_beat.data[i_byte*8+:8] = 'x;
+            end else begin
+              r_beat.data[i_byte*8+:8] = mem[byte_addr];
+            end
           end
           if (r_cnt == ar_queue[0].len) begin
             r_beat.last = 1'b1;
           end
-          dram_resp.r = r_beat;
-          dram_resp.r_valid = 1'b1;
-          if (dram_req.r_ready) begin
+          `AXI_SET_FROM_R(from_xbar[0], r_beat);
+          from_xbar[0].r_valid = 1'b1;
+          @(posedge clk);
+          if (from_xbar[0].r_ready) begin
             if (r_beat.last) begin
               r_cnt = 0;
               void'(ar_queue.pop_front());
@@ -198,9 +311,9 @@ module hero_tb #(
             end
           end
         end else begin
-          dram_resp.r_valid = 1'b0;
+          @(posedge clk);
         end
-        @(posedge clk);
+        from_xbar[0].r_valid = 1'b0;
       end
     join
   end
@@ -237,13 +350,10 @@ module hero_tb #(
     wait (rst_n);
     @(posedge clk);
 
-    // Set up RAB slice from PULP to external memory: everything below 0x1000_0000 (except zero
-    // page).
-    write_rab_slice(32'hA0, 64'h0000_0000_0000_1000, 64'h0000_0000_0FFF_FFFF,
+    // Set up RAB slice from PULP to external devices: all addresses (that the interconnect routes
+    // through the RAB) except zero page.
+    write_rab_slice(32'hA0, 64'h0000_0000_0000_1000, 64'hFFFF_FFFF_FFFF_FFFF,
         64'h0000_0000_0000_1000);
-    // Set up RAB slice from PULP to external memory: everything above 0x1D00_0000.
-    write_rab_slice(32'hC0, 64'h0000_0000_1D00_0000, 64'hFFFF_FFFF_FFFF_FFFF,
-        64'h0000_0000_1D00_0000);
 
     // Start cluster 0.
     cl_fetch_en[0] = 1'b1;
@@ -276,6 +386,12 @@ module hero_tb #(
         end
       end
     end
+  end
+
+  // Drive requests into PULP.
+  initial begin
+    to_pulp_req = '0;
+    wait (rst_n);
   end
 
   // Observe SoC bus for errors.

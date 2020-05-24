@@ -32,13 +32,13 @@ DEFMK_ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 # 1) without suffix, they apply to heterogeneous compilation;
 # 3) with _PULP suffix, they apply only to the PULP part of compilation;
 # 4) with _COMMON suffix, they apply to both PULP and host compilation.
-CFLAGS_COMMON += $(cflags) -fopenmp=libomp -O$(opt)
+CFLAGS_COMMON += $(cflags) -fopenmp=libomp -O$(opt) -static
 ifeq ($(default-as),pulp)
   CFLAGS_COMMON += -fhero-device-default-as=device
 endif
-CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV)
+CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -I$(HERO_PULP_INC_DIR)
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
-LDFLAGS_COMMON ?= $(ldflags)
+LDFLAGS_COMMON ?= $(ldflags) -static
 LDFLAGS_PULP += $(LDFLAGS_COMMON)
 LDFLAGS += $(LDFLAGS_COMMON) -lhero-target
 ifeq ($(TARGET_HOST),riscv64-hero-linux-gnu)
@@ -70,7 +70,7 @@ all : $(DEPS) $(EXE) $(EXE).dis slm
 	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS_PULP) $(INCPATHS) $<
 
 %.OMP.ll: %.ll
-	hc-omp-pass $< OmpAddressSpaceAssigner "HERCULES-omp-address-space-assigner" $(<:.ll=.TMP.1.ll) $(AS_ANNOTATE_ARGS)
+	cp $< $(<:.ll=.TMP.1.ll)
 	hc-omp-pass $(<:.ll=.TMP.1.ll) OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(<:.ll=.TMP.2.ll)
 	hc-omp-pass $(<:.ll=.TMP.2.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(<:.ll=.TMP.3.ll)
 	cp $(<:.ll=.TMP.3.ll) $(<:.ll=.OMP.ll)
@@ -97,14 +97,14 @@ $(EXE).dis: $(EXE)
 	$(DEV_OBJDUMP) -d $^ > $@
 
 else
-all: $(DEPS) $(EXE) $(EXE).dis
+all: $(DEPS) $(EXE) $(EXE).dis $(EXE).pulp.dis
 
 %.ll: %.c $(DEPDIR)/%.d | $(DEPDIR)
 	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS) $(INCPATHS) $<
 	$(COB) -inputs=$@ -outputs="$(<:.c=-host.ll),$(<:.c=-dev.ll)" -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)" -unbundle
 
 %-dev.OMP.ll: %.ll
-	hc-omp-pass $(<:.ll=-dev.ll) OmpAddressSpaceAssigner "HERCULES-omp-address-space-assigner" $(@:.OMP.ll=.TMP.1.ll)
+	cp $(<:.ll=-dev.ll) $(@:.OMP.ll=.TMP.1.ll)
 	hc-omp-pass $(@:.OMP.ll=.TMP.1.ll) OmpKernelWrapper "HERCULES-omp-kernel-wrapper" $(@:.OMP.ll=.TMP.2.ll)
 	hc-omp-pass $(@:.OMP.ll=.TMP.2.ll) OmpHostPointerLegalizer "HERCULES-omp-host-pointer-legalizer" $(@:.OMP.ll=.TMP.3.ll)
 	cp $(@:.OMP.ll=.TMP.3.ll) $@
@@ -116,11 +116,15 @@ all: $(DEPS) $(EXE) $(EXE).dis
 %-out.ll: %-host.OMP.ll %-dev.OMP.ll
 	$(COB) -inputs="$(@:-out.ll=-host.OMP.ll),$(@:-out.ll=-dev.OMP.ll)" -outputs=$@ -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)"
 
-$(EXE): $(SRC:.c=-out.ll)
-	$(CC) $(LIBPATHS) $(CFLAGS) $< $(LDFLAGS) -o $@
+exeobjs := $(patsubst %.c, %-out.ll, $(SRC))
+$(EXE): $(exeobjs)
+	$(CC) $(LIBPATHS) $(CFLAGS) $(exeobjs) $(LDFLAGS) -o $@
 
 $(EXE).dis: $(EXE)
 	$(HOST_OBJDUMP) -d $^ > $@
+
+$(EXE).pulp.dis: $(EXE)
+	$(HOST_OBJDUMP) -h $^ | grep .riscv32 | awk '{print "dd if=$^ of=$^_riscv.elf bs=1 count=$$[0x" $$3 "] skip=$$[0x" $$6 "]"}' | bash && $(DEV_OBJDUMP) -d $^_riscv.elf > $@
 
 endif
 

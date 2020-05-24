@@ -105,7 +105,7 @@ This generates a SD card image containing the complete infrastructure and fully 
 ```
 Afterwards the system can be booted up after configuring the ZCU102 board jumpers to boot from the SD card. To develop applications for this setup, the dynamic environment can be loaded using `source env/exilzcu102.sh`. Afterwards applications can be built and transferred directly to the board.
 
-The host processor is implemented as a hard-macro, allowing the FPGA implementation of the accelerator to be loaded later during boot. A bitstream with the hardware implementation can be loaded automatically by adding `BR_HERO_BITSTREAM=<path_bitstream>` in `local.cfg` and rebuilding the image with `make br-har-exilzcu102`.
+The host processor is implemented as a hard-macro, allowing the FPGA implementation of the accelerator to be loaded later during boot. A bitstream with the hardware implementation can be loaded automatically by adding `BR2_HERO_BITSTREAM=<path_to_bitstream>` in `local.cfg` and rebuilding the image with `make br-har-exilzcu102`.
 
 Similary to the RISC-V setup, the base image does currently not contain the entire HERO infrastructure. A development filesystem based on the corresponding host SDK can be mounted externally instead, for example via NFS. The target filesystem can be extracted from `output/hrv-rootfs.tar`. This filesystem can be mounted automatically on boot by adding a configuration line with value `BR2_HERO_EXT_MOUNT="<mount-options> <ip>:<path>"` in `local.cfg` and then updating the image by rerunning `make br-har-exilzcu102`.
 

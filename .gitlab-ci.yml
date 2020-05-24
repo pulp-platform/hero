@@ -1,50 +1,174 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   HERO_INSTALL: '$CI_PROJECT_DIR/install'
+  RUST_LOG: 'memora=debug'
+  PATH: '/home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin'
 
 before_script:
+  - env
   - mkdir -p $HERO_INSTALL
 
 after_script:
   - chmod -R u+w $HERO_INSTALL
 
-all:
+stages:
+  - build1
+  - build2
+  - build3
+  - build4
+  - test
+
+tc-pulp:
+  stage: build1
   script:
-    ### build base toolchains
-    - make tc-pulp tc-hrv-olinux tc-har-olinux
-    ### build accelerator sdk
-    - make sdk-pulp
-    ### build host sdks
-    - make sdk-har
-    - make sdk-hrv
-    ### build other images
-    - make br-hrv-ediggenesys2
-    - make br-har-exilzcu102
-    - make br-hrv-eqemu
-    ### build llvm
-    - make tc-llvm
-    ### build tools
-    - make tools-hrv-openocd
-    ### build examples
-    - source env/esim.sh
     - >
-      for d in helloworld; do
+      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-pulp; then
+        make tc-pulp
+        chmod -R u+w $HERO_INSTALL
+        $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-pulp
+      fi
+
+tc-har-olinux:
+  stage: build1
+  script:
+    - >
+      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-har-olinux; then
+        make tc-har-olinux
+        chmod -R u+w $HERO_INSTALL
+        $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-har-olinux
+      fi
+
+tc-hrv-olinux:
+  stage: build1
+  script:
+    - >
+      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-hrv-olinux; then
+        make tc-hrv-olinux
+        chmod -R u+w $HERO_INSTALL
+        $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-hrv-olinux
+      fi
+
+vsim-pulp:
+  stage: build1
+  script:
+    - >
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup vsim-pulp; then
+        exit 0
+      fi
+    - cd hardware
+    - make
+    - cd vsim
+    - ./compile.sh
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert vsim-pulp
+
+sdk-pulp-and-sdk-har:
+  stage: build2
+  script:
+    - >
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup sdk-pulp-and-sdk-har; then
+        exit 0
+      fi
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
+    - chmod -R u-w $HERO_INSTALL
+    - make sdk-pulp # TODO: `sdk-pulp-har` does not seem to work?
+    - make sdk-har
+    - chmod -R u+w $HERO_INSTALL
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert sdk-pulp-and-sdk-har
+
+sdk-pulp-and-sdk-hrv:
+  stage: build2
+  script:
+    - >
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup sdk-pulp-and-sdk-hrv; then
+        exit 0
+      fi
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-olinux
+    - chmod -R u-w $HERO_INSTALL
+    - make sdk-pulp-hrv
+    - make sdk-hrv
+    - chmod -R u+w $HERO_INSTALL
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert sdk-pulp-and-sdk-hrv
+
+tc-llvm:
+  stage: build3
+  script:
+    - >
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-llvm; then
+        exit 0
+      fi
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get sdk-pulp-and-sdk-har
+    - chmod -R u-w $HERO_INSTALL
+    - make tc-llvm
+    - chmod -R u+w $HERO_INSTALL
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-llvm
+
+bitstream-zcu102:
+  stage: build3
+  script:
+    - >
+      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup bitstream-zcu102; then
+        cd hardware/fpga
+        make hero_exilzcu102
+        $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert bitstream-zcu102
+      fi
+
+br-har-exilzcu102:
+  stage: build4
+  script:
+    - >
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-har-exilzcu102; then
+        exit 0
+      fi
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get bitstream-zcu102
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
+    - chmod -R u-w $HERO_INSTALL
+    - echo 'BR2_HERO_BITSTREAM=$CI_PROJECT_DIR/hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1/hero_exilzcu102_wrapper.bit' >> local.cfg
+    - make br-har-exilzcu102
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-har-exilzcu102
+
+br-hrv-ediggenesys2:
+  stage: build4
+  script:
+    - >
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-hrv-ediggenesys2; then
+        exit 0
+      fi
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-olinux
+    - chmod -R u-w $HERO_INSTALL
+    - make br-hrv-ediggenesys2
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-hrv-ediggenesys2
+
+br-hrv-eqemu:
+  stage: build4
+  script:
+    - >
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-hrv-eqemu; then
+        exit 0
+      fi
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-olinux
+    - chmod -R u-w $HERO_INSTALL
+    - make br-hrv-eqemu
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-hrv-eqemu
+
+test-zcu102-examples:
+  stage: test
+  script:
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get vsim-pulp
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-llvm
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get sdk-pulp-and-sdk-har
+    - chmod -R u-w $HERO_INSTALL
+    - make sdk-pulp # PULP SDK is not relocatable
+    - source env/exilzcu102.sh
+    ## build examples
+    - >
+      for d in helloworld mm-large mm-small; do
         make -C openmp-examples/$d all
       done
-    ### compile testbench
-    - cd hardware/vsim
-    - ./compile.sh
-    - cd -
-    ### simulate examples
-    - cd hardware/vsim
-    - >
-      for d in tests-pulp helloworld; do
-        make -C ../../openmp-examples/$d only=pulp clean all
-        ../test/gen_slm_files.sh $d
-        ./start_sim.sh
-      done
-    - cd -
-    ### test benchmarks
+    ## test benchmarks: compile
     - >
       for d in openmp-examples/polybench-acc/*/; do
         if [ $(basename $d) = "common" ]; then
@@ -52,10 +176,28 @@ all:
         fi
         make -C $d only=pulp default-as=host clean all
         make -C $d only=pulp clean all
+        make -C $d default-as=host clean all
+        make -C $d default-as=pulp clean all
+      done
+    ## test benchmarks: simulate
+    - source env/esim-exilzcu102.sh
+    - >
+      for d in openmp-examples/polybench-acc/*/; do
+        if [ $(basename $d) = "common" ]; then
+          continue
+        fi
+        make -C $d only=pulp clean all
         .gitlab-ci.d/verify-bench.sh $(basename $d)
       done
-  artifacts:
-    paths:
-      - install
-      - openmp-examples
-      - pulp/sdk
+
+compiler-smoketest:
+  stage: test
+  script:
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-llvm
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get sdk-pulp-and-sdk-har
+    - chmod -R u-w $HERO_INSTALL
+    - make sdk-pulp # PULP SDK is not relocatable
+    - source env/exilzcu102.sh
+    - .gitlab-ci.d/compiler-smoketest.sh

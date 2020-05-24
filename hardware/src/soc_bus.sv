@@ -40,12 +40,11 @@ module soc_bus #(
   AXI_BUS.Slave   rab_slv
 );
 
-  localparam int unsigned N_REGIONS = 2;
-  localparam int unsigned N_MASTERS = N_CLUSTERS + L2_N_PORTS + 2;
+  localparam int unsigned N_REGIONS = 3;
+  localparam int unsigned N_MASTERS = N_CLUSTERS + L2_N_PORTS + 1;
   localparam int unsigned N_SLAVES = soc_bus_pkg::n_slaves(N_CLUSTERS);
   localparam int unsigned IDX_L2_MEM = N_CLUSTERS;
-  localparam int unsigned IDX_PERIPH = IDX_L2_MEM + 1;
-  localparam int unsigned IDX_RAB = IDX_PERIPH + 1;
+  localparam int unsigned IDX_RAB = IDX_L2_MEM + 1;
 
   typedef logic [AXI_AW-1:0] addr_t;
 
@@ -76,7 +75,6 @@ module soc_bus #(
   for (genvar i = 0; i < L2_N_PORTS; i++) begin: gen_bind_l2
     `AXI_ASSIGN(l2_mst[i], masters[IDX_L2_MEM+i]);
   end
-  `AXI_ASSIGN(periph_mst, masters[IDX_PERIPH]);
   `AXI_ASSIGN(rab_mst, masters[IDX_RAB]);
 
   // Address Map
@@ -97,6 +95,11 @@ module soc_bus #(
       valid_rule[0][i]  = 1'b1;
     end
 
+    // Everthing in `0x1A..` to RAB
+    start_addr[1][IDX_RAB]  = 64'h0000_0000_1A00_0000;
+    end_addr[1][IDX_RAB]    = 64'h0000_0000_1AFF_FFFF;
+    valid_rule[1][IDX_RAB]  = 1'b1;
+
     // L2 Memory
     for (int i = 0; i < L2_N_PORTS; i++) begin
       automatic int unsigned idx = IDX_L2_MEM + i;
@@ -105,15 +108,10 @@ module soc_bus #(
       valid_rule[0][idx]  = 1'b1;
     end
 
-    // Peripherals
-    start_addr[0][IDX_PERIPH] = 64'h0000_0000_1A10_0000;
-    end_addr[0][IDX_PERIPH]   = start_addr[0][IDX_PERIPH] + PERIPH_N_BYTES - 1;
-    valid_rule[0][IDX_PERIPH] = 1'b1;
-
     // Everything above L2 Memory to RAB
-    start_addr[1][IDX_RAB]  = end_addr[0][IDX_L2_MEM+L2_N_PORTS-1] + 1;
-    end_addr[1][IDX_RAB]    = 64'hFFFF_FFFF_FFFF_FFFF;
-    valid_rule[1][IDX_RAB]  = 1'b1;
+    start_addr[2][IDX_RAB]  = end_addr[0][IDX_L2_MEM+L2_N_PORTS-1] + 1;
+    end_addr[2][IDX_RAB]    = 64'hFFFF_FFFF_FFFF_FFFF;
+    valid_rule[2][IDX_RAB]  = 1'b1;
   end
 
   axi_node_wrap_with_slices #(

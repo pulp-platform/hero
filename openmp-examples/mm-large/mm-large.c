@@ -39,7 +39,10 @@ void compare_matrices(uint32_t* a, uint32_t* b, unsigned width, unsigned height)
 
 #pragma omp declare target
 
-int double_buf_mm(uint32_t * __restrict__ a, uint32_t * __restrict__ b, uint32_t * __restrict__ c, uint32_t width, uint32_t height, uint32_t stripe_height)
+int double_buf_mm(__host uint32_t * __restrict__ a,
+                  __host uint32_t * __restrict__ b,
+                  __host uint32_t * __restrict__ c,
+                  uint32_t width, uint32_t height, uint32_t stripe_height)
 {
   const unsigned width_local         = hero_tryread((unsigned int *)&width);
   const unsigned height_local        = hero_tryread((unsigned int *)&height);

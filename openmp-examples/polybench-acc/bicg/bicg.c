@@ -156,24 +156,29 @@ void kernel_bicg(int nx, int ny,
                  DATA_TYPE POLYBENCH_1D(r,NX,nx))
 {
   #pragma scop
-  #pragma omp target
+  #pragma omp target data \
+    map(to: A[0:NX][0:NY], r[0:NX], p[0:NY]) \
+    map(from: s[0:NY], q[0:NX])
   {
-    #pragma omp parallel for num_threads(NUM_THREADS)
-    for (int i = 0; i < _PB_NX; i++)
+    #pragma omp target
     {
-      q[i] = 0;
-      for (int j = 0; j < _PB_NY; j++) {
-        q[i] = q[i] + A[i][j] * p[j];
+      #pragma omp parallel for num_threads(NUM_THREADS)
+      for (int i = 0; i < _PB_NX; i++)
+      {
+        q[i] = 0;
+        for (int j = 0; j < _PB_NY; j++) {
+          q[i] = q[i] + A[i][j] * p[j];
+        }
       }
-    }
-    #pragma omp parallel for num_threads(NUM_THREADS)
-    for (int i = 0; i < _PB_NY; i++)
-      s[i] = 0;
-    #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
-    for (int j = 0; j < _PB_NY; j++)
-    {
-      for (int i = 0; i < _PB_NX; i++) {
-        s[j] = s[j] + r[i] * A[i][j];
+      #pragma omp parallel for num_threads(NUM_THREADS)
+      for (int i = 0; i < _PB_NY; i++)
+        s[i] = 0;
+      #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
+      for (int j = 0; j < _PB_NY; j++)
+      {
+        for (int i = 0; i < _PB_NX; i++) {
+          s[j] = s[j] + r[i] * A[i][j];
+        }
       }
     }
   }
@@ -183,6 +188,8 @@ void kernel_bicg(int nx, int ny,
 
 int main(int argc, char** argv)
 {
+  omp_set_default_device(BIGPULP_MEMCPY);
+
   /* Retrieve problem size. */
   int nx = NX;
   int ny = NY;

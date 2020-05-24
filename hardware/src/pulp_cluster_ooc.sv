@@ -9,6 +9,9 @@
 
 import axi_pkg::*;
 import pulp_cluster_cfg_pkg::*;
+import pulp_cluster_cfg_pkg::addr_t;
+import pulp_cluster_cfg_pkg::id_slv_t;
+import pulp_cluster_cfg_pkg::user_t;
 
 // Stub of PULP Cluster for out-of-context synthesis
 module pulp_cluster_ooc (
