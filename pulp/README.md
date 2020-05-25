@@ -1,0 +1,4 @@
+# PULP SDK
+Interface to the PULP-SDK (submodule in the `sdk` directory) that brings the PULP accelerator libraries. The PULP-SDK has a separate build process that is run mostly independently.
+
+For supporting different setups with customizable cluster sizes, supporting both simulation and physical targets the integration with the PULP SDK is intended to be mostly dynamically configurable. This is done through linker configuration which can be passed while building the applications and optimized away during linker-time-optimization (LTO). The linker configurations can be found in the `refs` subdirectory for the different chips. At the moment the supported boards itself still require static configurations during builds, as the SDK needs to target a specific host architecture. The goal is to remove this limitation in the future.
