@@ -1,0 +1,5 @@
+/html/
+/latex/*
+!/latex/Makefile
+!/latex/logo_rev.tex
+/pulp_linux_driver_doc.pdf
