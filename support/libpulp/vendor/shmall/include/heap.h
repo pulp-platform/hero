@@ -3,10 +3,11 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "pulp_common.h"
 
-#define HEAP_INIT_SIZE 0x10000
-#define HEAP_MAX_SIZE 0xF0000
-#define HEAP_MIN_SIZE 0x10000
+#define HEAP_INIT_SIZE L3_MEM_SIZE_B
+#define HEAP_MAX_SIZE L3_MEM_SIZE_B
+#define HEAP_MIN_SIZE L3_MEM_SIZE_B
 
 #define MIN_ALLOC_SZ 4
 

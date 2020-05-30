@@ -32,7 +32,7 @@ A      := $(LIBDIR)/libpulp.a
 COMPILE.c = $(CC) $(DEPFLAGS) $(CFLAGS) -c
 
 vendor/shmall/%.o : vendor/shmall/%.c $(DEPDIR)/vendor/shmall/%.d | $(DEPDIR)/vendor/shmall
-	$(COMPILE.c) -Ivendor/shmall/include -o $@ $<
+	$(COMPILE.c) -Ivendor/shmall/include -Iinc -o $@ $<
 
 %.o : %.c
 src/%.o : src/%.c $(DEPDIR)/src/%.d | $(DEPDIR)
