@@ -40,7 +40,10 @@ typedef struct {
     bin_t *bins[BIN_COUNT];
 } heap_t;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 static uint overhead = sizeof(footer_t) + sizeof(node_t);
+#pragma GCC diagnostic pop
 
 void init_heap(heap_t *heap, long start);
 
