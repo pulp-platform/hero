@@ -14,7 +14,7 @@
 #define MIN_WILDERNESS 0x2000
 #define MAX_WILDERNESS 0x1000000
 
-#define BIN_COUNT 9
+#define BIN_COUNT 8
 #define BIN_MAX_IDX (BIN_COUNT - 1)
 
 typedef unsigned int uint;
