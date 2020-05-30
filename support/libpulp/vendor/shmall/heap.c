@@ -12,8 +12,8 @@ void init_heap(heap_t *heap, long start) {
 
     add_node(heap->bins[get_bin_index(init_region->size)], init_region);
 
-    heap->start = (void *) start;
-    heap->end   = (void *) (start + HEAP_INIT_SIZE);
+    heap->start = start;
+    heap->end   = start + HEAP_INIT_SIZE;
 }
 
 void *heap_alloc(heap_t *heap, size_t size) {
