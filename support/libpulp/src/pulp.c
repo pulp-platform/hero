@@ -1676,13 +1676,14 @@ int pulp_offload_l3_copy_raw_in(PulpDev *pulp, const TaskDesc *task, const ElemP
 
 uintptr_t pulp_l3_malloc(PulpDev *pulp, unsigned size_b, uintptr_t *p_addr)
 {
-  // Allocate 7 more byte so we can align the returned address to 8 B (required for PULP DMA).
-  uintptr_t v_addr = (uintptr_t)heap_alloc(&pulp->l3_heap_mgr, size_b + 7);
+  // Align size of allocation to 8B because that's required by the PULP DMA.  (Header and footer of
+  // the allocated region are already 8B-aligned).
+  if (size_b & 0x7) {
+    size_b = (size_b & ~0x7) + 0x8;
+  }
+  uintptr_t v_addr = (uintptr_t)heap_alloc(&pulp->l3_heap_mgr, size_b);
   if (v_addr == 0) {
     return 0;
-  }
-  if (v_addr & 0x7) {
-    v_addr = (v_addr & ~0x7) + 0x8;
   }
 
   // Calculate physical address.
