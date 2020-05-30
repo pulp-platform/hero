@@ -24,10 +24,12 @@ typedef struct node_t {
     uint size;
     struct node_t* next;
     struct node_t* prev;
+    uint8_t pad[8 - ((2*sizeof(uint)+2*sizeof(struct node_t*)) % 8)]; // pad size to 8B alignment
 } node_t;
 
 typedef struct { 
     node_t *header;
+    uint8_t pad[8 - (sizeof(node_t*) % 8)]; // pad size to 8B alignment
 } footer_t;
 
 typedef struct {
