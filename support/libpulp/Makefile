@@ -36,7 +36,7 @@ vendor/shmall/%.o : vendor/shmall/%.c $(DEPDIR)/vendor/shmall/%.d | $(DEPDIR)/ve
 
 %.o : %.c
 src/%.o : src/%.c $(DEPDIR)/src/%.d | $(DEPDIR)
-	$(COMPILE.c) -Iinc -I$(HERO_PULP_INC_DIR) -o $@ $<
+	$(COMPILE.c) -Iinc -I$(HERO_PULP_INC_DIR) -Ivendor/shmall/include -o $@ $<
 
 $(SO): $(OBJS) | $(LIBDIR)
 	$(CC) $(CFLAGS_SO) -o $@ $^

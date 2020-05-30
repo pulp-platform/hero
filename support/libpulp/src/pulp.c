@@ -26,6 +26,7 @@
 #include <errno.h>
 
 #include "pulp.h"
+#include "heap.h"
 
 uint32_t pulp_read32(const uint32_t *base_addr, uint32_t off, char off_type)
 {
@@ -293,6 +294,13 @@ int pulp_mmap(PulpDev *pulp)
   } else if (DEBUG_LEVEL > 0) {
     printf("Shared L3 memory mapped to virtual user space at %p.\n", pulp->l3_mem.v_addr);
   }
+  // Initialize L3 heap manager.
+  const size_t bin_size = L3_MEM_SIZE_B / BIN_COUNT;
+  for (unsigned i = 0; i < BIN_COUNT; i++) {
+    pulp->l3_heap_mgr.bins[i] = (bin_t*)((uintptr_t)pulp->l3_mem.v_addr + (i * bin_size));
+    memset(pulp->l3_heap_mgr.bins[i], 0, sizeof(bin_t));
+  }
+  init_heap(&pulp->l3_heap_mgr, (long)pulp->l3_mem.v_addr);
 
   // PULP external
   // GPIO
@@ -495,9 +503,6 @@ int pulp_init(PulpDev *pulp)
   // check
   if (DEBUG_LEVEL > 1)
     printf("Mailbox interrupt enable register = %#x\n", pulp_read32(pulp->mbox.v_addr, MBOX_IE_OFFSET_B, 'b'));
-
-  // reset the l3_offset pointer
-  pulp->l3_offset = 0;
 
   return err;
 }
@@ -1671,22 +1676,17 @@ int pulp_offload_l3_copy_raw_in(PulpDev *pulp, const TaskDesc *task, const ElemP
 
 uintptr_t pulp_l3_malloc(PulpDev *pulp, unsigned size_b, uintptr_t *p_addr)
 {
-  uintptr_t v_addr;
-
-  // round l3_offset to next higher 64-bit word -> required for PULP DMA
-  if (pulp->l3_offset & 0x7) {
-    pulp->l3_offset = (pulp->l3_offset & 0xFFFFFFF8) + 0x8;
+  // Allocate 7 more byte so we can align the returned address to 8 B (required for PULP DMA).
+  uintptr_t v_addr = (uintptr_t)heap_alloc(&pulp->l3_heap_mgr, size_b + 7);
+  if (v_addr == 0) {
+    return 0;
+  }
+  if (v_addr & 0x7) {
+    v_addr = (v_addr & ~0x7) + 0x8;
   }
 
-  if ((pulp->l3_offset + size_b) >= L3_MEM_SIZE_B) {
-    printf("WARNING: overflow in contiguous L3 memory.\n");
-    pulp->l3_offset = 0;
-  }
-
-  v_addr = (uintptr_t)pulp->l3_mem.v_addr + pulp->l3_offset;
-  *p_addr = L3_MEM_BASE_ADDR + pulp->l3_offset;
-
-  pulp->l3_offset += size_b;
+  // Calculate physical address.
+  *p_addr = v_addr - (uintptr_t)pulp->l3_mem.v_addr + L3_MEM_BASE_ADDR;
 
   if (DEBUG_LEVEL > 2) {
     printf("Host virtual address = %#lx \n", v_addr);
@@ -1698,7 +1698,7 @@ uintptr_t pulp_l3_malloc(PulpDev *pulp, unsigned size_b, uintptr_t *p_addr)
 
 void pulp_l3_free(PulpDev *pulp, uintptr_t v_addr, uintptr_t p_addr)
 {
-  return;
+  heap_free(&pulp->l3_heap_mgr, (void*)v_addr);
 }
 
 int pulp_dma_xfer(const PulpDev *pulp, uintptr_t addr_l3, uintptr_t addr_pulp, size_t size_b, int host_read)
