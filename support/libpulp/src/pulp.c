@@ -1691,8 +1691,12 @@ int pulp_offload_l3_copy_raw_in(PulpDev *pulp, const TaskDesc *task, const ElemP
 
 uintptr_t pulp_l3_malloc(PulpDev *pulp, unsigned size_b, uintptr_t *p_addr)
 {
+  if (DEBUG_LEVEL > 2) {
+    printf("pulp_l3_malloc(%p, %d)\n", pulp, size_b);
+  }
+
   // Align size of allocation to 8B because that's required by the PULP DMA.  (Header and footer of
-  // the allocated region are already 8B-aligned).
+  // the allocated region are already 8B-aligned.)
   if (size_b & 0x7) {
     size_b = (size_b & ~0x7) + 0x8;
   }
@@ -1701,11 +1705,14 @@ uintptr_t pulp_l3_malloc(PulpDev *pulp, unsigned size_b, uintptr_t *p_addr)
     return 0;
   }
 
+  if (DEBUG_LEVEL > 2) {
+    printf("Host virtual address = %#lx \n", v_addr);
+  }
+
   // Calculate physical address.
   *p_addr = v_addr - (uintptr_t)pulp->l3_mem.v_addr + L3_MEM_BASE_ADDR;
 
   if (DEBUG_LEVEL > 2) {
-    printf("Host virtual address = %#lx \n", v_addr);
     printf("PMCA physical address = %#lx \n", *p_addr);
   }
 
