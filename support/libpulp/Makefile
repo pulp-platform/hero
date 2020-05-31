@@ -67,4 +67,6 @@ clean:
 	-rm -f $(OBJS)
 
 deploy:
+	@test -n "$(HERO_TARGET_HOST)" || (echo "'HERO_TARGET_HOST' not defined!"; exit 1)
+	@test -n "$(HERO_TARGET_PATH_LIB)" || (echo "'HERO_TARGET_PATH_LIB' not defined!"; exit 1)
 	scp $(LIBDIR)/* $(HERO_TARGET_HOST):$(HERO_TARGET_PATH_LIB)
