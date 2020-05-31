@@ -297,10 +297,10 @@ int pulp_mmap(PulpDev *pulp)
   // Initialize L3 heap manager.
   const size_t bin_size = L3_MEM_SIZE_B / BIN_COUNT;
   for (unsigned i = 0; i < BIN_COUNT; i++) {
-    pulp->l3_heap_mgr.bins[i] = (bin_t*)((uintptr_t)pulp->l3_mem.v_addr + (i * bin_size));
-    memset(pulp->l3_heap_mgr.bins[i], 0, sizeof(bin_t));
+    ((heap_t*)pulp->l3_heap_mgr)->bins[i] = (bin_t*)((uintptr_t)pulp->l3_mem.v_addr + (i * bin_size));
+    memset(((heap_t*)pulp->l3_heap_mgr)->bins[i], 0, sizeof(bin_t));
   }
-  init_heap(&pulp->l3_heap_mgr, (long)pulp->l3_mem.v_addr);
+  init_heap((heap_t*)pulp->l3_heap_mgr, (long)pulp->l3_mem.v_addr);
 
   // PULP external
   // GPIO
@@ -495,16 +495,23 @@ int pulp_clking_measure_freq(PulpDev *pulp)
 
 int pulp_init(PulpDev *pulp)
 {
-  int err;
-
   // set mbox mode to driver
-  err = ioctl(pulp->fd, PULP_IOCTL_MBOX_SET_MODE, MBOX_DRIVER);
+  int err = ioctl(pulp->fd, PULP_IOCTL_MBOX_SET_MODE, MBOX_DRIVER);
 
   // check
   if (DEBUG_LEVEL > 1)
     printf("Mailbox interrupt enable register = %#x\n", pulp_read32(pulp->mbox.v_addr, MBOX_IE_OFFSET_B, 'b'));
 
-  return err;
+  if (err != 0)
+    return err;
+
+  // Allocate memory for L3 heap manager.
+  pulp->l3_heap_mgr = malloc(sizeof(heap_t));
+  if (pulp->l3_heap_mgr == NULL) {
+    return ENOMEM;
+  }
+
+  return 0;
 }
 
 void pulp_reset(PulpDev *pulp, unsigned full)
@@ -1681,7 +1688,7 @@ uintptr_t pulp_l3_malloc(PulpDev *pulp, unsigned size_b, uintptr_t *p_addr)
   if (size_b & 0x7) {
     size_b = (size_b & ~0x7) + 0x8;
   }
-  uintptr_t v_addr = (uintptr_t)heap_alloc(&pulp->l3_heap_mgr, size_b);
+  uintptr_t v_addr = (uintptr_t)heap_alloc((heap_t*)pulp->l3_heap_mgr, size_b);
   if (v_addr == 0) {
     return 0;
   }
@@ -1699,7 +1706,7 @@ uintptr_t pulp_l3_malloc(PulpDev *pulp, unsigned size_b, uintptr_t *p_addr)
 
 void pulp_l3_free(PulpDev *pulp, uintptr_t v_addr, uintptr_t p_addr)
 {
-  heap_free(&pulp->l3_heap_mgr, (void*)v_addr);
+  heap_free((heap_t*)pulp->l3_heap_mgr, (void*)v_addr);
 }
 
 int pulp_dma_xfer(const PulpDev *pulp, uintptr_t addr_l3, uintptr_t addr_pulp, size_t size_b, int host_read)
