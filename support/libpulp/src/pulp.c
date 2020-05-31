@@ -299,14 +299,25 @@ int pulp_mmap(PulpDev *pulp)
   if (pulp->l3_heap_mgr == NULL) {
     printf("Malloc failed for L3 heap manager.\n");
     return -ENOMEM;
+  } else if (DEBUG_LEVEL > 0) {
+    printf("Allocated L3 heap manager at %p.\n", pulp->l3_heap_mgr);
   }
   // Initialize L3 heap manager.
   const size_t bin_size = L3_MEM_SIZE_B / BIN_COUNT;
   for (unsigned i = 0; i < BIN_COUNT; i++) {
     ((heap_t*)pulp->l3_heap_mgr)->bins[i] = (bin_t*)((uintptr_t)pulp->l3_mem.v_addr + (i * bin_size));
+    if (DEBUG_LEVEL > 2) {
+      printf("L3 heap bin %d: %p.\n", i, ((heap_t*)pulp->l3_heap_mgr)->bins[i]);
+    }
     memset(((heap_t*)pulp->l3_heap_mgr)->bins[i], 0, sizeof(bin_t));
   }
+  if (DEBUG_LEVEL > 0) {
+    printf("Initialized bins for L3 heap manager.\n");
+  }
   init_heap((heap_t*)pulp->l3_heap_mgr, (long)pulp->l3_mem.v_addr);
+  if (DEBUG_LEVEL > 0) {
+    printf("Initialized L3 heap manager.\n");
+  }
 
   // PULP external
   // GPIO
