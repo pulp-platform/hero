@@ -294,6 +294,12 @@ int pulp_mmap(PulpDev *pulp)
   } else if (DEBUG_LEVEL > 0) {
     printf("Shared L3 memory mapped to virtual user space at %p.\n", pulp->l3_mem.v_addr);
   }
+  // Allocate memory for L3 heap manager.
+  pulp->l3_heap_mgr = malloc(sizeof(heap_t));
+  if (pulp->l3_heap_mgr == NULL) {
+    printf("Malloc failed for L3 heap manager.\n");
+    return -ENOMEM;
+  }
   // Initialize L3 heap manager.
   const size_t bin_size = L3_MEM_SIZE_B / BIN_COUNT;
   for (unsigned i = 0; i < BIN_COUNT; i++) {
@@ -502,16 +508,7 @@ int pulp_init(PulpDev *pulp)
   if (DEBUG_LEVEL > 1)
     printf("Mailbox interrupt enable register = %#x\n", pulp_read32(pulp->mbox.v_addr, MBOX_IE_OFFSET_B, 'b'));
 
-  if (err != 0)
-    return err;
-
-  // Allocate memory for L3 heap manager.
-  pulp->l3_heap_mgr = malloc(sizeof(heap_t));
-  if (pulp->l3_heap_mgr == NULL) {
-    return ENOMEM;
-  }
-
-  return 0;
+  return err;
 }
 
 void pulp_reset(PulpDev *pulp, unsigned full)
