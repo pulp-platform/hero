@@ -40,11 +40,11 @@ unsigned check_events()
   #pragma omp parallel num_threads(2)
   {
     if(omp_get_thread_num() == 0) {
-      volatile int *mask_addr = (int*)(ARCHI_EU_DEMUX_ADDR + EU_CORE_MASK);
+      volatile int *mask_addr = (__device int*)(ARCHI_EU_DEMUX_ADDR + EU_CORE_MASK);
       int prev_mask = *mask_addr;
       *mask_addr = 1;
-      __builtin_pulp_event_unit_read((int*)ARCHI_EU_DEMUX_ADDR, EU_CORE_EVENT_WAIT);
-      volatile int *clr_addr = (int*)(ARCHI_EU_DEMUX_ADDR + EU_CORE_BUFFER_CLEAR);
+      __builtin_pulp_event_unit_read((__device int*)ARCHI_EU_DEMUX_ADDR, EU_CORE_EVENT_WAIT);
+      volatile int *clr_addr = (__device int*)(ARCHI_EU_DEMUX_ADDR + EU_CORE_BUFFER_CLEAR);
       *clr_addr = 1;
       *mask_addr = prev_mask;
       correct = (*sum_store == 1999000);
@@ -53,7 +53,7 @@ unsigned check_events()
       for(int i=0; i<2000; ++i) {
         *sum_store += i;
       }
-      volatile int *trigg_addr = (int*)(ARCHI_EU_DEMUX_ADDR + EU_SW_EVENTS_DEMUX_OFFSET + EU_CORE_TRIGG_SW_EVENT);
+      volatile int *trigg_addr = (__device int*)(ARCHI_EU_DEMUX_ADDR + EU_SW_EVENTS_DEMUX_OFFSET + EU_CORE_TRIGG_SW_EVENT);
       *trigg_addr = 1;
     }
   }
