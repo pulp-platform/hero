@@ -206,7 +206,7 @@ module register_file_2r_2w_icache
         for(k=0; k<NUM_WORDS; k++)
         begin : w_WordIter
             if( ClocksxC[k] == 1'b1)
-                MemContentxDP[k] = WAddrOneHotxDb_reg[k] ? WDataIntxDb : WDataIntxDa;
+                MemContentxDP[k] <= WAddrOneHotxDb_reg[k] ? WDataIntxDb : WDataIntxDa;
         end
     end
 
