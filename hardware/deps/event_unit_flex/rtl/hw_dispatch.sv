@@ -169,7 +169,7 @@ module hw_dispatch
       req_in_progr_SP  <= req_in_progr_SN;
 
       for (int i=0; i<FIFO_DEPTH; i++) begin
-        if (|w_req_int[0] | |clr_core_stat_transp[i])
+        if ((|w_req_int[0]) | (|clr_core_stat_transp[i]))
           core_set_stat_DP[i] <= core_set_stat_DN[i];
       end
 
