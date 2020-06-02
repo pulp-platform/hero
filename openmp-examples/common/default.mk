@@ -137,7 +137,7 @@ $(DEPFILES):
 include $(wildcard $(DEPFILES))
 
 clean::
-	-rm -vf __hmpp* $(EXE) *~ *.dis *.ll *.slm
+	-rm -vf __hmpp* $(EXE) *~ *.bc *.dis *.i *.lh *.lk *.ll *.o *.s *.slm
 	-rm -rvf $(DEPDIR)
 
 init-target-host:
