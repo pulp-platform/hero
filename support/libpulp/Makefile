@@ -23,13 +23,16 @@ CC          := $(CROSS_COMPILE)gcc
 AR          := $(CROSS_COMPILE)ar
 OBJCDUMP    := $(CROSS_COMPILE)objdump
 
-SRCS   := vendor/shmall/llist.c vendor/shmall/heap.c src/pulp.c
+SRCS   := vendor/shmall/llist.c vendor/shmall/heap.c vendor/o1heap/o1heap/o1heap.c src/pulp.c
 OBJS   := $(SRCS:%.c=%.o)
 LIBDIR := lib
 SO     := $(LIBDIR)/libpulp.so
 A      := $(LIBDIR)/libpulp.a
 
 COMPILE.c = $(CC) $(DEPFLAGS) $(CFLAGS) -c
+
+vendor/o1heap/o1heap/%.o : vendor/o1heap/o1heap/%.c $(DEPDIR)/vendor/o1heap/o1heap/%.d | $(DEPDIR)/vendor/o1heap/o1heap
+	$(COMPILE.c) -Ivendor/o1heap/o1heap -o $@ $<
 
 vendor/shmall/%.o : vendor/shmall/%.c $(DEPDIR)/vendor/shmall/%.d | $(DEPDIR)/vendor/shmall
 	$(COMPILE.c) -Ivendor/shmall/include -Iinc -o $@ $<
@@ -48,6 +51,7 @@ $(LIBDIR): ; @mkdir -p $@
 
 $(DEPDIR): ; @mkdir -p $@
 $(DEPDIR)/src: ; @mkdir -p $@
+$(DEPDIR)/vendor/o1heap/o1heap: ; @mkdir -p $@
 $(DEPDIR)/vendor/shmall: ; @mkdir -p $@
 
 DEPFILES := $(SRCS:%.c=$(DEPDIR)/%.d)
