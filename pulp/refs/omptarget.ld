@@ -6,6 +6,7 @@ MEMORY
   L2                 : ORIGIN = 0x1c000000, LENGTH = 0x0000f000
   L1                 : ORIGIN = 0x10000004, LENGTH = 0x0001fffc
   L1_aliased         : ORIGIN = 0x1b000004, LENGTH = 0x0001fffc
+  L3                 : ORIGIN = 0x80000000, LENGTH = 0x08000000
 }
 
 /*
@@ -309,4 +310,13 @@ SECTIONS
 
   __l1_heap_start = ALIGN(4);
   __l1_heap_size = LENGTH(L1) - __l1_heap_start + ORIGIN(L1);
+
+  __stdout_buf_size = 1024*1024; /* 1 MiB */
+  .stdout_buf : {
+    . = ALIGN(8);
+    __stdout_buf_start = .;
+    . = . + __stdout_buf_size;
+    __stdout_buf_end = .;
+  } > L3
+  __l3_heap_start = ALIGN(8);
 }
