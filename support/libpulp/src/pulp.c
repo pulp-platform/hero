@@ -294,8 +294,10 @@ int pulp_mmap(PulpDev *pulp)
   } else if (DEBUG_LEVEL > 0) {
     printf("Shared L3 memory mapped to virtual user space at %p.\n", pulp->l3_mem.v_addr);
   }
+  // FIXME: The size of the stdout buffer should be defined in the same place as for PULP.
+  void* const l3_heap_base_v_addr = (void*)((uint8_t*)pulp->l3_mem.v_addr + 1024*1024);
   // Initialize L3 heap manager.
-  pulp->l3_heap_mgr = o1heapInit(pulp->l3_mem.v_addr, L3_MEM_SIZE_B, NULL, NULL);
+  pulp->l3_heap_mgr = o1heapInit(l3_heap_base_v_addr, L3_MEM_SIZE_B, NULL, NULL);
   if (pulp->l3_heap_mgr == NULL) {
     printf("Failed to initialize L3 heap manager.\n");
     return -ENOMEM;
