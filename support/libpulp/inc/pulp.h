@@ -71,7 +71,7 @@ typedef struct {
 #if PLATFORM != JUNO
   PulpSubDev slcr;
 #endif
-  unsigned int l3_offset; // used for pulp_l3_malloc
+  struct O1HeapInstance* l3_heap_mgr;
   unsigned int cluster_sel; // cluster select
   unsigned int host_clk_freq_mhz;
   unsigned int pulp_clk_freq_mhz;
@@ -597,8 +597,6 @@ int pulp_offload_l3_copy_raw_in(PulpDev *pulp, const TaskDesc *task, const ElemP
 
 /** Allocate a chunk of memory in contiguous L3.
 
- *  NOTE: This function can only allocate each address once!
-
   \param    pulp   pointer to the PulpDev structure
   \param    size_b size in Bytes of the requested chunk
   \param    p_addr pointer to store the physical address to
@@ -608,8 +606,6 @@ int pulp_offload_l3_copy_raw_in(PulpDev *pulp, const TaskDesc *task, const ElemP
 uintptr_t pulp_l3_malloc(PulpDev *pulp, unsigned size_b, uintptr_t *p_addr);
 
 /** Free memory previously allocated in contiguous L3.
-
- *  NOTE: This function does not do anything!
 
  \param    pulp   pointer to the PulpDev structure
  \param    v_addr pointer to unsigned containing the virtual address

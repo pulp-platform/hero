@@ -14,21 +14,46 @@
 #
 MAKEFLAGS=--warn-undefined-variables
 
-CC       := ${CROSS_COMPILE}gcc
-AR       := ${CROSS_COMPILE}ar
-OBJCDUMP := ${CROSS_COMPILE}objdump
+DEPDIR := .deps
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 
-SRC_DIR  := src
-INC_DIR  := inc
-LIB_DIR  := lib
+CFLAGS		:= -Wall -O2 -fPIC -DPLATFORM=$(PLATFORM) $(CFLAGS)
+CFLAGS_SO   := $(CFLAGS) -shared
+CC          := $(CROSS_COMPILE)gcc
+AR          := $(CROSS_COMPILE)ar
+OBJCDUMP    := $(CROSS_COMPILE)objdump
 
-SOURCES  := $(SRC_DIR)/pulp.c
-HEADERS  := $(INC_DIR)/pulp.h $(INC_DIR)/pulp_common.h
-CFLAGS   := -Wall -O2 -fPIC -DPLATFORM=${PLATFORM} ${CFLAGS}
-CFLAGS_SO:= $(CFLAGS) -shared
+SRCS   := vendor/o1heap/o1heap/o1heap.c src/pulp.c
+OBJS   := $(SRCS:%.c=%.o)
+LIBDIR := lib
+SO     := $(LIBDIR)/libpulp.so
+A      := $(LIBDIR)/libpulp.a
 
-SO       := $(LIB_DIR)/libpulp.so
-A        := $(LIB_DIR)/libpulp.a
+COMPILE.c = $(CC) $(DEPFLAGS) $(CFLAGS) -c
+
+vendor/o1heap/o1heap/%.o : vendor/o1heap/o1heap/%.c $(DEPDIR)/vendor/o1heap/o1heap/%.d | $(DEPDIR)/vendor/o1heap/o1heap
+	$(COMPILE.c) -Ivendor/o1heap/o1heap -o $@ $<
+
+%.o : %.c
+src/%.o : src/%.c $(DEPDIR)/src/%.d | $(DEPDIR)
+	$(COMPILE.c) -Iinc -I$(HERO_PULP_INC_DIR) -Ivendor/o1heap/o1heap -o $@ $<
+
+$(SO): $(OBJS) | $(LIBDIR)
+	$(CC) $(CFLAGS_SO) -o $@ $^
+
+$(A): $(OBJS) | $(LIBDIR)
+	$(AR) rvs -o $@ $^
+
+$(LIBDIR): ; @mkdir -p $@
+
+$(DEPDIR): ; @mkdir -p $@
+$(DEPDIR)/src: ; @mkdir -p $@
+$(DEPDIR)/vendor/o1heap/o1heap: ; @mkdir -p $@
+
+DEPFILES := $(SRCS:%.c=$(DEPDIR)/%.d)
+$(DEPFILES):
+
+include $(wildcard $(DEPFILES))
 
 .PHONY: all build clean deploy
 
@@ -36,19 +61,12 @@ all: build deploy
 
 build: $(SO) $(A)
 
-$(SO): $(SOURCES) $(HEADERS)
-	mkdir -p $(LIB_DIR)
-	$(foreach l,$(SOURCES),$(CC) -I${INC_DIR} -I${HERO_PULP_INC_DIR} -c $(l) $(CFLAGS_SO);)
-	$(CC) $(CFLAGS_SO) -o $@ $(addsuffix .o,$(basename $(notdir $(SOURCES))))
-
-$(A): $(SOURCES) $(HEADERS)
-	mkdir -p $(LIB_DIR)
-	$(foreach l,$(SOURCES),$(CC) -I${INC_DIR} -I${HERO_PULP_INC_DIR} -c $(l) $(CFLAGS);)
-	$(AR) rvs -o $@ $(addsuffix .o,$(basename $(notdir $(SOURCES))))
-
 clean:
-	-rm -rf $(LIB_DIR) $(SO) $(A)
-	-rm -rf $(addsuffix .o,$(basename $(notdir $(SOURCES))))
+	-rm -rf $(DEPDIR)
+	-rm -rf $(LIBDIR)
+	-rm -f $(OBJS)
 
 deploy:
-	scp $(LIB_DIR)/* ${HERO_TARGET_HOST}:${HERO_TARGET_PATH_LIB}
+	@test -n "$(HERO_TARGET_HOST)" || (echo "'HERO_TARGET_HOST' not defined!"; exit 1)
+	@test -n "$(HERO_TARGET_PATH_LIB)" || (echo "'HERO_TARGET_PATH_LIB' not defined!"; exit 1)
+	scp $(LIBDIR)/* $(HERO_TARGET_HOST):$(HERO_TARGET_PATH_LIB)

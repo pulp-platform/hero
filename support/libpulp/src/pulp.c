@@ -26,6 +26,7 @@
 #include <errno.h>
 
 #include "pulp.h"
+#include "o1heap.h"
 
 uint32_t pulp_read32(const uint32_t *base_addr, uint32_t off, char off_type)
 {
@@ -293,6 +294,14 @@ int pulp_mmap(PulpDev *pulp)
   } else if (DEBUG_LEVEL > 0) {
     printf("Shared L3 memory mapped to virtual user space at %p.\n", pulp->l3_mem.v_addr);
   }
+  // Initialize L3 heap manager.
+  pulp->l3_heap_mgr = o1heapInit(pulp->l3_mem.v_addr, L3_MEM_SIZE_B, NULL, NULL);
+  if (pulp->l3_heap_mgr == NULL) {
+    printf("Failed to initialize L3 heap manager.\n");
+    return -ENOMEM;
+  } else if (DEBUG_LEVEL > 0) {
+    printf("Allocated L3 heap manager at %p.\n", pulp->l3_heap_mgr);
+  }
 
   // PULP external
   // GPIO
@@ -487,17 +496,12 @@ int pulp_clking_measure_freq(PulpDev *pulp)
 
 int pulp_init(PulpDev *pulp)
 {
-  int err;
-
   // set mbox mode to driver
-  err = ioctl(pulp->fd, PULP_IOCTL_MBOX_SET_MODE, MBOX_DRIVER);
+  int err = ioctl(pulp->fd, PULP_IOCTL_MBOX_SET_MODE, MBOX_DRIVER);
 
   // check
   if (DEBUG_LEVEL > 1)
     printf("Mailbox interrupt enable register = %#x\n", pulp_read32(pulp->mbox.v_addr, MBOX_IE_OFFSET_B, 'b'));
-
-  // reset the l3_offset pointer
-  pulp->l3_offset = 0;
 
   return err;
 }
@@ -1671,25 +1675,29 @@ int pulp_offload_l3_copy_raw_in(PulpDev *pulp, const TaskDesc *task, const ElemP
 
 uintptr_t pulp_l3_malloc(PulpDev *pulp, unsigned size_b, uintptr_t *p_addr)
 {
-  uintptr_t v_addr;
-
-  // round l3_offset to next higher 64-bit word -> required for PULP DMA
-  if (pulp->l3_offset & 0x7) {
-    pulp->l3_offset = (pulp->l3_offset & 0xFFFFFFF8) + 0x8;
+  if (DEBUG_LEVEL > 2) {
+    printf("pulp_l3_malloc(%p, %d)\n", pulp, size_b);
   }
 
-  if ((pulp->l3_offset + size_b) >= L3_MEM_SIZE_B) {
-    printf("WARNING: overflow in contiguous L3 memory.\n");
-    pulp->l3_offset = 0;
+  // Align size of allocation to 8B because that's required by the PULP DMA.
+  if (size_b & 0x7) {
+    size_b = (size_b & ~0x7) + 0x8;
   }
-
-  v_addr = (uintptr_t)pulp->l3_mem.v_addr + pulp->l3_offset;
-  *p_addr = L3_MEM_BASE_ADDR + pulp->l3_offset;
-
-  pulp->l3_offset += size_b;
+  // The returned pointer is guaranteed to be aligned to a multiple of `sizeof(void*)`, which
+  // fulfills the 8B alignment requirement of the PULP DMA.
+  uintptr_t v_addr = (uintptr_t)o1heapAllocate((O1HeapInstance*)pulp->l3_heap_mgr, size_b);
+  if (v_addr == 0) {
+    return 0;
+  }
 
   if (DEBUG_LEVEL > 2) {
     printf("Host virtual address = %#lx \n", v_addr);
+  }
+
+  // Calculate physical address.
+  *p_addr = v_addr - (uintptr_t)pulp->l3_mem.v_addr + L3_MEM_BASE_ADDR;
+
+  if (DEBUG_LEVEL > 2) {
     printf("PMCA physical address = %#lx \n", *p_addr);
   }
 
@@ -1698,7 +1706,7 @@ uintptr_t pulp_l3_malloc(PulpDev *pulp, unsigned size_b, uintptr_t *p_addr)
 
 void pulp_l3_free(PulpDev *pulp, uintptr_t v_addr, uintptr_t p_addr)
 {
-  return;
+  o1heapFree((O1HeapInstance*)pulp->l3_heap_mgr, (void*)v_addr);
 }
 
 int pulp_dma_xfer(const PulpDev *pulp, uintptr_t addr_l3, uintptr_t addr_pulp, size_t size_b, int host_read)
