@@ -26,7 +26,7 @@
 #include <errno.h>
 
 #include "pulp.h"
-#include "heap.h"
+#include "o1heap.h"
 
 uint32_t pulp_read32(const uint32_t *base_addr, uint32_t off, char off_type)
 {
@@ -294,29 +294,13 @@ int pulp_mmap(PulpDev *pulp)
   } else if (DEBUG_LEVEL > 0) {
     printf("Shared L3 memory mapped to virtual user space at %p.\n", pulp->l3_mem.v_addr);
   }
-  // Allocate memory for L3 heap manager.
-  pulp->l3_heap_mgr = malloc(sizeof(heap_t));
+  // Initialize L3 heap manager.
+  pulp->l3_heap_mgr = o1heapInit(pulp->l3_mem.v_addr, L3_MEM_SIZE_B, NULL, NULL);
   if (pulp->l3_heap_mgr == NULL) {
-    printf("Malloc failed for L3 heap manager.\n");
+    printf("Failed to initialize L3 heap manager.\n");
     return -ENOMEM;
   } else if (DEBUG_LEVEL > 0) {
     printf("Allocated L3 heap manager at %p.\n", pulp->l3_heap_mgr);
-  }
-  // Initialize L3 heap manager.
-  const size_t bin_size = L3_MEM_SIZE_B / BIN_COUNT;
-  for (unsigned i = 0; i < BIN_COUNT; i++) {
-    ((heap_t*)pulp->l3_heap_mgr)->bins[i] = (bin_t*)((uintptr_t)pulp->l3_mem.v_addr + (i * bin_size));
-    if (DEBUG_LEVEL > 2) {
-      printf("L3 heap bin %d: %p.\n", i, ((heap_t*)pulp->l3_heap_mgr)->bins[i]);
-    }
-    memset(((heap_t*)pulp->l3_heap_mgr)->bins[i], 0, sizeof(bin_t));
-  }
-  if (DEBUG_LEVEL > 0) {
-    printf("Initialized bins for L3 heap manager.\n");
-  }
-  init_heap((heap_t*)pulp->l3_heap_mgr, (long)pulp->l3_mem.v_addr);
-  if (DEBUG_LEVEL > 0) {
-    printf("Initialized L3 heap manager.\n");
   }
 
   // PULP external
@@ -1695,12 +1679,13 @@ uintptr_t pulp_l3_malloc(PulpDev *pulp, unsigned size_b, uintptr_t *p_addr)
     printf("pulp_l3_malloc(%p, %d)\n", pulp, size_b);
   }
 
-  // Align size of allocation to 8B because that's required by the PULP DMA.  (Header and footer of
-  // the allocated region are already 8B-aligned.)
+  // Align size of allocation to 8B because that's required by the PULP DMA.
   if (size_b & 0x7) {
     size_b = (size_b & ~0x7) + 0x8;
   }
-  uintptr_t v_addr = (uintptr_t)heap_alloc((heap_t*)pulp->l3_heap_mgr, size_b);
+  // The returned pointer is guaranteed to be aligned to a multiple of `sizeof(void*)`, which
+  // fulfills the 8B alignment requirement of the PULP DMA.
+  uintptr_t v_addr = (uintptr_t)o1heapAllocate((O1HeapInstance*)pulp->l3_heap_mgr, size_b);
   if (v_addr == 0) {
     return 0;
   }
@@ -1721,7 +1706,7 @@ uintptr_t pulp_l3_malloc(PulpDev *pulp, unsigned size_b, uintptr_t *p_addr)
 
 void pulp_l3_free(PulpDev *pulp, uintptr_t v_addr, uintptr_t p_addr)
 {
-  heap_free((heap_t*)pulp->l3_heap_mgr, (void*)v_addr);
+  o1heapFree((O1HeapInstance*)pulp->l3_heap_mgr, (void*)v_addr);
 }
 
 int pulp_dma_xfer(const PulpDev *pulp, uintptr_t addr_l3, uintptr_t addr_pulp, size_t size_b, int host_read)

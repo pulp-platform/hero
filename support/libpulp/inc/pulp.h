@@ -71,7 +71,7 @@ typedef struct {
 #if PLATFORM != JUNO
   PulpSubDev slcr;
 #endif
-  struct heap_t* l3_heap_mgr;
+  struct O1HeapInstance* l3_heap_mgr;
   unsigned int cluster_sel; // cluster select
   unsigned int host_clk_freq_mhz;
   unsigned int pulp_clk_freq_mhz;
