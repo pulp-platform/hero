@@ -253,9 +253,9 @@
   #define CLKING_INPUT_FREQ_MHZ 100
 #else // PLATFORM == ZYNQMP
   #define N_CLUSTERS 1
-  #define N_CORES 2
-  #define L2_MEM_SIZE_KB 64
-  #define L1_MEM_SIZE_KB 64
+  #define N_CORES 8
+  #define L2_MEM_SIZE_KB 128
+  #define L1_MEM_SIZE_KB 128
   #define PULP_DEFAULT_FREQ_MHZ 50
   #define CLKING_INPUT_FREQ_MHZ 50
 #endif
