@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- `hier-icache`: Fix width mismatch and default branch issue.
 
 
 ## 2020-05-20
