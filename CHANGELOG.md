@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
+- PULP SDK/`librtio`: Add support for floats in `printf`.
 
 ### Changed
 - Prefix types in `axi2mem`, `axi_xbar`, and `axi_cut_intf` to prevent type collisions in some
@@ -21,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fix width mismatch and default branch issue.
   - Fix non-blocking assignment.
 - `riscv_core`: Fix declaration of `mult_is_cplx_ex`.
+- PULP SDK/`librtio`: Fix pointer arithmetic in `l1malloc`, `l1free`, `l2malloc`, and `l2free`.
 
 
 ## 2020-05-20
