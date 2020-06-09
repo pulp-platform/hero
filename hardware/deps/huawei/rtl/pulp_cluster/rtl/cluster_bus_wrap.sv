@@ -156,19 +156,19 @@ module cluster_bus_wrap
   localparam int unsigned MAX_TXNS_PER_SLV_PORT = (DMA_NB_OUTSND_BURSTS > NB_CORES) ?
                                                     DMA_NB_OUTSND_BURSTS : NB_CORES;
   axi_xbar_intf #(
-    .AXI_USER_WIDTH         ( AXI_USER_WIDTH                  ),
-    .NO_SLV_PORTS           ( NB_SLAVE                        ),
-    .NO_MST_PORTS           ( NB_MASTER                       ),
-    .MAX_MST_TRANS          ( MAX_TXNS_PER_SLV_PORT           ),
-    .MAX_SLV_TRANS          ( DMA_NB_OUTSND_BURSTS + NB_CORES ),
-    .FALL_THROUGH           ( 1'b0                            ),
-    .LATENCY_MODE           ( axi_pkg::CUT_ALL_AX             ),
-    .AXI_ID_WIDTH_SLV_PORTS ( AXI_ID_IN_WIDTH                 ),
-    .AXI_ID_USED_SLV_PORTS  ( AXI_ID_IN_WIDTH                 ),
-    .AXI_ADDR_WIDTH         ( AXI_ADDR_WIDTH                  ),
-    .AXI_DATA_WIDTH         ( AXI_DATA_WIDTH                  ),
-    .NO_ADDR_RULES          ( N_RULES                         ),
-    .rule_t                 ( axi_pkg::xbar_rule_32_t         )
+    .AXI_USER_WIDTH         ( AXI_USER_WIDTH                        ),
+    .NO_SLV_PORTS           ( NB_SLAVE                              ),
+    .NO_MST_PORTS           ( NB_MASTER                             ),
+    .MAX_MST_TRANS          ( MAX_TXNS_PER_SLV_PORT                 ),
+    .MAX_SLV_TRANS          ( DMA_NB_OUTSND_BURSTS + NB_CORES       ),
+    .FALL_THROUGH           ( 1'b0                                  ),
+    .LATENCY_MODE           ( axi_pkg::CUT_ALL_AX | axi_pkg::DemuxW ),
+    .AXI_ID_WIDTH_SLV_PORTS ( AXI_ID_IN_WIDTH                       ),
+    .AXI_ID_USED_SLV_PORTS  ( AXI_ID_IN_WIDTH                       ),
+    .AXI_ADDR_WIDTH         ( AXI_ADDR_WIDTH                        ),
+    .AXI_DATA_WIDTH         ( AXI_DATA_WIDTH                        ),
+    .NO_ADDR_RULES          ( N_RULES                               ),
+    .rule_t                 ( axi_pkg::xbar_rule_32_t               )
   ) i_xbar (
     .clk_i,
     .rst_ni,
