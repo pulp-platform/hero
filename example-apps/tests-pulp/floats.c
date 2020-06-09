@@ -27,6 +27,7 @@ unsigned test_floats()
   n_errors += condition_or_printf(tmp == 1.96875, "Result of multiplication is wrong!");
   tmp /= 2;
   n_errors += condition_or_printf(tmp == 0.984375, "Result of division is wrong!");
+  printf("%f\n", tmp);
 
   printf("Floating-point tests completed.\n");
   return n_errors;
