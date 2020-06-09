@@ -426,7 +426,7 @@ module cluster_interconnect_wrap
       .clk_i,
       .rst_ni,
       .flush_i  (1'b0),
-      .rr_i     (/* disabled */),
+      .rr_i     ('0),
 
       .req_i    (reqs),
       .gnt_o    (gnts),

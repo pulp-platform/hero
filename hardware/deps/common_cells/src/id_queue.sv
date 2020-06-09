@@ -162,12 +162,12 @@ module id_queue #(
 
     assign inp_gnt_o = ~full;
     always_comb begin
-        match_id            = 'x;
+        match_id            = id_t'('0);
         match_id_valid      = 1'b0;
         head_tail_d         = head_tail_q;
         linked_data_d       = linked_data_q;
         oup_gnt_o           = 1'b0;
-        oup_data_o          = data_t'('x);
+        oup_data_o          = data_t'('0);
         oup_data_valid_o    = 1'b0;
         if (inp_req_i && !full) begin
             match_id = inp_id_i;
@@ -187,7 +187,7 @@ module id_queue #(
             end
             linked_data_d[linked_data_free_idx] = '{
                 data: inp_data_i,
-                next: 'x,
+                next: ld_idx_t'('0),
                 free: 1'b0
             };
         end else if (oup_req_i) begin
@@ -198,10 +198,10 @@ module id_queue #(
                 oup_data_valid_o = 1'b1;
                 if (oup_pop_i) begin
                     // Set free bit of linked data entry, all other bits are don't care.
-                    linked_data_d[head_tail_q[match_idx].head]      = 'x;
+                    linked_data_d[head_tail_q[match_idx].head]      = '{default: '0};
                     linked_data_d[head_tail_q[match_idx].head][0]   = 1'b1;
                     if (head_tail_q[match_idx].head == head_tail_q[match_idx].tail) begin
-                        head_tail_d[match_idx] = '{free: 1'b1, default: 'x};
+                        head_tail_d[match_idx] = '{free: 1'b1, default: '0};
                     end else begin
                         head_tail_d[match_idx].head = linked_data_q[head_tail_q[match_idx].head].next;
                     end
@@ -233,7 +233,7 @@ module id_queue #(
     end
     always_comb begin
         exists_gnt_o = 1'b0;
-        exists_o = 'x;
+        exists_o = 1'b0;
         if (exists_req_i) begin
             exists_gnt_o = 1'b1;
             exists_o = (|exists_match);
@@ -244,7 +244,7 @@ module id_queue #(
     for (genvar i = 0; i < HT_CAPACITY; i++) begin: gen_ht_ffs
         always_ff @(posedge clk_i, negedge rst_ni) begin
             if (!rst_ni) begin
-                head_tail_q[i] <= '{free: 1'b1, default: 'x};
+                head_tail_q[i] <= '{free: 1'b1, default: '0};
             end else begin
                 head_tail_q[i] <= head_tail_d[i];
             end
@@ -254,7 +254,7 @@ module id_queue #(
         always_ff @(posedge clk_i, negedge rst_ni) begin
             if (!rst_ni) begin
                 // Set free bit of linked data entries, all other bits are don't care.
-                linked_data_q[i]    <= 'x;
+                linked_data_q[i]    <= '{default: '0};
                 linked_data_q[i][0] <= 1'b1;
             end else begin
                 linked_data_q[i]    <= linked_data_d[i];

@@ -26,7 +26,7 @@ module axi_xbar #(
   parameter int unsigned            NoAddrRules         = 0,
   parameter type                    slv_aw_chan_t       = logic,
   parameter type                    mst_aw_chan_t       = logic,
-  parameter type                    w_chan_t            = logic,
+  parameter type                    axi_w_chan_t        = logic,
   parameter type                    slv_b_chan_t        = logic,
   parameter type                    mst_b_chan_t        = logic,
   parameter type                    slv_ar_chan_t       = logic,
@@ -137,7 +137,7 @@ module axi_xbar #(
     axi_demux #(
       .AxiIdWidth     ( AxiIdWidthSlvPorts  ),  // ID Width
       .aw_chan_t      ( slv_aw_chan_t       ),  // AW Channel Type
-      .w_chan_t       ( w_chan_t            ),  //  W Channel Type
+      .w_chan_t       ( axi_w_chan_t        ),  //  W Channel Type
       .b_chan_t       ( slv_b_chan_t        ),  //  B Channel Type
       .ar_chan_t      ( slv_ar_chan_t       ),  // AR Channel Type
       .r_chan_t       ( slv_r_chan_t        ),  //  R Channel Type
@@ -196,7 +196,7 @@ module axi_xbar #(
       .SlvAxiIDWidth ( AxiIdWidthSlvPorts ), // ID width of the slave ports
       .slv_aw_chan_t ( slv_aw_chan_t      ), // AW Channel Type, slave ports
       .mst_aw_chan_t ( mst_aw_chan_t      ), // AW Channel Type, master port
-      .w_chan_t      ( w_chan_t           ), //  W Channel Type, all ports
+      .w_chan_t      ( axi_w_chan_t       ), //  W Channel Type, all ports
       .slv_b_chan_t  ( slv_b_chan_t       ), //  B Channel Type, slave ports
       .mst_b_chan_t  ( mst_b_chan_t       ), //  B Channel Type, master port
       .slv_ar_chan_t ( slv_ar_chan_t      ), // AR Channel Type, slave ports
@@ -279,15 +279,15 @@ module axi_xbar_intf #(
 
   `AXI_TYPEDEF_AW_CHAN_T(mst_aw_chan_t, addr_t, id_mst_t, user_t)
   `AXI_TYPEDEF_AW_CHAN_T(slv_aw_chan_t, addr_t, id_slv_t, user_t)
-  `AXI_TYPEDEF_W_CHAN_T(w_chan_t, data_t, strb_t, user_t)
+  `AXI_TYPEDEF_W_CHAN_T(axi_w_chan_t, data_t, strb_t, user_t)
   `AXI_TYPEDEF_B_CHAN_T(mst_b_chan_t, id_mst_t, user_t)
   `AXI_TYPEDEF_B_CHAN_T(slv_b_chan_t, id_slv_t, user_t)
   `AXI_TYPEDEF_AR_CHAN_T(mst_ar_chan_t, addr_t, id_mst_t, user_t)
   `AXI_TYPEDEF_AR_CHAN_T(slv_ar_chan_t, addr_t, id_slv_t, user_t)
   `AXI_TYPEDEF_R_CHAN_T(mst_r_chan_t, data_t, id_mst_t, user_t)
   `AXI_TYPEDEF_R_CHAN_T(slv_r_chan_t, data_t, id_slv_t, user_t)
-  `AXI_TYPEDEF_REQ_T(mst_req_t, mst_aw_chan_t, w_chan_t, mst_ar_chan_t)
-  `AXI_TYPEDEF_REQ_T(slv_req_t, slv_aw_chan_t, w_chan_t, slv_ar_chan_t)
+  `AXI_TYPEDEF_REQ_T(mst_req_t, mst_aw_chan_t, axi_w_chan_t, mst_ar_chan_t)
+  `AXI_TYPEDEF_REQ_T(slv_req_t, slv_aw_chan_t, axi_w_chan_t, slv_ar_chan_t)
   `AXI_TYPEDEF_RESP_T(mst_resp_t, mst_b_chan_t, mst_r_chan_t)
   `AXI_TYPEDEF_RESP_T(slv_resp_t, slv_b_chan_t, slv_r_chan_t)
 
@@ -320,7 +320,7 @@ module axi_xbar_intf #(
     .NoAddrRules        ( NO_ADDR_RULES           ),
     .slv_aw_chan_t      ( slv_aw_chan_t           ),
     .mst_aw_chan_t      ( mst_aw_chan_t           ),
-    .w_chan_t           ( w_chan_t                ),
+    .axi_w_chan_t       ( axi_w_chan_t            ),
     .slv_b_chan_t       ( slv_b_chan_t            ),
     .mst_b_chan_t       ( mst_b_chan_t            ),
     .slv_ar_chan_t      ( slv_ar_chan_t           ),

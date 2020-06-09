@@ -75,13 +75,13 @@ module axi_to_mem_banked_intf #(
   typedef logic [AXI_DATA_WIDTH-1:0]   data_t;
   typedef logic [AXI_DATA_WIDTH/8-1:0] strb_t;
   typedef logic [AXI_USER_WIDTH-1:0]   user_t;
-  `AXI_TYPEDEF_AW_CHAN_T(aw_chan_t, addr_t, id_t, user_t)
-  `AXI_TYPEDEF_W_CHAN_T(w_chan_t, data_t, strb_t, user_t)
-  `AXI_TYPEDEF_B_CHAN_T(b_chan_t, id_t, user_t)
-  `AXI_TYPEDEF_AR_CHAN_T(ar_chan_t, addr_t, id_t, user_t)
-  `AXI_TYPEDEF_R_CHAN_T(r_chan_t, data_t, id_t, user_t)
-  `AXI_TYPEDEF_REQ_T(axi_req_t, aw_chan_t, w_chan_t, ar_chan_t)
-  `AXI_TYPEDEF_RESP_T(axi_resp_t, b_chan_t, r_chan_t)
+  `AXI_TYPEDEF_AW_CHAN_T(atm_aw_chan_t, addr_t, id_t, user_t)
+  `AXI_TYPEDEF_W_CHAN_T(atm_w_chan_t, data_t, strb_t, user_t)
+  `AXI_TYPEDEF_B_CHAN_T(atm_b_chan_t, id_t, user_t)
+  `AXI_TYPEDEF_AR_CHAN_T(atm_ar_chan_t, addr_t, id_t, user_t)
+  `AXI_TYPEDEF_R_CHAN_T(atm_r_chan_t, data_t, id_t, user_t)
+  `AXI_TYPEDEF_REQ_T(axi_req_t, atm_aw_chan_t, atm_w_chan_t, atm_ar_chan_t)
+  `AXI_TYPEDEF_RESP_T(axi_resp_t, atm_b_chan_t, atm_r_chan_t)
 
   axi_req_t  mem_axi_req;
   axi_resp_t mem_axi_resp;
@@ -93,11 +93,11 @@ module axi_to_mem_banked_intf #(
     .AxiIdWidth    ( AXI_ID_WIDTH               ),
     .AxiAddrWidth  ( AXI_ADDR_WIDTH             ),
     .AxiDataWidth  ( AXI_DATA_WIDTH             ),
-    .axi_aw_chan_t ( aw_chan_t                  ),
-    .axi_w_chan_t  (  w_chan_t                  ),
-    .axi_b_chan_t  (  b_chan_t                  ),
-    .axi_ar_chan_t ( ar_chan_t                  ),
-    .axi_r_chan_t  (  r_chan_t                  ),
+    .axi_aw_chan_t ( atm_aw_chan_t              ),
+    .axi_w_chan_t  (  atm_w_chan_t              ),
+    .axi_b_chan_t  (  atm_b_chan_t              ),
+    .axi_ar_chan_t ( atm_ar_chan_t              ),
+    .axi_r_chan_t  (  atm_r_chan_t              ),
     .axi_req_t     ( axi_req_t                  ),
     .axi_resp_t    ( axi_resp_t                 ),
     .MemNumBanks   ( MEM_NUM_BANKS              ),
