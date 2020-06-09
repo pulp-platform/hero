@@ -53,6 +53,7 @@
     `define CLEAR_CNTS                6'b00_0100 //0x10
     `define ENABLE_CNTS               6'b00_0101 //0x14
 `endif
+    `define ENABLE_BYPASS             6'b00_0110 //0x18
     `define ENABLE_L1_L15_PREFETCH    6'b00_0111 //0x1C
 
 
@@ -340,41 +341,42 @@ generate
 
         if(is_write)
         begin
-            case(speriph_slave_addr_i[7:0])
-                8'h00: // ENABLE-DISABLE
+            if (speriph_slave_addr_i[7:2] == `ENABLE_ICACHE)  // ENABLE-DISABLE
                 begin
                   r_enable_icache[NB_CORES+NB_CACHE_BANKS-1:0] <= {(NB_CORES+NB_CACHE_BANKS){speriph_slave_wdata_i[0]}};
                 end
 
-                8'h04: // FLUSH
+            else if (speriph_slave_addr_i[7:2] == `FLUSH_ICACHE) // FLUSH
                 begin
                   r_flush_icache[NB_CORES+NB_CACHE_BANKS-1:0] <= {(NB_CORES+NB_CACHE_BANKS){speriph_slave_wdata_i[0]}};
                 end
 
-                8'h08: // FLUSH_L1_ONLY
+            else if(speriph_slave_addr_i[7:2] == `FLUSH_L1_ONLY) // FLUSH_L1_ONLY
                 begin
                   r_flush_icache[NB_CORES+NB_CACHE_BANKS-1:0] <= {{(NB_CACHE_BANKS){1'b0}}, {(NB_CORES){speriph_slave_wdata_i[0]}} };
                 end
-                8'h0C: // Sel FLUSH
+
+            else if(speriph_slave_addr_i[7:2] == `SEL_FLUSH_ICACHE) // Sel FLUSH
                 begin
                   r_sel_flush_icache <= speriph_slave_wdata_i;
                 end
+
             `ifdef FEATURE_ICACHE_STAT
-                8'h10: // CLEAR
+            else if(speriph_slave_addr_i[7:2] == `CLEAR_CNTS) // CLEAR
                 begin
                   r_clear_cnt[NB_CORES+NB_CACHE_BANKS-1:0] <= {(NB_CORES+NB_CACHE_BANKS){speriph_slave_wdata_i[0]}};
                 end
 
-                8'h14: // ENABLE-DISABLE STAT REGS
+            else if(speriph_slave_addr_i[7:2] == `ENABLE_CNTS) // ENABLE-DISABLE STAT REGS
                 begin
                   r_enable_cnt[NB_CORES+NB_CACHE_BANKS-1:0] <= {(NB_CORES+NB_CACHE_BANKS){speriph_slave_wdata_i[0]}};
                 end
             `endif
-                8'h1C: // enable l1 to l15 prefetch feature
+            else if(speriph_slave_addr_i[7:2] == `ENABLE_L1_L15_PREFETCH) // enable l1 to l15 prefetch feature
                 begin
                   enable_l1_l15_prefetch_o <= speriph_slave_wdata_i[NB_CORES-1:0];
                 end
-            endcase
+
         end
         else // Not Write
         begin
@@ -571,9 +573,9 @@ endgenerate
                       is_write = 1'b1;
                       NS = IDLE;
 
-                      case(speriph_slave_addr_i[7:0])
+                      case(speriph_slave_addr_i[7:2])
 
-                            8'h00: // Enable - Disable register
+                            `ENABLE_ICACHE: // Enable - Disable register
                             begin
                                 if( speriph_slave_wdata_i[0] == 1'b0 )
                                 begin
@@ -589,21 +591,21 @@ endgenerate
                                 end
                             end //~2'b00
 
-                            8'h04:
+                            `FLUSH_ICACHE:
                             begin
                               NS = FLUSH_ICACHE_CHECK;
                               L1_mask_flush_req_NS = ~{(NB_CORES){speriph_slave_wdata_i[0]}};
                               L2_mask_flush_req_NS = ~{(NB_CACHE_BANKS){speriph_slave_wdata_i[0]}};
                             end
 
-                            8'h08:
+                            `FLUSH_L1_ONLY:
                             begin
                               NS = FLUSH_ICACHE_CHECK;
                               L1_mask_flush_req_NS = ~{(NB_CORES){speriph_slave_wdata_i[0]}};
                               L2_mask_flush_req_NS = '1;
                             end
 
-                            8'h0C:
+                            `SEL_FLUSH_ICACHE:
                             begin
                               NS = SEL_FLUSH_ICACHE;
                               L1_mask_sel_flush_req_NS = L1_icache_sel_flush_req_o;
@@ -612,24 +614,24 @@ endgenerate
 
 
                         `ifdef FEATURE_ICACHE_STAT
-                            8'h10: // CLEAR
+                            `CLEAR_CNTS: // CLEAR
                             begin
                               NS = CLEAR_STAT_REGS;
                             end
 
-                            8'h14: // START
+                            `ENABLE_CNTS: // START
                             begin
                               NS = ENABLE_STAT_REGS;
                             end
                         `endif
 
-                            8'h18: // Enable BYPASS
+                             `ENABLE_BYPASS: // Enable BYPASS
                               begin
                                 deliver_response = 1'b1;
                                 NS = IDLE;
                               end
 
-                            8'h1C: // Enable L1_L15
+                             `ENABLE_L1_L15_PREFETCH: // Enable L1_L15
                               begin
                                 deliver_response = 1'b1;
                                 NS = IDLE;
