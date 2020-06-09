@@ -9,9 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- Prefix types in `axi2mem`, `axi_xbar`, and `axi_cut_intf` to prevent type collisions in some
+  tools.
 
 ### Fixed
-- `hier-icache`: Fix width mismatch and default branch issue.
+- `axi_id_remap` and `id_queue`: Remove `'x` default assignments.
+- `cluster_interconnect_wrap`: Tie unused input of `i_arb` off.
+- `event_unit_flex`: Add parentheses around OR-reduction.
+- `fpnew_pkg`: Fix definition of `opgrp_fmt_unit_types_t`.
+- `hier-icache`:
+  - Fix width mismatch and default branch issue.
+  - Fix non-blocking assignment.
+- `riscv_core`: Fix declaration of `mult_is_cplx_ex`.
 
 
 ## 2020-05-20
