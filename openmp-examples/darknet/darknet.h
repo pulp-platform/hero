@@ -32,7 +32,7 @@ extern int gpu_index;
 
 typedef struct{
     int classes;
-    char **names;
+    __host char **names;
 } metadata;
 
 metadata get_metadata(char *file);
@@ -533,7 +533,7 @@ typedef struct detection{
 
 typedef struct matrix{
     int rows, cols;
-    float **vals;
+    __host float **vals;
 } matrix;
 
 
@@ -552,11 +552,11 @@ typedef enum {
 
 typedef struct load_args{
     int threads;
-    char **paths;
+    __host char **paths;
     char *path;
     int n;
     int m;
-    char **labels;
+    __host char **labels;
     int h;
     int w;
     int out_w;
@@ -717,7 +717,7 @@ image copy_image(image p);
 void draw_box_width(image a, int x1, int y1, int x2, int y2, int w, float r, float g, float b);
 float get_current_rate(network *net);
 void composite_3d(char *f1, char *f2, char *out, int delta);
-data load_data_old(char **paths, int n, int m, char **labels, int k, int w, int h);
+data load_data_old(__host char **paths, int n, int m, __host char **labels, int k, int w, int h);
 size_t get_current_batch(network *net);
 void constrain_image(image im);
 image get_network_image_layer(network *net, int i);
@@ -741,7 +741,7 @@ box float_to_box(float *f, int stride);
 void draw_detections(image im, detection *dets, int num, float thresh, char **names, image **alphabet, int classes);
 
 matrix network_predict_data(network *net, data test);
-image **load_alphabet();
+__host image **load_alphabet();
 image get_network_image(network *net);
 float *network_predict(network *net, float *input);
 
@@ -754,7 +754,7 @@ void free_detections(detection *dets, int n);
 
 void reset_network_state(network *net, int b);
 
-char **get_labels(char *filename);
+__host char **get_labels(char *filename);
 void do_nms_obj(detection *dets, int total, int classes, float thresh);
 void do_nms_sort(detection *dets, int total, int classes, float thresh);
 
@@ -784,7 +784,7 @@ void free_ptrs(void **ptrs, int n);
 char *fgetl(FILE *fp);
 void strip(char *s);
 float sec(clock_t clocks);
-void **list_to_array(list *l);
+__host void **list_to_array(list *l);
 void top_k(float *a, int n, int k, int *index);
 int *read_map(char *filename);
 void error(const char *s);
