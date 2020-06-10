@@ -47,9 +47,9 @@ char **get_random_paths_indexes(char **paths, int n, int m, int *indexes)
 }
 */
 
-__host char **get_random_paths(__host char **paths, int n, int m)
+char **get_random_paths(char **paths, int n, int m)
 {
-    __host char **random_paths = calloc(n, sizeof(char*));
+    char **random_paths = calloc(n, sizeof(char*));
     int i;
     pthread_mutex_lock(&mutex);
     for(i = 0; i < n; ++i){
@@ -61,9 +61,9 @@ __host char **get_random_paths(__host char **paths, int n, int m)
     return random_paths;
 }
 
-__host char **find_replace_paths(__host char **paths, int n, char *find, char *replace)
+char **find_replace_paths(char **paths, int n, char *find, char *replace)
 {
-    __host char **replace_paths = calloc(n, sizeof(char*));
+    char **replace_paths = calloc(n, sizeof(char*));
     int i;
     for(i = 0; i < n; ++i){
         char replaced[4096];
@@ -73,7 +73,7 @@ __host char **find_replace_paths(__host char **paths, int n, char *find, char *r
     return replace_paths;
 }
 
-matrix load_image_paths_gray(__host char **paths, int n, int w, int h)
+matrix load_image_paths_gray(char **paths, int n, int w, int h)
 {
     int i;
     matrix X;
@@ -94,7 +94,7 @@ matrix load_image_paths_gray(__host char **paths, int n, int w, int h)
     return X;
 }
 
-matrix load_image_paths(__host char **paths, int n, int w, int h)
+matrix load_image_paths(char **paths, int n, int w, int h)
 {
     int i;
     matrix X;
@@ -110,7 +110,7 @@ matrix load_image_paths(__host char **paths, int n, int w, int h)
     return X;
 }
 
-matrix load_image_augment_paths(__host char **paths, int n, int min, int max, int size, float angle, float aspect, float hue, float saturation, float exposure, int center)
+matrix load_image_augment_paths(char **paths, int n, int min, int max, int size, float angle, float aspect, float hue, float saturation, float exposure, int center)
 {
     int i;
     matrix X;
@@ -521,7 +521,7 @@ void fill_truth_captcha(char *path, int n, float *truth)
     }
 }
 
-data load_data_captcha(__host char **paths, int n, int m, int k, int w, int h)
+data load_data_captcha(char **paths, int n, int m, int k, int w, int h)
 {
     if(m) paths = get_random_paths(paths, n, m);
     data d = {0};
@@ -536,7 +536,7 @@ data load_data_captcha(__host char **paths, int n, int m, int k, int w, int h)
     return d;
 }
 
-data load_data_captcha_encode(__host char **paths, int n, int m, int w, int h)
+data load_data_captcha_encode(char **paths, int n, int m, int w, int h)
 {
     if(m) paths = get_random_paths(paths, n, m);
     data d = {0};
@@ -548,7 +548,7 @@ data load_data_captcha_encode(__host char **paths, int n, int m, int w, int h)
     return d;
 }
 
-void fill_truth(char *path, __host char **labels, int k, float *truth)
+void fill_truth(char *path, char **labels, int k, float *truth)
 {
     int i;
     memset(truth, 0, k*sizeof(float));
@@ -595,7 +595,7 @@ void fill_hierarchy(float *truth, int k, tree *hierarchy)
     }
 }
 
-matrix load_regression_labels_paths(__host char **paths, int n, int k)
+matrix load_regression_labels_paths(char **paths, int n, int k)
 {
     matrix y = make_matrix(n, k);
     int i,j;
@@ -625,7 +625,7 @@ matrix load_regression_labels_paths(__host char **paths, int n, int k)
     return y;
 }
 
-matrix load_labels_paths(__host char **paths, int n, __host char **labels, int k, tree *hierarchy)
+matrix load_labels_paths(char **paths, int n, char **labels, int k, tree *hierarchy)
 {
     matrix y = make_matrix(n, k);
     int i;
@@ -638,7 +638,7 @@ matrix load_labels_paths(__host char **paths, int n, __host char **labels, int k
     return y;
 }
 
-matrix load_tags_paths(__host char **paths, int n, int k)
+matrix load_tags_paths(char **paths, int n, int k)
 {
     matrix y = make_matrix(n, k);
     int i;
@@ -662,10 +662,10 @@ matrix load_tags_paths(__host char **paths, int n, int k)
     return y;
 }
 
-__host char **get_labels(char *filename)
+char **get_labels(char *filename)
 {
     list *plist = get_paths(filename);
-    __host char **labels = list_to_array(plist);
+    char **labels = (char **)list_to_array(plist);
     free_list(plist);
     return labels;
 }
@@ -742,9 +742,9 @@ image get_segmentation_image2(char *path, int w, int h, int classes)
     return mask;
 }
 
-data load_data_seg(int n, __host char **paths, int m, int w, int h, int classes, int min, int max, float angle, float aspect, float hue, float saturation, float exposure, int div)
+data load_data_seg(int n, char **paths, int m, int w, int h, int classes, int min, int max, float angle, float aspect, float hue, float saturation, float exposure, int div)
 {
-    __host char **random_paths = get_random_paths(paths, n, m);
+    char **random_paths = get_random_paths(paths, n, m);
     int i;
     data d = {0};
     d.shallow = 0;
@@ -790,9 +790,9 @@ data load_data_seg(int n, __host char **paths, int m, int w, int h, int classes,
     return d;
 }
 
-data load_data_iseg(int n, __host char **paths, int m, int w, int h, int classes, int boxes, int div, int min, int max, float angle, float aspect, float hue, float saturation, float exposure)
+data load_data_iseg(int n, char **paths, int m, int w, int h, int classes, int boxes, int div, int min, int max, float angle, float aspect, float hue, float saturation, float exposure)
 {
-    __host char **random_paths = get_random_paths(paths, n, m);
+    char **random_paths = get_random_paths(paths, n, m);
     int i;
     data d = {0};
     d.shallow = 0;
@@ -830,9 +830,9 @@ data load_data_iseg(int n, __host char **paths, int m, int w, int h, int classes
     return d;
 }
 
-data load_data_mask(int n, __host char **paths, int m, int w, int h, int classes, int boxes, int coords, int min, int max, float angle, float aspect, float hue, float saturation, float exposure)
+data load_data_mask(int n, char **paths, int m, int w, int h, int classes, int boxes, int coords, int min, int max, float angle, float aspect, float hue, float saturation, float exposure)
 {
-    __host char **random_paths = get_random_paths(paths, n, m);
+    char **random_paths = get_random_paths(paths, n, m);
     int i;
     data d = {0};
     d.shallow = 0;
@@ -870,9 +870,9 @@ data load_data_mask(int n, __host char **paths, int m, int w, int h, int classes
     return d;
 }
 
-data load_data_region(int n, __host char **paths, int m, int w, int h, int size, int classes, float jitter, float hue, float saturation, float exposure)
+data load_data_region(int n, char **paths, int m, int w, int h, int size, int classes, float jitter, float hue, float saturation, float exposure)
 {
-    __host char **random_paths = get_random_paths(paths, n, m);
+    char **random_paths = get_random_paths(paths, n, m);
     int i;
     data d = {0};
     d.shallow = 0;
@@ -924,7 +924,7 @@ data load_data_region(int n, __host char **paths, int m, int w, int h, int size,
     return d;
 }
 
-data load_data_compare(int n, __host char **paths, int m, int classes, int w, int h)
+data load_data_compare(int n, char **paths, int m, int classes, int w, int h)
 {
     if(m) paths = get_random_paths(paths, 2*n, m);
     int i,j;
@@ -988,7 +988,7 @@ data load_data_compare(int n, __host char **paths, int m, int classes, int w, in
     return d;
 }
 
-data load_data_swag(__host char **paths, int n, int classes, float jitter)
+data load_data_swag(char **paths, int n, int classes, float jitter)
 {
     int index = rand()%n;
     char *random_path = paths[index];
@@ -1041,9 +1041,9 @@ data load_data_swag(__host char **paths, int n, int classes, float jitter)
     return d;
 }
 
-data load_data_detection(int n, __host char **paths, int m, int w, int h, int boxes, int classes, float jitter, float hue, float saturation, float exposure)
+data load_data_detection(int n, char **paths, int m, int w, int h, int boxes, int classes, float jitter, float hue, float saturation, float exposure)
 {
-    __host char **random_paths = get_random_paths(paths, n, m);
+    char **random_paths = get_random_paths(paths, n, m);
     int i;
     data d = {0};
     d.shallow = 0;
@@ -1194,10 +1194,10 @@ pthread_t load_data(load_args args)
     return thread;
 }
 
-data load_data_writing(__host char **paths, int n, int m, int w, int h, int out_w, int out_h)
+data load_data_writing(char **paths, int n, int m, int w, int h, int out_w, int out_h)
 {
     if(m) paths = get_random_paths(paths, n, m);
-    __host char **replace_paths = find_replace_paths(paths, n, ".png", "-label.png");
+    char **replace_paths = find_replace_paths(paths, n, ".png", "-label.png");
     data d = {0};
     d.shallow = 0;
     d.X = load_image_paths(paths, n, w, h);
@@ -1209,7 +1209,7 @@ data load_data_writing(__host char **paths, int n, int m, int w, int h, int out_
     return d;
 }
 
-data load_data_old(__host char **paths, int n, int m, __host char **labels, int k, int w, int h)
+data load_data_old(char **paths, int n, int m, char **labels, int k, int w, int h)
 {
     if(m) paths = get_random_paths(paths, n, m);
     data d = {0};
@@ -1234,7 +1234,7 @@ data load_data_old(__host char **paths, int n, int m, __host char **labels, int 
    }
  */
 
-data load_data_super(__host char **paths, int n, int m, int w, int h, int scale)
+data load_data_super(char **paths, int n, int m, int w, int h, int scale)
 {
     if(m) paths = get_random_paths(paths, n, m);
     data d = {0};
@@ -1264,7 +1264,7 @@ data load_data_super(__host char **paths, int n, int m, int w, int h, int scale)
     return d;
 }
 
-data load_data_regression(__host char **paths, int n, int m, int k, int min, int max, int size, float angle, float aspect, float hue, float saturation, float exposure)
+data load_data_regression(char **paths, int n, int m, int k, int min, int max, int size, float angle, float aspect, float hue, float saturation, float exposure)
 {
     if(m) paths = get_random_paths(paths, n, m);
     data d = {0};
@@ -1345,7 +1345,7 @@ data resize_data(data orig, int w, int h)
     return d;
 }
 
-data load_data_augment(__host char **paths, int n, int m, __host char **labels, int k, tree *hierarchy, int min, int max, int size, float angle, float aspect, float hue, float saturation, float exposure, int center)
+data load_data_augment(char **paths, int n, int m, char **labels, int k, tree *hierarchy, int min, int max, int size, float angle, float aspect, float hue, float saturation, float exposure, int center)
 {
     if(m) paths = get_random_paths(paths, n, m);
     data d = {0};
@@ -1358,7 +1358,7 @@ data load_data_augment(__host char **paths, int n, int m, __host char **labels, 
     return d;
 }
 
-data load_data_tag(__host char **paths, int n, int m, int k, int min, int max, int size, float angle, float aspect, float hue, float saturation, float exposure)
+data load_data_tag(char **paths, int n, int m, int k, int min, int max, int size, float angle, float aspect, float hue, float saturation, float exposure)
 {
     if(m) paths = get_random_paths(paths, n, m);
     data d = {0};
@@ -1416,7 +1416,7 @@ data load_categorical_data_csv(char *filename, int target, int k)
     d.shallow = 0;
     matrix X = csv_to_matrix(filename);
     float *truth_1d = pop_column(&X, target);
-    __host float **truth = one_hot_encode(truth_1d, X.rows, k);
+    float **truth = one_hot_encode(truth_1d, X.rows, k);
     matrix y;
     y.rows = X.rows;
     y.cols = k;
