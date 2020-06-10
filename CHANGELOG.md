@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Prefix types in `axi2mem`, `axi_xbar`, and `axi_cut_intf` to prevent type collisions in some
   tools.
+- `axi_pkg`: Remove `enum`ness of `xbar_latency_e` to improve compatibility with some formal tools.
 
 ### Fixed
 - `axi_id_remap` and `id_queue`: Remove `'x` default assignments.
