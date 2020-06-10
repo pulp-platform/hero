@@ -9,7 +9,6 @@
 #include <dmatransfer.h>
 
 #define BILLION 1E9
-#define TIME_DMA_AND_COMP
 
 void gemm_bin(int M, int N, int K, float ALPHA, 
         char  *A, int lda, 
@@ -77,193 +76,463 @@ void gemm(int TA, int TB, int M, int N, int K, float ALPHA,
     gemm_cpu( TA,  TB,  M, N, K, ALPHA,A,lda, B, ldb,BETA,C,ldc);
 }
 
-#pragma omp declare target
-int inline my_min(int a, int b) {
-  if(a < b) {
-    return a;
-  } else {
-    return b;
-  }
-}
-#pragma omp end declare target
-
 void gemm_nn(int M, int N, int K, float ALPHA, 
         float *A, int lda, 
         float *B, int ldb,
         float *C, int ldc)
 {
+    int i,j,k;
+		//printf("%i,%i,%i\n",M,N,K);
+		if(0)
+		//if((M==16)&&(N==173056)&&(K=27))	// 00
+		//if((M==32)&&(N==43264)&&(K=144))	// 02
+		//if((M==64)&&(N==10816)&&(K=288))	// 04
+		//if((M==128)&&(N==2704)&&(K=576))	// 06
+		//if((M==256)&&(N==676)&&(K=1152))	// 08
+		//if((M==512)&&(N==169)&&(K=2304))	// 10/14
+		//if((M==1024)&&(N==169)&&(K=4608))	// 12
+		//if((M==256)&&(N==169)&&(K=1024))	// 13
+		//if((M==255)&&(N==169)&&(K=512))		// 15
+		//if((M==128)&&(N==169)&&(K=256))		// 18
+		//if((M==256)&&(N==676)&&(K=3456))	// 21
+		//if((M==255)&&(N==676)&&(K=256))		// 22
+		//if(((M==255)&&(N==169)&&(K=512))||((M==128)&&(N==169)&&(K=256)))		// 15 and 18
+		//if(((M==255)&&(N==169)&&(K=512))||((M==255)&&(N==676)&&(K=256)))		// 15 and 22
+		//if(((M==128)&&(N==169)&&(K=256))||((M==255)&&(N==676)&&(K=256)))		// 18 and 22
+		//if(((M==128)&&(N==169)&&(K=256))||((M==255)&&(N==676)&&(K=256)||((M==255)&&(N==169)&&(K=512))))		// 15, 18 and 22
+		{
+      // Offloading
+			printf("Accelerating Layer\n");
+			printf("Address of C is %p\n", C);
+			printf("Sum is %i\n", M*N+M*K+K*N);
+			struct timespec requestStart, requestEnd;
+			clock_gettime(CLOCK_REALTIME, &requestStart);
 
-  // For correctness check
-  float* E_flt= (float*) malloc(M*N*sizeof(float));
-  for(int m = 0; m < M; m++){
-    for(int n = 0; n < N; n++){
-      E_flt[m*N+n] = 0.0;
-      for(int k = 0; k < K; k++){
-        E_flt[m*N+n] += A[m*K+k]*B[k*N+n];
-      }
-    }
-  }
+      //#pragma omp target device(BIGPULP_MEMCPY) map(tofrom: C[0:M*N]) map(to: A[0:M*K], B[0:K*N], ALPHA, i, j, k) 
+      #pragma omp target data map(tofrom: C[0:M*N]) map(to: A[0:M*K], B[0:K*N]) 
+			{
+      #pragma omp target //device(BIGPULP_MEMCPY)
+			{
+			float* spm = alloc_spm();
+			if(spm == NULL){
+				printf("SPM allocation failed!\n");
+			}
+			else{
+				printf("SPM at address %p\n", spm);
+			}
+			int rows_per_chunk = M;
 
-  struct timespec requestStart, requestEnd;
-  clock_gettime(CLOCK_REALTIME, &requestStart);
-	#ifdef TIME_DMA_AND_COMP
-	unsigned int  dma_cycles = 0;
-	unsigned int comp_cycles = 0;
-	unsigned int   ld_stalls = 42;
-  
-  #pragma omp target device(BIGPULP_MEMCPY) \
-      map(tofrom: C[0:M*N], dma_cycles, comp_cycles, ld_stalls) \
-      map(to: A[0:M*K], B[0:K*N]) 
-	#else
-  #pragma omp target device(BIGPULP_MEMCPY) \
-      map(tofrom: C[0:M*N]) \
-      map(to: A[0:M*K], B[0:K*N]) 
-	#endif
-  {
-		// Compute memory allocation block sizes
-    const int L1_b = 80 * 1024;
-    const int L1_flt = L1_b / sizeof(float);
-    const int blockSize = sqrt(L1_flt / 3);
-  
-		// Allocate memory in L3
-    int* spm = alloc_spm();
-    float* A_spm = spm;
-    float* B_spm = A_spm + blockSize * blockSize;
-    float* C_spm = B_spm + blockSize * blockSize;
-		
-		#if defined TIME_DMA_AND_COMP && defined __PULP__ 
-		asm volatile ("csrw 0x79F, %0" :: "r" (0): "memory");
-		asm volatile ("csrr %0, 0x782" : "=r" (ld_stalls) :: "memory"); 
-		#endif
+			float* B_spm = spm;
+			float* A_spm = spm + K*N;
+			float* C_spm = spm + K*N + K*rows_per_chunk;
+			/*
+			if(spm + K*N + M*K + M*N > 0x10020000){
+				printf("Memory allocation larger than L1!\n");
+			}
+			else{
+				printf("Highest address is at %p\n", spm + K*N + M*K + M*N);
+			}
+			*/
 
-		// Compute kernel
-    #pragma omp parallel num_threads(8)
-		//if(M > 0 && N > 0 && K > 0) {
-    for(int bn = 0; bn < N && N-bn-1 != 0; bn += my_min(N-bn-1, blockSize)) {
-			//asm volatile ("nop\n");
-			//asm volatile ("nop\n");
-      for(int bk = 0; bk < K && K-bk-1 != 0; bk += my_min(K-bk-1, blockSize)) {
-        #pragma omp single
-        {
-					#ifdef TIME_DMA_AND_COMP
-					hero_reset_clk_counter();
+			memcpy_to_spm(B_spm, ((float*) B), K*N);
 
+			int row = 0;
+			
+			while (row < M) {         
+			//while (row < 1) {         
+				int chunk_rows = (rows_per_chunk < M - row) ? rows_per_chunk : (M - row);         
+				memcpy_to_spm(A_spm, ((float*) A) + row*K, chunk_rows*K);         
+				memcpy_to_spm(C_spm, ((float*) C) + row*N, chunk_rows*N);         
+				dma_flush();
 
-					#endif
-
-          for (int r = 0; r < blockSize; r++) {
-            // Copy in B with K rows of length N
-            memcpy_to_spm(B_spm + r * blockSize,
-                B + (bk + r) * N + bn,
-                blockSize);
-          }
-
-					#ifdef TIME_DMA_AND_COMP
-					dma_cycles += hero_get_clk_counter();
-					#endif 
-        }
-        for(int bm = 0; bm < M && M-bm-1 != 0; bm += my_min(M-bm-1, blockSize)) {					
-          #pragma omp single
-          {
-						#ifdef TIME_DMA_AND_COMP
-						hero_reset_clk_counter();
-						#endif
-
-            for (int r = 0; r < blockSize; r++) {
-              // Copy in A, with M rows of length K
-              memcpy_to_spm(A_spm + r * blockSize,
-                  A + (bm + r) * K + bk,
-                  blockSize);
-              // Copy in C with M rows of length N
-              memcpy_to_spm(C_spm + r * blockSize,
-                  C + (bm + r) * N + bn,
-                  blockSize);
-            }
-            dma_flush();
-
-						#ifdef TIME_DMA_AND_COMP
-						dma_cycles += hero_get_clk_counter();
-						#endif 
-          }
-				
-          int limitM = my_min(M - bm, blockSize);
-          int limitN = my_min(N - bn, blockSize);
-          int limitK = my_min(K - bk, blockSize);
-
-					#ifdef TIME_DMA_AND_COMP
-					#pragma omp single
-					{
-						hero_reset_clk_counter();
+				#pragma omp parallel for collapse(2) num_threads(8) firstprivate(ALPHA) private(i, j, k)
+				for (i = 0; i < chunk_rows; i++) {
+					for (j = 0; j < N; j++) {
+						for (k = 0; k < K; ++k) {
+							C_spm[i*N+j] += ALPHA * A_spm[i*K+k] * B_spm[k*N+j];
+						}
 					}
-					#endif
+				}
 
-          #pragma omp for collapse(2)
-          for(int m = 0; m < limitM; m++) {
-            for(int n = 0; n < limitN; n++) {
-              for(int k = 0; k < limitK; k++) {
-                C_spm[m * blockSize + n] += A_spm[m * blockSize + k] * 
-                  B_spm[k * blockSize + n];
-              }
-            }
-          }
+				memcpy_from_spm(((float*) C) + row*N, C_spm, chunk_rows*N);
+				dma_flush();
+				row += rows_per_chunk;
+			}
+
+			dealloc_spm(spm);
+			}
+			}
+
+
+			
+			/*
+#pragma omp parallel for num_threads(8) private(i,j,k)
+			for(i = 0; i < M; ++i){
+				for(k = 0; k < K; ++k){
+					register float A_PART = ALPHA*A[i*lda+k];
+					for(j = 0; j < N; ++j){
+			  			C[i*ldc+j] += A_PART*B[k*ldb+j];
+			  		}
+			  	}    
+			  }
+			}
+
+			*/
+
+			clock_gettime(CLOCK_REALTIME, &requestEnd);
+			double accum = ( requestEnd.tv_sec - requestStart.tv_sec )
+				  + ( requestEnd.tv_nsec - requestStart.tv_nsec )
+					  / BILLION;
+			printf( "Time spent on layer: %lf\n", accum );
+      // Store the output of C in case we want to compare correctness.
+			FILE *fp = fopen("C_dump", "w+");
+			for(i=0;i<M*N;i++){
+				fprintf(fp, "%f\n", C[i]);
+			}
+			fclose(fp);
+			
+		} 
+
+		else if(0&&(M==128)&&(N==169)&&(K=256)){		// Layer 18 float check
+
+			int i, len=16;
+
+			float a[len];
+			float b[len];
+			float c[len];
+			float r[len];
+
+			for(i = 0; i < len; i++)
+			{	
+				a[i] = i + 0.5;
+				b[i] = i + 1.5;
+				c[i] = i + 2.5;
+				r[i] = a[i]*b[i] + c[i];
+			}
+
+      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: c[0:len]) map(to: a[0:len], b[0:len], i, len)
+		 	{
+				float* spm = alloc_spm();
+				float* a_spm = spm;
+				float* b_spm = a_spm + len;
+			  float* c_spm = b_spm + len;
+
+				memcpy_to_spm(a_spm, a, len);
+				memcpy_to_spm(b_spm, b, len);
+				memcpy_to_spm(c_spm, c, len);
+				dma_flush();
+				
+				#pragma omp parallel for num_threads(8) private(i)
+				for(i = 0; i < len; i++){
+					c_spm[i] += a_spm[i]*b_spm[i];
+				}
+
+				memcpy_from_spm(c, c_spm, len);
+				dma_flush();
+
+				dealloc_spm(spm);
+			}	
+
+		for(i = 0; i < len; i++){
+			printf("c[%d] is %f, expected: %f\n", i, c[i], r[i]);
+			if(c[i] != r[i]){
+				printf("\n\n\n!!!ERROR DETECTED!!!\n\n\n");
+			}
+		}
+
+
+		}
+		else if((M==128)&&(N==169)&&(K=256)){		// Layer 18 rewrite matrices
+			printf("Layer 18!\n");
+			
+			/*	
+			M = 1;
+			K = 2;
+			N = 6;
+			int A_flt[M*K], B_flt[K*N], C_flt[M*N], E_flt[M*N];
+
+			printf("A_flt:\n");
+			for(int m = 0; m < M; m++){
+				for(int k = 0; k < K; k++){
+					A_flt[m*K+k] = m*K+k;
+					printf("%d,",A_flt[m*K+k]);
+				}
+				printf("\n");
+			}
+
+			printf("B_flt:\n");
+			for(int k = 0; k < K; k++){
+				for(int n = 0; n < N; n++){
+					B_flt[k*N+n] = k*N+n;
+					printf("%d,",B_flt[k*N+n]);
+				}
+				printf("\n");
+			}
+
+
+			printf("C_flt:\n");
+			for(int m = 0; m < M; m++){
+				for(int n = 0; n < N; n++){
+					C_flt[m*N+n] = 0.0;
+					printf("%d,",C_flt[m*N+n]);
+					E_flt[m*N+n] = 0.0;
+				}
+				printf("\n");
+			}
+			
+			
+			*/
+			float* E_flt= (float*) malloc(M*N*sizeof(float));
+			for(int m = 0; m < M; m++){
+				for(int n = 0; n < N; n++){
+					E_flt[m*N+n] = 0.0;
+					for(int k = 0; k < K; k++){
+						E_flt[m*N+n] += A[m*K+k]*B[k*N+n];
+					}
+				}
+			}
+
+
+
+
+
+			int l1 = 80;
+			//int col = l1*256/(2*K+1);
+			int col = (l1*256-K)/(K+1);
+
+			int used_mem = K*sizeof(float)+col*K*sizeof(float)+col*sizeof(float);
+			printf("Used memory: %d\n", used_mem);
+
+			int exp_iter = M*N/col;
+			printf("Expected iterations: %d\n", exp_iter);
+			
+
+			struct timespec requestStart, requestEnd;
+			clock_gettime(CLOCK_REALTIME, &requestStart);
+      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: C[0:M*N]) map(to: A[0:M*K], B[0:K*N]) 
+			{
+
+			int n, lim;
+			int* spm = alloc_spm();
+
+			float* A_spm = spm;
+			float* B_spm = A_spm + K;
+			float* C_spm;
+
+
+			// Load one row of A and multiple columns of B and write the partial results in C
+			for(int m = 0; m < M; m++){
+
+				// Initiate DMA transfer for one row of A
+				memcpy_to_spm(A_spm, A+m*K, K);
+						
+				// Check amount of columns in order not to overshoot B
+				n = 0;
+				while(n < N){
+					if(N < n+col){
+						lim = N - n;
+					}
+					else{
+						lim = col;
+					}
+					
+					// DMA transfers for columns in B and entries in C
+					C_spm = B_spm + lim*K;
+					memcpy_to_spm(C_spm, C+m*N+n, lim);
+					for(k = 0; k < K; k++){
+						memcpy_to_spm(B_spm+k*lim, B+k*N+n, lim);
+					}
+					dma_flush();
+
+	
+					
+					/*
+					printf("Address of A_spm: %p %p\n", A_spm);
+					printf("Address of B_spm: %p %p\n", B_spm);
+
+					printf("A_spm:\n");
+					for(int i = 0; i < M; i++){
+						for(int j = 0; j < K; j++){
+							printf("%d %d,", A_spm[i*K+j]);
+						}
+						printf("\n");
+					}
+					printf("\n");
+
+
+
+					printf("B_spm:\n");
+					for(int i = 0; i < K; i++){
+						for(int j = 0; j < lim; j++){
+							printf("%d %d,", B_spm[i*lim+j]);
+						}
+						printf("\n");
+					}
+					printf("\n");
+					*/
 					
 
-          #pragma omp single
-          {
-  	        #ifdef TIME_DMA_AND_COMP
-    	      comp_cycles += hero_get_clk_counter();
-						hero_reset_clk_counter();
-        	  #endif
+					// Do the computation
+					#pragma omp parallel for collapse(2) num_threads(8) 
+					for(int c = 0; c < lim; c++){
+						for(int k = 0; k < K; k++){
+							C_spm[c] += A_spm[k]*B_spm[k*lim+c];
+						}
+					}
 
-            // Copy out C with M rows of length N
-            for (int r = 0; r < blockSize; r++) {
-              memcpy_from_spm(C + (bm + r) * N + bn,
-                  C_spm + r * blockSize,
-                  blockSize);
-            }
-            dma_flush();
-
-	          #ifdef TIME_DMA_AND_COMP
-  	        dma_cycles += hero_get_clk_counter();
-    	      #endif
-          }
-        }
-      }
-		//}
-		}
+					// Transfer back the entries of C
+					memcpy_from_spm(C+m*N+n, C_spm, lim);
+					dma_flush();
+					
+					n += lim;
+				}
+			}
+			dma_flush();
+			dealloc_spm(spm);
+			}
+			clock_gettime(CLOCK_REALTIME, &requestEnd);
+			double accum = ( requestEnd.tv_sec - requestStart.tv_sec )
+				  + ( requestEnd.tv_nsec - requestStart.tv_nsec )
+					  / BILLION;
+			printf( "Time spent on layer: %lf\n", accum );
 		
-    dealloc_spm(spm);
-  }
-	#ifdef TIME_DMA_AND_COMP
-	printf("DMA cycles:  %u\n", dma_cycles);	
-	printf("Computation: %u\n", comp_cycles);
-	printf("Load stalls: %u\n", ld_stalls);
-	#endif
+			// Compare correctness.
+			int error = 0;
+			for(i=0;i<M*N;i++){
+				//printf("Output: %d, expected: %d\n", C_flt[i], E_flt[i]);
+				if(fabs(C[i] - E_flt[i]) > 0.00001){
+					printf("ERROR: Output: %f, expected: %f\n", C[i], E_flt[i]);
+					error = 1;
+				}
+			}
+			if(!error){
+				printf("Computation successful!\n");
+			}
+			free(E_flt);
 
-  clock_gettime(CLOCK_REALTIME, &requestEnd);
-  double accum = ( requestEnd.tv_sec - requestStart.tv_sec )
-  	  + ( requestEnd.tv_nsec - requestStart.tv_nsec )
-  		  / BILLION;
-  printf( "Time spent on layer: %lf\n", accum );
+			// Store the output of C in case we want to compare correctness.
+			FILE *fp = fopen("18_C_current_dump", "w+");
+			for(i=0;i<M*N;i++){
+				fprintf(fp, "%f\n", C[i]);
+			}
+			fclose(fp);
 
-  // Compare correctness.
-  int errors = 0;
-  int same = 0;
-  for(int i=0;i<M*N;i++){
-    //printf("Output: %d, expected: %d\n", C_flt[i], E_flt[i]);
-    if(fabs(C[i] - E_flt[i]) > 0.00001){
-      //printf("ERROR: Output: %f, expected: %f\n", C[i], E_flt[i]);
-      errors++;
-    } else {
-      same++;
-    }
-  }
-  if(!errors){
-    printf("Computation successful!\n");
-  } else {
-    printf("Had %d errors and %d matches!\n", errors, same);
-  }
-  free(E_flt);
+			printf("After dumping C\n");
+
+
+		}	
+		else if(0&&(M==128)&&(N==169)&&(K=256)){		// 18
+			// No offloading
+			for(i = 0; i < M; ++i){
+				for(k = 0; k < K; ++k){
+					register float A_PART = ALPHA*A[i*lda+k];
+					for(j = 0; j < N; ++j){
+						C[i*ldc+j] += A_PART*B[k*ldb+j];
+					}
+				}   
+			}
+			// Store the output of C in case we want to compare correctness.
+			FILE *fp = fopen("18_C_gold_dump", "w+");
+			for(i=0;i<M*N;i++){
+				fprintf(fp, "%f\n", C[i]);
+			}
+			fclose(fp);
+
+		}
+		else if(0&&(M==128)&&(N==169)&&(K=256)){		// Layer 18
+			printf("Layer 18!\n");
+			int l1 = 128;
+			int col = l1*256/(2*K+1);
+
+			int c, m, n, k, lim;
+      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: C[0:M*N]) map(to: A[0:M*K], B[0:K*N], c, m, n, k, lim) 
+			{
+
+			float* spm = alloc_spm();
+
+			float* A_spm = spm;
+			float* B_spm = A_spm + M;
+			float* C_spm;
+
+			// Load one row of A and multiple columns of B and write the partial results in C
+			for(m = 0; m < M; m++){
+
+				// Initiate DMA transfer for one row of A
+				memcpy_to_spm(A_spm, A+m*M, M);
+						
+				// Check amount of columns in order not to overshoot B
+				n = 0;
+				while(n < N){
+					if(N < n+col){
+						lim = N - n;
+					}
+					else{
+						lim = col;
+					}
+					
+					// DMA transfers for columns in B and entries in C
+					C_spm = B_spm + lim*K;
+					memcpy_to_spm(C_spm, C+m*N+n, lim);
+					for(k = 0; k < K; k++){
+						memcpy_to_spm(B_spm, B+k*N+n, lim);
+					}
+					dma_flush();
+
+					// Do the computation
+					#pragma omp parallel for collapse(2) num_threads(8) private(c, k)
+					for(c = 0; c < lim; c++){
+						for(k = 0; k < K; k++){
+							C_spm[c] += A_spm[k]*B_spm[k*lim+c];
+						}
+					}
+
+					// Transfer back the entries of C
+					memcpy_from_spm(C+m*N+n, C_spm, lim);
+					dma_flush();
+					
+					n += col;
+				}
+			}
+			dma_flush();
+			dealloc_spm(spm);
+			}
+			// Store the output of C in case we want to compare correctness.
+			FILE *fp = fopen("18_C_new_dump", "w+");
+			for(i=0;i<M*N;i++){
+				fprintf(fp, "%f\n", C[i]);
+			}
+			fclose(fp);
+		}	
+		else if(0&&(M==128)&&(N==169)&&(K=256)){		// 18
+			// No offloading
+			for(i = 0; i < M; ++i){
+				for(k = 0; k < K; ++k){
+					register float A_PART = ALPHA*A[i*lda+k];
+					for(j = 0; j < N; ++j){
+						C[i*ldc+j] += A_PART*B[k*ldb+j];
+					}
+				}   
+			}
+			// Store the output of C in case we want to compare correctness.
+			FILE *fp = fopen("18_C_gold_dump", "w+");
+			for(i=0;i<M*N;i++){
+				fprintf(fp, "%f\n", C[i]);
+			}
+			fclose(fp);
+
+		}
+
+		else{
+      // No offloading
+			for(i = 0; i < M; ++i){
+				for(k = 0; k < K; ++k){
+					register float A_PART = ALPHA*A[i*lda+k];
+					for(j = 0; j < N; ++j){
+						C[i*ldc+j] += A_PART*B[k*ldb+j];
+					}
+				}   
+			}
+		}
 }
 
 void gemm_nt(int M, int N, int K, float ALPHA, 

@@ -1,1 +1,6 @@
-/home/mmaxim/polybox/PhD/tiny_yolo/src/demo.h
+#ifndef DEMO_H
+#define DEMO_H
+
+#include "image.h"
+
+#endif
