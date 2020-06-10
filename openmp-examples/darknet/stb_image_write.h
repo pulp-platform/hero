@@ -1,0 +1,1 @@
+/home/mmaxim/polybox/PhD/tiny_yolo/src/stb_image_write.h
