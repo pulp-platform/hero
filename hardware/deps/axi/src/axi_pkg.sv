@@ -338,15 +338,14 @@ package axi_pkg;
   /// Slice on Mux R channel.
   localparam logic [9:0] MuxR    = (1 << 0);
   /// Latency configuration for `axi_xbar`.
-  typedef enum logic [9:0] {
-    NO_LATENCY    = 10'b000_00_000_00,
-    CUT_SLV_AX    = DemuxAw | DemuxAr,
-    CUT_MST_AX    = MuxAw | MuxAr,
-    CUT_ALL_AX    = DemuxAw | DemuxAr | MuxAw | MuxAr,
-    CUT_SLV_PORTS = DemuxAw | DemuxW | DemuxB | DemuxAr | DemuxR,
-    CUT_MST_PORTS = MuxAw | MuxW | MuxB | MuxAr | MuxR,
-    CUT_ALL_PORTS = 10'b111_11_111_11
-  } xbar_latency_e;
+  localparam logic [9:0] NO_LATENCY     = 10'b000_00_000_00;
+  localparam logic [9:0] CUT_SLV_AX     = DemuxAw | DemuxAr;
+  localparam logic [9:0] CUT_MST_AX     = MuxAw | MuxAr;
+  localparam logic [9:0] CUT_ALL_AX     = DemuxAw | DemuxAr | MuxAw | MuxAr;
+  localparam logic [9:0] CUT_SLV_PORTS  = DemuxAw | DemuxW | DemuxB | DemuxAr | DemuxR;
+  localparam logic [9:0] CUT_MST_PORTS  = MuxAw | MuxW | MuxB | MuxAr | MuxR;
+  localparam logic [9:0] CUT_ALL_PORTS  = 10'b111_11_111_11;
+  typedef logic [9:0] xbar_latency_e;
 
   /// Configuration for `axi_xbar`.
   typedef struct packed {
