@@ -1,14 +1,14 @@
 // SPM_SIZE in ints
-#define SPM_SIZE (92*1024/4)
+#define SPM_SIZE (92 * 1024 / 4)
 
 #include <stdint.h>
 
 #if defined(__llvm__)
-#  define DEVICE_PTR __device int*
-#  define HOST_PTR __host int*
+#define DEVICE_PTR __device int*
+#define HOST_PTR __host int*
 #else
-#  define HOST_PTR uint64_t
-#  define DEVICE_PTR uint32_t
+#define HOST_PTR uint64_t
+#define DEVICE_PTR uint32_t
 #endif
 
 #pragma omp declare target

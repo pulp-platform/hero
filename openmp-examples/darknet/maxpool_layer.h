@@ -1,8 +1,8 @@
 #ifndef MAXPOOL_LAYER_H
 #define MAXPOOL_LAYER_H
 
-#include "image.h"
 #include "cuda.h"
+#include "image.h"
 #include "layer.h"
 #include "network.h"
 
@@ -20,4 +20,3 @@ void backward_maxpool_layer_gpu(maxpool_layer l, network net);
 #endif
 
 #endif
-
