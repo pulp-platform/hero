@@ -103,7 +103,7 @@ void gemm_nn(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int 
 #ifdef TIME_DMA_AND_COMP
   unsigned int dma_cycles = 0;
   unsigned int comp_cycles = 0;
-  unsigned int ld_stalls = 42;
+  unsigned int ld_stalls = 0;
 
 // clang-format off
 #pragma omp target device(BIGPULP_MEMCPY) \
@@ -118,6 +118,7 @@ void gemm_nn(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int 
   {
 #ifdef TIME_DMA_AND_COMP
     hero_perf_enable(CYCLES);
+    hero_perf_enable(STALLS_LOAD);
 #endif
 
     // Compute memory allocation block sizes
@@ -133,77 +134,85 @@ void gemm_nn(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int 
 
     // Compute kernel
 #pragma omp parallel num_threads(8)
-    for (int bn = 0; bn < N && N - bn - 1 != 0; bn += my_min(N - bn - 1, blockSize)) {
-      for (int bk = 0; bk < K && K - bk - 1 != 0; bk += my_min(K - bk - 1, blockSize)) {
-#pragma omp single
-        {
-#ifdef TIME_DMA_AND_COMP
-          const uint32_t cycles_before = hero_perf_get(CYCLES);
-#endif
-          for (int r = 0; r < blockSize; r++) {
-            // Copy in B with K rows of length N
-            memcpy_to_spm(B_spm + r * blockSize, B + (bk + r) * N + bn, blockSize);
-          }
-#ifdef TIME_DMA_AND_COMP
-          dma_cycles += hero_perf_get(CYCLES) - cycles_before;
-#endif
-        }
-        for (int bm = 0; bm < M && M - bm - 1 != 0; bm += my_min(M - bm - 1, blockSize)) {
+    {
+      const uint32_t ld_stalls_before = hero_perf_get(STALLS_LOAD);  // per core
+      for (int bn = 0; bn < N && N - bn - 1 != 0; bn += my_min(N - bn - 1, blockSize)) {
+        for (int bk = 0; bk < K && K - bk - 1 != 0; bk += my_min(K - bk - 1, blockSize)) {
 #pragma omp single
           {
 #ifdef TIME_DMA_AND_COMP
             const uint32_t cycles_before = hero_perf_get(CYCLES);
 #endif
             for (int r = 0; r < blockSize; r++) {
-              // Copy in A, with M rows of length K
-              memcpy_to_spm(A_spm + r * blockSize, A + (bm + r) * K + bk, blockSize);
-              // Copy in C with M rows of length N
-              memcpy_to_spm(C_spm + r * blockSize, C + (bm + r) * N + bn, blockSize);
+              // Copy in B with K rows of length N
+              memcpy_to_spm(B_spm + r * blockSize, B + (bk + r) * N + bn, blockSize);
             }
-            dma_flush();
 #ifdef TIME_DMA_AND_COMP
             dma_cycles += hero_perf_get(CYCLES) - cycles_before;
 #endif
           }
+          for (int bm = 0; bm < M && M - bm - 1 != 0; bm += my_min(M - bm - 1, blockSize)) {
+#pragma omp single
+            {
+#ifdef TIME_DMA_AND_COMP
+              const uint32_t cycles_before = hero_perf_get(CYCLES);
+#endif
+              for (int r = 0; r < blockSize; r++) {
+                // Copy in A, with M rows of length K
+                memcpy_to_spm(A_spm + r * blockSize, A + (bm + r) * K + bk, blockSize);
+                // Copy in C with M rows of length N
+                memcpy_to_spm(C_spm + r * blockSize, C + (bm + r) * N + bn, blockSize);
+              }
+              dma_flush();
+#ifdef TIME_DMA_AND_COMP
+              dma_cycles += hero_perf_get(CYCLES) - cycles_before;
+#endif
+            }
 
-          int limitM = my_min(M - bm, blockSize);
-          int limitN = my_min(N - bn, blockSize);
-          int limitK = my_min(K - bk, blockSize);
+            int limitM = my_min(M - bm, blockSize);
+            int limitN = my_min(N - bn, blockSize);
+            int limitK = my_min(K - bk, blockSize);
 
 #ifdef TIME_DMA_AND_COMP
-          uint32_t cycles_before = 0;
+            uint32_t cycles_before = 0;
 #pragma omp master
-          cycles_before = hero_perf_get(CYCLES);
+            cycles_before = hero_perf_get(CYCLES);
 #endif
 #pragma omp for collapse(2)
-          for (int m = 0; m < limitM; m++) {
-            for (int n = 0; n < limitN; n++) {
-              for (int k = 0; k < limitK; k++) {
-                C_spm[m * blockSize + n] += A_spm[m * blockSize + k] * B_spm[k * blockSize + n];
+            for (int m = 0; m < limitM; m++) {
+              for (int n = 0; n < limitN; n++) {
+                for (int k = 0; k < limitK; k++) {
+                  C_spm[m * blockSize + n] += A_spm[m * blockSize + k] * B_spm[k * blockSize + n];
+                }
               }
             }
-          }
 #ifdef TIME_DMA_AND_COMP
 #pragma omp master
-          comp_cycles += hero_perf_get(CYCLES) - cycles_before;
+            comp_cycles += hero_perf_get(CYCLES) - cycles_before;
 #endif
 
 #pragma omp single
-          {
+            {
 #ifdef TIME_DMA_AND_COMP
-            const uint32_t cycles_before = hero_perf_get(CYCLES);
+              const uint32_t cycles_before = hero_perf_get(CYCLES);
 #endif
-            // Copy out C with M rows of length N
-            for (int r = 0; r < blockSize; r++) {
-              memcpy_from_spm(C + (bm + r) * N + bn, C_spm + r * blockSize, blockSize);
+              // Copy out C with M rows of length N
+              for (int r = 0; r < blockSize; r++) {
+                memcpy_from_spm(C + (bm + r) * N + bn, C_spm + r * blockSize, blockSize);
+              }
+              dma_flush();
+#ifdef TIME_DMA_AND_COMP
+              dma_cycles += hero_perf_get(CYCLES) - cycles_before;
+#endif
             }
-            dma_flush();
-#ifdef TIME_DMA_AND_COMP
-            dma_cycles += hero_perf_get(CYCLES) - cycles_before;
-#endif
           }
         }
       }
+
+#pragma omp single
+      // TODO: this should be `atomic update` to take all cores into account, but that freezes
+      // execution
+      { ld_stalls += hero_perf_get(STALLS_LOAD) - ld_stalls_before; }
     }
 
     dealloc_spm(spm);
