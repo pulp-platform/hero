@@ -8,6 +8,7 @@
 #include <time.h>
 
 #include "cuda.h"
+#include "hero_perf.h"
 #include "utils.h"
 
 #define BILLION 1E9
@@ -115,6 +116,10 @@ void gemm_nn(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int 
 // clang-format on
 #endif
   {
+#ifdef TIME_DMA_AND_COMP
+    hero_perf_enable(CYCLES);
+#endif
+
     // Compute memory allocation block sizes
     const int L1_b = 80 * 1024;
     const int L1_flt = L1_b / sizeof(float);
@@ -133,26 +138,22 @@ void gemm_nn(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int 
 #pragma omp single
         {
 #ifdef TIME_DMA_AND_COMP
-          hero_reset_clk_counter();
-
+          const uint32_t cycles_before = hero_perf_get(CYCLES);
 #endif
-
           for (int r = 0; r < blockSize; r++) {
             // Copy in B with K rows of length N
             memcpy_to_spm(B_spm + r * blockSize, B + (bk + r) * N + bn, blockSize);
           }
-
 #ifdef TIME_DMA_AND_COMP
-          dma_cycles += hero_get_clk_counter();
+          dma_cycles += hero_perf_get(CYCLES) - cycles_before;
 #endif
         }
         for (int bm = 0; bm < M && M - bm - 1 != 0; bm += my_min(M - bm - 1, blockSize)) {
 #pragma omp single
           {
 #ifdef TIME_DMA_AND_COMP
-            hero_reset_clk_counter();
+            const uint32_t cycles_before = hero_perf_get(CYCLES);
 #endif
-
             for (int r = 0; r < blockSize; r++) {
               // Copy in A, with M rows of length K
               memcpy_to_spm(A_spm + r * blockSize, A + (bm + r) * K + bk, blockSize);
@@ -160,9 +161,8 @@ void gemm_nn(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int 
               memcpy_to_spm(C_spm + r * blockSize, C + (bm + r) * N + bn, blockSize);
             }
             dma_flush();
-
 #ifdef TIME_DMA_AND_COMP
-            dma_cycles += hero_get_clk_counter();
+            dma_cycles += hero_perf_get(CYCLES) - cycles_before;
 #endif
           }
 
@@ -171,10 +171,10 @@ void gemm_nn(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int 
           int limitK = my_min(K - bk, blockSize);
 
 #ifdef TIME_DMA_AND_COMP
-#pragma omp single
-          { hero_reset_clk_counter(); }
+          uint32_t cycles_before = 0;
+#pragma omp master
+          cycles_before = hero_perf_get(CYCLES);
 #endif
-
 #pragma omp for collapse(2)
           for (int m = 0; m < limitM; m++) {
             for (int n = 0; n < limitN; n++) {
@@ -183,22 +183,23 @@ void gemm_nn(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int 
               }
             }
           }
+#ifdef TIME_DMA_AND_COMP
+#pragma omp master
+          comp_cycles += hero_perf_get(CYCLES) - cycles_before;
+#endif
 
 #pragma omp single
           {
 #ifdef TIME_DMA_AND_COMP
-            comp_cycles += hero_get_clk_counter();
-            hero_reset_clk_counter();
+            const uint32_t cycles_before = hero_perf_get(CYCLES);
 #endif
-
             // Copy out C with M rows of length N
             for (int r = 0; r < blockSize; r++) {
               memcpy_from_spm(C + (bm + r) * N + bn, C_spm + r * blockSize, blockSize);
             }
             dma_flush();
-
 #ifdef TIME_DMA_AND_COMP
-            dma_cycles += hero_get_clk_counter();
+            dma_cycles += hero_perf_get(CYCLES) - cycles_before;
 #endif
           }
         }
