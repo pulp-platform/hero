@@ -2,6 +2,10 @@
 
 # Initialize environment
 set -e
+if [ -z "$HERO_INSTALL" ]; then
+  echo "Fatal error: The 'HERO_INSTALL' environment variable is not defined!"
+  exit 1
+fi
 THIS_DIR=$(dirname "$(readlink -f "$0")")
 if [ "$#" -ne 1 ] || [ ! -f "${THIS_DIR}/sdk/configs/${1}.sh" ]; then
     echo "Fatal error: expects a single argument with existing pulp chip"
