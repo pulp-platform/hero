@@ -126,11 +126,6 @@ void gemm_nn(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int 
     float *B_spm = A_spm + blockSize * blockSize;
     float *C_spm = B_spm + blockSize * blockSize;
 
-#if defined TIME_DMA_AND_COMP && defined __PULP__
-    asm volatile("csrw 0x79F, %0" ::"r"(0) : "memory");
-    asm volatile("csrr %0, 0x782" : "=r"(ld_stalls)::"memory");
-#endif
-
     // Compute kernel
 #pragma omp parallel num_threads(8)
     // if(M > 0 && N > 0 && K > 0) {
