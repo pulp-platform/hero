@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Configure measurement script
+script=scripts/board_measurements.sh
+sed "s/^progs.*/progs=($(sed -n '4 p' config))/g" -i ${script}
+sed "s/^back.*/back=($(sed -n '5 p' config))/g" -i ${script}
+sed "s/^samples.*/samples=$(sed -n '6 p' config)/g" -i ${script}
+
+# Send it to the board
+remotehost=$(sed -n '1 p' config)
+remotedir=$(sed -n '2 p' config)
+scp ${script} ${remotehost}:${remotedir}

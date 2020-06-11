@@ -1,0 +1,16 @@
+xxx
+xxx
+xxx
+2mm 3mm atax axpy bicg conv2d gemm rand seq
+2mm 3mm atax axpy bicg conv2d gemm pirand piseq rand seq
+128
+xxx
++++++++++++++++++++++++++++++++++++++++++++++
+++   Line 1: Remote platform               ++
+++   Line 2: Directory on platform         ++ 
+++   Line 3: Memory size                   ++
+++   Line 4: List of foreground programs   ++
+++   Line 5: List of background programs   ++
+++   Line 6: Number of runs							   ++
+++   Line 7: Data file name							   ++
++++++++++++++++++++++++++++++++++++++++++++++

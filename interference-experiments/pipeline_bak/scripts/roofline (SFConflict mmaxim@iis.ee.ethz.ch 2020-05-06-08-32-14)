@@ -1,0 +1,71 @@
+#!/bin/zsh
+
+# Some config parameters
+export HERO_INSTALL="/scratch/hero/install"
+
+name=$1
+size=2048
+freq=(36 60 84 108 132 156 180 204 228 252 276 300)
+gen=(1 2 3 4)
+K=(1) # 2 4 8 16 32 64 128 256 512 1024) # 2048 4096 8192 16384)
+samples=16
+
+if [[ "$name" = "" ]]
+then
+	echo "Please provide the run name"
+	exit 1
+fi
+
+# Compile once, run remotely
+./scripts/compile ${size} 
+
+for f in ${freq} 
+do
+	for g in ${gen}
+	do
+		for k in ${K}
+		do
+			newdir=roofline_${k}_${f}MHz
+			ssh root@172.31.182.80 "\
+				cd /mnt/mmaxim/crosscompiled;\
+				zsh ./run_tg_pi.sh ${k} ${f} ${g} ${samples};\
+				mkdir ${newdir};\
+				mv TrafGenDump_* ${newdir};\
+				"
+		done
+	done
+done
+
+# Copy measurements back
+ssh root@172.31.182.80 "\
+	cd /mnt/mmaxim/crosscompiled;\
+	mkdir all_${name}_experiments;\
+	mv roofline_* all_${name}_experiments;\
+	"
+mkdir -p roofline_experiments
+scp -r root@172.31.182.80:/mnt/mmaxim/crosscompiled/all_${name}_experiments roofline_experiments/
+cd roofline_experiments/all_${name}_experiments
+
+# Extract measurements into one CSV
+for f in ${freq} 
+do
+	for g in ${gen}
+	do
+		for k in ${K} 
+		do
+			echo -n $(cat roofline_${k}_${f}MHz/*${g}trafgen_word*) >> ${name}_extracted.csv 
+			echo -n , >> ${name}_extracted.csv
+		done
+	echo >> ${name}_extracted.csv 
+	done
+done
+
+# Write down configuration
+echo ${size} >> ${name}_config.txt
+echo ${freq} >> ${name}_config.txt
+echo ${gen} >> ${name}_config.txt
+echo ${K} >> ${name}_config.txt
+
+cd ../..
+	
+exit 0

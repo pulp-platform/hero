@@ -1,0 +1,65 @@
+#!/bin/python3
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import rc
+from tqdm import tqdm
+import pickle
+import sys
+
+# Set fontsizes to fit inside a small space, increase img quality
+rc('xtick', labelsize=3)
+rc('ytick', labelsize=3)
+rc('legend', fontsize=4)
+rc('savefig', dpi=1000)
+rc('savefig', jpeg_quality=100)
+
+
+if __name__ == '__main__':
+
+
+	prefix = 'TrafGenDump_20200330-175758_'
+	programs = ['2mm', '3mm', 'atax', 'axpy', 'bicg', 'conv2d', 'rand', 'seq']
+	infix_one = '.elf_'
+#	generators = ['0trafgen', '1trafgen', '2trafgen']
+	generators = ['1trafgen', '2trafgen']
+	infix_two = '_word3'
+#	qualities = ['qos0', 'qos0x30', 'qos0xF0030']
+	qualities = ['qos0x30', 'qos0xF0030']
+	suffix = '_datadump.txt'
+
+	
+	hist_bins = 100
+
+	for quality in qualities:
+		for gen in generators:
+			hist_fig, hist_ax=plt.subplots(4, 2)
+			row = 0
+			col = 0
+			for program in programs:
+				basefile = prefix+program+infix_one+'0trafgen'+infix_two+'qos0'+suffix
+				intrfile = prefix+program+infix_one+gen+infix_two+quality+suffix
+
+				base = pd.read_csv(basefile, header=None)
+				intr = pd.read_csv(intrfile, header=None)
+
+				maxi = max(base.max().iloc[0], intr.max().iloc[0])
+				base.hist(ax=hist_ax[col,row], bins=hist_bins, range=(0, maxi), label='none', log=True)
+				intr.hist(ax=hist_ax[col,row], bins=hist_bins, range=(0, maxi), label='none', log=True)
+				if quality == 'qos0x30':
+					qualstr = 'QoS=0x0'
+				elif quality == 'qos0xF0030':
+					qualstr = 'QoS=0xF'
+				else:
+					qualstr = 'UNKNOWN'
+				hist_ax[col, row].legend(['isolated', gen+', '+qualstr])
+				hist_ax[col, row].set_title(program, fontsize=5)
+
+				col += 1
+				if (col%4 == 0):
+					col = 0
+					row += 1
+
+			hist_fig.subplots_adjust(hspace=0.4, wspace=0.2)
+			hist_fig.savefig(quality+'_'+gen+'.png')

@@ -1,0 +1,38 @@
+#!/bin/zsh
+
+export HERO_INSTALL="/scratch/hero/install"
+size=2048
+
+name=$1
+
+if [[ "$name" = "" ]]
+then
+	echo "Please provide the run name"
+	exit 1
+fi
+
+for freq in 50 150 250
+do
+	for K in 1 2 4 8 16 32 64 128 256 512 1024 2048 4096 8192 16384
+	do
+		export K=${K}
+		newdir=${name}_${K}_${freq}MHz
+		./scripts/compile ${size} 
+		ssh root@172.31.182.80 "\
+			echo ${freq}000000 > /sys/class/fclkcfg/fclk0/rate;\
+			cd /mnt/mmaxim/crosscompiled;\
+			zsh ./run_tg_pi.sh;\
+			mkdir ${newdir};\
+			mv TrafGenDump_* ${newdir};\
+			"
+	done
+done
+ssh root@172.31.182.80 "\
+	cd /mnt/mmaxim/crosscompiled;\
+	mkdir all_${name}_experiments;\
+	mv ${name}_* all_${name}_experiments;\
+	"
+mkdir -p roofline_experiments
+scp -r root@172.31.182.80:/mnt/mmaxim/crosscompiled/all_${name}_experiments roofline_experiments/
+	
+exit 0

@@ -1,0 +1,8 @@
+,no_interference,2mm_interfering,3mm_interfering,atax_interfering,axpy_interfering,bicg_interfering,conv2d_interfering,gemm_interfering,rand_interfering,seq_interfering
+axpy,inf,inf,inf,inf,inf,inf,inf,inf,inf,inf
+
+,no_interference,2mm_interfering,3mm_interfering,atax_interfering,axpy_interfering,bicg_interfering,conv2d_interfering,gemm_interfering,rand_interfering,seq_interfering
+axpy,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+
+,no_interference,2mm_interfering,3mm_interfering,atax_interfering,axpy_interfering,bicg_interfering,conv2d_interfering,gemm_interfering,rand_interfering,seq_interfering
+axpy,0,0,0,0,0,0,0,0,0,0

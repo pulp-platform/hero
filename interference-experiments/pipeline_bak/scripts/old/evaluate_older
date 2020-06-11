@@ -1,0 +1,184 @@
+#!/bin/python3
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import sys
+import os
+from tqdm import tqdm
+#from matplotlib import rc
+#rc('text', usetex=True)
+
+try:
+	filename=sys.argv[1]
+except IndexError:
+	print("Please provide a filename and, optionally, a config file")
+	sys.exit()
+
+try:
+	config=sys.argv[2]
+except IndexError:
+	print("No config file given, taking default as input")
+	config='config'
+
+with open('config', 'r') as f:
+	lines = f.read().splitlines()
+
+prognames = []
+for program in lines[3].split(' '):
+	if program == "":
+		continue
+	prognames.append(program) 
+
+interference = ['no_interference']
+interest_noise = ['none']
+for noise in lines[4].split(' '):
+	if noise == "":
+		continue
+	interference.append(noise+"_interfering")
+	interest_noise.append(noise)
+
+total=[]
+for noise in interference:
+	for program in prognames:
+		total.append(program+','+noise)
+
+"""
+prognames = ["2mm", "3mm", "atax", "axpy", "bicg", "conv2d", "gemm", "rand", "seq"]
+interference = ["no_interference"]
+for program in prognames:
+	interference.append(program+"_interfering")
+"""
+
+with open(filename) as f:
+	data = f.read().splitlines()
+
+period = 0
+
+for i in range(len(data)):
+	if data[i] == "++STRT++":
+		if period == 0:
+			period = i
+		else:
+			period = i - period
+			break
+
+df_total=pd.DataFrame(columns=total)
+
+df_min = pd.DataFrame(float("inf"), columns=interference, index=prognames)
+df_avg = pd.DataFrame(0, columns=interference, index=prognames)
+df_max = pd.DataFrame(0, columns=interference, index=prognames)
+
+normcnt=0
+
+for offset in tqdm(range(len(data))):
+	try:
+		if (data[offset] == "++STRT++") and (data[offset+period-1] == "--STOP--"):
+			normcnt+=1
+			temprow=[]
+			for col in range(len(interference)):
+				for row in range(len(prognames)):
+					current=float(data[offset+col*len(prognames)+row+1])
+					#df_min.iloc[row, col] = min(df_min.iloc[row,col], current)
+					#df_max.iloc[row, col] = max(df_max.iloc[row,col], current)
+					#df_avg.iloc[row, col] += current 
+					temprow.append(current)
+			if str(df_total.index.max())=='nan':
+				df_total.loc[0, :]=temprow
+			else:
+				df_total.loc[df_total.index.max()+1, :]=temprow
+	except IndexError:
+		break
+
+df_avg = df_avg.div(normcnt) 
+'''
+print('###########################')
+print("min:")
+print(df_min)
+print(df_total.min(axis=0))
+print("avg:")
+print(df_avg)
+print(df_total.mean(axis=0))
+print("max:")
+print(df_max)
+print(df_total.max(axis=0))
+print('###########################')
+'''
+
+fig,ax=plt.subplots(3,3)
+fig.tight_layout()
+rcount=0
+ccount=0
+for interest in prognames:
+	df_interest=pd.DataFrame(columns=interest_noise)
+	df_interest['none'] = df_total[interest+','+'no_interference']
+	for noise in interest_noise:
+		if noise == 'none':
+			continue
+		else:
+			df_interest[noise] = df_total[interest+','+noise+'_interfering']
+
+	df_interest.boxplot(vert=True, column=interest_noise, fontsize=3, ax=ax[ccount,rcount])
+	ax[ccount,rcount].set_title(interest, fontsize=5)
+	
+	rcount+=1
+	if rcount == 3:
+		ccount+=1
+		rcount = 0
+	
+fig.savefig('results/boxplots.pdf', format='pdf')
+fig.savefig('results/boxplots.png', format='png')
+
+fig,ax=plt.subplots(2,5)
+fig.tight_layout
+rcount=0
+ccount=0
+bins=100
+
+df_axpy=pd.DataFrame(columns=interest_noise)
+df_axpy['none'] = df_total['axpy,no_interference']
+for noise in interest_noise:
+	if noise == 'none':
+		df_axpy[['none']].hist(ax=ax[ccount,rcount], xlabelsize=3, ylabelsize=3, bins=bins)
+		ax[ccount,rcount].set_title('none', fontsize=5)
+		rcount+=1
+		continue
+	else:
+		df_axpy[noise]=df_total['axpy,'+noise+'_interfering']
+		df_axpy[[noise]].hist(ax=ax[ccount,rcount], xlabelsize=3, ylabelsize=3, bins=bins)
+	ax[ccount,rcount].set_title(noise, fontsize=5)
+	rcount+=1
+	if rcount == 5:
+		ccount+=1
+		rcount=0
+fig.savefig('results/axpyhistogram.pdf', format='pdf')	
+
+#df_avg.plot(kind='bar', yerr=pd.DataFrame(1000000, columns=interference, index=prognames))
+#plt.savefig('results/plot.eps', format='eps')
+
+output = 'results/result.csv'
+temp1 = 'results/temp1'
+temp2 = 'results/temp2'
+
+plus=df_max.sub(df_avg)
+minus=df_avg.sub(df_min)
+
+plus.columns.name = 'max - avg'
+minus.columns.name = 'avg - min'
+
+df_min.to_csv(output)
+df_avg.to_csv(temp1)
+df_max.to_csv(temp2)
+
+with open(output, 'a') as f:
+	f.write('\n')
+	with open(temp1, 'r') as t:
+		temp = t.read()
+	f.write(temp)
+	f.write('\n')
+	with open(temp2, 'r') as t:
+		temp = t.read()
+	f.write(temp)
+
+os.remove(temp1)
+os.remove(temp2)

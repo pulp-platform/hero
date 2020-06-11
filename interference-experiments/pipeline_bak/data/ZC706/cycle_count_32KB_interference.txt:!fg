@@ -1,0 +1,57 @@
+#! /bin/bash
+# This script crosscompiles benchmarks and sends them to the Zynq board
+# Benchmark program list: 2mm, 3mm, atax, bicg, gemm, axpy, convolution-2d
+# In test mode, a subset of benchmarks are compiled with gcc and executed locally
+# I had to create symlinks to use HERO's clang-9, else the loader would complain:
+
+bindir="./bin"
+srcdir="./src"
+remotehost=$(sed -n '1 p' config)
+remotedir=$(sed -n '2 p' config)
+mem_size=$(sed -n '3 p' config)
+programs=($(sed -n '4 p' config))
+common="-Isrc src/polybench.c"
+poly="${common} -DPOLYBENCH_TIME"
+#poly="${common}"
+suffix=".elf"
+
+ln -s /scratch/hero/install/lib/gcc/arm-none-linux-gnueabi/8.3.0/crtbegin.o ./crtbegin.o
+ln -s /scratch/hero/install/lib/gcc/arm-none-linux-gnueabi/8.3.0/crtend.o ./crtend.o
+
+compiler="/scratch/hero/install/bin/clang-9 -static -L/scratch/hero/install/lib/gcc/arm-none-linux-gnueabi/8.3.0 -mfloat-abi=soft -march=armv7"; source /scratch/hero/env/hero-z-7045-env.sh
+
+
+mkdir -p ${bindir}
+
+for program in ${programs[*]}
+do
+	prog_size=$(scripts/computesize ${program} ${mem_size})
+	size_flags="-DNI=${prog_size} -DNJ=${prog_size} -DNK=${prog_size} -DNL=${prog_size} -DNM=${prog_size} -DN=${prog_size} -DNX=${prog_size} -DNY=${prog_size}" 
+	${compiler} ${poly} ${size_flags} ${srcdir}/${program}.c -o ${bindir}/${program}${suffix}
+	if [ $? -ne 0 ]
+	then
+		echo "ERROR: Could not compile ${program}"
+		exit 1
+	fi
+	scp ${bindir}/${program}${suffix} ${remotehost}:${remotedir}
+done
+
+programs=($(sed -n '5 p' config))
+echo "Compiling background programs"
+poly="${common} -DLOOPFOREVER"
+suffix="_noise.elf"
+
+for program in ${programs[*]}
+do
+	prog_size=$(scripts/computesize ${program} ${mem_size})
+	size_flags="-DNI=${prog_size} -DNJ=${prog_size} -DNK=${prog_size} -DNL=${prog_size} -DNM=${prog_size} -DN=${prog_size} -DNX=${prog_size} -DNY=${prog_size}" 
+	${compiler} ${poly} ${size_flags} ${srcdir}/${program}.c -o ${bindir}/${program}${suffix}
+	if [ $? -ne 0 ]
+	then
+		echo "ERROR: Could not compile ${program}"
+		exit 1
+	fi
+	scp ${bindir}/${program}${suffix} ${remotehost}:${remotedir}
+done
+
+rm crtbegin.o crtend.o

@@ -1,0 +1,143 @@
+#!/bin/python3
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import rc
+from tqdm import tqdm
+import pickle
+import sys
+
+# Set fontsizes to fit inside a small space, increase img quality
+rc('xtick', labelsize=3)
+rc('ytick', labelsize=3)
+rc('legend', fontsize=4)
+rc('savefig', dpi=1000)
+rc('savefig', jpeg_quality=100)
+
+
+if __name__ == '__main__':
+	
+########## Configuration Parameters ############
+																								#
+	experiment_name = '2020-02-24_dma'						#
+	size = '2048KB'																#
+	ext = 'pdf'																		#
+	hist_superpose = ['dma']											#
+	hist_bins = 100 															#
+																								#
+################################################
+
+	# Load experiment results
+	run_path = './results/' + experiment_name + '/'
+
+	with open(run_path+'tensor.pkl', 'rb') as f:
+		tensor = pickle.load(f)
+
+	with open(run_path+'labels.pkl', 'rb') as f:
+		labels  = pickle.load(f)
+
+	# Translate labels and find plot array dim sizes 
+	memory = labels[0]
+	bg = labels[2]
+	fg = labels[1]
+	fg_len = len(fg)
+
+	dim2 = round(fg_len**0.5)
+	dim1 = round(fg_len/dim2)
+
+	if (dim1*dim2) != fg_len:
+		temp2 = dim1-1
+		temp1 = round(fg_len/temp2)
+		if (temp1*temp2) == fg_len:
+			dim1 = temp1
+			dim2 = temp2
+
+	# Prepare empty plots
+	cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
+	hist_fig,hist_ax=plt.subplots(dim1, dim2)
+	mamp_fig,mamp_ax=plt.subplots(dim1, dim2)
+	time_fig,time_ax=plt.subplots(dim1, dim2)
+
+	hist_fig.tight_layout
+	mamp_fig.tight_layout
+	time_fig.tight_layout
+	
+	hist_fig.suptitle(size+' Histogram Plots', fontsize=10)
+	mamp_fig.suptitle(size+' Barplots', fontsize=10)
+	time_fig.suptitle('Time Series (no interference)', fontsize=10)
+
+	hist_ax = np.matrix(hist_ax)
+	mamp_ax = np.matrix(mamp_ax)
+	time_ax = np.matrix(time_ax)
+
+	c1, c2 = 0, 0
+
+	# Extract relevant memory size from tensor
+	size_index = labels[0].index(size)
+	df = pd.DataFrame(tensor[size_index,:,0,:].T, index=labels[3], columns=fg)
+
+	df_min = pd.DataFrame(tensor[size_index, :, :, :].min(axis=2).T, index=bg, columns=fg)
+	df_avg = pd.DataFrame(tensor[size_index, :, :, :].mean(axis=2).T, index=bg, columns=fg)
+	df_max = pd.DataFrame(tensor[size_index, :, :, :].max(axis=2).T, index=bg, columns=fg)
+	df_neg = df_avg-df_min
+	df_pos = df_max-df_avg
+
+	# Iterate through the subplot arrays and plot them
+	for f in fg:
+		mamp_ax[c1,c2]
+		df_avg[[f]].plot(kind='bar', ax=mamp_ax[c1,c2],legend=False, yerr=[[df_neg[f], df_pos[f]]])
+
+		# TIMESERIES plots with different memory sizes
+		for m, mem in enumerate(memory):
+			dfm = pd.DataFrame(tensor[m,fg.index(f),0,:].T, index=labels[3], columns=[mem])
+			dfm[[mem]].plot(ax=time_ax[c1,c2])#, logy=True)
+
+		# HISTOGRAM Superimpose plots if specified
+			# Check if there are plots to superpose, norm bin width
+		mini = [df[[f]].min().iloc[0]]
+		maxi = [df[[f]].max().iloc[0]]
+		for s in hist_superpose:
+			mini.append(tensor[size_index,fg.index(f),bg.index(s),:].min())
+			maxi.append(tensor[size_index,fg.index(f),bg.index(s),:].max())
+			# Plot the execution without interference
+		df[[f]].hist(ax=hist_ax[c1,c2], bins=hist_bins, range=(0, max(maxi)), label='none', log=True)
+		hist_ax[c1,c2].text(maxi[0], 0, '<max', fontsize=5, rotation=90, color=cycle[0], 
+				horizontalalignment='center', verticalalignment='bottom')
+			# Plot superposing executions
+		for s, sup in enumerate(hist_superpose):
+			dfs = pd.DataFrame(tensor[size_index,:,bg.index(sup),:].T, index=labels[3], columns=fg)
+			dfs[[f]].hist(ax=hist_ax[c1,c2], bins=hist_bins, range=(0, max(maxi)), label=sup, log=True)
+			hist_ax[c1,c2].legend()
+			hist_ax[c1,c2].text(maxi[s+1], 0, '<max ' + str(round(maxi[s+1]/maxi[0], 2)), fontsize=5, rotation=90, color=cycle[s+1], 
+					horizontalalignment='center', verticalalignment='bottom')
+
+		# Set subplot title and its fontsize
+		hist_ax[c1,c2].set_title(f, fontsize=5)
+		mamp_ax[c1,c2].set_title(f, fontsize=5)
+		time_ax[c1,c2].set_title(f, fontsize=5)
+
+		# Comment in to norm histogram subplot axes
+		#hist_ax[c1,c2].set(ylim=[0,15], xlim=[df.min().min(),df.max().max()])
+
+		# Deal with the indices of the subplot array
+		c1 += 1
+		if c1 == dim1:
+			c1 = 0
+			c2 += 1
+
+	# Adjust the subplot spacings and save them
+	hist_str = ''
+	for sup in hist_superpose:
+		hist_str = hist_str+sup+'_'
+	hist_fig.subplots_adjust(hspace=0.4, wspace=0.2)
+	hist_fig.savefig(run_path + 'histogram.' + ext)
+	hist_fig.savefig(run_path + size + '_' + hist_str + str(hist_bins) + 'bins_' + 'histogram.' + ext)
+
+	mamp_fig.subplots_adjust(hspace=0.5, wspace=0.3)
+	mamp_fig.savefig(run_path + 'barplot.' + ext)
+	mamp_fig.savefig(run_path + size + '_barplot.' + ext)
+	
+	time_fig.subplots_adjust(hspace=0.4, wspace=0.2)
+	time_fig.savefig(run_path + 'timeseries.' + ext)

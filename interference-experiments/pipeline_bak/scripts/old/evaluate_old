@@ -1,0 +1,172 @@
+#!/bin/python3
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import rc
+from tqdm import tqdm
+import pickle
+import sys
+
+rc('xtick', labelsize=3)
+rc('ytick', labelsize=3)
+
+def plot_timeseries():
+
+	series = subtitles
+	series.reverse()
+	col.reverse()
+
+	fig, ax=plt.subplots(1,1)
+	fig.suptitle(title, fontsize=10)
+	fig.tight_layout
+
+	df = pd.DataFrame(mat.T, index=row, columns=col)
+
+	for size in series:
+		df[[size]].plot(ax=ax)
+
+	ax.legend(bbox_to_anchor=(1, 0.5), loc='center left')
+	plt.subplots_adjust(right=0.8)
+	fig.savefig(run_path + 'timeseries.pdf')
+
+
+def plot_histogram():
+
+	bins = 100 
+		
+	dim2 = round(len(subtitles)**0.5)
+	dim1 = round(len(subtitles)/dim2)
+
+	if (dim1*dim2) != len(subtitles):
+		temp2 = dim1-1
+		temp1 = round(len(subtitles)/temp2)
+		if (temp1*temp2) == len(subtitles):
+			dim1 = temp1
+			dim2 = temp2
+
+	fig,ax=plt.subplots(dim1, dim2)
+	fig.tight_layout
+	fig.suptitle(title, fontsize=10)
+
+	c1, c2 = 0, 0
+
+	df = pd.DataFrame(mat.T, index=row, columns=col)
+
+	for size in subtitles:
+		df[[size]].hist(ax=ax[c1,c2], 
+										bins=bins
+										)
+		'''
+		# Plot in the background of every histogram
+		df[['seq']].hist(ax=ax[c1,c2], 
+										xlabelsize=3, 
+										ylabelsize=3, 
+										bins=bins
+										)
+		'''
+		ax[c1,c2].set_title(size, fontsize=5)
+		ax[c1,c2].set(
+									#ylim=[0,15],
+									#xlim=[df.min().min(),df.max().max()],
+									)
+		c1 += 1
+		if c1 == dim1:
+			c1 = 0
+			c2 += 1
+
+	plt.subplots_adjust(hspace=0.7)
+	fig.savefig(run_path + 'histogram.pdf')
+
+	return
+
+def plot_minavgmax():
+		
+	df_min = pd.DataFrame(tensor[mem, :, :, :].min(axis=2).T, index=labels[2], columns=labels[1])
+	df_avg = pd.DataFrame(tensor[mem, :, :, :].mean(axis=2).T, index=labels[2], columns=labels[1])
+	df_max = pd.DataFrame(tensor[mem, :, :, :].max(axis=2).T, index=labels[2], columns=labels[1])
+	print(df_min)
+	print(df_avg)
+	print(df_max)
+
+	subtitles = labels[1]
+
+	dim1 = round(len(subtitles)**0.5)
+	dim2 = round(len(subtitles)/dim1)
+
+	if (dim1*dim2) != len(subtitles):
+		temp1 = dim1-1
+		temp2 = round(len(subtitles)/temp1)
+		if (temp1*temp2) == len(subtitles):
+			dim1 = temp1
+			dim2 = temp2
+
+	fig,ax=plt.subplots(dim1, dim2)
+	plt.subplots_adjust(hspace=0.5)
+	fig.tight_layout
+	fig.suptitle('Bar Plots for ' + sizetitle, fontsize=10)
+
+	c1, c2 = 0, 0
+
+	df_neg = df_avg-df_min
+	df_pos = df_max-df_avg
+
+
+	for size in subtitles:
+		df_avg[[size]].plot(kind='bar', ax=ax[c1,c2],legend=False, yerr=[[df_neg[size], df_pos[size]]])
+		ax[c1,c2].set_title(size, fontsize=5)
+		ax[c1,c2].set_xticklabels(labels=labels[2],fontsize=3)
+		c2 += 1
+		if c2 == dim2:
+			c2 = 0
+			c1 += 1
+
+	fig.savefig(run_path + 'barplot.pdf')
+
+	
+	return
+
+if __name__ == '__main__':
+
+	run_path = './results/poly_interference_200207/'
+
+	with open(run_path+'tensor.pkl', 'rb') as f:
+		tensor = pickle.load(f)
+
+	with open(run_path+'labels.pkl', 'rb') as f:
+		labels  = pickle.load(f)
+
+	sizetitle = '2048KB'
+	observed  = 'axpy'
+
+	observed = labels[1].index(observed)
+	mem = labels[0].index(sizetitle)
+	title = labels[1][observed]+' at '+labels[0][mem]+' with interference'
+
+	# What labels to plot
+	subif = 'twos'
+
+	if subif == 'twos':
+		subtitles = [	'16KB',   '32KB',   '64KB',  '128KB', 
+									'256KB', '512KB', '1024KB', '2048KB']
+	elif subif == 'fine':
+		subtitles = [	'100KB', '150KB', '200KB', '250KB', '300KB',
+									'350KB', '400KB', '450KB', '500KB', '550KB']
+	elif subif == 'all':
+		subtitles = labels[0]
+	else:
+		subtitles = ['512KB']
+
+	subtitles = labels[2]
+
+	# What part of the matrix to take
+	mat = tensor[mem, observed, :, :]
+	col = subtitles
+	row = labels[3]
+	
+	plot_histogram()
+	plot_timeseries()
+	plot_minavgmax()
+
+
+

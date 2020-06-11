@@ -1,0 +1,115 @@
+#! /bin/bash
+# This script crosscompiles benchmarks and sends them to the Zynq board
+export HERO_INSTALL="/scratch/mmaxim/hero/install"
+
+if [ $# -ne 2 ]
+then
+	echo "Please provide the memory size in KB \
+and a bit to indicate whether to use PREM (1) or not (0)"
+	exit 1
+fi
+
+mem_size=$1
+use_cmux=$2
+bindir="./bin"
+srcdir="./src"
+remotehost=$(sed -n '1 p' config)
+remotedir=$(sed -n '2 p' config)
+#mem_size=$(sed -n '3 p' config)
+common="-Isrc src/polybench.c -DUSEFLAG"
+#poly="${common} -DPOLYBENCH_TIME"
+poly="${common}"
+
+if [ "${use_cmux}" = "1" ]
+then
+    suffix="_PREM.elf"
+else
+    suffix=".elf"
+fi
+
+# For some esoteric reason, Create symlinks to use HERO's clang-9, else the loader complains:
+ln -s ${HERO_INSTALL}/lib/gcc/arm-none-linux-gnueabi/8.3.0/crtbegin.o ./crtbegin.o
+ln -s ${HERO_INSTALL}/lib/gcc/arm-none-linux-gnueabi/8.3.0/crtend.o ./crtend.o
+
+compiler="${HERO_INSTALL}/bin/clang-9 \
+          --sysroot=${HERO_INSTALL}/aarch64-buildroot-linux-gnu/sysroot \
+          -target aarch64-hero-linux-gnu -O3"
+
+source ${HERO_INSTALL}/../env/exilzcu102.sh
+
+if [ "${use_cmux}" = "1" ]
+then
+    export HERCULES_INSTALL=${HERO_INSTALL}
+    source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh
+    export HERCULES_ARCH="PULP"
+    export CMUX_ROOT="/scratch/mmaxim/hero/cmux"
+    export HERCULES_FORCE_FOOTPRINT_DENSE=1
+    export HERCULES_CPU_MEMORY_SIZE=32768
+    export HERCULES_DMA_ENFORCE
+    export HERCULES_NO_INTERVAL_CONTROLFLOW
+fi
+
+mkdir -p ${bindir}
+
+# Compile foreground programs
+programs=($(sed -n '4 p' config))
+for program in ${programs[*]}
+do
+	prog_size=$(scripts/computesize ${program} ${mem_size})
+	size_flags="-DNI=${prog_size} -DNJ=${prog_size} -DNK=${prog_size} -DNL=${prog_size} \
+                -DNM=${prog_size} -DN=${prog_size} -DNX=${prog_size} -DNY=${prog_size} -DKS=1"
+    if [ "${use_cmux}" = "1" ]
+    then
+	    ${compiler} -v ${poly} ${size_flags} -L${CMUX_ROOT}/lib -I${CMUX_ROOT}/inc \
+            -I${CMUX_ROOT}/src -DTIMEKERN -DPREM ${srcdir}/${program}.c -o \
+            ${bindir}/${program}${suffix} -lpremnotify-cpu
+    else
+	    ${compiler} -v ${poly} ${size_flags} -DTIMEKERN ${srcdir}/${program}.c -o \
+            ${bindir}/${program}${suffix}
+    fi
+
+    if [ $? -ne 0 ]
+	then
+		echo "ERROR: Could not compile ${program}"
+		rm crtbegin.o crtend.o
+		exit 1
+	fi
+	scp ${bindir}/${program}${suffix} ${remotehost}:${remotedir}
+done
+
+# Compile background programs
+programs=($(sed -n '5 p' config))
+poly="${common} -DLOOPFOREVER"
+
+if [ "${use_cmux}" = "1" ]
+then
+    suffix="_noise_PREM.elf"
+else
+    suffix="_noise.elf"
+fi
+
+for program in ${programs[*]}
+do
+	prog_size=$(scripts/computesize ${program} ${mem_size})
+	size_flags="-DNI=${prog_size} -DNJ=${prog_size} -DNK=${prog_size} -DNL=${prog_size} \
+                -DNM=${prog_size} -DN=${prog_size} -DNX=${prog_size} -DNY=${prog_size} -DKS=1"
+    if [ "${use_cmux}" = "1" ]
+    then
+	    ${compiler} -v ${poly} ${size_flags} -L${CMUX_ROOT}/lib -I${CMUX_ROOT}/inc \
+            -I${CMUX_ROOT}/src -DPREM ${srcdir}/${program}.c -o \
+            ${bindir}/${program}${suffix} -lpremnotify-cpu
+    else
+	    ${compiler} -v ${poly} ${size_flags} ${srcdir}/${program}.c -o \
+            ${bindir}/${program}${suffix}
+    fi
+	if [ $? -ne 0 ]
+	then
+		echo "ERROR: Could not compile ${program}"
+		rm crtbegin.o crtend.o
+		exit 1
+	fi
+	scp ${bindir}/${program}${suffix} ${remotehost}:${remotedir}
+done
+
+rm crtbegin.o crtend.o
+echo "HERCULES_ARCH is "${HERCULES_ARCH}

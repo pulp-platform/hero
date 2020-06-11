@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Compile programs and send them to the platform
+scripts/compile
+if [ $? -ne 0 ]
+then
+	echo "ERROR: Compilation failed"
+	exit 1
+fi
+
+# Generate autogen.sh and send it to the platform
+scripts/autogenerate
+
+# Loop autogen.sh on the platform and send back results
+scripts/remoterun

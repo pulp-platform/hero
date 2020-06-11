@@ -1,0 +1,41 @@
+#!/bin/python3
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import rc
+from tqdm import tqdm
+import pickle
+import sys
+
+# Set fontsizes to fit inside a small space, increase img quality
+rc('xtick', labelsize=3)
+rc('ytick', labelsize=3)
+rc('legend', fontsize=4)
+rc('savefig', dpi=1000)
+rc('savefig', jpeg_quality=100)
+
+
+if __name__ == '__main__':
+
+
+	programs = ['seq', 'rand', 'axpy']
+	suffix = '_noise.txt'
+
+	
+	hist_bins = 100
+	hist_fig, hist_ax=plt.subplots(3)
+
+	base = pd.read_csv('no'+suffix)
+
+	for p, program in enumerate(programs):
+		intr = pd.read_csv(program+suffix)
+		maxi = max(base.max().iloc[0], intr.max().iloc[0])
+		base.hist(ax=hist_ax[p], bins=hist_bins, range=(0, maxi), label='none')
+		intr.hist(ax=hist_ax[p], bins=hist_bins, range=(0, maxi), label='none')
+		hist_ax[p].legend(['isolated', program])
+		hist_ax[p].set_title(program, fontsize=5)
+
+	hist_fig.subplots_adjust(hspace=0.4, wspace=0.2)
+	hist_fig.savefig('trafgen.png')
+
