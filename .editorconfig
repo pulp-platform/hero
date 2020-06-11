@@ -12,7 +12,7 @@ tab_width = 4
 trim_trailing_whitespace = true
 max_line_length = 100
 
-[*{.c,h}]
+[*{.c,h,cpp,hpp}]
 indent_size = 2
 tab_width = 2
 
