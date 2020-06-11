@@ -18,20 +18,21 @@ void hero_perf_reset_all() {
 
 uint32_t hero_perf_get(hero_perf_cnt_t cnt) {
 #if defined __PULP__
-#define csr_read_case(label, addr)                            \
-  case label:                                                 \
-    asm volatile("csrr %0, " #addr : "=r"(val) : : "memory"); \
-    break;
+#define csr_read_val(addr) asm volatile("csrr %0, " #addr : "=r"(val) : : "memory");
   uint32_t val;
   switch (cnt) {
     case CYCLES:
       val = *(volatile uint32_t*)(CL_CYCLE_COUNT_BASE + 0x8);
       break;
-      // clang-format off
-    csr_read_case(CYCLES_ACTIVE, 0x780)
-    csr_read_case(INSTRS, 0x781)
-    csr_read_case(STALLS_LOAD, 0x782)
-      // clang-format on
+    case CYCLES_ACTIVE:
+      csr_read_val(0x780);
+      break;
+    case INSTRS:
+      csr_read_val(0x781);
+      break;
+    case STALLS_LOAD:
+      csr_read_val(0x782);
+      break;
   }
   return val;
 #else
