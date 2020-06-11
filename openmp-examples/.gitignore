@@ -7,6 +7,7 @@ offload.bin
 imgs_out
 __pycache__
 testsuite
+*.elf
 *.ini
 *.dis
 *.ll
