@@ -104,14 +104,15 @@ void gemm_nn(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int 
   unsigned int comp_cycles = 0;
   unsigned int ld_stalls = 42;
 
-#pragma omp target device(BIGPULP_MEMCPY) map(tofrom                                             \
-                                              : C [0:M * N], dma_cycles, comp_cycles, ld_stalls) \
-    map(to                                                                                       \
-        : A [0:M * K], B [0:K * N])
+// clang-format off
+#pragma omp target device(BIGPULP_MEMCPY) \
+    map(tofrom: C [0:M * N], dma_cycles, comp_cycles, ld_stalls) \
+    map(to: A [0:M * K], B [0:K * N])
 #else
-#pragma omp target device(BIGPULP_MEMCPY) map(tofrom                \
-                                              : C [0:M * N]) map(to \
-                                                                 : A [0:M * K], B [0:K * N])
+#pragma omp target device(BIGPULP_MEMCPY) \
+    map(tofrom: C [0:M * N]) \
+    map(to: A [0:M * K], B [0:K * N])
+// clang-format on
 #endif
   {
     // Compute memory allocation block sizes
