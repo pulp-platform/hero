@@ -128,10 +128,7 @@ void gemm_nn(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int 
 
     // Compute kernel
 #pragma omp parallel num_threads(8)
-    // if(M > 0 && N > 0 && K > 0) {
     for (int bn = 0; bn < N && N - bn - 1 != 0; bn += my_min(N - bn - 1, blockSize)) {
-      // asm volatile ("nop\n");
-      // asm volatile ("nop\n");
       for (int bk = 0; bk < K && K - bk - 1 != 0; bk += my_min(K - bk - 1, blockSize)) {
 #pragma omp single
         {
@@ -206,7 +203,6 @@ void gemm_nn(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int 
           }
         }
       }
-      //}
     }
 
     dealloc_spm(spm);
