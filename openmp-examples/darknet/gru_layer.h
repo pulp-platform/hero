@@ -21,4 +21,3 @@ void pull_gru_layer(layer l);
 #endif
 
 #endif
-
