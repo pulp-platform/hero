@@ -1,5 +1,5 @@
-*
-!/.gitignore
-!/compile.sh
-!/run.tcl
-!/start_sim.sh
+/*.log
+/*.wlf
+/compile.tcl
+/transcript
+/work/
