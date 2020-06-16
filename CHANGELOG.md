@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
+
+### Changed
+
+### Fixed
+
+
+## 2020-06-16
+### Added
 - PULP SDK/`librtio`: Add support for floats in `printf`.
 - `pulp` top-level HW module: Add `jtag_tdo_en_o` output pin connected to JTAG debug module.
 
