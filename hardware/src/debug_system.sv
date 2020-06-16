@@ -33,6 +33,7 @@ module debug_system #(
   input logic  jtag_tdi_i,
   input logic  jtag_tms_i,
   output logic jtag_tdo_o,
+  output logic jtag_tdo_en_o,
   // debug requests to core
   output logic [MAX_HARTS-1:0] core_debug_req_o,
   // access from cores
@@ -243,7 +244,7 @@ module debug_system #(
     .trst_ni          (jtag_trst_ni),
     .td_i             (jtag_tdi_i),
     .td_o             (jtag_tdo_o),
-    .tdo_oe_o         ()
+    .tdo_oe_o         (jtag_tdo_en_o)
   );
 
 

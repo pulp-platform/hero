@@ -60,6 +60,7 @@ module pulp_tb #(
   logic jtag_tdi;
   logic jtag_tms;
   logic jtag_tdo;
+  logic jtag_tdo_en;
 
   // jtag openocd bridge signals
   logic         sim_jtag_tck;
@@ -67,6 +68,7 @@ module pulp_tb #(
   logic         sim_jtag_tdi;
   logic         sim_jtag_trst_n;
   logic         sim_jtag_tdo;
+  logic         sim_jtag_tdo_en;
   logic [31:0]  sim_jtag_exit;
   logic         sim_jtag_enable;
 
@@ -104,6 +106,7 @@ module pulp_tb #(
     .jtag_tdi_i     (jtag_tdi),
     .jtag_tms_i     (jtag_tms),
     .jtag_tdo_o     (jtag_tdo),
+    .jtag_tdo_en_o  (jtag_tdo_en),
 
     // DFT signals tied off in this testbench.
     .mem_ctrl           ('0),
@@ -503,7 +506,7 @@ module pulp_tb #(
     .jtag_TDI        ( sim_jtag_tdi    ),
     .jtag_TRSTn      ( sim_jtag_trst_n ),
     .jtag_TDO_data   ( sim_jtag_tdo    ),
-    .jtag_TDO_driven ( 1'b1            ),
+    .jtag_TDO_driven ( sim_jtag_tdo_en ),
     .exit            ( sim_jtag_exit   ) //TODO: abort simulation
   );
 
@@ -512,6 +515,7 @@ module pulp_tb #(
   assign jtag_tdi = sim_jtag_tdi;
   assign jtag_tms = sim_jtag_tms;
   assign sim_jtag_tdo = jtag_tdo;
+  assign sim_jtag_tdo_en = jtag_tdo_en;
 `endif
 
 endmodule
