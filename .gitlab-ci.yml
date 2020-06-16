@@ -58,6 +58,25 @@ lint_spyglass:
     - cd hardware/spyglass
     - ./run_spyglass.sh
 
+test_synthesis:
+  stage: build_test_rest
+  script:
+    ### Test elaboration for synthesis
+    - |
+      cd hardware/gf22fdx/synopsys
+      ./start_synth.sh --elab-only | tee synth.log
+      if grep -q '^Error:' synth.log; then
+        echo "Elaboration had errors!"
+        exit 1
+      fi
+      if rg -U --multiline-dotall --pcre2 -n \
+          '^[[:blank:]]*?(?<!module )cluster_clock_gat.*?\);' unmapped/pulp_unmapped.v \
+          | rg -U --multiline-dotall "test_en_i\(.*?1'b0.*?\)"; then
+        echo "There are clock gates with unconnected 'test_en_i' input!"
+        exit 1
+      fi
+      cd -
+
 build_test_archive:
   stage: build_test_rest
   script:
@@ -101,21 +120,6 @@ build_test_archive:
         done
         cd -
       done
-    ### Test elaboration for synthesis
-    - |
-      cd hardware/gf22fdx/synopsys
-      ./start_synth.sh --elab-only | tee synth.log
-      if grep -q '^Error:' synth.log; then
-        echo "Elaboration had errors!"
-        exit 1
-      fi
-      if rg -U --multiline-dotall --pcre2 -n \
-          '^[[:blank:]]*?(?<!module )cluster_clock_gat.*?\);' unmapped/pulp_unmapped.v \
-          | rg -U --multiline-dotall "test_en_i\(.*?1'b0.*?\)"; then
-        echo "There are clock gates with unconnected 'test_en_i' input!"
-        exit 1
-      fi
-      cd -
     ### Build the virtual platform
     - make virtual-platform
     - >
