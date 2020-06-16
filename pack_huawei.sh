@@ -33,6 +33,9 @@ make vsim/compile.tcl vcs/compile.sh
 rm Makefile bender
 sed -i -e 's|make -C .. vsim/compile.tcl||' vsim/compile.sh
 
+# Hardware: Remove GF22 scripts and sources.
+rm -rf gf22fdx
+
 # Add SLM Converter and python script.
 cd "$SRC"
 mkdir -p "$TMP_DST/install/bin"
