@@ -35,6 +35,7 @@ sed -i -e 's|make -C .. vsim/compile.tcl||' vsim/compile.sh
 
 # Hardware: Remove GF22 scripts and sources.
 rm -rf gf22fdx
+rm -rf deps/tech_cells_GF22FDX
 
 # Add SLM Converter and python script.
 cd "$SRC"
