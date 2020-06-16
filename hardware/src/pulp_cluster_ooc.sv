@@ -37,7 +37,7 @@ module pulp_cluster_ooc
   input  logic                ext_evt_2_i,
   input  logic                ext_evt_3_i,
 
-  // DFT (no direction suffixes due to customer request)
+  // DFT (no direction suffixes due to partner request)
   input  logic [25:0]         mem_ctrl,
   input  logic                dft_ram_gt_se,
   input  logic                dft_ram_bypass,
@@ -401,7 +401,7 @@ module pulp_cluster_sync
   input  logic        ext_evt_2_i,
   input  logic        ext_evt_3_i,
 
-  // DFT (no direction suffixes due to customer request)
+  // DFT (no direction suffixes due to partner request)
   input  logic [25:0] mem_ctrl,
   input  logic        dft_ram_gt_se,
   input  logic        dft_ram_bypass,
@@ -565,7 +565,7 @@ module pulp_cluster_async
   input  logic          ext_evt_2_i,
   input  logic          ext_evt_3_i,
 
-  // DFT (no direction suffixes due to customer request)
+  // DFT (no direction suffixes due to partner request)
   input  logic [25:0]   mem_ctrl,
   input  logic          dft_ram_gt_se,
   input  logic          dft_ram_bypass,

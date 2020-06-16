@@ -71,7 +71,7 @@ module icache_hier_top
    input logic                                          rst_n,
    input logic                                          test_en_i,
 
-   // DFT ports (no suffixes due to customer request)
+   // DFT ports (no suffixes due to partner request)
    input logic [25:0]                                   mem_ctrl,
    input logic                                          dft_ram_gt_se,
    input logic                                          dft_ram_bypass,

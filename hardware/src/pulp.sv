@@ -114,7 +114,7 @@ module pulp #(
   output logic                    jtag_tdo_o,
   output logic                    jtag_tdo_en_o,
 
-  // DFT (no direction suffixes due to customer request)
+  // DFT (no direction suffixes due to partner request)
   input  logic [25:0]             mem_ctrl,
   input  logic                    dft_mode,
   input  logic                    dft_glb_gt_se,

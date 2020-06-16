@@ -23,7 +23,7 @@ module l2_mem #(
   input  logic  rst_ni,
   AXI_BUS.Slave slv,
 
-  // DFT (no direction suffixes due to customer request)
+  // DFT (no direction suffixes due to partner request)
   input  logic [25:0] mem_ctrl,
   input  logic        dft_ram_gt_se,
   input  logic        dft_ram_bypass,

@@ -22,7 +22,7 @@ module sram #(
   parameter int unsigned MORE_CUTS   = (NB_CUTS > 1) ? 1: 0,
   parameter type strb_t = logic[STRB_WIDTH-1:0]
 ) (
-  // DFT (no direction suffixes due to customer request)
+  // DFT (no direction suffixes due to partner request)
   input  logic [25:0] mem_ctrl,
   input  logic        dft_ram_gt_se,
   input  logic        dft_ram_bypass,

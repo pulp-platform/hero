@@ -44,7 +44,7 @@ module share_icache
    input logic                                                rst_n,
    input logic                                                test_en_i,
    // -------------------------------------------------------------------------------------
-   // DFT Port Declarations (no direction suffixes due to customer request) ---------------
+   // DFT Port Declarations (no direction suffixes due to partner request) ----------------
    // -------------------------------------------------------------------------------------
    input logic [25:0]                                          mem_ctrl,
    input logic                                                 dft_ram_gt_se,
