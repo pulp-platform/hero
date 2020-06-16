@@ -1,4 +1,4 @@
-# HERO for Huawei 2020 Tapeout
+# Hemera: Integrating a PULP Cluster With a Microcontroller Host Processor Using the HERO Framework
 
 This variant of HERO provides the hardware and software to integrate PULP with a simple microcontroller host processor.
 
