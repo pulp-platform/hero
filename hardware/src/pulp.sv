@@ -112,6 +112,7 @@ module pulp #(
   input  logic                    jtag_tdi_i,
   input  logic                    jtag_tms_i,
   output logic                    jtag_tdo_o,
+  output logic                    jtag_tdo_en_o,
 
   // DFT (no direction suffixes due to customer request)
   input  logic [25:0]             mem_ctrl,
@@ -552,6 +553,7 @@ module pulp #(
     .jtag_tdi_i,
     .jtag_tms_i,
     .jtag_tdo_o,
+    .jtag_tdo_en_o,
     .core_debug_req_o (core_debug_req),
     .dm_slave         (debug_slv_dwced),
     .dm_master        (debug_mst_predwc)
