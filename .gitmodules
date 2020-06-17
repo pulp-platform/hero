@@ -12,7 +12,3 @@
 	path = toolchain/llvm-project
 	url = git@iis-git.ee.ethz.ch:hero/llvm-project.git
 	branch = hero
-[submodule "toolchain/hercules"]
-	path = toolchain/hercules
-	url = git@iis-git.ee.ethz.ch:hero/HerculesCompiler-public.git
-	branch = hero
