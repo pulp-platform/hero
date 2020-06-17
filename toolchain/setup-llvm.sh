@@ -3,13 +3,6 @@
 ### SETUP A HERO LLVM RTE ###
 THIS_DIR=$(dirname "$(readlink -f "$0")")
 
-export CXX=g++-4.8.3
-export CC=gcc-4.8.3
-export LD_LIBRARY_PATH=/usr/pack/gcc-4.8.3-af/x86_64-rhe6-linux/lib64:$LD_LIBRARY_PATH
-export LIBRARY_PATH=/usr/pack/gcc-4.8.3-af/x86_64-rhe6-linux/lib64:$LIBRARY_PATH
-export C_INCLUDE_PATH=/usr/pack/gcc-4.8.3-af/include/c++/4.8.3:/usr/pack/gcc-4.8.3-af/include/c++/4.8.3/x86_64-unknown-linux-gnu
-export CPLUS_INCLUDE_PATH=/usr/pack/gcc-4.8.3-af/include/c++/4.8.3:/usr/pack/gcc-4.8.3-af/include/c++/4.8.3/x86_64-unknown-linux-gnu
-
 # stop on all errors
 set -e
 
