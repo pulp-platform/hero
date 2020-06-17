@@ -91,9 +91,9 @@ Finally, start the simulation with
 
 Build the virtual platfrom by executing `make virtual-platform` in the repository's root directory.
 
-To launch an application use the `run_vp.sh` script in the `pulp/virual-platform` repository. It takes the name of an application or the full path to a binary as an argument. For example to launch the `hello` application use:
+To launch an application use the `run_vp.sh` script in the `pulp/virtual-platform` repository. It takes the name of an application or the full path to a binary as an argument. For example to launch the `hello` application use:
 ``` bash
-./pulp/virual-platform/run_vp.sh hello
+./pulp/virtual-platform/run_vp.sh hello
 ```
 
 The script contains two configuration variables.
