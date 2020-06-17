@@ -1480,7 +1480,7 @@ artifacts:
     inputs:
       - Makefile
       - toolchain/hc-omp-pass
-      - toolchain/hercules
+      - toolchain/llvm-support
       - toolchain/llvm-project
       - toolchain/setup-llvm.sh
       # sdk-pulp-and-sdk-har
@@ -1584,7 +1584,6 @@ artifacts:
       - install/bin/yaml2obj
       - install/include/clang
       - install/include/clang-c
-      - install/include/hercules
       - install/include/llvm
       - install/include/llvm-c
       - install/lib/CheckerDependencyHandlingAnalyzerPlugin.so
@@ -1593,7 +1592,7 @@ artifacts:
       - install/lib/clang
       - install/lib/cmake/clang
       - install/lib/cmake/llvm
-      - install/lib/hercules
+      - install/lib/llvm-support
       - install/lib/libLLVMAArch64AsmParser.so
       - install/lib/libLLVMAArch64AsmParser.so.9
       - install/lib/libLLVMAArch64CodeGen.so
