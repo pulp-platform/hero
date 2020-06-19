@@ -66,13 +66,17 @@ module register_file_1r_1w
 
     logic [NUM_WORDS-1:0]                         WAddrOneHotxD;
     logic [NUM_WORDS-1:0]                         ClocksxC;
+`ifndef RF_1R1W_FF
     logic [DATA_WIDTH-1:0]                        WDataIntxD;
+`endif
 
     logic                                         clk_int;
 
     int unsigned i;
     int unsigned j;
+`ifndef RF_1R1W_FF
     int unsigned k;
+`endif
     int unsigned l;
     int unsigned m;
 
@@ -138,6 +142,7 @@ module register_file_1r_1w
     end
     endgenerate
 
+`ifndef RF_1R1W_FF
     //-----------------------------------------------------------------------------
     // WRITE : SAMPLE INPUT DATA
     //---------------------------------------------------------------------------
@@ -146,6 +151,7 @@ module register_file_1r_1w
         if(WriteEnable)
             WDataIntxD <= WriteData;
     end
+`endif
 
 
     //-----------------------------------------------------------------------------
@@ -157,6 +163,15 @@ module register_file_1r_1w
     //-- Use active low, i.e. transparent on low latches as storage elements
     //-- Data is sampled on rising clock edge
 
+`ifdef RF_1R1W_FF
+    for (genvar k = 0; k < NUM_WORDS; k++) begin : gen_ff
+      always_ff @(posedge ClocksxC[k]) begin
+        if (WAddrOneHotxD[k]) begin
+          MemContentxDP[k] <= WriteData;
+        end
+      end
+    end
+`else
     always_latch
     begin : latch_wdata
         for(k=0; k<NUM_WORDS; k++)
@@ -165,5 +180,6 @@ module register_file_1r_1w
               MemContentxDP[k] <= WDataIntxD;
         end
     end
+`endif
 
 endmodule
