@@ -55,10 +55,10 @@ cd hc_build
 
 # run hercules pass build
 # FIXME: integrate LLVM passes better in the HERO architecture
-echo "Building Hercules LLVM passes"
+echo "Building LLVM support passes"
 $HERO_INSTALL/bin/cmake -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DLLVM_DIR:STRING=$HERO_INSTALL/lib/cmake/llvm \
-      $THIS_DIR/hercules/llvm-passes/
+      $THIS_DIR/llvm-support/
 $HERO_INSTALL/bin/cmake --build . --target install
 cd ..
 

@@ -3,7 +3,7 @@
 # ======================== CONFIGURATION OPTIONS =========================== #
 
 # HERCULES passes build directory.
-PASSROOT="$HERO_INSTALL/lib/hercules"
+PASSROOT="$HERO_INSTALL/lib/llvm-support"
 
 # LLVM bin directory (empty for standard PATH).
 # Note: Must end with slash character ("/") unless empty.
