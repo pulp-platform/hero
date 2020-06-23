@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `axi` and `common_cells`: Export include directory `include/axi` and `include/common_cells`,
   respectively, to improve compatibility with tools that do not support directories in SystemVerilog
-  ```include``.
+  `` `include``.
 - `axi2mem`: Improve tool compatibility by separating modules into individual files.
 - `fpnew`:
   - Add `default` to `unique case` that does not need a default to improve tool compatibility.
