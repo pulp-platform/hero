@@ -3,6 +3,8 @@ package:
   description: "Technology-agnostic building blocks."
 
 sources:
+  - src/tc_sram.sv
+
   - target: all(fpga, xilinx)
     files:
       - src/cluster_clock_gating_xilinx.sv

@@ -92,34 +92,14 @@ build_test_archive:
     - ./setup.sh --no-tc-pulp --no-script-symlinks
     ### build RTL tests
     - source env/ehuawei-minimal-runtime.sh
+    ### Import CI helper scripts.
+    - cp -r "$CI_PROJECT_DIR/.gitlab-ci.d" .
     ### Test both simulators
-    - >
-      for sim in vsim vcs; do
-        # Compile testbench
-        cd hardware/$sim
-        ./compile.sh
-        for d in $TEST_MIN_RT_EXAMPLES; do
-          make -C ../../example-apps/$d clean all
-          ../test/gen_slm_files.sh $d
-          ./start_sim.sh
-        done
-        cd -
-      done
+    - .gitlab-ci.d/test-sims.sh $TEST_MIN_RT_EXAMPLES
     ### reconfigure to use PULP SDK
     - source env/esim.sh
     ### Test both simulators
-    - >
-      for sim in vsim vcs; do
-        # Compile testbench
-        cd hardware/$sim
-        ./compile.sh
-        for d in $TEST_PULP_SDK_EXAMPLES; do
-          make -C ../../example-apps/$d clean all
-          ../test/gen_slm_files.sh $d
-          ./start_sim.sh
-        done
-        cd -
-      done
+    - .gitlab-ci.d/test-sims.sh $TEST_PULP_SDK_EXAMPLES
     ### Build the virtual platform
     - make virtual-platform
     - >
@@ -137,19 +117,7 @@ build_test_pulp-runtime:
     ### Configure pulp-runtime
     - source env/ehuawei-minimal-runtime.sh
     ### Test both simulators
-    - make -C "$CI_PROJECT_DIR/hardware" vcs/compile.sh
-    - >
-      for sim in vsim vcs; do
-        # Compile testbench
-        cd hardware/$sim
-        ./compile.sh
-        for d in $TEST_MIN_RT_EXAMPLES; do
-          make -C ../../example-apps/$d clean all
-          ../test/gen_slm_files.sh $d
-          ./start_sim.sh
-        done
-        cd -
-      done
+    - .gitlab-ci.d/test-sims.sh $TEST_MIN_RT_EXAMPLES
     ### Build the virtual platform
     - make virtual-platform
     - >
@@ -170,19 +138,7 @@ build_test_sdk:
     ### Configure for SDK
     - source env/esim.sh
     ### Test both simulators
-    - make -C "$CI_PROJECT_DIR/hardware" vcs/compile.sh
-    - >
-      for sim in vsim vcs; do
-        # Compile testbench
-        cd hardware/$sim
-        ./compile.sh
-        for d in $TEST_PULP_SDK_EXAMPLES; do
-          make -C ../../example-apps/$d clean all
-          ../test/gen_slm_files.sh $d
-          ./start_sim.sh
-        done
-        cd -
-      done
+    - .gitlab-ci.d/test-sims.sh $TEST_PULP_SDK_EXAMPLES
     ### Build the virtual platform
     - make virtual-platform
     - >

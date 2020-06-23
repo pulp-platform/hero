@@ -56,6 +56,12 @@ module pri_icache
    input logic                            rst_n,
    input logic                            test_en_i,
 
+   // DFT (no direction suffixes due to partner request)
+   input  logic [25:0]                    mem_ctrl,
+   input  logic                           dft_ram_gt_se,
+   input  logic                           dft_ram_bypass,
+   input  logic                           dft_ram_bp_clk_en,
+
    // interface with processor
    input  logic                           fetch_req_i,
    input  logic [FETCH_ADDR_WIDTH-1:0]    fetch_addr_i,
@@ -279,37 +285,61 @@ module pri_icache
       // ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝ ╚═════╝╚═╝     ╚═╝
 
 
+      logic [NB_WAYS-1:0][DATA_WIDTH-1:0] rdata_unused;
       for(i=0; i<NB_WAYS; i++)
       begin : _DATA_WAY_
 
-     `ifdef PULP_FPGA_EMUL
-         register_file_1r_1w
+     `ifdef ICACHE_L1_DATA_SRAM
+       tc_sram #(
+         .NumWords  ( 1 << SCM_DATA_ADDR_WIDTH  ),
+         .DataWidth ( DATA_WIDTH                ),
+         .ByteWidth ( 32'd8                     ),
+         .NumPorts  ( 32'd2                     ),
+         .Latency   ( 32'd1                     )
+       ) i_sram (
+         .mem_ctrl,
+         .dft_ram_gt_se,
+         .dft_ram_bypass,
+         .dft_ram_bp_clk_en,
+         .clk_i   ( clk                                           ),
+         .rst_ni  ( rst_n                                         ),
+         .req_i   ( {DATA_rd_req_int[i]  ,  DATA_wr_req_int[i]  } ),
+         .we_i    ( {              1'b0  ,                1'b1  } ),
+         .addr_i  ( {DATA_addr_int       ,  DATA_addr_int       } ),
+         .wdata_i ( {{DATA_WIDTH{1'b0}}  ,  DATA_wdata_int      } ),
+         .be_i    ( {{DATA_WIDTH/8{1'b0}},  {DATA_WIDTH/8{1'b1}}} ),
+         .rdata_o ( {DATA_rdata_int[i]   ,  rdata_unused[i]     } )
+       );
      `else
-         register_file_1r_1w_test_wrap
+      `ifdef PULP_FPGA_EMUL
+          register_file_1r_1w
+      `else
+          register_file_1r_1w_test_wrap
+      `endif
+          #(
+              .ADDR_WIDTH  ( SCM_DATA_ADDR_WIDTH ),
+              .DATA_WIDTH  ( DATA_WIDTH         )
+          )
+          DATA_BANK
+          (
+              .clk         ( clk          ),
+          `ifdef PULP_FPGA_EMUL
+              .rst_n       ( rst_n        ),
+          `endif
+
+              .test_en_i,
+
+              // Read port
+              .ReadEnable  ( DATA_rd_req_int[i]    ),
+              .ReadAddr    ( DATA_addr_int         ),
+              .ReadData    ( DATA_rdata_int[i]     ),
+
+              // Write port
+              .WriteEnable ( DATA_wr_req_int[i]    ),
+              .WriteAddr   ( DATA_addr_int         ),
+              .WriteData   ( DATA_wdata_int        )
+          );
      `endif
-         #(
-            .ADDR_WIDTH  ( SCM_DATA_ADDR_WIDTH ),
-            .DATA_WIDTH  ( DATA_WIDTH         )
-         )
-         DATA_BANK
-         (
-            .clk         ( clk          ),
-         `ifdef PULP_FPGA_EMUL
-            .rst_n       ( rst_n        ),
-         `endif
-
-            .test_en_i,
-
-            // Read port
-            .ReadEnable  ( DATA_rd_req_int[i]    ),
-            .ReadAddr    ( DATA_addr_int         ),
-            .ReadData    ( DATA_rdata_int[i]     ),
-
-            // Write port
-            .WriteEnable ( DATA_wr_req_int[i]    ),
-            .WriteAddr   ( DATA_addr_int         ),
-            .WriteData   ( DATA_wdata_int        )
-         );
       end
    endgenerate
 
