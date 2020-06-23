@@ -340,6 +340,11 @@ module icache_hier_top
             .rst_n                ( rst_n                                        ),
             .test_en_i            ( test_en_i                                    ),
 
+            .mem_ctrl,
+            .dft_ram_gt_se,
+            .dft_ram_bypass,
+            .dft_ram_bp_clk_en,
+
             .fetch_req_i          ( fetch_req_i[i]                               ),
             .fetch_addr_i         ( fetch_addr_i[i]                              ),
             .fetch_gnt_o          ( fetch_gnt_o[i]                               ),

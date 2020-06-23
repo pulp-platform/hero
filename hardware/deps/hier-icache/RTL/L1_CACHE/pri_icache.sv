@@ -56,6 +56,12 @@ module pri_icache
    input logic                            rst_n,
    input logic                            test_en_i,
 
+   // DFT (no direction suffixes due to partner request)
+   input  logic [25:0]                    mem_ctrl,
+   input  logic                           dft_ram_gt_se,
+   input  logic                           dft_ram_bypass,
+   input  logic                           dft_ram_bp_clk_en,
+
    // interface with processor
    input  logic                           fetch_req_i,
    input  logic [FETCH_ADDR_WIDTH-1:0]    fetch_addr_i,
@@ -291,6 +297,10 @@ module pri_icache
          .NumPorts  ( 32'd2                     ),
          .Latency   ( 32'd1                     )
        ) i_sram (
+         .mem_ctrl,
+         .dft_ram_gt_se,
+         .dft_ram_bypass,
+         .dft_ram_bp_clk_en,
          .clk_i   ( clk                                           ),
          .rst_ni  ( rst_n                                         ),
          .req_i   ( {DATA_rd_req_int[i]  ,  DATA_wr_req_int[i]  } ),
