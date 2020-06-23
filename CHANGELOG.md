@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pulp`: Tie `ref_clk_i` of cluster off to prevent timing conflicts.
 
 ### Fixed
+- `fpnew`:
+  - Fix undriven unused signals in multi-fmt blocks.
+  - Fix undriven portions of result in multi slices.
 
 
 ## 2020-06-16
