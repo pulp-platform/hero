@@ -1,9 +1,9 @@
 # Copyright ETH Zurich 2019
-VLOG_ARGS += -suppress vlog-2583 -suppress vlog-13314 -suppress vlog-13233
+VLOG_ARGS += -suppress vlog-2583 -suppress vlog-13314 -suppress vlog-13233 ${DEFINES}
 #VLOG_ARGS += -define PRINT_CORE_MEM_ACCESSES
 VCS ?= vcs-2017.03
 VCS_ARGS += -nc
-VLOGAN_ARGS += $(VCS_ARGS) -timescale=1ps/1ps -assert svaext
+VLOGAN_ARGS += $(VCS_ARGS) -timescale=1ps/1ps -assert svaext ${DEFINES}
 
 .PHONY: vsim/compile.tcl
 vsim/compile.tcl: bender test/remote_bitbang/librbs.so
