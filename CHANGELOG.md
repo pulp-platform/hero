@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
+
+### Changed
+
+### Fixed
+
+
+## 2020-06-23
+### Added
 - `hier-icache`: Add implementation alternatives of data and tag memories of the instruction cache.
   The following options can be selected via `define`s:
   - Defining `RF_1R1W_FF` and `RF_2R2W_FF` means that the 1R/1W and 2R/2W register files are
