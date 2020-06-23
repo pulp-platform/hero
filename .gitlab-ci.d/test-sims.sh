@@ -5,9 +5,11 @@ set -e
 def_icache_latches=''
 def_icache_ffs='RF_1R1W_FF RF_2R2W_FF'
 def_icache_ffs_l15_data_sram="$def_icache_ffs USE_DATA_SRAM"
+def_icache_ffs_both_data_sram="$def_icache_ffs_l15_data_sram ICACHE_L1_DATA_SRAM"
 
 cd hardware
-for defines in "$def_icache_latches" "$def_icache_ffs" "$def_icache_ffs_l15_data_sram"; do
+for defines in "$def_icache_latches" "$def_icache_ffs" "$def_icache_ffs_l15_data_sram" \
+    "$def_icache_ffs_both_data_sram"; do
   export DEFINES="$defines"
   for sim in vsim vcs; do
     if [ "$sim" = "vcs" ]; then
