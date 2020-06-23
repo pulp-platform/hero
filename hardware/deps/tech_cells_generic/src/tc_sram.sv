@@ -65,6 +65,12 @@ module tc_sram #(
   parameter type         data_t    = logic [DataWidth-1:0],
   parameter type         be_t      = logic [BeWidth-1:0]
 ) (
+  // DFT (no direction suffixes due to partner request)
+  input  logic [25:0]          mem_ctrl,
+  input  logic                 dft_ram_gt_se,
+  input  logic                 dft_ram_bypass,
+  input  logic                 dft_ram_bp_clk_en,
+
   input  logic                 clk_i,      // Clock
   input  logic                 rst_ni,     // Asynchronous reset active low
   // input ports
