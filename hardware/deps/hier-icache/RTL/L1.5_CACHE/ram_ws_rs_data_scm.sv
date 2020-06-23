@@ -38,81 +38,29 @@ module ram_ws_rs_data_scm
 
 `ifdef USE_DATA_SRAM
 
-    logic cs_n;
-    logic we_n;
+    logic [data_width-1:0] wdata_int;
+    assign {>>{wdata_int}} = wdata;
 
-    assign  cs_n = ~req;
-    assign  we_n = ~write;
+    sram #(
+      .DATA_WIDTH (data_width),
+      .N_WORDS    (1 << addr_width)
+    ) i_sram (
+      // DFT
+      .mem_ctrl,
+      .dft_ram_gt_se,
+      .dft_ram_bypass,
+      .dft_ram_bp_clk_en,
 
-    generate
-      if(data_width==128)
-      begin : SRAM_CUT
+      .clk_i    (clk),
+      .rst_ni   (rst_n),
+      .req_i    (req),
+      .we_i     (write),
+      .addr_i   (addr),
+      .wdata_i  (wdata_int),
+      .be_i     (be),
+      .rdata_o  (rdata)
+    );
 
-        case (addr_width)
-            5: begin
-                logic [4-1:0]   n_aw;
-                logic [1-1:0]   n_ac;
-                logic [127:0]   bw;
-                assign {n_aw, n_ac} = addr;
-                assign bw = (we_n) ?  '0 : '1;
-
-                IN22FDX_R1PH_NFHN_W00032B128M02C256 sram_data //
-                (
-
-                    .CLK          ( clk              ),
-                    .CEN          ( cs_n             ),
-                    .RDWEN        ( write            ),
-                    .AW           ( addr[4:1]        ),
-                    .AC           ( addr[0]          ),
-                    .D            ( wdata            ),
-                    .BW           ( bw               ),
-                    .Q            ( rdata            ),
-                    .T_LOGIC      ( 1'b0             ),
-                    .MA_SAWL      ( '0               ),
-                    .MA_WL        ( '0               ),
-                    .MA_WRAS      ( '0               ),
-                    .MA_WRASD     ( '0               ),
-                    .OBSV_CTL     (                  )
-
-                );
-
-            end
-
-            6: begin
-                logic          n_as;
-                logic [2:0]    n_aw;
-                logic [1:0]    n_ac;
-                logic [127:0]   bw;
-                assign {n_aw[2], n_as, n_aw[1:0], n_ac} = addr;
-                assign bw = (we_n) ?  '0 : '1;
-
-                IN22FDX_R1PH_NFHN_W00064B128M02C256 sram_data // /usr/pack/gf-22-kgf/dz/mem/R1PH/V03R01/model/verilog/
-                (
-
-                    .CLK          ( clk              ),
-                    .CEN          ( cs_n             ),
-                    .RDWEN        ( write            ),
-                    .AW           ( addr[5:1]        ),
-                    .AC           ( addr[0]          ),
-                    .D            ( wdata            ),
-                    .BW           ( bw               ),
-                    .Q            ( rdata            ),
-                    .T_LOGIC      ( 1'b0             ),
-                    .MA_SAWL      ( '0               ),
-                    .MA_WL        ( '0               ),
-                    .MA_WRAS      ( '0               ),
-                    .MA_WRASD     ( '0               ),
-                    .OBSV_CTL     (                  )
-
-                );
-
-            end
-            default : /* default */;
-        endcase
-
-      end
-
-    endgenerate
 `else
 
  `ifdef PULP_FPGA_EMUL
