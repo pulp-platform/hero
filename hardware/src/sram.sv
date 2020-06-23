@@ -142,27 +142,73 @@ module sram #(
 
  `else
 
-  logic [31:0] BE_BW;
+  if (N_WORDS == 1024 && DATA_WIDTH == 32) begin : gen_w01024_b032
+    logic [31:0] BE_BW;
 
-  assign BE_BW      = { {8{be_i[3]}}, {8{be_i[2]}}, {8{be_i[1]}}, {8{be_i[0]}} };
+    assign BE_BW      = { {8{be_i[3]}}, {8{be_i[2]}}, {8{be_i[1]}}, {8{be_i[0]}} };
 
-  IN22FDX_R1PH_NFHN_W01024B032M04C256 i_tcdm_bank
-  (
-    .CLK          ( clk_i            ),
-    .CEN          ( ~req_i           ),
-    .RDWEN        ( we_i             ),
-    .AW           ( addr_i[9:2]      ),
-    .AC           ( addr_i[1:0]      ),
-    .D            ( wdata_i          ),
-    .BW           ( BE_BW            ),
-    .Q            ( rdata_o          ),
-    .T_LOGIC      ( 1'b0             ),
-    .MA_SAWL      ( '0               ),
-    .MA_WL        ( '0               ),
-    .MA_WRAS      ( '0               ),
-    .MA_WRASD     ( '0               ),
-    .OBSV_CTL     (                  )
-  );
+    IN22FDX_R1PH_NFHN_W01024B032M04C256 i_tcdm_bank
+    (
+      .CLK          ( clk_i            ),
+      .CEN          ( ~req_i           ),
+      .RDWEN        ( we_i             ),
+      .AW           ( addr_i[9:2]      ),
+      .AC           ( addr_i[1:0]      ),
+      .D            ( wdata_i          ),
+      .BW           ( BE_BW            ),
+      .Q            ( rdata_o          ),
+      .T_LOGIC      ( 1'b0             ),
+      .MA_SAWL      ( '0               ),
+      .MA_WL        ( '0               ),
+      .MA_WRAS      ( '0               ),
+      .MA_WRASD     ( '0               ),
+      .OBSV_CTL     (                  )
+    );
+
+  end else if (DATA_WIDTH == 128) begin : gen_b128
+    logic [127:0] be_bw;
+    assign be_bw = {  {8{be_i[15]}}, {8{be_i[14]}}, {8{be_i[13]}}, {8{be_i[12]}},
+                      {8{be_i[11]}}, {8{be_i[10]}}, {8{be_i[ 9]}}, {8{be_i[ 8]}},
+                      {8{be_i[ 7]}}, {8{be_i[ 6]}}, {8{be_i[ 5]}}, {8{be_i[ 4]}},
+                      {8{be_i[ 3]}}, {8{be_i[ 2]}}, {8{be_i[ 1]}}, {8{be_i[ 0]}}};
+
+    if (N_WORDS == 32) begin : gen_w00032
+      IN22FDX_R1PH_NFHN_W00032B128M02C256 sram_data (
+        .CLK          ( clk_i            ),
+        .CEN          ( ~req_i           ),
+        .RDWEN        ( we_i             ),
+        .AW           ( addr_i[4:1]      ),
+        .AC           ( addr_i[0]        ),
+        .D            ( wdata_i          ),
+        .BW           ( be_bw            ),
+        .Q            ( rdata_o          ),
+        .T_LOGIC      ( 1'b0             ),
+        .MA_SAWL      ( '0               ),
+        .MA_WL        ( '0               ),
+        .MA_WRAS      ( '0               ),
+        .MA_WRASD     ( '0               ),
+        .OBSV_CTL     (                  )
+      );
+
+    end else if (N_WORDS == 64) begin : gen_w00064
+      IN22FDX_R1PH_NFHN_W00064B128M02C256 sram_data (
+          .CLK          ( clk              ),
+          .CEN          ( ~req_i           ),
+          .RDWEN        ( we_i             ),
+          .AW           ( addr_i[5:1]      ),
+          .AC           ( addr_i[0]        ),
+          .D            ( wdata_i          ),
+          .BW           ( be_bw            ),
+          .Q            ( rdata_o          ),
+          .T_LOGIC      ( 1'b0             ),
+          .MA_SAWL      ( '0               ),
+          .MA_WL        ( '0               ),
+          .MA_WRAS      ( '0               ),
+          .MA_WRASD     ( '0               ),
+          .OBSV_CTL     (                  )
+      );
+    end
+  end
   `endif
   `endif
 
