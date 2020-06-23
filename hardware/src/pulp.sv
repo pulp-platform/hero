@@ -343,7 +343,7 @@ module pulp #(
       pulp_cluster_async i_cluster (
         .clk_i,
         .rst_ni (ndmreset_n),
-        .ref_clk_i    (clk_i),
+        .ref_clk_i    (1'b0),
         .test_mode_i  (dft_glb_gt_se),
         .cluster_id_i (cluster_id),
         .fetch_en_i   (cl_fetch_en_i[i]),
@@ -383,7 +383,7 @@ module pulp #(
       pulp_cluster_sync i_cluster (
         .clk_i,
         .rst_ni (ndmreset_n),
-        .ref_clk_i    (clk_i),
+        .ref_clk_i    (1'b0),
         .test_mode_i  (dft_glb_gt_se),
         .cluster_id_i (cluster_id),
         .fetch_en_i   (cl_fetch_en_i[i]),
