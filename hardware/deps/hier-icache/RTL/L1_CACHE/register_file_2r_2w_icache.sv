@@ -81,8 +81,10 @@ module register_file_2r_2w_icache
     logic [NUM_WORDS-1:0]                          WAddrOneHotxDb_reg;
 
     logic [NUM_WORDS-1:0]                          ClocksxC;
+`ifndef RF_2R2W_FF
     logic [DATA_WIDTH-1:0]                         WDataIntxDa;
     logic [DATA_WIDTH-1:0]                         WDataIntxDb;
+`endif
 
     logic clk_int;
 
@@ -90,7 +92,9 @@ module register_file_2r_2w_icache
 
     int unsigned i;
     int unsigned j;
+`ifndef RF_2R2W_FF
     int unsigned k;
+`endif
     int unsigned l;
     int unsigned m;
 
@@ -180,6 +184,7 @@ module register_file_2r_2w_icache
     end
     endgenerate
 
+`ifndef RF_2R2W_FF
     //-----------------------------------------------------------------------------
     // WRITE : SAMPLE INPUT DATA
     //---------------------------------------------------------------------------
@@ -190,6 +195,7 @@ module register_file_2r_2w_icache
         if(we_b_i)
             WDataIntxDb <= wdata_b_i;
     end
+`endif
 
     //-----------------------------------------------------------------------------
     //-- WRITE : Write operation
@@ -201,6 +207,21 @@ module register_file_2r_2w_icache
     //-- Data is sampled on rising clock edge
 
 
+`ifdef RF_2R2W_FF
+    for (genvar k = 0; k < NUM_WORDS; k++) begin: gen_ff
+      always_ff @(posedge ClocksxC[k]) begin
+        if (WAddrOneHotxDb_reg[k]) begin
+          if (we_b_i) begin
+            MemContentxDP[k] <= wdata_b_i;
+          end
+        end else begin
+          if (we_a_i) begin
+            MemContentxDP[k] <= wdata_a_i;
+          end
+        end
+      end
+    end
+`else
     always_latch
     begin : latch_wdata
         for(k=0; k<NUM_WORDS; k++)
@@ -209,5 +230,6 @@ module register_file_2r_2w_icache
                 MemContentxDP[k] <= WAddrOneHotxDb_reg[k] ? WDataIntxDb : WDataIntxDa;
         end
     end
+`endif
 
 endmodule
