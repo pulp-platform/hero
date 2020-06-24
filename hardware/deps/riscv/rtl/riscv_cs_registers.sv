@@ -384,6 +384,8 @@ if(PULP_SECURE==1) begin
       12'h042: csr_rdata_int = {ucause_q[5], 26'h0, ucause_q[4:0]};
       // current priv level (not official)
       12'hC10: csr_rdata_int = {30'h0, priv_lvl_q};
+      // debug trigger info (hardwired to "trigger does not exist")
+      12'h7A4: csr_rdata_int = 32'h1;
       default:
         csr_rdata_int = '0;
     endcase
@@ -450,6 +452,8 @@ end else begin //PULP_SECURE == 0
       12'h014: csr_rdata_int = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]};
       // current priv level (not official)
       12'hC10: csr_rdata_int = {30'h0, priv_lvl_q};
+      // debug trigger info (hardwired to "trigger does not exist")
+      12'h7A4: csr_rdata_int = 32'h1;
       default:
         csr_rdata_int = '0;
     endcase
