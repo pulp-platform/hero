@@ -76,8 +76,8 @@ module trans_unit
    
    trans_buffers
      #(
-       .RX_BUFFER_DEPTH(2),
-       .TX_BUFFER_DEPTH(2)
+       .RX_BUFFER_DEPTH(4),
+       .TX_BUFFER_DEPTH(4)
        )
    trans_buffers_tcdm_i
      (
@@ -112,7 +112,7 @@ module trans_unit
    generic_fifo
      #(
        .DATA_WIDTH(72),
-       .DATA_DEPTH(2)
+       .DATA_DEPTH(4)
        )
    trans_buffer_ext_tx_i
      (
@@ -133,7 +133,7 @@ module trans_unit
    generic_fifo
      #(
        .DATA_WIDTH(64),
-       .DATA_DEPTH(2)
+       .DATA_DEPTH(4)
        )
    trans_buffer_ext_rx_i
      (
@@ -158,7 +158,7 @@ module trans_unit
    generic_fifo
      #(
        .DATA_WIDTH(MCHAN_LEN_WIDTH+6),
-       .DATA_DEPTH(2)
+       .DATA_DEPTH(4)
        )
    trans_queue_tx_i
      (
@@ -179,7 +179,7 @@ module trans_unit
    generic_fifo
      #(
        .DATA_WIDTH(MCHAN_LEN_WIDTH+6),
-       .DATA_DEPTH(2)
+       .DATA_DEPTH(4)
        )
    trans_queue_rx_i
      (
