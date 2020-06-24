@@ -63,7 +63,7 @@ module fpnew_fma #(
   // Internal exponent width of FMA must accomodate all meaningful exponent values in order to avoid
   // datapath leakage. This is either given by the exponent bits or the width of the LZC result.
   // In most reasonable FP formats the internal exponent will be wider than the LZC result.
-  localparam int unsigned EXP_WIDTH = unsigned'(fpnew_pkg::maximum(EXP_BITS + 2, LZC_RESULT_WIDTH));
+  localparam int unsigned EXP_WIDTH = 32'(fpnew_pkg::maximum(EXP_BITS + 2, LZC_RESULT_WIDTH));
   // Shift amount width: maximum internal mantissa size is 3p+3 bits
   localparam int unsigned SHIFT_AMOUNT_WIDTH = $clog2(3 * PRECISION_BITS + 3);
   // Pipelines
