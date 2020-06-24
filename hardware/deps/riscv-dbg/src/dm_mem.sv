@@ -212,6 +212,7 @@ module dm_mem #(
   // read/write logic
   logic [63:0] data_bits;
   logic [7:0][7:0] rdata;
+  localparam int unsigned ProgBufSizeLog2 = $clog2(dm::ProgBufSize);
   always_comb begin : p_rw_logic
 
     halted_d_aligned   = NrHartsAligned'(halted_q);
@@ -289,15 +290,15 @@ module dm_mem #(
 
           [DataBaseAddr:DataEndAddr]: begin
             rdata_d = {
-                      data_i[$clog2(dm::ProgBufSize)'(addr_i[DbgAddressBits-1:3] -
+                      data_i[ProgBufSizeLog2'(addr_i[DbgAddressBits-1:3] -
                           DataBaseAddr[DbgAddressBits-1:3] + 1'b1)],
-                      data_i[$clog2(dm::ProgBufSize)'(addr_i[DbgAddressBits-1:3] -
+                      data_i[ProgBufSizeLog2'(addr_i[DbgAddressBits-1:3] -
                           DataBaseAddr[DbgAddressBits-1:3])]
                       };
           end
 
           [ProgBufBaseAddr:ProgBufEndAddr]: begin
-            rdata_d = progbuf[$clog2(dm::ProgBufSize)'(addr_i[DbgAddressBits-1:3] -
+            rdata_d = progbuf[ProgBufSizeLog2'(addr_i[DbgAddressBits-1:3] -
                           ProgBufBaseAddr[DbgAddressBits-1:3])];
           end
 
