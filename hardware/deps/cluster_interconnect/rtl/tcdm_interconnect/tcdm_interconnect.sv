@@ -233,10 +233,11 @@ end else if (Topology == tcdm_interconnect_pkg::BFLY2 || Topology == tcdm_interc
     end
   end
 
+  localparam int unsigned NumParLog2 = $clog2(NumPar);
   if (NumPar > unsigned'(1)) begin : gen_rr_arb
 
     logic [$clog2(NumPar)-1:0] rr2;
-    assign rr2 = $clog2(NumPar)'(rr[$clog2(NumPar)-1:0]);
+    assign rr2 = NumParLog2'(rr[$clog2(NumPar)-1:0]);
 
     for (genvar k = 0; unsigned'(k) < NumOut; k++) begin : gen_par
       rr_arb_tree #(
