@@ -215,6 +215,7 @@ module dm_csrs #(
   dm::dmcontrol_t dmcontrol;
   dm::abstractcs_t a_abstractcs;
   logic [4:0] autoexecdata_idx;
+  localparam int unsigned DataCountLog2 = $clog2(dm::DataCount);
   always_comb begin : csr_read_write
     // --------------------
     // Static Values (R/O)
@@ -292,7 +293,7 @@ module dm_csrs #(
         [(dm::Data0):DataEnd]: begin
           // logic [$clog2(dm::DataCount)-1:0] resp_queue_idx;
           // resp_queue_idx = dmi_req_i.addr[4:0] - int'(dm::Data0);
-          resp_queue_data = data_q[$clog2(dm::DataCount)'(autoexecdata_idx)];
+          resp_queue_data = data_q[DataCountLog2'(autoexecdata_idx)];
           if (!cmdbusy_i) begin
             // check whether we need to re-execute the command (just give a cmd_valid)
             if (autoexecdata_idx < $bits(abstractauto_q.autoexecdata)) begin
