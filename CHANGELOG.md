@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility with some tools.
 
 ### Fixed
+- `axi_to_mem` and `core_demux`: Remove `'x` default assignments.
+- `register_file_2r_2w_icache`: Fix enable condition in FF mode.
 
 
 ## 2020-06-23

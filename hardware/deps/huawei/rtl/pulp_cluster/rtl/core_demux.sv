@@ -423,7 +423,7 @@ module core_demux
 
       default : begin
         data_r_valid_o = 1'b0;
-        data_r_rdata_o = 'x;
+        data_r_rdata_o = '0;
         data_r_opc_o   = 1'b0;
       end
     endcase

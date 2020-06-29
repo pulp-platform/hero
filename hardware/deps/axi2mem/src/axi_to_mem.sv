@@ -101,7 +101,7 @@ module axi_to_mem #(
     // Default assignments
     axi_resp_o.ar_ready = 1'b0;
     rd_meta_d = rd_meta_q;
-    rd_meta = 'x;
+    rd_meta = '{default: '0};
     rd_valid = 1'b0;
     r_cnt_d = r_cnt_q;
     // Handle R burst in progress.
@@ -141,7 +141,7 @@ module axi_to_mem #(
     axi_resp_o.aw_ready = 1'b0;
     axi_resp_o.w_ready = 1'b0;
     wr_meta_d = wr_meta_q;
-    wr_meta = 'x;
+    wr_meta = '{default: '0};
     wr_valid = 1'b0;
     w_cnt_d = w_cnt_q;
     // Handle W bursts in progress.
