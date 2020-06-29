@@ -210,7 +210,7 @@ module register_file_2r_2w_icache
 `ifdef RF_2R2W_FF
     for (genvar k = 0; k < NUM_WORDS; k++) begin: gen_ff
       always_ff @(posedge ClocksxC[k]) begin
-        if (WAddrOneHotxDb_reg[k]) begin
+        if (WAddrOneHotxDb[k]) begin
           if (we_b_i) begin
             MemContentxDP[k] <= wdata_b_i;
           end
