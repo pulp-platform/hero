@@ -9,8 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
-- `pulp_cluster`: Increase depth of buffers in DMA `trans_unit` to 4 and add a register on the W
-  channel of the cluster crossbar to reduce the number of idle bus cycles between DMA bursts.
+- `pulp_cluster`:
+  - Increase depth of buffers in DMA `trans_unit` to 4 and add a register on the W channel of the
+    cluster crossbar to reduce the number of idle bus cycles between DMA bursts.
+  - Increase maximum number of in-flight DMA transactions to 32.
 - `fpnew`, `riscv-dbg`, `tcdm_interconnect`: Change syntax of some type casts to improve
   compatibility with some tools.
 
