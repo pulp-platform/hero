@@ -166,6 +166,23 @@ pulp_run_target_test:
     paths:
       - example-apps
 
+openocd_simple_connection:
+  stage: build_test_rest
+  script:
+    - memora get tc-pulp
+    - source env/ehuawei-minimal-runtime.sh
+    ### compile and run testbench
+    - cd hardware/vsim
+    - VLOG_ARGS=+define+USE_JTAG_DPI ./compile.sh
+    - VSIM_FLAGS=-gRUN_CUSTOM_TESTS="openocd" ./start_sim_with_dpi.sh &
+    - cd -
+    ### start openocd test
+    - cd hardware/test
+    - ./openocd-smart.sh -f dm_connection_test.cfg
+  artifacts:
+    paths:
+      - example-apps
+
 build_toolchain:
   stage: build_toolchain
   script:
