@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - `axi_to_mem` and `core_demux`: Remove `'x` default assignments.
 - `register_file_2r_2w_icache`: Fix enable condition in FF mode.
+- `riscv` core: Provide legal value in Debug Trigger Info CSR.
 
 
 ## 2020-06-23
