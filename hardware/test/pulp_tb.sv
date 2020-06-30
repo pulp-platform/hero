@@ -394,8 +394,8 @@ module pulp_tb #(
     `endif
       // disable icache (not needed, already default)
       write_axi(32'h1020_1400, 128'h00000000_00000000_00000000_00000000);
-
-      // TODO: make core loop on boot addr. We don't have a bootrom so we assume
+      // loop forever on entry
+      write_axi(32'h1c00_0080, 128'h00000000_00000000_00000000_0000006f);
       // the user initialized the ram already somehow
       write_axi(32'h1c00_0080, 128'h00000000_00000000_00000000_0000006f);
 
