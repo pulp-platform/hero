@@ -394,10 +394,10 @@ module pulp_tb #(
     `endif
       // disable icache (not needed, already default)
       write_axi(32'h1020_1400, 128'h00000000_00000000_00000000_00000000);
-      // loop forever on entry
-      write_axi(32'h1c00_0080, 128'h00000000_00000000_00000000_0000006f);
       // the user initialized the ram already somehow
       write_axi(32'h1c00_0080, 128'h00000000_00000000_00000000_0000006f);
+      //// enable all cores (TODO: what to do when multiple clusters)
+      write_axi(32'h1020_0008, 128'h00000000_000000ff_00000000_00000000);
 
       // enable jtag bridge. The dpi model will start blocking on the first jtag clock tick
       sim_jtag_enable = 1'b1;
