@@ -516,6 +516,13 @@ module pulp_tb #(
   assign jtag_tms = sim_jtag_tms;
   assign sim_jtag_tdo = jtag_tdo;
   assign sim_jtag_tdo_en = jtag_tdo_en;
+
+  // stop simulation when dpi jtag disconnects or errors
+  always_ff @(posedge clk or negedge rst_n) begin: jtag_exit_handler
+    if (rst_n && sim_jtag_exit)
+      $finish(2);
+  end
+
 `endif
 
 endmodule

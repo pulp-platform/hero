@@ -56,6 +56,8 @@ An environment is provided to simulate the PULP accelerator in RTL. If QuestaSim
 cd hardware/vsim
 ./compile.sh
 ```
+Note that additional arguments can be passed to the compiler by setting `VLOG_ARGS` e.g.
+```VLOG_ARGS=+define+USE_JTAG_DPI ./compile.sh``
 
 Then, generate SLM files to initialize memory with
 ``` bash
