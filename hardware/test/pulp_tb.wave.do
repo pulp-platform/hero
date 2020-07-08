@@ -1017,9 +1017,176 @@ add wave -noupdate -group {TB I/O} /pulp_tb/from_pulp_req
 add wave -noupdate -group {TB I/O} /pulp_tb/from_pulp_resp
 add wave -noupdate -group {TB I/O} /pulp_tb/to_pulp_req
 add wave -noupdate -group {TB I/O} /pulp_tb/to_pulp_resp
+add wave -noupdate -group {TB Top} /pulp_tb/clk
+add wave -noupdate -group {TB Top} /pulp_tb/rst_n
+add wave -noupdate -group {TB Top} /pulp_tb/cl_busy
+add wave -noupdate -group {TB Top} /pulp_tb/cl_eoc
+add wave -noupdate -group {TB Top} /pulp_tb/cl_fetch_en
+add wave -noupdate -group {TB Top} /pulp_tb/from_pulp_req
+add wave -noupdate -group {TB Top} /pulp_tb/to_pulp_req
+add wave -noupdate -group {TB Top} /pulp_tb/from_pulp_resp
+add wave -noupdate -group {TB Top} /pulp_tb/to_pulp_resp
+add wave -noupdate -group {TB Top} /pulp_tb/jtag_tck
+add wave -noupdate -group {TB Top} /pulp_tb/jtag_trst_n
+add wave -noupdate -group {TB Top} /pulp_tb/jtag_tdi
+add wave -noupdate -group {TB Top} /pulp_tb/jtag_tms
+add wave -noupdate -group {TB Top} /pulp_tb/jtag_tdo
+add wave -noupdate -group {TB Top} /pulp_tb/sim_jtag_tck
+add wave -noupdate -group {TB Top} /pulp_tb/sim_jtag_tms
+add wave -noupdate -group {TB Top} /pulp_tb/sim_jtag_tdi
+add wave -noupdate -group {TB Top} /pulp_tb/sim_jtag_trst_n
+add wave -noupdate -group {TB Top} /pulp_tb/sim_jtag_tdo
+add wave -noupdate -group {TB Top} /pulp_tb/sim_jtag_exit
+add wave -noupdate -group {TB Top} /pulp_tb/sim_jtag_enable
+add wave -noupdate -group {TB Top} /pulp_tb/addr_map
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/clk_i
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/rst_ni
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/testmode_i
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_rst_no
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_req_o
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_req_valid_o
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_req_ready_i
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_resp_i
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_resp_ready_o
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_resp_valid_i
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/tck_i
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/tms_i
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/trst_ni
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/td_i
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/td_o
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/tdo_oe_o
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/test_logic_reset
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/shift_dr
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/update_dr
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/capture_dr
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_access
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dtmcs_select
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_reset
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_tdi
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_tdo
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_req
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_req_ready
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_req_valid
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_resp
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_resp_valid
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi_resp_ready
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/state_d
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/state_q
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dr_d
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dr_q
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/address_d
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/address_q
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/data_d
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/data_q
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/dmi
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/error_dmi_busy
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/error_d
+add wave -noupdate -group dmi_jtag /pulp_tb/dut/i_debug_system/i_dmi_jtag/error_q
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/clk_i
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/rst_ni
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/testmode_i
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/ndmreset_o
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/dmactive_o
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/debug_req_o
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/unavailable_i
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/hartinfo_i
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/slave_req_i
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/slave_we_i
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/slave_addr_i
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/slave_be_i
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/slave_wdata_i
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/slave_rdata_o
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/master_req_o
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/master_add_o
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/master_we_o
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/master_wdata_o
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/master_be_o
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/master_gnt_i
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/master_r_valid_i
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/master_r_rdata_i
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/dmi_rst_ni
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/dmi_req_valid_i
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/dmi_req_ready_o
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/dmi_req_i
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/dmi_resp_valid_o
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/dmi_resp_ready_i
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/dmi_resp_o
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/halted
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/resumeack
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/haltreq
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/resumereq
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/clear_resumeack
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/cmd_valid
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/cmd
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/cmderror_valid
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/cmderror
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/cmdbusy
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/progbuf
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/data_csrs_mem
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/data_mem_csrs
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/data_valid
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/hartsel
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/sbaddress_csrs_sba
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/sbaddress_sba_csrs
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/sbaddress_write_valid
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/sbreadonaddr
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/sbautoincrement
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/sbaccess
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/sbreadondata
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/sbdata_write
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/sbdata_read_valid
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/sbdata_write_valid
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/sbdata_read
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/sbdata_valid
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/sbbusy
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/sberror_valid
+add wave -noupdate -group dm_top /pulp_tb/dut/i_debug_system/i_dm_top/sberror
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/clk_i
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/rst_ni
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/test_en_i
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/jtag_tck_i
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/jtag_trst_ni
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/jtag_tdi_i
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/jtag_tms_i
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/jtag_tdo_o
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/core_debug_req_o
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/system_bus_req
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/system_bus_we
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/system_bus_addr
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/system_bus_be
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/system_bus_wdata
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/system_bus_gnt
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/system_bus_r_valid
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/system_bus_r_rdata
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/tcdm_slave_req
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/tcdm_slave_we
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/tcdm_slave_addr
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/tcdm_slave_be
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/tcdm_slave_wdata
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/tcdm_slave_gnt
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/tcdm_slave_r_valid
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/tcdm_slave_r_rdata
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/dmi_req_valid
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/dmi_req_ready
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/dmi_resp_ready
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/dmi_resp_valid
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/dmi_req
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/dmi_resp
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/hartinfo
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/AXI_AW
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/AXI_DW
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/AXI_IW
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/AXI_UW
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/JTAG_IDCODE
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/N_CORES
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/N_CLUSTERS
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/MAX_HARTS
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/BUS_WIDTH
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/SELECTABLE_HARTS
+add wave -noupdate -group debug_system /pulp_tb/dut/i_debug_system/RI5CY_HARTINFO
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 11} {35680473 ps} 1} {W {35686614 ps} 1} {{Cursor 13} {13789004 ps} 0} {{Cursor 14} {13785000 ps} 1}
-quietly wave cursor active 3
+WaveRestoreCursors {{Cursor 5} {187761 ps} 0}
+quietly wave cursor active 1
 configure wave -namecolwidth 271
 configure wave -valuecolwidth 483
 configure wave -justifyvalue left
