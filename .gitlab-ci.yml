@@ -166,7 +166,7 @@ pulp_run_target_test:
     paths:
       - example-apps
 
-openocd_simple_connection:
+openocd_compliance:
   stage: build_test_rest
   script:
     - memora get tc-pulp
@@ -178,10 +178,7 @@ openocd_simple_connection:
     - cd -
     ### start openocd test
     - cd hardware/test
-    - ./openocd-smart.sh -f dm_connection_test.cfg
-  artifacts:
-    paths:
-      - example-apps
+    - ./openocd-smart.sh -f dm_compliance_test.cfg
 
 build_toolchain:
   stage: build_toolchain
