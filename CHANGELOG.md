@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `debug_system`: Add OpenOCD tests.
 
 ### Changed
+- `axi_dwc`: Update to upstream v0.22.0.  The downsizer now lets AXI transactions narrower than the
+  downstream data width pass through unmodified, and it downsizes transactions also without the
+  Modifiable bit set.
 
 ### Fixed
 - `axi_dwc`: Fix overflow of B forward FIFO in downsizer.  The downsizer is used for memory accesses
