@@ -14,9 +14,10 @@
 // Data width downsize conversion.
 // Connects a wide master to a narrower slave.
 
-// NOTE: The downsizer does not support WRAP and FIXED bursts, and
-// will answer with SLVERR upon receiving a burst of such types.
-
+// NOTE: The downsizer does not support WRAP bursts, and will answer with SLVERR
+// upon receiving a burst of such type.  The downsizer does support FIXED
+// bursts, but only if they consist of a single beat; it will answer with SLVERR
+// on multi-beat FIXED bursts.
 module axi_dw_downsizer #(
     parameter int unsigned AxiMaxReads         = 1    , // Number of outstanding reads
     parameter int unsigned AxiSlvPortDataWidth = 8    , // Data width of the slv port
@@ -49,6 +50,7 @@ module axi_dw_downsizer #(
    *  DEFINITIONS  *
    *****************/
   import axi_pkg::aligned_addr;
+  import axi_pkg::modifiable  ;
 
   // Type used to index which adapter is handling each outstanding transaction.
   localparam TranIdWidth = AxiMaxReads > 1 ? $clog2(AxiMaxReads) : 1;
@@ -384,55 +386,54 @@ module axi_dw_downsizer #(
 
             case (r_req_d.ar.burst)
               axi_pkg::BURST_INCR : begin
-                // Modifiable transaction
-                if (|(r_req_d.ar.cache & axi_pkg::CACHE_MODIFIABLE)) begin
+                // Evaluate downsize ratio
+                automatic addr_t size_mask  = (1 << r_req_d.ar.size) - 1                                              ;
+                automatic addr_t conv_ratio = ((1 << r_req_d.ar.size) + AxiMstPortStrbWidth - 1) / AxiMstPortStrbWidth;
+
+                // Evaluate output burst length
+                automatic addr_t align_adj = (r_req_d.ar.addr & size_mask & ~MstPortByteMask) / AxiMstPortStrbWidth;
+                r_req_d.burst_len          = (r_req_d.ar.len + 1) * conv_ratio - align_adj - 1                     ;
+
+                if (conv_ratio != 1) begin
+                  r_req_d.ar.size = AxiMstPortMaxSize;
+
+                  if (r_req_d.burst_len <= 255) begin
+                    r_state_d      = R_INCR_DOWNSIZE  ;
+                    r_req_d.ar.len = r_req_d.burst_len;
+                  end else begin
+                    r_state_d      = R_SPLIT_INCR_DOWNSIZE;
+                    r_req_d.ar.len = 255 - align_adj      ;
+                  end
+                end
+              end
+
+              axi_pkg::BURST_FIXED: begin
+                // Single transaction
+                if (r_req_d.ar.len == '0) begin
                   // Evaluate downsize ratio
                   automatic addr_t size_mask  = (1 << r_req_d.ar.size) - 1                                              ;
                   automatic addr_t conv_ratio = ((1 << r_req_d.ar.size) + AxiMstPortStrbWidth - 1) / AxiMstPortStrbWidth;
 
                   // Evaluate output burst length
                   automatic addr_t align_adj = (r_req_d.ar.addr & size_mask & ~MstPortByteMask) / AxiMstPortStrbWidth;
-                  r_req_d.burst_len          = (r_req_d.ar.len + 1) * conv_ratio - align_adj - 1                     ;
+                  r_req_d.burst_len          = (conv_ratio >= align_adj + 1) ? (conv_ratio - align_adj - 1) : 0;
 
                   if (conv_ratio != 1) begin
-                    r_req_d.ar.size = AxiMstPortMaxSize;
-
-                    if (r_req_d.burst_len <= 255) begin
-                      r_state_d      = R_INCR_DOWNSIZE  ;
-                      r_req_d.ar.len = r_req_d.burst_len;
-                    end else begin
-                      r_state_d      = R_SPLIT_INCR_DOWNSIZE;
-                      r_req_d.ar.len = 255 - align_adj      ;
-                    end
+                    r_state_d        = R_INCR_DOWNSIZE    ;
+                    r_req_d.ar.len   = r_req_d.burst_len  ;
+                    r_req_d.ar.size  = AxiMstPortMaxSize  ;
+                    r_req_d.ar.burst = axi_pkg::BURST_INCR;
                   end
-                // Non-modifiable transaction
                 end else begin
-                  // Incoming transaction is wider than the master bus
-                  if (r_req_d.ar.size > AxiMstPortMaxSize) begin
-                    r_req_d.ar_throw_error = 1'b1         ;
-                    r_state_d              = R_PASSTHROUGH;
-                  end
+                  // The downsizer does not support fixed burts
+                  r_req_d.ar_throw_error = 1'b1;
                 end
               end
 
               axi_pkg::BURST_WRAP: begin
-                // The DW converter does not support this kind of burst ...
+                // The DW converter does not support this type of burst.
                 r_state_d              = R_PASSTHROUGH;
                 r_req_d.ar_throw_error = 1'b1         ;
-
-                // ... but might if this is a narrow single-beat transaction
-                if (r_req_d.ar.len == '0 && r_req_d.ar.size <= AxiMstPortMaxSize)
-                  r_req_d.ar_throw_error = 1'b0;
-              end
-
-              axi_pkg::BURST_FIXED: begin
-                // The DW converter does not support this kind of burst ...
-                r_state_d              = R_PASSTHROUGH;
-                r_req_d.ar_throw_error = 1'b1         ;
-
-                // ... but might if this is a narrow single-beat transaction
-                if (r_req_d.ar.len == '0 && r_req_d.ar.size <= AxiMstPortMaxSize)
-                  r_req_d.ar_throw_error = 1'b0;
               end
             endcase
           end
@@ -465,13 +466,21 @@ module axi_dw_downsizer #(
                       r_req_d.r.data[8*b +: 8] = mst_resp.r.data[8*(b + mst_port_offset - slv_port_offset) +: 8];
                     end
 
-                  r_req_d.burst_len = r_req_q.burst_len - 1                                                  ;
-                  r_req_d.ar.len    = r_req_q.ar.len - 1                                                     ;
-                  r_req_d.ar.addr   = aligned_addr(r_req_q.ar.addr, r_req_q.ar.size) + (1 << r_req_q.ar.size);
-                  r_req_d.r.last    = (r_req_q.burst_len == 0)                                               ;
-                  r_req_d.r.id      = mst_resp.r.id                                                          ;
-                  r_req_d.r.resp    = mst_resp.r.resp                                                        ;
-                  r_req_d.r.user    = mst_resp.r.user                                                        ;
+                  r_req_d.burst_len = r_req_q.burst_len - 1   ;
+                  r_req_d.ar.len    = r_req_q.ar.len - 1      ;
+                  r_req_d.r.last    = (r_req_q.burst_len == 0);
+                  r_req_d.r.id      = mst_resp.r.id           ;
+                  r_req_d.r.resp    = mst_resp.r.resp         ;
+                  r_req_d.r.user    = mst_resp.r.user         ;
+
+                  case (r_req_d.ar.burst)
+                    axi_pkg::BURST_INCR: begin
+                      r_req_d.ar.addr = aligned_addr(r_req_q.ar.addr, r_req_q.ar.size) + (1 << r_req_q.ar.size);
+                    end
+                    axi_pkg::BURST_FIXED: begin
+                      r_req_d.ar.addr = r_req_q.ar.addr;
+                    end
+                  endcase
 
                   if (r_req_q.burst_len == 0)
                     idqueue_pop[t] = 1'b1;
@@ -637,9 +646,17 @@ module axi_dw_downsizer #(
 
         // Acknowledgment
         if (mst_resp.w_ready && mst_req.w_valid) begin
-          w_req_d.burst_len = w_req_q.burst_len - 1                                                  ;
-          w_req_d.aw.len    = w_req_q.aw.len - 1                                                     ;
-          w_req_d.aw.addr   = aligned_addr(w_req_q.aw.addr, w_req_q.aw.size) + (1 << w_req_q.aw.size);
+          w_req_d.burst_len = w_req_q.burst_len - 1;
+          w_req_d.aw.len    = w_req_q.aw.len - 1   ;
+
+          case (w_req_d.aw.burst)
+            axi_pkg::BURST_INCR: begin
+              w_req_d.aw.addr = aligned_addr(w_req_q.aw.addr, w_req_q.aw.size) + (1 << w_req_q.aw.size);
+            end
+            axi_pkg::BURST_FIXED: begin
+              w_req_d.aw.addr = w_req_q.aw.addr;
+            end
+          endcase
 
           case (w_state_q)
             W_PASSTHROUGH:
@@ -679,28 +696,27 @@ module axi_dw_downsizer #(
       w_req_d.aw_valid       = 1'b0;
       w_req_d.aw_throw_error = 1'b0;
 
-      if (slv_req_i.aw_valid && slv_req_i.aw.atop[5]) begin // ATOP with an R response
-        inject_aw_into_ar_req = 1'b1                 ;
-        slv_resp_o.aw_ready   = inject_aw_into_ar_gnt;
-      end else begin // Regular AW
-        slv_resp_o.aw_ready = 1'b1;
-      end
+      if (!forward_b_beat_full) begin
+        if (slv_req_i.aw_valid && slv_req_i.aw.atop[5]) begin // ATOP with an R response
+          inject_aw_into_ar_req = 1'b1                 ;
+          slv_resp_o.aw_ready   = inject_aw_into_ar_gnt;
+        end else begin // Regular AW
+          slv_resp_o.aw_ready = 1'b1;
+        end
 
-      // New write request
-      if (slv_req_i.aw_valid && slv_resp_o.aw_ready && !forward_b_beat_full) begin
-        // Default state
-        w_state_d = W_PASSTHROUGH;
+        // New write request
+        if (slv_req_i.aw_valid && slv_resp_o.aw_ready) begin
+          // Default state
+          w_state_d = W_PASSTHROUGH;
 
-        // Save beat
-        w_req_d.aw           = slv_req_i.aw     ;
-        w_req_d.aw_valid     = 1'b1             ;
-        w_req_d.burst_len    = slv_req_i.aw.len ;
-        w_req_d.orig_aw_size = slv_req_i.aw.size;
+          // Save beat
+          w_req_d.aw           = slv_req_i.aw     ;
+          w_req_d.aw_valid     = 1'b1             ;
+          w_req_d.burst_len    = slv_req_i.aw.len ;
+          w_req_d.orig_aw_size = slv_req_i.aw.size;
 
-        case (slv_req_i.aw.burst)
-          axi_pkg::BURST_INCR: begin
-            // Modifiable transaction
-            if (|(slv_req_i.aw.cache & axi_pkg::CACHE_MODIFIABLE)) begin
+          case (slv_req_i.aw.burst)
+            axi_pkg::BURST_INCR: begin
               // Evaluate downsize ratio
               automatic addr_t size_mask  = (1 << slv_req_i.aw.size) - 1                                              ;
               automatic addr_t conv_ratio = ((1 << slv_req_i.aw.size) + AxiMstPortStrbWidth - 1) / AxiMstPortStrbWidth;
@@ -720,36 +736,38 @@ module axi_dw_downsizer #(
                   w_req_d.aw.len = 255 - align_adj      ;
                 end
               end
-            // Non-modifiable transaction.
-            end else begin
-              // Incoming transaction is wider than the master bus.
-              if (slv_req_i.aw.size > AxiMstPortMaxSize) begin
-                w_state_d              = W_PASSTHROUGH;
-                w_req_d.aw_throw_error = 1'b1         ;
+            end
+
+            axi_pkg::BURST_FIXED: begin
+              // Single transaction
+              if (slv_req_i.aw.len == '0) begin
+                // Evaluate downsize ratio
+                automatic addr_t size_mask  = (1 << slv_req_i.aw.size) - 1                                              ;
+                automatic addr_t conv_ratio = ((1 << slv_req_i.aw.size) + AxiMstPortStrbWidth - 1) / AxiMstPortStrbWidth;
+
+                // Evaluate output burst length
+                automatic addr_t align_adj = (slv_req_i.aw.addr & size_mask & ~MstPortByteMask) / AxiMstPortStrbWidth;
+                w_req_d.burst_len          = (conv_ratio >= align_adj + 1) ? (conv_ratio - align_adj - 1) : 0;
+
+                if (conv_ratio != 1) begin
+                  w_state_d        = W_INCR_DOWNSIZE    ;
+                  w_req_d.aw.len   = w_req_d.burst_len  ;
+                  w_req_d.aw.size  = AxiMstPortMaxSize  ;
+                  w_req_d.aw.burst = axi_pkg::BURST_INCR;
+                end
+              end else begin
+                // The downsizer does not support fixed bursts
+                w_req_d.aw_throw_error = 1'b1;
               end
             end
-          end
 
-          axi_pkg::BURST_WRAP: begin
-            // The DW converter does not support this kind of burst ...
-            w_state_d              = W_PASSTHROUGH;
-            w_req_d.aw_throw_error = 1'b1         ;
-
-            // ... but might if this is a narrow single-beat transaction
-            if (slv_req_i.aw.size <= AxiSlvPortMaxSize && slv_req_i.aw.len == '0)
-              w_req_d.aw_throw_error = 1'b0;
-          end
-
-          axi_pkg::BURST_FIXED: begin
-            // The DW converter does not support this kind of burst ...
-            w_state_d              = W_PASSTHROUGH;
-            w_req_d.aw_throw_error = 1'b1         ;
-
-            // ... but might if this is a narrow single-beat transaction
-            if (slv_req_i.aw.size <= AxiSlvPortMaxSize && slv_req_i.aw.len == '0)
-              w_req_d.aw_throw_error = 1'b0;
-          end
-        endcase
+            axi_pkg::BURST_WRAP: begin
+              // The DW converter does not support this type of burst.
+              w_state_d              = W_PASSTHROUGH;
+              w_req_d.aw_throw_error = 1'b1         ;
+            end
+          endcase
+        end
       end
     end
   end

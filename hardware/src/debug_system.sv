@@ -203,25 +203,28 @@ module debug_system #(
 
   // protocol conversion
   // AXI -> debug module (tcdm)
-  axi_tcdm_if #(
-    .AXI_ADDR_WIDTH       (AXI_AW),
-    .AXI_DATA_WIDTH       (AXI_DW),
-    .AXI_USER_WIDTH       (AXI_UW),
-    .AXI_ID_WIDTH         (AXI_IW)
-  ) i_debug_axi_tcdm_if (
+  axi_to_mem_intf #(
+    .AddrWidth (AXI_AW),
+    .DataWidth (AXI_DW),
+    .IdWidth   (AXI_IW),
+    .UserWidth (AXI_UW),
+    .NumBanks  (1),
+    .BufDepth  (1)
+  ) i_debug_axi_to_mem_intf (
     .clk_i,
-    .rst_ni                (ndmreset_no),
-    .slave                 (dm_slave),
+    .rst_ni        (ndmreset_no),
+    .busy_o        (),
+    .slv           (dm_slave),
 
-    .tcdm_master_req_o     (tcdm_slave_req),
-    .tcdm_master_addr_o    (tcdm_slave_addr), //TODO: wen vs we
-    .tcdm_master_we_o      (tcdm_slave_we),
-    .tcdm_master_be_o      (tcdm_slave_be),
-    .tcdm_master_data_o    (tcdm_slave_wdata),
-    .tcdm_master_gnt_i     (tcdm_slave_gnt),
-
-    .tcdm_master_r_valid_i (tcdm_slave_r_valid),
-    .tcdm_master_r_data_i  (tcdm_slave_r_rdata)
+    .mem_req_o     (tcdm_slave_req),
+    .mem_gnt_i     (tcdm_slave_gnt),
+    .mem_addr_o    (tcdm_slave_addr), //TODO: wen vs we
+    .mem_strb_o    (tcdm_slave_be),
+    .mem_atop_o    (),
+    .mem_we_o      (tcdm_slave_we),
+    .mem_wdata_o   (tcdm_slave_wdata),
+    .mem_rvalid_i  (tcdm_slave_r_valid),
+    .mem_rdata_i   (tcdm_slave_r_rdata)
   );
 
 

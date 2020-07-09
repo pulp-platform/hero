@@ -250,10 +250,13 @@ module pulp_tb #(
           from_xbar[0].w_ready = 1'b1;
           if (from_xbar[0].w_valid) begin
             automatic axi_pkg::size_t size = aw_queue[0].size;
-            automatic pulp_pkg::axi_addr_t addr = axi_pkg::beat_addr(aw_queue[0].addr, size, w_cnt);
+            automatic axi_pkg::len_t len = aw_queue[0].len;
+            automatic axi_pkg::burst_t burst = aw_queue[0].burst;
+            automatic pulp_pkg::axi_addr_t addr = axi_pkg::beat_addr(
+                aw_queue[0].addr, size, len, burst, w_cnt);
             for (shortint unsigned
-                i_byte = axi_pkg::beat_lower_byte(addr, size, AXI_SW, w_cnt);
-                i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, w_cnt);
+                i_byte = axi_pkg::beat_lower_byte(addr, size, len, burst, AXI_SW, w_cnt);
+                i_byte <= axi_pkg::beat_upper_byte(addr, size, len, burst, AXI_SW, w_cnt);
                 i_byte++) begin
               if (from_xbar[0].w_strb[i_byte]) begin
                 automatic pulp_pkg::axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
@@ -306,14 +309,17 @@ module pulp_tb #(
       forever begin
         if (ar_queue.size() != 0) begin
           automatic axi_pkg::size_t size = ar_queue[0].size;
-          automatic pulp_pkg::axi_addr_t addr = axi_pkg::beat_addr(ar_queue[0].addr, size, r_cnt);
+          automatic axi_pkg::len_t len = ar_queue[0].len;
+          automatic axi_pkg::burst_t burst = ar_queue[0].burst;
+          automatic pulp_pkg::axi_addr_t addr = axi_pkg::beat_addr(
+              ar_queue[0].addr, size, len, burst, r_cnt);
           automatic pulp_pkg::axi_r_mst_t r_beat = '0;
           r_beat.data = 'x;
           r_beat.id = ar_queue[0].id;
           r_beat.resp = axi_pkg::RESP_OKAY;
           for (shortint unsigned
-              i_byte = axi_pkg::beat_lower_byte(addr, size, AXI_SW, r_cnt);
-              i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, r_cnt);
+              i_byte = axi_pkg::beat_lower_byte(addr, size, len, burst, AXI_SW, r_cnt);
+              i_byte <= axi_pkg::beat_upper_byte(addr, size, len, burst, AXI_SW, r_cnt);
               i_byte++) begin
             automatic pulp_pkg::axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
             if (!mem.exists(byte_addr)) begin
@@ -394,10 +400,10 @@ module pulp_tb #(
     `endif
       // disable icache (not needed, already default)
       write_axi(32'h1020_1400, 128'h00000000_00000000_00000000_00000000);
-
-      // TODO: make core loop on boot addr. We don't have a bootrom so we assume
       // the user initialized the ram already somehow
       write_axi(32'h1c00_0080, 128'h00000000_00000000_00000000_0000006f);
+      //// enable all cores (TODO: what to do when multiple clusters)
+      write_axi(32'h1020_0008, 128'h00000000_000000ff_00000000_00000000);
 
       // enable jtag bridge. The dpi model will start blocking on the first jtag clock tick
       sim_jtag_enable = 1'b1;
@@ -516,6 +522,13 @@ module pulp_tb #(
   assign jtag_tms = sim_jtag_tms;
   assign sim_jtag_tdo = jtag_tdo;
   assign sim_jtag_tdo_en = jtag_tdo_en;
+
+  // stop simulation when dpi jtag disconnects or errors
+  always_ff @(posedge clk or negedge rst_n) begin: jtag_exit_handler
+    if (rst_n && sim_jtag_exit)
+      $finish(2);
+  end
+
 `endif
 
 endmodule

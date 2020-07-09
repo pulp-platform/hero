@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
+- `debug_system`: Add OpenOCD tests.
 
 ### Changed
 
 ### Fixed
+- `axi_dwc`: Fix overflow of B forward FIFO in downsizer.  The downsizer is used for memory accesses
+  to the debug system.
 
 
 ## 2020-06-30
