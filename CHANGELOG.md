@@ -12,6 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 
+## 2020-07-09-1
+### Fixed
+- `axi_pkg`: Reapply patch "Remove `enum`ness of `xbar_latency_e` to improve compatibility with some
+  formal tools".
+
+
 ## 2020-07-09
 ### Added
 - `debug_system`: Add OpenOCD tests.
