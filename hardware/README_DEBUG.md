@@ -29,10 +29,28 @@ Now the simulation will be waiting for OpenOCD to connect. You do this by callin
 openocd -f your-openocd-script.cfg
 ```
 
-Open `gdb` now and and execute
+Currently there are two scripts provided for debugging with GDB:
+`test/dm_8pe_hwthread.cfg` and `test/dm_8pe_rtos_riscv.cfg`. Both allow
+debugging all eight cores at once, but differ how openocd handles the cores:
+
+* -rtos riscv (used in `dm_8pe_rtos_riscv.cfg`): Deprecated and only there for backwards
+  compatibility reasons. Represent cores as threads in gdb, but the
+  implementation is really hacky.
+* -rtos hwthread (used in `dm_8pe_hwthread.cfg`): Represent cores as threads in gdb. See
+  the [OpenOCD manual](http://openocd.org/doc/html/GDB-and-OpenOCD.html#Using-OpenOCD-SMP-with-GDB)
+  for more details.
+
+Finally open `gdb` and execute
+
 ```
 target remote localhost:3333
 ```
 
 You should now be able to load a binary and debug it.
+
+## OpenOCD tests
+OpenOCD has some internal tests that can be run. To run those, pass
+`dm_compliance_test.cfg`. If you just want to quickly tests connectivity
+(checking whether OpenOCD can interact with the hardware) use
+`dm_connection_rtos_riscv_test.cfg` or `dm_connection_hwthread_test.cfg`.
 

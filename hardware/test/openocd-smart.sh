@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
-echo "polling until port opens"
+if [[ -z $JTAG_VPI_PORT ]]; then
+    echo "falling back to default port 9999"
+    export JTAG_VPI_PORT=9999
+fi
 
-while ! netstat -plnt 2>/dev/null | grep -q 0.0.0.0:9999; do
+echo "polling until port $JTAG_VPI_PORT opens"
+
+while ! netstat -plnt 2>/dev/null | grep -q "0.0.0.0:$JTAG_VPI_PORT"; do
     sleep 0.1
 done
 

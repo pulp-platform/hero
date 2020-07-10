@@ -172,9 +172,10 @@ openocd_compliance:
     - memora get tc-pulp
     - source env/ehuawei-minimal-runtime.sh
     ### compile and run testbench
+    - export JTAG_VPI_PORT=$(shuf -i 2000-65000 -n 1)
     - cd hardware/vsim
     - VLOG_ARGS=+define+USE_JTAG_DPI ./compile.sh
-    - VSIM_FLAGS=-gRUN_CUSTOM_TESTS="openocd" ./start_sim_with_dpi.sh &
+    - VSIM_FLAGS="-gRUN_CUSTOM_TESTS=openocd -gOPENOCD_PORT=$JTAG_VPI_PORT" ./start_sim_with_dpi.sh &
     - cd -
     ### start openocd test
     - cd hardware/test
