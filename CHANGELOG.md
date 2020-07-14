@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 ### Fixed
+- `axi_dw_downsizer` and `debug_system`: Cut W channel to break combinational loop.
 
 
 ## 2020-07-10
