@@ -213,7 +213,8 @@ module axi_dw_downsizer #(
     .resp_t     (axi_mst_resp_t),
     .NoMstPorts (2             ),
     .MaxTrans   (AxiMaxReads   ),
-    .SpillAw    (1'b1          ) // Required to break dependency between AW and W channels
+    .SpillAw    (1'b1          ),// Required to break dependency between AW and W channels
+    .SpillW     (1'b1          ) // Required to break combinational loop into debug system
   ) i_axi_demux (
     .clk_i          (clk_i                      ),
     .rst_ni         (rst_ni                     ),
