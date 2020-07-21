@@ -330,7 +330,14 @@ package fpnew_pkg;
 
   // Returns the bias value for a given format (as per IEEE 754-2008)
   function automatic int unsigned bias(fp_format_e fmt);
-    return unsigned'(2**(FP_ENCODINGS[fmt].exp_bits-1)-1); // symmetrical bias
+    unique case (fmt)
+      FP32:    return 127;
+      FP64:    return 1023;
+      FP16:    return 15;
+      FP8:     return 15;
+      FP16ALT: return 127;
+      default: return 127;
+    endcase
   endfunction
 
   function automatic fp_encoding_t super_format(fmt_logic_t cfg);
