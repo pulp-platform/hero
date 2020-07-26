@@ -214,7 +214,12 @@ module register_file_2r_2w_icache
           if (we_b_i) begin
             MemContentxDP[k] <= wdata_b_i;
           end
+        `ifdef FPGA
+        end
+        if (WAddrOneHotxDa[k]) begin
+        `else
         end else begin
+        `endif
           if (we_a_i) begin
             MemContentxDP[k] <= wdata_a_i;
           end
