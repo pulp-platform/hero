@@ -12,6 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 
+## 2020-07-26
+### Fixed
+- `fpnew_pkg`: Rewrite `bias` function to improve compatibility with FPGA synthesis tool.
+- `register_file_2r_2w_icache`: Fix cache line writing on FPGA.
+
+
 ## 2020-07-14
 ### Fixed
 - `axi_dw_downsizer` and `debug_system`: Cut W channel to break combinational loop.
