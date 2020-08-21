@@ -12,6 +12,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 
+## 2020-08-21
+### Fixed
+- Enable hard-floats in Newlib standard library and PULP SDK libraries.
+
+
 ## 2020-07-26
 ### Fixed
 - `fpnew_pkg`: Rewrite `bias` function to improve compatibility with FPGA synthesis tool.
