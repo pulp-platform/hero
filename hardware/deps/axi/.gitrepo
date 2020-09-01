@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/pulp-platform/axi.git
+	branch = v0.23.1
+	commit = d7b0b0fd1244d5ce332c3ebab5c0f69bba134259
+	parent = 0d5600dc9803efa5aaae4044d388334b0f2f13fc
+	method = merge
+	cmdver = 0.4.1
