@@ -222,11 +222,14 @@ module pulp_tb #(
         if (aw_queue.size() != 0) begin
           from_xbar[0].w_ready = 1'b1;
           if (from_xbar[0].w_valid) begin
+            automatic axi_pkg::burst_t burst = aw_queue[0].burst;
+            automatic axi_pkg::len_t len = aw_queue[0].len;
             automatic axi_pkg::size_t size = aw_queue[0].size;
-            automatic axi_addr_t addr = axi_pkg::beat_addr(aw_queue[0].addr, size, w_cnt);
+            automatic axi_addr_t addr = axi_pkg::beat_addr(aw_queue[0].addr, size, len, burst,
+                w_cnt);
             for (shortint unsigned
-                i_byte = axi_pkg::beat_lower_byte(addr, size, AXI_SW, w_cnt);
-                i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, w_cnt);
+                i_byte = axi_pkg::beat_lower_byte(addr, size, len, burst, AXI_SW, w_cnt);
+                i_byte <= axi_pkg::beat_upper_byte(addr, size, len, burst, AXI_SW, w_cnt);
                 i_byte++) begin
               if (from_xbar[0].w_strb[i_byte]) begin
                 automatic axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
@@ -278,15 +281,17 @@ module pulp_tb #(
       // R
       forever begin
         if (ar_queue.size() != 0) begin
+          automatic axi_pkg::burst_t burst = ar_queue[0].burst;
+          automatic axi_pkg::len_t len = ar_queue[0].len;
           automatic axi_pkg::size_t size = ar_queue[0].size;
-          automatic axi_addr_t addr = axi_pkg::beat_addr(ar_queue[0].addr, size, r_cnt);
+          automatic axi_addr_t addr = axi_pkg::beat_addr(ar_queue[0].addr, size, len, burst, r_cnt);
           automatic axi_r_t r_beat = '0;
           r_beat.data = 'x;
           r_beat.id = ar_queue[0].id;
           r_beat.resp = axi_pkg::RESP_OKAY;
           for (shortint unsigned
-              i_byte = axi_pkg::beat_lower_byte(addr, size, AXI_SW, r_cnt);
-              i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, r_cnt);
+              i_byte = axi_pkg::beat_lower_byte(addr, size, len, burst, AXI_SW, r_cnt);
+              i_byte <= axi_pkg::beat_upper_byte(addr, size, len, burst, AXI_SW, r_cnt);
               i_byte++) begin
             automatic axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
             if (!mem.exists(byte_addr)) begin
