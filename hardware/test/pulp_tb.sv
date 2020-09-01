@@ -45,11 +45,12 @@ module pulp_tb #(
   typedef pulp_pkg::lite_addr_t axi_lite_addr_t;
   typedef pulp_pkg::lite_data_t axi_lite_data_t;
   typedef pulp_pkg::lite_strb_t axi_lite_strb_t;
-  `AXI_LITE_TYPEDEF_AX_CHAN_T(  axi_lite_ax_t,    axi_lite_addr_t, axi_id_t, axi_user_t);
-  `AXI_LITE_TYPEDEF_W_CHAN_T(   axi_lite_w_t,     axi_lite_data_t, axi_lite_strb_t, axi_user_t);
-  `AXI_LITE_TYPEDEF_B_CHAN_T(   axi_lite_b_t,     axi_id_t, axi_user_t);
-  `AXI_LITE_TYPEDEF_R_CHAN_T(   axi_lite_r_t,     axi_lite_data_t, axi_id_t, axi_user_t);
-  `AXI_LITE_TYPEDEF_REQ_T(      axi_lite_req_t,   axi_lite_ax_t, axi_lite_w_t);
+  `AXI_LITE_TYPEDEF_AW_CHAN_T(  axi_lite_aw_t,    axi_lite_addr_t);
+  `AXI_LITE_TYPEDEF_W_CHAN_T(   axi_lite_w_t,     axi_lite_data_t, axi_lite_strb_t);
+  `AXI_LITE_TYPEDEF_B_CHAN_T(   axi_lite_b_t);
+  `AXI_LITE_TYPEDEF_AR_CHAN_T(  axi_lite_ar_t,    axi_lite_addr_t);
+  `AXI_LITE_TYPEDEF_R_CHAN_T(   axi_lite_r_t,     axi_lite_data_t);
+  `AXI_LITE_TYPEDEF_REQ_T(      axi_lite_req_t,   axi_lite_aw_t, axi_lite_w_t, axi_lite_ar_t);
   `AXI_LITE_TYPEDEF_RESP_T(     axi_lite_resp_t,  axi_lite_b_t, axi_lite_r_t);
 
   logic clk,
@@ -320,7 +321,6 @@ module pulp_tb #(
 
   task write_rab(input axi_lite_addr_t addr, input axi_lite_data_t data);
     rab_conf_req.aw.addr = addr;
-    rab_conf_req.aw.size = 3'h3;
     rab_conf_req.aw_valid = 1'b1;
     `wait_for(rab_conf_resp.aw_ready)
     rab_conf_req.aw_valid = 1'b0;
