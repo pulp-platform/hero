@@ -241,12 +241,13 @@ module pulp #(
       .out    (cl_inp_remapped[i])
     );
 
-    axi_data_width_converter #(
-      .ADDR_WIDTH     (AXI_AW),
-      .SI_DATA_WIDTH  (AXI_DW),
-      .MI_DATA_WIDTH  (AXI_DW_CL),
-      .ID_WIDTH       (AXI_IW_CL_INP),
-      .USER_WIDTH     (AXI_UW)
+    axi_dw_converter_intf #(
+      .AXI_ID_WIDTH             (AXI_IW_CL_INP),
+      .AXI_ADDR_WIDTH           (AXI_AW),
+      .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW),
+      .AXI_MST_PORT_DATA_WIDTH  (AXI_DW_CL),
+      .AXI_USER_WIDTH           (AXI_UW),
+      .AXI_MAX_READS            (6)
     ) i_dwc_cl_inp (
       .clk_i,
       .rst_ni,
@@ -314,13 +315,13 @@ module pulp #(
       );
     end
 
-    axi_data_width_converter #(
-      .ADDR_WIDTH     (AXI_AW),
-      .SI_DATA_WIDTH  (AXI_DW_CL),
-      .MI_DATA_WIDTH  (AXI_DW),
-      .ID_WIDTH       (AXI_IW_CL_OUP),
-      .USER_WIDTH     (AXI_UW),
-      .NR_OUTSTANDING (8)
+    axi_dw_converter_intf #(
+      .AXI_ID_WIDTH             (AXI_IW_CL_OUP),
+      .AXI_ADDR_WIDTH           (AXI_AW),
+      .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW_CL),
+      .AXI_MST_PORT_DATA_WIDTH  (AXI_DW),
+      .AXI_USER_WIDTH           (AXI_UW),
+      .AXI_MAX_READS            (8)
     ) i_dwc_cl_oup (
       .clk_i,
       .rst_ni,
@@ -457,12 +458,13 @@ module pulp #(
     .out    (rab_slv_remapped)
   );
 
-  axi_data_width_converter #(
-    .ADDR_WIDTH     (AXI_AW),
-    .SI_DATA_WIDTH  (AXI_DW),
-    .MI_DATA_WIDTH  (AXI_DW_PERIPHS),
-    .ID_WIDTH       (AXI_IW_SB_OUP),
-    .USER_WIDTH     (AXI_UW)
+  axi_dw_converter_intf #(
+    .AXI_ID_WIDTH             (AXI_IW_SB_OUP),
+    .AXI_ADDR_WIDTH           (AXI_AW),
+    .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW),
+    .AXI_MST_PORT_DATA_WIDTH  (AXI_DW_PERIPHS),
+    .AXI_USER_WIDTH           (AXI_UW),
+    .AXI_MAX_READS            (4)
   ) i_dwc_periph_mst (
     .clk_i,
     .rst_ni,
