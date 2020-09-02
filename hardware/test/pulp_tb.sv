@@ -121,41 +121,42 @@ module pulp_tb #(
   ) to_periphs ();
   `AXI_ASSIGN_FROM_REQ(from_pulp[0], from_pulp_req);
   `AXI_ASSIGN_TO_RESP (from_pulp_resp, from_pulp[0]);
-  localparam int unsigned NODE_REGIONS = 2;
-  logic [NODE_REGIONS-1:0][1:0][pulp_pkg::AXI_AW-1:0] node_start, node_end;
-  logic [NODE_REGIONS-1:0][1:0]                       node_valid;
-  always_comb begin
-    node_start = '0;
-    node_end = '0;
-    node_valid = '0;
-
-    node_start[0][1] = 64'h0000_0000_1a10_0000;
-    node_end  [0][1] = 64'h0000_0000_1a10_ffff;
-    node_valid[0][1] = 1'b1;
-    node_start[0][0] = 64'h0000_0000_0000_0000;
-    node_end  [0][0] = node_start[0][1] - 1;
-    node_valid[0][0] = 1'b1;
-    node_start[1][0] = node_end[0][1] + 1;
-    node_end  [1][0] = 64'hffff_ffff_ffff_ffff;
-    node_valid[1][0] = 1'b1;
-  end
-  axi_node_intf_wrap #(
-    .NB_MASTER      (2),
-    .NB_SLAVE       (2), // actually only 1 but then vsim cannot handle axi_node
-    .NB_REGION      (2),
-    .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
-    .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (AXI_IW),
-    .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
+  // Address Map
+  typedef axi_pkg::xbar_rule_64_t rule_t;
+  localparam int unsigned NumRules = 1;
+  rule_t [NumRules-1:0] addr_map;
+  assign addr_map[0] = '{
+    idx:        1,
+    start_addr: 64'h0000_0000_1a10_0000,
+    end_addr:   64'h0000_0000_1a10_ffff
+  };
+  // Crossbar Configuration and Instantiation
+  localparam axi_pkg::xbar_cfg_t XbarCfg = '{
+    NoSlvPorts:         2,
+    NoMstPorts:         2,
+    MaxMstTrans:        8,
+    MaxSlvTrans:        8,
+    FallThrough:        1'b1,
+    LatencyMode:        axi_pkg::NO_LATENCY,
+    AxiIdWidthSlvPorts: AXI_IW,
+    AxiIdUsedSlvPorts:  AXI_IW,
+    AxiAddrWidth:       pulp_pkg::AXI_AW,
+    AxiDataWidth:       AXI_DW,
+    NoAddrRules:        NumRules
+  };
+  axi_xbar_intf #(
+    .AXI_USER_WIDTH (pulp_pkg::AXI_UW),
+    .Cfg            (XbarCfg),
+    .rule_t         (rule_t)
   ) i_xbar (
-    .clk          (clk),
-    .rst_n        (rst_n),
-    .test_en_i    (1'b0),
-    .slave        (from_pulp),
-    .master       (from_xbar),
-    .start_addr_i (node_start),
-    .end_addr_i   (node_end),
-    .valid_rule_i (node_valid)
+    .clk_i                  (clk),
+    .rst_ni                 (rst_n),
+    .test_i                 (1'b0),
+    .slv_ports              (from_pulp),
+    .mst_ports              (from_xbar),
+    .addr_map_i             (addr_map),
+    .en_default_mst_port_i  ('1), // default all slave ports to master port 0
+    .default_mst_port_i     ('0)
   );
 
   // Peripherals
