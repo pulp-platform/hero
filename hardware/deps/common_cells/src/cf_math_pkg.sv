@@ -45,6 +45,30 @@ package cf_math_pkg;
         end
     endfunction
 
+    // Ceiled Binary Logarithm of a Natural Number
+    //
+    // Returns the binary logarithm (i.e., the logarithm to the base 2) of a natural number rounded
+    // towards plus infinity.
+    //
+    // Use this as drop-in replacement for the `$clog2` system function where the latter is not
+    // supported by your toolchain.
+    function integer clog2 (input longint unsigned val);
+        automatic longint unsigned tmp;
+
+        // pragma translate_off
+        `ifndef VERILATOR
+        if (val == 0) begin
+            $fatal(1, "Logarithm of 0 cannot be represented!");
+        end
+        `endif
+        // pragma translate_on
+
+        tmp = val - 1;
+        for (clog2 = 0; tmp > 0; clog2++) begin
+            tmp = tmp >> 1;
+        end
+    endfunction
+
     /// Index width required to be able to represent up to `num_idx` indices as a binary
     /// encoded signal.
     /// Ensures that the minimum width if an index signal is `1`, regardless of parametrization.
