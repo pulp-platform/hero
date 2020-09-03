@@ -511,19 +511,21 @@ module pulp_cluster
 
   /* cluster bus and attached peripherals */
   cluster_bus_wrap #(
-    .NB_CORES         ( NB_CORES           ),
-    .AXI_ADDR_WIDTH   ( AXI_ADDR_WIDTH     ),
-    .AXI_DATA_WIDTH   ( AXI_DATA_C2S_WIDTH ),
-    .AXI_USER_WIDTH   ( AXI_USER_WIDTH     ),
-    .AXI_ID_IN_WIDTH  ( AXI_ID_IN_WIDTH    ),
-    .AXI_ID_OUT_WIDTH ( AXI_ID_OUT_WIDTH   )
+    .NB_CORES             ( NB_CORES            ),
+    .DMA_NB_OUTSND_BURSTS ( NB_OUTSND_BURSTS    ),
+    .TCDM_SIZE            ( TCDM_SIZE           ),
+    .AXI_ADDR_WIDTH       ( AXI_ADDR_WIDTH      ),
+    .AXI_DATA_WIDTH       ( AXI_DATA_C2S_WIDTH  ),
+    .AXI_ID_IN_WIDTH      ( AXI_ID_IN_WIDTH     ),
+    .AXI_ID_OUT_WIDTH     ( AXI_ID_OUT_WIDTH    ),
+    .AXI_USER_WIDTH       ( AXI_USER_WIDTH      )
   ) cluster_bus_wrap_i (
     .clk_i         ( clk_cluster       ),
     .rst_ni        ( rst_ni            ),
     .test_en_i     ( test_mode_i       ),
     .cluster_id_i  ( cluster_id_i      ),
-    .instr_slave   ( s_core_instr_bus  ),
     .data_slave    ( s_core_ext_bus    ),
+    .instr_slave   ( s_core_instr_bus  ),
     .dma_slave     ( s_dma_ext_bus     ),
     .ext_slave     ( s_data_slave      ),
     .tcdm_master   ( s_ext_tcdm_bus    ),
