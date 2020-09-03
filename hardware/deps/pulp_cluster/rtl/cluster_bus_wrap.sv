@@ -94,18 +94,19 @@ module cluster_bus_wrap
 
   // Address Map
   addr_t cluster_base_addr;
-  assign cluster_base_addr = 32'h1000_0000 + ( cluster_id_i << 22);
+  assign cluster_base_addr = 64'h0000_0000_1000_0000 + ( cluster_id_i << 22);
   localparam int unsigned N_RULES = 4;
-  axi_pkg::xbar_rule_32_t [N_RULES-1:0] addr_map;
+  typedef axi_pkg::xbar_rule_64_t xbar_rule_t;
+  xbar_rule_t [N_RULES-1:0] addr_map;
   assign addr_map[0] = '{ // everything below cluster to ext_slave
     idx:  2,
-    start_addr: 32'h0000_0000,
+    start_addr: 64'h0000_0000_0000_0000,
     end_addr:   cluster_base_addr
   };
   assign addr_map[1] = '{ // everything above cluster to ext_slave
     idx:  2,
-    start_addr: cluster_base_addr + 32'h0040_0000,
-    end_addr:   32'hFFFF_FFFF
+    start_addr: cluster_base_addr + 64'h0000_0000_0040_0000,
+    end_addr:   64'h0000_0000_FFFF_FFFF
   };
   assign addr_map[2] = '{ // TCDM
     idx:  0,
@@ -114,14 +115,14 @@ module cluster_bus_wrap
   };
   assign addr_map[3] = '{ // Peripherals
     idx:  1,
-    start_addr: cluster_base_addr + 32'h0020_0000,
-    end_addr:   cluster_base_addr + 32'h0040_0000
+    start_addr: cluster_base_addr + 64'h0000_0000_0020_0000,
+    end_addr:   cluster_base_addr + 64'h0000_0000_0040_0000
   };
   // pragma translate_off
   `ifndef VERILATOR
     initial begin
-      assert (AXI_ADDR_WIDTH == 32)
-        else $fatal("Address map is only defined for 32-bit addresses!");
+      assert (AXI_ADDR_WIDTH == 64)
+        else $fatal("Address map is only defined for 64-bit addresses!");
       assert (TCDM_SIZE <= 128*1024)
         else $fatal(1, "TCDM size exceeds available address space in cluster bus!");
       assert (TCDM_SIZE > 0)
@@ -168,7 +169,7 @@ module cluster_bus_wrap
     .AXI_ADDR_WIDTH         ( AXI_ADDR_WIDTH                        ),
     .AXI_DATA_WIDTH         ( AXI_DATA_WIDTH                        ),
     .NO_ADDR_RULES          ( N_RULES                               ),
-    .rule_t                 ( axi_pkg::xbar_rule_32_t               )
+    .rule_t                 ( xbar_rule_t                           )
   ) i_xbar (
     .clk_i,
     .rst_ni,
