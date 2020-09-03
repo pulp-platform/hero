@@ -1651,12 +1651,6 @@ add wave -noupdate -group {cl_oup[3]} {/pulp_tb/dut/cl_oup[3]/r_last}
 add wave -noupdate -group {cl_oup[3]} {/pulp_tb/dut/cl_oup[3]/r_user}
 add wave -noupdate -group {cl_oup[3]} {/pulp_tb/dut/cl_oup[3]/r_valid}
 add wave -noupdate -group {cl_oup[3]} {/pulp_tb/dut/cl_oup[3]/r_ready}
-add wave -noupdate -group {i_dwc_cl_oup[2]} {/pulp_tb/dut/gen_clusters[2]/i_dwc_cl_oup/UPSIZE/i_axi_data_upsize/clk_i}
-add wave -noupdate -group {i_dwc_cl_oup[2]} {/pulp_tb/dut/gen_clusters[2]/i_dwc_cl_oup/UPSIZE/i_axi_data_upsize/rst_ni}
-add wave -noupdate -group {i_dwc_cl_oup[2]} {/pulp_tb/dut/gen_clusters[2]/i_dwc_cl_oup/UPSIZE/i_axi_data_upsize/w_state_d}
-add wave -noupdate -group {i_dwc_cl_oup[2]} {/pulp_tb/dut/gen_clusters[2]/i_dwc_cl_oup/UPSIZE/i_axi_data_upsize/w_state_q}
-add wave -noupdate -group {i_dwc_cl_oup[2]} {/pulp_tb/dut/gen_clusters[2]/i_dwc_cl_oup/UPSIZE/i_axi_data_upsize/w_req_d}
-add wave -noupdate -group {i_dwc_cl_oup[2]} {/pulp_tb/dut/gen_clusters[2]/i_dwc_cl_oup/UPSIZE/i_axi_data_upsize/w_req_q}
 add wave -noupdate -group {dma[0]/ext_master} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/dmac_wrap_i/ext_master/aw_id}
 add wave -noupdate -group {dma[0]/ext_master} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/dmac_wrap_i/ext_master/aw_addr}
 add wave -noupdate -group {dma[0]/ext_master} {/pulp_tb/dut/gen_clusters[0]/gen_cluster_sync/i_cluster/i_ooc/i_bound/dmac_wrap_i/ext_master/aw_len}
