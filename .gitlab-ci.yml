@@ -202,10 +202,10 @@ compiler-smoketest:
     - source env/exilzcu102.sh
     - .gitlab-ci.d/compiler-smoketest.sh
 
-doc-pulp-driver:
-  stage: test
-  script:
-    - make -C support/pulp-driver/doc
-  artifacts:
-    paths:
-      - support/pulp-driver/doc/pulp_linux_driver_doc.pdf
+#doc-pulp-driver:
+#  stage: test
+#  script:
+#    - make -C support/pulp-driver/doc
+#  artifacts:
+#    paths:
+#      - support/pulp-driver/doc/pulp_linux_driver_doc.pdf
