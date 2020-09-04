@@ -950,6 +950,32 @@ module pulp_cluster
     end
   endgenerate
 
+  // Remap all I$ fetches to a single ID.  This is necessary as the instruction cache does not
+  // support out-of-order responses.
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH     ),
+    .AXI_DATA_WIDTH ( AXI_DATA_C2S_WIDTH ),
+    .AXI_ID_WIDTH   ( AXI_ID_OUT_WIDTH   ),
+    .AXI_USER_WIDTH ( AXI_USER_WIDTH     )
+  ) icache_axi ();
+
+  axi_serializer_intf #(
+    .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH      ),
+    .AXI_DATA_WIDTH ( AXI_DATA_C2S_WIDTH  ),
+    .AXI_ID_WIDTH   ( AXI_ID_OUT_WIDTH    ),
+    .AXI_USER_WIDTH ( AXI_USER_WIDTH      ),
+    .MAX_READ_TXNS  ( NB_CORES            ),
+    .MAX_WRITE_TXNS ( 1                   )
+  ) i_serializer_icache (
+    .clk_i  (clk_cluster),
+    .rst_ni,
+    .slv    (icache_axi),
+    .mst    (s_core_instr_bus)
+  );
+
+  // Tie AWATOP, which is not driven by the instruction cache, off.
+  assign icache_axi.aw_atop = '0;
+
   /* instruction cache */
   icache_top_mp_128_PF #(
     .FETCH_ADDR_WIDTH ( 32                 ),
@@ -974,50 +1000,50 @@ module pulp_cluster
     .fetch_gnt_o            ( instr_gnt                  ),
     .fetch_rvalid_o         ( instr_r_valid              ),
     .fetch_rdata_o          ( instr_r_rdata              ),
-    .axi_master_arid_o      ( s_core_instr_bus.ar_id     ),
-    .axi_master_araddr_o    ( s_core_instr_bus.ar_addr   ),
-    .axi_master_arlen_o     ( s_core_instr_bus.ar_len    ),
-    .axi_master_arsize_o    ( s_core_instr_bus.ar_size   ),
-    .axi_master_arburst_o   ( s_core_instr_bus.ar_burst  ),
-    .axi_master_arlock_o    ( s_core_instr_bus.ar_lock   ),
-    .axi_master_arcache_o   ( s_core_instr_bus.ar_cache  ),
-    .axi_master_arprot_o    ( s_core_instr_bus.ar_prot   ),
-    .axi_master_arregion_o  ( s_core_instr_bus.ar_region ),
-    .axi_master_aruser_o    ( s_core_instr_bus.ar_user   ),
-    .axi_master_arqos_o     ( s_core_instr_bus.ar_qos    ),
-    .axi_master_arvalid_o   ( s_core_instr_bus.ar_valid  ),
-    .axi_master_arready_i   ( s_core_instr_bus.ar_ready  ),
-    .axi_master_rid_i       ( s_core_instr_bus.r_id      ),
-    .axi_master_rdata_i     ( s_core_instr_bus.r_data    ),
-    .axi_master_rresp_i     ( s_core_instr_bus.r_resp    ),
-    .axi_master_rlast_i     ( s_core_instr_bus.r_last    ),
-    .axi_master_ruser_i     ( s_core_instr_bus.r_user    ),
-    .axi_master_rvalid_i    ( s_core_instr_bus.r_valid   ),
-    .axi_master_rready_o    ( s_core_instr_bus.r_ready   ),
-    .axi_master_awid_o      ( s_core_instr_bus.aw_id     ),
-    .axi_master_awaddr_o    ( s_core_instr_bus.aw_addr   ),
-    .axi_master_awlen_o     ( s_core_instr_bus.aw_len    ),
-    .axi_master_awsize_o    ( s_core_instr_bus.aw_size   ),
-    .axi_master_awburst_o   ( s_core_instr_bus.aw_burst  ),
-    .axi_master_awlock_o    ( s_core_instr_bus.aw_lock   ),
-    .axi_master_awcache_o   ( s_core_instr_bus.aw_cache  ),
-    .axi_master_awprot_o    ( s_core_instr_bus.aw_prot   ),
-    .axi_master_awregion_o  ( s_core_instr_bus.aw_region ),
-    .axi_master_awuser_o    ( s_core_instr_bus.aw_user   ),
-    .axi_master_awqos_o     ( s_core_instr_bus.aw_qos    ),
-    .axi_master_awvalid_o   ( s_core_instr_bus.aw_valid  ),
-    .axi_master_awready_i   ( s_core_instr_bus.aw_ready  ),
-    .axi_master_wdata_o     ( s_core_instr_bus.w_data    ),
-    .axi_master_wstrb_o     ( s_core_instr_bus.w_strb    ),
-    .axi_master_wlast_o     ( s_core_instr_bus.w_last    ),
-    .axi_master_wuser_o     ( s_core_instr_bus.w_user    ),
-    .axi_master_wvalid_o    ( s_core_instr_bus.w_valid   ),
-    .axi_master_wready_i    ( s_core_instr_bus.w_ready   ),
-    .axi_master_bid_i       ( s_core_instr_bus.b_id      ),
-    .axi_master_bresp_i     ( s_core_instr_bus.b_resp    ),
-    .axi_master_buser_i     ( s_core_instr_bus.b_user    ),
-    .axi_master_bvalid_i    ( s_core_instr_bus.b_valid   ),
-    .axi_master_bready_o    ( s_core_instr_bus.b_ready   ),
+    .axi_master_arid_o      ( icache_axi.ar_id           ),
+    .axi_master_araddr_o    ( icache_axi.ar_addr         ),
+    .axi_master_arlen_o     ( icache_axi.ar_len          ),
+    .axi_master_arsize_o    ( icache_axi.ar_size         ),
+    .axi_master_arburst_o   ( icache_axi.ar_burst        ),
+    .axi_master_arlock_o    ( icache_axi.ar_lock         ),
+    .axi_master_arcache_o   ( icache_axi.ar_cache        ),
+    .axi_master_arprot_o    ( icache_axi.ar_prot         ),
+    .axi_master_arregion_o  ( icache_axi.ar_region       ),
+    .axi_master_aruser_o    ( icache_axi.ar_user         ),
+    .axi_master_arqos_o     ( icache_axi.ar_qos          ),
+    .axi_master_arvalid_o   ( icache_axi.ar_valid        ),
+    .axi_master_arready_i   ( icache_axi.ar_ready        ),
+    .axi_master_rid_i       ( icache_axi.r_id            ),
+    .axi_master_rdata_i     ( icache_axi.r_data          ),
+    .axi_master_rresp_i     ( icache_axi.r_resp          ),
+    .axi_master_rlast_i     ( icache_axi.r_last          ),
+    .axi_master_ruser_i     ( icache_axi.r_user          ),
+    .axi_master_rvalid_i    ( icache_axi.r_valid         ),
+    .axi_master_rready_o    ( icache_axi.r_ready         ),
+    .axi_master_awid_o      ( icache_axi.aw_id           ),
+    .axi_master_awaddr_o    ( icache_axi.aw_addr         ),
+    .axi_master_awlen_o     ( icache_axi.aw_len          ),
+    .axi_master_awsize_o    ( icache_axi.aw_size         ),
+    .axi_master_awburst_o   ( icache_axi.aw_burst        ),
+    .axi_master_awlock_o    ( icache_axi.aw_lock         ),
+    .axi_master_awcache_o   ( icache_axi.aw_cache        ),
+    .axi_master_awprot_o    ( icache_axi.aw_prot         ),
+    .axi_master_awregion_o  ( icache_axi.aw_region       ),
+    .axi_master_awuser_o    ( icache_axi.aw_user         ),
+    .axi_master_awqos_o     ( icache_axi.aw_qos          ),
+    .axi_master_awvalid_o   ( icache_axi.aw_valid        ),
+    .axi_master_awready_i   ( icache_axi.aw_ready        ),
+    .axi_master_wdata_o     ( icache_axi.w_data          ),
+    .axi_master_wstrb_o     ( icache_axi.w_strb          ),
+    .axi_master_wlast_o     ( icache_axi.w_last          ),
+    .axi_master_wuser_o     ( icache_axi.w_user          ),
+    .axi_master_wvalid_o    ( icache_axi.w_valid         ),
+    .axi_master_wready_i    ( icache_axi.w_ready         ),
+    .axi_master_bid_i       ( icache_axi.b_id            ),
+    .axi_master_bresp_i     ( icache_axi.b_resp          ),
+    .axi_master_buser_i     ( icache_axi.b_user          ),
+    .axi_master_bvalid_i    ( icache_axi.b_valid         ),
+    .axi_master_bready_o    ( icache_axi.b_ready         ),
     .IC_ctrl_unit_slave_if  ( IC_ctrl_unit_bus           )
   );
 
