@@ -226,6 +226,22 @@ module pulp #(
     .AXI_USER_WIDTH (AXI_UW)
   ) periph_mst_dwced();
 
+  // Interfaces to Mailbox
+  // i_soc_bus.mbox_host_mst -> [mbox_host] -> i_mailbox.host_slv
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
+    .AXI_USER_WIDTH (AXI_UW)
+  ) mbox_host();
+  // i_soc_bus.mbox_pulp_mst -> [mbox_pulp] -> i_mailbox.dev_slv
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW),
+    .AXI_ID_WIDTH   (AXI_IW_SB_OUP),
+    .AXI_USER_WIDTH (AXI_UW)
+  ) mbox_pulp();
+
   for (genvar i = 0; i < N_CLUSTERS; i++) begin: gen_clusters
     axi_id_resize #(
       .ADDR_WIDTH   (AXI_AW),
@@ -356,6 +372,7 @@ module pulp #(
     );
   end
 
+  addr_t mbox_host_base_addr, mbox_pulp_base_addr;
   soc_bus #(
     .AXI_AW               (AXI_AW),
     .AXI_DW               (AXI_DW),
@@ -370,11 +387,15 @@ module pulp #(
   ) i_soc_bus (
     .clk_i,
     .rst_ni,
-    .cl_slv     (cl_oup),
-    .cl_mst     (cl_inp),
-    .l2_mst     (l2_mst),
-    .rab_mst    (rab_mst),
-    .rab_slv    (rab_slv_remapped)
+    .cl_slv                 (cl_oup),
+    .cl_mst                 (cl_inp),
+    .l2_mst                 (l2_mst),
+    .mbox_host_mst          (mbox_host),
+    .mbox_host_base_addr_o  (mbox_host_base_addr),
+    .mbox_pulp_mst          (mbox_pulp),
+    .mbox_pulp_base_addr_o  (mbox_pulp_base_addr),
+    .rab_mst                (rab_mst),
+    .rab_slv                (rab_slv_remapped)
   );
 
   for (genvar i = 0; i < L2_N_AXI_PORTS; i++) begin: gen_l2_ports
