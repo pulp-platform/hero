@@ -1,4 +1,4 @@
-// Copyright 2018 ETH Zurich and University of Bologna.
+// Copyright (c) 2020 ETH Zurich and University of Bologna.
 // Copyright and related rights are licensed under the Solderpad Hardware
 // License, Version 0.51 (the "License"); you may not use this file except in
 // compliance with the License.  You may obtain a copy of the License at
@@ -7,256 +7,207 @@
 // this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-//
-// Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 
+// Author: Wolfgang Roenninger <wroennin@ethz.ch>
+
+// Directed Random Verification Testbench for `axi_lite_xbar`:  The crossbar is instantiated with
+// a number of random axi master and slave modules. Each random master executes a fixed number of
+// writes and reads over the whole addess map. All masters simultaneously issue transactions
+// through the crossbar, thereby fully saturating all its bandwidth.
+
+`include "axi/typedef.svh"
 `include "axi/assign.svh"
 
 module tb_axi_lite_xbar;
+  // Dut parameters
+  localparam int unsigned NoMasters   = 32'd6;    // How many Axi Masters there are
+  localparam int unsigned NoSlaves    = 32'd8;    // How many Axi Slaves  there are
+  // Random master no Transactions
+  localparam int unsigned NoWrites   = 32'd10000;  // How many writes per master
+  localparam int unsigned NoReads    = 32'd10000;  // How many reads per master
+  // timing parameters
+  localparam time CyclTime = 10ns;
+  localparam time ApplTime =  2ns;
+  localparam time TestTime =  8ns;
+  // axi configuration
+  localparam int unsigned AxiAddrWidth      =  32'd32;    // Axi Address Width
+  localparam int unsigned AxiDataWidth      =  32'd64;    // Axi Data Width
+  localparam int unsigned AxiStrbWidth      =  AxiDataWidth / 32'd8;
+  // in the bench can change this variables which are set here freely
+  localparam axi_pkg::xbar_cfg_t xbar_cfg = '{
+    NoSlvPorts:         NoMasters,
+    NoMstPorts:         NoSlaves,
+    MaxMstTrans:        32'd10,
+    MaxSlvTrans:        32'd6,
+    FallThrough:        1'b0,
+    LatencyMode:        axi_pkg::CUT_ALL_AX,
+    AxiAddrWidth:       AxiAddrWidth,
+    AxiDataWidth:       AxiDataWidth,
+    NoAddrRules:        32'd8,
+    default:            '0
+  };
+  typedef logic [AxiAddrWidth-1:0]      addr_t;
+  typedef axi_pkg::xbar_rule_32_t       rule_t; // Has to be the same width as axi addr
+  typedef logic [AxiDataWidth-1:0]      data_t;
+  typedef logic [AxiStrbWidth-1:0]      strb_t;
 
-  parameter AW = 32;
-  parameter DW = 32;
-  parameter IW = 8;
-  parameter UW = 8;
+  `AXI_LITE_TYPEDEF_AW_CHAN_T(aw_chan_lite_t, addr_t)
+  `AXI_LITE_TYPEDEF_W_CHAN_T(w_chan_lite_t, data_t, strb_t)
+  `AXI_LITE_TYPEDEF_B_CHAN_T(b_chan_lite_t)
 
-  parameter NUM_MASTER       = 2;
-  parameter NUM_SLAVE        = 2;
-  parameter NUM_TRANSACTIONS = 1000;
+  `AXI_LITE_TYPEDEF_AR_CHAN_T(ar_chan_lite_t, addr_t)
+  `AXI_LITE_TYPEDEF_R_CHAN_T(r_chan_lite_t, data_t)
 
-  localparam tCK = 1ns;
+  `AXI_LITE_TYPEDEF_REQ_T(req_lite_t, aw_chan_lite_t, w_chan_lite_t, ar_chan_lite_t)
+  `AXI_LITE_TYPEDEF_RESP_T(resp_lite_t, b_chan_lite_t, r_chan_lite_t)
 
-  logic clk = 0;
-  logic rst = 1;
+  localparam rule_t [xbar_cfg.NoAddrRules-1:0] AddrMap = '{
+    '{idx: 32'd7, start_addr: 32'h0001_0000, end_addr: 32'h0001_1000},
+    '{idx: 32'd6, start_addr: 32'h0000_9000, end_addr: 32'h0001_0000},
+    '{idx: 32'd5, start_addr: 32'h0000_8000, end_addr: 32'h0000_9000},
+    '{idx: 32'd4, start_addr: 32'h0000_7000, end_addr: 32'h0000_8000},
+    '{idx: 32'd3, start_addr: 32'h0000_6300, end_addr: 32'h0000_7000},
+    '{idx: 32'd2, start_addr: 32'h0000_4000, end_addr: 32'h0000_6300},
+    '{idx: 32'd1, start_addr: 32'h0000_3000, end_addr: 32'h0000_4000},
+    '{idx: 32'd0, start_addr: 32'h0000_0000, end_addr: 32'h0000_3000}
+  };
 
+  typedef axi_test::rand_axi_lite_master #(
+    // AXI interface parameters
+    .AW ( AxiAddrWidth       ),
+    .DW ( AxiDataWidth       ),
+    // Stimuli application and test time
+    .TA ( ApplTime           ),
+    .TT ( TestTime           ),
+    .MIN_ADDR ( 32'h0000_0000 ),
+    .MAX_ADDR ( 32'h0001_3000 ),
+    .MAX_READ_TXNS  ( 10 ),
+    .MAX_WRITE_TXNS ( 10 )
+  ) rand_lite_master_t;
+  typedef axi_test::rand_axi_lite_slave #(
+    // AXI interface parameters
+    .AW ( AxiAddrWidth       ),
+    .DW ( AxiDataWidth       ),
+    // Stimuli application and test time
+    .TA ( ApplTime           ),
+    .TT ( TestTime           )
+  ) rand_lite_slave_t;
+
+  // -------------
+  // DUT signals
+  // -------------
+  logic clk;
+  // DUT signals
+  logic rst_n;
+  logic [NoMasters-1:0] end_of_sim;
+
+  // master structs
+  req_lite_t  [NoMasters-1:0] masters_req;
+  resp_lite_t [NoMasters-1:0] masters_resp;
+
+  // slave structs
+  req_lite_t  [NoSlaves-1:0] slaves_req;
+  resp_lite_t [NoSlaves-1:0] slaves_resp;
+
+  // -------------------------------
+  // AXI Interfaces
+  // -------------------------------
+  AXI_LITE #(
+    .AXI_ADDR_WIDTH ( AxiAddrWidth      ),
+    .AXI_DATA_WIDTH ( AxiDataWidth      )
+  ) master [NoMasters-1:0] ();
   AXI_LITE_DV #(
-    .AXI_ADDR_WIDTH(AW),
-    .AXI_DATA_WIDTH(DW)
-  ) master_dv [0:NUM_MASTER-1](clk);
+    .AXI_ADDR_WIDTH ( AxiAddrWidth      ),
+    .AXI_DATA_WIDTH ( AxiDataWidth      )
+  ) master_dv [NoMasters-1:0] (clk);
+  for (genvar i = 0; i < NoMasters; i++) begin : gen_conn_dv_masters
+    `AXI_LITE_ASSIGN(master[i], master_dv[i])
+    `AXI_LITE_ASSIGN_TO_REQ(masters_req[i], master[i])
+    `AXI_LITE_ASSIGN_FROM_RESP(master[i], masters_resp[i])
+  end
 
   AXI_LITE #(
-    .AXI_ADDR_WIDTH(AW),
-    .AXI_DATA_WIDTH(DW)
-  ) master [0:NUM_MASTER-1]();
-
-  for (genvar i = 0; i < NUM_MASTER; i++) begin: gen_conn_dv_masters
-    `AXI_LITE_ASSIGN(master[i], master_dv[i]);
-  end
-
+    .AXI_ADDR_WIDTH ( AxiAddrWidth     ),
+    .AXI_DATA_WIDTH ( AxiDataWidth     )
+  ) slave [NoSlaves-1:0] ();
   AXI_LITE_DV #(
-    .AXI_ADDR_WIDTH(AW),
-    .AXI_DATA_WIDTH(DW)
-  ) slave_dv [0:NUM_SLAVE-1](clk);
-
-  AXI_LITE #(
-    .AXI_ADDR_WIDTH(AW),
-    .AXI_DATA_WIDTH(DW)
-  ) slave [0:NUM_SLAVE-1]();
-
-  for (genvar i = 0; i < NUM_SLAVE; i++) begin: gen_conn_dv_slaves
-    `AXI_LITE_ASSIGN(slave_dv[i], slave[i]);
+    .AXI_ADDR_WIDTH ( AxiAddrWidth     ),
+    .AXI_DATA_WIDTH ( AxiDataWidth     )
+  ) slave_dv [NoSlaves-1:0](clk);
+  for (genvar i = 0; i < NoSlaves; i++) begin : gen_conn_dv_slaves
+    `AXI_LITE_ASSIGN(slave_dv[i], slave[i])
+    `AXI_LITE_ASSIGN_FROM_REQ(slave[i], slaves_req[i])
+    `AXI_LITE_ASSIGN_TO_RESP(slaves_resp[i], slave[i])
+  end
+  // -------------------------------
+  // AXI Rand Masters and Slaves
+  // -------------------------------
+  // Masters control simulation run time
+  for (genvar i = 0; i < NoMasters; i++) begin : gen_rand_master
+    initial begin : proc_generate_traffic
+      automatic rand_lite_master_t lite_axi_master = new ( master_dv[i], $sformatf("MST_%0d", i));
+      automatic data_t          data = '0;
+      automatic axi_pkg::resp_t resp = '0;
+      end_of_sim[i] <= 1'b0;
+      lite_axi_master.reset();
+      @(posedge rst_n);
+      lite_axi_master.write(32'h0000_1100, axi_pkg::prot_t'('0), 64'hDEADBEEFDEADBEEF, 8'hFF, resp);
+      lite_axi_master.read(32'h0000_e100, axi_pkg::prot_t'('0), data, resp);
+      lite_axi_master.run(NoReads, NoWrites);
+      end_of_sim[i] <= 1'b1;
+    end
   end
 
-  AXI_ROUTING_RULES #(
-    .AXI_ADDR_WIDTH(AW),
-    .NUM_SLAVE(NUM_SLAVE),
-    .NUM_RULES(1)
-  ) routing();
-
-  localparam int SLAVE_SHIFT = (AW-$clog2(NUM_SLAVE));
-  for (genvar i = 0; i < NUM_SLAVE; i++) begin
-    logic [AW-1:0] addr = i;
-    assign routing.rules[i][0].enabled = 1;
-    assign routing.rules[i][0].mask    = '1 << SLAVE_SHIFT;
-    assign routing.rules[i][0].base    = addr << SLAVE_SHIFT;
+  for (genvar i = 0; i < NoSlaves; i++) begin : gen_rand_slave
+    initial begin : proc_recieve_traffic
+      automatic rand_lite_slave_t lite_axi_slave = new( slave_dv[i] , $sformatf("SLV_%0d", i));
+      lite_axi_slave.reset();
+      @(posedge rst_n);
+      lite_axi_slave.run();
+    end
   end
 
-  axi_lite_xbar #(
-    .ADDR_WIDTH(AW),
-    .DATA_WIDTH(DW),
-    .NUM_MASTER(NUM_MASTER),
-    .NUM_SLAVE(NUM_SLAVE),
-    .NUM_RULES(1)
-  ) i_dut (
-    .clk_i  ( clk     ),
-    .rst_ni ( rst     ),
-    .master ( master  ),
-    .slave  ( slave   ),
-    .rules  ( routing )
+  initial begin : proc_stop_sim
+    wait (&end_of_sim);
+    repeat (1000) @(posedge clk);
+    $display("Simulation stopped as all Masters transferred their data, Success.",);
+    $stop();
+  end
+
+  //-----------------------------------
+  // Clock generator
+  //-----------------------------------
+  clk_rst_gen #(
+    .CLK_PERIOD    ( CyclTime ),
+    .RST_CLK_CYCLES( 5        )
+  ) i_clk_gen (
+    .clk_o (clk),
+    .rst_no(rst_n)
   );
 
-  // Define the transaction queues.
-  class transaction_t;
-    rand logic [AW-1:0] addr;
-    rand logic [DW-1:0] data;
-    rand logic [DW/8-1:0] strb;
-    axi_pkg::resp_t resp;
-  endclass
-
-  typedef axi_test::axi_lite_driver #(
-    .AW(AW),
-    .DW(DW),
-    .TA(0.2*tCK),
-    .TT(0.8*tCK)
-  ) driver_t;
-
-  // Randomly block for a few clock cycles.
-  task random_delay;
-    automatic int i;
-    i = $urandom_range(0, 50);
-    if (i > 5) return;
-    repeat (i) @(posedge clk);
-  endtask
-
-  // Setup a queue for reads and writes for each slave.
-  transaction_t queue_rd [NUM_SLAVE][$];
-  transaction_t queue_wr [NUM_SLAVE][$];
-  mailbox mailbox_rd [NUM_SLAVE];
-  mailbox mailbox_wr [NUM_SLAVE];
-  int tests_total = 0;
-  int tests_failed = 0;
-
-  // Initialize the master driver processes.
-  logic [NUM_MASTER-1:0] master_done = '0;
-  assign done = &master_done;
-  for (genvar i = 0; i < NUM_MASTER; i++) initial begin : g_master
-    // Initialize and reset the driver.
-    static driver_t drv = new(master_dv[i]);
-    drv.reset_master();
-    repeat(2) @(posedge clk);
-
-    // Fork off multiple processes that will issue transactions on the read
-    // and write paths.
-    fork
-      for (int k = 0; k < NUM_TRANSACTIONS; k++) begin : t_read
-        static transaction_t t;
-        static logic [DW-1:0] data;
-        static axi_pkg::resp_t resp;
-        t = new();
-        do begin
-          automatic int rand_success = t.randomize();
-          assert(rand_success);
-        end while ((t.addr >> SLAVE_SHIFT) >= NUM_SLAVE);
-        t.resp = axi_pkg::RESP_OKAY;
-        random_delay();
-        drv.send_ar(t.addr);
-        // queue_rd[t.addr >> SLAVE_SHIFT].push_back(t);
-        mailbox_rd[t.addr >> SLAVE_SHIFT].put(t);
-        random_delay();
-        drv.recv_r(data, resp);
-        tests_total++;
-        if (t.data != data || t.resp != resp) begin
-          tests_failed++;
-          $info("MISMATCH: master [%0d] read, data exp=%h act=%h, resp exp=%h act=%h",
-            i, t.data, data, t.resp, resp
-          );
-        end
-      end
-      for (int k = 0; k < NUM_TRANSACTIONS; k++) begin : t_write
-        static transaction_t t;
-        static axi_pkg::resp_t resp;
-        t = new();
-        do begin
-          automatic int rand_success = t.randomize();
-          assert(rand_success);
-        end while ((t.addr >> SLAVE_SHIFT) >= NUM_SLAVE);
-        t.resp = axi_pkg::RESP_OKAY;
-        random_delay();
-        drv.send_aw(t.addr);
-        // queue_wr[t.addr >> SLAVE_SHIFT].push_back(t);
-        mailbox_wr[t.addr >> SLAVE_SHIFT].put(t);
-        random_delay();
-        drv.send_w(t.data, t.strb);
-        random_delay();
-        drv.recv_b(resp);
-        tests_total++;
-        if (t.resp != resp) begin
-          tests_failed++;
-          $info("MISMATCH: master [%0d] write, resp exp=%h act=%h",
-            i, t.resp, resp
-          );
-        end
-      end
-    join
-
-    repeat(2) @(posedge clk);
-    master_done[i] = 1;
-  end
-
-  // Initialize the slave driver processes.
-  for (genvar i = 0; i < NUM_SLAVE; i++) initial begin : g_slave
-    // Initialize and reset the driver.
-    static driver_t drv = new(slave_dv[i]);
-    drv.reset_slave();
-    mailbox_rd[i] = new();
-    mailbox_wr[i] = new();
-    @(posedge clk);
-
-    // Fork off mulitple processes that will respond to transactions on the read
-    // and write paths.
-    fork
-      while (!done) begin : t_read
-        static transaction_t t;
-        static logic [AW-1:0] addr;
-        random_delay();
-        drv.recv_ar(addr);
-        // t = queue_rd[i].pop_front();
-        mailbox_rd[i].get(t);
-        random_delay();
-        drv.send_r(t.data, t.resp);
-        tests_total++;
-        if (t.addr != addr) begin
-          tests_failed++;
-          $info("MISMATCH: slave [%0d] read, addr exp=%h act=%h",
-            i, t.addr, addr
-          );
-        end
-      end
-      while (!done) begin : t_write
-        static transaction_t t;
-        static logic [AW-1:0] addr;
-        static logic [DW-1:0] data;
-        static logic [DW/8-1:0] strb;
-        random_delay();
-        drv.recv_aw(addr);
-        // t = queue_wr[i].pop_front();
-        mailbox_wr[i].get(t);
-        random_delay();
-        drv.recv_w(data, strb);
-        random_delay();
-        drv.send_b(t.resp);
-        tests_total++;
-        if (t.addr != addr || t.data != data || t.strb != strb) begin
-          tests_failed++;
-          $info("MISMATCH: slave [%0d] write, addr exp=%h act=%h, data exp=%h act=%h, strb exp=%h act=%h",
-            i, t.addr, addr, t.data, data, t.strb, strb
-          );
-        end
-      end
-    join
-  end
-
-  // Clock and reset generator.
-  initial begin
-    static int cycle = 0;
-    #tCK;
-    rst <= 0;
-    #tCK;
-    rst <= 1;
-    #tCK;
-    while (!done) begin
-      clk <= 1;
-      #(tCK/2);
-      clk <= 0;
-      #(tCK/2);
-      if (cycle >= 1000000)
-        $fatal(1, "timeout at %t", $time);
-      cycle++;
-    end
-
-    if (tests_failed == 0)
-      $info("ALL %0d TESTS PASSED", tests_total);
-    else
-      $error("%0d / %0d TESTS FAILED", tests_failed, tests_total);
-  end
-
+  //-----------------------------------
+  // DUT
+  //-----------------------------------
+  axi_lite_xbar #(
+    .Cfg       ( xbar_cfg       ),
+    .aw_chan_t ( aw_chan_lite_t ),
+    .w_chan_t  (  w_chan_lite_t ),
+    .b_chan_t  (  b_chan_lite_t ),
+    .ar_chan_t ( ar_chan_lite_t ),
+    .r_chan_t  (  r_chan_lite_t ),
+    .req_t     (  req_lite_t    ),
+    .resp_t    ( resp_lite_t    ),
+    .rule_t    ( rule_t         )
+  ) i_xbar_dut (
+    .clk_i      ( clk      ),
+    .rst_ni     ( rst_n    ),
+    .test_i     ( 1'b0     ),
+    .slv_ports_req_i  ( masters_req  ),
+    .slv_ports_resp_o ( masters_resp ),
+    .mst_ports_req_o  ( slaves_req   ),
+    .mst_ports_resp_i ( slaves_resp  ),
+    .addr_map_i       ( AddrMap      ),
+    .en_default_mst_port_i ( '0      ),
+    .default_mst_port_i    ( '0      )
+  );
 endmodule

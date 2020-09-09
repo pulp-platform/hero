@@ -13,7 +13,7 @@ package automatic soc_bus_pkg;
   endfunction
 
   function int unsigned oup_id_w(input int unsigned n_clusters, inp_id_w);
-    return inp_id_w + cf_math_pkg::log2(n_slaves(n_clusters));
+    return inp_id_w + cf_math_pkg::clog2(n_slaves(n_clusters));
   endfunction
 endpackage
 
@@ -78,61 +78,70 @@ module soc_bus #(
   `AXI_ASSIGN(rab_mst, masters[IDX_RAB]);
 
   // Address Map
-  always_comb begin
-    start_addr  = '0;
-    end_addr    = '0;
-    valid_rule  = '0;
-
-    // Everything below Cluster 0 to RAB
-    start_addr[0][IDX_RAB]  = 64'h0000_0000_0000_0000;
-    end_addr[0][IDX_RAB]    = 64'h0000_0000_0FFF_FFFF;
-    valid_rule[0][IDX_RAB]  = 1'b1;
-
-    // Clusters
-    for (int i = 0; i < N_CLUSTERS; i++) begin
-      start_addr[0][i]  = 64'h0000_0000_1000_0000 + i * 32'h0040_0000;
-      end_addr[0][i]    = start_addr[0][i] + 32'h002F_FFFF;
-      valid_rule[0][i]  = 1'b1;
-    end
-
-    // Everthing in `0x1A..` to RAB
-    start_addr[1][IDX_RAB]  = 64'h0000_0000_1A00_0000;
-    end_addr[1][IDX_RAB]    = 64'h0000_0000_1AFF_FFFF;
-    valid_rule[1][IDX_RAB]  = 1'b1;
-
-    // L2 Memory
-    for (int i = 0; i < L2_N_PORTS; i++) begin
-      automatic int unsigned idx = IDX_L2_MEM + i;
-      start_addr[0][idx]  = 64'h0000_0000_1C00_0000 + i*L2_N_BYTES_PER_PORT;
-      end_addr[0][idx]    = start_addr[0][idx] + L2_N_BYTES_PER_PORT - 1;
-      valid_rule[0][idx]  = 1'b1;
-    end
-
-    // Everything above L2 Memory to RAB
-    start_addr[2][IDX_RAB]  = end_addr[0][IDX_L2_MEM+L2_N_PORTS-1] + 1;
-    end_addr[2][IDX_RAB]    = 64'hFFFF_FFFF_FFFF_FFFF;
-    valid_rule[2][IDX_RAB]  = 1'b1;
+  typedef axi_pkg::xbar_rule_64_t rule_t;
+  localparam int unsigned NumRules = N_CLUSTERS + L2_N_PORTS + 3;
+  rule_t [NumRules-1:0] addr_map;
+  // Everything below Cluster 0 to RAB
+  assign addr_map[0] = '{
+    idx:        IDX_RAB,
+    start_addr: 64'h0000_0000_0000_0000,
+    end_addr:   64'h0000_0000_0FFF_FFFF
+  };
+  // Clusters
+  for (genvar i = 0; i < N_CLUSTERS; i++) begin : gen_map_cluster
+    assign addr_map[i+1] = '{
+      idx:        i,
+      start_addr: 64'h0000_0000_1000_0000 + i * 32'h0040_0000,
+      end_addr:   64'h0000_0000_1000_0000 + i * 32'h0040_0000 + 32'h002F_FFFF
+    };
   end
+  // Everthing in `0x1A..` to RAB
+  assign addr_map[1+N_CLUSTERS] = '{
+    idx:        IDX_RAB,
+    start_addr: 64'h0000_0000_1A00_0000,
+    end_addr:   64'h0000_0000_1AFF_FFFF
+  };
+  // L2 Memory
+  for (genvar i = 0; i < L2_N_PORTS; i++) begin : gen_map_l2_port
+    assign addr_map[1+N_CLUSTERS+1+i] = '{
+      idx:        IDX_L2_MEM + i,
+      start_addr: 64'h0000_0000_1C00_0000 + i*L2_N_BYTES_PER_PORT,
+      end_addr:   64'h0000_0000_1C00_0000 + (i+1)*L2_N_BYTES_PER_PORT - 1
+    };
+  end
+  // Everything above L2 Memory to RAB
+  assign addr_map[1+N_CLUSTERS+1+L2_N_PORTS] = '{
+    idx:        IDX_RAB,
+    start_addr: 64'h0000_0000_1C00_0000 + L2_N_PORTS*L2_N_BYTES_PER_PORT,
+    end_addr:   64'hFFFF_FFFF_FFFF_FFFF
+  };
 
-  axi_node_wrap_with_slices #(
-    .NB_MASTER          (N_MASTERS),
-    .NB_SLAVE           (N_SLAVES),
-    .NB_REGION          (N_REGIONS),
-    .AXI_ADDR_WIDTH     (AXI_AW),
-    .AXI_DATA_WIDTH     (AXI_DW),
-    .AXI_ID_WIDTH       (AXI_IW_INP),
-    .AXI_USER_WIDTH     (AXI_UW),
-    .MASTER_SLICE_DEPTH (MST_SLICE_DEPTH),
-    .SLAVE_SLICE_DEPTH  (SLV_SLICE_DEPTH)
-  ) i_axi_node_wrap (
-    .clk          (clk_i),
-    .rst_n        (rst_ni),
-    .test_en_i    (1'b0),
-    .slave        (slaves),
-    .master       (masters),
-    .start_addr_i (start_addr),
-    .end_addr_i   (end_addr),
-    .valid_rule_i (valid_rule)
+  localparam axi_pkg::xbar_cfg_t XbarCfg = '{
+    NoSlvPorts:         N_SLAVES,
+    NoMstPorts:         N_MASTERS,
+    MaxMstTrans:        4,
+    MaxSlvTrans:        4,
+    FallThrough:        1'b0,
+    LatencyMode:        axi_pkg::CUT_ALL_PORTS,
+    AxiIdWidthSlvPorts: AXI_IW_INP,
+    AxiIdUsedSlvPorts:  AXI_IW_INP,
+    AxiAddrWidth:       AXI_AW,
+    AxiDataWidth:       AXI_DW,
+    NoAddrRules:        NumRules
+  };
+  axi_xbar_intf #(
+    .AXI_USER_WIDTH (AXI_UW),
+    .Cfg            (XbarCfg),
+    .rule_t         (rule_t)
+  ) i_axi_xbar (
+    .clk_i,
+    .rst_ni,
+    .test_i                 (1'b0),
+    .slv_ports              (slaves),
+    .mst_ports              (masters),
+    .addr_map_i             (addr_map),
+    .en_default_mst_port_i  ('0),
+    .default_mst_port_i     ('0)
   );
 
 endmodule

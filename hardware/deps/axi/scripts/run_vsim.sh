@@ -11,6 +11,7 @@
 # specific language governing permissions and limitations under the License.
 #
 # Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+# Andreas Kurth  <akurth@iis.ee.ethz.ch>
 
 set -e
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
@@ -18,33 +19,68 @@ ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 [ ! -z "$VSIM" ] || VSIM=vsim
 
 call_vsim() {
-	echo "run -all" | $VSIM "$@" | tee vsim.log 2>&1
-	grep "Errors: 0," vsim.log
+    echo "run -all" | $VSIM "$@" | tee vsim.log 2>&1
+    grep "Errors: 0," vsim.log
 }
 
-for DW in 8 16 32 64 128 256 512 1024; do
-	call_vsim tb_axi_lite_to_axi -GDW=$DW -t 1ps -c
-	call_vsim tb_axi_to_axi_lite -GDW=$DW -t 1ps -c
-done
-
-test_axi_lite_xbar() {
-	call_vsim tb_axi_lite_xbar -GNUM_MASTER=$1 -GNUM_SLAVE=$2 -t 1ps -c
+exec_test() {
+    if [ ! -e "$ROOT/test/tb_$1.sv" ]; then
+        echo "Testbench for '$1' not found!"
+        exit 1
+    fi
+    case "$1" in
+        axi_lite_to_axi)
+            for DW in 8 16 32 64 128 256 512 1024; do
+                call_vsim tb_axi_lite_to_axi -GDW=$DW -t 1ps -c
+            done
+            ;;
+        axi_dw_downsizer)
+            for DW in 8 16 32 64 128 256 512 1024; do
+                for (( MULT = 2; MULT <= `echo 1024/$DW`; MULT *= 2 )); do
+                    call_vsim tb_axi_dw_downsizer -GDW=$DW -GMULT=$MULT -t 1ps -c
+                done
+            done
+            ;;
+        axi_dw_upsizer)
+            for DW in 8 16 32 64 128 256 512 1024; do
+                for (( MULT = `echo 1024/$DW | bc`; MULT > 1; MULT /= 2 )); do
+                    call_vsim tb_axi_dw_upsizer -GDW=$DW -GMULT=$MULT -t 1ps -c
+                done
+            done
+            ;;
+        axi_cdc|axi_delayer)
+            call_vsim tb_$1
+            ;;
+        axi_atop_filter)
+            for MAX_TXNS in 1 3 12; do
+                call_vsim tb_axi_atop_filter -GN_TXNS=1000 -GAXI_MAX_WRITE_TXNS=$MAX_TXNS
+            done
+            ;;
+        axi_lite_regs)
+            for PRIV in 0 1; do
+                for SECU in 0 1; do
+                    call_vsim tb_axi_lite_regs -GPrivProtOnly=$PRIV -GSecuProtOnly=$SECU
+                done
+            done
+            ;;
+        *)
+            call_vsim tb_$1 -t 1ns -coverage -voptargs="+acc +cover=bcesfx"
+            ;;
+    esac
+    touch "$1.tested"
 }
 
-# regression test cases
-test_axi_lite_xbar 1 1
-# test_axi_lite_xbar 4 9 # This seems to be a bug in ModelSim!
+if [ "$#" -eq 0 ]; then
+    tests=()
+    while IFS=  read -r -d $'\0'; do
+        tb_name="$(basename -s .sv $REPLY)"
+        dut_name="${tb_name#tb_}"
+        tests+=("$dut_name")
+    done < <(find "$ROOT/test" -name 'tb_*.sv' -a \( ! -name '*_pkg.sv' \) -print0)
+else
+    tests=("$@")
+fi
 
-for NM in 1 2 3 4 8; do
-	test_axi_lite_xbar $NM 4
+for t in "${tests[@]}"; do
+    exec_test $t
 done
-
-for NS in 1 2 3 4 8; do
-	test_axi_lite_xbar 4 $NS
-done
-
-call_vsim tb_axi_delayer
-call_vsim tb_axi_id_remap
-call_vsim tb_axi_atop_filter -GN_TXNS=1000
-call_vsim tb_axi_perf_mon
-call_vsim tb_axi_cdc

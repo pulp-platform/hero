@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.com/pulp-platform/common_cells.svg?branch=master)](https://travis-ci.com/pulp-platform/common_cells)
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/pulp-platform/common_cells?color=blue&label=current&sort=semver)](CHANGELOG.md)
+[![SHL-0.51 license](https://img.shields.io/badge/license-SHL--0.51-green)](LICENSE)
+
 # Common Cells Repository
 
 Maintainer: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
@@ -11,7 +15,7 @@ Please note that cells with status *deprecated* are not to be used for new desig
 
 ### Clocks and Resets
 
-|           Name          |                     Description                     |    Status    | Superseded By |
+| Name                    | Description                                         | Status       | Superseded By |
 |-------------------------|-----------------------------------------------------|--------------|---------------|
 | `clk_div`               | Clock divider with integer divisor                  | active       |               |
 | `clock_divider`         | Clock divider with configuration registers          | *deprecated* | `clk_div`     |
@@ -21,36 +25,42 @@ Please note that cells with status *deprecated* are not to be used for new desig
 
 ### Clock Domains and Asynchronous Crossings
 
-|         Name         |                                   Description                                    |    Status    | Superseded By |
-|----------------------|----------------------------------------------------------------------------------|--------------|---------------|
-| `cdc_2phase`         | Clock domain crossing using two-phase handshake, with ready/valid interface      | active       |               |
-| `cdc_fifo_2phase`    | Clock domain crossing FIFO using two-phase handshake, with ready/valid interface | active       |               |
-| `cdc_fifo_gray`      | Clock domain crossing FIFO using a gray-counter, with ready/valid interface      | active       |               |
-| `edge_detect`        | Rising/falling edge detector                                                     | active       |               |
-| `edge_propagator`    | **ANTONIO ADD DESCRIPTION**                                                      | active       |               |
-| `edge_propagator_rx` | **ANTONIO ADD DESCRIPTION**                                                      | active       |               |
-| `edge_propagator_tx` | **ANTONIO ADD DESCRIPTION**                                                      | active       |               |
-| `pulp_sync`          | Serial line synchronizer                                                         | *deprecated* | `sync`        |
-| `pulp_sync_wedge`    | Serial line synchronizer with edge detector                                      | *deprecated* | `sync_wedge`  |
-| `serial_deglitch`    | Serial line deglitcher                                                           | active       |               |
-| `sync`               | Serial line synchronizer                                                         | active       |               |
-| `sync_wedge`         | Serial line synchronizer with edge detector                                      | active       |               |
+| Name                         | Description                                                                      | Status       | Superseded By |
+|------------------------------|----------------------------------------------------------------------------------|--------------|---------------|
+| `cdc_2phase`                 | Clock domain crossing using two-phase handshake, with ready/valid interface      | active       |               |
+| `cdc_fifo_2phase`            | Clock domain crossing FIFO using two-phase handshake, with ready/valid interface | active       |               |
+| `cdc_fifo_gray`              | Clock domain crossing FIFO using a gray-counter, with ready/valid interface      | active       |               |
+| `edge_detect`                | Rising/falling edge detector                                                     | active       |               |
+| `edge_propagator`            | **ANTONIO ADD DESCRIPTION**                                                      | active       |               |
+| `edge_propagator_rx`         | **ANTONIO ADD DESCRIPTION**                                                      | active       |               |
+| `edge_propagator_tx`         | **ANTONIO ADD DESCRIPTION**                                                      | active       |               |
+| `isochronous_spill_register` | Isochronous clock domain crossing and full handshake (like `spill_register`)     | active       |               |
+| `pulp_sync`                  | Serial line synchronizer                                                         | *deprecated* | `sync`        |
+| `pulp_sync_wedge`            | Serial line synchronizer with edge detector                                      | *deprecated* | `sync_wedge`  |
+| `serial_deglitch`            | Serial line deglitcher                                                           | active       |               |
+| `sync`                       | Serial line synchronizer                                                         | active       |               |
+| `sync_wedge`                 | Serial line synchronizer with edge detector                                      | active       |               |
 
 ### Counters and Shift Registers
 
-|         Name        |                   Description                                     |    Status    | Superseded By |
+| Name                | Description                                                       | Status       | Superseded By |
 |---------------------|-------------------------------------------------------------------|--------------|---------------|
 | `counter`           | Generic up/down counter with overflow detection                   | active       |               |
+| `delta_counter`     | Up/down counter with variable delta and overflow detection        | active       |               |
 | `generic_LFSR_8bit` | 8-bit linear feedback shift register (LFSR)                       | *deprecated* | `lfsr_8bit`   |
 | `lfsr_8bit`         | 8-bit linear feedback shift register (LFSR)                       | active       |               |
 | `lfsr_16bit`        | 16-bit linear feedback shift register (LFSR)                      | active       |               |
 | `lfsr`              | 4...64-bit parametric Galois LFSR with optional whitening feature | active       |               |
+| `max_counter`       | Up/down counter with variable delta that tracks its maximum value | active       |               |
 | `mv_filter`         | **ZARUBAF ADD DESCRIPTION**                                       | active       |               |
 
 ### Data Path Elements
 
 | Name                         | Description                                                                    | Status         | Superseded By |
-| :--------------------------- | :----------------------------------------------------------------------------- | :------------- | :------------ |
+|------------------------------|--------------------------------------------------------------------------------|----------------|---------------|
+| `addr_decode   `             | Address map decoder                                                            | active         |               |
+| `ecc_decode`                 | SECDED Decoder (Single Error Correction, Double Error Detection)               | active         |               |
+| `ecc_encode`                 | SECDED Encoder (Single Error Correction, Double Error Detection)               | active         |               |
 | `binary_to_gray`             | Binary to gray code converter                                                  | active         |               |
 | `find_first_one`             | Leading-one finder / leading-zero counter                                      | *deprecated*   | `lzc`         |
 | `gray_to_binary`             | Gray code to binary converter                                                  | active         |               |
@@ -65,20 +75,27 @@ Please note that cells with status *deprecated* are not to be used for new desig
 | `stream_arbiter`             | Round-robin arbiter for ready/valid stream interface                           | active         |               |
 | `stream_arbiter_flushable`   | Round-robin arbiter for ready/valid stream interface and flush functionality   | active         |               |
 | `stream_demux`               | Ready/valid interface demultiplexer                                            | active         |               |
+| `stream_join`                | Ready/valid handshake join multiple to one common                              | active         |               |
 | `stream_mux`                 | Ready/valid interface multiplexer                                              | active         |               |
 | `stream_register`            | Register with ready/valid interface                                            | active         |               |
 | `stream_fork`                | Ready/valid fork                                                               | active         |               |
+| `stream_fork_dynamic`        | Ready/valid fork, with selection mask for partial forking                      | active         |               |
 | `stream_filter`              | Ready/valid filter                                                             | active         |               |
 | `stream_delay`               | Randomize or delay ready/valid interface                                       | active         |               |
+| `stream_to_mem`              | Use memories without flow control for output data in streams.                  | active         |               |
+| `stream_xbar`                | Fully connected crossbar with ready/valid interface.                           | active         |               |
+| `sub_per_hash`               | Substitution-permutation hash function                                         | active         |               |
 | `popcount`                   | Combinatorial popcount (hamming weight)                                        | active         |               |
 
 ### Data Structures
 
 | Name                 | Description                                     | Status         | Superseded By |
-| :------------------- | :---------------------------------------------- | :------------- | :------------ |
+|----------------------|-------------------------------------------------|----------------|---------------|
+| `cb_filter`          | Counting-Bloom-Filter with combinational lookup | active         |               |
 | `fifo`               | FIFO register with upper threshold              | *deprecated*   | `fifo_v3`     |
 | `fifo_v2`            | FIFO register with upper and lower threshold    | *deprecated*   | `fifo_v3`     |
 | `fifo_v3`            | FIFO register with generic fill counts          | active         |               |
+| `stream_fifo`        | FIFO register with ready/valid interface        | active         |               |
 | `generic_fifo`       | FIFO register without thresholds                | *deprecated*   | `fifo_v3`     |
 | `generic_fifo_adv`   | FIFO register without thresholds                | *deprecated*   | `fifo_v3`     |
 | `sram`               | SRAM behavioral model                           | active         |               |
@@ -96,7 +113,7 @@ The header file `registers.svh` contains macros that expand to descriptions of r
 To avoid misuse of `always_ff` blocks, only the following macros shall be used to describe sequential behavior.
 The use of linter rules that flag explicit uses of `always_ff` in source code is encouraged.
 
-|         Macro         |                            Arguments                            |                               Description                               |
+| Macro                 | Arguments                                                       | Description                                                             |
 |-----------------------|-----------------------------------------------------------------|-------------------------------------------------------------------------|
 | <code>\`FF</code>     | `q_sig`, `d_sig`, `rst_val`                                     | Flip-flop with asynchronous active-low reset (implicit)                 |
 | <code>\`FFAR</code>   | `q_sig`, `d_sig`, `rst_val`, `clk_sig`, `arst_sig`              | Flip-flop with asynchronous active-high reset                           |

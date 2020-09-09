@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/pulp-platform/common_cells.git
+	branch = v1.19.0
+	commit = eb425a5c76f3c2ae0c1b20f97e6c0d8fd28a1eef
+	parent = bc8729f374023e291c4e6f0b178d767c4a27c4f3
+	method = merge
+	cmdver = 0.4.1

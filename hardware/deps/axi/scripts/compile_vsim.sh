@@ -11,7 +11,16 @@
 # specific language governing permissions and limitations under the License.
 #
 # Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+# Andreas Kurth  <akurth@iis.ee.ethz.ch>
 
 set -e
 
-bender vsim -t test
+[ ! -z "$VSIM" ] || VSIM=vsim
+
+bender script vsim -t test \
+    --vlog-arg="-svinputport=compat" \
+    --vlog-arg="-override_timescale 1ns/1ps" \
+    --vlog-arg="-suppress 2583" \
+    > compile.tcl
+echo 'return 0' >> compile.tcl
+$VSIM -c -do 'exit -code [source compile.tcl]'

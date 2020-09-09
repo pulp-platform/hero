@@ -317,7 +317,7 @@ module axi2mem #(
   assign m2s_req.we = meta.write;
 
   // Interface memory as stream.
-  mem_to_stream #(
+  stream_to_mem #(
     .mem_req_t  (mem_req_t),
     .mem_resp_t (axi_data_t),
     .BufDepth   (BufDepth)

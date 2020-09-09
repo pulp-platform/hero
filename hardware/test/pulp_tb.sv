@@ -45,11 +45,12 @@ module pulp_tb #(
   typedef pulp_pkg::lite_addr_t axi_lite_addr_t;
   typedef pulp_pkg::lite_data_t axi_lite_data_t;
   typedef pulp_pkg::lite_strb_t axi_lite_strb_t;
-  `AXI_LITE_TYPEDEF_AX_CHAN_T(  axi_lite_ax_t,    axi_lite_addr_t, axi_id_t, axi_user_t);
-  `AXI_LITE_TYPEDEF_W_CHAN_T(   axi_lite_w_t,     axi_lite_data_t, axi_lite_strb_t, axi_user_t);
-  `AXI_LITE_TYPEDEF_B_CHAN_T(   axi_lite_b_t,     axi_id_t, axi_user_t);
-  `AXI_LITE_TYPEDEF_R_CHAN_T(   axi_lite_r_t,     axi_lite_data_t, axi_id_t, axi_user_t);
-  `AXI_LITE_TYPEDEF_REQ_T(      axi_lite_req_t,   axi_lite_ax_t, axi_lite_w_t);
+  `AXI_LITE_TYPEDEF_AW_CHAN_T(  axi_lite_aw_t,    axi_lite_addr_t);
+  `AXI_LITE_TYPEDEF_W_CHAN_T(   axi_lite_w_t,     axi_lite_data_t, axi_lite_strb_t);
+  `AXI_LITE_TYPEDEF_B_CHAN_T(   axi_lite_b_t);
+  `AXI_LITE_TYPEDEF_AR_CHAN_T(  axi_lite_ar_t,    axi_lite_addr_t);
+  `AXI_LITE_TYPEDEF_R_CHAN_T(   axi_lite_r_t,     axi_lite_data_t);
+  `AXI_LITE_TYPEDEF_REQ_T(      axi_lite_req_t,   axi_lite_aw_t, axi_lite_w_t, axi_lite_ar_t);
   `AXI_LITE_TYPEDEF_RESP_T(     axi_lite_resp_t,  axi_lite_b_t, axi_lite_r_t);
 
   logic clk,
@@ -120,51 +121,53 @@ module pulp_tb #(
   ) to_periphs ();
   `AXI_ASSIGN_FROM_REQ(from_pulp[0], from_pulp_req);
   `AXI_ASSIGN_TO_RESP (from_pulp_resp, from_pulp[0]);
-  localparam int unsigned NODE_REGIONS = 2;
-  logic [NODE_REGIONS-1:0][1:0][pulp_pkg::AXI_AW-1:0] node_start, node_end;
-  logic [NODE_REGIONS-1:0][1:0]                       node_valid;
-  always_comb begin
-    node_start = '0;
-    node_end = '0;
-    node_valid = '0;
-
-    node_start[0][1] = 64'h0000_0000_1a10_0000;
-    node_end  [0][1] = 64'h0000_0000_1a10_ffff;
-    node_valid[0][1] = 1'b1;
-    node_start[0][0] = 64'h0000_0000_0000_0000;
-    node_end  [0][0] = node_start[0][1] - 1;
-    node_valid[0][0] = 1'b1;
-    node_start[1][0] = node_end[0][1] + 1;
-    node_end  [1][0] = 64'hffff_ffff_ffff_ffff;
-    node_valid[1][0] = 1'b1;
-  end
-  axi_node_intf_wrap #(
-    .NB_MASTER      (2),
-    .NB_SLAVE       (2), // actually only 1 but then vsim cannot handle axi_node
-    .NB_REGION      (2),
-    .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
-    .AXI_DATA_WIDTH (AXI_DW),
-    .AXI_ID_WIDTH   (AXI_IW),
-    .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
+  // Address Map
+  typedef axi_pkg::xbar_rule_64_t rule_t;
+  localparam int unsigned NumRules = 1;
+  rule_t [NumRules-1:0] addr_map;
+  assign addr_map[0] = '{
+    idx:        1,
+    start_addr: 64'h0000_0000_1a10_0000,
+    end_addr:   64'h0000_0000_1a10_ffff
+  };
+  // Crossbar Configuration and Instantiation
+  localparam axi_pkg::xbar_cfg_t XbarCfg = '{
+    NoSlvPorts:         2,
+    NoMstPorts:         2,
+    MaxMstTrans:        8,
+    MaxSlvTrans:        8,
+    FallThrough:        1'b1,
+    LatencyMode:        axi_pkg::NO_LATENCY,
+    AxiIdWidthSlvPorts: AXI_IW,
+    AxiIdUsedSlvPorts:  AXI_IW,
+    AxiAddrWidth:       pulp_pkg::AXI_AW,
+    AxiDataWidth:       AXI_DW,
+    NoAddrRules:        NumRules
+  };
+  axi_xbar_intf #(
+    .AXI_USER_WIDTH (pulp_pkg::AXI_UW),
+    .Cfg            (XbarCfg),
+    .rule_t         (rule_t)
   ) i_xbar (
-    .clk          (clk),
-    .rst_n        (rst_n),
-    .test_en_i    (1'b0),
-    .slave        (from_pulp),
-    .master       (from_xbar),
-    .start_addr_i (node_start),
-    .end_addr_i   (node_end),
-    .valid_rule_i (node_valid)
+    .clk_i                  (clk),
+    .rst_ni                 (rst_n),
+    .test_i                 (1'b0),
+    .slv_ports              (from_pulp),
+    .mst_ports              (from_xbar),
+    .addr_map_i             (addr_map),
+    .en_default_mst_port_i  ('1), // default all slave ports to master port 0
+    .default_mst_port_i     ('0)
   );
 
   // Peripherals
-  axi_data_width_converter #(
-    .ADDR_WIDTH     (pulp_pkg::AXI_AW),
-    .SI_DATA_WIDTH  (AXI_DW),
-    .MI_DATA_WIDTH  (64),
-    .ID_WIDTH       (AXI_IW+1),
-    .USER_WIDTH     (pulp_pkg::AXI_UW)
-  ) i_dwc_peripherals (
+  axi_dw_converter_intf #(
+    .AXI_ID_WIDTH             (AXI_IW+1),
+    .AXI_ADDR_WIDTH           (pulp_pkg::AXI_AW),
+    .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW),
+    .AXI_MST_PORT_DATA_WIDTH  (64),
+    .AXI_USER_WIDTH           (pulp_pkg::AXI_UW),
+    .AXI_MAX_READS            (4)
+  ) i_dwc_periph_mst (
     .clk_i  (clk),
     .rst_ni (rst_n),
     .slv    (from_xbar[1]),
@@ -221,11 +224,14 @@ module pulp_tb #(
         if (aw_queue.size() != 0) begin
           from_xbar[0].w_ready = 1'b1;
           if (from_xbar[0].w_valid) begin
+            automatic axi_pkg::burst_t burst = aw_queue[0].burst;
+            automatic axi_pkg::len_t len = aw_queue[0].len;
             automatic axi_pkg::size_t size = aw_queue[0].size;
-            automatic axi_addr_t addr = axi_pkg::beat_addr(aw_queue[0].addr, size, w_cnt);
+            automatic axi_addr_t addr = axi_pkg::beat_addr(aw_queue[0].addr, size, len, burst,
+                w_cnt);
             for (shortint unsigned
-                i_byte = axi_pkg::beat_lower_byte(addr, size, AXI_SW, w_cnt);
-                i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, w_cnt);
+                i_byte = axi_pkg::beat_lower_byte(addr, size, len, burst, AXI_SW, w_cnt);
+                i_byte <= axi_pkg::beat_upper_byte(addr, size, len, burst, AXI_SW, w_cnt);
                 i_byte++) begin
               if (from_xbar[0].w_strb[i_byte]) begin
                 automatic axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
@@ -277,15 +283,17 @@ module pulp_tb #(
       // R
       forever begin
         if (ar_queue.size() != 0) begin
+          automatic axi_pkg::burst_t burst = ar_queue[0].burst;
+          automatic axi_pkg::len_t len = ar_queue[0].len;
           automatic axi_pkg::size_t size = ar_queue[0].size;
-          automatic axi_addr_t addr = axi_pkg::beat_addr(ar_queue[0].addr, size, r_cnt);
+          automatic axi_addr_t addr = axi_pkg::beat_addr(ar_queue[0].addr, size, len, burst, r_cnt);
           automatic axi_r_t r_beat = '0;
           r_beat.data = 'x;
           r_beat.id = ar_queue[0].id;
           r_beat.resp = axi_pkg::RESP_OKAY;
           for (shortint unsigned
-              i_byte = axi_pkg::beat_lower_byte(addr, size, AXI_SW, r_cnt);
-              i_byte <= axi_pkg::beat_upper_byte(addr, size, AXI_SW, r_cnt);
+              i_byte = axi_pkg::beat_lower_byte(addr, size, len, burst, AXI_SW, r_cnt);
+              i_byte <= axi_pkg::beat_upper_byte(addr, size, len, burst, AXI_SW, r_cnt);
               i_byte++) begin
             automatic axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
             if (!mem.exists(byte_addr)) begin
@@ -320,7 +328,6 @@ module pulp_tb #(
 
   task write_rab(input axi_lite_addr_t addr, input axi_lite_data_t data);
     rab_conf_req.aw.addr = addr;
-    rab_conf_req.aw.size = 3'h3;
     rab_conf_req.aw_valid = 1'b1;
     `wait_for(rab_conf_resp.aw_ready)
     rab_conf_req.aw_valid = 1'b0;

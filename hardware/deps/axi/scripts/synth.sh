@@ -11,6 +11,7 @@
 # specific language governing permissions and limitations under the License.
 #
 # Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+# Andreas Kurth  <akurth@iis.ee.ethz.ch>
 
 set -e
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
@@ -18,9 +19,11 @@ ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 [ ! -z "$SYNOPSYS_DC" ] || SYNOPSYS_DC="synopsys dc_shell -64"
 
 echo 'remove_design -all' > ./synth.tcl
-bender synopsys -t synth_test >> ./synth.tcl
+bender script synopsys -t synth_test >> ./synth.tcl
 echo 'elaborate synth_bench' >> ./synth.tcl
 
 cat ./synth.tcl | $SYNOPSYS_DC | tee synth.log 2>&1
 grep -i "warning:" synth.log || true
-! grep -i "error:" synth.log
+grep -i "error:" synth.log && false
+
+touch synth.completed

@@ -8,20 +8,19 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
-// cf_math_pkg: Constant Function Implementations of Mathematical Functions for HDL Elaboration
-//
-// This package contains a collection of mathematical functions that are commonly used when defining
-// the value of constants in HDL code.  These functions are implemented as Verilog constants
-// functions.  Introduced in Verilog 2001 (IEEE Std 1364-2001), a constant function (§ 10.3.5) is a
-// function whose value can be evaluated at compile time or during elaboration.  A constant function
-// must be called with arguments that are constants.
+/// cf_math_pkg: Constant Function Implementations of Mathematical Functions for HDL Elaboration
+///
+/// This package contains a collection of mathematical functions that are commonly used when defining
+/// the value of constants in HDL code.  These functions are implemented as Verilog constants
+/// functions.  Introduced in Verilog 2001 (IEEE Std 1364-2001), a constant function (§ 10.3.5) is a
+/// function whose value can be evaluated at compile time or during elaboration.  A constant function
+/// must be called with arguments that are constants.
+package cf_math_pkg;
 
-package automatic cf_math_pkg;
-
-    // Ceiled Division of Two Natural Numbers
-    //
-    // Returns the quotient of two natural numbers, rounded towards plus infinity.
-    function integer ceil_div (input longint dividend, input longint divisor);
+    /// Ceiled Division of Two Natural Numbers
+    ///
+    /// Returns the quotient of two natural numbers, rounded towards plus infinity.
+    function automatic integer ceil_div (input longint dividend, input longint divisor);
         automatic longint remainder;
 
         // pragma translate_off
@@ -48,26 +47,39 @@ package automatic cf_math_pkg;
 
     // Ceiled Binary Logarithm of a Natural Number
     //
-    // Returns the binary logarithm (i.e., the logarithm to the base 2) of a natural number
-    // (including 0), rounded towards plus infinity.
+    // Returns the binary logarithm (i.e., the logarithm to the base 2) of a natural number rounded
+    // towards plus infinity.
     //
     // Use this as drop-in replacement for the `$clog2` system function where the latter is not
     // supported by your toolchain.
-    function integer log2 (input longint val);
-        automatic longint tmp;
+    function integer clog2 (input longint unsigned val);
+        automatic longint unsigned tmp;
 
         // pragma translate_off
         `ifndef VERILATOR
-        if (val < 0) begin
-            $fatal(1, "Argument %0d is not a natural number!", val);
+        if (val == 0) begin
+            $fatal(1, "Logarithm of 0 cannot be represented!");
         end
         `endif
         // pragma translate_on
 
         tmp = val - 1;
-        for (log2 = 0; tmp > 0; log2++) begin
+        for (clog2 = 0; tmp > 0; clog2++) begin
             tmp = tmp >> 1;
         end
+    endfunction
+
+    /// Index width required to be able to represent up to `num_idx` indices as a binary
+    /// encoded signal.
+    /// Ensures that the minimum width if an index signal is `1`, regardless of parametrization.
+    ///
+    /// Sample usage in type definition:
+    /// As parameter:
+    ///   `parameter type idx_t = logic[cf_math_pkg::idx_width(NumIdx)-1:0]`
+    /// As typedef:
+    ///   `typedef logic [cf_math_pkg::idx_width(NumIdx)-1:0] idx_t`
+    function automatic integer unsigned idx_width (input integer unsigned num_idx);
+        return (num_idx > 32'd1) ? unsigned'($clog2(num_idx)) : 32'd1;
     endfunction
 
 endpackage

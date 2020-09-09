@@ -13,8 +13,8 @@
 module onehot_to_bin #(
     parameter int unsigned ONEHOT_WIDTH = 16,
     // Do Not Change
-    parameter int unsigned BIN_WIDTH   = ONEHOT_WIDTH > 1 ? $clog2(ONEHOT_WIDTH) : 1
-)(
+    parameter int unsigned BIN_WIDTH    = ONEHOT_WIDTH == 1 ? 1 : $clog2(ONEHOT_WIDTH)
+)   (
     input  logic [ONEHOT_WIDTH-1:0] onehot,
     output logic [BIN_WIDTH-1:0]    bin
 );
@@ -29,11 +29,4 @@ module onehot_to_bin #(
         assign bin[j] = |(tmp_mask & onehot);
     end
 
-// pragma translate_off
-`ifndef VERILATOR
-    initial begin
-        assert($onehot0(onehot)) else $fatal(1, "[onehot_to_bin] More than two bit set in the one-hot signal");
-    end
-`endif
-// pragma translate_on
 endmodule

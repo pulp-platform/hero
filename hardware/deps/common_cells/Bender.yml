@@ -7,6 +7,7 @@ package:
     - "Andreas Kurth <akurth@iis.ee.ethz.ch>"
     - "Manuel Eggimann <meggimann@iis.ee.ethz.ch>"
     - "Stefan Mach <smach@iis.ee.ethz.ch>"
+    - "Wolfgang Roenninger <wroennin@student.ethz.ch>"
 
 dependencies:
   common_verification: { git: "https://github.com/pulp-platform/common_verification.git", version: 0.1.1 }
@@ -23,13 +24,16 @@ sources:
   - src/cdc_2phase.sv
   - src/cf_math_pkg.sv
   - src/clk_div.sv
-  - src/counter.sv
+  - src/delta_counter.sv
+  - src/ecc_pkg.sv
   - src/edge_propagator_tx.sv
+  - src/exp_backoff.sv
   - src/fifo_v3.sv
   - src/graycode.sv
+  - src/isochronous_spill_register.sv
+  - src/lfsr.sv
   - src/lfsr_16bit.sv
   - src/lfsr_8bit.sv
-  - src/lzc.sv
   - src/mv_filter.sv
   - src/onehot_to_bin.sv
   - src/plru_tree.sv
@@ -42,22 +46,33 @@ sources:
   - src/stream_demux.sv
   - src/stream_filter.sv
   - src/stream_fork.sv
+  - src/stream_intf.sv
   - src/stream_join.sv
   - src/stream_mux.sv
+  - src/sub_per_hash.sv
   - src/sync.sv
   - src/sync_wedge.sv
+  - src/unread.sv
   # Level 1
+  - src/addr_decode.sv
+  - src/cb_filter.sv
   - src/cdc_fifo_2phase.sv
   - src/cdc_fifo_gray.sv
+  - src/counter.sv
+  - src/ecc_decode.sv
+  - src/ecc_encode.sv
   - src/edge_detect.sv
-  - src/id_queue.sv
+  - src/lzc.sv
+  - src/max_counter.sv
   - src/rstgen.sv
   - src/stream_delay.sv
   - src/stream_fifo.sv
   - src/stream_fork_dynamic.sv
+  - src/stream_xbar.sv
   # Level 2
   - src/fall_through_register.sv
-  - src/mem_to_stream.sv
+  - src/id_queue.sv
+  - src/stream_to_mem.sv
   - src/stream_arbiter_flushable.sv
   - src/stream_register.sv
   # Level 3
@@ -69,13 +84,23 @@ sources:
 
   - target: test
     files:
+      # Level 0
+      - test/addr_decode_tb.sv
+      - test/cb_filter_tb.sv
       - test/cdc_2phase_tb.sv
       - test/cdc_fifo_tb.sv
       - test/fifo_tb.sv
       - test/graycode_tb.sv
       - test/id_queue_tb.sv
       - test/popcount_tb.sv
+      - test/rr_arb_tree_tb.sv
+      - test/stream_test.sv
       - test/stream_register_tb.sv
+      - test/stream_to_mem_tb.sv
+      - test/stream_xbar_tb.sv
+      - test/sub_per_hash_tb.sv
+      # Level 1
+      - test/isochronous_spill_register_tb.sv
 
   - target: synth_test
     files:
@@ -83,14 +108,13 @@ sources:
       - test/cdc_2phase_synth.sv
       - test/id_queue_synth.sv
       - test/stream_arbiter_synth.sv
+      - test/ecc_synth.sv
       # Level 1
       - test/synth_bench.sv
 
   # Deprecated modules
   # Level 0
   - src/deprecated/clock_divider_counter.sv
-  - src/deprecated/fifo_v1.sv
-  - src/deprecated/fifo_v2.sv
   - src/deprecated/find_first_one.sv
   - src/deprecated/generic_LFSR_8bit.sv
   - src/deprecated/generic_fifo.sv
@@ -100,6 +124,9 @@ sources:
   - src/deprecated/rrarbiter.sv
   # Level 1
   - src/deprecated/clock_divider.sv
+  - src/deprecated/fifo_v2.sv
+  # Level 2
+  - src/deprecated/fifo_v1.sv
 
   # Depend on deprecated modules
   - src/edge_propagator.sv
