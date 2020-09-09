@@ -79,7 +79,7 @@ module soc_bus #(
 
   // Address Map
   typedef axi_pkg::xbar_rule_64_t rule_t;
-  localparam int unsigned NumRules = N_CLUSTERS + L2_N_PORTS + 3;
+  localparam int unsigned NumRules = N_MASTERS + 2;
   rule_t [NumRules-1:0] addr_map;
   // Everything below Cluster 0 to RAB
   assign addr_map[0] = '{
