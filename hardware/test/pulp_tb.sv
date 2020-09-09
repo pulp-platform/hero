@@ -92,6 +92,14 @@ module pulp_tb #(
     .cl_eoc_o       (cl_eoc),
     .cl_busy_o      (cl_busy),
 
+    .rab_from_pulp_miss_irq_o   (/* unused */),
+    .rab_from_pulp_multi_irq_o  (/* unused */),
+    .rab_from_pulp_prot_irq_o   (/* unused */),
+    .rab_from_host_miss_irq_o   (/* unused */),
+    .rab_from_host_multi_irq_o  (/* unused */),
+    .rab_from_host_prot_irq_o   (/* unused */),
+    .rab_miss_fifo_full_irq_o   (/* unused */),
+
     .ext_req_o      (from_pulp_req),
     .ext_resp_i     (from_pulp_resp),
     .ext_req_i      (to_pulp_req),
