@@ -358,10 +358,38 @@ module pulp_tb #(
     write_rab(slice_addr+8'h18, 64'h7);
   endtask
 
+  task write_to_pulp(input axi_addr_t addr, input axi_data_t data);
+    to_pulp_req.aw.id = '0;
+    to_pulp_req.aw.addr = addr;
+    to_pulp_req.aw.len = '0;
+    to_pulp_req.aw.size = $clog2(AXI_SW);
+    to_pulp_req.aw.burst = axi_pkg::BURST_INCR;
+    to_pulp_req.aw.lock = 1'b0;
+    to_pulp_req.aw.cache = '0;
+    to_pulp_req.aw.prot = '0;
+    to_pulp_req.aw.qos = '0;
+    to_pulp_req.aw.region = '0;
+    to_pulp_req.aw.user = '0;
+    to_pulp_req.aw_valid = 1'b1;
+    `wait_for(to_pulp_resp.aw_ready)
+    to_pulp_req.aw_valid = 1'b0;
+    to_pulp_req.w.data = data;
+    to_pulp_req.w.strb = '1;
+    to_pulp_req.w.last = 1'b1;
+    to_pulp_req.w.user = '0;
+    to_pulp_req.w_valid = 1'b1;
+    `wait_for(to_pulp_resp.w_ready)
+    to_pulp_req.w_valid = 1'b0;
+    to_pulp_req.b_ready = 1'b1;
+    `wait_for(to_pulp_resp.b_valid)
+    to_pulp_req.b_ready = 1'b0;
+  endtask
+
   // Simulation control
   initial begin
     cl_fetch_en = '0;
     rab_conf_req = '{default: '0};
+    to_pulp_req = '{default: '0};
     // Wait for reset.
     wait (rst_n);
     @(posedge clk);
@@ -370,6 +398,13 @@ module pulp_tb #(
     // through the RAB) except zero page.
     write_rab_slice(32'hA0, 64'h0000_0000_0000_1000, 64'hFFFF_FFFF_FFFF_FFFF,
         64'h0000_0000_0000_1000);
+
+    // Set up RAB slice from external/Host to mailbox.
+    write_rab_slice(32'h40, 64'h0000_0000_1B80_1000, 64'h0000_0000_1B80_1FFF,
+        64'h0000_0000_1B80_1000);
+
+    // Write word to mailbox.
+    write_to_pulp(64'h0000_0000_1B80_1000, 32'h5000_600D);
 
     // Start cluster 0.
     cl_fetch_en[0] = 1'b1;
@@ -402,12 +437,6 @@ module pulp_tb #(
         end
       end
     end
-  end
-
-  // Drive requests into PULP.
-  initial begin
-    to_pulp_req = '0;
-    wait (rst_n);
   end
 
   // Observe SoC bus for errors.
