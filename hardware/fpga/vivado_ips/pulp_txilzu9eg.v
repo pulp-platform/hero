@@ -107,7 +107,8 @@ module pulp_txilzu9eg (
   output          rab_from_host_miss_irq_o,
   output          rab_from_host_multi_irq_o,
   output          rab_from_host_prot_irq_o,
-  output          rab_miss_fifo_full_irq_o
+  output          rab_miss_fifo_full_irq_o,
+  output          mbox_irq_o
 );
   wire [  6:0] slv_aw_id,     slv_b_id,                   slv_ar_id,        slv_r_id,
                mst_aw_id,     mst_b_id,                   mst_ar_id,        mst_r_id;
@@ -272,7 +273,8 @@ module pulp_txilzu9eg (
     .rab_from_host_miss_irq_o   (rab_from_host_miss_irq_o),
     .rab_from_host_multi_irq_o  (rab_from_host_multi_irq_o),
     .rab_from_host_prot_irq_o   (rab_from_host_prot_irq_o),
-    .rab_miss_fifo_full_irq_o   (rab_miss_fifo_full_irq_o)
+    .rab_miss_fifo_full_irq_o   (rab_miss_fifo_full_irq_o),
+    .mbox_irq_o                 (mbox_irq_o)
   );
   axi_id_resize_ports #(
     .ADDR_WIDTH   (64),

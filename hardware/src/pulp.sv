@@ -68,6 +68,9 @@ module pulp #(
   output logic                  rab_from_host_prot_irq_o,
   output logic                  rab_miss_fifo_full_irq_o,
 
+  // Mailbox IRQ
+  output logic                  mbox_irq_o,
+
   output axi_req_t              ext_req_o,
   input  axi_resp_t             ext_resp_i,
   input  axi_req_t              ext_req_i,
@@ -396,6 +399,24 @@ module pulp #(
     .mbox_pulp_base_addr_o  (mbox_pulp_base_addr),
     .rab_mst                (rab_mst),
     .rab_slv                (rab_slv_remapped)
+  );
+
+  hero_axi_mailbox_intf #(
+    .Depth        (32'd8),
+    .AxiAddrWidth (AXI_AW),
+    .AxiDataWidth (AXI_DW),
+    .AxiIdWidth   (AXI_IW_SB_OUP),
+    .AxiUserWidth (AXI_UW)
+  ) i_mailbox (
+    .clk_i,
+    .rst_ni,
+    .test_i                 (1'b0),
+    .host_slv               (mbox_host),
+    .host_irq_o             (mbox_irq_o),
+    .host_mbox_base_addr_i  (mbox_host_base_addr),
+    .dev_slv                (mbox_pulp),
+    .dev_irq_o              (/* unused */),
+    .dev_mbox_base_addr_i   (mbox_pulp_base_addr)
   );
 
   for (genvar i = 0; i < L2_N_AXI_PORTS; i++) begin: gen_l2_ports

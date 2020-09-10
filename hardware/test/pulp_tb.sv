@@ -99,6 +99,7 @@ module pulp_tb #(
     .rab_from_host_multi_irq_o  (/* unused */),
     .rab_from_host_prot_irq_o   (/* unused */),
     .rab_miss_fifo_full_irq_o   (/* unused */),
+    .mbox_irq_o                 (/* unused */),
 
     .ext_req_o      (from_pulp_req),
     .ext_resp_i     (from_pulp_resp),
