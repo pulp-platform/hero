@@ -65,8 +65,8 @@ module axi_to_axi_lite #(
     .DataWidth    ( AxiDataWidth    ),
     .IdWidth      ( AxiIdWidth      ),
     .UserWidth    ( AxiUserWidth    ),
-    .req_t        ( full_req_t      ),
-    .resp_t       ( full_resp_t     )
+    .axi_req_t    ( full_req_t      ),
+    .axi_resp_t   ( full_resp_t     )
   ) i_axi_burst_splitter (
     .clk_i      ( clk_i         ),
     .rst_ni     ( rst_ni        ),
