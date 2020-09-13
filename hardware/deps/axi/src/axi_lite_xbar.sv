@@ -168,8 +168,8 @@ module axi_lite_xbar #(
       .AxiDataWidth ( Cfg.AxiDataWidth  ),
       .req_lite_t   ( axi_req_t         ),
       .resp_lite_t  ( axi_resp_t        ),
-      .req_t        ( full_req_t        ),
-      .resp_t       ( full_resp_t       )
+      .axi_req_t    ( full_req_t        ),
+      .axi_resp_t   ( full_resp_t       )
     ) i_dec_err_conv (
       .slv_req_lite_i  ( slv_reqs[i][Cfg.NoMstPorts]  ),
       .slv_resp_lite_o ( slv_resps[i][Cfg.NoMstPorts] ),
