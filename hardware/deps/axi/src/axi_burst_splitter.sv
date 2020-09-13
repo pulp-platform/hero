@@ -119,8 +119,8 @@ module axi_burst_splitter #(
   // Respond to unsupported transactions with slave errors.
   axi_err_slv #(
     .AxiIdWidth ( IdWidth               ),
-    .req_t      ( axi_req_t             ),
-    .resp_t     ( axi_resp_t            ),
+    .axi_req_t  ( axi_req_t             ),
+    .axi_resp_t ( axi_resp_t            ),
     .Resp       ( axi_pkg::RESP_SLVERR  ),
     .ATOPs      ( 1'b0                  ),  // The burst splitter does not support ATOPs.
     .MaxTrans   ( 1                     )   // Splitting bursts implies a low-performance bus.

@@ -181,8 +181,8 @@ module axi_lite_xbar #(
 
     axi_err_slv #(
       .AxiIdWidth  ( 32'd1                ), // ID width is one as defined as logic above
-      .req_t       ( full_req_t           ), // AXI request struct
-      .resp_t      ( full_resp_t          ), // AXI response struct
+      .axi_req_t   ( full_req_t           ), // AXI request struct
+      .axi_resp_t  ( full_resp_t          ), // AXI response struct
       .Resp        ( axi_pkg::RESP_DECERR ),
       .ATOPs       ( 1'b0                 ), // no ATOPs in AXI4-Lite
       .MaxTrans    ( 1                    )  // Transactions terminate at this slave, and AXI4-Lite

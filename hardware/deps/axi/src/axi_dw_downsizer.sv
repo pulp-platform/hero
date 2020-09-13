@@ -181,8 +181,8 @@ module axi_dw_downsizer #(
   axi_err_slv #(
     .AxiIdWidth(AxiIdWidth          ),
     .Resp      (axi_pkg::RESP_SLVERR),
-    .req_t     (axi_mst_req_t       ),
-    .resp_t    (axi_mst_resp_t      )
+    .axi_req_t (axi_mst_req_t       ),
+    .axi_resp_t(axi_mst_resp_t      )
   ) i_axi_err_slv (
     .clk_i     (clk_i       ),
     .rst_ni    (rst_ni      ),

@@ -152,8 +152,8 @@ module axi_xbar #(
 
     axi_err_slv #(
       .AxiIdWidth  ( Cfg.AxiIdWidthSlvPorts ),
-      .req_t       ( slv_req_t              ),
-      .resp_t      ( slv_resp_t             ),
+      .axi_req_t   ( slv_req_t              ),
+      .axi_resp_t  ( slv_resp_t             ),
       .Resp        ( axi_pkg::RESP_DECERR   ),
       .ATOPs       ( 1'b1                   ),
       .MaxTrans    ( 4                      )   // Transactions terminate at this slave, so minimize
