@@ -127,8 +127,8 @@ module axi_xbar #(
       .b_chan_t       ( slv_b_chan_t           ),  //  B Channel Type
       .ar_chan_t      ( slv_ar_chan_t          ),  // AR Channel Type
       .r_chan_t       ( slv_r_chan_t           ),  //  R Channel Type
-      .req_t          ( slv_req_t              ),
-      .resp_t         ( slv_resp_t             ),
+      .axi_req_t      ( slv_req_t              ),
+      .axi_resp_t     ( slv_resp_t             ),
       .NoMstPorts     ( Cfg.NoMstPorts + 1     ),
       .MaxTrans       ( Cfg.MaxMstTrans        ),
       .AxiLookBits    ( Cfg.AxiIdUsedSlvPorts  ),
