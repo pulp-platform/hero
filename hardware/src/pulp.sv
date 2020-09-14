@@ -345,7 +345,7 @@ module pulp #(
       .clk_i,
       .rst_ni,
       .slv    (cl_oup_predwc[i]),
-      .mst    (cl_oup_prepacker[i])
+      .mst    (cl_oup[i])
     );
 
     //axi_write_burst_packer_wrap #(
@@ -361,18 +361,18 @@ module pulp #(
     //  .mst    (cl_oup_prebuf[i])
     //);
 
-    axi_read_burst_buffer_wrap #(
-      .ADDR_WIDTH   (AXI_AW),
-      .DATA_WIDTH   (AXI_DW),
-      .ID_WIDTH     (AXI_IW_CL_OUP),
-      .USER_WIDTH   (AXI_UW),
-      .BUF_DEPTH    (pulp_cluster_cfg_pkg::DMA_MAX_BURST_LEN)
-    ) i_r_buf_cl_oup (
-      .clk_i,
-      .rst_ni,
-      .slv    (cl_oup_prepacker[i]),
-      .mst    (cl_oup[i])
-    );
+    //axi_read_burst_buffer_wrap #(
+    //  .ADDR_WIDTH   (AXI_AW),
+    //  .DATA_WIDTH   (AXI_DW),
+    //  .ID_WIDTH     (AXI_IW_CL_OUP),
+    //  .USER_WIDTH   (AXI_UW),
+    //  .BUF_DEPTH    (pulp_cluster_cfg_pkg::DMA_MAX_BURST_LEN)
+    //) i_r_buf_cl_oup (
+    //  .clk_i,
+    //  .rst_ni,
+    //  .slv    (cl_oup_prepacker[i]),
+    //  .mst    (cl_oup[i])
+    //);
   end
 
   addr_t mbox_host_base_addr, mbox_pulp_base_addr;
