@@ -122,12 +122,12 @@ set_property range 4K [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_intc_Reg}]
 set_property offset 0x00A9100000 [get_bd_addr_segs {i_zynq_ps/Data/SEG_i_intc_Reg}]
 ## DDR Low
 assign_bd_address [get_bd_addr_segs {i_zynq_ps/SAXIGP3/HP1_DDR_LOW }]
-set_property range 2G [get_bd_addr_segs {i_zynq_ps/SAXIGP3/HP1_DDR_LOW }]
-set_property offset 0x0000000000 [get_bd_addr_segs {i_zynq_ps/SAXIGP3/HP1_DDR_LOW }]
+set_property range 2G [get_bd_addr_segs {i_pulp/Data/SEG_i_zynq_ps_HP1_DDR_LOW}]
+set_property offset 0x0000000000 [get_bd_addr_segs {i_pulp/Data/SEG_i_zynq_ps_HP1_DDR_LOW}]
 ## DDR High
 assign_bd_address [get_bd_addr_segs {i_zynq_ps/SAXIGP3/HP1_DDR_HIGH }]
-set_property range 32G [get_bd_addr_segs {i_zynq_ps/SAXIGP3/HP1_DDR_HIGH }]
-set_property offset 0x0800000000 [get_bd_addr_segs {i_zynq_ps/SAXIGP3/HP1_DDR_HIGH }]
+set_property range 32G [get_bd_addr_segs {i_pulp/Data/SEG_i_zynq_ps_HP1_DDR_HIGH}]
+set_property offset 0x0800000000 [get_bd_addr_segs {i_pulp/Data/SEG_i_zynq_ps_HP1_DDR_HIGH}]
 
 # Validate and save Top-Level Block Design
 save_bd_design
