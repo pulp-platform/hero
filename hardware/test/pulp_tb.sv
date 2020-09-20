@@ -369,6 +369,7 @@ module pulp_tb #(
     to_pulp_req.aw.prot = '0;
     to_pulp_req.aw.qos = '0;
     to_pulp_req.aw.region = '0;
+    to_pulp_req.aw.atop = '0;
     to_pulp_req.aw.user = '0;
     to_pulp_req.aw_valid = 1'b1;
     `wait_for(to_pulp_resp.aw_ready)
