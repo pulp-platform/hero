@@ -1308,7 +1308,7 @@ long pulp_rab_req(void *rab_config, RabSliceReq *rab_slice_req)
   if (BIT_GET(rab_slice_req->flags_drv, RAB_FLAGS_DRV_CONST)) { // constant remapping
     switch (rab_slice_req->addr_start) {
     case MBOX_H_BASE_ADDR:
-      rab_slice_req->addr_offset = MBOX_BASE_ADDR - MBOX_SIZE_B; // Interface 0
+      rab_slice_req->addr_offset = MBOX_BASE_ADDR + MBOX_SIZE_B; // Interface 1
       break;
 
     case L2_MEM_H_BASE_ADDR:
