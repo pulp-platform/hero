@@ -89,6 +89,9 @@ void pulp_mbox_clear(void)
   n_words_written = 0;
   n_words_to_write = 0;
 
+  // Clear hardware mailbox: read *and* write direction.
+  iowrite32(0x3, pulp_mbox + MBOX_CTRL_OFFSET_B);
+
   spin_unlock_irqrestore(&mbox_fifo_lock, flags); // release the spinlock
 
   return;
