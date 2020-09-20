@@ -358,7 +358,7 @@ module pulp_tb #(
     write_rab(slice_addr+8'h18, 64'h7);
   endtask
 
-  task write_to_pulp(input axi_addr_t addr, input axi_data_t data);
+  task write_to_pulp(input axi_addr_t addr, input axi_data_t data, output axi_pkg::resp_t resp);
     to_pulp_req.aw.id = '0;
     to_pulp_req.aw.addr = addr;
     to_pulp_req.aw.len = '0;
@@ -383,11 +383,13 @@ module pulp_tb #(
     to_pulp_req.w_valid = 1'b0;
     to_pulp_req.b_ready = 1'b1;
     `wait_for(to_pulp_resp.b_valid)
+    resp = to_pulp_resp.b.resp;
     to_pulp_req.b_ready = 1'b0;
   endtask
 
   // Simulation control
   initial begin
+    axi_pkg::resp_t resp;
     cl_fetch_en = '0;
     rab_conf_req = '{default: '0};
     to_pulp_req = '{default: '0};
@@ -405,7 +407,8 @@ module pulp_tb #(
         64'h0000_0000_1B80_1000);
 
     // Write word to mailbox.
-    write_to_pulp(64'h0000_0000_1B80_1000, 32'h5000_600D);
+    write_to_pulp(64'h0000_0000_1B80_1000, 32'h5000_600D, resp);
+    assert(resp == axi_pkg::RESP_OKAY);
 
     // Start cluster 0.
     cl_fetch_en[0] = 1'b1;
