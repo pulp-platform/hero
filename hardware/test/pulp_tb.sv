@@ -20,7 +20,7 @@ module pulp_tb #(
   parameter time          CLK_PERIOD = 1000ps,
   // SoC Parameters
   parameter int unsigned  N_CLUSTERS = 4,
-  parameter int unsigned  AXI_DW = 256,
+  parameter int unsigned  AXI_DW = 128,
   parameter int unsigned  L2_N_AXI_PORTS = 1
 );
 
