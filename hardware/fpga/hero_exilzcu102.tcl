@@ -80,7 +80,7 @@ connect_bd_intf_net [get_bd_intf_pins i_intc/s_axi] -boundary_type upper \
 
 # Concat for the PULP->Host IRQs
 create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 i_irq_concat
-set_property -dict [list CONFIG.NUM_PORTS {9}] [get_bd_cells i_irq_concat]
+set_property -dict [list CONFIG.NUM_PORTS {10}] [get_bd_cells i_irq_concat]
 connect_bd_net [get_bd_pins i_irq_concat/dout] [get_bd_pins i_intc/intr]
 
 # PULP
@@ -102,6 +102,7 @@ connect_bd_net [get_bd_pins i_pulp/rab_from_pulp_multi_irq_o] [get_bd_pins i_irq
 connect_bd_net [get_bd_pins i_pulp/rab_from_pulp_prot_irq_o] [get_bd_pins i_irq_concat/In6]
 connect_bd_net [get_bd_pins i_pulp/cl_busy_o] [get_bd_pins i_irq_concat/In7]
 connect_bd_net [get_bd_pins i_pulp/cl_eoc_o] [get_bd_pins i_irq_concat/In8]
+connect_bd_net [get_bd_pins i_pulp/mbox_irq_o] [get_bd_pins i_irq_concat/In9]
 
 # Address Map
 ## PULP Slave
