@@ -368,6 +368,7 @@
 #define MBOX_ERROR_OFFSET_B 0x30
 #define MBOX_IS_OFFSET_B 0x60
 #define MBOX_IE_OFFSET_B 0x70
+#define MBOX_CTRL_OFFSET_B 0x90
 
 /*
  * RAB
