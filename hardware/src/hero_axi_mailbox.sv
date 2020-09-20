@@ -94,7 +94,7 @@ module hero_axi_mailbox #(
 
   axi_lite_mailbox #(
     .MailboxDepth   ( Depth ),
-    .IrqEdgeTrig    ( 1'b1  ),
+    .IrqEdgeTrig    ( 1'b0  ),
     .IrqActHigh     ( 1'b1  ),
     .AxiAddrWidth   ( AxiAddrWidth  ),
     .AxiDataWidth   ( AxiDataWidth  ),
