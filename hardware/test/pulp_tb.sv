@@ -411,6 +411,7 @@ module pulp_tb #(
 
   // Simulation control
   initial begin
+    axi_data_t data;
     axi_pkg::resp_t resp;
     cl_fetch_en = '0;
     rab_conf_req = '{default: '0};
@@ -431,6 +432,11 @@ module pulp_tb #(
     // Write word to mailbox.
     write_to_pulp(64'h0000_0000_1B80_1000, 32'h5000_600D, resp);
     assert(resp == axi_pkg::RESP_OKAY);
+
+    // Read status of mailbox.
+    read_from_pulp(64'h0000_0000_1B80_1020, data, resp);
+    assert(resp == axi_pkg::RESP_OKAY);
+    $display("Read 0x%08x from mailbox.", data);
 
     // Start cluster 0.
     cl_fetch_en[0] = 1'b1;
