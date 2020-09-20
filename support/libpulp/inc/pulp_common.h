@@ -194,7 +194,7 @@
  * PULP memory map -- see PULP SDK and PULP HW
  */
 #define PULP_BASE_ADDR 0x10000000
-#define MBOX_BASE_ADDR 0x1c00f100
+#define MBOX_BASE_ADDR 0x1B800000
 #define L2_MEM_BASE_ADDR 0x1C000000
 #define L3_MEM_BASE_ADDR 0x80000000 // address of the contiguous L3
 #define PGD_BASE_ADDR 0x20000000 // address of the top-level page table of user-space process
