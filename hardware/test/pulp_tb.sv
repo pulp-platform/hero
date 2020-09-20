@@ -387,6 +387,28 @@ module pulp_tb #(
     to_pulp_req.b_ready = 1'b0;
   endtask
 
+  task read_from_pulp(input axi_addr_t addr, output axi_data_t data, output axi_pkg::resp_t resp);
+    to_pulp_req.ar.id = '0;
+    to_pulp_req.ar.addr = addr;
+    to_pulp_req.ar.len = '0;
+    to_pulp_req.ar.size = $clog2(AXI_SW);
+    to_pulp_req.ar.burst = axi_pkg::BURST_INCR;
+    to_pulp_req.ar.lock = 1'b0;
+    to_pulp_req.ar.cache = '0;
+    to_pulp_req.ar.prot = '0;
+    to_pulp_req.ar.qos = '0;
+    to_pulp_req.ar.region = '0;
+    to_pulp_req.ar.user = '0;
+    to_pulp_req.ar_valid = 1'b1;
+    `wait_for(to_pulp_resp.ar_ready)
+    to_pulp_req.ar_valid = 1'b0;
+    to_pulp_req.r_ready = 1'b1;
+    `wait_for(to_pulp_resp.r_valid)
+    data = to_pulp_resp.r.data;
+    resp = to_pulp_resp.r.resp;
+    to_pulp_req.r_ready = 1'b0;
+  endtask
+
   // Simulation control
   initial begin
     axi_pkg::resp_t resp;
