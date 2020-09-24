@@ -1,4 +1,14 @@
 ############################ OpenMP Sources ############################
+
+#export HERCULES_INSTALL=${HERO_INSTALL}
+#export HERCULES_ARCH="PULP"
+#export CMUX_ROOT="/scratch/mmaxim/cmux"
+#export HERCULES_FORCE_FOOTPRINT_DENSE=1
+#export HERCULES_CPU_MEMORY_SIZE=32768
+#export HERCULES_DMA_ENFORCE
+#export HERCULES_NO_INTERVAL_CONTROLFLOW
+
+
 CC := clang
 LINK := llvm-link
 COB := clang-offload-bundler
@@ -33,6 +43,10 @@ DEFMK_ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 # 3) with _PULP suffix, they apply only to the PULP part of compilation;
 # 4) with _COMMON suffix, they apply to both PULP and host compilation.
 CFLAGS_COMMON += $(cflags) -fopenmp=libomp -O$(opt) -static
+
+# Add this for HERCULES
+#CFLAGS_COMMON += -v -L$(CMUX_ROOT)/lib -I$(CMUX_ROOT)/inc -I$(CMUX_ROOT)/src -lpremnotify-cpu
+
 ifeq ($(default-as),pulp)
   CFLAGS_COMMON += -fhero-device-default-as=device
 endif
