@@ -1,5 +1,6 @@
 #!/bin/bash
 export HERO_INSTALL=/scratch/mmaxim/hero/install
 source ${HERO_INSTALL}/../env/exilzcu102.sh
+echo ${HERCULES_ARCH}
 make default-as=pulp clean all
 scp darknet root@172.31.182.80:/mnt/mmaxim/crosscompiled

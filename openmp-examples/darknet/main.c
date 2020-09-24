@@ -1,22 +1,23 @@
 #include "darknet.h"
 
+#define TIMECOMP
 #ifdef TIMECOMP
 #include <time.h>
 #define CLOCK_PRECISION 1E9
 struct timespec tic, toc;
 
 void compute_delta(char* message) {
-  clock_gettime(CLOCK_MONOTONIC_RAW, &toc);
+  clock_gettime(CLOCK_REALTIME, &toc);
   double accum = (toc.tv_sec - tic.tv_sec) + (toc.tv_nsec - tic.tv_nsec) / CLOCK_PRECISION;
 
   printf("%s, %lf\n", message, accum);
-  clock_gettime(CLOCK_MONOTONIC_RAW, &tic);
+  clock_gettime(CLOCK_REALTIME, &tic);
 }
 #endif  // TIMECOMP
 
 int main() {
 #ifdef TIMECOMP
-  clock_gettime(CLOCK_MONOTONIC_RAW, &tic);
+  clock_gettime(CLOCK_REALTIME, &tic);
 #endif  // TIMECOMP
 
   // Load the network
