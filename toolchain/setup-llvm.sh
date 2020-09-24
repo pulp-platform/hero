@@ -21,6 +21,16 @@ fi
 mkdir -p $HERO_INSTALL
 chmod -R u+w $HERO_INSTALL
 
+# Apply patch to LLVM
+echo ${THIS_DIR}
+if ! patch -d $THIS_DIR/llvm-project -N  -p1 < $THIS_DIR/HerculesCompiler-public/setup/llvm-patches/llvm901_clang.patch
+then
+  if [ $? -gt 1 ]; then
+    exit 1;
+  fi
+fi
+
+
 # clean environment when running together with an env source script
 unset HERO_PULP_INC_DIR
 unset HERO_LIBPULP_DIR
@@ -54,8 +64,8 @@ cmake --build . --target install
 cd ..
 
 # setup hercules passes build
-mkdir -p hc_build
-cd hc_build
+mkdir -p llvm-support_build
+cd llvm-support_build
 
 # run hercules pass build
 # FIXME: integrate LLVM passes better in the HERO architecture
@@ -65,6 +75,18 @@ $HERO_INSTALL/bin/cmake -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL -DCMAKE_BUILD_TYPE=
       $THIS_DIR/llvm-support/
 $HERO_INSTALL/bin/cmake --build . --target install
 cd ..
+
+mkdir -p hercules_build
+cd hercules_build
+# run hercules pass build
+echo "Building Hercules LLVM passes"
+cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL \
+      -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+      -DLLVM_DIR:STRING=$HERO_INSTALL/lib/cmake/llvm \
+      $THIS_DIR/HerculesCompiler-public/llvm-passes/
+cmake --build . --target install
+cd ..
+
 
 # install wrapper script
 # FIXME: this wrapper script should be transparantly included in the HC compiler
