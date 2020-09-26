@@ -32,7 +32,7 @@
         reg = <0x0 0xa0000000 0x0 0x10000000
                0x0 0xa8000000 0x0 0x10000>;
         interrupt-parent = <&gic>;
-        interrupts = <0 89 1>;
+        interrupts = <0 0x59 0x4>;
         iommus = <&smmu 0x280>, <&smmu 0x281>, <&smmu 0x282>; /* FIXME: check this */
     };
 };
