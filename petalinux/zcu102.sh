@@ -3,11 +3,15 @@ THIS_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 
 set -e
 
+# Initialize Python environment suitable for PetaLinux.
+python3.6 -m venv .venv
+source .venv/bin/activate
+
 if [ -n "$NO_IIS" ]; then
   PETALINUX_VER=''
 else
   if [ -z "$PETALINUX_VER" ]; then
-    PETALINUX_VER="vivado-2017.2"
+    PETALINUX_VER="vitis-2019.2"
   fi
 fi
 readonly PETALINUX_VER
@@ -27,10 +31,10 @@ $PETALINUX_VER petalinux-config --oldconfig --get-hw-description "../../hardware
 mkdir -p components/ext_sources
 cd components/ext_sources
 if [ ! -d "linux-xlnx" ]; then
-    git clone --single-branch --branch xilinx-v2017.2 git://github.com/Xilinx/linux-xlnx.git
+    git clone --single-branch --branch xilinx-v2019.2.01 git://github.com/Xilinx/linux-xlnx.git
 fi
 cd linux-xlnx
-git checkout tags/xilinx-v2017.2
+git checkout tags/xilinx-v2019.2.01
 
 cd ../../../
 sed -i 's|CONFIG_SUBSYSTEM_COMPONENT_LINUX__KERNEL_NAME_LINUX__XLNX||' project-spec/configs/config
