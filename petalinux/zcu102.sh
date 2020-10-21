@@ -67,9 +67,6 @@ mkdir -p build/tmp/work/aarch64-xilinx-linux/external-hdf/1.0-r0/git/plnx_aarch6
 cp project-spec/hw-description/system.hdf build/tmp/work/aarch64-xilinx-linux/external-hdf/1.0-r0/git/plnx_aarch64/
 $PETALINUX_VER petalinux-build
 
-# create package
-$PETALINUX_VER petalinux-package --image
-
 mkdir -p build/tmp/work/aarch64-xilinx-linux/external-hdf/1.0-r0/git/plnx_aarch64/
 
 cd images/linux
@@ -85,7 +82,6 @@ if [ -f $THIS_DIR/../local.cfg ] && grep -q HERO_BITSTREAM $THIS_DIR/../local.cf
 the_ROM_image:
 {
   [init] regs.init
-  [fsbl_config] a53_x64
   [bootloader] zynqmp_fsbl.elf
   [pmufw_image] pmufw.elf
   [destination_device=pl] hero_exil${TARGET}_wrapper.bit
@@ -105,7 +101,6 @@ else
 the_ROM_image:
 {
   [init] regs.init
-  [fsbl_config] a53_x64
   [bootloader] zynqmp_fsbl.elf
   [pmufw_image] pmufw.elf
   [destination_cpu=a53-0, exception_level=el-3, trustzone] bl31.elf
