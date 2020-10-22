@@ -5,6 +5,7 @@ set -e
 
 # Initialize Python environment suitable for PetaLinux.
 python3.6 -m venv .venv
+ln -sf python3.6 .venv/bin/python3
 source .venv/bin/activate
 
 if [ -n "$NO_IIS" ]; then
