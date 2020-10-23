@@ -55,6 +55,7 @@
 #include <linux/ioctl.h> /* ioctl */
 #include <linux/slab.h> /* kmalloc */
 #include <linux/errno.h> /* errno */
+#include <linux/err.h> /* IS_ERR */
 #include <linux/sched.h> /* wake_up_interruptible(), TASK_INTERRUPTIBLE */
 #include <linux/delay.h> /* udelay */
 #include <linux/device.h> // class_create, device_create
@@ -516,6 +517,7 @@ struct file_operations pulp_fops = {
 static int __init pulp_init(void)
 {
   int i, err;
+  struct device *my_device;
 #if !INTR_REG_BASE_ADDR
   int *irq_vars[] = { &my_dev.irq_mbox,      &my_dev.irq_rab_miss,     &my_dev.irq_rab_prot,
                       &my_dev.irq_rab_multi, &my_dev.irq_rab_mhr_full, &my_dev.irq_eoc };
@@ -543,13 +545,15 @@ static int __init pulp_init(void)
     goto fail_alloc_chrdev_region;
   }
   // create class struct
-  if ((my_class = class_create(THIS_MODULE, "pmca")) == NULL) {
+  my_class = class_create(THIS_MODULE, "pmca");
+  if (IS_ERR(my_class)) {
     printk(KERN_WARNING "PULP: Error creating class.\n");
     err = -1;
     goto fail_create_class;
   }
   // create device and register it with sysfs
-  if (device_create_with_groups(my_class, NULL, my_dev.dev, NULL, pulp_groups, "PULP") == NULL) {
+  my_device = device_create_with_groups(my_class, NULL, my_dev.dev, NULL, pulp_groups, "PULP");
+  if (IS_ERR(my_device)) {
     printk(KERN_WARNING "PULP: Error creating device.\n");
     err = -1;
     goto fail_create_device;
