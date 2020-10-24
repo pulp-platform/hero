@@ -1,0 +1,36 @@
+#!/bin/sh
+
+SCRIPT_DIR_PATH=/home/root/startup_scripts
+
+start() {
+    echo "Executing startup scripts from '$SCRIPT_DIR_PATH' ..."
+    if test ! -d "$SCRIPT_DIR_PATH"; then
+        mkdir -p "$SCRIPT_DIR_PATH"
+    fi
+    for file in "$SCRIPT_DIR_PATH"/*; do
+        test -f "$file" && test -x "$file" && "$file"
+    done
+    echo "... done executing startup scripts."
+}
+
+stop() {
+    return 0
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit $?

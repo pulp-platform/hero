@@ -77,6 +77,8 @@ create_install_app() {
 }
 # Create application that will mount SD card folders on boot.
 create_install_app init-mount
+# Create application that will execute scripts from SD card on boot.
+create_install_app init-exec-scripts
 
 # start build
 set +e
