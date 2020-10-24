@@ -59,6 +59,14 @@ echo "
 };
 " > project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi
 
+# Configure RootFS
+rootfs_enable() {
+    sed -i -e "s/# CONFIG_$1 is not set/CONFIG_$1=y/" project-spec/configs/rootfs_config
+}
+for pkg in bash bash-completion bc ed grep patch sed vim; do
+  rootfs_enable $pkg
+done
+
 # start build
 set +e
 $PETALINUX_VER petalinux-build
