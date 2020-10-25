@@ -545,7 +545,7 @@ static int __init pulp_init(void)
     goto fail_alloc_chrdev_region;
   }
   // create class struct
-  my_class = class_create(THIS_MODULE, "pulp");
+  my_class = class_create(THIS_MODULE, "PULP");
   if (IS_ERR(my_class)) {
     printk(KERN_WARNING "PULP: Error creating class.\n");
     err = -1;
