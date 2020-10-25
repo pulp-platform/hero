@@ -735,7 +735,7 @@ static int __init pulp_init(void)
 #if INTR_REG_BASE_ADDR
   err = request_irq(my_dev.intr_reg_irq, pulp_isr, 0, "PULP", NULL);
   if (err) {
-    printk(KERN_WARNING "PULP: Error requesting IRQ.\n");
+    printk(KERN_WARNING "PULP: Error requesting IRQ: errno %d.\n", err);
     goto fail_request_irq;
   }
 #else
