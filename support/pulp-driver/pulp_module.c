@@ -728,7 +728,7 @@ static int __init pulp_init(void)
   err = platform_driver_register(&pulp_platform_driver);
   if (err) {
     printk(KERN_WARNING "PULP: Error registering platform driver: %d\n", err);
-    goto fail_request_irq;
+    goto fail_register_platform_driver;
   }
 
   // request interrupts and install top-half handler
@@ -776,7 +776,7 @@ static int __init pulp_init(void)
   err = cdev_add(&my_dev.cdev, my_dev.dev, PULP_N_DEV_NUMBERS);
   if (err) {
     printk(KERN_WARNING "PULP: Error registering the device.\n");
-    goto fail_register_device;
+    goto fail_cdev_add;
   }
   printk(KERN_INFO "PULP: Device registered.\n");
 
@@ -785,7 +785,8 @@ static int __init pulp_init(void)
   /*
    * error handling
    */
-fail_register_device:
+  cdev_del(&my_dev.cdev);
+fail_cdev_add:
 #if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX
   pulp_dma_chan_clean(pulp_dma_chan[1]);
   pulp_dma_chan_clean(pulp_dma_chan[0]);
@@ -807,34 +808,35 @@ fail_request_dma:
   if (my_dev.irq_eoc != -1)
     free_irq(my_dev.irq_eoc, NULL);
 #endif
-
-  platform_driver_unregister(&pulp_platform_driver);
 fail_request_irq:
+  platform_driver_unregister(&pulp_platform_driver);
+fail_register_platform_driver:
+  iounmap(my_dev.mbox);
+  iounmap(my_dev.l3_mem);
+  iounmap(my_dev.l2_mem);
+  iounmap(my_dev.soc_periph);
+  iounmap(my_dev.clusters);
 #if defined(PROFILE_RAB_STR) || defined(PROFILE_RAB_MH)
   pulp_rab_prof_free();
 #endif
   iounmap(my_dev.rab_config);
 #if RAB_AX_LOG_EN == 1
-  pulp_rab_ax_log_free();
-  iounmap(my_dev.rab_ar_log);
-  iounmap(my_dev.rab_aw_log);
   #if PLATFORM == JUNO //|| PLATFORM == TE0808
   iounmap(my_dev.rab_cfg_log);
   #endif
-#endif // RAB_AX_LOG_EN == 1
-#if INTR_REG_BASE_ADDR
-  iounmap(my_dev.intr_reg);
+  pulp_rab_ax_log_free();
+  iounmap(my_dev.rab_aw_log);
+  iounmap(my_dev.rab_ar_log);
+#endif
+#if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX || PLATFORM == TE0808
+  iounmap(my_dev.uart);
 #endif
 #if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX
   iounmap(my_dev.slcr);
-#endif // PLATFORM
-#if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX || PLATFORM == TE0808
-  iounmap(my_dev.uart);
-#endif // PLATFORM
-  iounmap(my_dev.clusters);
-  iounmap(my_dev.soc_periph);
-  iounmap(my_dev.l2_mem);
-  iounmap(my_dev.l3_mem);
+#endif
+#if INTR_REG_BASE_ADDR
+  iounmap(my_dev.intr_reg);
+#endif
 #if PLATFORM == TE0808
 fail_smmu_init:
   iounmap(my_dev.smmu);
@@ -843,13 +845,12 @@ fail_smmu_init:
 #if CLKING_BASE_ADDR
   iounmap(my_dev.clking);
 #endif
-  iounmap(my_dev.mbox);
 #ifdef GPIO_EXT_RESET_ADDR
   iounmap(my_dev.gpio_reset);
 #endif
   iounmap(my_dev.gpio);
 fail_ioremap:
-  cdev_del(&my_dev.cdev);
+  device_destroy(my_class, my_dev.dev);
 fail_create_device:
   class_destroy(my_class);
 fail_create_class:
@@ -879,6 +880,13 @@ static void __exit pulp_exit(void)
 
   printk(KERN_ALERT "PULP: Unloading device driver.\n");
 
+  cdev_del(&my_dev.cdev);
+
+#if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX
+  pulp_dma_chan_clean(pulp_dma_chan[1]);
+  pulp_dma_chan_clean(pulp_dma_chan[0]);
+#endif // PLATFORM
+
   // deregister
 #if INTR_REG_BASE_ADDR
   free_irq(my_dev.intr_reg_irq, NULL);
@@ -897,13 +905,21 @@ static void __exit pulp_exit(void)
     free_irq(my_dev.irq_eoc, NULL);
 #endif
   platform_driver_unregister(&pulp_platform_driver);
-#if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX
-  pulp_dma_chan_clean(pulp_dma_chan[1]);
-  pulp_dma_chan_clean(pulp_dma_chan[0]);
-#endif // PLATFORM
+
+  // disable PULP
+  gpio = 0;
+  iowrite32(gpio, (void *)((unsigned long)my_dev.gpio + GPIO_HOST2PULP_OFFSET));
+
 #if defined(PROFILE_RAB_STR) || defined(PROFILE_RAB_MH)
   pulp_rab_prof_free();
 #endif
+
+  // unmap memory
+  iounmap(my_dev.mbox);
+  iounmap(my_dev.l3_mem);
+  iounmap(my_dev.l2_mem);
+  iounmap(my_dev.soc_periph);
+  iounmap(my_dev.clusters);
   iounmap(my_dev.rab_config);
 #if RAB_AX_LOG_EN == 1
   pulp_rab_ax_log_free();
@@ -912,37 +928,28 @@ static void __exit pulp_exit(void)
   #if PLATFORM == JUNO //|| PLATFORM == TE0808
   iounmap(my_dev.rab_cfg_log);
   #endif
-#endif // RAB_AX_LOG_EN == 1
-
-  // disable PULP
-  gpio = 0;
-  iowrite32(gpio, (void *)((unsigned long)my_dev.gpio + GPIO_HOST2PULP_OFFSET));
-
-  // unmap memory
-#if INTR_REG_BASE_ADDR
-  iounmap(my_dev.intr_reg);
+#endif
+#if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX || PLATFORM == TE0808
+  iounmap(my_dev.uart);
 #endif
 #if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX
   iounmap(my_dev.slcr);
-#endif // PLATFORM
-#if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX || PLATFORM == TE0808
-  iounmap(my_dev.uart);
-#endif // PLATFORM
-  iounmap(my_dev.clusters);
-  iounmap(my_dev.soc_periph);
-  iounmap(my_dev.l2_mem);
-  iounmap(my_dev.l3_mem);
-  iounmap(my_dev.mbox);
+#endif
+#if INTR_REG_BASE_ADDR
+  iounmap(my_dev.intr_reg);
+#endif
 #if PLATFORM == TE0808
   iounmap(my_dev.smmu);
   iounmap(my_dev.cci);
-#endif // PLATFORM
+#endif
 #if CLKING_BASE_ADDR
   iounmap(my_dev.clking);
 #endif
+#ifdef GPIO_EXT_RESET_ADDR
+  iounmap(my_dev.gpio_reset);
+#endif
   iounmap(my_dev.gpio);
 
-  cdev_del(&my_dev.cdev);
   device_destroy(my_class, my_dev.dev);
   class_destroy(my_class);
   unregister_chrdev_region(my_dev.dev, 1);
