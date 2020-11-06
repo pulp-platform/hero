@@ -368,6 +368,8 @@
 #define MBOX_STATUS_MASK_FULL 0x2   // bitmask that selects the Full bit
 #define MBOX_STATUS_MASK_EMPTY 0x1  // bitmask that selects the Empty bit
 #define MBOX_ERROR_OFFSET_B 0x30
+#define MBOX_WIRQT_OFFSET_B 0x40
+#define MBOX_RIRQT_OFFSET_B 0x50
 #define MBOX_IS_OFFSET_B 0x60
 #define MBOX_IE_OFFSET_B 0x70
 #define MBOX_IRQ_MASK_ALL 0x7   // bitmask that selects all IRQs
