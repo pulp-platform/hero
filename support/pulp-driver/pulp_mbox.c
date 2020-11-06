@@ -143,6 +143,7 @@ void pulp_mbox_intr(void *mbox)
 
   // check interrupt status
   mbox_is = ioread32((void *)((unsigned long)mbox + MBOX_IS_OFFSET_B)) & MBOX_IRQ_MASK_ALL;
+  pr_debug("PULP - MBOX: IRQ status: 0x%01x.\n", mbox_is);
 
   if (mbox_is & MBOX_IRQ_MASK_READ) { // mailbox receive threshold interrupt
     // clear the interrupt
