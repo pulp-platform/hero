@@ -368,6 +368,11 @@
 #define MBOX_ERROR_OFFSET_B 0x30
 #define MBOX_IS_OFFSET_B 0x60
 #define MBOX_IE_OFFSET_B 0x70
+#define MBOX_IRQ_MASK_ALL 0x7   // bitmask that selects all IRQs
+#define MBOX_IRQ_MASK_ERROR 0x4 // bitmask that selects only Error IRQ
+#define MBOX_IRQ_MASK_READ 0x2  // bitmask that selects only Read Threshold IRQ
+#define MBOX_IRQ_MASK_WRITE 0x1 // bitmask that selects only Write Threshold IRQ
+#define MBOX_IRQ_MASK_NONE 0x0  // bitmask that selects no IRQs
 #define MBOX_CTRL_OFFSET_B 0x90
 
 /*
