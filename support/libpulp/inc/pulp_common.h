@@ -365,6 +365,8 @@
 #define MBOX_WRDATA_OFFSET_B 0x0
 #define MBOX_RDDATA_OFFSET_B 0x10
 #define MBOX_STATUS_OFFSET_B 0x20
+#define MBOX_STATUS_MASK_FULL 0x2   // bitmask that selects the Full bit
+#define MBOX_STATUS_MASK_EMPTY 0x1  // bitmask that selects the Empty bit
 #define MBOX_ERROR_OFFSET_B 0x30
 #define MBOX_IS_OFFSET_B 0x60
 #define MBOX_IE_OFFSET_B 0x70
