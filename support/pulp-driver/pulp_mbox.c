@@ -113,8 +113,12 @@ void pulp_mbox_clear(void)
   n_words_written = 0;
   n_words_to_write = 0;
 
-  // Clear hardware mailbox: read *and* write direction.
-  iowrite32(0x3, pulp_mbox + MBOX_CTRL_OFFSET_B);
+  // Flush hardware mailbox and acknowledge any Host-side IRQs.
+  pr_info("PULP - MBOX: Flushing read and write FIFOs.\n");
+  iowrite32(MBOX_CTRL_MASK_FLUSH_WRITES | MBOX_CTRL_MASK_FLUSH_READS,
+      pulp_mbox + MBOX_CTRL_OFFSET_B);
+  pr_info("PULP - MBOX: Acknowledging any Host-side IRQs.\n");
+  iowrite32(MBOX_IRQ_MASK_ALL, pulp_mbox + MBOX_IS_OFFSET_B);
 
   mbox_fifo_unlock_irqrestore(flags);
 
