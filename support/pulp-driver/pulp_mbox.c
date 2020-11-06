@@ -34,7 +34,7 @@ static unsigned *mbox_fifo_rd = mbox_fifo;
 static unsigned *mbox_fifo_wr = mbox_fifo;
 static unsigned n_words_written, n_words_to_write;
 
-DEFINE_SPINLOCK(mbox_fifo_lock);
+DEFINE_SPINLOCK(mbox_fifo_mtx);
 DECLARE_WAIT_QUEUE_HEAD(mbox_wq);
 
 void pulp_mbox_init(void *mbox)
@@ -69,12 +69,34 @@ MailboxMode pulp_mbox_get_mode(void)
   return mbox_mode;
 }
 
+void mbox_fifo_lock(void) {
+  spin_lock(&mbox_fifo_mtx);
+  pr_debug("PULP - MBOX: Acquired FIFO lock.\n");
+}
+
+void mbox_fifo_lock_irqsave(unsigned long* const flags) {
+  unsigned long _flags;
+  spin_lock_irqsave(&mbox_fifo_mtx, _flags);
+  *flags = _flags;
+  pr_debug("PULP - MBOX: Acquired FIFO lock after disabling IRQs.\n");
+}
+
+void mbox_fifo_unlock(void) {
+  spin_unlock(&mbox_fifo_mtx);
+  pr_debug("PULP - MBOX: Released FIFO lock.\n");
+}
+
+void mbox_fifo_unlock_irqrestore(const unsigned long flags) {
+  spin_unlock_irqrestore(&mbox_fifo_mtx, flags);
+  pr_debug("PULP - MBOX: Released FIFO lock and re-enabled IRQs.\n");
+}
+
 void pulp_mbox_clear(void)
 {
   int i;
   unsigned long flags;
 
-  spin_lock_irqsave(&mbox_fifo_lock, flags);
+  mbox_fifo_lock_irqsave(&flags);
 
   // empty mbox_fifo
   if ((mbox_fifo_wr != mbox_fifo_rd) || mbox_fifo_full) {
@@ -92,7 +114,7 @@ void pulp_mbox_clear(void)
   // Clear hardware mailbox: read *and* write direction.
   iowrite32(0x3, pulp_mbox + MBOX_CTRL_OFFSET_B);
 
-  spin_unlock_irqrestore(&mbox_fifo_lock, flags); // release the spinlock
+  mbox_fifo_unlock_irqrestore(flags);
 
   return;
 }
@@ -121,7 +143,7 @@ void pulp_mbox_intr(void *mbox)
 
     n_words_written_tmp = 0;
 
-    spin_lock(&mbox_fifo_lock);
+    mbox_fifo_lock();
     // while mailbox not empty and FIFO buffer not full
     while (!(0x1 & ioread32((void *)((unsigned long)mbox + MBOX_STATUS_OFFSET_B))) && !mbox_fifo_full) {
       // read mailbox
@@ -138,7 +160,7 @@ void pulp_mbox_intr(void *mbox)
 
           continue;
         } else {
-          spin_unlock(&mbox_fifo_lock);
+          mbox_fifo_unlock();
 
           if (RAB_UPDATE == req_type) {
             pulp_rab_update(mbox_data);
@@ -148,7 +170,7 @@ void pulp_mbox_intr(void *mbox)
             printk(KERN_INFO "PULP - MBOX: Unknown request type %d\n", req_type);
           }
 
-          spin_lock(&mbox_fifo_lock);
+          mbox_fifo_lock();
         }
       } else { // write to mailbox FIFO buffer
 
@@ -181,7 +203,7 @@ void pulp_mbox_intr(void *mbox)
 
       } // write to mailbox FIFO buffer
     } // while mailbox not empty and FIFO buffer not full
-    spin_unlock(&mbox_fifo_lock);
+    mbox_fifo_unlock();
 
     // wake up user space process
     if (n_words_written_tmp) {
@@ -214,16 +236,16 @@ ssize_t pulp_mbox_read(struct file *filp, char __user *buf, size_t count, loff_t
   unsigned req_type;
   unsigned long not_copied, flags;
 
-  spin_lock_irqsave(&mbox_fifo_lock, flags);
+  mbox_fifo_lock_irqsave(&flags);
   while ((mbox_fifo_wr == mbox_fifo_rd) && !mbox_fifo_full) { // nothing to read
-    spin_unlock_irqrestore(&mbox_fifo_lock, flags); // release the spinlock
+    mbox_fifo_unlock_irqrestore(flags);
 
     if (filp->f_flags & O_NONBLOCK)
       return -EAGAIN;
     if (wait_event_interruptible(mbox_wq, (mbox_fifo_wr != mbox_fifo_rd) || mbox_fifo_full))
       return -ERESTARTSYS; // signal: tell the fs layer to handle it
 
-    spin_lock_irqsave(&mbox_fifo_lock, flags);
+    mbox_fifo_lock_irqsave(&flags);
   }
 
   // mbox_fifo contains data to be read by user
@@ -233,11 +255,11 @@ ssize_t pulp_mbox_read(struct file *filp, char __user *buf, size_t count, loff_t
     count = min(count, (size_t)(mbox_fifo + 2 * MBOX_FIFO_DEPTH - mbox_fifo_rd) * sizeof(mbox_fifo[0]));
 
   // release the spinlock, copy_to_user can sleep
-  spin_unlock_irqrestore(&mbox_fifo_lock, flags);
+  mbox_fifo_unlock_irqrestore(flags);
 
   not_copied = copy_to_user(buf, mbox_fifo_rd, count);
 
-  spin_lock_irqsave(&mbox_fifo_lock, flags);
+  mbox_fifo_lock_irqsave(&flags);
 
   // update read pointer
   mbox_fifo_rd = mbox_fifo_rd + (count - not_copied) / sizeof(mbox_fifo[0]);
@@ -267,7 +289,7 @@ ssize_t pulp_mbox_read(struct file *filp, char __user *buf, size_t count, loff_t
 
           continue;
         } else {
-          spin_unlock_irqrestore(&mbox_fifo_lock, flags);
+          mbox_fifo_unlock_irqrestore(flags);
 
           if (RAB_UPDATE == req_type) {
             printk(KERN_INFO "PULP: RAB update in MBOX read detected.\n");
@@ -279,7 +301,7 @@ ssize_t pulp_mbox_read(struct file *filp, char __user *buf, size_t count, loff_t
             printk(KERN_INFO "PULP - MBOX: Unknown request type %d\n", req_type);
           }
 
-          spin_lock_irqsave(&mbox_fifo_lock, flags);
+          mbox_fifo_lock_irqsave(&flags);
         }
       } else { // write to mailbox FIFO buffer
         // write to mbox_fifo
@@ -317,7 +339,7 @@ ssize_t pulp_mbox_read(struct file *filp, char __user *buf, size_t count, loff_t
     printk(KERN_INFO "PULP - MBOX: mbox_fifo_rd: %d\n", (unsigned)(mbox_fifo_rd - mbox_fifo));
     printk(KERN_INFO "PULP - MBOX: mbox_fifo_full %d\n", mbox_fifo_full);
   }
-  spin_unlock_irqrestore(&mbox_fifo_lock, flags); // release the spinlock
+  mbox_fifo_unlock_irqrestore(flags);
 
   if (DEBUG_LEVEL_MBOX > 0) {
     printk(KERN_INFO "PULP - MBOX: Read %li words from mbox_fifo.\n", (count - not_copied) / sizeof(mbox_fifo[0]));
