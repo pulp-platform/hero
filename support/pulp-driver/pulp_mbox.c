@@ -37,6 +37,75 @@ static unsigned n_words_written, n_words_to_write;
 DEFINE_SPINLOCK(mbox_fifo_mtx);
 DECLARE_WAIT_QUEUE_HEAD(mbox_wq);
 
+uint32_t ioread32_offset(const void* const base, unsigned long offset) {
+  return ioread32((void*)((unsigned long)base + offset));
+}
+void iowrite32_offset(void* const base, unsigned long offset, uint32_t data) {
+  iowrite32(data, (void*)((unsigned long)base + offset));
+}
+
+/// Data Read Register
+uint32_t pulp_mbox_rddata(const void* const mbox) {
+  return ioread32_offset(mbox, MBOX_RDDATA_OFFSET_B);
+}
+
+/// Status Register
+uint32_t pulp_mbox_status(const void* const mbox) {
+  return ioread32_offset(mbox, MBOX_STATUS_OFFSET_B);
+}
+bool pulp_mbox_empty(const void* const mbox) {
+  return (pulp_mbox_status(mbox) & MBOX_STATUS_MASK_EMPTY) == MBOX_STATUS_MASK_EMPTY;
+}
+
+/// Write Interrupt Request Threshold (WIRQT) Register
+uint32_t pulp_mbox_wirqt(const void* const mbox) {
+  return ioread32_offset(mbox, MBOX_WIRQT_OFFSET_B);
+}
+void pulp_mbox_set_wirqt(void* const mbox, const uint32_t val) {
+  iowrite32_offset(mbox, MBOX_WIRQT_OFFSET_B, val);
+}
+
+/// Read Interrupt Request Threshold (RIRQT) Register
+uint32_t pulp_mbox_rirqt(const void* const mbox) {
+  return ioread32_offset(mbox, MBOX_RIRQT_OFFSET_B);
+}
+void pulp_mbox_set_rirqt(void* const mbox, const uint32_t val) {
+  iowrite32_offset(mbox, MBOX_RIRQT_OFFSET_B, val);
+}
+
+/// Interrupt Request Status (IRQS) Register
+uint32_t pulp_mbox_irqs(const void* const mbox) {
+  return ioread32_offset(mbox, MBOX_IS_OFFSET_B);
+}
+void pulp_mbox_set_irqs(void* const mbox, const uint32_t val) {
+  iowrite32_offset(mbox, MBOX_IS_OFFSET_B, val);
+}
+void pulp_mbox_ack_read_irq(void* const mbox) {
+  pulp_mbox_set_irqs(mbox, MBOX_IRQ_MASK_READ);
+}
+void pulp_mbox_ack_write_irq(void* const mbox) {
+  pulp_mbox_set_irqs(mbox, MBOX_IRQ_MASK_WRITE);
+}
+void pulp_mbox_ack_error_irq(void* const mbox) {
+  pulp_mbox_set_irqs(mbox, MBOX_IRQ_MASK_ERROR);
+}
+
+/// Interrupt Request Enable (IRQEN) Register
+uint32_t pulp_mbox_irqen(const void* const mbox) {
+  return ioread32_offset(mbox, MBOX_IE_OFFSET_B);
+}
+void pulp_mbox_set_irqen(void* const mbox, const uint32_t val) {
+  iowrite32_offset(mbox, MBOX_IE_OFFSET_B, val);
+}
+
+/// Control (CTRL) Register
+uint32_t pulp_mbox_ctrl(const void* const mbox) {
+  return ioread32_offset(mbox, MBOX_CTRL_OFFSET_B);
+}
+void pulp_mbox_set_ctrl(void* const mbox, const uint32_t val) {
+  iowrite32_offset(mbox, MBOX_CTRL_OFFSET_B, val);
+}
+
 void pulp_mbox_init(void *mbox)
 {
   // initialize the pointer for pulp_mbox_read
@@ -56,11 +125,11 @@ int pulp_mbox_set_mode(MailboxMode mode)
 
   if (mode == MBOX_OFF) {
     // Disable all mailbox IRQs.
-    iowrite32(MBOX_IRQ_MASK_NONE, pulp_mbox + MBOX_IE_OFFSET_B);
+    pulp_mbox_set_irqen(pulp_mbox, MBOX_IRQ_MASK_NONE);
     pr_info("PULP - MBOX: All IRQs disabled.\n");
   } else {
     // Enable read threshold and error IRQ.
-    iowrite32(MBOX_IRQ_MASK_READ | MBOX_IRQ_MASK_ERROR, pulp_mbox + MBOX_IE_OFFSET_B);
+    pulp_mbox_set_irqen(pulp_mbox, MBOX_IRQ_MASK_READ | MBOX_IRQ_MASK_ERROR);
     pr_info("PULP - MBOX: Read threshold and error IRQ enabled.\n");
   }
 
@@ -115,10 +184,9 @@ void pulp_mbox_clear(void)
 
   // Flush hardware mailbox and acknowledge any Host-side IRQs.
   pr_info("PULP - MBOX: Flushing read and write FIFOs.\n");
-  iowrite32(MBOX_CTRL_MASK_FLUSH_WRITES | MBOX_CTRL_MASK_FLUSH_READS,
-      pulp_mbox + MBOX_CTRL_OFFSET_B);
+  pulp_mbox_set_ctrl(pulp_mbox, MBOX_CTRL_MASK_FLUSH_WRITES | MBOX_CTRL_MASK_FLUSH_READS);
   pr_info("PULP - MBOX: Acknowledging any Host-side IRQs.\n");
-  iowrite32(MBOX_IRQ_MASK_ALL, pulp_mbox + MBOX_IS_OFFSET_B);
+  pulp_mbox_set_irqs(pulp_mbox, MBOX_IRQ_MASK_ALL);
 
   mbox_fifo_unlock_irqrestore(flags);
 
@@ -142,7 +210,7 @@ void pulp_mbox_intr(void *mbox)
   }
 
   // check interrupt status
-  mbox_is = ioread32((void *)((unsigned long)mbox + MBOX_IS_OFFSET_B)) & MBOX_IRQ_MASK_ALL;
+  mbox_is = pulp_mbox_irqs(mbox);
   pr_debug("PULP - MBOX: IRQ status: 0x%01x.\n", mbox_is);
 
   if (mbox_is & MBOX_IRQ_MASK_READ) { // mailbox receive threshold interrupt
@@ -151,9 +219,9 @@ void pulp_mbox_intr(void *mbox)
 
     mbox_fifo_lock();
     // while mailbox not empty and FIFO buffer not full
-    while (!(0x1 & ioread32((void *)((unsigned long)mbox + MBOX_STATUS_OFFSET_B))) && !mbox_fifo_full) {
+    while (!pulp_mbox_empty(mbox) && !mbox_fifo_full) {
       // read mailbox
-      mbox_data = ioread32((void *)((unsigned long)mbox + MBOX_RDDATA_OFFSET_B));
+      mbox_data = pulp_mbox_rddata(mbox);
       pr_debug("PULP - MBOX: Read 0x%08x.\n", mbox_data);
 
       if (n_words_written == n_words_to_write) { // new transfer
@@ -213,7 +281,7 @@ void pulp_mbox_intr(void *mbox)
     mbox_fifo_unlock();
 
     // Clear the IRQ.
-    iowrite32(MBOX_IRQ_MASK_READ, (void *)((unsigned long)mbox + MBOX_IS_OFFSET_B));
+    pulp_mbox_ack_read_irq(mbox);
     pr_debug("PULP - MBOX: IRQ cleared.\n");
 
     // wake up user space process
@@ -226,10 +294,11 @@ void pulp_mbox_intr(void *mbox)
     else if (mbox_fifo_full) {
       pr_info("PULP - MBOX: mbox_fifo_full %d\n", mbox_fifo_full);
     }
-  } else if (mbox_is & MBOX_IRQ_MASK_ERROR) // mailbox error
-    iowrite32(MBOX_IRQ_MASK_ERROR, (void *)((unsigned long)mbox + MBOX_IS_OFFSET_B));
-  else // mailbox send interrupt threshold - not used
-    iowrite32(MBOX_IRQ_MASK_WRITE, (void *)((unsigned long)mbox + MBOX_IS_OFFSET_B));
+  } else if (mbox_is & MBOX_IRQ_MASK_ERROR) { // mailbox error
+    pulp_mbox_ack_error_irq(mbox);
+  } else { // mailbox send interrupt threshold - not used
+    pulp_mbox_ack_write_irq(mbox);
+  }
 
   if (DEBUG_LEVEL_MBOX > 0) {
     do_gettimeofday(&time);
@@ -285,9 +354,9 @@ ssize_t pulp_mbox_read(struct file *filp, char __user *buf, size_t count, loff_t
 
     // if there is data available in the mailbox, read it to mbox_fifo
     // as the interrupt won't be triggered anymore
-    while (!(0x1 & ioread32((void *)((unsigned long)pulp_mbox + MBOX_STATUS_OFFSET_B))) && !mbox_fifo_full) {
+    while (!pulp_mbox_empty(pulp_mbox) && !mbox_fifo_full) {
       // read mailbox
-      mbox_data = ioread32((void *)((unsigned long)pulp_mbox + MBOX_RDDATA_OFFSET_B));
+      mbox_data = pulp_mbox_rddata(pulp_mbox);
 
       if (n_words_written == n_words_to_write) { // new transfer
 
