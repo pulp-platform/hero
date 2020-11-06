@@ -376,6 +376,8 @@
 #define MBOX_IRQ_MASK_WRITE 0x1 // bitmask that selects only Write Threshold IRQ
 #define MBOX_IRQ_MASK_NONE 0x0  // bitmask that selects no IRQs
 #define MBOX_CTRL_OFFSET_B 0x90
+#define MBOX_CTRL_MASK_FLUSH_WRITES 0x1 // bitmask that flushes writes
+#define MBOX_CTRL_MASK_FLUSH_READS 0x2  // bitmask that flushes reads
 
 /*
  * RAB
