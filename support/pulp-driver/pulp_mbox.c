@@ -134,10 +134,11 @@ void pulp_mbox_intr(void *mbox)
   struct timeval time;
 
   if (mbox_mode == MBOX_OFF) {
-    printk(KERN_WARNING "PULP - MBOX: Not enabled, ignoring interrupt\n");
+    pr_warn("PULP - MBOX: Got IRQ outside driver mode, propagating IRQ Off to hardware.\n");
+    pulp_mbox_set_mode(MBOX_OFF);
     return;
   } else if (DEBUG_LEVEL_MBOX > 0) {
-    pr_info("PULP - MBOX: Interrupt.\n");
+    pr_info("PULP - MBOX: Handling IRQ.\n");
   }
 
   // check interrupt status
@@ -155,7 +156,7 @@ void pulp_mbox_intr(void *mbox)
       // read mailbox
       mbox_data = ioread32((void *)((unsigned long)mbox + MBOX_RDDATA_OFFSET_B));
 
-      if (mbox_mode == MBOX_DRIVER && n_words_written == n_words_to_write) { // new transfer
+      if (n_words_written == n_words_to_write) { // new transfer
 
         MBOX_GET_REQ_TYPE(req_type, mbox_data);
 
