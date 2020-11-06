@@ -101,7 +101,7 @@ void pulp_mbox_clear(void)
   // empty mbox_fifo
   if ((mbox_fifo_wr != mbox_fifo_rd) || mbox_fifo_full) {
     for (i = 0; i < 2 * MBOX_FIFO_DEPTH; i++) {
-      printk(KERN_INFO "mbox_fifo[%d]: %d %d %#x \n", i, (&mbox_fifo[i] == mbox_fifo_wr) ? 1 : 0,
+      pr_info("mbox_fifo[%d]: %d %d %#x \n", i, (&mbox_fifo[i] == mbox_fifo_wr) ? 1 : 0,
              (&mbox_fifo[i] == mbox_fifo_rd) ? 1 : 0, mbox_fifo[i]);
     }
   }
@@ -131,7 +131,7 @@ void pulp_mbox_intr(void *mbox)
     printk(KERN_WARNING "PULP - MBOX: Not enabled, ignoring interrupt\n");
     return;
   } else if (DEBUG_LEVEL_MBOX > 0) {
-    printk(KERN_INFO "PULP - MBOX: Interrupt.\n");
+    pr_info("PULP - MBOX: Interrupt.\n");
   }
 
   // check interrupt status
@@ -167,7 +167,7 @@ void pulp_mbox_intr(void *mbox)
           } else if (RAB_SWITCH == req_type) {
             pulp_rab_switch();
           } else {
-            printk(KERN_INFO "PULP - MBOX: Unknown request type %d\n", req_type);
+            pr_info("PULP - MBOX: Unknown request type %d\n", req_type);
           }
 
           mbox_fifo_lock();
@@ -187,13 +187,13 @@ void pulp_mbox_intr(void *mbox)
         if (mbox_fifo_wr == mbox_fifo_rd)
           mbox_fifo_full = 1;
         if (DEBUG_LEVEL_MBOX > 0) {
-          printk(KERN_INFO "PULP - MBOX: Written %#x to mbox_fifo.\n", mbox_data);
-          printk(KERN_INFO "PULP - MBOX: mbox_fifo_wr: %d\n", (unsigned)(mbox_fifo_wr - mbox_fifo));
-          printk(KERN_INFO "PULP - MBOX: mbox_fifo_rd: %d\n", (unsigned)(mbox_fifo_rd - mbox_fifo));
-          printk(KERN_INFO "PULP - MBOX: mbox_fifo_full %d\n", mbox_fifo_full);
+          pr_info("PULP - MBOX: Written %#x to mbox_fifo.\n", mbox_data);
+          pr_info("PULP - MBOX: mbox_fifo_wr: %d\n", (unsigned)(mbox_fifo_wr - mbox_fifo));
+          pr_info("PULP - MBOX: mbox_fifo_rd: %d\n", (unsigned)(mbox_fifo_rd - mbox_fifo));
+          pr_info("PULP - MBOX: mbox_fifo_full %d\n", mbox_fifo_full);
           if (DEBUG_LEVEL_MBOX > 1) {
             for (i = 0; i < 2 * MBOX_FIFO_DEPTH; i++) {
-              printk(KERN_INFO "mbox_fifo[%d]: %d %d %#x\n", i, (&mbox_fifo[i] == mbox_fifo_wr) ? 1 : 0,
+              pr_info("mbox_fifo[%d]: %d %d %#x\n", i, (&mbox_fifo[i] == mbox_fifo_wr) ? 1 : 0,
                      (&mbox_fifo[i] == mbox_fifo_rd) ? 1 : 0, mbox_fifo[i]);
             }
           }
@@ -209,11 +209,11 @@ void pulp_mbox_intr(void *mbox)
     if (n_words_written_tmp) {
       wake_up_interruptible(&mbox_wq);
       if (DEBUG_LEVEL_MBOX > 0)
-        printk(KERN_INFO "PULP - MBOX: Wrote %d words to mbox_fifo.\n", n_words_written_tmp);
+        pr_info("PULP - MBOX: Wrote %d words to mbox_fifo.\n", n_words_written_tmp);
     }
     // adjust receive interrupt threshold of mailbox interface
     else if (mbox_fifo_full) {
-      printk(KERN_INFO "PULP - MBOX: mbox_fifo_full %d\n", mbox_fifo_full);
+      pr_info("PULP - MBOX: mbox_fifo_full %d\n", mbox_fifo_full);
     }
   } else if (mbox_is & 0x4) // mailbox error
     iowrite32(0x4, (void *)((unsigned long)mbox + MBOX_IS_OFFSET_B));
@@ -222,7 +222,7 @@ void pulp_mbox_intr(void *mbox)
 
   if (DEBUG_LEVEL_MBOX > 0) {
     do_gettimeofday(&time);
-    printk(KERN_INFO "PULP - MBOX: Interrupt status: %#x. Interrupt handled at: %02li:%02li:%02li.\n", mbox_is,
+    pr_info("PULP - MBOX: IRQ status: %#x. IRQ handled at: %02li:%02li:%02li.\n", mbox_is,
            (time.tv_sec / 3600) % 24, (time.tv_sec / 60) % 60, time.tv_sec % 60);
   }
 
@@ -292,13 +292,13 @@ ssize_t pulp_mbox_read(struct file *filp, char __user *buf, size_t count, loff_t
           mbox_fifo_unlock_irqrestore(flags);
 
           if (RAB_UPDATE == req_type) {
-            printk(KERN_INFO "PULP: RAB update in MBOX read detected.\n");
+            pr_info("PULP: RAB update in MBOX read detected.\n");
             pulp_rab_update(mbox_data);
           } else if (RAB_SWITCH == req_type) {
-            printk(KERN_INFO "PULP: RAB switch in MBOX read detected.\n");
+            pr_info("PULP: RAB switch in MBOX read detected.\n");
             pulp_rab_switch();
           } else {
-            printk(KERN_INFO "PULP - MBOX: Unknown request type %d\n", req_type);
+            pr_info("PULP - MBOX: Unknown request type %d\n", req_type);
           }
 
           mbox_fifo_lock_irqsave(&flags);
@@ -317,13 +317,13 @@ ssize_t pulp_mbox_read(struct file *filp, char __user *buf, size_t count, loff_t
         if (mbox_fifo_wr == mbox_fifo_rd)
           mbox_fifo_full = 1;
         if (DEBUG_LEVEL_MBOX > 0) {
-          printk(KERN_INFO "PULP - MBOX: Written %#x to mbox_fifo.\n", mbox_data);
-          printk(KERN_INFO "PULP - MBOX: mbox_fifo_wr: %d\n", (unsigned)(mbox_fifo_wr - mbox_fifo));
-          printk(KERN_INFO "PULP - MBOX: mbox_fifo_rd: %d\n", (unsigned)(mbox_fifo_rd - mbox_fifo));
-          printk(KERN_INFO "PULP - MBOX: mbox_fifo_full %d\n", mbox_fifo_full);
+          pr_info("PULP - MBOX: Written %#x to mbox_fifo.\n", mbox_data);
+          pr_info("PULP - MBOX: mbox_fifo_wr: %d\n", (unsigned)(mbox_fifo_wr - mbox_fifo));
+          pr_info("PULP - MBOX: mbox_fifo_rd: %d\n", (unsigned)(mbox_fifo_rd - mbox_fifo));
+          pr_info("PULP - MBOX: mbox_fifo_full %d\n", mbox_fifo_full);
           if (DEBUG_LEVEL_MBOX > 1) {
             for (i = 0; i < 2 * MBOX_FIFO_DEPTH; i++) {
-              printk(KERN_INFO "mbox_fifo[%d]: %d %d %#x\n", i, (&mbox_fifo[i] == mbox_fifo_wr) ? 1 : 0,
+              pr_info("mbox_fifo[%d]: %d %d %#x\n", i, (&mbox_fifo[i] == mbox_fifo_wr) ? 1 : 0,
                      (&mbox_fifo[i] == mbox_fifo_rd) ? 1 : 0, mbox_fifo[i]);
             }
           }
@@ -334,15 +334,15 @@ ssize_t pulp_mbox_read(struct file *filp, char __user *buf, size_t count, loff_t
     } // while mailbox not empty and FIFO buffer not full
   }
   if (DEBUG_LEVEL_MBOX > 0) {
-    printk(KERN_INFO "PULP - MBOX: Read from mbox_fifo.\n");
-    printk(KERN_INFO "PULP - MBOX: mbox_fifo_wr: %d\n", (unsigned)(mbox_fifo_wr - mbox_fifo));
-    printk(KERN_INFO "PULP - MBOX: mbox_fifo_rd: %d\n", (unsigned)(mbox_fifo_rd - mbox_fifo));
-    printk(KERN_INFO "PULP - MBOX: mbox_fifo_full %d\n", mbox_fifo_full);
+    pr_info("PULP - MBOX: Read from mbox_fifo.\n");
+    pr_info("PULP - MBOX: mbox_fifo_wr: %d\n", (unsigned)(mbox_fifo_wr - mbox_fifo));
+    pr_info("PULP - MBOX: mbox_fifo_rd: %d\n", (unsigned)(mbox_fifo_rd - mbox_fifo));
+    pr_info("PULP - MBOX: mbox_fifo_full %d\n", mbox_fifo_full);
   }
   mbox_fifo_unlock_irqrestore(flags);
 
   if (DEBUG_LEVEL_MBOX > 0) {
-    printk(KERN_INFO "PULP - MBOX: Read %li words from mbox_fifo.\n", (count - not_copied) / sizeof(mbox_fifo[0]));
+    pr_info("PULP - MBOX: Read %li words from mbox_fifo.\n", (count - not_copied) / sizeof(mbox_fifo[0]));
   }
 
   if (not_copied)
