@@ -55,11 +55,13 @@ int pulp_mbox_set_mode(MailboxMode mode)
   mbox_mode = mode;
 
   if (mode == MBOX_OFF) {
-    // disable mailbox interrupt
-    iowrite32(0x0, pulp_mbox + MBOX_IE_OFFSET_B);
+    // Disable all mailbox IRQs.
+    iowrite32(MBOX_IRQ_MASK_NONE, pulp_mbox + MBOX_IE_OFFSET_B);
+    pr_info("PULP - MBOX: All IRQs disabled.\n");
   } else {
-    // enable mailbox interrupt
-    iowrite32(0x6, pulp_mbox + MBOX_IE_OFFSET_B);
+    // Enable read threshold and error IRQ.
+    iowrite32(MBOX_IRQ_MASK_READ | MBOX_IRQ_MASK_ERROR, pulp_mbox + MBOX_IE_OFFSET_B);
+    pr_info("PULP - MBOX: Read threshold and error IRQ enabled.\n");
   }
 
   return 0;
