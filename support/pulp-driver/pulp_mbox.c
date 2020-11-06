@@ -142,9 +142,9 @@ void pulp_mbox_intr(void *mbox)
   }
 
   // check interrupt status
-  mbox_is = 0x7 & ioread32((void *)((unsigned long)mbox + MBOX_IS_OFFSET_B));
+  mbox_is = ioread32((void *)((unsigned long)mbox + MBOX_IS_OFFSET_B)) & MBOX_IRQ_MASK_ALL;
 
-  if (mbox_is & 0x2) { // mailbox receive threshold interrupt
+  if (mbox_is & MBOX_IRQ_MASK_READ) { // mailbox receive threshold interrupt
     // clear the interrupt
     iowrite32(0x2, (void *)((unsigned long)mbox + MBOX_IS_OFFSET_B));
 
@@ -222,10 +222,10 @@ void pulp_mbox_intr(void *mbox)
     else if (mbox_fifo_full) {
       pr_info("PULP - MBOX: mbox_fifo_full %d\n", mbox_fifo_full);
     }
-  } else if (mbox_is & 0x4) // mailbox error
-    iowrite32(0x4, (void *)((unsigned long)mbox + MBOX_IS_OFFSET_B));
+  } else if (mbox_is & MBOX_IRQ_MASK_ERROR) // mailbox error
+    iowrite32(MBOX_IRQ_MASK_ERROR, (void *)((unsigned long)mbox + MBOX_IS_OFFSET_B));
   else // mailbox send interrupt threshold - not used
-    iowrite32(0x1, (void *)((unsigned long)mbox + MBOX_IS_OFFSET_B));
+    iowrite32(MBOX_IRQ_MASK_WRITE, (void *)((unsigned long)mbox + MBOX_IS_OFFSET_B));
 
   if (DEBUG_LEVEL_MBOX > 0) {
     do_gettimeofday(&time);
