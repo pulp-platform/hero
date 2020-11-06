@@ -155,6 +155,7 @@ void pulp_mbox_intr(void *mbox)
     while (!(0x1 & ioread32((void *)((unsigned long)mbox + MBOX_STATUS_OFFSET_B))) && !mbox_fifo_full) {
       // read mailbox
       mbox_data = ioread32((void *)((unsigned long)mbox + MBOX_RDDATA_OFFSET_B));
+      pr_debug("PULP - MBOX: Read 0x%08x.\n", mbox_data);
 
       if (n_words_written == n_words_to_write) { // new transfer
 
