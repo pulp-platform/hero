@@ -146,8 +146,6 @@ void pulp_mbox_intr(void *mbox)
   pr_debug("PULP - MBOX: IRQ status: 0x%01x.\n", mbox_is);
 
   if (mbox_is & MBOX_IRQ_MASK_READ) { // mailbox receive threshold interrupt
-    // clear the interrupt
-    iowrite32(0x2, (void *)((unsigned long)mbox + MBOX_IS_OFFSET_B));
 
     n_words_written_tmp = 0;
 
@@ -213,6 +211,10 @@ void pulp_mbox_intr(void *mbox)
       } // write to mailbox FIFO buffer
     } // while mailbox not empty and FIFO buffer not full
     mbox_fifo_unlock();
+
+    // Clear the IRQ.
+    iowrite32(MBOX_IRQ_MASK_READ, (void *)((unsigned long)mbox + MBOX_IS_OFFSET_B));
+    pr_debug("PULP - MBOX: IRQ cleared.\n");
 
     // wake up user space process
     if (n_words_written_tmp) {
