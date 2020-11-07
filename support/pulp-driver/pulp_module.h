@@ -137,11 +137,14 @@ typedef struct {
   // interrupts
   int intr_reg_irq;
   int irq_mbox;
-  int irq_rab_miss;
-  int irq_rab_multi;
-  int irq_rab_prot;
-  int irq_rab_mhr_full;
+  int irq_rab_host_miss;
+  int irq_rab_host_multi;
+  int irq_rab_host_prot;
+  int irq_rab_pulp_miss;
+  int irq_rab_pulp_multi;
+  int irq_rab_pulp_prot;
   int irq_eoc;
+  int irq_rab_mhr_full;
   // virtual address pointers for ioremap_nocache()
   void *mbox;
   void *rab_config;
