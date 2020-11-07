@@ -1222,6 +1222,8 @@ irqreturn_t pulp_isr(int irq, void *ptr)
   int i;
   unsigned rab_mh;
 
+  pr_debug("PULP: Handling IRQ %0d.\n", irq);
+
   // read and clear the interrupt register
 #if INTR_REG_BASE_ADDR
   intr_reg_value = ioread32((void *)(unsigned long)my_dev.intr_reg);
