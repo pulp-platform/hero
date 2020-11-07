@@ -89,7 +89,7 @@ int pulp_mbox_write(PulpDev *pulp, uint32_t word)
   // wait for not full
   while (status) {
     usleep(us_delay);
-    status = pulp_read32(pulp->mbox.v_addr, MBOX_STATUS_OFFSET_B, 'b') & 0x2;
+    status = pulp_read32(pulp->mbox.v_addr, MBOX_STATUS_OFFSET_B, 'b') & MBOX_STATUS_MASK_FULL;
   }
 
   // mbox is ready to receive
