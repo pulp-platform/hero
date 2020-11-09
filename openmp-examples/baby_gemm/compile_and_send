@@ -1,0 +1,23 @@
+#!/bin/bash
+
+export HERCULES_INSTALL=/scratch/mmaxim/hero/install
+export HERCULES_ARCH="PULP"
+export CMUX_ROOT="/scratch/mmaxim/cmux"
+export HERCULES_FORCE_FOOTPRINT_DENSE=1
+export HERCULES_CPU_MEMORY_SIZE=32768
+export HERCULES_DISQ_THRESHOLD=0
+export HERCULES_DMA_ENFORCE
+export HERCULES_DEFAULT_NUM_THREADS=8
+export HERCULES_NO_INTERVAL_CONTROLFLOW
+export HERCULES_WHITELIST="gemm_nn gemm_cpu gemm .omp_outlined.
+__omp_offloading_803_1108d5d_gemm_zero_l125 __omp_offloading_803_1108d69_gemm_zero_l125
+__omp_offloading_803_1108bea_gemm_zero_l126 __omp_offloading_803_1108d79_gemm_zero_l125
+__omp_offloading_803_1108d67_gemm_zero_l125 __omp_offloading_803_1108d0b_gemm_zero_l125
+__omp_offloading_803_1108d58_gemm_zero_l125 __omp_offloading_803_1108d62_gemm_zero_l125
+__omp_offloading_803_1108d57_gemm_zero_l126 __omp_offloading_803_1108d6c_gemm_zero_l125"
+source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh
+
+export HERO_INSTALL=/scratch/mmaxim/hero/install
+source ${HERO_INSTALL}/../env/exilzcu102.sh
+make default-as=pulp clean all
+scp baby_gemm root@172.31.182.80:/mnt/mmaxim/crosscompiled
