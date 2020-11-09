@@ -17,3 +17,6 @@
 [submodule "toolchain/HerculesCompiler-public"]
 	path = toolchain/HerculesCompiler-public
 	url = git@iis-git.ee.ethz.ch:H2020-Compiler/HerculesCompiler-public.git
+[submodule "cmux"]
+	path = cmux
+	url = git@iis-git.ee.ethz.ch:H2020-Compiler/cmux.git
