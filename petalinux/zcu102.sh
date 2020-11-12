@@ -32,7 +32,7 @@ $PETALINUX_VER petalinux-config --oldconfig --get-hw-description "../../hardware
 mkdir -p components/ext_sources
 cd components/ext_sources
 if [ ! -d "linux-xlnx" ]; then
-    git clone --single-branch --branch xilinx-v2019.2.01 git://github.com/Xilinx/linux-xlnx.git
+    git clone --depth 1 --single-branch --branch xilinx-v2019.2.01 git://github.com/Xilinx/linux-xlnx.git
 fi
 cd linux-xlnx
 git checkout tags/xilinx-v2019.2.01
