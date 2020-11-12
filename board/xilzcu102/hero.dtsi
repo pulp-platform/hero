@@ -21,7 +21,7 @@
     };
 };
 
-&amba_pl {
+&amba {
     pulp: pulp@a0000000 {
         memory-region = <&pulp_reserved>;
         compatible = "pulp,bigpulp";
