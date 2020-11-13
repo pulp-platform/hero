@@ -92,8 +92,6 @@ Currently the default MAC address is not loaded from the device, but fixed in th
 As on Ariane loading images from the SD card is currently limited and the root filesystem is not preserved on reboots, the base image does not directly contain the entire HERO infrastructure. A development filesystem based on the corresponding host SDK can be mounted externally instead. It is recommended to mount these images via NFS, the target filesystem can be extracted from `output/hrv-rootfs.tar`. This filesystem can be mounted automatically on boot by adding a configuration line with value `BR2_HERO_EXT_MOUNT="<mount-options> <ip>:<path>"` in `local.cfg` and then updating the image as above.
 
 ##### Xilinx ZCU102
-*NOTE: A functional FPGA bitstream for this platform is currently not available for external distribution yet*
-
 A complete Linux environment with kernel and the base root filesystem for the ARMv8 host on the Xilinx Zynq UltraScale+ MPSoC ZCU102 can be built with:
 ```
 make br-har-exilzcu102
@@ -101,13 +99,21 @@ make br-har-exilzcu102
 This generates a SD card image containing the complete infrastructure and fully ready to be booted directly. It can be loaded on a SD card as follows, but *CAREFUL* action is required to not overwrite the wrong device.
 ```
 # fdisk -l # search for the disk label of the SD-card (e.g. /dev/sdx)
-# dd if=output/har-exilzcu102-base-bbl.bin of=/dev/sdx status=progress oflag=sync bs=1M # write the image on the SD-card
+# dd if=output/har-exilzcu102-base-sdcard.img of=/dev/sdx status=progress oflag=sync bs=1M # write the image on the SD-card
 ```
-Afterwards the system can be booted up after configuring the ZCU102 board jumpers to boot from the SD card. To develop applications for this setup, the dynamic environment can be loaded using `source env/exilzcu102.sh`. Afterwards applications can be built and transferred directly to the board.
+The system can then be booted up after configuring the ZCU102 board jumpers to boot from the SD card.  The root filesystem mounted after boot is provided by PetaLinux.  It is loaded into memory during boot, and changes are not persisted to the SD card.  Furthermore, that root filesystem does not include the HERO libraries.  A persistent filesystem, which includes the HERO libraries, resides on the second partition of the SD card.  We recommend mounting it at `/mnt`
+```sh
+mount /dev/mmcblk0p2 /mnt
+```
+and using its dynamically-linked shared libraries through
+```sh
+export LD_LIBRARY_PATH=/mnt/usr/lib:/mnt/lib
+```
+in every session on the board.  You may also want to place your binaries and data under `/mnt` to not lose them on a reboot (or kernel panic).
+
+To develop applications for this setup, the dynamic environment on the development machine can be loaded using `source env/exilzcu102.sh`. Afterwards applications can be built and transferred directly to the board.
 
 The host processor is implemented as a hard-macro, allowing the FPGA implementation of the accelerator to be loaded later during boot. A bitstream with the hardware implementation can be loaded automatically by adding `BR2_HERO_BITSTREAM=<path_to_bitstream>` in `local.cfg` and rebuilding the image with `make br-har-exilzcu102`.
-
-Similary to the RISC-V setup, the base image does currently not contain the entire HERO infrastructure. A development filesystem based on the corresponding host SDK can be mounted externally instead, for example via NFS. The target filesystem can be extracted from `output/hrv-rootfs.tar`. This filesystem can be mounted automatically on boot by adding a configuration line with value `BR2_HERO_EXT_MOUNT="<mount-options> <ip>:<path>"` in `local.cfg` and then updating the image by rerunning `make br-har-exilzcu102`.
 
 ##### QEMU RISC-V
 For host debugging it can be useful to test the environment first with the QEMU machine emulator. A clone of the RISC-V Ariane environment without specific hardware patches and including virtual drivers can be built with:
