@@ -86,12 +86,12 @@ void kernel_bicg_dma(int nx, int ny,
       __device DATA_TYPE* q_spm = (__device DATA_TYPE *) hero_l1malloc(rows_per_chunk * sizeof(DATA_TYPE));
       __device DATA_TYPE* A_spm = (__device DATA_TYPE *) hero_l1malloc(NY * rows_per_chunk * sizeof(DATA_TYPE));
 
-      hero_memcpy_host2dev(p_spm, ((__host DATA_TYPE*) p), NY);
+      hero_memcpy_host2dev(p_spm, ((__host DATA_TYPE*) p), NY * sizeof(DATA_TYPE));
 
       int row = 0;
       while (row < NX) {
         int chunk_rows = (row + rows_per_chunk < NX) ? rows_per_chunk : (NX - row);
-        hero_memcpy_host2dev(A_spm, ((__host DATA_TYPE*) A) + row*NY, chunk_rows*NY);
+        hero_memcpy_host2dev(A_spm, ((__host DATA_TYPE*) A) + row*NY, chunk_rows*NY * sizeof(DATA_TYPE));
 
         #pragma omp parallel for num_threads(NUM_THREADS)
         for (int i = 0; i < chunk_rows; i++) {
@@ -100,7 +100,7 @@ void kernel_bicg_dma(int nx, int ny,
             q_spm[i] = q_spm[i] + A_spm[i*NY+j] * p_spm[j];
         }
 
-        hero_memcpy_dev2host(((__host DATA_TYPE*) q) + row, q_spm, chunk_rows);
+        hero_memcpy_dev2host(((__host DATA_TYPE*) q) + row, q_spm, chunk_rows * sizeof(DATA_TYPE));
         row += rows_per_chunk;
       }
 
@@ -123,8 +123,8 @@ void kernel_bicg_dma(int nx, int ny,
       int row = 0;
       while (row < NX) {
         int chunk_rows = (row + rows_per_chunk < NX) ? rows_per_chunk : (NX - row);
-        hero_dma_job_t job_A = hero_memcpy_host2dev_async(A_spm, ((__host DATA_TYPE*) A) + row*NY, chunk_rows*NY);
-        hero_dma_job_t job_r = hero_memcpy_host2dev_async(r_spm, ((__host DATA_TYPE*) r) + row, chunk_rows);
+        hero_dma_job_t job_A = hero_memcpy_host2dev_async(A_spm, ((__host DATA_TYPE*) A) + row*NY, chunk_rows*NY * sizeof(DATA_TYPE));
+        hero_dma_job_t job_r = hero_memcpy_host2dev_async(r_spm, ((__host DATA_TYPE*) r) + row, chunk_rows * sizeof(DATA_TYPE));
         hero_dma_wait(job_A);
         hero_dma_wait(job_r);
 
@@ -136,7 +136,7 @@ void kernel_bicg_dma(int nx, int ny,
         row += rows_per_chunk;
       }
 
-      hero_memcpy_dev2host(((__host DATA_TYPE*) s), s_spm, NY);
+      hero_memcpy_dev2host(((__host DATA_TYPE*) s), s_spm, NY * sizeof(DATA_TYPE));
 
       hero_l1free(s_spm);
       hero_l1free(r_spm);

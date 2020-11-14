@@ -84,14 +84,14 @@ void kernel_gemm_dma(int ni, int nj, int nk,
       __device DATA_TYPE* A_spm = (__device DATA_TYPE*) hero_l1malloc(NK * rows_per_chunk * sizeof(DATA_TYPE));
       __device DATA_TYPE* C_spm = (__device DATA_TYPE*) hero_l1malloc(NK * rows_per_chunk * sizeof(DATA_TYPE));
 
-      hero_memcpy_host2dev(B_spm, ((__host DATA_TYPE*) B), NJ*NK);
+      hero_memcpy_host2dev(B_spm, ((__host DATA_TYPE*) B), NJ*NK * sizeof(DATA_TYPE));
 
       /* C := alpha*A*B + beta*C */
       int row = 0;
       while (row < NI) {
         int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
-        hero_dma_job_t job_A = hero_memcpy_host2dev_async(A_spm, ((__host DATA_TYPE*) A) + row*NK, chunk_rows*NK);
-        hero_dma_job_t job_C = hero_memcpy_host2dev_async(C_spm, ((__host DATA_TYPE*) C) + row*NJ, chunk_rows*NJ);
+        hero_dma_job_t job_A = hero_memcpy_host2dev_async(A_spm, ((__host DATA_TYPE*) A) + row*NK, chunk_rows*NK * sizeof(DATA_TYPE));
+        hero_dma_job_t job_C = hero_memcpy_host2dev_async(C_spm, ((__host DATA_TYPE*) C) + row*NJ, chunk_rows*NJ * sizeof(DATA_TYPE));
         hero_dma_wait(job_A);
         hero_dma_wait(job_C);
 
@@ -105,7 +105,7 @@ void kernel_gemm_dma(int ni, int nj, int nk,
           }
         }
 
-        hero_memcpy_dev2host(((__host DATA_TYPE*) C) + row*NJ, C_spm, chunk_rows*NJ);
+        hero_memcpy_dev2host(((__host DATA_TYPE*) C) + row*NJ, C_spm, chunk_rows*NJ * sizeof(DATA_TYPE));
         row += rows_per_chunk;
       }
 

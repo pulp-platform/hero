@@ -112,7 +112,7 @@ hero_memcpy_host2dev_async(DEVICE_VOID_PTR spm, HOST_VOID_PTR ram,
   if (ram > UINT32_MAX) {
     printf("DMA cannot handle addresses this wide!\n");
   }
-  return __hero_dma_memcpy_async(spm, ram, len*4, 1);
+  return __hero_dma_memcpy_async(spm, ram, len, 1);
 }
 
 hero_dma_job_t
@@ -122,7 +122,7 @@ hero_memcpy_dev2host_async(HOST_VOID_PTR ram, DEVICE_VOID_PTR spm,
   if (ram > UINT32_MAX) {
     printf("DMA cannot handle addresses this wide!\n");
   }
-  return __hero_dma_memcpy_async(spm, ram, len*4, 0);
+  return __hero_dma_memcpy_async(spm, ram, len, 0);
 }
 
 void

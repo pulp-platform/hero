@@ -77,7 +77,7 @@ void kernel_covariance_dma(int m, int n,
     __device DATA_TYPE *mean_spm = (__device DATA_TYPE *) hero_l1malloc(M * sizeof(DATA_TYPE));
 
     DATA_TYPE float_n_spm = float_n;
-    hero_memcpy_host2dev(data_spm, (__host DATA_TYPE*)data, M*N);
+    hero_memcpy_host2dev(data_spm, (__host DATA_TYPE*)data, M*N) * sizeof(DATA_TYPE);
 
     /* Determine mean of column vectors of input data matrix */
     #pragma omp parallel num_threads (NUM_THREADS)
@@ -107,7 +107,7 @@ void kernel_covariance_dma(int m, int n,
         }
     }
 
-    hero_memcpy_dev2host((__host DATA_TYPE*)symmat, symmat_spm, M*M);
+    hero_memcpy_dev2host((__host DATA_TYPE*)symmat, symmat_spm, M*M * sizeof(DATA_TYPE));
 
     hero_l1free(mean_spm);
     hero_l1free(symmat_spm);

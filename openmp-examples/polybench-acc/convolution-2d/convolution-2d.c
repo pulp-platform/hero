@@ -78,7 +78,7 @@ void kernel_conv2d_dma(int ni,
       int row = 0;
       while (row < NI - 2) {
         int chunk_rows = rows_per_chunk < (NI - 2 - row) ? rows_per_chunk : (NI - 2 - row);
-        hero_memcpy_host2dev(A_spm, ((__host DATA_TYPE*) A) + row*NJ, (chunk_rows+2)*NJ);
+        hero_memcpy_host2dev(A_spm, ((__host DATA_TYPE*) A) + row*NJ, (chunk_rows+2)*NJ * sizeof(DATA_TYPE));
 
         #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
         for (int i = 0; i < chunk_rows; ++i) {
@@ -90,7 +90,7 @@ void kernel_conv2d_dma(int ni,
           }
         }
 
-        hero_memcpy_dev2host(((__host DATA_TYPE*) B) + (row+1)*NJ, B_spm, chunk_rows*NJ);
+        hero_memcpy_dev2host(((__host DATA_TYPE*) B) + (row+1)*NJ, B_spm, chunk_rows*NJ * sizeof(DATA_TYPE));
         row += rows_per_chunk;
       }
       hero_l1free(A_spm);
