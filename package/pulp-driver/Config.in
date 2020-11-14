@@ -1,14 +1,21 @@
 comment "pulp-driver needs a Linux kernel to be built"
 	depends on !BR2_LINUX_KERNEL
 
+comment "pulp-driver requires headers from libpulp"
+	depends on !BR2_PACKAGE_LIBPULP
+
+comment "pulp-driver needs a well-defined HERO platform"
+	depends on !BR2_PACKAGE_HERO_PLATFORM
+
 config BR2_PACKAGE_PULP_DRIVER
 bool "pulp-driver"
 	depends on BR2_LINUX_KERNEL
+	depends on BR2_PACKAGE_LIBPULP
+	depends on BR2_PACKAGE_HERO_PLATFORM
   select libpulp
 	help
 		HERO support infrastructure with PULP linux kernel driver,
 		user-space libraries and support binaries.
-
 
 if BR2_PACKAGE_PULP_DRIVER
 

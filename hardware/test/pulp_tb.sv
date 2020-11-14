@@ -20,7 +20,7 @@ module pulp_tb #(
   parameter time          CLK_PERIOD = 1000ps,
   // SoC Parameters
   parameter int unsigned  N_CLUSTERS = 4,
-  parameter int unsigned  AXI_DW = 256,
+  parameter int unsigned  AXI_DW = 128,
   parameter int unsigned  L2_N_AXI_PORTS = 1
 );
 
@@ -91,6 +91,15 @@ module pulp_tb #(
     .cl_fetch_en_i  (cl_fetch_en),
     .cl_eoc_o       (cl_eoc),
     .cl_busy_o      (cl_busy),
+
+    .rab_from_pulp_miss_irq_o   (/* unused */),
+    .rab_from_pulp_multi_irq_o  (/* unused */),
+    .rab_from_pulp_prot_irq_o   (/* unused */),
+    .rab_from_host_miss_irq_o   (/* unused */),
+    .rab_from_host_multi_irq_o  (/* unused */),
+    .rab_from_host_prot_irq_o   (/* unused */),
+    .rab_miss_fifo_full_irq_o   (/* unused */),
+    .mbox_irq_o                 (/* unused */),
 
     .ext_req_o      (from_pulp_req),
     .ext_resp_i     (from_pulp_resp),
@@ -349,10 +358,64 @@ module pulp_tb #(
     write_rab(slice_addr+8'h18, 64'h7);
   endtask
 
+  task write_to_pulp(input axi_addr_t addr, input axi_data_t data, output axi_pkg::resp_t resp);
+    to_pulp_req.aw.id = '0;
+    to_pulp_req.aw.addr = addr;
+    to_pulp_req.aw.len = '0;
+    to_pulp_req.aw.size = $clog2(AXI_SW);
+    to_pulp_req.aw.burst = axi_pkg::BURST_INCR;
+    to_pulp_req.aw.lock = 1'b0;
+    to_pulp_req.aw.cache = '0;
+    to_pulp_req.aw.prot = '0;
+    to_pulp_req.aw.qos = '0;
+    to_pulp_req.aw.region = '0;
+    to_pulp_req.aw.atop = '0;
+    to_pulp_req.aw.user = '0;
+    to_pulp_req.aw_valid = 1'b1;
+    `wait_for(to_pulp_resp.aw_ready)
+    to_pulp_req.aw_valid = 1'b0;
+    to_pulp_req.w.data = data;
+    to_pulp_req.w.strb = '1;
+    to_pulp_req.w.last = 1'b1;
+    to_pulp_req.w.user = '0;
+    to_pulp_req.w_valid = 1'b1;
+    `wait_for(to_pulp_resp.w_ready)
+    to_pulp_req.w_valid = 1'b0;
+    to_pulp_req.b_ready = 1'b1;
+    `wait_for(to_pulp_resp.b_valid)
+    resp = to_pulp_resp.b.resp;
+    to_pulp_req.b_ready = 1'b0;
+  endtask
+
+  task read_from_pulp(input axi_addr_t addr, output axi_data_t data, output axi_pkg::resp_t resp);
+    to_pulp_req.ar.id = '0;
+    to_pulp_req.ar.addr = addr;
+    to_pulp_req.ar.len = '0;
+    to_pulp_req.ar.size = $clog2(AXI_SW);
+    to_pulp_req.ar.burst = axi_pkg::BURST_INCR;
+    to_pulp_req.ar.lock = 1'b0;
+    to_pulp_req.ar.cache = '0;
+    to_pulp_req.ar.prot = '0;
+    to_pulp_req.ar.qos = '0;
+    to_pulp_req.ar.region = '0;
+    to_pulp_req.ar.user = '0;
+    to_pulp_req.ar_valid = 1'b1;
+    `wait_for(to_pulp_resp.ar_ready)
+    to_pulp_req.ar_valid = 1'b0;
+    to_pulp_req.r_ready = 1'b1;
+    `wait_for(to_pulp_resp.r_valid)
+    data = to_pulp_resp.r.data;
+    resp = to_pulp_resp.r.resp;
+    to_pulp_req.r_ready = 1'b0;
+  endtask
+
   // Simulation control
   initial begin
+    axi_data_t data;
+    axi_pkg::resp_t resp;
     cl_fetch_en = '0;
     rab_conf_req = '{default: '0};
+    to_pulp_req = '{default: '0};
     // Wait for reset.
     wait (rst_n);
     @(posedge clk);
@@ -361,6 +424,19 @@ module pulp_tb #(
     // through the RAB) except zero page.
     write_rab_slice(32'hA0, 64'h0000_0000_0000_1000, 64'hFFFF_FFFF_FFFF_FFFF,
         64'h0000_0000_0000_1000);
+
+    // Set up RAB slice from external/Host to mailbox.
+    write_rab_slice(32'h40, 64'h0000_0000_1B80_1000, 64'h0000_0000_1B80_1FFF,
+        64'h0000_0000_1B80_1000);
+
+    // Write word to mailbox.
+    write_to_pulp(64'h0000_0000_1B80_1000, 32'h5000_600D, resp);
+    assert(resp == axi_pkg::RESP_OKAY);
+
+    // Read status of mailbox.
+    read_from_pulp(64'h0000_0000_1B80_1020, data, resp);
+    assert(resp == axi_pkg::RESP_OKAY);
+    $display("Read 0x%08x from mailbox.", data);
 
     // Start cluster 0.
     cl_fetch_en[0] = 1'b1;
@@ -393,12 +469,6 @@ module pulp_tb #(
         end
       end
     end
-  end
-
-  // Drive requests into PULP.
-  initial begin
-    to_pulp_req = '0;
-    wait (rst_n);
   end
 
   // Observe SoC bus for errors.

@@ -55,6 +55,7 @@
 #include <linux/ioctl.h> /* ioctl */
 #include <linux/slab.h> /* kmalloc */
 #include <linux/errno.h> /* errno */
+#include <linux/err.h> /* IS_ERR */
 #include <linux/sched.h> /* wake_up_interruptible(), TASK_INTERRUPTIBLE */
 #include <linux/delay.h> /* udelay */
 #include <linux/device.h> // class_create, device_create
@@ -197,10 +198,29 @@ static int find_dev(const char *name, struct device **dev)
 static int pulp_probe(struct platform_device *pdev)
 {
   int i;
-  int *irq_vars[] = { &my_dev.irq_mbox,      &my_dev.irq_rab_miss,     &my_dev.irq_rab_prot,
-                      &my_dev.irq_rab_multi, &my_dev.irq_rab_mhr_full, &my_dev.irq_eoc };
+  int *irq_vars[] = {
+    &my_dev.irq_mbox,
+    &my_dev.irq_rab_host_miss,
+    &my_dev.irq_rab_host_multi,
+    &my_dev.irq_rab_host_prot,
+    &my_dev.irq_rab_pulp_miss,
+    &my_dev.irq_rab_pulp_multi,
+    &my_dev.irq_rab_pulp_prot,
+    &my_dev.irq_eoc,
+    &my_dev.irq_rab_mhr_full
+  };
 #if !INTR_REG_BASE_ADDR
-  char *irq_names[] = { "mailbox", "RAB miss", "RAB multi", "RAB prot", "RAB MHR full", "end of computation" };
+  char *irq_names[] = {
+    "mailbox",
+    "RAB Host miss",
+    "RAB Host multi hit",
+    "RAB Host prot violation",
+    "RAB PULP miss",
+    "RAB PULP multi hit",
+    "RAB PULP prot violation",
+    "end of computation",
+    "RAB MHR full"
+  };
 #endif
 
 #if PLATFORM == TE0808
@@ -516,9 +536,19 @@ struct file_operations pulp_fops = {
 static int __init pulp_init(void)
 {
   int i, err;
+  struct device *my_device;
 #if !INTR_REG_BASE_ADDR
-  int *irq_vars[] = { &my_dev.irq_mbox,      &my_dev.irq_rab_miss,     &my_dev.irq_rab_prot,
-                      &my_dev.irq_rab_multi, &my_dev.irq_rab_mhr_full, &my_dev.irq_eoc };
+  int *irq_vars[] = {
+    &my_dev.irq_mbox,
+    &my_dev.irq_rab_host_miss,
+    &my_dev.irq_rab_host_prot,
+    &my_dev.irq_rab_host_multi,
+    &my_dev.irq_rab_pulp_miss,
+    &my_dev.irq_rab_pulp_prot,
+    &my_dev.irq_rab_pulp_multi,
+    &my_dev.irq_eoc,
+    &my_dev.irq_rab_mhr_full
+  };
 #endif
 
   // initialize profiling structure
@@ -543,13 +573,15 @@ static int __init pulp_init(void)
     goto fail_alloc_chrdev_region;
   }
   // create class struct
-  if ((my_class = class_create(THIS_MODULE, "pmca")) == NULL) {
+  my_class = class_create(THIS_MODULE, "PULP");
+  if (IS_ERR(my_class)) {
     printk(KERN_WARNING "PULP: Error creating class.\n");
     err = -1;
     goto fail_create_class;
   }
   // create device and register it with sysfs
-  if (device_create_with_groups(my_class, NULL, my_dev.dev, NULL, pulp_groups, "PULP") == NULL) {
+  my_device = device_create_with_groups(my_class, NULL, my_dev.dev, NULL, pulp_groups, "PULP");
+  if (IS_ERR(my_device)) {
     printk(KERN_WARNING "PULP: Error creating device.\n");
     err = -1;
     goto fail_create_device;
@@ -724,14 +756,14 @@ static int __init pulp_init(void)
   err = platform_driver_register(&pulp_platform_driver);
   if (err) {
     printk(KERN_WARNING "PULP: Error registering platform driver: %d\n", err);
-    goto fail_request_irq;
+    goto fail_register_platform_driver;
   }
 
   // request interrupts and install top-half handler
 #if INTR_REG_BASE_ADDR
   err = request_irq(my_dev.intr_reg_irq, pulp_isr, 0, "PULP", NULL);
   if (err) {
-    printk(KERN_WARNING "PULP: Error requesting IRQ.\n");
+    printk(KERN_WARNING "PULP: Error requesting IRQ: errno %d.\n", err);
     goto fail_request_irq;
   }
 #else
@@ -772,7 +804,7 @@ static int __init pulp_init(void)
   err = cdev_add(&my_dev.cdev, my_dev.dev, PULP_N_DEV_NUMBERS);
   if (err) {
     printk(KERN_WARNING "PULP: Error registering the device.\n");
-    goto fail_register_device;
+    goto fail_cdev_add;
   }
   printk(KERN_INFO "PULP: Device registered.\n");
 
@@ -781,7 +813,8 @@ static int __init pulp_init(void)
   /*
    * error handling
    */
-fail_register_device:
+  cdev_del(&my_dev.cdev);
+fail_cdev_add:
 #if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX
   pulp_dma_chan_clean(pulp_dma_chan[1]);
   pulp_dma_chan_clean(pulp_dma_chan[0]);
@@ -792,45 +825,52 @@ fail_request_dma:
 #else
   if (my_dev.irq_mbox != -1)
     free_irq(my_dev.irq_mbox, NULL);
-  if (my_dev.irq_rab_miss != -1)
-    free_irq(my_dev.irq_rab_miss, NULL);
-  if (my_dev.irq_rab_multi != -1)
-    free_irq(my_dev.irq_rab_multi, NULL);
-  if (my_dev.irq_rab_prot != -1)
-    free_irq(my_dev.irq_rab_prot, NULL);
-  if (my_dev.irq_rab_mhr_full != -1)
-    free_irq(my_dev.irq_rab_mhr_full, NULL);
+  if (my_dev.irq_rab_host_miss != -1)
+    free_irq(my_dev.irq_rab_host_miss, NULL);
+  if (my_dev.irq_rab_host_multi != -1)
+    free_irq(my_dev.irq_rab_host_multi, NULL);
+  if (my_dev.irq_rab_host_prot != -1)
+    free_irq(my_dev.irq_rab_host_prot, NULL);
+  if (my_dev.irq_rab_pulp_miss != -1)
+    free_irq(my_dev.irq_rab_pulp_miss, NULL);
+  if (my_dev.irq_rab_pulp_multi != -1)
+    free_irq(my_dev.irq_rab_pulp_multi, NULL);
+  if (my_dev.irq_rab_pulp_prot != -1)
+    free_irq(my_dev.irq_rab_pulp_prot, NULL);
   if (my_dev.irq_eoc != -1)
     free_irq(my_dev.irq_eoc, NULL);
+  if (my_dev.irq_rab_mhr_full != -1)
+    free_irq(my_dev.irq_rab_mhr_full, NULL);
 #endif
-
-  platform_driver_unregister(&pulp_platform_driver);
 fail_request_irq:
+  platform_driver_unregister(&pulp_platform_driver);
+fail_register_platform_driver:
+  iounmap(my_dev.mbox);
+  iounmap(my_dev.l3_mem);
+  iounmap(my_dev.l2_mem);
+  iounmap(my_dev.soc_periph);
+  iounmap(my_dev.clusters);
 #if defined(PROFILE_RAB_STR) || defined(PROFILE_RAB_MH)
   pulp_rab_prof_free();
 #endif
   iounmap(my_dev.rab_config);
 #if RAB_AX_LOG_EN == 1
-  pulp_rab_ax_log_free();
-  iounmap(my_dev.rab_ar_log);
-  iounmap(my_dev.rab_aw_log);
   #if PLATFORM == JUNO //|| PLATFORM == TE0808
   iounmap(my_dev.rab_cfg_log);
   #endif
-#endif // RAB_AX_LOG_EN == 1
-#if INTR_REG_BASE_ADDR
-  iounmap(my_dev.intr_reg);
+  pulp_rab_ax_log_free();
+  iounmap(my_dev.rab_aw_log);
+  iounmap(my_dev.rab_ar_log);
+#endif
+#if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX || PLATFORM == TE0808
+  iounmap(my_dev.uart);
 #endif
 #if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX
   iounmap(my_dev.slcr);
-#endif // PLATFORM
-#if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX || PLATFORM == TE0808
-  iounmap(my_dev.uart);
-#endif // PLATFORM
-  iounmap(my_dev.clusters);
-  iounmap(my_dev.soc_periph);
-  iounmap(my_dev.l2_mem);
-  iounmap(my_dev.l3_mem);
+#endif
+#if INTR_REG_BASE_ADDR
+  iounmap(my_dev.intr_reg);
+#endif
 #if PLATFORM == TE0808
 fail_smmu_init:
   iounmap(my_dev.smmu);
@@ -839,13 +879,12 @@ fail_smmu_init:
 #if CLKING_BASE_ADDR
   iounmap(my_dev.clking);
 #endif
-  iounmap(my_dev.mbox);
 #ifdef GPIO_EXT_RESET_ADDR
   iounmap(my_dev.gpio_reset);
 #endif
   iounmap(my_dev.gpio);
 fail_ioremap:
-  cdev_del(&my_dev.cdev);
+  device_destroy(my_class, my_dev.dev);
 fail_create_device:
   class_destroy(my_class);
 fail_create_class:
@@ -875,31 +914,52 @@ static void __exit pulp_exit(void)
 
   printk(KERN_ALERT "PULP: Unloading device driver.\n");
 
+  cdev_del(&my_dev.cdev);
+
+#if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX
+  pulp_dma_chan_clean(pulp_dma_chan[1]);
+  pulp_dma_chan_clean(pulp_dma_chan[0]);
+#endif // PLATFORM
+
   // deregister
 #if INTR_REG_BASE_ADDR
   free_irq(my_dev.intr_reg_irq, NULL);
 #else
   if (my_dev.irq_mbox != -1)
     free_irq(my_dev.irq_mbox, NULL);
-  if (my_dev.irq_rab_miss != -1)
-    free_irq(my_dev.irq_rab_miss, NULL);
-  if (my_dev.irq_rab_multi != -1)
-    free_irq(my_dev.irq_rab_multi, NULL);
-  if (my_dev.irq_rab_prot != -1)
-    free_irq(my_dev.irq_rab_prot, NULL);
-  if (my_dev.irq_rab_mhr_full != -1)
-    free_irq(my_dev.irq_rab_mhr_full, NULL);
+  if (my_dev.irq_rab_host_miss != -1)
+    free_irq(my_dev.irq_rab_host_miss, NULL);
+  if (my_dev.irq_rab_host_multi != -1)
+    free_irq(my_dev.irq_rab_host_multi, NULL);
+  if (my_dev.irq_rab_host_prot != -1)
+    free_irq(my_dev.irq_rab_host_prot, NULL);
+  if (my_dev.irq_rab_pulp_miss != -1)
+    free_irq(my_dev.irq_rab_pulp_miss, NULL);
+  if (my_dev.irq_rab_pulp_multi != -1)
+    free_irq(my_dev.irq_rab_pulp_multi, NULL);
+  if (my_dev.irq_rab_pulp_prot != -1)
+    free_irq(my_dev.irq_rab_pulp_prot, NULL);
   if (my_dev.irq_eoc != -1)
     free_irq(my_dev.irq_eoc, NULL);
+  if (my_dev.irq_rab_mhr_full != -1)
+    free_irq(my_dev.irq_rab_mhr_full, NULL);
 #endif
   platform_driver_unregister(&pulp_platform_driver);
-#if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX
-  pulp_dma_chan_clean(pulp_dma_chan[1]);
-  pulp_dma_chan_clean(pulp_dma_chan[0]);
-#endif // PLATFORM
+
+  // disable PULP
+  gpio = 0;
+  iowrite32(gpio, (void *)((unsigned long)my_dev.gpio + GPIO_HOST2PULP_OFFSET));
+
 #if defined(PROFILE_RAB_STR) || defined(PROFILE_RAB_MH)
   pulp_rab_prof_free();
 #endif
+
+  // unmap memory
+  iounmap(my_dev.mbox);
+  iounmap(my_dev.l3_mem);
+  iounmap(my_dev.l2_mem);
+  iounmap(my_dev.soc_periph);
+  iounmap(my_dev.clusters);
   iounmap(my_dev.rab_config);
 #if RAB_AX_LOG_EN == 1
   pulp_rab_ax_log_free();
@@ -908,37 +968,28 @@ static void __exit pulp_exit(void)
   #if PLATFORM == JUNO //|| PLATFORM == TE0808
   iounmap(my_dev.rab_cfg_log);
   #endif
-#endif // RAB_AX_LOG_EN == 1
-
-  // disable PULP
-  gpio = 0;
-  iowrite32(gpio, (void *)((unsigned long)my_dev.gpio + GPIO_HOST2PULP_OFFSET));
-
-  // unmap memory
-#if INTR_REG_BASE_ADDR
-  iounmap(my_dev.intr_reg);
+#endif
+#if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX || PLATFORM == TE0808
+  iounmap(my_dev.uart);
 #endif
 #if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX
   iounmap(my_dev.slcr);
-#endif // PLATFORM
-#if PLATFORM == ZEDBOARD || PLATFORM == ZC706 || PLATFORM == MINI_ITX || PLATFORM == TE0808
-  iounmap(my_dev.uart);
-#endif // PLATFORM
-  iounmap(my_dev.clusters);
-  iounmap(my_dev.soc_periph);
-  iounmap(my_dev.l2_mem);
-  iounmap(my_dev.l3_mem);
-  iounmap(my_dev.mbox);
+#endif
+#if INTR_REG_BASE_ADDR
+  iounmap(my_dev.intr_reg);
+#endif
 #if PLATFORM == TE0808
   iounmap(my_dev.smmu);
   iounmap(my_dev.cci);
-#endif // PLATFORM
+#endif
 #if CLKING_BASE_ADDR
   iounmap(my_dev.clking);
 #endif
+#ifdef GPIO_EXT_RESET_ADDR
+  iounmap(my_dev.gpio_reset);
+#endif
   iounmap(my_dev.gpio);
 
-  cdev_del(&my_dev.cdev);
   device_destroy(my_class, my_dev.dev);
   class_destroy(my_class);
   unregister_chrdev_region(my_dev.dev, 1);
@@ -1171,22 +1222,26 @@ irqreturn_t pulp_isr(int irq, void *ptr)
   int i;
   unsigned rab_mh;
 
+  pr_debug("PULP: Handling IRQ %0d.\n", irq);
+
   // read and clear the interrupt register
 #if INTR_REG_BASE_ADDR
   intr_reg_value = ioread32((void *)(unsigned long)my_dev.intr_reg);
-// FIXME: remove custom clearance of interrupt
-#if PLATFORM == ZYNQMP
-  iowrite32(intr_reg_value, (void *)(unsigned long)my_dev.intr_reg + 0xc);
-#endif
 #else
   if (irq == my_dev.irq_mbox) {
     BIT_SET(intr_reg_value, BF_MASK_GEN(INTR_MBOX, 1));
-  } else if (irq == my_dev.irq_rab_miss) {
-    BIT_SET(intr_reg_value, BF_MASK_GEN(INTR_RAB_MISS, 1));
-  } else if (irq == my_dev.irq_rab_multi) {
-    BIT_SET(intr_reg_value, BF_MASK_GEN(INTR_RAB_MULTI, 1));
-  } else if (irq == my_dev.irq_rab_prot) {
-    BIT_SET(intr_reg_value, BF_MASK_GEN(INTR_RAB_PROT, 1));
+  } else if (irq == my_dev.irq_rab_host_miss) {
+    BIT_SET(intr_reg_value, BF_MASK_GEN(INTR_RAB_HOST_MISS, 1));
+  } else if (irq == my_dev.irq_rab_host_multi) {
+    BIT_SET(intr_reg_value, BF_MASK_GEN(INTR_RAB_HOST_MULTI, 1));
+  } else if (irq == my_dev.irq_rab_host_prot) {
+    BIT_SET(intr_reg_value, BF_MASK_GEN(INTR_RAB_HOST_PROT, 1));
+  } else if (irq == my_dev.irq_rab_pulp_miss) {
+    BIT_SET(intr_reg_value, BF_MASK_GEN(INTR_RAB_PULP_MISS, 1));
+  } else if (irq == my_dev.irq_rab_pulp_multi) {
+    BIT_SET(intr_reg_value, BF_MASK_GEN(INTR_RAB_PULP_MULTI, 1));
+  } else if (irq == my_dev.irq_rab_pulp_prot) {
+    BIT_SET(intr_reg_value, BF_MASK_GEN(INTR_RAB_PULP_PROT, 1));
   } else if (irq == my_dev.irq_rab_mhr_full) {
     BIT_SET(intr_reg_value, BF_MASK_GEN(INTR_RAB_MHR_FULL, 1));
   } else if (irq == my_dev.irq_eoc) {
@@ -1213,12 +1268,12 @@ irqreturn_t pulp_isr(int irq, void *ptr)
   if (BF_GET(intr_reg_value, INTR_MBOX, 1)) { // mailbox
     pulp_mbox_intr(my_dev.mbox);
   }
-  if (BF_GET(intr_reg_value, INTR_RAB_MISS, 1)) { // RAB miss
+  if (BF_GET(intr_reg_value, INTR_RAB_HOST_MISS, 1)) { // RAB Host miss
     rab_mh = pulp_rab_mh_sched();
 
     if ((DEBUG_LEVEL_RAB_MH > 1) && (rab_mh == 1)) {
       if (printk_ratelimit()) {
-        printk(KERN_INFO "PULP: RAB miss interrupt handled at %02li:%02li:%02li.\n", (time.tv_sec / 3600) % 24,
+        printk(KERN_INFO "PULP: RAB Host miss interrupt handled at %02li:%02li:%02li.\n", (time.tv_sec / 3600) % 24,
                (time.tv_sec / 60) % 60, time.tv_sec % 60);
 
         // for debugging
@@ -1226,21 +1281,46 @@ irqreturn_t pulp_isr(int irq, void *ptr)
       }
     }
   }
+  if (BF_GET(intr_reg_value, INTR_RAB_HOST_MULTI, 1)) { // RAB Host multi
+    if (printk_ratelimit()) {
+      printk(KERN_ALERT "PULP: RAB Host multi interrupt received at %02li:%02li:%02li.\n", (time.tv_sec / 3600) % 24,
+             (time.tv_sec / 60) % 60, time.tv_sec % 60);
+    }
+  }
+  if (BF_GET(intr_reg_value, INTR_RAB_HOST_PROT, 1)) { // RAB Host prot
+    if (printk_ratelimit()) {
+      printk(KERN_ALERT "PULP: RAB Host prot interrupt received at %02li:%02li:%02li.\n", (time.tv_sec / 3600) % 24,
+             (time.tv_sec / 60) % 60, time.tv_sec % 60);
+    }
+  }
+  if (BF_GET(intr_reg_value, INTR_RAB_PULP_MISS, 1)) { // RAB PULP miss
+    rab_mh = pulp_rab_mh_sched();
+
+    if ((DEBUG_LEVEL_RAB_MH > 1) && (rab_mh == 1)) {
+      if (printk_ratelimit()) {
+        printk(KERN_INFO "PULP: RAB PULP miss interrupt handled at %02li:%02li:%02li.\n", (time.tv_sec / 3600) % 24,
+               (time.tv_sec / 60) % 60, time.tv_sec % 60);
+
+        // for debugging
+        pulp_rab_mapping_print(my_dev.rab_config, 0xAAAA);
+      }
+    }
+  }
+  if (BF_GET(intr_reg_value, INTR_RAB_PULP_MULTI, 1)) { // RAB PULP multi
+    if (printk_ratelimit()) {
+      printk(KERN_ALERT "PULP: RAB PULP multi interrupt received at %02li:%02li:%02li.\n", (time.tv_sec / 3600) % 24,
+             (time.tv_sec / 60) % 60, time.tv_sec % 60);
+    }
+  }
+  if (BF_GET(intr_reg_value, INTR_RAB_PULP_PROT, 1)) { // RAB PULP prot
+    if (printk_ratelimit()) {
+      printk(KERN_ALERT "PULP: RAB PULP prot interrupt received at %02li:%02li:%02li.\n", (time.tv_sec / 3600) % 24,
+             (time.tv_sec / 60) % 60, time.tv_sec % 60);
+    }
+  }
   if (BF_GET(intr_reg_value, INTR_RAB_MHR_FULL, 1)) { // RAB mhr full
     if (printk_ratelimit()) {
       printk(KERN_ALERT "PULP: RAB mhr full interrupt received at %02li:%02li:%02li.\n", (time.tv_sec / 3600) % 24,
-             (time.tv_sec / 60) % 60, time.tv_sec % 60);
-    }
-  }
-  if (BF_GET(intr_reg_value, INTR_RAB_MULTI, 1)) { // RAB multi
-    if (printk_ratelimit()) {
-      printk(KERN_ALERT "PULP: RAB multi interrupt received at %02li:%02li:%02li.\n", (time.tv_sec / 3600) % 24,
-             (time.tv_sec / 60) % 60, time.tv_sec % 60);
-    }
-  }
-  if (BF_GET(intr_reg_value, INTR_RAB_PROT, 1)) { // RAB prot
-    if (printk_ratelimit()) {
-      printk(KERN_ALERT "PULP: RAB prot interrupt received at %02li:%02li:%02li.\n", (time.tv_sec / 3600) % 24,
              (time.tv_sec / 60) % 60, time.tv_sec % 60);
     }
   }

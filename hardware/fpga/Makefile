@@ -6,7 +6,7 @@ DEFINE_TCLS := \
     vivado_ips/define_sources.tcl
 
 ifeq ($(VIVADO),)
-VIVADO := vivado-2019.1.1 vivado
+VIVADO := vitis-2019.2 vivado
 endif
 
 VIVADO_OPT :=-mode batch

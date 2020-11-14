@@ -1,0 +1,53 @@
+#!/bin/sh
+
+SDCARD_MNT='/run/media/mmcblk0p2'
+
+mkdir_if_not_existing() {
+    if test ! -d "$1"; then
+        mkdir -p "$1"
+    fi
+}
+
+_mount() {
+    mkdir_if_not_existing "$1"
+    mount "$1" "$2"
+    echo "Mounted '$1' at '$2'."
+}
+
+start() {
+    if test ! -d "$SDCARD_MNT"; then
+        echo "Error: Mount point of SD card ('$SDCARD_MNT') does not exist!"
+        exit -1
+    fi
+    mkdir_if_not_existing "$SDCARD_MNT/home/root"
+    _mount "$SDCARD_MNT/home" /home
+    _mount "$SDCARD_MNT/etc/dropbear" /etc/dropbear
+}
+
+_umount() {
+    umount "$1"
+    echo "Unmounted '$1'."
+}
+
+stop() {
+    _umount /etc/dropbear
+    _umount /home
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit $?

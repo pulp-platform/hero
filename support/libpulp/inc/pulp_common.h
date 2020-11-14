@@ -137,7 +137,7 @@
   #define H_GPIO_BASE_ADDR 0xA9000000
   #define CLKING_BASE_ADDR 0x00000000 // not supported
   #define RAB_CONFIG_BASE_ADDR 0xA8000000
-  #define INTR_REG_BASE_ADDR 0xA9100000
+  #define INTR_REG_BASE_ADDR 0
 
   #define RAB_AX_LOG_EN 0
 
@@ -186,7 +186,7 @@
   #define L1_MEM_H_BASE_ADDR PULP_H_BASE_ADDR
   #define L2_MEM_H_BASE_ADDR 0xA7000000
   #define L3_MEM_H_BASE_ADDR (0x80000000 - L3_MEM_SIZE_B)
-  #define MBOX_H_BASE_ADDR   0xA6000000 // FIXME
+  #define MBOX_H_BASE_ADDR   0xA6000000
   #define SOC_PERIPHERALS_H_BASE_ADDR 0xA5100000
 #endif // PLATFORM
 
@@ -194,7 +194,7 @@
  * PULP memory map -- see PULP SDK and PULP HW
  */
 #define PULP_BASE_ADDR 0x10000000
-#define MBOX_BASE_ADDR 0x1c00f100
+#define MBOX_BASE_ADDR 0x1B800000
 #define L2_MEM_BASE_ADDR 0x1C000000
 #define L3_MEM_BASE_ADDR 0x80000000 // address of the contiguous L3
 #define PGD_BASE_ADDR 0x20000000 // address of the top-level page table of user-space process
@@ -292,13 +292,16 @@
 #define INTR_EOC_N 7 + (N_CLUSTERS - 1) // max 15
 
 #define INTR_MBOX 16
-#define INTR_RAB_MISS 17
-#define INTR_RAB_MULTI 18
-#define INTR_RAB_PROT 19
-#define INTR_RAB_MHR_FULL 20
-#define INTR_RAB_AR_LOG_FULL 21
-#define INTR_RAB_AW_LOG_FULL 22
-#define INTR_RAB_CFG_LOG_FULL 23
+#define INTR_RAB_HOST_MISS 17
+#define INTR_RAB_HOST_MULTI 18
+#define INTR_RAB_HOST_PROT 19
+#define INTR_RAB_PULP_MISS 20
+#define INTR_RAB_PULP_MULTI 21
+#define INTR_RAB_PULP_PROT 22
+#define INTR_RAB_MHR_FULL 23
+#define INTR_RAB_AR_LOG_FULL 24
+#define INTR_RAB_AW_LOG_FULL 25
+#define INTR_RAB_CFG_LOG_FULL 26
 #else
 #define INTR_EOC_0 0
 #define INTR_EOC_N (N_CLUSTERS - 1) // max 15
@@ -363,11 +366,23 @@
  */
 #define MBOX_FIFO_DEPTH 16
 #define MBOX_WRDATA_OFFSET_B 0x0
-#define MBOX_RDDATA_OFFSET_B 0x8
-#define MBOX_STATUS_OFFSET_B 0x10
-#define MBOX_ERROR_OFFSET_B 0x14
-#define MBOX_IS_OFFSET_B 0x20
-#define MBOX_IE_OFFSET_B 0x24
+#define MBOX_RDDATA_OFFSET_B 0x10
+#define MBOX_STATUS_OFFSET_B 0x20
+#define MBOX_STATUS_MASK_FULL 0x2   // bitmask that selects the Full bit
+#define MBOX_STATUS_MASK_EMPTY 0x1  // bitmask that selects the Empty bit
+#define MBOX_ERROR_OFFSET_B 0x30
+#define MBOX_WIRQT_OFFSET_B 0x40
+#define MBOX_RIRQT_OFFSET_B 0x50
+#define MBOX_IS_OFFSET_B 0x60
+#define MBOX_IE_OFFSET_B 0x70
+#define MBOX_IRQ_MASK_ALL 0x7   // bitmask that selects all IRQs
+#define MBOX_IRQ_MASK_ERROR 0x4 // bitmask that selects only Error IRQ
+#define MBOX_IRQ_MASK_READ 0x2  // bitmask that selects only Read Threshold IRQ
+#define MBOX_IRQ_MASK_WRITE 0x1 // bitmask that selects only Write Threshold IRQ
+#define MBOX_IRQ_MASK_NONE 0x0  // bitmask that selects no IRQs
+#define MBOX_CTRL_OFFSET_B 0x90
+#define MBOX_CTRL_MASK_FLUSH_WRITES 0x1 // bitmask that flushes writes
+#define MBOX_CTRL_MASK_FLUSH_READS 0x2  // bitmask that flushes reads
 
 /*
  * RAB

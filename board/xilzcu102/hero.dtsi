@@ -14,14 +14,10 @@
         };
     };
 
-    fclk0 {
-        status = "okay";
-        compatible = "ikwzm,fclkcfg-0.10.a";
-        clocks = <&clkc 71>;
-        insert-rate = "50000000";
-        insert-enable = <1>;
-        remove-rate = "1000000";
-        remove-enable = <0>;
+    /* Ensure serial terminal is enabled at boot. */
+    chosen {
+        bootargs = "earlycon clk_ignore_unused console=ttyPS0,115200";
+        stdout-path = "serial0:115200n8";
     };
 };
 
@@ -32,19 +28,8 @@
         reg = <0x0 0xa0000000 0x0 0x10000000
                0x0 0xa8000000 0x0 0x10000>;
         interrupt-parent = <&gic>;
-        interrupts = <0 0x59 0x4>;
+        interrupts = <0 0x59 0x4 0 0x5a 0x4 0 0x5b 0x4 0 0x5c 0x4 0 0x5d 0x4 0 0x5e 0x4 0 0x5f 0x4 0 0x69 0x4 0 0x6a 0x4>;
         iommus = <&smmu 0x280>, <&smmu 0x281>, <&smmu 0x282>; /* FIXME: check this */
-    };
-};
-
-&gem3 {
-    phy-handle = <&phyc>;
-    phyc: phy@c {
-        reg = <0xc>;
-        ti,rx-internal-delay=<0x8>;
-        ti,tx-internal-delay=<0xa>;
-        ti,fifo-depth=<0x1>;
-        ti,rxctrl-strap-worka;
     };
 };
 

@@ -27,4 +27,4 @@ cd "$slm_path"
 $slm_conv --swap-endianness -f "$app_path/${app_name}_l1.slm" \
     -w 32 -P 16 -S 1 -n 2048 -s 0x10000000 -F l1_%01S_%01P.slm
 $slm_conv --swap-endianness -f "$app_path/${app_name}_l2.slm" \
-    -w 32 -P  8 -S 4 -n 1024 -s 0x1c000000 -F l2_%01S_%01P.slm
+    -w 32 -P  4 -S 8 -n 1024 -s 0x1c000000 -F l2_%01S_%01P.slm

@@ -145,7 +145,9 @@ module pulp_ooc #(
   output logic  rab_from_host_miss_irq_o,
   output logic  rab_from_host_multi_irq_o,
   output logic  rab_from_host_prot_irq_o,
-  output logic  rab_miss_fifo_full_irq_o
+  output logic  rab_miss_fifo_full_irq_o,
+  // Mailbox IRQ
+  output logic  mbox_irq_o
 );
 
   `AXI_TYPEDEF_AW_CHAN_T(aw_t, addr_t, id_t, user_t)
@@ -304,6 +306,7 @@ module pulp_ooc #(
     .rab_from_host_multi_irq_o,
     .rab_from_host_prot_irq_o,
     .rab_miss_fifo_full_irq_o,
+    .mbox_irq_o,
     .ext_req_o        (from_pulp_req),
     .ext_resp_i       (from_pulp_resp),
     .ext_req_i        (to_pulp_req),
