@@ -19,46 +19,59 @@
 #include <stdlib.h>
 #include <string.h>
 
-unsigned int hero_tryread(const unsigned int* const addr)
+uint64_t hero_tryread(CONST_HOST_PTR_CONST addr)
 {
-	return (unsigned int)(*(const volatile unsigned *) addr);
+	return (uint64_t)(*(const volatile HOST_PTR) addr);
 }
 
-int
-hero_tryread_prefetch(const unsigned int* const addr)
+int32_t
+hero_tryread_prefetch(CONST_HOST_PTR_CONST addr)
 {
 	return 0;
 }
 
 void
-hero_trywrite(unsigned int* const addr, const unsigned int val)
+hero_trywrite(HOST_PTR_CONST addr, const uint64_t val)
 {
 	*addr = val;
 }
 
-int
-hero_trywrite_prefetch(unsigned int* const addr)
+int32_t
+hero_trywrite_prefetch(HOST_PTR_CONST addr)
 {
 	return 0;
 }
 
-int
+int32_t
 hero_handle_rab_misses(void)
 {
 	return 0;
 }
 
 hero_dma_job_t 
-hero_dma_memcpy_async(void *dst, void *src, int size)
+hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst, HOST_VOID_PTR src, uint32_t size)
 {
-	memcpy(dst, src, size);
+	memcpy((HOST_VOID_PTR)dst, src, size);
+	return 0;
+}
+
+hero_dma_job_t
+hero_memcpy_dev2host_async(HOST_VOID_PTR dst, DEVICE_VOID_PTR src, uint32_t size)
+{
+	memcpy(dst, (HOST_VOID_PTR)src, size);
 	return 0;
 }
 
 void
-hero_dma_memcpy(void *dst, void *src, int size)
+hero_memcpy_host2dev(DEVICE_VOID_PTR dst, HOST_VOID_PTR src, uint32_t size)
 {
-	memcpy(dst, src, size);
+	memcpy((HOST_VOID_PTR)dst, src, size);
+}
+
+void
+hero_memcpy_dev2host(HOST_VOID_PTR dst, DEVICE_VOID_PTR src, uint32_t size)
+{
+	memcpy(dst, (HOST_VOID_PTR)src, size);
 }
 
 void
@@ -67,40 +80,44 @@ hero_dma_wait(hero_dma_job_t id)
 	return;
 }
 
-void *
-hero_l1malloc(int size)
+DEVICE_PTR
+hero_l1malloc(int32_t size)
 {
-	return malloc(size);
+  // Undefined from host
+	return (DEVICE_PTR) NULL;
 }
-void *
-hero_l2malloc(int size)
+DEVICE_PTR
+hero_l2malloc(int32_t size)
 {
-	return malloc(size);
+  // Undefined from host
+	return (DEVICE_PTR) NULL;
 }
-void *
-hero_l3malloc(int size)
+HOST_VOID_PTR
+hero_l3malloc(int32_t size)
 {
   // FIXME: use actual L3 memory
   return malloc(size);
 }
 
 void
-hero_l1free(void * a)
+hero_l1free(DEVICE_PTR a)
 {
-  free(a);
+  // Undefined
+  return;
 }
 void
-hero_l2free(void * a)
+hero_l2free(DEVICE_PTR a)
 {
-  free(a);
+  // Undefined
+  return;
 }
 void
-hero_l3free(void * a)
+hero_l3free(HOST_VOID_PTR a)
 {
   free(a);
 }
 
-int
+int32_t
 hero_rt_core_id(void)
 {
   return omp_get_thread_num();
@@ -112,7 +129,7 @@ hero_reset_clk_counter(void) {
     return;
 }
 
-int
+int32_t
 hero_get_clk_counter(void) {
     return 0;
 }

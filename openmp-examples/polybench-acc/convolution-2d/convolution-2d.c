@@ -15,8 +15,8 @@
 /* Include polybench common header. */
 #include <polybench.h>
 
-/* Include dma lib. */
-#include <dmatransfer.h>
+/* Include hero runtime lib. */
+#include <hero-target.h>
 
 /* Include benchmark-specific header. */
 /* Default data type is double, default size is 4096x4096. */
@@ -67,18 +67,18 @@ void kernel_conv2d_dma(int ni,
   {
     #pragma omp target
     {
-      DATA_TYPE* spm = alloc_spm();
       // Divide SPM between A and B
       int rows_per_chunk = NI; //(SPM_SIZE - 2*NJ) / (2*NJ);
 
-      DATA_TYPE* A_spm = spm;
-      DATA_TYPE* B_spm = spm + (rows_per_chunk+2) * NJ;
+      __device DATA_TYPE* A_spm =
+          (__device DATA_TYPE *) hero_l1malloc(rows_per_chunk + 2);
+      __device DATA_TYPE* B_spm =
+          (__device DATA_TYPE *) hero_l1malloc(rows_per_chunk);
 
       int row = 0;
       while (row < NI - 2) {
         int chunk_rows = rows_per_chunk < (NI - 2 - row) ? rows_per_chunk : (NI - 2 - row);
-        memcpy_to_spm(A_spm, ((DATA_TYPE*) A) + row*NJ, (chunk_rows+2)*NJ);
-        dma_flush();
+        hero_memcpy_host2dev(A_spm, ((__host DATA_TYPE*) A) + row*NJ, (chunk_rows+2)*NJ);
 
         #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
         for (int i = 0; i < chunk_rows; ++i) {
@@ -90,12 +90,11 @@ void kernel_conv2d_dma(int ni,
           }
         }
 
-        memcpy_from_spm(((DATA_TYPE*) B) + (row+1)*NJ, B_spm, chunk_rows*NJ);
-        dma_flush();
+        hero_memcpy_dev2host(((__host DATA_TYPE*) B) + (row+1)*NJ, B_spm, chunk_rows*NJ);
         row += rows_per_chunk;
       }
-
-      dealloc_spm(spm);
+      hero_l1free(A_spm);
+      hero_l1free(B_spm);
     }
   }
 }
