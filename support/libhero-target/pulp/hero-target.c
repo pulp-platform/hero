@@ -87,8 +87,8 @@ __hero_dma_memcpy_async(HOST_VOID_PTR dst, HOST_VOID_PTR src, int32_t len,
     }
 
     //dma = (hero_dma_job_t)plp_dma_memcpy_priv(ext_addr,loc_addr,size_tmp,ext2loc);
-    printf("copy cmd: loc: 0x%llx ext: 0x%llx ext2loc: %ld len: %ld\n", dst, src,
-           ext2loc, len);
+    DEBUG("copy cmd: loc: 0x%llx ext: 0x%llx ext2loc: %ld len: %ld\n", dst, src,
+          ext2loc, len);
     dma_cmd = plp_dma_getCmd(ext2loc, len_tmp, PLP_DMA_1D, PLP_DMA_TRIG_EVT,
                              PLP_DMA_NO_TRIG_IRQ, PLP_DMA_PRIV);
     __asm__ __volatile__ ("" : : : "memory");

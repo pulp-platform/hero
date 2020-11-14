@@ -9,4 +9,4 @@ PULP_CL_CFLAGS_hero-target    = -Wall -O3 -g3 -I../inc
 
 header::
 	mkdir -p $(PULP_SDK_HOME)/install/include/libhero-target
-	cp ../inc/hero-target.h $(PULP_SDK_HOME)/install/include/libhero-target
+	cp ../inc/hero-target.h $(PULP_SDK_HOME)/install/include

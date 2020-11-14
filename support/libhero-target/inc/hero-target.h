@@ -25,12 +25,12 @@
 #if defined(__llvm__)
 #  define DEVICE_VOID_PTR __device void*
 #  define HOST_VOID_PTR __host void*
-#  define DEVICE_PTR __device unsigned int32_t*
-#  define HOST_PTR __host unsigned int32_t*
-#  define DEVICE_PTR_CONST __device const unsigned int32_t* const
-#  define HOST_PTR_CONST __host const unsigned int32_t* const
-#  define CONST_DEVICE_PTR_CONST __device const unsigned int32_t* const
-#  define CONST_HOST_PTR_CONST __host const unsigned int32_t* const
+#  define DEVICE_PTR __device int32_t*
+#  define HOST_PTR __host int32_t*
+#  define DEVICE_PTR_CONST __device const int32_t* const
+#  define HOST_PTR_CONST __host const int32_t* const
+#  define CONST_DEVICE_PTR_CONST __device const int32_t* const
+#  define CONST_HOST_PTR_CONST __host const int32_t* const
 #else
 #  ifdef __PULP__
 #    define HOST_VOID_PTR uint64_t
