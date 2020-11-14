@@ -71,9 +71,9 @@ void kernel_conv2d_dma(int ni,
       int rows_per_chunk = NI; //(SPM_SIZE - 2*NJ) / (2*NJ);
 
       __device DATA_TYPE* A_spm =
-          (__device DATA_TYPE *) hero_l1malloc((rows_per_chunk + 2) * sizeof(DATA_TYPE));
+          (__device DATA_TYPE *) hero_l1malloc(NJ * (rows_per_chunk + 2) * sizeof(DATA_TYPE));
       __device DATA_TYPE* B_spm =
-          (__device DATA_TYPE *) hero_l1malloc(rows_per_chunk * sizeof(DATA_TYPE));
+          (__device DATA_TYPE *) hero_l1malloc(NJ * rows_per_chunk * sizeof(DATA_TYPE));
 
       int row = 0;
       while (row < NI - 2) {
