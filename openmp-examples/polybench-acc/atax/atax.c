@@ -15,8 +15,8 @@
 /* Include polybench common header. */
 #include <polybench.h>
 
-/* Include dma lib. */
-#include <dmatransfer.h>
+/* Include hero runtime lib. */
+#include <hero-target.h>
 
 /* Include benchmark-specific header. */
 /* Default data type is double, default size is 4000. */
@@ -70,20 +70,18 @@ void kernel_atax_dma(int nx, int ny,
   {
     #pragma omp target
     {
-      DATA_TYPE* spm = alloc_spm();
       int rows_per_chunk = NX; // (SPM_SIZE - NY) / (NY + 1);
 
-      DATA_TYPE* x_spm = spm;
-      DATA_TYPE* tmp_spm = spm + NY;
-      DATA_TYPE* A_spm = spm + NY + rows_per_chunk;
+      __device DATA_TYPE* x_spm = (__device DATA_TYPE *) hero_l1malloc(NY * sizeof(DATA_TYPE));
+      __device DATA_TYPE* tmp_spm = (__device DATA_TYPE *) hero_l1malloc(rows_per_chunk * sizeof(DATA_TYPE));
+      __device DATA_TYPE* A_spm = (__device DATA_TYPE *) hero_l1malloc(NY * rows_per_chunk * sizeof(DATA_TYPE));
 
-      memcpy_to_spm(x_spm, ((DATA_TYPE*) x), NY);
+      hero_memcpy_host2dev(x_spm, ((__host DATA_TYPE*) x), NY);
 
       int row = 0;
       while (row < NX) {
         int chunk_rows = (row + rows_per_chunk < NX) ? rows_per_chunk : (NX - row);
-        memcpy_to_spm(A_spm, ((DATA_TYPE*) A) + row*NY, chunk_rows*NY);
-        dma_flush();
+        hero_memcpy_host2dev(A_spm, ((__host DATA_TYPE*) A) + row*NY, chunk_rows*NY);
 
         #pragma omp parallel for num_threads(NUM_THREADS)
         for (int i = 0; i < chunk_rows; i++) {
@@ -93,29 +91,30 @@ void kernel_atax_dma(int nx, int ny,
           }
         }
 
-        memcpy_from_spm(((DATA_TYPE*) tmp) + row, tmp_spm, chunk_rows);
-        dma_flush();
+        hero_memcpy_dev2host(((__host DATA_TYPE*) tmp) + row, tmp_spm, chunk_rows);
         row += rows_per_chunk;
       }
 
-      dealloc_spm(spm);
+      hero_l1free(A_spm);
+      hero_l1free(tmp_spm);
+      hero_l1free(x_spm);
     }
 
     #pragma omp target
     {
-      DATA_TYPE* spm = alloc_spm();
       int rows_per_chunk = NX; // (SPM_SIZE - NY) / (NY + 1);
 
-      DATA_TYPE* y_spm = spm;
-      DATA_TYPE* tmp_spm = spm + NY;
-      DATA_TYPE* A_spm = spm + NY + rows_per_chunk;
+      __device DATA_TYPE* y_spm = (__device DATA_TYPE *) hero_l1malloc(NY * sizeof(DATA_TYPE));
+      __device DATA_TYPE* tmp_spm = (__device DATA_TYPE *) hero_l1malloc(rows_per_chunk * sizeof(DATA_TYPE));
+      __device DATA_TYPE* A_spm = (__device DATA_TYPE *) hero_l1malloc(NY * rows_per_chunk * sizeof(DATA_TYPE));
 
       int row = 0;
       while (row < NX) {
         int chunk_rows = (row + rows_per_chunk < NX) ? rows_per_chunk : (NX - row);
-        memcpy_to_spm(A_spm, ((DATA_TYPE*) A) + row*NY, chunk_rows*NY);
-        memcpy_to_spm(tmp_spm, ((DATA_TYPE*) tmp) + row, chunk_rows);
-        dma_flush();
+        hero_dma_job_t job_A = hero_memcpy_host2dev_async(A_spm, ((__host DATA_TYPE*) A) + row*NY, chunk_rows*NY);
+        hero_dma_job_t job_tmp = hero_memcpy_host2dev_async(tmp_spm, ((__host DATA_TYPE*) tmp) + row, chunk_rows);
+        hero_dma_wait(job_A);
+        hero_dma_wait(job_tmp);
 
         #pragma omp parallel for num_threads(NUM_THREADS) firstprivate(chunk_rows)
         for (int i = 0; i < NY; i++) {
@@ -126,10 +125,11 @@ void kernel_atax_dma(int nx, int ny,
         row += rows_per_chunk;
       }
 
-      memcpy_from_spm(((DATA_TYPE*) y), y_spm, NY);
-      dma_flush();
+      hero_memcpy_dev2host((__host DATA_TYPE*) y, y_spm, NY);
 
-      dealloc_spm(spm);
+      hero_l1free(A_spm);
+      hero_l1free(tmp_spm);
+      hero_l1free(y_spm);
     }
   }
 }
