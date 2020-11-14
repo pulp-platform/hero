@@ -65,6 +65,7 @@ After the base toolchains and accelerator and host SDKs are installed, the HERO 
 ```
 make tc-llvm
 ```
+Note that the LLVM OpenMP target offloading plugin for PULP (i.e., `libomptarget.rtl.pulp.so`) is *not* compiled as part of LLVM.  Instead, it is compiled as package in the Host SDK, because it must be compiled for a specific Host architecture.  You can thus safely ignore the message `LIBOMPTARGET: Not building PULP offloading plugin: build disabled.`.
 
 ### Environments
 With the toolchains and SDKs installed, several development environments can be created. At the moment HERO supports two different hardware targets: (1) a fully open-source FPGA implementation with a RISC-V Ariane host and (2) an implementation with a hard-macro ARMv8 Cortex-A on the Xilinx ZCU102. Moreover, elementary simulation targets are available for (1) the RISC-V host infrastructure using QEMU and (2) the PULP accelerator in an RTL simulator (QuestaSim).

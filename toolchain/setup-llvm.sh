@@ -33,7 +33,10 @@ cd llvm_build
 
 # run llvm build and install
 echo "Building LLVM project"
-# NOTE: use the cmake from the host tools to ensure a recent version
+# Notes:
+# - Use the cmake from the host tools to ensure a recent version.
+# - Do not build PULP libomptarget offloading plugin as part of the LLVM build on the *development*
+#   machine.  That plugin will be compiled for each Host architecture through a Buildroot package.
 $HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DBUILD_SHARED_LIBS=True -DLLVM_USE_SPLIT_DWARF=True \
       -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL \
@@ -45,6 +48,7 @@ $HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON \
       -DLLVM_ENABLE_PROJECTS="clang;openmp" \
       -DLIBOMPTARGET_NVPTX_BUILD=OFF \
+      -DLIBOMPTARGET_PULP_BUILD=OFF \
       $THIS_DIR/llvm-project/llvm
 cmake --build . --target install
 cd ..
