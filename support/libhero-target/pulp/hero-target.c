@@ -159,15 +159,10 @@ hero_l2malloc(int32_t size)
   return l2malloc(size);
 }
 
-static HOST_VOID_PTR l3_ptr = (void*)L3_MEM_BASE_ADDR;
-
 HOST_VOID_PTR
 hero_l3malloc(int32_t size)
 {
-  // TODO: Return nullpointer, check that no examples depend on this.
-  HOST_VOID_PTR ptr = l3_ptr;
-  l3_ptr += size;
-  return ptr;
+  return (HOST_VOID_PTR)NULL;
 }
 
 void
@@ -184,7 +179,7 @@ hero_l2free(DEVICE_VOID_PTR a)
 void
 hero_l3free(HOST_VOID_PTR a)
 {
-  //FIXME: implement
+  // Undefined
   return;
 }
 
