@@ -80,11 +80,13 @@ typedef struct Fragment Fragment;
 
 typedef struct FragmentHeader
 {
+    uint16_t  segmentationCanary; // Canary before actual fragment header to detect memory overflows.
+    bool      used;
     Fragment* next;
     Fragment* prev;
     size_t    size;
-    bool      used;
 } FragmentHeader;
+static_assert(sizeof(bool) == 1, "Size of bool does not allow canary");
 static_assert(sizeof(FragmentHeader) <= O1HEAP_ALIGNMENT, "Memory layout error");
 
 struct Fragment
@@ -176,12 +178,21 @@ O1HEAP_PRIVATE void interlink(Fragment* const left, Fragment* const right)
     }
 }
 
+inline uint16_t segmentationCanary(const Fragment* const fragment) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
+  // We deliberately truncate the pointer and do not want a compiler warning about it.
+  return (uint16_t)fragment;
+#pragma GCC diagnostic pop
+}
+
 /// Adds a new block into the appropriate bin and updates the lookup mask.
 O1HEAP_PRIVATE void rebin(O1HeapInstance* const handle, Fragment* const fragment);
 O1HEAP_PRIVATE void rebin(O1HeapInstance* const handle, Fragment* const fragment)
 {
     O1HEAP_ASSERT(handle != NULL);
     O1HEAP_ASSERT(fragment != NULL);
+    O1HEAP_ASSERT("Memory overflow detected due to corrupt fragment!" && fragment->header.segmentationCanary == segmentationCanary(fragment));
     O1HEAP_ASSERT(fragment->header.size >= FRAGMENT_SIZE_MIN);
     O1HEAP_ASSERT((fragment->header.size % FRAGMENT_SIZE_MIN) == 0U);
     const uint8_t idx = log2Floor(fragment->header.size / FRAGMENT_SIZE_MIN);  // Round DOWN when inserting.
@@ -204,6 +215,7 @@ O1HEAP_PRIVATE void unbin(O1HeapInstance* const handle, const Fragment* const fr
 {
     O1HEAP_ASSERT(handle != NULL);
     O1HEAP_ASSERT(fragment != NULL);
+    O1HEAP_ASSERT("Memory overflow detected due to corrupt fragment!" && fragment->header.segmentationCanary == segmentationCanary(fragment));
     O1HEAP_ASSERT(fragment->header.size >= FRAGMENT_SIZE_MIN);
     O1HEAP_ASSERT((fragment->header.size % FRAGMENT_SIZE_MIN) == 0U);
     const uint8_t idx = log2Floor(fragment->header.size / FRAGMENT_SIZE_MIN);  // Round DOWN when removing.
@@ -268,6 +280,7 @@ O1HeapInstance* o1heapInit(void* const      base,
         // Initialize the root fragment.
         Fragment* const frag = (Fragment*) (void*) (((uint8_t*) base) + INSTANCE_SIZE_PADDED);
         O1HEAP_ASSERT((((size_t) frag) % O1HEAP_ALIGNMENT) == 0U);
+        frag->header.segmentationCanary = segmentationCanary(frag);
         frag->header.next = NULL;
         frag->header.prev = NULL;
         frag->header.size = capacity;
@@ -326,6 +339,7 @@ void* o1heapAllocate(O1HeapInstance* const handle, const size_t amount)
             // The bin we found shall not be empty, otherwise it's a state divergence (memory corruption?).
             Fragment* const frag = handle->bins[bin_index];
             O1HEAP_ASSERT(frag != NULL);
+            O1HEAP_ASSERT("Memory overflow detected due to corrupt fragment!" && frag->header.segmentationCanary == segmentationCanary(frag));
             O1HEAP_ASSERT(frag->header.size >= fragment_size);
             O1HEAP_ASSERT((frag->header.size % FRAGMENT_SIZE_MIN) == 0U);
             O1HEAP_ASSERT(!frag->header.used);
@@ -340,6 +354,7 @@ void* o1heapAllocate(O1HeapInstance* const handle, const size_t amount)
             {
                 Fragment* const new_frag = (Fragment*) (void*) (((uint8_t*) frag) + fragment_size);
                 O1HEAP_ASSERT(((size_t) new_frag) % O1HEAP_ALIGNMENT == 0U);
+                new_frag->header.segmentationCanary = segmentationCanary(new_frag);
                 new_frag->header.size = leftover;
                 new_frag->header.used = false;
                 interlink(new_frag, frag->header.next);
@@ -395,6 +410,7 @@ void o1heapFree(O1HeapInstance* const handle, void* const pointer)
         O1HEAP_ASSERT(((size_t) frag) >= (((size_t) handle) + INSTANCE_SIZE_PADDED));
         O1HEAP_ASSERT(((size_t) frag) <=
                       (((size_t) handle) + INSTANCE_SIZE_PADDED + handle->diagnostics.capacity - FRAGMENT_SIZE_MIN));
+        O1HEAP_ASSERT("Memory overflow detected due to corrupt fragment!" && frag->header.segmentationCanary == segmentationCanary(frag));
         O1HEAP_ASSERT(frag->header.used);  // Catch double-free
         O1HEAP_ASSERT(((size_t) frag->header.next) % sizeof(Fragment*) == 0U);
         O1HEAP_ASSERT(((size_t) frag->header.prev) % sizeof(Fragment*) == 0U);
