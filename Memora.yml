@@ -1838,7 +1838,8 @@ artifacts:
       - buildroot
       - configs/har_exilzcu102_defconfig
       - package
-      - support
+      - support/libpulp # package `libpulp`
+      - support/pulp-driver # package `pulp-driver`
       # bitstream-zcu102
       - hardware/Bender.lock
       - hardware/Bender.yml
