@@ -21,96 +21,106 @@
 
 uint64_t hero_tryread(CONST_HOST_PTR_CONST addr)
 {
-	return (uint64_t)(*(const volatile HOST_PTR) addr);
+  return (uint64_t)(*(const volatile HOST_PTR) addr);
 }
 
 int32_t
 hero_tryread_prefetch(CONST_HOST_PTR_CONST addr)
 {
-	return 0;
+  return 0;
 }
 
 void
 hero_trywrite(HOST_PTR_CONST addr, const uint64_t val)
 {
-	*addr = val;
+  *addr = val;
 }
 
 int32_t
 hero_trywrite_prefetch(HOST_PTR_CONST addr)
 {
-	return 0;
+  return 0;
 }
 
 int32_t
 hero_handle_rab_misses(void)
 {
-	return 0;
+  return 0;
 }
 
 hero_dma_job_t 
 hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst, HOST_VOID_PTR src, uint32_t size)
 {
-	memcpy((HOST_VOID_PTR)dst, src, size);
-	return 0;
+  memcpy((HOST_VOID_PTR)dst, src, size);
+  return 0;
 }
 
 hero_dma_job_t
 hero_memcpy_dev2host_async(HOST_VOID_PTR dst, DEVICE_VOID_PTR src, uint32_t size)
 {
-	memcpy(dst, (HOST_VOID_PTR)src, size);
-	return 0;
+  memcpy(dst, (HOST_VOID_PTR)src, size);
+  return 0;
 }
 
 void
 hero_memcpy_host2dev(DEVICE_VOID_PTR dst, HOST_VOID_PTR src, uint32_t size)
 {
-	memcpy((HOST_VOID_PTR)dst, src, size);
+  memcpy((HOST_VOID_PTR)dst, src, size);
 }
 
 void
 hero_memcpy_dev2host(HOST_VOID_PTR dst, DEVICE_VOID_PTR src, uint32_t size)
 {
-	memcpy(dst, (HOST_VOID_PTR)src, size);
+  memcpy(dst, (HOST_VOID_PTR)src, size);
 }
 
 void
 hero_dma_wait(hero_dma_job_t id)
 {
-	return;
+  return;
 }
 
 DEVICE_PTR
 hero_l1malloc(int32_t size)
 {
-  // Undefined from host
-	return (DEVICE_PTR) NULL;
+  printf("Trying to allocate L1 memory from host, which is not defined\n");
+  return (DEVICE_PTR) NULL;
 }
+
 DEVICE_PTR
 hero_l2malloc(int32_t size)
 {
-  // Undefined from host
-	return (DEVICE_PTR) NULL;
+  printf("Trying to allocate L2 memory from host, which is not defined\n");
+  return (DEVICE_PTR) NULL;
 }
+
 HOST_VOID_PTR
 hero_l3malloc(int32_t size)
 {
-  // FIXME: use actual L3 memory
+  // The concept of L3 exposed to the HERO end-user is just L3 = DRAM, and as
+  // such this function is just a wrapper for malloc. This is different from
+  // the understandig of L3 in libpulp, where it refers to unpaged buffer
+  // memory for copy-on-offload data mappings. We don't expose this to the
+  // end-user, as for BIGPULP_MEMCPY the offloading runtime takes care of the
+  // buffer allocation, and for BIGPULP_SVM any address in DRAM can be
+  // resolved.
   return malloc(size);
 }
 
 void
 hero_l1free(DEVICE_PTR a)
 {
-  // Undefined
+  printf("Trying to free L1 memory from host, which is not defined\n");
   return;
 }
+
 void
 hero_l2free(DEVICE_PTR a)
 {
-  // Undefined
+  printf("Trying to free L2 memory from host, which is not defined\n");
   return;
 }
+
 void
 hero_l3free(HOST_VOID_PTR a)
 {
@@ -126,10 +136,10 @@ hero_rt_core_id(void)
 // FIXME implement clock counters for host
 void
 hero_reset_clk_counter(void) {
-    return;
+  return;
 }
 
 int32_t
 hero_get_clk_counter(void) {
-    return 0;
+  return 0;
 }

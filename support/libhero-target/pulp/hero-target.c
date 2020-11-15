@@ -66,13 +66,11 @@ hero_handle_rab_misses(void)
 
 // -------------------------------------------------------------------------- //
 
-// FIXME: The underlying DMA still only accepts 32-bit pointers, so this
-// function must take DEVICE_PTRs. When the DMA accepts 64-bit pointers, this
-// should be fixed.
-// XXX This function is no longer globally visible.
+// Internal function
 hero_dma_job_t
 __hero_dma_memcpy_async(HOST_VOID_PTR dst, HOST_VOID_PTR src, int32_t len,
-                      int32_t ext2loc) {
+                        int32_t ext2loc)
+{
 
   hero_dma_job_t dma_job = plp_dma_counter_alloc();
   uint32_t dma_cmd;
@@ -86,9 +84,8 @@ __hero_dma_memcpy_async(HOST_VOID_PTR dst, HOST_VOID_PTR src, int32_t len,
       len_tmp = PULP_DMA_MAX_XFER_SIZE_B;
     }
 
-    //dma = (hero_dma_job_t)plp_dma_memcpy_priv(ext_addr,loc_addr,size_tmp,ext2loc);
     DEBUG("copy cmd: loc: 0x%llx ext: 0x%llx ext2loc: %ld len: %ld\n", dst, src,
-          ext2loc, len);
+           ext2loc, len);
     dma_cmd = plp_dma_getCmd(ext2loc, len_tmp, PLP_DMA_1D, PLP_DMA_TRIG_EVT,
                              PLP_DMA_NO_TRIG_IRQ, PLP_DMA_PRIV);
     __asm__ __volatile__ ("" : : : "memory");
@@ -106,8 +103,8 @@ __hero_dma_memcpy_async(HOST_VOID_PTR dst, HOST_VOID_PTR src, int32_t len,
 
 
 hero_dma_job_t
-hero_memcpy_host2dev_async(DEVICE_VOID_PTR spm, HOST_VOID_PTR ram,
-                           uint32_t len) {
+hero_memcpy_host2dev_async(DEVICE_VOID_PTR spm, HOST_VOID_PTR ram, uint32_t len)
+{
   DEBUG("hero_memcpy_host2dev_async(0x%x, 0x%x, 0x%x)\n", spm, ram, len);
   if (ram > UINT32_MAX) {
     printf("DMA cannot handle addresses this wide!\n");
@@ -116,8 +113,8 @@ hero_memcpy_host2dev_async(DEVICE_VOID_PTR spm, HOST_VOID_PTR ram,
 }
 
 hero_dma_job_t
-hero_memcpy_dev2host_async(HOST_VOID_PTR ram, DEVICE_VOID_PTR spm,
-                           uint32_t len) {
+hero_memcpy_dev2host_async(HOST_VOID_PTR ram, DEVICE_VOID_PTR spm, uint32_t len)
+{
   DEBUG("hero_memcpy_dev2host_async(0x%x, 0x%x, 0x%x)\n", ram, spm, len);
   if (ram > UINT32_MAX) {
     printf("DMA cannot handle addresses this wide!\n");
@@ -162,6 +159,7 @@ hero_l2malloc(int32_t size)
 HOST_VOID_PTR
 hero_l3malloc(int32_t size)
 {
+  printf("Trying to allocate L3 memory from PULP, which is not defined\n");
   return (HOST_VOID_PTR)NULL;
 }
 
@@ -176,10 +174,11 @@ hero_l2free(DEVICE_VOID_PTR a)
 {
   l2free(a);
 }
+
 void
 hero_l3free(HOST_VOID_PTR a)
 {
-  // Undefined
+  printf("Trying to free L3 memory from PULP, which is not defined\n");
   return;
 }
 
@@ -190,12 +189,14 @@ hero_rt_core_id(void)
 }
 
 void
-hero_reset_clk_counter(void) {
-    reset_timer();
-    start_timer();
+hero_reset_clk_counter(void)
+{
+  reset_timer();
+  start_timer();
 }
 
 int32_t
-hero_get_clk_counter(void) {
-    return get_time();
+hero_get_clk_counter(void)
+{
+  return get_time();
 }
