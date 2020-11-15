@@ -19,35 +19,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-uint64_t hero_tryread(CONST_HOST_PTR_CONST addr)
-{
-  return (uint64_t)(*(const volatile HOST_PTR) addr);
-}
-
-int32_t
-hero_tryread_prefetch(CONST_HOST_PTR_CONST addr)
-{
-  return 0;
-}
-
-void
-hero_trywrite(HOST_PTR_CONST addr, const uint64_t val)
-{
-  *addr = val;
-}
-
-int32_t
-hero_trywrite_prefetch(HOST_PTR_CONST addr)
-{
-  return 0;
-}
-
-int32_t
-hero_handle_rab_misses(void)
-{
-  return 0;
-}
-
 hero_dma_job_t 
 hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst, HOST_VOID_PTR src, uint32_t size)
 {

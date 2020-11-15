@@ -37,9 +37,9 @@
 #    define DEVICE_VOID_PTR void *
 #    define HOST_PTR uint64_t
 #    define DEVICE_PTR unsigned int *
-#    define HOST_PTR_CONST uint64_t
+#    define HOST_PTR_CONST const uint64_t
 #    define DEVICE_PTR_CONST unsigned int * const
-#    define CONST_HOST_PTR_CONST uint64_t
+#    define CONST_HOST_PTR_CONST const uint64_t
 #    define CONST_DEVICE_PTR_CONST const unsigned int * const
 #  else
 #    define HOST_VOID_PTR void *
@@ -47,9 +47,9 @@
 #    define HOST_PTR int32_t *
 #    define DEVICE_PTR uint32_t
 #    define HOST_PTR_CONST int32_t * const
-#    define DEVICE_PTR_CONST uint32_t
+#    define DEVICE_PTR_CONST const uint32_t
 #    define CONST_HOST_PTR_CONST const int32_t * const
-#    define CONST_DEVICE_PTR_CONST uint32_t
+#    define CONST_DEVICE_PTR_CONST const uint32_t
 #  endif
 #endif
 
@@ -58,65 +58,6 @@
 #define HOST            (2)
 
 typedef int32_t hero_dma_job_t;
-
-/** @name SVM-related functions
- *
- * @{
- */
-
-/** Used by PULP to securely read from an address in SVM and block until the read completes.
-
-    Resolved to a normal read for the host.
-
-  \param   addr  The address that shall be read.
-
-  \return  The data stored at that address.
- */
-uint64_t hero_tryread(CONST_HOST_PTR_CONST addr);
-
-/** Used by PULP to try to read from a memory address without blocking in case it misses in the RAB
-    and without causing a memory transaction. This function can be used to trigger the setup of a
-    RAB slice in advance of a read.
-
-    Resolved to nothing for the host.
-
-  \param   addr  The address that shall be read-prefetched.
-
-  \return  0 if the read would succeed (i.e., a slice in the RAB exists for this address); 1 if
-           the read resulted in a RAB miss; negative value with an errno on errors.
- */
-int32_t hero_tryread_prefetch(CONST_HOST_PTR_CONST addr);
-
-/** Used by PULP to securely write to an address in SVM and block until the write completes.
-
-    Resolved to a normal write for the host.
-
-  \param   addr  The address to which data shall be written.
-  \param   val   The value that shall be written.
- */
-void hero_trywrite(HOST_PTR_CONST addr, const uint64_t val);
-
-/** Used by PULP to Try to write to a memory address without blocking in case it misses in the RAB
-    and without causing a memory transaction. This function can be used to trigger the setup of a
-    RAB slice in advance of a write.
-
-    Resolved to nothing for the host.
-
-  \param   addr  The address that shall be write-prefetched.
-
-  \return  0 if the write would succeed (i.e., a slice in the RAB exists for this address); 1 if
-           the write resulted in a RAB miss; negative value with an errno on errors.
- */
-int32_t hero_trywrite_prefetch(HOST_PTR_CONST addr);
-
-/** Used by PULP to handle all outstanding RAB misses (if there are any).
-
-    Resolved to nothing for the host.
-
-  \return  0 on success; negative value with an errno on errors. -ENOENT is returned in case no
-           misses were outstanding.
- */
-int32_t hero_handle_rab_misses(void);
 
 //!@}
 

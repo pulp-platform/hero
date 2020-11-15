@@ -26,46 +26,6 @@
 
 #define DEBUG(...) //printf(__VA_ARGS__)
 
-uint64_t
-hero_tryread(CONST_HOST_PTR_CONST addr)
-{
-  // FIXME: Try* commands currently only work with 32-bit addresses. When this
-  //        is fixed, we should remove the cast.
-  return pulp_tryread((CONST_DEVICE_PTR_CONST) addr);
-}
-
-int32_t
-hero_tryread_prefetch(CONST_HOST_PTR_CONST addr)
-{
-  // FIXME: Try* commands currently only work with 32-bit addresses. When this
-  //        is fixed, we should remove the cast.
-  return pulp_tryread_prefetch((DEVICE_PTR_CONST) addr);
-}
-
-void
-hero_trywrite(HOST_PTR_CONST addr, const uint64_t val)
-{
-  // FIXME: Try* commands currently only work with 32-bit addresses. When this
-  //        is fixed, we should remove the cast.
-  return pulp_trywrite((DEVICE_PTR_CONST) addr, val);
-}
-
-int32_t
-hero_trywrite_prefetch(HOST_PTR_CONST addr)
-{
-  // FIXME: Try* commands currently only work with 32-bit addresses. When this
-  //        is fixed, we should remove the cast.
-  return pulp_trywrite_prefetch((DEVICE_PTR_CONST) addr);
-}
-
-int32_t
-hero_handle_rab_misses(void)
-{
-  return handle_rab_misses();
-}
-
-// -------------------------------------------------------------------------- //
-
 // Internal function
 hero_dma_job_t
 __hero_dma_memcpy_async(HOST_VOID_PTR dst, HOST_VOID_PTR src, int32_t len,
