@@ -1838,8 +1838,10 @@ artifacts:
       - buildroot
       - configs/har_exilzcu102_defconfig
       - package
+      - support/libhero-target # package `libhero-target`
       - support/libpulp # package `libpulp`
       - support/pulp-driver # package `pulp-driver`
+      - toolchain/llvm-project/openmp # package `hero-openmp`
       # bitstream-zcu102
       - hardware/Bender.lock
       - hardware/Bender.yml
