@@ -290,6 +290,10 @@
 #if PLATFORM == ZYNQMP
 #define INTR_EOC_0 7
 #define INTR_EOC_N 7 + (N_CLUSTERS - 1) // max 15
+#else
+#define INTR_EOC_0 0
+#define INTR_EOC_N (N_CLUSTERS - 1) // max 15
+#endif
 
 #define INTR_MBOX 16
 #define INTR_RAB_HOST_MISS 17
@@ -302,19 +306,6 @@
 #define INTR_RAB_AR_LOG_FULL 24
 #define INTR_RAB_AW_LOG_FULL 25
 #define INTR_RAB_CFG_LOG_FULL 26
-#else
-#define INTR_EOC_0 0
-#define INTR_EOC_N (N_CLUSTERS - 1) // max 15
-
-#define INTR_MBOX 16
-#define INTR_RAB_MISS 17
-#define INTR_RAB_MULTI 18
-#define INTR_RAB_PROT 19
-#define INTR_RAB_MHR_FULL 20
-#define INTR_RAB_AR_LOG_FULL 21
-#define INTR_RAB_AW_LOG_FULL 22
-#define INTR_RAB_CFG_LOG_FULL 23
-#endif
 
 /*
  * PULP GPIOs -- see bigpulp*_top.sv
