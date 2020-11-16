@@ -1,0 +1,17 @@
+{
+
+  "system_tree": {
+    "board": {
+
+      "chip": {
+        "includes": ["hero-z-7045.json"]
+      },
+      "pulp_chip": {
+        "hero-z-7045" : {
+        }
+      }
+    }
+  }
+
+}
+

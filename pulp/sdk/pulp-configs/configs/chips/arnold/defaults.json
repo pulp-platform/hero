@@ -1,0 +1,13 @@
+{
+  "runner": {
+    "boot_from_flash": false,
+    "boot-mode": "jtag"
+  },
+  
+  "loader": {
+    "boot": {
+      "mode": "jtag"
+    }
+  }
+}
+

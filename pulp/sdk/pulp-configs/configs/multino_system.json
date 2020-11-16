@@ -1,0 +1,17 @@
+{
+
+  "system_tree": {
+    "board": {
+
+      "chip": {
+        "includes": ["multino.json"]
+      },
+      "pulp_chip": {
+        "multino" : {
+        }
+      }
+    }
+  }
+
+}
+

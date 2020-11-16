@@ -1,0 +1,8 @@
+{
+  "version": 1,
+
+  "hal_files" : [ "hal/efuse/efuse_v1.h" ],
+  "archi_files" : [ "archi/efuse/efuse_v1.h" ],
+
+  "nb_regs"   : 128
+}

@@ -1,0 +1,102 @@
+{
+  "name": "wolfe",
+
+  "pulp_chip_family" : "wolfe",
+  "pulp_chip_version": 0,
+  "boot_from_rom": true,
+
+  "hal_files": [ "hal/chips/wolfe/pulp.h" ],
+  "archi_files": [ "archi/chips/wolfe/pulp.h", "archi/chips/wolfe/memory_map.h", "archi/chips/wolfe/properties.h", "archi/chips/wolfe/apb_soc.h" ],
+
+
+  "vp_class": "pulp/chip",
+
+  "vp_comps": [ "soc", "soc_clock" ],
+
+  "vp_bindings": [
+    ["soc_clock->out", "soc->clock"]
+  ],
+
+  "padframe": {
+    "includes": [ "ips/wolfe/padframe.json" ]
+  },
+
+  "pads": {
+    "spim0": {
+      "udma_channel": 0
+    },
+    "spim1": {
+      "udma_channel": 1
+    },
+    "hyper0": {
+      "udma_channel": 2
+    },
+    "uart0": {
+      "udma_channel": 3
+    },
+    "i2c0": {
+      "udma_channel": 4
+    },
+    "i2c1": {
+      "udma_channel": 5
+    },
+    "i2s0": {
+      "udma_channel": 6,
+      "udma_subchannel": 0
+    },
+    "i2s1": {
+      "udma_channel": 6,
+      "udma_subchannel": 1
+    },
+    "cpi0": {
+      "udma_channel": 7
+    }
+  },
+
+  "soc_clock": {
+    "vp_class": "vp/clock_domain",
+    "frequency": 100000000
+  },
+
+  "soc": {
+    "includes" : ["ips/soc_v4.2.json"],
+
+    "apb_soc_ctrl": {
+      "includes"  : ["ips/apb_soc_v3.json"]
+    },
+
+    "fc": {
+      "includes"  : ["ips/zeroriscy.json"],
+      "cluster_id": 31,
+      "core_id"   : 0,
+      "fetch_enable"     : true,
+      "boot_addr" : "0x1A000080"
+    },
+
+    "nb_cluster"       : 1,
+    "cluster": {
+      "includes": ["ips/cluster_v5_fpu.json"]
+    },
+
+    "fll": {
+      "includes"  : ["ips/fll_v1.json"]
+    },
+
+    "soc_ico": {
+      "peripherals": {
+
+        "fll0": {
+          "offset": "0x00000000",
+          "size"  : "0x00000010"
+        },
+
+        "fll1": {
+          "offset": "0x00000010",
+          "size"  : "0x00000010"
+        }
+
+      }
+    }
+
+  }
+}

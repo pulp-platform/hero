@@ -1,0 +1,11 @@
+{
+
+  "includes": ["defaults.json"],
+
+  "system_tree": {
+    "system": "wolfe"
+  },
+
+  "includes_eval": ["'%s_system.json' % config.get('system')"]
+
+}

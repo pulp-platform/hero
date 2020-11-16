@@ -1,0 +1,39 @@
+{
+
+  "system_tree": {
+    "includes": [ "pulp_system_common.json" ],
+    
+    "board": {
+      "devices": ["hyperram0", "hyperflash0"],
+
+      "chip": {
+        "includes": ["vivosoc3.json"]
+      },
+      "pulp_chip": {
+        "vivosoc3" : {
+        }
+      },
+      "hyperram0": {
+        "size": "0x00800000"
+      },
+      "hyperflash0": {
+        "size": "0x00800000"
+      },
+      "bindings": [
+        ["pulp_chip.hyper0", "hyperram0"],
+        ["pulp_chip.hyper0", "hyperflash0"]
+      ]
+    },
+
+    "peripherals": {
+
+    },
+
+    "debug_bridge": {
+      "start_addr": "0x1A104014",
+      "start_value": "1",
+      "set_pc_addr": "0x1A104010"
+    }
+  }
+}
+

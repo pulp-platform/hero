@@ -1,0 +1,28 @@
+{
+
+  "system_tree": {
+    "vp_class" : "pulp/system",
+
+    "vp_comps": [ "board" ],
+
+    "board": {
+      "vp_class": "pulp/board",
+
+      "vp_comps": [ "pulp_chip/devchip" ],
+
+      "chip": {
+        "includes": ["devchip.json"]
+      },
+      "pulp_chip": {
+        "devchip" : {
+        }
+      }
+    },
+
+    "peripherals": {
+
+    }
+  }
+
+}
+

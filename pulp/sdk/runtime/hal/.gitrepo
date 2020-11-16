@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@iis-git.ee.ethz.ch:hero/hal.git
+	branch = 674aa739091d18908f8407973766847771138641
+	commit = 674aa739091d18908f8407973766847771138641
+	parent = 31a01088f50533b86b0d249b986b0f109e4c211b
+	method = merge
+	cmdver = 0.4.1

@@ -1,0 +1,14 @@
+{
+  "name": "multino",
+
+  "pulp_chip_family" : "multino",
+  "pulp_chip_version": 0,
+
+  "hal_files": [ "hal/chips/multino/pulp.h" ],
+  "archi_files": [ "archi/chips/multino/pulp.h", "archi/chips/multino/memory_map.h", "archi/chips/multino/properties.h", "archi/chips/multino/apb_soc.h" ],
+
+
+  "soc": {
+    "includes" : ["chips/multino/soc.json"]
+  }
+}

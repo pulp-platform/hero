@@ -1,0 +1,9 @@
+{
+  "version": 1,
+
+  "vp_class": "pulp/fll/fll_v1",
+
+  "hal_files" : [ "hal/fll/fll_v1.h" ],
+  "archi_files" : [ "archi/fll/fll_v1.h" ]
+
+}

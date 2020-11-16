@@ -1,0 +1,5 @@
+{
+  "size"  : "0x10000000",
+  "vp_class": "memory/ddr",
+  "frequency": 100000000
+}

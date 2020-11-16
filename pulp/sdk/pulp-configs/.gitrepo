@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@iis-git.ee.ethz.ch:hero/pulp-configs.git
+	branch = 49ec733ae29fa5a3074770bbbc45bca2bbf3d256
+	commit = 49ec733ae29fa5a3074770bbbc45bca2bbf3d256
+	parent = 9516e8a2c2849243a60255ac189878b048f8305e
+	method = merge
+	cmdver = 0.4.1

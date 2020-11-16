@@ -1,0 +1,112 @@
+{
+  "includes": [ "gvsoc.json" ],
+
+  "platform": "gvsoc",
+
+  "pulp_compiler": {
+    "default": "gcc",
+    "gcc"    : {},
+    "llvm"   : {}
+  },
+
+  "pulp_rt_version": {
+    "default" : "bench",
+    "release" : {},
+    "bench"   : {},
+    "profile0": {},
+    "profile1": {},
+    "debug"   : {}
+  },
+
+  "pulp_omp_version": {
+    "default" : "libgomp",
+    "libgomp" : {},
+    "new"     : {}
+  },
+
+  "testbench": {
+    "use_dpi": false
+  },
+
+  "vsim": {
+    "help": {
+      "gui": "Open modelsim using the GUI.",
+      "simchecker": "Activate instruction checking through golden model.",
+      "script": "Specify the script used to launch the platform"
+    },
+    "script": "run.tcl",
+    "gui": false,
+    "simchecker": false,
+    "args": [],
+    "tcl_args": []
+  },
+
+  "runner": {
+    "help": {
+      "py-stack": "Display the full python stack in case an exception is caught"
+    },
+    "verbose": false,
+    "boot-mode": "jtag",
+    "use_tb_comps": false,
+    "use_external_tb": false,
+    "active_tb_comps": [],
+    "py-stack": false,
+    "boot_from_flash": false,
+    "flash_type": "spi",
+    "flash_slm_file": "slm_files/flash_stim.slm",
+    "rtl_simulator": "vsim",
+    "simulator": null,
+    "aes_key": "12345678275689075642768987654345",
+    "aes_iv": "0987654323456789"
+
+  },
+
+  "gdb": {
+    "active": false
+  },
+
+  "rt": {
+    "version"        : "bench",
+    "type"           : "pulp-rt",
+    "mode"           : "rt",
+    "stack_size"     : 2048,
+    "cl_master_stack_size" : 1024,
+    "cl_slave_stack_size" : 1024,
+    "io"             : true,
+    "warnings"       : true,
+    "werror"         : true,
+    "assert"         : false,
+    "trace"          : false,
+    "trace_level"    : 0,
+    "traces"         : "all",
+    "libc"           : false,
+    "no-rt"          : false,
+    "no-link-script" : false,
+    "no-crt0"        : false,
+    "cluster-start"  : false,
+    "openmp"         : true,
+    "openmp-rt"      : "pulp-rt",
+    "iodev"          : "default",
+    "user-sections"  : [],
+    "iodevs"          : {
+      "default": {
+        "value":   "0"
+      },
+      "uart": {
+        "value":   "1",
+        "channel": "0",
+        "baudrate": "625000"
+      }
+    }
+  },
+
+  "loader": {
+    "bridge": "none",
+    "cable": "proxy",
+    "binaries": [],
+    "boot": {
+      "mode": "jtag"
+    }
+  }
+
+}

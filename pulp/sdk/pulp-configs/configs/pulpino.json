@@ -1,0 +1,61 @@
+{
+  "name": "pulpino",
+
+  "pulp_chip_family" : "pulpino",
+  "pulp_chip_version": 0,
+  "boot_from_rom": true,
+
+  "hal_files": [ "hal/pulpino/pulp.h" ],
+
+  "pads": {
+    "spim0": {
+      "udma_channel": 0
+    },
+    "spim1": {
+      "udma_channel": 1
+    },
+    "hyper0": {
+      "udma_channel": 2
+    },
+    "uart0": {
+      "udma_channel": 3
+    },
+    "i2c0": {
+      "udma_channel": 4
+    },
+    "i2c1": {
+      "udma_channel": 5
+    },
+    "i2s0": {
+      "udma_channel": 6,
+      "udma_subchannel": 0
+    },
+    "i2s1": {
+      "udma_channel": 6,
+      "udma_subchannel": 1
+    },
+    "cpi0": {
+      "udma_channel": 7
+    }
+  },
+
+  "soc": {
+    "includes" : ["ips/soc_v4.2.json"],
+
+    "apb_soc_ctrl": {
+      "includes"  : ["ips/apb_soc_v3.json"]
+    },
+
+    "fll": {
+      "includes"  : ["ips/fll_v1.json"]
+    },
+
+    "fc": {
+      "includes"  : ["ips/zeroriscy.json"],
+      "cluster_id": 31,
+      "core_id"   : 0
+    }
+
+  }
+
+}

@@ -1,0 +1,33 @@
+{
+  "name": "lupo",
+
+  "pulp_chip_family" : "wolfe",
+  "pulp_chip_version": 0,
+  "boot_from_rom": true,
+
+  "pads": {
+    "hyper0": {
+      "udma_channel": 2
+    }
+  },
+
+  "soc": {
+    "includes" : ["ips/soc_v4.2.json"],
+
+    "apb_soc_ctrl": {
+      "includes"  : ["ips/apb_soc_v3.json"]
+    },
+
+    "fc": {
+      "includes"  : ["ips/zeroriscy.json"],
+      "cluster_id": 31,
+      "core_id"   : 0
+    },
+
+    "nb_cluster"       : 1,
+    "cluster": {
+      "includes": ["ips/cluster_v5_fpu.json"]
+    }
+
+  }
+}

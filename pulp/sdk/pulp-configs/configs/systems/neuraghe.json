@@ -1,0 +1,644 @@
+{
+  "gvsoc": {
+    "cycles_to_seconds": "int(max(cycles * nb_cores / 5000000, 600))",
+    "trace-file": "stdout",
+    "trace-level": "trace",
+    "trace": [],
+    "event": [],
+    "load-binary": [],
+    "pdb-no-break": "True",
+    "werror": "True",
+    "vcd": {
+      "help": {
+        "active": "Activate VCD tracing.",
+        "all": "Activate all VCD traces.",
+        "gtkw": "Generate script for Gtkwave."
+      },
+      "active": false,
+      "all": true,
+      "gtkw": false,
+      "files": []
+    }
+  },
+  "dpi_models": {
+    "uart_loopback": {
+      "module": "uart_tb.so",
+      "baudrate": 625000,
+      "loopback": true,
+      "stdout": true,
+      "tx_file": "tx_uart.log",
+      "ports": {
+        "in": {
+          "type": "uart",
+          "itf": 0
+        }
+      }
+    }
+  },
+  "platform": "gvsoc",
+  "pulp_compiler": {
+    "default": "gcc",
+    "gcc": {},
+    "llvm": {}
+  },
+  "pulp_rt_version": {
+    "default": "bench",
+    "release": {},
+    "bench": {},
+    "profile0": {},
+    "profile1": {},
+    "debug": {}
+  },
+  "pulp_omp_version": {
+    "default": "libgomp",
+    "libgomp": {},
+    "new": {}
+  },
+  "testbench": {
+    "use_dpi": false
+  },
+  "vsim": {
+    "help": {
+      "gui": "Open modelsim using the GUI.",
+      "simchecker": "Activate instruction checking through golden model.",
+      "script": "Specify the script used to launch the platform"
+    },
+    "script": "run.tcl",
+    "gui": false,
+    "simchecker": false,
+    "args": [],
+    "tcl_args": []
+  },
+  "runner": {
+    "help": {
+      "py-stack": "Display the full python stack in case an exception is caught"
+    },
+    "verbose": false,
+    "boot-mode": "jtag",
+    "use_tb_comps": false,
+    "use_external_tb": false,
+    "active_tb_comps": [],
+    "py-stack": false,
+    "boot_from_flash": false,
+    "flash_type": "spi",
+    "flash_slm_file": "slm_files/flash_stim.slm",
+    "rtl_simulator": "vsim",
+    "simulator": null,
+    "aes_key": "12345678275689075642768987654345",
+    "aes_iv": "0987654323456789"
+  },
+  "gdb": {
+    "active": false
+  },
+  "rt": {
+    "version": "bench",
+    "type": "pulp-rt",
+    "mode": "rt",
+    "stack_size": 2048,
+    "cl_master_stack_size": 1024,
+    "cl_slave_stack_size": 1024,
+    "io": true,
+    "warnings": true,
+    "werror": true,
+    "assert": false,
+    "trace": false,
+    "trace_level": 0,
+    "traces": "all",
+    "libc": false,
+    "no-rt": false,
+    "no-link-script": false,
+    "no-crt0": false,
+    "cluster-start": false,
+    "openmp": true,
+    "openmp-rt": "pulp-rt",
+    "iodev": "default",
+    "user-sections": [],
+    "iodevs": {
+      "default": {
+        "value": "0"
+      },
+      "uart": {
+        "value": "1",
+        "channel": "0",
+        "baudrate": "625000"
+      }
+    }
+  },
+  "loader": {
+    "bridge": "none",
+    "cable": "proxy",
+    "binaries": [],
+    "boot": {
+      "mode": "jtag"
+    }
+  },
+  "system_tree": {
+    "debug_bridge": {
+      "cable": {
+        "type": "jtag-proxy",
+        "tap": 0,
+        "jtag-proxy": {
+          "port": 37539
+        },
+        "ftdi": {},
+        "active": false,
+        "autorun": false,
+        "access_timeout_us": 1000000
+      },
+      "adv_dbg_unit": {
+        "debug_ir": "0x4"
+      },
+      "boot-mode": "default",
+      "commands": "load ioloop reqloop start wait",
+      "gdb_commands": "load ioloop reqloop start gdb wait"
+    },
+    "vp_class": "pulp/system",
+    "vp_comps": [
+      "board"
+    ],
+    "board": {
+      "vp_class": "pulp/board",
+      "vp_comps": [
+        "pulp_chip/neuraghe"
+      ],
+      "chip": {
+        "name": "neuraghe",
+        "pulp_chip_family": "neuraghe",
+        "pulp_chip_version": 0,
+        "boot_from_rom": false,
+        "hal_files": [
+          "hal/chips/neuraghe/pulp.h"
+        ],
+        "archi_files": [
+          "archi/chips/neuraghe/pulp.h",
+          "archi/chips/neuraghe/memory_map.h",
+          "archi/chips/neuraghe/properties.h"
+        ],
+        "soc": {
+          "nb_cluster": 1,
+          "cluster": {
+            "nb_pe": 1,
+            "l1": {
+              "size": "0x400",
+              "map_base": "0x10000000"
+            },
+            "pe": {
+              "vp_class": "cpu/iss/iss",
+              "version": "zeroriscy",
+              "archi": "riscv",
+              "implementation": "zeroriscy",
+              "gv_isa": [
+                "--pulp-zeroriscy",
+                "--pulp",
+                "--rv32m"
+              ],
+              "isa": "rv32imcXpulpslim",
+              "march": "imcXpulpslim",
+              "priv_version": 1.9,
+              "perf_counters": true,
+              "features": [
+                "misaligned",
+                "perf"
+              ],
+              "hal_files": [
+                "hal/riscv/riscv_v4.h",
+                "hal/riscv/builtins_v2.h",
+                "hal/riscv/builtins_v2_emu.h",
+                "hal/riscv/types.h"
+              ],
+              "archi_files": [
+                "archi/riscv/priv_1_9.h",
+                "archi/riscv/pcer_v1.h"
+              ],
+              "defines": [
+                "CORE_PULP_BUILTINS"
+              ],
+              "power_models": {
+                "clock_gated": {
+                  "type": "linear",
+                  "values": {
+                    "25": {
+                      "1.2": {
+                        "any": "1"
+                      },
+                      "1.1": {
+                        "any": "0.9"
+                      }
+                    }
+                  }
+                },
+                "insn": {
+                  "type": "linear",
+                  "values": {
+                    "25": {
+                      "1.2": {
+                        "any": "40"
+                      },
+                      "1.1": {
+                        "any": "30"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "event_unit": {
+              "version": 3,
+              "nb_core": 1,
+              "vp_class": "pulp/event_unit/eu_v3",
+              "hal_files": [
+                "hal/eu/eu_v3.h"
+              ],
+              "archi_files": [
+                "archi/eu/eu_v3.h"
+              ],
+              "regmap": {
+                "areas": {
+                  "global": {
+                    "cores": {
+                      "offset": "0x0000",
+                      "size": "0x0400",
+                      "areas": {
+                        "core": {
+                          "offset": "0x0000",
+                          "size": "0x0040",
+                          "number": 16
+                        }
+                      }
+                    },
+                    "barriers": {
+                      "offset": "0x0400",
+                      "size": "0x0200",
+                      "areas": {
+                        "barrier": {
+                          "offset": "0x0000",
+                          "size": "0x0020",
+                          "number": 16
+                        }
+                      }
+                    },
+                    "sw_events": {
+                      "offset": "0x0600",
+                      "size": "0x0100"
+                    },
+                    "soc_events": {
+                      "offset": "0x0700",
+                      "size": "0x0080"
+                    },
+                    "ext_events": {
+                      "offset": "0x0780",
+                      "size": "0x0080"
+                    },
+                    "mutex": {
+                      "size": "0x0040"
+                    },
+                    "dispatch": {
+                      "size": "0x0040"
+                    }
+                  },
+                  "demux": {
+                    "core": {
+                      "offset": "0x0000",
+                      "size": "0x0040"
+                    },
+                    "dispatch": {
+                      "offset": "0x0080",
+                      "size": "0x0040"
+                    },
+                    "mutex": {
+                      "offset": "0x00C0",
+                      "size": "0x0040"
+                    },
+                    "sw_events": {
+                      "offset": "0x0100",
+                      "size": "0x0100"
+                    },
+                    "barriers": {
+                      "offset": "0x0200",
+                      "size": "0x0200"
+                    }
+                  }
+                },
+                "registers": {
+                  "mask": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x00",
+                    "width": 32
+                  },
+                  "mask_and": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x04",
+                    "width": 32
+                  },
+                  "mask_or": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x08",
+                    "width": 32
+                  },
+                  "mask_irq": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x0C",
+                    "width": 32
+                  },
+                  "mask_irq_and": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x10",
+                    "width": 32
+                  },
+                  "mask_irq_or": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x14",
+                    "width": 32
+                  },
+                  "status": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x18",
+                    "width": 32
+                  },
+                  "buffer": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x1C",
+                    "width": 32
+                  },
+                  "buffer_masked": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x20",
+                    "width": 32
+                  },
+                  "buffer_irq_masked": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x24",
+                    "width": 32
+                  },
+                  "buffer_clear": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x28",
+                    "width": 32
+                  },
+                  "sw_events_mask": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x2C",
+                    "width": 32
+                  },
+                  "sw_events_mask_and": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x30",
+                    "width": 32
+                  },
+                  "sw_events_mask_or": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x34",
+                    "width": 32
+                  },
+                  "event_wait": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x38",
+                    "width": 32
+                  },
+                  "event_wait_clear": {
+                    "areas": [
+                      "demux/core",
+                      "global/cores/core"
+                    ],
+                    "offset": "0x3C",
+                    "width": 32
+                  },
+                  "trigg_sw_event": {
+                    "areas": [
+                      "demux/sw_events",
+                      "global/sw_events"
+                    ],
+                    "offset": "0x00",
+                    "width": 32,
+                    "number": 16
+                  },
+                  "trigg_sw_event_wait": {
+                    "areas": [
+                      "demux/sw_events",
+                      "global/sw_events"
+                    ],
+                    "offset": "0x40",
+                    "width": 32,
+                    "number": 16
+                  },
+                  "trigg_sw_event_wait_clear": {
+                    "areas": [
+                      "demux/sw_events",
+                      "global/sw_events"
+                    ],
+                    "offset": "0x80",
+                    "width": 32,
+                    "number": 16
+                  },
+                  "soc_events_current_event": {
+                    "areas": [
+                      "global/soc_events"
+                    ],
+                    "offset": "0x00",
+                    "width": 32,
+                    "bitfield": {
+                      "event_id": {
+                        "bit": 0,
+                        "width": 9
+                      },
+                      "valid": {
+                        "bit": 31,
+                        "width": 1
+                      }
+                    }
+                  },
+                  "barr_trigger_mask": {
+                    "areas": [
+                      "demux/barriers",
+                      "global/barriers"
+                    ],
+                    "offset": "0x00",
+                    "width": 32
+                  },
+                  "barr_status": {
+                    "areas": [
+                      "demux/barriers",
+                      "global/barriers"
+                    ],
+                    "offset": "0x04",
+                    "width": 32
+                  },
+                  "barr_status_summary": {
+                    "areas": [
+                      "demux/barriers",
+                      "global/barriers"
+                    ],
+                    "offset": "0x08",
+                    "width": 32
+                  },
+                  "barr_target_mask": {
+                    "areas": [
+                      "demux/barriers",
+                      "global/barriers"
+                    ],
+                    "offset": "0x0C",
+                    "width": 32
+                  },
+                  "barr_trigger": {
+                    "areas": [
+                      "demux/barriers",
+                      "global/barriers"
+                    ],
+                    "offset": "0x10",
+                    "width": 32
+                  },
+                  "barr_trigger_self": {
+                    "areas": [
+                      "demux/barriers",
+                      "global/barriers"
+                    ],
+                    "offset": "0x14",
+                    "width": 32
+                  },
+                  "barr_trigger_wait": {
+                    "areas": [
+                      "demux/barriers",
+                      "global/barriers"
+                    ],
+                    "offset": "0x18",
+                    "width": 32
+                  },
+                  "barr_trigger_wait_clear": {
+                    "areas": [
+                      "demux/barriers",
+                      "global/barriers"
+                    ],
+                    "offset": "0x1C",
+                    "width": 32
+                  },
+                  "dispatch_fifo_access": {
+                    "areas": [
+                      "demux/dispatch",
+                      "global/dispatch"
+                    ],
+                    "offset": "0x00",
+                    "width": 32
+                  },
+                  "dispatch_team_config": {
+                    "areas": [
+                      "demux/dispatch",
+                      "global/dispatch"
+                    ],
+                    "offset": "0x04",
+                    "width": 32
+                  }
+                }
+              },
+              "properties": {
+                "dispatch": {
+                  "size": 8
+                },
+                "mutex": {
+                  "nb_mutexes": 1
+                },
+                "barriers": {
+                  "nb_barriers": 8
+                },
+                "events": {
+                  "barrier": 16,
+                  "mutex": 17,
+                  "dispatch": 18
+                }
+              }
+            },
+            "cluster_ctrl": {
+              "version": 2,
+              "vp_class": "pulp/cluster/cluster_ctrl_v2",
+              "hal_files": [
+                "hal/cluster_ctrl/cluster_ctrl_v2.h"
+              ],
+              "archi_files": [
+                "archi/cluster_ctrl/cluster_ctrl_v2.h"
+              ],
+              "nb_core": 1
+            },
+            "timer": {
+              "version": 2,
+              "vp_class": "pulp/timer/timer_v2",
+              "hal_files": [
+                "hal/timer/timer_v2.h"
+              ],
+              "archi_files": [
+                "archi/timer/timer_v2.h"
+              ]
+            },
+            "icache_ctrl": {
+              "version": 2,
+              "vp_class": "pulp/icache_ctrl/icache_ctrl_v2",
+              "hal_files": [
+                "hal/icache/icache_ctrl_v2.h"
+              ]
+            }
+          },
+          "l2": {
+            "is_partitioned": false,
+            "map_base": "0x1C000000",
+            "size": "0x00200000"
+          },
+          "stdout": {
+            "version": 3,
+            "vp_class": "pulp/stdout/stdout_v3",
+            "archi_files": [
+              "archi/stdout/stdout_v3.h"
+            ],
+            "max_cluster": 33,
+            "max_core_per_cluster": 16
+          }
+        }
+      },
+      "pulp_chip": {
+        "neuraghe": {}
+      }
+    }
+  }
+}

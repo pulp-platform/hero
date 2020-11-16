@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@iis-git.ee.ethz.ch:hero/archi-host.git
+	branch = 08a996a34cb3aa355a0d948ee78555d50010b645
+	commit = 08a996a34cb3aa355a0d948ee78555d50010b645
+	parent = 5908494db0b2eba5f51887db30ecfe561d6a1979
+	method = merge
+	cmdver = 0.4.1

@@ -1,0 +1,11 @@
+{
+  "module": "spim_verif.so",
+  "mem_size": 1048576,
+  "ports": {
+    "in": {
+      "type": "spis",
+      "itf": 0,
+      "cs": 0
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "bigpulp",
+
+  "pulp_chip_family" : "bigpulp",
+  "pulp_chip_version": 0,
+
+  "hal_files": [ "hal/chips/bigpulp/pulp.h" ],
+  "archi_files": [ "archi/chips/bigpulp/pulp.h", "archi/chips/bigpulp/mailbox.h", "archi/chips/bigpulp/memory_map.h", "archi/chips/bigpulp/properties.h", "archi/chips/bigpulp/apb_soc.h" ],
+  "archi_host_src_files": [ "src/phys_addr.c", "src/virt_addr.c" ],
+
+
+  "soc": {
+    "includes" : ["ips/bigpulp/soc_bigpulp.json"]
+  }
+}

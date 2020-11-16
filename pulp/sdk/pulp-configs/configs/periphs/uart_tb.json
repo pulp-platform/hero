@@ -1,0 +1,12 @@
+{
+  "module": "uart_tb.so",
+  "baudrate": 625000,
+  "loopback": true,
+  "stdout": false,
+  "tx_file": null,
+  "ports": {
+    "in": {
+      "type": "uart"
+    }
+  }
+}

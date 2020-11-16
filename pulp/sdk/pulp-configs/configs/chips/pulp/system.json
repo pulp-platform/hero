@@ -1,0 +1,57 @@
+{
+  "system_tree": {
+    "includes": [
+      "pulp_system_common.json"
+    ],
+    "vp_class": "pulp/system",
+    "vp_comps": [
+      "board"
+    ],
+    "debug_bridge": {
+      "start_addr": "0x1A110000",
+      "start_value": "0",
+      "stop_addr": "0x1A110000",
+      "stop_value": "0x00010000",
+      "set_pc_addr": "0x1A112000",
+      "commands": "reset stop load ioloop reqloop start wait"
+    },
+    "board": {
+      "vp_class": "pulp/board",
+      "vp_comps": [
+        "chip",
+        "dpi_clock",
+        "pulp_chip",
+        "dpi"
+      ],
+      "vp_bindings": [
+        [
+          "dpi_clock->out",
+          "dpi->clock"
+        ]
+      ],
+      "chip": {
+        "includes": [
+          "chip.json"
+        ]
+      },
+      "dpi_clock": {
+        "vp_class": "vp/clock_domain",
+        "frequency": 50000000,
+        "vp_ports": [
+          "out"
+        ]
+      },
+      "pulp_chip": {
+        "pulp": {}
+      },
+      "dpi": {
+        "includes": [
+          "periph/dpi_wrapper.json"
+        ],
+        "vp_ports": [
+          "clock"
+        ]
+      }
+    }
+  }
+}

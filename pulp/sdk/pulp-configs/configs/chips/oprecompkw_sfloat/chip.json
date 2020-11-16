@@ -1,0 +1,49 @@
+{
+  "name": "oprecompkw_sfloat",
+  "pulp_chip_family": "oprecompkw",
+  "pulp_chip_version": 0,
+  "boot_from_rom": false,
+  "vp_class": "pulp/chip",
+  "hal_files": [
+    "hal/chips/oprecompkw/pulp.h"
+  ],
+  "archi_files": [
+    "archi/chips/oprecompkw/pulp.h",
+    "archi/chips/oprecompkw/memory_map.h",
+    "archi/chips/oprecompkw/properties.h",
+    "archi/chips/oprecompkw/apb_soc.h"
+  ],
+  "vp_comps": [
+    "soc_clock",
+    "soc"
+  ],
+  "vp_ports": [
+    "ddr"
+  ],
+  "vp_bindings": [
+    [
+      "soc_clock->out",
+      "soc->clock"
+    ],
+    [
+      "soc->ddr",
+      "self->ddr"
+    ]
+  ],
+  "soc_clock": {
+    "vp_class": "vp/clock_domain",
+    "frequency": 50000000,
+    "vp_ports": [
+      "out"
+    ]
+  },
+  "soc": {
+    "includes": [
+      "soc.json"
+    ],
+    "vp_ports": [
+      "ddr",
+      "clock"
+    ]
+  }
+}

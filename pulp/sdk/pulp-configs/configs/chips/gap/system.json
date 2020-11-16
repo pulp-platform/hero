@@ -1,0 +1,79 @@
+{
+  "system_tree": {
+    "includes": [
+      "pulp_system_common.json"
+    ],
+    "vp_class": "pulp/system",
+    "vp_comps": [
+      "board"
+    ],
+    "debug_bridge": {},
+    "board": {
+      "vp_class": "pulp/board",
+      "vp_comps": [
+        "chip",
+        "dpi_clock",
+        "pulp_chip",
+        "dpi",
+        "ref_clock_clock",
+        "ref_clock"
+      ],
+      "vp_bindings": [
+        [
+          "dpi_clock->out",
+          "dpi->clock"
+        ],
+        [
+          "ref_clock_clock->out",
+          "ref_clock->clock"
+        ],
+        [
+          "ref_clock->clock_sync",
+          "chip->ref_clock"
+        ]
+      ],
+      "chip": {
+        "includes": [
+          "chip.json"
+        ],
+        "vp_ports": [
+          "ref_clock"
+        ]
+      },
+      "dpi_clock": {
+        "vp_class": "vp/clock_domain",
+        "frequency": 50000000,
+        "vp_ports": [
+          "out"
+        ]
+      },
+      "pulp_chip": {
+        "gap": {}
+      },
+      "dpi": {
+        "includes": [
+          "periph/dpi_wrapper.json"
+        ],
+        "vp_ports": [
+          "clock"
+        ]
+      },
+      "ref_clock_clock": {
+        "vp_class": "vp/clock_domain",
+        "frequency": 65536,
+        "vp_ports": [
+          "out"
+        ]
+      },
+      "ref_clock": {
+        "includes": [
+          "ips/misc/clock.json"
+        ],
+        "vp_ports": [
+          "clock_sync",
+          "clock"
+        ]
+      }
+    }
+  }
+}

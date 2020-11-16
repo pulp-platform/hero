@@ -1,0 +1,55 @@
+{
+  "version": 2.1,
+  "archi"  : 2,
+
+  "vp_class": "pulp/udma/udma_v2",
+
+  "hal_files": [ "hal/udma/udma_v2.h", "hal/udma/udma_periph_v2.h", "hal/udma/udma_periph_hyper_v1.h", "hal/udma/udma_periph_i2s_v1.h" ],
+  "archi_files": [ "archi/udma/udma_v2.h", "archi/udma/udma_periph_v2.h", "archi/udma/hyper.h" ],
+  
+  "nb_channels": 8,
+
+  "interfaces" : ["spim", "i2c", "i2s", "uart", "cam", "hyper"],
+
+  "spim": {
+    "version"      : 2,
+    "nb_channels"  : 2,
+    "ids"          : [0, 1],
+    "offsets"      : ["0x000", "0x080"]
+  },
+
+  "hyper": {
+    "version"      : 1,
+    "nb_channels"  : 1,
+    "ids"          : [2],
+    "offsets"      : ["0x100"]
+  },
+
+  "uart": {
+    "version"      : 1,
+    "nb_channels"  : 1,
+    "ids"          : [3],
+    "offsets"      : ["0x180"]
+  },
+
+  "i2c": {
+    "version"      : 2,
+    "nb_channels"  : 2,
+    "ids"          : [4, 5],
+    "offsets"      : ["0x200", "0x280"]
+  },
+
+  "i2s": {
+    "version"      : 1,
+    "nb_channels"  : 2,
+    "ids"          : [6],
+    "offsets"      : ["0x300"]
+  },
+
+  "cam": {
+    "version"      : 1,
+    "nb_channels"  : 1,
+    "ids"          : [7],
+    "offsets"      : ["0x380"]
+  }
+}

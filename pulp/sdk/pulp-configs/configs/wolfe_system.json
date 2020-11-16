@@ -1,0 +1,54 @@
+{
+
+  "system_tree": {
+    "includes": [ "pulp_system_common.json" ],
+
+    "vp_class" : "pulp/system",
+
+    "vp_comps": [ "board" ],
+
+    "board": {
+      "vp_class": "pulp/board",
+
+      "vp_comps": [ "pulp_chip/wolfe" ],
+
+      "devices": ["hyperram0", "hyperflash0"],
+
+      "chip": {
+        "includes": ["wolfe.json"]
+      },
+
+      "pulp_chip": {
+        "wolfe" : {
+        }
+      },
+      "hyperram0": {
+        "size": "0x00800000"
+      },
+      "hyperflash0": {
+        "size": "0x00800000"
+      },
+      "bindings": [
+        ["pulp_chip.hyper0", "hyperram0"],
+        ["pulp_chip.hyper0", "hyperflash0"]
+      ]
+    },
+
+    "peripherals": {
+
+    }
+  },
+
+  "runner": {
+    "boot_from_flash": true,
+    "boot-mode": "rom"
+  },
+  
+  "loader": {
+    "boot": {
+      "mode": "rom"
+    }
+  }
+
+}
+

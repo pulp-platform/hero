@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@iis-git.ee.ethz.ch:hero/libvmm.git
+	branch = 76326b1ca86acacb134ae4faa30418022291f61d
+	commit = 76326b1ca86acacb134ae4faa30418022291f61d
+	parent = ae641bf7b720e4528200fc1137199af50d6a69be
+	method = merge
+	cmdver = 0.4.1
