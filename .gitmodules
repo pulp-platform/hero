@@ -4,10 +4,6 @@
 [submodule "tools/riscv-openocd"]
 	path = tools/riscv-openocd
 	url = https://github.com/riscv/riscv-openocd
-[submodule "pulp/sdk"]
-	path = pulp/sdk
-	url = git@iis-git.ee.ethz.ch:hero/pulp-sdk.git
-	ignore = dirty
 [submodule "toolchain/llvm-project"]
 	path = toolchain/llvm-project
 	url = git@iis-git.ee.ethz.ch:hero/llvm-project.git
