@@ -43,3 +43,9 @@ indent_style = unset
 insert_final_newline = false
 max_line_length = 0
 trim_trailing_whitespace = false
+
+[Config.in{,.host}]
+indent_style = tab
+tab_width = 8
+indent_size = 8
+max_line_length = 72
