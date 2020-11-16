@@ -1,12 +1,10 @@
-#comment "zynq-fclkcfg needs a ARM Linux kernel to be built"
-#    depends on !BR2_arm && !BR2_aarch64
-#    depends on !BR2_LINUX_KERNEL
-
 config BR2_PACKAGE_ZYNQ_FCLKCFG
-#   depends on BR2_arm || BR2_aarch64
-#	depends on BR2_LINUX_KERNEL
-       bool "zynq-fclkcfg"
+	depends on BR2_arm || BR2_aarch64
+	depends on BR2_LINUX_KERNEL
+       bool "Kernel driver to dynamically configure ZynqMP FPGA clocks"
        help
-         Kernel module to dynamically configure ZynqMP FPGA clocks
-
          https://github.com/ikwzm/fclkcfg
+
+comment "zynq-fclkcfg needs a ARM Linux kernel to be built"
+	depends on !BR2_arm && !BR2_aarch64
+	depends on !BR2_LINUX_KERNEL
