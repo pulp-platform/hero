@@ -1,6 +1,4 @@
 config BR2_PACKAGE_HOST_ZYNQ_MKBOOTIMAGE
-       bool "host zynq-mkbootimage"
-       help
-         Tool to build Zynq boot image files
-
-         https://github.com/antmicro/zynq-mkbootimage
+	bool "Tool to build Zynq boot image files"
+	help
+	  https://github.com/antmicro/zynq-mkbootimage
