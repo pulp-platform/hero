@@ -1,29 +1,26 @@
-comment "pulp-driver needs a Linux kernel to be built"
+config BR2_PACKAGE_PULP_DRIVER
+	bool "Linux kernel driver for PULP"
+	depends on BR2_LINUX_KERNEL
+	depends on BR2_PACKAGE_HERO_PLATFORM
+	depends on BR2_PACKAGE_LIBPULP
+
+comment "PULP driver needs a Linux kernel to be built"
 	depends on !BR2_LINUX_KERNEL
 
-comment "pulp-driver requires headers from libpulp"
-	depends on !BR2_PACKAGE_LIBPULP
-
-comment "pulp-driver needs a well-defined HERO platform"
+comment "PULP driver needs a well-defined HERO platform"
 	depends on !BR2_PACKAGE_HERO_PLATFORM
-
-config BR2_PACKAGE_PULP_DRIVER
-bool "pulp-driver"
-	depends on BR2_LINUX_KERNEL
-	depends on BR2_PACKAGE_LIBPULP
-	depends on BR2_PACKAGE_HERO_PLATFORM
-  select libpulp
-	help
-		HERO support infrastructure with PULP linux kernel driver,
-		user-space libraries and support binaries.
 
 if BR2_PACKAGE_PULP_DRIVER
 
+comment "PULP driver requires headers from libpulp"
+	depends on !BR2_PACKAGE_LIBPULP
+
 config BR2_PACKAGE_PULP_DRIVER_DEBUG_LEVEL
-  int "Debug level"
-  default 0
-  help
-    Debug level for PULP driver. Higher is more verbose.
-    If more than zero the binaries are also compiled with debugging symbols.
+	int "PULP driver debug level"
+	default 0
+	help
+	  Debug level for PULP driver.  Higher is more verbose.  If more
+	  than zero, the binaries are also compiled with debugging
+	  symbols.
 
 endif
