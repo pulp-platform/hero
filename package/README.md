@@ -19,3 +19,10 @@ scp target/usr/lib/libpulp.so <root_dir>/usr/lib/
 scp target/usr/lib/libomp* <root_dir>/usr/lib/
 scp target/usr/bin/pulp-standalone <root_dir>/usr/bin
 ```
+
+## References
+Every package has a `Config.in` and a `*.mk` file.  The [`Config.in` file][1] defines the configuration options and dependencies of the package.  It is written in the [`Kconfig` language][2] of the Linux kernel.  The [`*.mk` file][3] describes how the package is downloaded, configured, built, and installed.
+
+[1]: https://buildroot.org/downloads/manual/manual.html#_config_files
+[2]: https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt
+[3]: https://buildroot.org/downloads/manual/manual.html#_the_literal_mk_literal_file
