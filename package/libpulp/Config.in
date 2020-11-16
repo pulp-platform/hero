@@ -1,13 +1,13 @@
 config BR2_PACKAGE_LIBPULP
 	bool "libpulp: PULP userspace library"
 	depends on BR2_LINUX_KERNEL
-	depends on BR2_PACKAGE_HERO_PLATFORM
+	depends on BR2_PACKAGE_HERO_PLATFORM != ""
 
 comment "libpulp needs a Linux kernel to be built"
 	depends on !BR2_LINUX_KERNEL
 
 comment "libpulp needs a well-defined HERO platform"
-	depends on !BR2_PACKAGE_HERO_PLATFORM
+	depends on BR2_PACKAGE_HERO_PLATFORM = ""
 
 if BR2_PACKAGE_LIBPULP
 
