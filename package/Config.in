@@ -1,4 +1,2 @@
 config BR2_PACKAGE_HERO_PLATFORM
-	string "hero-platform"
-	help
-	  HERO target platform
+	string "HERO target platform"
