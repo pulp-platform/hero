@@ -2,7 +2,7 @@ config BR2_PACKAGE_PULP_DRIVER
 	bool "Linux kernel driver for PULP"
 	depends on BR2_LINUX_KERNEL
 	depends on BR2_PACKAGE_HERO_PLATFORM
-	depends on BR2_PACKAGE_LIBPULP
+	select BR2_PACKAGE_LIBPULP
 
 comment "PULP driver needs a Linux kernel to be built"
 	depends on !BR2_LINUX_KERNEL
