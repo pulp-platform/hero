@@ -1,24 +1,22 @@
+config BR2_PACKAGE_LIBPULP
+	bool "libpulp: PULP userspace library"
+	depends on BR2_LINUX_KERNEL
+	depends on BR2_PACKAGE_HERO_PLATFORM
+
 comment "libpulp needs a Linux kernel to be built"
 	depends on !BR2_LINUX_KERNEL
 
 comment "libpulp needs a well-defined HERO platform"
 	depends on !BR2_PACKAGE_HERO_PLATFORM
 
-config BR2_PACKAGE_LIBPULP
-bool "libpulp"
-	depends on BR2_LINUX_KERNEL
-	depends on BR2_PACKAGE_HERO_PLATFORM
-	help
-		PULP userspace library
-
-
 if BR2_PACKAGE_LIBPULP
 
 config BR2_PACKAGE_LIBPULP_DEBUG_LEVEL
-  int "Debug level"
-  default 0
-  help
-    Debug level for libpulp support library. Higher is more verbose.
-    If more than zero the binaries are also compiled with debugging symbols.
+	int "libpulp debug level"
+	default 0
+	help
+	  Debug level for libpulp support library.  Higher is more
+	  verbose.  If more than zero, the binaries are also compiled
+	  with debugging symbols.
 
 endif
