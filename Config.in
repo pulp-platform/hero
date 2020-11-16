@@ -8,7 +8,6 @@ source "$BR2_EXTERNAL_HERO_PATH/package/libpulp/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/pulp-driver/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/riscv-pk-ariane/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/vitetris/Config.in"
-source "$BR2_EXTERNAL_HERO_PATH/package/zynq-fclkcfg/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/zynq-mkbootimage/Config.in.host"
 
 config BR2_HERO_AUTHORIZED_KEYS
