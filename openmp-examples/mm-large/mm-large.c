@@ -44,12 +44,8 @@ int double_buf_mm(__host uint32_t * __restrict__ a,
                   __host uint32_t * __restrict__ c,
                   uint32_t width, uint32_t height, uint32_t stripe_height)
 {
-  const uint32_t width_local         = hero_tryread((__host int32_t *)&width);
-  const uint32_t height_local        = hero_tryread((__host int32_t *)&height);
-  const uint32_t stripe_height_local = hero_tryread((__host int32_t *)&stripe_height);
-
-  const uint32_t n_stripes = height_local / stripe_height_local;
-  const uint32_t stripe_size_b = width_local * stripe_height_local * sizeof(uint32_t);
+  const uint32_t n_stripes = height / stripe_height;
+  const uint32_t stripe_size_b = width * stripe_height * sizeof(uint32_t);
 
   __device uint32_t * a_ptrs[2];
   __device uint32_t * b_ptrs[2];
@@ -79,19 +75,19 @@ int double_buf_mm(__host uint32_t * __restrict__ a,
   }
 
   #pragma omp parallel \
-    firstprivate(a_ptrs, b_ptrs, c_ptrs, width_local, height_local, stripe_height_local) \
+    firstprivate(a_ptrs, b_ptrs, c_ptrs, width, height, stripe_height) \
     firstprivate(a_dma, b_dma, c_dma) \
     shared(a_idx, b_idx, c_idx) \
-    shared(a, b, c)
+    shared(a, b, c) num_threads(8)
   {
     const int thread_id = omp_get_thread_num();
 
     // get the first stripes
     if (thread_id == 0) {
-      a_dma[a_idx] = hero_memcpy_host2dev_async(a_ptrs[a_idx], (__host void *)a, stripe_size_b);
+      a_dma[a_idx] = hero_memcpy_host2dev_async(a_ptrs[a_idx], a, stripe_size_b);
     }
     else if (thread_id == 1) {
-      b_dma[b_idx] = hero_memcpy_host2dev_async(b_ptrs[b_idx], (__host void *)b, stripe_size_b);
+      b_dma[b_idx] = hero_memcpy_host2dev_async(b_ptrs[b_idx], b, stripe_size_b);
     }
 
     // horizontal a and c stripes
@@ -158,18 +154,18 @@ int double_buf_mm(__host uint32_t * __restrict__ a,
         #pragma omp for collapse(2)
 
         // horizontal a and c rows
-        for (uint32_t i=0; i<stripe_height_local; i++) {
+        for (uint32_t i=0; i<stripe_height; i++) {
 
           // vertical b columns
-          for (uint32_t j=0; j<stripe_height_local; j++) {
+          for (uint32_t j=0; j<stripe_height; j++) {
 
             uint32_t sum = 0;
-            for (uint32_t k=0; k<width_local; k++) {
-              sum = sum + a_ptrs[!a_idx][i*width_local+k] * b_ptrs[!b_idx][j*width_local+k];
-            } // k < width_local
-            c_ptrs[c_idx][i*width_local+t*stripe_height_local+j] = sum;
-          } // j < stripe_height_local
-        } // i < stripe_height_local
+            for (uint32_t k=0; k<width; k++) {
+              sum = sum + a_ptrs[!a_idx][i*width+k] * b_ptrs[!b_idx][j*width+k];
+            } // k < width
+            c_ptrs[c_idx][i*width+t*stripe_height+j] = sum;
+          } // j < stripe_height
+        } // i < stripe_height
       } // t < n_stripes
 
     } // n_stripes
@@ -288,25 +284,29 @@ int main(int argc, char *argv[])
   compare_matrices(c, d, width, height);
   memset(c, 0, (size_t)(width*height));
 
-  /*
-   * Make sure PULP is ready - speeds up the first target
-   *
-   * Actually, we should not use both devices at the same time as it is not safe. OpenMP will load
-   * or boot both of them. But in reality only one accelerator is there.
-   */
-  #pragma omp target device(0) map(to: tmp_1) map(from: tmp_2)
-  {
-    hero_trywrite((__host int32_t *)&tmp_2, hero_tryread((__host int32_t *)&tmp_1));
-  }
-  tmp_1 = tmp_2;
+  // The following code is commented out, as it requires SVM support. This is
+  // intended to be added in version v0.2 and does not yet function correctly.
+  if (0 /* Will never be true */) {
+    /*
+     * Make sure PULP is ready - speeds up the first target
+     *
+     * Actually, we should not use both devices at the same time as it is not safe. OpenMP will load
+     * or boot both of them. But in reality only one accelerator is there.
+     */
+    #pragma omp target device(0) map(to: tmp_1) map(from: tmp_2)
+    {
+      tmp_2 = tmp_1;
+    }
+    tmp_1 = tmp_2;
 
-  bench_start("PULP Execution: Parallel, double-buffered DMA, SVM");
-  #pragma omp target device(0) map(to: a[0:width*height], b[0:width*height], width, height, stripe_height) \
-    map(from: c[0:width*height])
-  double_buf_mm(a, b, c, width, height, stripe_height);
-  bench_stop();
-  compare_matrices(c, d, width, height);
-  memset(c, 0, (size_t)(width*height));
+    bench_start("PULP Execution: Parallel, double-buffered DMA, SVM");
+    #pragma omp target device(0) map(to: a[0:width*height], b[0:width*height], width, height, stripe_height) \
+      map(from: c[0:width*height])
+    double_buf_mm(a, b, c, width, height, stripe_height);
+    bench_stop();
+    compare_matrices(c, d, width, height);
+    memset(c, 0, (size_t)(width*height));
+  }
 
   // free memory
   free(a);
