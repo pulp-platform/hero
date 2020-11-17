@@ -22,7 +22,7 @@
 #include <vmm/vmm.h>
 
 #define L3_MEM_BASE_ADDR 0x80000000
-#define PULP_DMA_MAX_XFER_SIZE_B 32768
+#define PULP_DMA_MAX_XFER_SIZE_B 512 // Larger causes RAB problems
 
 #define DEBUG(...) //printf(__VA_ARGS__)
 
@@ -32,7 +32,7 @@ __hero_dma_memcpy_async(DEVICE_VOID_PTR loc, HOST_VOID_PTR ext, int32_t len,
                         int32_t ext2loc)
 {
 
-  hero_dma_job_t dma_job = plp_dma_counter_alloc();
+  hero_dma_job_t dma_job = -1;
   uint32_t dma_cmd;
 
   uint32_t loc_tmp = (uint32_t) loc;
@@ -47,6 +47,8 @@ __hero_dma_memcpy_async(DEVICE_VOID_PTR loc, HOST_VOID_PTR ext, int32_t len,
       len_tmp = PULP_DMA_MAX_XFER_SIZE_B;
     }
 
+    dma_job = plp_dma_counter_alloc();
+
     DEBUG("copy cmd: loc: 0x%x ext: 0x%lx, ", loc_tmp, ext_tmp);
     DEBUG("ext2loc: %d, len: %d\n", ext2loc, len);
     dma_cmd = plp_dma_getCmd(ext2loc, len_tmp, PLP_DMA_1D, PLP_DMA_TRIG_EVT,
@@ -59,6 +61,14 @@ __hero_dma_memcpy_async(DEVICE_VOID_PTR loc, HOST_VOID_PTR ext, int32_t len,
     len -= len_tmp;
     loc_tmp += len_tmp;
     ext_tmp += len_tmp;
+
+    if (len > 0) {
+      // TODO We should enqueue as many as we canm and then catch stragglers in
+      // the WAIT function. We store the entire state in a struct, which also
+      // tells us which counters we have allocated .We need to take locks for
+      // counter allocation.
+      plp_dma_wait(dma_job);
+    }
   }
 
   return dma_job;
