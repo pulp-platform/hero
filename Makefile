@@ -123,5 +123,5 @@ tools-hrv-openocd:
 .PHONY: check_HERO_INSTALL
 check_HERO_INSTALL:
 ifndef HERO_INSTALL
-	$(error HERO_INSTALL enviroment variable is undefined)
+	$(error HERO_INSTALL environment variable is undefined)
 endif
