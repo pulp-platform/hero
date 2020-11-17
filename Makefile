@@ -9,7 +9,7 @@ hrv-ediggenesys2: tc-hrv-olinux tc-pulp br-hrv-ediggenesys2 sdk-pulp sdk-hrv tc-
 .PHONY: br-hrv-ediggenesys2-base br-har-exilzcu102-base br-hrv br-har br-hrv-eqemu
 
 # environment
-br-hrv-ediggenesys2-base: check_HERO_INSTALL
+br-hrv-ediggenesys2-base: check_environment
 	mkdir -p $(CURDIR)/output/br-hrv-ediggenesys2
 	$(MAKE) O=$(CURDIR)/output/br-hrv-ediggenesys2 BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hrv_ediggenesys2_defconfig
 	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hrv-ediggenesys2/.config; fi
@@ -17,7 +17,7 @@ br-hrv-ediggenesys2-base: check_HERO_INSTALL
 	cp $(CURDIR)/output/br-hrv-ediggenesys2/images/bbl.bin $(CURDIR)/output/hrv-ediggenesys-base-bbl.bin
 br-hrv-ediggenesys2: br-hrv-ediggenesys2-base
 
-br-har-exilzcu102-base: check_HERO_INSTALL
+br-har-exilzcu102-base: check_environment
 	mkdir -p $(CURDIR)/output/br-har-exilzcu102
 	$(MAKE) O=$(CURDIR)/output/br-har-exilzcu102 BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot har_exilzcu102_defconfig
 	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-har-exilzcu102/.config; fi
@@ -26,7 +26,7 @@ br-har-exilzcu102-base: check_HERO_INSTALL
 br-har-exilzcu102: br-har-exilzcu102-base
 
 # sdk images
-br-hrv: check_HERO_INSTALL
+br-hrv: check_environment
 	mkdir -p $(CURDIR)/output/br-hrv
 	$(MAKE) O=$(CURDIR)/output/br-hrv BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hrv_defconfig
 	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hrv/.config; fi
@@ -34,7 +34,7 @@ br-hrv: check_HERO_INSTALL
 	cp $(CURDIR)/output/br-hrv/images/rootfs.ext4 $(CURDIR)/output/hrv-rootfs.ext4
 	cp $(CURDIR)/output/br-hrv/images/rootfs.tar $(CURDIR)/output/hrv-rootfs.tar
 
-br-har: check_HERO_INSTALL
+br-har: check_environment
 	mkdir -p $(CURDIR)/output/br-har
 	$(MAKE) O=$(CURDIR)/output/br-har BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot har_defconfig
 	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-har/.config; fi
@@ -43,7 +43,7 @@ br-har: check_HERO_INSTALL
 	cp $(CURDIR)/output/br-har/images/rootfs.tar $(CURDIR)/output/har-rootfs.tar
 
 # simulation images
-br-hrv-eqemu-base: check_HERO_INSTALL
+br-hrv-eqemu-base: check_environment
 	mkdir -p $(CURDIR)/output/br-hrv-eqemu
 	$(MAKE) O=$(CURDIR)/output/br-hrv-eqemu BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hrv_eqemu_defconfig
 	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hrv-eqemu/.config; fi
@@ -56,19 +56,19 @@ br-hrv-eqemu: br-hrv-eqemu-base
 .PHONY: tc-hrv-obare tc-hrv-olinux tc-har-obare tc-har-olinux tc-pulp tc-llvm tc-llvm-debug
 
 # host
-tc-hrv-obare: check_HERO_INSTALL
+tc-hrv-obare: check_environment
 	mkdir -p $(CURDIR)/output/tc-hrv-obare/
 	cd $(CURDIR)/output/tc-hrv-obare/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/hrv-obare.config ariane
 
-tc-hrv-olinux: check_HERO_INSTALL
+tc-hrv-olinux: check_environment
 	mkdir -p $(CURDIR)/output/tc-hrv-olinux/
 	cd $(CURDIR)/output/tc-hrv-olinux/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/hrv-olinux.config hero br_real
 
-tc-har-obare: check_HERO_INSTALL
+tc-har-obare: check_environment
 	mkdir -p $(CURDIR)/output/tc-har-obare/
 	cd $(CURDIR)/output/tc-har-obare/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/har-obare.config
 
-tc-har-olinux: check_HERO_INSTALL
+tc-har-olinux: check_environment
 	mkdir -p $(CURDIR)/output/tc-har-olinux/
 	cd $(CURDIR)/output/tc-har-olinux/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/har-olinux.config hero br_real
 
@@ -120,8 +120,6 @@ tools-hrv-openocd:
 		chmod -R u-w $(HERO_INSTALL); \
 	)
 
-.PHONY: check_HERO_INSTALL
-check_HERO_INSTALL:
-ifndef HERO_INSTALL
-	$(error HERO_INSTALL environment variable is undefined)
-endif
+.PHONY: check_environment
+check_environment:
+	@env/check_environment.sh
