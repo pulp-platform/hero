@@ -28,12 +28,15 @@
 
 // Internal function
 hero_dma_job_t
-__hero_dma_memcpy_async(HOST_VOID_PTR dst, HOST_VOID_PTR src, int32_t len,
+__hero_dma_memcpy_async(DEVICE_VOID_PTR loc, HOST_VOID_PTR ext, int32_t len,
                         int32_t ext2loc)
 {
 
   hero_dma_job_t dma_job = plp_dma_counter_alloc();
   uint32_t dma_cmd;
+
+  uint32_t loc_tmp = (uint32_t) loc;
+  uint64_t ext_tmp = (uint64_t) ext;
 
   // we might need to split the transfer into chunks of PULP_DMA_MAX_XFER_SIZE_B
   while (len > 0) {
@@ -44,18 +47,18 @@ __hero_dma_memcpy_async(HOST_VOID_PTR dst, HOST_VOID_PTR src, int32_t len,
       len_tmp = PULP_DMA_MAX_XFER_SIZE_B;
     }
 
-    DEBUG("copy cmd: loc: 0x%llx ext: 0x%llx ext2loc: %ld len: %ld\n", dst, src,
-           ext2loc, len);
+    DEBUG("copy cmd: loc: 0x%x ext: 0x%lx, ", loc_tmp, ext_tmp);
+    DEBUG("ext2loc: %d, len: %d\n", ext2loc, len);
     dma_cmd = plp_dma_getCmd(ext2loc, len_tmp, PLP_DMA_1D, PLP_DMA_TRIG_EVT,
                              PLP_DMA_NO_TRIG_IRQ, PLP_DMA_PRIV);
     __asm__ __volatile__ ("" : : : "memory");
     // FIXME: DMA commands currently only work with 32-bit addresses. When this
     //        is fixed, we should remove the cast.
-    plp_dma_cmd_push(dma_cmd, (uint32_t) dst, (uint32_t) src);
+    plp_dma_cmd_push(dma_cmd, (uint32_t) loc_tmp, (uint32_t) ext_tmp);
 
     len -= len_tmp;
-    dst += len_tmp;
-    src += len_tmp;
+    loc_tmp += len_tmp;
+    ext_tmp += len_tmp;
   }
 
   return dma_job;
@@ -63,23 +66,23 @@ __hero_dma_memcpy_async(HOST_VOID_PTR dst, HOST_VOID_PTR src, int32_t len,
 
 
 hero_dma_job_t
-hero_memcpy_host2dev_async(DEVICE_VOID_PTR spm, HOST_VOID_PTR ram, uint32_t len)
+hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst, HOST_VOID_PTR src, uint32_t len)
 {
-  DEBUG("hero_memcpy_host2dev_async(0x%x, 0x%x, 0x%x)\n", spm, ram, len);
-  if (ram > UINT32_MAX) {
+  DEBUG("hero_memcpy_host2dev_async(0x%x, 0x%x, 0x%x)\n", dst, src, len);
+  if (src > UINT32_MAX) {
     printf("DMA cannot handle addresses this wide!\n");
   }
-  return __hero_dma_memcpy_async(spm, ram, len, 1);
+  return __hero_dma_memcpy_async(dst, src, len, 1);
 }
 
 hero_dma_job_t
-hero_memcpy_dev2host_async(HOST_VOID_PTR ram, DEVICE_VOID_PTR spm, uint32_t len)
+hero_memcpy_dev2host_async(HOST_VOID_PTR dst, DEVICE_VOID_PTR src, uint32_t len)
 {
-  DEBUG("hero_memcpy_dev2host_async(0x%x, 0x%x, 0x%x)\n", ram, spm, len);
-  if (ram > UINT32_MAX) {
+  DEBUG("hero_memcpy_dev2host_async(0x%x, 0x%x, 0x%x)\n", dst, src, len);
+  if (dst > UINT32_MAX) {
     printf("DMA cannot handle addresses this wide!\n");
   }
-  return __hero_dma_memcpy_async(spm, ram, len, 0);
+  return __hero_dma_memcpy_async(src, dst, len, 0);
 }
 
 void
