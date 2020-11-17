@@ -79,6 +79,9 @@ create_install_app() {
 create_install_app init-mount
 # Create application that will execute scripts from SD card on boot.
 create_install_app init-exec-scripts
+# Create application to deploy custom `/etc/sysctl.conf`.
+cp "$THIS_DIR/../board/common/overlay/etc/sysctl.conf" "$THIS_DIR/recipes-apps/sysctl-conf/files/"
+create_install_app sysctl-conf
 
 # start build
 set +e
