@@ -57,7 +57,19 @@
 #define BIGPULP_MEMCPY  (1)
 #define HOST            (2)
 
-typedef int32_t hero_dma_job_t;
+struct hero_dma_job {
+  uint32_t loc;
+  uint32_t ext;
+  int32_t len;
+  int32_t ext2loc;
+  uint16_t counter_mask;
+};
+
+#if defined(__llvm__)
+typedef __device struct hero_dma_job* hero_dma_job_t;
+#else
+typedef struct hero_dma_job* hero_dma_job_t;
+#endif
 
 //!@}
 

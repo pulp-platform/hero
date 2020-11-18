@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 
+#include <stdbool.h>
 #include <hero-target.h>
 #include <pulp.h>
 #include <bench/bench.h>
@@ -23,65 +24,180 @@
 
 #define L3_MEM_BASE_ADDR 0x80000000
 #define PULP_DMA_MAX_XFER_SIZE_B 512 // Larger causes RAB problems
+#define PULP_DMA_MAX_XFERS 16
+#define PULP_DMA_MASK_DATA_TYPE uint16_t // Holds bitmask for PULP_DMA_MAX_XFERS
 
 #define DEBUG(...) //printf(__VA_ARGS__)
 
+struct hero_dma_job *__hero_dma_job_ctor(DEVICE_VOID_PTR loc, HOST_VOID_PTR ext,
+                                   int32_t len, int32_t ext2loc) {
+  struct hero_dma_job *job =
+      (struct hero_dma_job *) l1malloc(sizeof(struct hero_dma_job));
+  job->loc = (uint32_t)loc;
+  job->ext = (uint64_t)ext;
+  job->len = len;
+  job->ext2loc = ext2loc;
+  job->counter_mask = 0U;
+
+  printf("Allocated job 0x%x: loc = 0x%x, ext = 0x%lx",
+         (uint32_t) job, job->loc, job->ext);
+  printf(", len = %d, ext2loc = %d, mask = 0x%x\n",
+         job->len, job->ext2loc, job->counter_mask);
+
+  return job;
+}
+
+void __hero_dma_job_print(struct hero_dma_job *job) {
+  printf("Job 0x%x: ", (uint32_t) job);
+  printf("  Loc = 0x%x", job->loc);
+  printf("  Ext = 0x%lx", job->ext);
+  printf("  Len = %d", job->len);
+  printf("  E2L = %d", job->ext2loc);
+  printf("  Msk = 0x%x\n", job->counter_mask);
+}
+
+// This keeps track of how many counters we have allocated. It does not
+// necessarily match the DMA counter that is returned from the hardware.
+PULP_DMA_MASK_DATA_TYPE __hero_dma_status = 0x0;
+uint32_t __hero_dma_num_inflight = 0;
+
+int16_t __hero_dma_global_get_next_counter() {
+  // TODO Take lock
+  if (__hero_dma_num_inflight < PULP_DMA_MAX_XFERS) {
+    __hero_dma_num_inflight++;
+    uint32_t counter = plp_dma_counter_alloc();
+    __hero_dma_status |= (1 << counter);
+    // TODO Release lock
+    return counter;
+  }
+  // If we reached end, there was no counter. Return error.
+  // TODO Release lock
+  return -1;
+}
+
+void __hero_dma_global_release_counter(uint32_t id) {
+  // TODO Take lock
+  __hero_dma_status &= ~(1 << id);
+  __hero_dma_num_inflight--;
+  plp_dma_counter_free(id);
+  // TODO Release lock
+}
+
+bool __hero_dma_job_get_counter(struct hero_dma_job *job) {
+  bool success = false;
+  int8_t counter = __hero_dma_global_get_next_counter();
+  if (counter >= 0) {
+    // There are free counters, take one, add it to our mask, and set successful
+    // state.
+    printf("DMA Job 0x%x: Reserved counter %d, current status is 0x%x\n",
+           (uint32_t) job, counter);
+    job->counter_mask |= (1 << counter);
+    success = true;
+  }
+  return success;
+}
+
+bool __hero_dma_job_worker(struct hero_dma_job *job) {
+
+  // As long as there is more data to transfer, and we still manage to add
+  // another counter to our job, enqueue another transfer.
+  while (job->len > 0 && __hero_dma_job_get_counter(job)) {
+
+    // get XFER length
+    int32_t len_tmp = job->len;
+    if (job->len > PULP_DMA_MAX_XFER_SIZE_B) {
+      len_tmp = PULP_DMA_MAX_XFER_SIZE_B;
+    }
+
+    printf("DMA Job 0x%x: Burst: loc: 0x%x ext: 0x%lx, ", (uint32_t) job,
+           job->loc, job->ext);
+    printf("ext2loc: %d, len: %d\n", job->ext2loc, job->len);
+    uint32_t dma_cmd = plp_dma_getCmd(job->ext2loc, len_tmp, PLP_DMA_1D,
+                             PLP_DMA_TRIG_EVT, PLP_DMA_NO_TRIG_IRQ,
+                             PLP_DMA_PRIV);
+    __asm__ __volatile__ ("" : : : "memory");
+    // FIXME: DMA commands currently only work with 32-bit addresses. When this
+    //        is fixed, we should remove the cast.
+    plp_dma_cmd_push(dma_cmd, (uint32_t) job->loc, (uint32_t) job->ext);
+
+    job->len -= len_tmp;
+    job->loc += len_tmp;
+    job->ext += len_tmp;
+
+  }
+
+  // Return true if there is still data to transfer.
+  return (job->len > 0);
+}
+
+void __hero_dma_job_wait(struct hero_dma_job *job) {
+  for (int i = 0; i < PULP_DMA_MAX_XFERS; i++) {
+    // Walk through mask, wait for every counter we have allocated, and then
+    // clear mask.
+    if (job->counter_mask & (1 << i)) {
+      printf("DMA Job 0x%x: Waiting for burst %d...\n", (uint32_t) job, i);
+      while(DMA_READ(PLP_DMA_STATUS_OFFSET) & (1 << i)) {
+        eu_evt_maskWaitAndClr(1<<ARCHI_CL_EVT_DMA0);
+      }
+      printf("DMA Job 0x%x: Releasing counter %d...\n", (uint32_t) job, i);
+      job->counter_mask &= ~(1 << i);
+      __hero_dma_global_release_counter(i);
+    }
+  }
+}
+
 // Internal function
-hero_dma_job_t
+struct hero_dma_job *
 __hero_dma_memcpy_async(DEVICE_VOID_PTR loc, HOST_VOID_PTR ext, int32_t len,
                         int32_t ext2loc)
 {
 
-  hero_dma_job_t dma_job = -1;
-  uint32_t dma_cmd;
-
-  uint32_t loc_tmp = (uint32_t) loc;
-  uint64_t ext_tmp = (uint64_t) ext;
-
-  // we might need to split the transfer into chunks of PULP_DMA_MAX_XFER_SIZE_B
-  while (len > 0) {
-
-    // get XFER length
-    int32_t len_tmp = len;
-    if (len > PULP_DMA_MAX_XFER_SIZE_B) {
-      len_tmp = PULP_DMA_MAX_XFER_SIZE_B;
-    }
-
-    dma_job = plp_dma_counter_alloc();
-
-    DEBUG("copy cmd: loc: 0x%x ext: 0x%lx, ", loc_tmp, ext_tmp);
-    DEBUG("ext2loc: %d, len: %d\n", ext2loc, len);
-    dma_cmd = plp_dma_getCmd(ext2loc, len_tmp, PLP_DMA_1D, PLP_DMA_TRIG_EVT,
-                             PLP_DMA_NO_TRIG_IRQ, PLP_DMA_PRIV);
-    __asm__ __volatile__ ("" : : : "memory");
-    // FIXME: DMA commands currently only work with 32-bit addresses. When this
-    //        is fixed, we should remove the cast.
-    plp_dma_cmd_push(dma_cmd, (uint32_t) loc_tmp, (uint32_t) ext_tmp);
-
-    len -= len_tmp;
-    loc_tmp += len_tmp;
-    ext_tmp += len_tmp;
-
-    if (len > 0) {
-      // TODO We should enqueue as many as we canm and then catch stragglers in
-      // the WAIT function. We store the entire state in a struct, which also
-      // tells us which counters we have allocated .We need to take locks for
-      // counter allocation.
-      plp_dma_wait(dma_job);
-    }
+  // TODO When DMA can handle wide jobs, remove this warning.
+  if ((uint64_t)ext > UINT32_MAX) {
+    printf("DMA cannot handle addresses this wide!\n");
   }
 
+  // Create the new job.
+  struct hero_dma_job *dma_job = __hero_dma_job_ctor(loc, ext, len, ext2loc);
+
+  // Run as much of the job as possible
+  __hero_dma_job_worker(dma_job);
+
+  // Return the job to caller
   return dma_job;
 }
 
+void
+hero_dma_wait(struct hero_dma_job *job)
+{
+
+  __hero_dma_job_print(job);
+
+  // First wait for all transfers we have already started.
+  __hero_dma_job_wait(job);
+
+  // If we still have bursts left to issue, issue as many as we can, wait for
+  // them to complete, and then repeat until all data has been transfered.
+  while (__hero_dma_job_worker(job)) {
+    printf("Job 0x%x: Issuing straggler jobs\n", (uint32_t) job);
+    __hero_dma_job_wait(job);
+  }
+
+  // Once we have finished issuing commands, ensure that the last bursts
+  // complete before returning to the program.
+  __hero_dma_job_wait(job);
+
+  __hero_dma_job_print(job);
+
+  // Free the job
+  l1free(job);
+
+}
 
 hero_dma_job_t
 hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst, HOST_VOID_PTR src, uint32_t len)
 {
   DEBUG("hero_memcpy_host2dev_async(0x%x, 0x%x, 0x%x)\n", dst, src, len);
-  if (src > UINT32_MAX) {
-    printf("DMA cannot handle addresses this wide!\n");
-  }
   return __hero_dma_memcpy_async(dst, src, len, 1);
 }
 
@@ -89,9 +205,6 @@ hero_dma_job_t
 hero_memcpy_dev2host_async(HOST_VOID_PTR dst, DEVICE_VOID_PTR src, uint32_t len)
 {
   DEBUG("hero_memcpy_dev2host_async(0x%x, 0x%x, 0x%x)\n", dst, src, len);
-  if (dst > UINT32_MAX) {
-    printf("DMA cannot handle addresses this wide!\n");
-  }
   return __hero_dma_memcpy_async(src, dst, len, 0);
 }
 
@@ -109,11 +222,6 @@ hero_memcpy_dev2host(HOST_VOID_PTR dst, DEVICE_VOID_PTR src, uint32_t size)
   hero_dma_wait(hero_memcpy_dev2host_async(dst, src, size));
 }
 
-void
-hero_dma_wait(hero_dma_job_t id)
-{
-  plp_dma_wait(id);
-}
 
 // -------------------------------------------------------------------------- //
 
