@@ -295,9 +295,11 @@ SECTIONS
 
   .bss_l1 : {
     . = ALIGN(4);
+    _bss_l1_start = .;
     *(.bss_l1)
     *(.bss_l1.*)
     . = ALIGN(4);
+    _bss_l1_end = .;
   } > L1
 
   .spm_buf : {
