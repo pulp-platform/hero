@@ -1,0 +1,96 @@
+{
+  "vp_comps": [
+    "system_tree"
+  ],
+  "system_tree": {
+    "board": {
+      "tb_comps": [
+        "jtag_proxy",
+        "uart",
+        "camera"
+      ],
+      "vp_bindings": [
+        [
+          "chip->uart0",
+          "dpi->uart0"
+        ],
+        [
+          "dpi->jtag0",
+          "chip->jtag0_pad"
+        ]
+      ],
+      "tb_bindings": [
+        [
+          "chip->uart0",
+          "uart->uart"
+        ],
+        [
+          "chip->jtag0",
+          "jtag_proxy->jtag"
+        ],
+        [
+          "chip->ctrl",
+          "jtag_proxy->ctrl"
+        ]
+      ],
+      "chip": {
+        "vp_ports": [
+          "uart0",
+          "jtag0",
+          "ctrl",
+          "jtag0_pad"
+        ],
+        "vp_bindings": [
+          [
+            "self->jtag0_pad",
+            "padframe->jtag0_pad"
+          ],
+          [
+            "padframe->uart0_pad",
+            "self->uart0"
+          ]
+        ],
+        "padframe": {
+          "vp_ports": [
+            "uart0_pad",
+            "jtag0_pad"
+          ]
+        }
+      },
+      "dpi": {
+        "vp_ports": [
+          "jtag0",
+          "uart0"
+        ]
+      },
+      "jtag_proxy": {
+        "type": "dpi",
+        "active": false,
+        "module": "jtag_proxy.so",
+        "verbose": false,
+        "port": 37539,
+        "vp_ports": [
+          "jtag",
+          "ctrl"
+        ]
+      },
+      "uart": {
+        "type": "dpi",
+        "module": "uart.so",
+        "verbose": false,
+        "baudrate": 625000,
+        "loopback": true,
+        "stdout": false,
+        "tx_file": "tx_uart.log",
+        "vp_ports": [
+          "uart"
+        ]
+      },
+      "camera": {
+        "type": "dpi",
+        "model": "himax",
+        "module": "camera.so"
+      }
+    }
+  }
+}

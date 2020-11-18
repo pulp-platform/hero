@@ -1,0 +1,6 @@
+{
+  "includes" : ["cluster_v6_template.json"],
+  "pe": {
+    "includes" : ["ri5ky_v2.json"]
+  }
+}

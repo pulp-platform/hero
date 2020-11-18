@@ -1,0 +1,5 @@
+{
+  "version"   : 1,
+  "hal_files" : [ "hal/vendors/dolphin/rtc.h" ],
+  "archi_files" : [ "archi/vendors/dolphin/rtc.h" ]
+}

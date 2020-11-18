@@ -1,0 +1,9 @@
+{
+  "system_tree": {
+    "board": {
+      "chip": {
+        "name": "pulpino"
+      }
+    }
+  }
+}

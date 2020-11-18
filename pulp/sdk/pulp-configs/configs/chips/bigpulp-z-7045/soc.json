@@ -1,0 +1,275 @@
+{
+  "nb_cluster": 1,
+  "vp_class": "pulp/soc",
+  "peripherals_base": "0x1A100000",
+  "soc_events_ids": {},
+  "fc_events": {},
+  "vp_comps": [
+    "axi_ico",
+    "soc_ico",
+    "apb_ico",
+    "l2",
+    "plt_loader",
+    "apb_soc_ctrl",
+    "stdout",
+    "apb_uart",
+    "uart",
+    "cluster",
+    "adv_dbg_unit"
+  ],
+  "vp_ports": [
+    "cluster_clock",
+    "jtag0"
+  ],
+  "vp_bindings": [
+    [
+      "self->cluster_clock",
+      "cluster->clock"
+    ],
+    [
+      "self->jtag0",
+      "adv_dbg_unit->jtag"
+    ],
+    [
+      "axi_ico->cluster",
+      "cluster->input"
+    ],
+    [
+      "axi_ico->soc",
+      "soc_ico->axi_slave"
+    ],
+    [
+      "soc_ico->apb",
+      "apb_ico->input"
+    ],
+    [
+      "soc_ico->axi_master",
+      "axi_ico->input"
+    ],
+    [
+      "soc_ico->l2",
+      "l2->input"
+    ],
+    [
+      "apb_ico->stdout",
+      "stdout->input"
+    ],
+    [
+      "apb_ico->apb_soc_ctrl",
+      "apb_soc_ctrl->input"
+    ],
+    [
+      "plt_loader->out",
+      "soc_ico->debug"
+    ],
+    [
+      "cluster->soc",
+      "axi_ico->input"
+    ],
+    [
+      "adv_dbg_unit->io",
+      "soc_ico->debug"
+    ]
+  ],
+  "axi_ico": {
+    "includes": [
+      "ips/interco/router.json"
+    ],
+    "latency": 9,
+    "mappings": {
+      "soc": {
+        "base": "0x1A000000",
+        "size": "0x06000000"
+      },
+      "cluster": {
+        "base": "0x10000000",
+        "size": "0x400000"
+      }
+    },
+    "vp_ports": [
+      "cluster",
+      "soc",
+      "input"
+    ]
+  },
+  "soc_ico": {
+    "nb_l2_shared_banks": 4,
+    "gv_class": "pulp.Soc_Ico_v2.Soc_Ico",
+    "vp_class": null,
+    "vp_comps": [
+      "ll_ico",
+      "hb_ico"
+    ],
+    "vp_ports": [
+      "debug",
+      "axi_slave",
+      "apb",
+      "axi_master",
+      "l2",
+      "l2_shared_0",
+      "l2_shared_1",
+      "l2_shared_2",
+      "l2_shared_3"
+    ],
+    "vp_bindings": [
+      [
+        "self->debug",
+        "ll_ico->input"
+      ],
+      [
+        "self->axi_slave",
+        "ll_ico->input"
+      ],
+      [
+        "ll_ico->apb",
+        "self->apb"
+      ],
+      [
+        "ll_ico->l2",
+        "self->l2"
+      ],
+      [
+        "ll_ico->axi_master",
+        "self->axi_master"
+      ],
+      [
+        "hb_ico->out_0",
+        "self->l2_shared_0"
+      ],
+      [
+        "hb_ico->out_1",
+        "self->l2_shared_1"
+      ],
+      [
+        "hb_ico->out_2",
+        "self->l2_shared_2"
+      ],
+      [
+        "hb_ico->out_3",
+        "self->l2_shared_3"
+      ]
+    ],
+    "ll_ico": {
+      "includes": [
+        "ips/interco/router.json"
+      ],
+      "mappings": {
+        "apb": {
+          "base": "0x1A100000",
+          "size": "0x00100000"
+        },
+        "axi_master": {
+          "base": "0x10000000",
+          "size": "0x400000"
+        },
+        "l2": {
+          "base": "0x1C000000",
+          "size": "0x00080000",
+          "remove_offset": "0x1C000000"
+        }
+      },
+      "vp_ports": [
+        "apb",
+        "l2",
+        "axi_master",
+        "input"
+      ]
+    },
+    "hb_ico": {
+      "includes": [
+        "ips/interco/interleaver.json"
+      ],
+      "nb_slaves": 4,
+      "interleaving_bits": 2,
+      "remove_offset": "0x1C000000",
+      "vp_ports": [
+        "out_0",
+        "out_1",
+        "out_2",
+        "out_3"
+      ]
+    }
+  },
+  "apb_ico": {
+    "includes": [
+      "ips/interco/router.json"
+    ],
+    "mappings": {
+      "stdout": {
+        "base": "0x1A10F000",
+        "size": "0x00001000",
+        "remove_offset": "0x1A10F000"
+      },
+      "apb_soc_ctrl": {
+        "base": "0x1A103000",
+        "size": "0x00001000",
+        "remove_offset": "0x1A103000"
+      }
+    },
+    "vp_ports": [
+      "stdout",
+      "apb_soc_ctrl",
+      "input"
+    ]
+  },
+  "l2": {
+    "size": 524288,
+    "map_base": "0x1C000000",
+    "map_size": "0x00080000",
+    "vp_class": "memory/memory",
+    "vp_ports": [
+      "input"
+    ]
+  },
+  "plt_loader": {
+    "includes": [
+      "tools/plt_loader/plt_loader.json"
+    ],
+    "vp_ports": [
+      "out"
+    ]
+  },
+  "apb_soc_ctrl": {
+    "includes": [
+      "chips/bigpulp-z-7045/apb_soc.json"
+    ],
+    "vp_ports": [
+      "input"
+    ]
+  },
+  "stdout": {
+    "includes": [
+      "ips/stdout_v3.json"
+    ],
+    "vp_ports": [
+      "input"
+    ]
+  },
+  "apb_uart": {
+    "includes": [
+      "ips/uart_v0.json"
+    ]
+  },
+  "uart": {
+    "version": 1
+  },
+  "cluster": {
+    "includes": [
+      "chips/bigpulp-z-7045/cluster_0.json"
+    ],
+    "vp_ports": [
+      "soc",
+      "clock",
+      "input"
+    ]
+  },
+  "adv_dbg_unit": {
+    "includes": [
+      "ips/adv_dbg_unit/adv_dbg_unit.json"
+    ],
+    "vp_ports": [
+      "io",
+      "jtag"
+    ]
+  }
+}

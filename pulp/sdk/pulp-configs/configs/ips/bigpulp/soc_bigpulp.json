@@ -1,0 +1,72 @@
+{
+  "nb_cluster"       : 1,
+
+  "cluster": {
+    "includes": ["../cluster_v5.json"],
+    "l1": {
+      "size" : 262144,
+      "alias_base": "0x1b000000"
+    }
+  },
+
+  "soc_ico": {
+
+    "gv_class": "pulp.Soc_Ico_v1.Soc_Ico",
+
+    "nb_l2_shared_banks": 4,
+
+    "apb": {
+      "base"  : "0x1A100000",
+      "size"  : "0x00100000"
+    },
+
+    "l2": {
+      "base"  : "0x1C000000",
+      "size"  : "0x00080000"
+    },
+
+    "peripherals_base"  : "0x1A100000",
+
+    "peripherals": {
+
+      "stdout": {
+        "offset": "0x0000f000",
+        "size"  : "0x00001000"
+      },
+
+      "apb_soc_ctrl": {
+        "offset": "0x00004000",
+        "size"  : "0x00001000"
+      }
+
+    }
+  },
+
+  "l2": {
+    "size": 262144,
+    "map_base": "0x1C000000",
+    "map_size": "0x00080000"
+  },
+
+  "l2_shared": {
+    "nb_banks": 4,
+    "size": 262144,
+    "map_base": "0x1C000000",
+    "map_size": "0x01000000"
+  },
+
+  "apb_uart": {
+    "version": 0
+  },
+
+  "peripherals_base": "0x1A100000",
+
+  "stdout": {
+    "includes"  : ["../stdout_v3.json"]
+  },
+
+  "apb_soc_ctrl": {
+    "includes"  : ["../apb_soc_v3.json"]
+  }
+
+}

@@ -1,0 +1,50 @@
+{
+
+  "includes": [ "pulp_chip_common.json" ],
+
+  "name": "fulmine",
+
+  "pulp_chip_family" : "fulmine",
+  "pulp_chip_version": 0,
+
+  "hal_files": [ "hal/chips/fulmine/pulp.h" ],
+  "archi_files": [ "archi/chips/fulmine/pulp.h", "archi/chips/fulmine/apb_soc.h", "archi/chips/fulmine/memory_map.h", "archi/chips/fulmine/properties.h" ],
+
+  "padframe": {
+    "includes": [ "ips/fulmine/padframe.json" ]
+  },
+
+  "soc": {
+    "nb_cluster"       : 1,
+    "cluster": {
+      "includes": ["ips/cluster_v4.json"]
+    },
+
+    "stdout": {
+      "includes": ["ips/stdout_v2.json"]
+    },
+
+    "l2": {
+      "size": 196608,
+      "map_base": "0x1C000000",
+      "map_size": "0x00080000"
+    },
+
+    "stdout": {
+      "includes"  : ["ips/stdout_v2.json"]
+    },
+
+    "apb_soc_ctrl": {
+      "includes"  : ["ips/apb_soc_v1.json"]
+    },
+
+    "udma": {
+      "includes"  : ["ips/udma/udma_v1.json"]
+    },
+
+    "soc_ico": {
+
+    }
+  }
+  
+}

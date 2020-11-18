@@ -1,0 +1,16 @@
+{
+
+  "system_tree": {
+    "board": {
+      "chip": {
+        "includes": ["honey.json"]
+      },
+      "pulp_chip": {
+        "honey" : {
+        }
+      }
+    }
+  }
+
+}
+

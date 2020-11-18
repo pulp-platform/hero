@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@iis-git.ee.ethz.ch:hero/libomptarget-pulp-rtl.git
+	branch = 78908aaeb0c3d8138deaaae37c1c79cd344b1d5b
+	commit = 78908aaeb0c3d8138deaaae37c1c79cd344b1d5b
+	parent = ed87584ca4c590e4dd02501d498fc01375aeb9e5
+	method = merge
+	cmdver = 0.4.1

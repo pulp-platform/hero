@@ -1,0 +1,80 @@
+{
+  "name": "gap",
+
+  "pulp_chip_family" : "gap",
+  "pulp_chip_version": 0,
+  "boot_from_rom": true,
+
+  "hal_files": [ "hal/chips/gap/pulp.h", "hal/chips/gap/efuse.h" ],
+
+  "archi_files": [ "archi/chips/gap/pulp.h", "archi/chips/gap/memory_map.h", "archi/chips/gap/properties.h", "archi/chips/gap/apb_soc.h" ],
+
+  "vp_class": "pulp/chip",
+
+  "vp_comps": [ "soc", "soc_clock" ],
+
+  "vp_bindings": [ ["soc_clock->out", "soc->clock"] ],
+
+  "padframe": {
+    "includes": [ "ips/gap/padframe.json" ]
+  },
+
+  "pads": {
+    "rf0": {
+      "udma_channel": 0
+    },
+    "spim0": {
+      "udma_channel": 1
+    },
+    "spim1": {
+      "udma_channel": 2
+    },
+    "hyper0": {
+      "udma_channel": 3
+    },
+    "uart0": {
+      "udma_channel": 4
+    },
+    "i2c0": {
+      "udma_channel": 5
+    },
+    "i2c1": {
+      "udma_channel": 6
+    },
+    "tcdm0": {
+      "udma_channel": 7
+    },
+    "i2s0": {
+      "udma_channel": 8,
+      "udma_subchannel": 0
+    },
+    "i2s1": {
+      "udma_channel": 8,
+      "udma_subchannel": 1
+    },
+    "cpi0": {
+      "udma_channel": 9
+    }
+  },
+
+  "soc_clock": {
+    "vp_class": "vp/clock_domain",
+    "frequency": 100000000
+  },
+
+  "soc": {
+    "includes" : ["ips/gap/soc_gap.json"],
+
+    "nb_cluster"       : 1,
+    "cluster": {
+      "includes": ["ips/cluster_v5.json"],
+      "hwce": {
+        "includes": ["ips/hwce_v4.json"]
+      },
+      "pe": {
+        "includes" : ["ips/ri5ky_v2_cplx.json"]
+      }
+    }
+
+  }
+}

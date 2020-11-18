@@ -1,0 +1,46 @@
+{
+
+  "system_tree": {
+    "board": {
+      "devices": ["hyperram0", "hyperflash0"],
+
+      "chip": {
+        "includes": ["wolfe.json"],
+        "soc": {
+          "soc_ico": {
+            "axi_lock": {
+              "lines": 256
+            }
+          },
+          "nb_cluster"       : 31,
+          "cluster": {
+            "pe": {
+              "includes" : ["ips/ri5ky_v2_fpu_a.json"]
+            }
+          }
+        }
+      },
+
+      "pulp_chip": {
+        "wolfe" : {
+        }
+      },
+      "hyperram0": {
+        "size": "0x00800000"
+      },
+      "hyperflash0": {
+        "size": "0x00800000"
+      },
+      "bindings": [
+        ["pulp_chip.hyper0", "hyperram0"],
+        ["pulp_chip.hyper0", "hyperflash0"]
+      ]
+    },
+
+    "peripherals": {
+
+    }
+  }
+
+}
+

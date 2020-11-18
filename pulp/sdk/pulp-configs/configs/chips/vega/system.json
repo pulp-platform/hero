@@ -1,0 +1,50 @@
+{
+  "system_tree": {
+    "includes": [
+      "pulp_system_common.json"
+    ],
+    "vp_class": "pulp/system",
+    "vp_comps": [
+      "board"
+    ],
+    "debug_bridge": {},
+    "board": {
+      "vp_class": "pulp/board",
+      "vp_comps": [
+        "chip",
+        "dpi_clock",
+        "pulp_chip",
+        "dpi"
+      ],
+      "vp_bindings": [
+        [
+          "dpi_clock->out",
+          "dpi->clock"
+        ]
+      ],
+      "chip": {
+        "includes": [
+          "chip.json"
+        ]
+      },
+      "dpi_clock": {
+        "vp_class": "vp/clock_domain",
+        "frequency": 50000000,
+        "vp_ports": [
+          "out"
+        ]
+      },
+      "pulp_chip": {
+        "vega": {}
+      },
+      "dpi": {
+        "includes": [
+          "periph/dpi_wrapper.json"
+        ],
+        "vp_ports": [
+          "clock"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+
+  "system_tree":
+  {
+    "includes": [ "pulp_system_common.json" ],
+
+    "vp_class" : "pulp/system",
+
+    "vp_comps": [ "board" ],
+
+    "board": {
+
+      "vp_class": "pulp/board",
+
+      "vp_comps": [ "pulp_chip/gap" ],
+
+      "chip": {
+        "includes": ["gap.json"]
+      },
+
+      "pulp_chip": {
+        "gap" : {
+        }
+      },
+
+      "hyperflash": {
+        "type": "hyperflash",
+        "size": "0x00800000",
+        "fs": {
+          "files": [],
+          "encrypt": false,
+          "aes_key": 0,
+          "aes_iv": 0,
+          "boot_binary": "test/test"
+        } 
+      },
+
+      "hyperram": {
+        "type": "hyperflash",
+        "size": "0x00800000",
+        "fs": {
+          "files": [],
+          "encrypt": false,
+          "aes_key": 0,
+          "aes_iv": 0,
+          "boot_binary": "test/test"
+        }
+      },
+
+      "camera": {
+        "includes": [ "periphs/himax.json" ]
+      },
+
+      "bindings": [
+        [
+          "pulp_chip.hyper0",
+          "hyperflash.hyperflash"
+        ],
+        [
+          "pulp_chip.hyper0",
+          "hyperram.hyperram"
+        ],          
+        [
+          "pulp_chip.cpi0",
+          "self.camera"
+        ],
+        [
+          "pulp_chip.i2c0",
+          "self.camera"
+        ]
+      ]
+
+
+    },
+    "debug_bridge": {
+      "boot-mode": "jtag"
+    }
+
+  },
+
+  "runner": {
+    "boot_from_flash": true,
+    "boot-mode": "rom"
+  },
+  
+  "loader": {
+    "boot": {
+      "mode": "rom"
+    }
+  }
+}
+

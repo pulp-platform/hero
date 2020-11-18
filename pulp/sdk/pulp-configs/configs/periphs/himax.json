@@ -1,0 +1,8 @@
+{
+  "model": "himax",
+  "width": 320,
+  "height": 240,
+  "image": [],
+  "frequency": 1000000,
+  "activeDelay": -1
+}

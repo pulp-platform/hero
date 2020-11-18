@@ -1,0 +1,17 @@
+{
+
+  "system_tree": {
+    "board": {
+
+      "chip": {
+        "includes": ["bigpulp-zux.json"]
+      },
+      "pulp_chip": {
+        "bigpulp-zux" : {
+        }
+      }
+    }
+  }
+
+}
+

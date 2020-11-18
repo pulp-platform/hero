@@ -1,0 +1,25 @@
+{
+
+  "system_tree": {
+    "board": {
+      "gv_class": "pulp.pulp_board.Pulp_board",
+      "chip": {
+        "includes": ["kerbin.json"]
+      },
+      "pulp_chip": {
+        "kerbin" : {
+        }
+      },
+      "ddr": {
+        "gv_class": "mem.memory.Memory",
+        "size"   : "0x01000000"
+      }
+    },
+
+    "peripherals": {
+
+    }
+  }
+
+}
+

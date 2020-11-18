@@ -1,0 +1,136 @@
+#!/usr/bin/env python3.6
+
+# Authors: Germain Haugou, ETH (germain.haugou@iis.ee.ethz.ch)
+
+ 
+import json
+import argparse
+from comp_gen import *
+
+parser = argparse.ArgumentParser(
+  description='Generate configuration for Pulp chip',
+  formatter_class=argparse.RawDescriptionHelpFormatter
+)
+
+parser.add_argument("--chip", dest="chip", default="pulp", help="Specify the chip")
+parser.add_argument("--soc-file", dest="soc_file", default=None, help="Specify the soc JSON file")
+parser.add_argument("--configs", dest="configs", default=[], action="append", help="Specify path to configurations")
+parser.add_argument("--output", dest="output", default=None, help="Specify path to output configuration")
+parser.add_argument("--template", dest="template", default=None, help="Specify the soc template")
+
+[args, known_args] = parser.parse_known_args()
+
+args = parser.parse_args()
+
+if args.template is None:
+  print ('The path to the template configuration must be given through option --template')
+  exit(-1)
+
+
+soc_file = 'soc.json'
+
+if args.soc_file is not None:
+  soc_file = args.soc_file
+
+
+os.environ['PULP_CONFIGS_PATH'] = ':'.join(args.configs + os.environ.get('PULP_CONFIGS_PATH').split(':'))
+
+
+tp = js.import_config_from_file(args.template, find=True)
+
+
+padframe              = tp.get('padframe')
+padframe_conf         = None
+if padframe is not None:
+  padframe_conf = js.import_config_from_file(tp.get_child_str('padframe/content'), find=True)
+chip_family           = tp.get_child_str('chip_family')
+has_udma          = tp.get('soc/peripherals/udma') is not None
+has_ddr = tp.get('ddr') is not None
+if chip_family is None:
+  chip_family = args.chip
+
+
+
+chip = Component(
+  name=args.chip,
+
+  pulp_chip_family=chip_family,
+  pulp_chip_version=0,
+  boot_from_rom=False,
+  vp_class="pulp/chip",
+
+  hal_files= [ "hal/chips/%s/pulp.h" % chip_family.replace('-', '_')],
+  archi_files= [ "archi/chips/%s/pulp.h" % chip_family, "archi/chips/%s/memory_map.h" % chip_family, "archi/chips/%s/properties.h" % chip_family, "archi/chips/%s/apb_soc.h" % chip_family ],
+)
+
+
+if padframe is not None:
+  content = tp.get_child_str('padframe/content')
+  if content is not None:
+    chip.padframe = Component(
+        includes= [ content ]
+    )
+  else:
+    chip.padframe = Component(
+      includes= [ "%s" % padframe ]
+    )
+
+  chip.ref_clock = chip.padframe.ref_clock_pad
+
+chip.soc_clock = Component(
+  vp_class="vp/clock_domain",
+  frequency=50000000
+)
+
+
+chip.soc = Component(
+  includes= [ soc_file ]
+)
+
+if padframe is not None:
+  chip.soc_clock.out = chip.padframe.clock
+  chip.padframe.ref_clock = chip.soc.ref_clock
+
+  if padframe_conf is not None:
+    groups_conf = padframe_conf.get('groups')
+    if groups_conf is not None:
+      for name, group in groups_conf.get_items().items():
+        nb_cs = group.get_child_int('nb_cs')
+        is_master = group.get_child_bool('is_master')
+        is_slave = group.get_child_bool('is_slave')
+
+        if is_master:
+          chip.soc.set(name, chip.padframe.new_itf(name))
+        if is_slave:
+          chip.padframe.set(name, chip.soc.new_itf(name))
+
+        if nb_cs is not None:
+          for cs in range(0, nb_cs):
+            cs_name = name + '_cs' + str(cs)
+            cs_data_name = name + '_cs' + str(cs) + '_data'
+            if is_master:
+              chip.padframe.set(cs_data_name + '_pad', chip.new_itf(cs_data_name))
+              chip.padframe.set(cs_name + '_pad', chip.new_itf(cs_name))
+            if is_slave:
+              chip.set(cs_data_name, chip.padframe.new_itf(cs_data_name + '_pad'))
+              chip.set(cs_name, chip.padframe.new_itf(cs_name + '_pad'))
+        else:
+          if is_master:
+            chip.padframe.set(name + '_pad', chip.new_itf(name))
+          if is_slave:
+            chip.set(name, chip.padframe.new_itf(name + '_pad'))
+
+  
+chip.soc_clock.out = chip.soc.clock
+
+if has_ddr:
+
+  chip.soc.ddr = chip.ddr
+
+
+config = chip.get_json_config()
+
+if args.output is not None:
+  with open(args.output, 'w') as file:
+    file.write(config)
+    file.write('\n')

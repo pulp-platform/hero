@@ -1,0 +1,88 @@
+{
+  "name": "oprecompkw",
+
+  "pulp_chip_family" : "oprecompkw",
+  "pulp_chip_version": 0,
+  "boot_from_rom": true,
+
+  "hal_files": [ "hal/chips/oprecompkw/pulp.h" ],
+  "archi_files": [ "archi/chips/oprecompkw/pulp.h", "archi/chips/oprecompkw/memory_map.h", "archi/chips/oprecompkw/properties.h", "archi/chips/oprecompkw/apb_soc.h" ],
+
+  "vp_class": "pulp/chip",
+
+  "vp_comps": [ "soc", "soc_clock", "cluster_clock" ],
+
+  "soc_clock": {
+    "vp_class": "vp/clock_domain",
+    "frequency": 100000000
+  },
+
+  "cluster_clock": {
+    "vp_class": "vp/clock_domain",
+    "frequency": 100000000
+  },
+
+  "vp_bindings": [
+    ["cluster_clock->out", "soc->cluster_clock"],
+    ["soc_clock->out", "soc->clock"]
+  ],
+
+
+  "soc": {
+    "includes" : ["chips/oprecompkw/soc.json"],
+
+    "gv_comps": {
+      "job_fifo": 1
+    },
+
+    "soc_ico": {
+      "rom": {
+        "base"  : "0x1A000000",
+        "size"  : "0x00010000"
+      }
+    },
+
+    "cluster": {
+      "dma": {
+        "is_64": true
+      },
+      "pe0": {
+        "fetch_enable"     : true,
+        "boot_addr" : "0x1A000000"
+      },
+      "vp_ports": [
+        "job_fifo_irq"
+      ],
+      "vp_bindings": [
+        [ "self->job_fifo_irq", "event_unit->in_event_24_pe_0" ],
+        [ "self->job_fifo_irq", "event_unit->in_event_24_pe_1" ],
+        [ "self->job_fifo_irq", "event_unit->in_event_24_pe_2" ],
+        [ "self->job_fifo_irq", "event_unit->in_event_24_pe_3" ],
+        [ "self->job_fifo_irq", "event_unit->in_event_24_pe_4" ],
+        [ "self->job_fifo_irq", "event_unit->in_event_24_pe_5" ],
+        [ "self->job_fifo_irq", "event_unit->in_event_24_pe_6" ],
+        [ "self->job_fifo_irq", "event_unit->in_event_24_pe_7" ]
+      ]
+    },
+
+    "injector": {
+      "includes": [ "tools/vp/injector.json" ]
+    },
+
+    "bindings": [
+      ["job_fifo.irq", "cluster.irq_24"]
+    ],
+
+    "vp_bindings": [
+      ["job_fifo->irq", "cluster->job_fifo_irq"]
+    ]
+  },
+
+  "rom": {
+    "includes"  : ["ips/rom_v2.json"],
+    "size"      : 8192,
+    "map_base"  : "0x1A000000",
+    "map_size"  : "0x00010000"
+  }
+
+}

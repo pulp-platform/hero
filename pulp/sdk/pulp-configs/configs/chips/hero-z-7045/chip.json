@@ -1,0 +1,41 @@
+{
+  "name": "hero-z-7045",
+  "pulp_chip_family": "bigpulp",
+  "pulp_chip_version": 0,
+  "boot_from_rom": false,
+  "vp_class": "pulp/chip",
+  "hal_files": [
+    "hal/chips/bigpulp/pulp.h"
+  ],
+  "archi_files": [
+    "archi/chips/bigpulp/pulp.h",
+    "archi/chips/bigpulp/memory_map.h",
+    "archi/chips/bigpulp/properties.h",
+    "archi/chips/bigpulp/apb_soc.h"
+  ],
+  "vp_comps": [
+    "soc_clock",
+    "soc"
+  ],
+  "vp_bindings": [
+    [
+      "soc_clock->out",
+      "soc->clock"
+    ]
+  ],
+  "soc_clock": {
+    "vp_class": "vp/clock_domain",
+    "frequency": 50000000,
+    "vp_ports": [
+      "out"
+    ]
+  },
+  "soc": {
+    "includes": [
+      "soc.json"
+    ],
+    "vp_ports": [
+      "clock"
+    ]
+  }
+}

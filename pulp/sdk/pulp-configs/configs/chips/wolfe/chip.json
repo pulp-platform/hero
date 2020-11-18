@@ -1,0 +1,152 @@
+{
+  "name": "wolfe",
+  "pulp_chip_family": "wolfe",
+  "pulp_chip_version": 0,
+  "boot_from_rom": false,
+  "vp_class": "pulp/chip",
+  "hal_files": [
+    "hal/chips/wolfe/pulp.h"
+  ],
+  "archi_files": [
+    "archi/chips/wolfe/pulp.h",
+    "archi/chips/wolfe/memory_map.h",
+    "archi/chips/wolfe/properties.h",
+    "archi/chips/wolfe/apb_soc.h"
+  ],
+  "vp_comps": [
+    "padframe",
+    "soc_clock",
+    "soc"
+  ],
+  "vp_ports": [
+    "jtag0",
+    "cpi0",
+    "spim0_cs0_data",
+    "spim0_cs0",
+    "spim0_cs1_data",
+    "spim0_cs1",
+    "uart0",
+    "hyper0_cs0_data",
+    "hyper0_cs0",
+    "hyper0_cs1_data",
+    "hyper0_cs1"
+  ],
+  "vp_bindings": [
+    [
+      "self->jtag0",
+      "padframe->jtag0_pad"
+    ],
+    [
+      "self->cpi0",
+      "padframe->cpi0_pad"
+    ],
+    [
+      "padframe->spim0_cs0_data_pad",
+      "self->spim0_cs0_data"
+    ],
+    [
+      "padframe->spim0_cs0_pad",
+      "self->spim0_cs0"
+    ],
+    [
+      "padframe->spim0_cs1_data_pad",
+      "self->spim0_cs1_data"
+    ],
+    [
+      "padframe->spim0_cs1_pad",
+      "self->spim0_cs1"
+    ],
+    [
+      "padframe->uart0_pad",
+      "self->uart0"
+    ],
+    [
+      "padframe->jtag0",
+      "soc->jtag0"
+    ],
+    [
+      "padframe->hyper0_cs0_data_pad",
+      "self->hyper0_cs0_data"
+    ],
+    [
+      "padframe->hyper0_cs0_pad",
+      "self->hyper0_cs0"
+    ],
+    [
+      "padframe->hyper0_cs1_data_pad",
+      "self->hyper0_cs1_data"
+    ],
+    [
+      "padframe->hyper0_cs1_pad",
+      "self->hyper0_cs1"
+    ],
+    [
+      "padframe->cpi0",
+      "soc->cpi0"
+    ],
+    [
+      "soc_clock->out",
+      "padframe->clock"
+    ],
+    [
+      "soc_clock->out",
+      "soc->clock"
+    ],
+    [
+      "soc->spim0",
+      "padframe->spim0"
+    ],
+    [
+      "soc->uart0",
+      "padframe->uart0"
+    ],
+    [
+      "soc->hyper0",
+      "padframe->hyper0"
+    ]
+  ],
+  "padframe": {
+    "includes": [
+      "templates/chips/wolfe/padframe.json"
+    ],
+    "vp_ports": [
+      "spim0_cs0_data_pad",
+      "spim0_cs0_pad",
+      "spim0_cs1_data_pad",
+      "spim0_cs1_pad",
+      "uart0_pad",
+      "jtag0",
+      "hyper0_cs0_data_pad",
+      "hyper0_cs0_pad",
+      "hyper0_cs1_data_pad",
+      "hyper0_cs1_pad",
+      "cpi0",
+      "clock",
+      "spim0",
+      "uart0",
+      "jtag0_pad",
+      "hyper0",
+      "cpi0_pad"
+    ]
+  },
+  "soc_clock": {
+    "vp_class": "vp/clock_domain",
+    "frequency": 50000000,
+    "vp_ports": [
+      "out"
+    ]
+  },
+  "soc": {
+    "includes": [
+      "soc.json"
+    ],
+    "vp_ports": [
+      "spim0",
+      "uart0",
+      "hyper0",
+      "jtag0",
+      "cpi0",
+      "clock"
+    ]
+  }
+}

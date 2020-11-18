@@ -1,0 +1,30 @@
+{
+  "runner": {
+    "boot_from_flash": true,
+    "boot-mode": "rom"
+  },
+  
+  "loader": {
+    "boot": {
+      "mode": "rom"
+    }
+  },
+
+  "system_tree": {
+    "board": {
+      "chip": {
+        "hal_files": [ "hal/chips/gap/pulp.h", "hal/chips/gap/efuse.h" ],
+        "soc": {
+          "rtc": {
+            "includes": [ "../../ips/rtc.json" ]
+          }
+        }
+      }
+    },
+    "debug_bridge": {
+      "boot-mode": "jtag"
+    }
+  }
+
+}
+

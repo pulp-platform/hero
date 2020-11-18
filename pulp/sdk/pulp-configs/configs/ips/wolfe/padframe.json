@@ -1,0 +1,474 @@
+{
+  "nb_alternate": 4,
+
+  "first_alternate": 0,
+
+  "version": 1,
+
+  "default_profile": "default",
+
+  "profiles": {
+    "default": {
+      "alternates": [ 0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 1, 1, 1, 1,
+                      1, 1, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0]
+    },
+    "hyper": {
+      "alternates": [ 0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0]
+    }
+  },
+
+  "groups": {
+    "spim0": {},
+    "i2c0": {},
+    "i2c1": {},
+    "i2s0": {},
+    "i2s1": {},
+    "spis": {},
+    "cpi": {},
+    "por": {},
+    "reset": {},
+    "jtag": {},
+    "hyper": {},
+    "timer0": {},
+    "timer1": {},
+    "timer2": {},
+    "timer3": {},
+    "xtal": {}
+  },
+
+  "pads": {
+
+    "pad_spim_sdio0": {
+      "id": 0,
+      "alternates": [
+        { "name": "spim0_sdio0", "groups": [ "spim0"    ] },
+        { "name": "gpioA0"     , "groups": [ "gpio0"  ] },
+        {},
+        {}
+      ]
+    },
+    "pad_spim_sdio1": {
+      "id": 1,
+      "alternates": [
+        { "name": "spim0_sdio1", "groups": [ "spim0"    ] },
+        { "name": "gpioA1"     , "groups": [ "gpio1"  ] },
+        {},
+        {}
+      ]
+    },
+    "pad_spim_sdio2": {
+      "id": 2,
+      "alternates": [
+        { "name": "spim0_sdio2", "groups": [ "spim0"  ] },
+        { "name": "gpioA2"     , "groups": [ "gpio2"  ] },
+        { "name": "ic1_sda"    , "groups": [ "ic1"    ] },
+        { "name": "timer0_ch0" , "groups": [ "timer0" ] }
+      ]
+    },
+    "pad_spim_sdio3": {
+      "id": 3,
+      "alternates": [
+        { "name": "spim0_sdio3", "groups": [ "spim0"  ] },
+        { "name": "gpioA3"     , "groups": [ "gpio3"  ] },
+        { "name": "ic1_scl"    , "groups": [ "ic1"    ] },
+        { "name": "timer0_ch1" , "groups": [ "timer0" ] }
+      ]
+    },
+    "pad_spim_cs0": {
+      "id": 4,
+      "alternates": [
+        { "name": "spim0_cs0"  , "groups": [ "spim0"  ] },
+        { "name": "gpioA4"     , "groups": [ "gpio4"  ] },
+        {},
+        {}
+      ]
+    },
+    "pad_spim_cs1": {
+      "id": 5,
+      "alternates": [
+        { "name": "spim0_cs1", "groups": [ "spim1"    ] },
+        { "name": "gpioA5"   , "groups": [ "gpio5"  ] },
+        {},
+        {}
+      ]
+    },
+    "pad_spim_sck": {
+      "id": 6,
+      "alternates": [
+        { "name": "spim0_sck", "groups": [ "spim0"    ] },
+        { "name": "gpioA6"   , "groups": [ "gpio6"  ] },
+        {},
+        {}
+      ]
+    },
+    "pad_uart_rx": {
+      "id": 7,
+      "alternates": [ 
+        { "name": "uart_rx"   , "groups": [ "uart"   ] },
+        { "name": "gpioA7"    , "groups": [ "gpio7"  ] },
+        { "name": "ic1_sda"   , "groups": [ "ic1"    ] },
+        { "name": "timer0_ch2", "groups": [ "timer0" ] }
+      ]
+    },
+    "pad_uart_tx": {
+      "id": 8,
+      "alternates": [ 
+        { "name": "uart_tx"    , "groups": [ "uart"   ] },
+        { "name": "gpioA8"     , "groups": [ "gpio8" ] },
+        { "name": "ic1_scl"    , "groups": [ "ic1"    ] },
+        { "name": "timer0_ch3" , "groups": [ "timer0" ] }
+      ]
+    },
+    "pad_cam_pclk": {
+      "id": 9,
+      "alternates": [
+        { "name": "cam_pclk"   , "groups": [ "cpi"    ] },
+        { "name": "gpioA9"     , "groups": [ "gpio9"  ] },
+        { "name": "timer1_ch0" , "groups": [ "timer1" ] },
+        {}
+      ]
+    },
+    "pad_cam_hsync": {
+      "id": 10,
+      "alternates": [
+        { "name": "cam_hsync"  , "groups": [ "cpi"   ] },
+        { "name": "gpioA10"    , "groups": [ "gpio10"] },
+        { "name": "timer1_ch1" , "groups": [ "timer1"] },
+        {}
+      ]
+    },
+    "pad_cam_data0": {
+      "id": 11,
+      "alternates": [
+        { "name": "cam_data0"  , "groups": [ "cpi"   ] },
+        { "name": "gpioA11"    , "groups": [ "gpio11"] },
+        { "name": "timer1_ch2" , "groups": [ "timer1"] },
+        {}
+      ]
+    },
+    "pad_cam_data1": {
+      "id": 12,
+      "alternates": [
+        { "name": "cam_data1"  , "groups": [ "cpi"   ] },
+        { "name": "gpioA12"    , "groups": [ "gpio12" ] },
+        { "name": "timer1_ch3" , "groups": [ "timer1"] },
+        {}
+      ]
+    },
+    "pad_cam_data2": {
+      "id": 13,
+      "alternates": [
+        { "name": "cam_data2"  , "groups": [ "cpi"   ] },
+        { "name": "gpioA13"    , "groups": [ "gpio13" ] },
+        { "name": "timer2_ch0" , "groups": [ "timer2"] },
+        {}
+      ]
+    },
+    "pad_cam_data3": {
+      "id": 14,
+      "alternates": [
+        { "name": "cam_data3"  , "groups": [ "cpi"   ] },
+        { "name": "gpioA14"    , "groups": [ "gpio14" ] },
+        { "name": "timer2_ch1" , "groups": [ "timer2"] },
+        {}
+      ]
+    },
+    "pad_cam_data4": {
+      "id": 15,
+      "alternates": [
+        { "name": "cam_data4"  , "groups": [ "cpi"    ] },
+        { "name": "gpioA15"    , "groups": [ "gpio15" ] },
+        { "name": "timer2_ch2" , "groups": [ "timer2" ] },
+        {}
+      ]
+    },
+    "pad_cam_data5": {
+      "id": 16,
+      "alternates": [
+        { "name": "cam_data5"  , "groups": [ "cpi"    ] },
+        { "name": "gpioA16"    , "groups": [ "gpio16" ] },
+        { "name": "timer2_ch3" , "groups": [ "timer2" ] },
+        {}
+      ]
+    },
+    "pad_cam_data6": {
+      "id": 17,
+      "alternates": [ 
+        { "name": "cam_data6"  , "groups": [ "cpi"    ] },
+        { "name": "gpioA17"    , "groups": [ "gpio17" ] },
+        { "name": "timer3_ch0" , "groups": [ "timer3" ] },
+        {}
+      ]
+    },
+    "pad_cam_data7": {
+      "id": 18,
+      "alternates": [ 
+        { "name": "cam_data7"  , "groups": [ "cpi"    ] },
+        { "name": "gpioA18"    , "groups": [ "gpio18" ] },
+        { "name": "timer3_ch1" , "groups": [ "timer3" ] },
+        {}
+      ]
+    },
+    "pad_cam_vsync": {
+      "id": 19,
+      "alternates": [ 
+        { "name": "cam_vsync"  , "groups": [ "cpi"    ] },
+        { "name": "gpioA19"    , "groups": [ "gpio19" ] },
+        { "name": "timer3_ch2" , "groups": [ "timer3" ] },
+        {}
+      ]
+    },
+    "pad_hyper_ckn": {
+      "id": 20,
+      "alternates": [ 
+        { "name": "hyper_ckn" , "groups": [ "hyper"  ] },
+        { "name": "gpioA20"   , "groups": [ "gpio20" ] },
+        {},
+        {}
+      ]
+    },
+    "pad_hyper_ck": {
+      "id": 21,
+      "alternates": [ 
+        { "name": "hyper_ck"   , "groups": [ "hyper"  ] },
+        { "name": "gpioA21"    , "groups": [ "gpio21" ] },
+        {},
+        {}
+      ]
+    },
+    "pad_hyper_dq[0]": {
+      "id": 22,
+      "alternates": [ 
+        { "name": "hyper_dq[0]", "groups": [ "hyper"  ] },
+        { "name": "gpioA22"    , "groups": [ "gpio22" ] },
+        {},
+        {}
+      ]
+    },
+    "pad_hyper_dq[1]": {
+      "id": 23,
+      "alternates": [ 
+        { "name": "hyper_dq[1]", "groups": [ "hyper"  ] },
+        { "name": "gpioA23"    , "groups": [ "gpio23" ] },
+        {},
+        {}
+      ]
+    },
+    "pad_hyper_dq[2]": {
+      "id": 24,
+      "alternates": [ 
+        { "name": "hyper_dq[2]", "groups": [ "hyper"  ] },
+        { "name": "gpioA24"    , "groups": [ "gpio24" ] },
+        { "name": "ic1_sda"    , "groups": [ "ic1"    ] },
+        {}
+      ]
+    },
+    "pad_hyper_dq[3]": {
+      "id": 25,
+      "alternates": [ 
+        { "name": "hyper_dq[3]", "groups": [ "hyper"  ] },
+        { "name": "gpioA25"    , "groups": [ "gpio25" ] },
+        { "name": "ic1_scl"    , "groups": [ "ic1"    ] },
+        {}
+      ]
+    },
+    "pad_hyper_dq[4]": {
+      "id": 26,
+      "alternates": [ 
+        { "name": "hyper_dq[4]" , "groups": [ "hyper"  ] },
+        {},
+        {},
+        {}
+      ]
+    },
+    "pad_hyper_dq[5]": {
+      "id": 27,
+      "alternates": [ 
+        { "name": "hyper_dq[5]" , "groups": [ "hyper"  ] },
+        {},
+        {},
+        {}
+      ]
+    },
+    "pad_hyper_dq[6]": {
+      "id": 28,
+      "alternates": [
+        { "name": "hyper_dq[6]" , "groups": [ "hyper" ] },
+        {},
+        {},
+        {}
+      ]
+    },
+    "pad_hyper_dq[7]": {
+      "id": 29,
+      "alternates": [ 
+        { "name": "hyper_dq[7]" , "groups": [ "hyper"  ] },
+        {},
+        {},
+        {}
+      ]
+    },
+    "pad_hyper_csn0": {
+      "id": 30,
+      "alternates": [ 
+        { "name": "hyper_csn0"  , "groups": [ "hyper"  ] },
+        {},
+        {},
+        {}
+      ]
+    },
+    "pad_hyper_csn1": {
+      "id": 31,
+      "alternates": [ 
+        { "name": "hyper_csn1"  , "groups": [ "hyper"  ] },
+        {},
+        {},
+        {}
+      ]
+    },
+    "pad_hyper_rwds": {
+      "id": 32,
+      "alternates": [ 
+        { "name": "hyper_rwds" , "groups": [ "hyper" ] },
+        {},
+        {},
+        {}
+      ]
+    },
+    "pad_i2c0_sda": {
+      "id": 33,
+      "alternates": [ 
+        { "name": "i2c0_sda"   , "groups": [ "i2c0"   ] },
+        { "name": "gpioA26"    , "groups": [ "gpio26" ] },
+        {},
+        {}
+      ]
+    },
+    "pad_i2c0_scl": {
+      "id": 34,
+      "alternates": [ 
+        { "name": "i2c0_scl" , "groups": [ "i2c0"   ] },
+        { "name": "gpioA27"  , "groups": [ "gpio27" ] },
+        {},
+        {}
+      ]
+    },
+    "pad_i2s0_sck": {
+      "id": 35,
+      "alternates": [ 
+        { "name": "i2s0_sck"  , "groups": [ "i2s0"   ] },
+        { "name": "gpioA28"   , "groups": [ "gpio28" ] },
+        { "name": "timer0_ch0", "groups": [ "timer0" ] },
+        {}
+      ]
+    },
+    "pad_i2s0_ws": {
+      "id": 36,
+      "alternates": [ 
+        { "name": "i2s0_ws"   , "groups": [ "i2s0"   ] },
+        { "name": "gpioA29"   , "groups": [ "gpio29" ] },
+        { "name": "timer0_ch1", "groups": [ "timer0" ] },
+        { "name": "timer1_ch0", "groups": [ "timer1" ] }
+      ]
+    },
+    "pad_i2s0_sdi": {
+      "id": 37,
+      "alternates": [ 
+        { "name": "i2s0_sdi" , "groups": [ "i2s0" ] },
+        { "name": "gpioA30"  , "groups": [ "gpio30" ] },
+        { "name": "timer0_ch2", "groups": [ "timer0" ] },
+        { "name": "timer2_ch0", "groups": [ "timer2" ] }
+      ]
+    },
+    "pad_i2s1_sdi": {
+      "id": 38,
+      "alternates": [ 
+        { "name": "i2s1_sdi" , "groups": [ "i2s1" ] },
+        { "name": "gpioA31"  , "groups": [ "gpio31" ] },
+        { "name": "timer0_ch3", "groups": [ "timer0" ] },
+        { "name": "timer3_ch0", "groups": [ "timer3" ] }
+      ]
+    },
+    "pad_por_n": {
+      "id": 39,
+      "alternates": [ 
+        { "name": "por_n" , "groups": [ "por" ] },
+        {},
+        {},
+        {}
+      ]
+    },
+    "pad_reset_n": {
+      "id": 40,
+      "alternates": [ 
+        { "name": "reset_n" , "groups": [ "reset" ] },
+        {},
+        {},
+        {}
+      ]
+    },
+    "pad_jtag_tck": {
+      "id": 41,
+      "alternates": [ 
+        { "name": "jtag_tck" , "groups": [ "jtag" ] },
+        {},
+        {},
+        {}
+      ]
+    },
+    "pad_jtag_tdi": {
+      "id": 42,
+      "alternates": [ 
+        { "name": "jtag_tdi" , "groups": [ "jtag" ] },
+        {},
+        {},
+        {}
+      ]
+    },
+    "pad_jtag_tdo": {
+      "id": 43,
+      "alternates": [ 
+        { "name": "jtag_tdo" , "groups": [ "jtag" ] },
+        {},
+        {},
+        {}
+      ]
+    },
+    "pad_jtag_tms": {
+      "id": 44,
+      "alternates": [
+        { "name": "jtag_tms" , "groups": [ "jtag" ] },
+        {},
+        {},
+        {}
+      ]
+    },
+    "pad_jtag_trst": {
+      "id": 45,
+      "alternates": [ 
+        { "name": "jtag_trst" , "groups": [ "jtag" ] },
+        {},
+        {},
+        {}
+      ]
+    },
+    "pad_xtal_in": {
+      "id": 46,
+      "alternates": [ 
+        { "groups": [ "xtal" ] },
+        {},
+        {},
+        {}
+      ]
+    }
+  }
+}

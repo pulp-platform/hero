@@ -1,0 +1,114 @@
+{
+  "name": "quentin",
+
+  "pulp_chip_family" : "quentin",
+  "pulp_chip_version": 0,
+  "boot_from_rom": true,
+  "use_sdk_rom": false,
+
+  "help": {
+    "use_sdk_rom": "Take the boot rom from the sdk instead of the platform."
+  },
+
+  "hal_files": [ "hal/chips/quentin/pulp.h" ],
+  "archi_files": [ "archi/chips/quentin/pulp.h", "archi/chips/quentin/memory_map.h", "archi/chips/quentin/properties.h", "archi/chips/quentin/apb_soc.h" ],
+
+  "vp_class": "pulp/chip",
+
+  "vp_comps": [ "soc", "soc_clock" ],
+
+  "vp_bindings": [ ["soc_clock->out", "soc->clock"] ],
+
+  "padframe": {
+    "includes": [ "ips/quentin/padframe.json" ]
+  },
+
+
+  "pads": {
+    "spim0": {
+      "udma_channel": 0
+    },
+    "spim1": {
+      "udma_channel": 1
+    },
+    "hyper0": {
+      "udma_channel": 2
+    },
+    "uart0": {
+      "udma_channel": 3
+    },
+    "i2c0": {
+      "udma_channel": 4
+    },
+    "i2c1": {
+      "udma_channel": 5
+    },
+    "i2s0": {
+      "udma_channel": 6,
+      "udma_subchannel": 0
+    },
+    "i2s1": {
+      "udma_channel": 6,
+      "udma_subchannel": 1
+    },
+    "cpi0": {
+      "udma_channel": 7
+    }
+  },
+
+  "soc_clock": {
+    "vp_class": "vp/clock_domain",
+    "frequency": 100000000
+  },
+
+  "soc": {
+
+    "clock_domains": [ "fc", "periph", "cluster" ],
+
+    "includes" : ["ips/quentin/soc_quentin.json"],
+
+    "fc": {
+      "includes"  : ["ips/ri5ky_v2_fpu.json"],
+      "cluster_id": 31,
+      "core_id"   : 0,
+      "fetch_enable"     : true,
+      "boot_addr" : "0x1C008000"
+    },
+
+    "fll_ctrl": {
+      "version": 3,
+      "gv_class": "pulp.Fll_ctrl.fll_ctrl"
+    },
+
+    "clk_gen": {
+      "nb_fll": 3,
+      "domains": [ "fc", "periph", "cluster" ]
+    },
+
+    "fll": {
+      "includes"  : ["ips/fll_v1.json"]
+    },
+
+    "soc_ico": {
+      "peripherals": {
+
+        "fll0": {
+          "offset": "0x00000000",
+          "size"  : "0x00000010"
+        },
+
+        "fll1": {
+          "offset": "0x00000010",
+          "size"  : "0x00000010"
+        },
+
+        "fll2": {
+          "offset": "0x00000020",
+          "size"  : "0x00000010"
+        }
+
+      }
+    }
+
+  }
+}

@@ -1,0 +1,194 @@
+{
+  "name": "gap",
+  "pulp_chip_family": "gap",
+  "pulp_chip_version": 0,
+  "boot_from_rom": false,
+  "vp_class": "pulp/chip",
+  "hal_files": [
+    "hal/chips/gap/pulp.h"
+  ],
+  "archi_files": [
+    "archi/chips/gap/pulp.h",
+    "archi/chips/gap/memory_map.h",
+    "archi/chips/gap/properties.h",
+    "archi/chips/gap/apb_soc.h"
+  ],
+  "vp_comps": [
+    "padframe",
+    "soc_clock",
+    "soc"
+  ],
+  "vp_ports": [
+    "ref_clock",
+    "cpi0",
+    "jtag0",
+    "spim0_cs0_data",
+    "spim0_cs0",
+    "spim0_cs1_data",
+    "spim0_cs1",
+    "spim1_cs0_data",
+    "spim1_cs0",
+    "spim1_cs1_data",
+    "spim1_cs1",
+    "uart0",
+    "hyper0_cs0_data",
+    "hyper0_cs0",
+    "hyper0_cs1_data",
+    "hyper0_cs1"
+  ],
+  "vp_bindings": [
+    [
+      "self->ref_clock",
+      "padframe->ref_clock_pad"
+    ],
+    [
+      "self->cpi0",
+      "padframe->cpi0_pad"
+    ],
+    [
+      "self->jtag0",
+      "padframe->jtag0_pad"
+    ],
+    [
+      "padframe->ref_clock",
+      "soc->ref_clock"
+    ],
+    [
+      "padframe->spim0_cs0_data_pad",
+      "self->spim0_cs0_data"
+    ],
+    [
+      "padframe->spim0_cs0_pad",
+      "self->spim0_cs0"
+    ],
+    [
+      "padframe->spim0_cs1_data_pad",
+      "self->spim0_cs1_data"
+    ],
+    [
+      "padframe->spim0_cs1_pad",
+      "self->spim0_cs1"
+    ],
+    [
+      "padframe->spim1_cs0_data_pad",
+      "self->spim1_cs0_data"
+    ],
+    [
+      "padframe->spim1_cs0_pad",
+      "self->spim1_cs0"
+    ],
+    [
+      "padframe->spim1_cs1_data_pad",
+      "self->spim1_cs1_data"
+    ],
+    [
+      "padframe->spim1_cs1_pad",
+      "self->spim1_cs1"
+    ],
+    [
+      "padframe->uart0_pad",
+      "self->uart0"
+    ],
+    [
+      "padframe->cpi0",
+      "soc->cpi0"
+    ],
+    [
+      "padframe->jtag0",
+      "soc->jtag0"
+    ],
+    [
+      "padframe->hyper0_cs0_data_pad",
+      "self->hyper0_cs0_data"
+    ],
+    [
+      "padframe->hyper0_cs0_pad",
+      "self->hyper0_cs0"
+    ],
+    [
+      "padframe->hyper0_cs1_data_pad",
+      "self->hyper0_cs1_data"
+    ],
+    [
+      "padframe->hyper0_cs1_pad",
+      "self->hyper0_cs1"
+    ],
+    [
+      "soc_clock->out",
+      "padframe->clock"
+    ],
+    [
+      "soc_clock->out",
+      "soc->clock"
+    ],
+    [
+      "soc->spim0",
+      "padframe->spim0"
+    ],
+    [
+      "soc->spim1",
+      "padframe->spim1"
+    ],
+    [
+      "soc->uart0",
+      "padframe->uart0"
+    ],
+    [
+      "soc->hyper0",
+      "padframe->hyper0"
+    ]
+  ],
+  "padframe": {
+    "includes": [
+      "templates/chips/gap/padframe.json"
+    ],
+    "vp_ports": [
+      "ref_clock",
+      "spim0_cs0_data_pad",
+      "spim0_cs0_pad",
+      "spim0_cs1_data_pad",
+      "spim0_cs1_pad",
+      "spim1_cs0_data_pad",
+      "spim1_cs0_pad",
+      "spim1_cs1_data_pad",
+      "spim1_cs1_pad",
+      "uart0_pad",
+      "cpi0",
+      "jtag0",
+      "hyper0_cs0_data_pad",
+      "hyper0_cs0_pad",
+      "hyper0_cs1_data_pad",
+      "hyper0_cs1_pad",
+      "ref_clock_pad",
+      "clock",
+      "spim0",
+      "spim1",
+      "uart0",
+      "cpi0_pad",
+      "jtag0_pad",
+      "hyper0"
+    ]
+  },
+  "soc_clock": {
+    "vp_class": "vp/clock_domain",
+    "frequency": 50000000,
+    "vp_ports": [
+      "out"
+    ]
+  },
+  "soc": {
+    "includes": [
+      "soc.json"
+    ],
+    "vp_ports": [
+      "spim0",
+      "spim1",
+      "uart0",
+      "hyper0",
+      "ref_clock",
+      "cpi0",
+      "jtag0",
+      "clock"
+    ]
+  }
+}

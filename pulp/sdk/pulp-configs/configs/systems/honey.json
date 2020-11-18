@@ -1,0 +1,283 @@
+{
+  "gvsoc": {
+    "cycles_to_seconds": "int(max(cycles * nb_cores / 5000000, 600))",
+    "trace-file": "stdout",
+    "trace-level": "trace",
+    "trace": [],
+    "event": [],
+    "load-binary": [],
+    "pdb-no-break": "True",
+    "werror": "True",
+    "vcd": {
+      "help": {
+        "active": "Activate VCD tracing.",
+        "all": "Activate all VCD traces.",
+        "gtkw": "Generate script for Gtkwave."
+      },
+      "active": false,
+      "all": true,
+      "gtkw": false,
+      "files": []
+    }
+  },
+  "dpi_models": {
+    "uart_loopback": {
+      "module": "uart_tb.so",
+      "baudrate": 625000,
+      "loopback": true,
+      "stdout": true,
+      "tx_file": "tx_uart.log",
+      "ports": {
+        "in": {
+          "type": "uart",
+          "itf": 0
+        }
+      }
+    }
+  },
+  "platform": "gvsoc",
+  "pulp_compiler": {
+    "default": "gcc",
+    "gcc": {},
+    "llvm": {}
+  },
+  "pulp_rt_version": {
+    "default": "bench",
+    "release": {},
+    "bench": {},
+    "profile0": {},
+    "profile1": {},
+    "debug": {}
+  },
+  "pulp_omp_version": {
+    "default": "libgomp",
+    "libgomp": {},
+    "new": {}
+  },
+  "testbench": {
+    "use_dpi": false
+  },
+  "vsim": {
+    "help": {
+      "gui": "Open modelsim using the GUI.",
+      "simchecker": "Activate instruction checking through golden model.",
+      "script": "Specify the script used to launch the platform"
+    },
+    "script": "run.tcl",
+    "gui": false,
+    "simchecker": false,
+    "args": [],
+    "tcl_args": []
+  },
+  "runner": {
+    "help": {
+      "py-stack": "Display the full python stack in case an exception is caught"
+    },
+    "verbose": false,
+    "boot-mode": "jtag",
+    "use_tb_comps": false,
+    "use_external_tb": false,
+    "active_tb_comps": [],
+    "py-stack": false,
+    "boot_from_flash": false,
+    "flash_type": "spi",
+    "flash_slm_file": "slm_files/flash_stim.slm",
+    "rtl_simulator": "vsim",
+    "simulator": null,
+    "aes_key": "12345678275689075642768987654345",
+    "aes_iv": "0987654323456789"
+  },
+  "gdb": {
+    "active": false
+  },
+  "rt": {
+    "version": "bench",
+    "type": "pulp-rt",
+    "mode": "rt",
+    "stack_size": 2048,
+    "cl_master_stack_size": 1024,
+    "cl_slave_stack_size": 1024,
+    "io": true,
+    "warnings": true,
+    "werror": true,
+    "assert": false,
+    "trace": false,
+    "trace_level": 0,
+    "traces": "all",
+    "libc": false,
+    "no-rt": false,
+    "no-link-script": false,
+    "no-crt0": false,
+    "cluster-start": false,
+    "openmp": true,
+    "openmp-rt": "pulp-rt",
+    "iodev": "default",
+    "user-sections": [],
+    "iodevs": {
+      "default": {
+        "value": "0"
+      },
+      "uart": {
+        "value": "1",
+        "channel": "0",
+        "baudrate": "625000"
+      }
+    }
+  },
+  "loader": {
+    "bridge": "none",
+    "cable": "proxy",
+    "binaries": [],
+    "boot": {
+      "mode": "jtag"
+    }
+  },
+  "system_tree": {
+    "board": {
+      "chip": {
+        "name": "honey",
+        "pulp_chip_family": "honey",
+        "pulp_chip_version": 0,
+        "hal_files": [
+          "hal/chips/honey/pulp.h"
+        ],
+        "archi_files": [
+          "archi/chips/honey/pulp.h",
+          "archi/chips/honey/memory_map.h",
+          "archi/chips/honey/properties.h",
+          "archi/chips/honey/padframe.h",
+          "archi/chips/honey/apb_soc.h"
+        ],
+        "soc": {
+          "nb_cluster": 1,
+          "cluster": {
+            "version": 3,
+            "nb_pe": 4,
+            "l1": {
+              "size": 65536,
+              "map_base": "0x10000000"
+            },
+            "dma": {
+              "version": 4,
+              "hal_files": [
+                "hal/dma/mchan_v4.h"
+              ],
+              "archi_files": [
+                "archi/dma/mchan_v3.h"
+              ]
+            },
+            "event_unit": {
+              "version": 1,
+              "hal_files": [
+                "hal/eu/eu_v1.h",
+                "hal/eu/eu_v1_ids.h"
+              ],
+              "archi_files": [
+                "archi/eu/eu_v1.h"
+              ]
+            },
+            "timer": {
+              "version": 1,
+              "hal_files": [
+                "hal/timer/timer_v1.h"
+              ]
+            },
+            "pe": {
+              "version": "ri5cy",
+              "archi": "riscv",
+              "implementation": "ri5cy",
+              "gv_isa": [
+                "--pulpv1",
+                "--pulp",
+                "--rv32m",
+                "--itc-external-wire"
+              ],
+              "isa": "RV32IXpulpv0",
+              "priv_version": 1.7,
+              "features": [],
+              "hal_files": [
+                "hal/riscv/riscv_v3.h",
+                "hal/riscv/builtins_v2_emu.h"
+              ],
+              "archi_files": [
+                "archi/riscv/priv_1_7.h",
+                "archi/riscv/pcer_v1.h"
+              ],
+              "defines": [
+                "ARCHI_CORE_HAS_PULPV1",
+                "CORE_PULP_BUILTINS"
+              ]
+            },
+            "icache_ctrl": {
+              "version": 1,
+              "hal_files": [
+                "hal/icache/icache_ctrl_v1.h"
+              ]
+            },
+            "cluster_ctrl": {
+              "version": 2,
+              "vp_class": "pulp/cluster/cluster_ctrl_v2",
+              "hal_files": [
+                "hal/cluster_ctrl/cluster_ctrl_v2.h"
+              ],
+              "archi_files": [
+                "archi/cluster_ctrl/cluster_ctrl_v2.h"
+              ],
+              "nb_core": 4
+            }
+          },
+          "l2": {
+            "size": 131072,
+            "map_base": "0x1C000000",
+            "map_size": "0x00080000"
+          },
+          "apb_soc_ctrl": {
+            "version": 1,
+            "hal_files": [
+              "hal/apb_soc/apb_soc_v1.h"
+            ],
+            "padframe": {
+              "version": 0
+            },
+            "gpio": {
+              "version": 0,
+              "hal_files": [
+                "hal/gpio/gpio_v0.h"
+              ]
+            }
+          },
+          "stdout": {
+            "version": 3,
+            "archi_files": [
+              "archi/stdout/stdout_v3.h"
+            ]
+          },
+          "fll": {
+            "version": 0,
+            "hal_files": [
+              "hal/chips/honey/fll.h"
+            ],
+            "archi_files": [
+              "archi/fll/fll_v0.h"
+            ]
+          },
+          "apb_uart": {
+            "version": 0
+          },
+          "spi_master": {
+            "version": 1,
+            "hal_files": [
+              "hal/periph/spi_v1.h"
+            ],
+            "archi_files": [
+              "archi/spim/spi_v1.h"
+            ]
+          }
+        }
+      },
+      "pulp_chip": {
+        "honey": {}
+      }
+    }
+  }
+}

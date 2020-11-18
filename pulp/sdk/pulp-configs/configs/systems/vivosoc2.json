@@ -1,0 +1,296 @@
+{
+  "gvsoc": {
+    "cycles_to_seconds": "int(max(cycles * nb_cores / 5000000, 600))",
+    "trace-file": "stdout",
+    "trace-level": "trace",
+    "trace": [],
+    "event": [],
+    "load-binary": [],
+    "pdb-no-break": "True",
+    "werror": "True",
+    "vcd": {
+      "help": {
+        "active": "Activate VCD tracing.",
+        "all": "Activate all VCD traces.",
+        "gtkw": "Generate script for Gtkwave."
+      },
+      "active": false,
+      "all": true,
+      "gtkw": false,
+      "files": []
+    }
+  },
+  "dpi_models": {
+    "uart_loopback": {
+      "module": "uart_tb.so",
+      "baudrate": 625000,
+      "loopback": true,
+      "stdout": true,
+      "tx_file": "tx_uart.log",
+      "ports": {
+        "in": {
+          "type": "uart",
+          "itf": 0
+        }
+      }
+    }
+  },
+  "platform": "gvsoc",
+  "pulp_compiler": {
+    "default": "gcc",
+    "gcc": {},
+    "llvm": {}
+  },
+  "pulp_rt_version": {
+    "default": "bench",
+    "release": {},
+    "bench": {},
+    "profile0": {},
+    "profile1": {},
+    "debug": {}
+  },
+  "pulp_omp_version": {
+    "default": "libgomp",
+    "libgomp": {},
+    "new": {}
+  },
+  "testbench": {
+    "use_dpi": false
+  },
+  "vsim": {
+    "help": {
+      "gui": "Open modelsim using the GUI.",
+      "simchecker": "Activate instruction checking through golden model.",
+      "script": "Specify the script used to launch the platform"
+    },
+    "script": "run.tcl",
+    "gui": false,
+    "simchecker": false,
+    "args": [],
+    "tcl_args": []
+  },
+  "runner": {
+    "help": {
+      "py-stack": "Display the full python stack in case an exception is caught"
+    },
+    "verbose": false,
+    "boot-mode": "jtag",
+    "use_tb_comps": false,
+    "use_external_tb": false,
+    "active_tb_comps": [],
+    "py-stack": false,
+    "boot_from_flash": false,
+    "flash_type": "spi",
+    "flash_slm_file": "slm_files/flash_stim.slm",
+    "rtl_simulator": "vsim",
+    "simulator": null,
+    "aes_key": "12345678275689075642768987654345",
+    "aes_iv": "0987654323456789"
+  },
+  "gdb": {
+    "active": false
+  },
+  "rt": {
+    "version": "bench",
+    "type": "pulp-rt",
+    "mode": "rt",
+    "stack_size": 2048,
+    "cl_master_stack_size": 1024,
+    "cl_slave_stack_size": 1024,
+    "io": true,
+    "warnings": true,
+    "werror": true,
+    "assert": false,
+    "trace": false,
+    "trace_level": 0,
+    "traces": "all",
+    "libc": false,
+    "no-rt": false,
+    "no-link-script": false,
+    "no-crt0": false,
+    "cluster-start": false,
+    "openmp": true,
+    "openmp-rt": "pulp-rt",
+    "iodev": "default",
+    "user-sections": [],
+    "iodevs": {
+      "default": {
+        "value": "0"
+      },
+      "uart": {
+        "value": "1",
+        "channel": "0",
+        "baudrate": "625000"
+      }
+    }
+  },
+  "loader": {
+    "bridge": "none",
+    "cable": "proxy",
+    "binaries": [],
+    "boot": {
+      "mode": "jtag"
+    }
+  },
+  "system_tree": {
+    "debug_bridge": {
+      "cable": {
+        "type": "jtag-proxy",
+        "tap": 0,
+        "jtag-proxy": {
+          "port": 37539
+        },
+        "ftdi": {},
+        "active": false,
+        "autorun": false,
+        "access_timeout_us": 1000000
+      },
+      "adv_dbg_unit": {
+        "debug_ir": "0x4"
+      },
+      "boot-mode": "default",
+      "commands": "reset stop load ioloop reqloop start wait",
+      "gdb_commands": "reset stop load ioloop reqloop start gdb wait"
+    },
+    "debug-bridge": {
+      "cable": {
+        "tap": 1
+      }
+    },
+    "board": {
+      "chip": {
+        "name": "vivosoc2",
+        "pulp_chip_family": "vivosoc2",
+        "pulp_chip_version": 0,
+        "hal_files": [
+          "hal/chips/vivosoc2/pulp.h"
+        ],
+        "hal_analog_files": [
+          "hal/analog/control_v1.h",
+          "hal/analog/exg_v1.h",
+          "hal/analog/ppg_v1.h",
+          "hal/analog/stim_v1.h",
+          "hal/analog/temp_v1.h",
+          "hal/analog/bioz_v1.h",
+          "hal/analog/vivosoc2.h",
+          "hal/analog/vivosoc.h"
+        ],
+        "archi_files": [
+          "archi/chips/vivosoc2/pulp.h",
+          "archi/chips/vivosoc2/memory_map.h",
+          "archi/chips/vivosoc2/properties.h"
+        ],
+        "archi_analog_files": [
+          "archi/analog/control_v1.h",
+          "archi/analog/exg_v1.h",
+          "archi/analog/ppg_v1.h",
+          "archi/analog/stim_v1.h",
+          "archi/analog/temp_v1.h",
+          "archi/analog/bioz_v1.h",
+          "archi/analog/vivosoc2.h"
+        ],
+        "soc": {
+          "nb_cluster": 1,
+          "cluster": {
+            "version": 4,
+            "nb_pe": 4,
+            "l1": {
+              "size": 32768,
+              "map_base": "0x10000000"
+            },
+            "dma": {
+              "version": 5,
+              "hal_files": [
+                "hal/dma/mchan_v5.h"
+              ],
+              "archi_files": [
+                "archi/dma/mchan_v5.h"
+              ]
+            },
+            "event_unit": {
+              "version": 1,
+              "hal_files": [
+                "hal/eu/eu_v1.h",
+                "hal/eu/eu_v1_ids.h"
+              ],
+              "archi_files": [
+                "archi/eu/eu_v1.h"
+              ]
+            },
+            "timer": {
+              "version": 1,
+              "hal_files": [
+                "hal/timer/timer_v1.h"
+              ]
+            },
+            "pe": {
+              "version": "or10nv2",
+              "archi": "or1k",
+              "implementation": "or10n",
+              "gv_isa": [],
+              "isa": "",
+              "features": [],
+              "hal_files": [
+                "hal/or1k/or1k_v5.h",
+                "hal/or1k/or10nv2_builtins.h"
+              ],
+              "archi_files": [
+                "archi/or1k/spr-defs.h"
+              ],
+              "defines": []
+            },
+            "cluster_ctrl": {
+              "version": 2,
+              "vp_class": "pulp/cluster/cluster_ctrl_v2",
+              "hal_files": [
+                "hal/cluster_ctrl/cluster_ctrl_v2.h"
+              ],
+              "archi_files": [
+                "archi/cluster_ctrl/cluster_ctrl_v2.h"
+              ],
+              "nb_core": 4
+            },
+            "icache_ctrl": {
+              "version": 1,
+              "hal_files": [
+                "hal/icache/icache_ctrl_v1.h"
+              ]
+            }
+          },
+          "l2": {
+            "size": 131072,
+            "map_base": "0x1C000000",
+            "map_size": "0x00080000"
+          },
+          "stdout": {
+            "version": 2,
+            "archi_files": [
+              "archi/stdout/stdout_v2.h"
+            ]
+          },
+          "udma": {
+            "version": 1,
+            "archi": 1,
+            "hal_files": [
+              "hal/udma/udma_v1.h",
+              "hal/udma/udma_periph_v1.h"
+            ],
+            "archi_files": [
+              "archi/udma/udma_v1.h",
+              "archi/udma/udma_periph_v1.h"
+            ],
+            "spim": {
+              "version": 1
+            },
+            "i2c": {
+              "version": 1
+            }
+          }
+        }
+      },
+      "pulp_chip": {
+        "vivosoc2": {}
+      }
+    }
+  }
+}

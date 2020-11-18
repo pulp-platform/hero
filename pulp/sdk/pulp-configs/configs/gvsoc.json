@@ -1,0 +1,41 @@
+{
+  "gvsoc"  : {
+    "cycles_to_seconds": "int(max(cycles * nb_cores / 5000000, 600))",
+    "trace-file": "stdout",
+    "trace-level": "trace",
+    "trace": [],
+    "event": [],
+    "load-binary": [],
+    "pdb-no-break": "True",
+    "werror": "True",
+    "vcd"  : {
+      "help": {
+        "active": "Activate VCD tracing.",
+        "all": "Activate all VCD traces.",
+        "gtkw": "Generate script for Gtkwave."
+      },
+      "active": false,
+      "all": true,
+      "gtkw": false,
+      "files": [ ]
+    }
+  },
+
+  "dpi_models": {
+    "uart_loopback": {
+      "includes": [ "periphs/uart_tb.json" ],
+      "stdout": true,
+      "module": "uart_tb.so",
+      "ports": {
+        "in": {
+          "type": "uart",
+          "itf": 0
+        }
+      },
+      "baudrate": 625000,
+      "tx_file": "tx_uart.log"
+    }
+  }
+
+
+}

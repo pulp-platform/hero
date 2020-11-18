@@ -1,0 +1,72 @@
+{
+  "name": "multino",
+  "pulp_chip_family": "multino",
+  "pulp_chip_version": 0,
+  "boot_from_rom": false,
+  "vp_class": "pulp/chip",
+  "hal_files": [
+    "hal/chips/multino/pulp.h"
+  ],
+  "archi_files": [
+    "archi/chips/multino/pulp.h",
+    "archi/chips/multino/memory_map.h",
+    "archi/chips/multino/properties.h",
+    "archi/chips/multino/apb_soc.h"
+  ],
+  "vp_comps": [
+    "padframe",
+    "soc_clock",
+    "soc"
+  ],
+  "vp_bindings": [
+    [
+      "padframe->jtag0",
+      "soc->jtag0"
+    ],
+    [
+      "soc_clock->out",
+      "padframe->clock"
+    ],
+    [
+      "soc_clock->out",
+      "soc->clock"
+    ],
+    [
+      "soc->spim0",
+      "padframe->spim0"
+    ],
+    [
+      "soc->uart0",
+      "padframe->uart0"
+    ]
+  ],
+  "padframe": {
+    "includes": [
+      "templates/chips/multino/padframe.json"
+    ],
+    "vp_ports": [
+      "jtag0",
+      "clock",
+      "spim0",
+      "uart0"
+    ]
+  },
+  "soc_clock": {
+    "vp_class": "vp/clock_domain",
+    "frequency": 50000000,
+    "vp_ports": [
+      "out"
+    ]
+  },
+  "soc": {
+    "includes": [
+      "soc.json"
+    ],
+    "vp_ports": [
+      "spim0",
+      "uart0",
+      "jtag0",
+      "clock"
+    ]
+  }
+}

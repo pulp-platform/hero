@@ -1,0 +1,6 @@
+{
+  "includes" : ["bigpulp.json"],
+  "name": "bigpulp-zux",
+
+  "archi_host_src_files": [ "src/arm64/pgtable_walk.c", "src/arm64/phys_addr.c" ]
+}

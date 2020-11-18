@@ -1,0 +1,40 @@
+{
+
+  "system_tree": {
+    "includes": [ "pulp_system_common.json" ],
+
+    "vp_class" : "pulp/system",
+
+    "vp_comps": [ "board" ],
+
+    "board": {
+      "vp_class": "pulp/board",
+
+      "vp_comps": [ "chip", "dpi", "dpi_clock" ],
+
+      "vp_bindings": [
+        ["dpi_clock->out", "dpi->clock"]
+      ],
+
+      "chip": {
+        "includes": ["pulp_chip.json"]
+      },
+
+      "dpi_clock": {
+        "vp_class": "vp/clock_domain",
+        "frequency": 100000000
+      },
+
+      "pulp_chip": {
+        "pulp" : {
+        }
+      },
+
+      "dpi": {
+        "includes": [ "periph/dpi_wrapper.json" ]
+      }
+    }
+  }
+
+}
+

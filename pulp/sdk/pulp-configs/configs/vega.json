@@ -1,0 +1,115 @@
+{
+  "name": "vega",
+
+  "pulp_chip_family" : "vega",
+  "pulp_chip_version": 0,
+  "boot_from_rom": true,
+  "use_sdk_rom": false,
+
+  "help": {
+    "use_sdk_rom": "Take the boot rom from the sdk instead of the platform."
+  },
+
+  "archi_files": [ "archi/chips/vega/pulp.h", "archi/chips/vega/memory_map.h", "archi/chips/vega/properties.h", "archi/chips/vega/apb_soc.h" ],
+
+  "hal_files": [ "hal/chips/vega/pulp.h" ],
+
+  "vp_class": "pulp/chip",
+
+  "vp_comps": [ "soc", "soc_clock" ],
+
+  "vp_bindings": [
+    ["soc_clock->out", "soc->clock"]
+  ],
+
+  "padframe": {
+    "includes": [ "ips/vega/padframe.json" ]
+  },
+
+  "pads": {
+    "spim0": {
+      "udma_channel": 0
+    },
+    "spim1": {
+      "udma_channel": 1
+    },
+    "hyper0": {
+      "udma_channel": 2
+    },
+    "uart0": {
+      "udma_channel": 3
+    },
+    "i2c0": {
+      "udma_channel": 4
+    },
+    "i2c1": {
+      "udma_channel": 5
+    },
+    "i2s0": {
+      "udma_channel": 6,
+      "udma_subchannel": 0
+    },
+    "i2s1": {
+      "udma_channel": 6,
+      "udma_subchannel": 1
+    },
+    "cpi0": {
+      "udma_channel": 7
+    }
+  },
+
+  "soc_clock": {
+    "vp_class": "vp/clock_domain",
+    "frequency": 100000000
+  },
+
+  "soc": {
+    "includes" : ["ips/vega/soc.json"],
+
+    "apb_soc_ctrl": {
+      "includes"  : ["ips/apb_soc_v3.json"]
+    },
+
+    "fc": {
+      "includes"  : ["ips/ri5ky_v2_sec.json"],
+      "cluster_id": 31,
+      "core_id"   : 0,
+      "fetch_enable"     : true,
+      "boot_addr" : "0x1A000080"
+    },
+
+    "nb_cluster"       : 1,
+    "cluster": {
+      "includes": ["ips/cluster_v6.json"],
+      "hwce": {
+        "includes": ["ips/hwce_v5.json"]
+      },
+      "nb_pe": 8
+    },
+
+    "fll": {
+      "includes"  : ["ips/fll_v1.json"]
+    },
+
+    "efuse": {
+      "includes"  : ["ips/efuse_v1.json"]
+    },
+
+    "soc_ico": {
+      "peripherals": {
+
+        "fll0": {
+          "offset": "0x00000000",
+          "size"  : "0x00000010"
+        },
+
+        "fll1": {
+          "offset": "0x00000010",
+          "size"  : "0x00000010"
+        }
+
+      }
+    }
+
+  }
+}

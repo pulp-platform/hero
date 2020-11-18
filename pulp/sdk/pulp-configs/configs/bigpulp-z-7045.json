@@ -1,0 +1,6 @@
+{
+  "includes" : ["bigpulp.json"],
+  "name": "bigpulp-z-7045",
+
+  "archi_host_src_files": [ "src/arm/phys_addr.c" ]
+}
