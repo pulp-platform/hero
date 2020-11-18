@@ -90,7 +90,15 @@ is_ariane:
 #endif
   bltu    t0, t1, 1b
 
-
+  // clear the L1 bss segment
+#if !defined(__ariane__)
+  la      t0, _bss_l1_start
+  la      t1, _bss_l1_end
+2:
+  sw      zero,0(t0)
+  addi    t0, t0, 1
+  bltu    t0, t1, 2b
+#endif
 
   /* Stack initialization */
   la    t0, stack
