@@ -17,6 +17,7 @@
 #ifndef __HERO_API_H__
 #define __HERO_API_H__
 
+#include <stdbool.h>
 #include <stdint.h>
 
 // If LLVM, use our address space support, otherwise fall back to bit-compatible
@@ -60,10 +61,11 @@
 #define HERO_L1_BSS __attribute__((section(".bss_l1")))
 
 struct hero_dma_job {
+  bool active;
   uint32_t loc;
-  uint32_t ext;
-  int32_t len;
-  int32_t ext2loc;
+  uint64_t ext;
+  uint32_t len;
+  bool ext2loc;
   uint16_t counter_mask;
 };
 
