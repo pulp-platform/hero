@@ -17,7 +17,6 @@
 #ifndef __HERO_API_H__
 #define __HERO_API_H__
 
-#include <stdio.h>
 #include <stdint.h>
 
 // If LLVM, use our address space support, otherwise fall back to bit-compatible
@@ -56,6 +55,9 @@
 #define BIGPULP_SVM     (0)
 #define BIGPULP_MEMCPY  (1)
 #define HOST            (2)
+
+#define HERO_L1_DATA __attribute__((section(".data_l1")))
+#define HERO_L1_BSS __attribute__((section(".bss_l1")))
 
 struct hero_dma_job {
   uint32_t loc;
@@ -211,4 +213,27 @@ int32_t hero_get_clk_counter(void);
 
 //!@}
 
+/** @name PULP L1 Atomic Operations
+ *
+ * This API provides atomic transactions on 32-bit unsigned integers (for the
+ * maximum and minimum operations, signed variants exist).  Each function
+ * atomically executes the operation in its name on the memory pointed to by
+ * `ptr` and the provided `val` and returns the original value in memory.
+ *
+ * NOTE: These functions are only defined for operation on the PULP L1.
+ *
+ *  @{
+ */
+
+int32_t  hero_atomic_swap  (DEVICE_PTR_CONST ptr, const int32_t  val);
+int32_t  hero_atomic_add   (DEVICE_PTR_CONST ptr, const int32_t  val);
+int32_t  hero_atomic_and   (DEVICE_PTR_CONST ptr, const int32_t  val);
+int32_t  hero_atomic_or    (DEVICE_PTR_CONST ptr, const int32_t  val);
+int32_t  hero_atomic_xor   (DEVICE_PTR_CONST ptr, const int32_t  val);
+int32_t  hero_atomic_max   (DEVICE_PTR_CONST ptr, const int32_t  val);
+uint32_t hero_atomic_maxu  (DEVICE_PTR_CONST ptr, const uint32_t val);
+int32_t  hero_atomic_min   (DEVICE_PTR_CONST ptr, const int32_t  val);
+uint32_t hero_atomic_minu  (DEVICE_PTR_CONST ptr, const uint32_t val);
+
+//!@}
 #endif

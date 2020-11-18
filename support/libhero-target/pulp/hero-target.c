@@ -26,8 +26,24 @@
 #define PULP_DMA_MAX_XFER_SIZE_B 512 // Larger causes RAB problems
 #define PULP_DMA_MAX_XFERS 16
 #define PULP_DMA_MASK_DATA_TYPE uint16_t // Holds bitmask for PULP_DMA_MAX_XFERS
+#define PULP_DMA_MUTEX_BACKOFF_CYCLES 60
 
 #define DEBUG(...) //printf(__VA_ARGS__)
+
+__attribute__((__aligned__(4))) volatile int32_t __hero_dma_lock = 0x0;
+void __hero_dma_take_lock() {
+  // Spin for lock
+  while (hero_atomic_xor(&__hero_dma_lock, 0x1) != 0x0) {
+    for (int i = 0; i < PULP_DMA_MUTEX_BACKOFF_CYCLES; i++) {
+      asm volatile("nop;": : :"memory");
+    }
+  }
+  return;
+}
+
+void __hero_dma_give_lock() {
+  hero_atomic_swap(&__hero_dma_lock, 0x0);
+}
 
 struct hero_dma_job *__hero_dma_job_ctor(DEVICE_VOID_PTR loc, HOST_VOID_PTR ext,
                                    int32_t len, int32_t ext2loc) {
@@ -62,25 +78,25 @@ PULP_DMA_MASK_DATA_TYPE __hero_dma_status = 0x0;
 uint32_t __hero_dma_num_inflight = 0;
 
 int16_t __hero_dma_global_get_next_counter() {
-  // TODO Take lock
+  __hero_dma_take_lock();
   if (__hero_dma_num_inflight < PULP_DMA_MAX_XFERS) {
     __hero_dma_num_inflight++;
     uint32_t counter = plp_dma_counter_alloc();
     __hero_dma_status |= (1 << counter);
-    // TODO Release lock
+    __hero_dma_give_lock();
     return counter;
   }
   // If we reached end, there was no counter. Return error.
-  // TODO Release lock
+  __hero_dma_give_lock();
   return -1;
 }
 
 void __hero_dma_global_release_counter(uint32_t id) {
-  // TODO Take lock
+  __hero_dma_take_lock();
   __hero_dma_status &= ~(1 << id);
   __hero_dma_num_inflight--;
   plp_dma_counter_free(id);
-  // TODO Release lock
+  __hero_dma_give_lock();
 }
 
 bool __hero_dma_job_get_counter(struct hero_dma_job *job) {
@@ -89,8 +105,7 @@ bool __hero_dma_job_get_counter(struct hero_dma_job *job) {
   if (counter >= 0) {
     // There are free counters, take one, add it to our mask, and set successful
     // state.
-    printf("DMA Job 0x%x: Reserved counter %d, current status is 0x%x\n",
-           (uint32_t) job, counter);
+    printf("DMA Job 0x%x: Reserved counter %d\n", (uint32_t) job, counter);
     job->counter_mask |= (1 << counter);
     success = true;
   }
@@ -187,8 +202,6 @@ hero_dma_wait(struct hero_dma_job *job)
   // complete before returning to the program.
   __hero_dma_job_wait(job);
 
-  __hero_dma_job_print(job);
-
   // Free the job
   l1free(job);
 
@@ -221,7 +234,6 @@ hero_memcpy_dev2host(HOST_VOID_PTR dst, DEVICE_VOID_PTR src, uint32_t size)
   DEBUG("hero_memcpy_dev2host(0x%x, 0x%x, 0x%x)\n", dst, src, size);
   hero_dma_wait(hero_memcpy_dev2host_async(dst, src, size));
 }
-
 
 // -------------------------------------------------------------------------- //
 
@@ -281,3 +293,28 @@ hero_get_clk_counter(void)
 {
   return get_time();
 }
+
+// -------------------------------------------------------------------------- //
+
+#define __hero_atomic_define(op, type) \
+  type hero_atomic_ ## op(DEVICE_PTR_CONST ptr, const type val) \
+  { \
+    /*assert(((uint32_t)ptr & 0x3) == 0);*/ /* only four-byte aligned addresses are supported */ \
+    type orig; \
+    __asm__ volatile("amo" #op ".w %[orig], %[val], (%[ptr])" \
+        : [orig] "=r" (orig), "+m" (*ptr) \
+        : [val] "r" (val), [ptr] "r" (ptr) \
+        : "memory" \
+    ); \
+    return orig; \
+  }
+
+__hero_atomic_define(swap, int32_t)
+__hero_atomic_define(add,  int32_t)
+__hero_atomic_define(and,  int32_t)
+__hero_atomic_define(or,   int32_t)
+__hero_atomic_define(xor,  int32_t)
+__hero_atomic_define(max,  int32_t)
+__hero_atomic_define(maxu, uint32_t)
+__hero_atomic_define(min,  int32_t)
+__hero_atomic_define(minu, uint32_t)
