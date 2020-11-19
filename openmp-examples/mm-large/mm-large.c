@@ -170,6 +170,9 @@ int double_buf_mm(__host uint32_t * __restrict__ a,
 
     } // n_stripes
 
+    // wait for second to last c stripe
+    hero_dma_wait(c_dma[!c_idx]);
+
     // copy out last c stripe
     if (thread_id == 2)
       hero_memcpy_dev2host((__host void *)((uint64_t)c+(n_stripes-1)*stripe_size_b), c_ptrs[c_idx], stripe_size_b);
