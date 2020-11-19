@@ -250,6 +250,11 @@ void OmpKernelWrapper::wrapOmpKernels(Module &M) {
 
   for (GlobalVariable *entry : getOmpOffloadEntries(M)) {
     Function *kernel = getOmpOffloadFunction(entry);
+    if (kernel == nullptr) {
+      // This is not a function, but some other global variable defined in a
+      // target declare section.
+      continue;
+    }
     Function *wrapper =
         Function::Create(wrapperTy, Function::WeakAnyLinkage,
                          OMP_WRAPPER_PREFIX + kernel->getName(), &M);
