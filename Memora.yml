@@ -1130,6 +1130,16 @@ artifacts:
       - support/pulp-driver # package `pulp-driver`
       - toolchain/install-sdk.sh
       - toolchain/llvm-project/openmp # package `hero-openmp`
+      # tc-pulp
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/pulp.config
+      # tc-hrv-olinux
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/hrv-olinux.config
     outputs:
       - install/bin/aclocal-1.15
       - install/bin/attr
