@@ -1842,6 +1842,8 @@ artifacts:
       - support/libpulp # package `libpulp`
       - support/pulp-driver # package `pulp-driver`
       - toolchain/llvm-project/openmp # package `hero-openmp`
+      # sdk-pulp
+      - pulp
       # bitstream-zcu102
       - hardware/Bender.lock
       - hardware/Bender.yml
@@ -1854,6 +1856,11 @@ artifacts:
       - toolchain/build.sh
       - toolchain/patches
       - toolchain/har-olinux.config
+      # tc-pulp
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/pulp.config
     outputs:
       - output/br-har-exilzcu102/images
 
