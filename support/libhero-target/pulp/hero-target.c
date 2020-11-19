@@ -52,10 +52,10 @@ __hero_dma_job_print(const struct hero_dma_job * const job)
 {
   DEBUG("Job 0x%x: ", (uint32_t) job);
   DEBUG("  Loc = 0x%x", job->loc);
-  DEBUG("  Ext = 0x%lx", job->ext);
-  DEBUG("  Len = %d", job->len);
+  DEBUG("  Ext = 0x%lx", (uint32_t)job->ext);
+  DEBUG("  Len = %6d", job->len);
   DEBUG("  E2L = %d", job->ext2loc);
-  DEBUG("  Msk = 0x%x", job->counter_mask);
+  DEBUG("  Msk = 0x%4x", job->counter_mask);
   DEBUG("  Act = %d\n", job->active);
 }
 
@@ -114,6 +114,7 @@ __hero_dma_job_dtor(struct hero_dma_job * const job)
 }
 
 // Get a DMA counter, and update the global counter mask and inflight counter.
+// Must be called while holding lock.
 int32_t
 __hero_dma_global_get_next_counter()
 {
@@ -177,7 +178,7 @@ __hero_dma_job_unset_counter(struct hero_dma_job * const job,
 // Add a counter to the mask of the job. Return true if this succeeded, in which
 // case the job may enqueue one more DMA burst. Return false if it did not
 // succeed, at which point the DMA job is not allowed to enqueue another DMA
-// burst.
+// burst. Must be called while holding lock.
 bool
 __hero_dma_job_get_counter(struct hero_dma_job * const job)
 {
@@ -256,8 +257,12 @@ __hero_dma_job_wait(struct hero_dma_job * const job)
       }
       DEBUG("DMA Job 0x%x: Releasing counter %d...\n", (uint32_t) job, i);
       __hero_dma_take_lock();
-      __hero_dma_job_unset_counter(job, i);
-      __hero_dma_global_release_counter(i);
+      // Double check with lock, so that noone has taken our counter in the
+      // meantime -- we only want to release it if we still own it.
+      if (job->counter_mask & (1 << i)) {
+        __hero_dma_job_unset_counter(job, i);
+        __hero_dma_global_release_counter(i);
+      }
       __hero_dma_give_lock();
     }
   }
@@ -281,7 +286,7 @@ __hero_dma_clear_finished_counters()
         if (job->counter_mask & (1 << i)) {
           DEBUG("DMA Job 0x%x: Checking completion of burst %d...\n",
                  (uint32_t) job, i);
-          if (!(DMA_READ(PLP_DMA_STATUS_OFFSET) & (1 << i))) {
+          if ((DMA_READ(PLP_DMA_STATUS_OFFSET) & (1 << i)) == 0) {
             DEBUG("DMA Job 0x%x: Releasing counter %d...\n", (uint32_t) job, i);
             __hero_dma_job_unset_counter(job, i);
             __hero_dma_global_release_counter(i);
@@ -325,6 +330,12 @@ __hero_dma_memcpy_async(DEVICE_VOID_PTR loc, HOST_VOID_PTR ext,
 void
 hero_dma_wait(struct hero_dma_job *job)
 {
+
+  // Return early if nothing to do.
+  if (!job->active) {
+    return;
+  }
+
   // First wait for all transfers we have already started.
   __hero_dma_job_wait(job);
 
