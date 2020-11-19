@@ -97,9 +97,11 @@ typedef struct hero_dma_job* hero_dma_job_t;
            initiated with async can entail undefined behavior.
  */
 hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst,
-                                          HOST_VOID_PTR src, uint32_t size);
+                                          const HOST_VOID_PTR src,
+                                          uint32_t size);
 hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst,
-                                          DEVICE_VOID_PTR src, uint32_t size);
+                                          const DEVICE_VOID_PTR src,
+                                          uint32_t size);
 
 /** Used by PULP to perform a blocking memcpy using the DMA engine from the cluster-internal L1
     scratchpad memory to cluster-external memory (L1 of another cluster, L2, SVM).
@@ -110,9 +112,9 @@ hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst,
   \param   src  The source address from which the data shall be copied.
   \param   size The amount of data that shall be copied in Bytes.
  */
-void hero_memcpy_host2dev(DEVICE_VOID_PTR dst, HOST_VOID_PTR src,
+void hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
                           uint32_t size);
-void hero_memcpy_dev2host(HOST_VOID_PTR dst, DEVICE_VOID_PTR src,
+void hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
                           uint32_t size);
 
 /** Used by PULP to wait for a previously issued memcpy/DMA transfer to finish.
