@@ -794,16 +794,6 @@ artifacts:
   sdk-pulp-and-sdk-har:
     inputs:
       - Makefile
-      # tc-pulp
-      - Makefile
-      - toolchain/build.sh
-      - toolchain/patches
-      - toolchain/pulp.config
-      # tc-har-olinux
-      - Makefile
-      - toolchain/build.sh
-      - toolchain/patches
-      - toolchain/har-olinux.config
       # sdk-pulp
       - pulp
       # sdk-har
@@ -817,6 +807,17 @@ artifacts:
       - support/pulp-driver # package `pulp-driver`
       - toolchain/install-sdk.sh
       - toolchain/llvm-project/openmp # package `hero-openmp`
+      ## Dependencies
+      # tc-pulp
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/pulp.config
+      # tc-har-olinux
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/har-olinux.config
     outputs:
       - install/aarch64-buildroot-linux-gnu
       - install/aarch64-hero-linux-gnu
@@ -1130,6 +1131,7 @@ artifacts:
       - support/pulp-driver # package `pulp-driver`
       - toolchain/install-sdk.sh
       - toolchain/llvm-project/openmp # package `hero-openmp`
+      ## Dependencies
       # tc-pulp
       - Makefile
       - toolchain/build.sh
@@ -1493,6 +1495,7 @@ artifacts:
       - toolchain/llvm-support
       - toolchain/llvm-project
       - toolchain/setup-llvm.sh
+      ## Dependencies
       # sdk-pulp-and-sdk-har
       - Makefile
       - Makefile
@@ -1854,6 +1857,7 @@ artifacts:
       - toolchain/llvm-project/openmp # package `hero-openmp`
       # sdk-pulp
       - pulp
+      ## Dependencies
       # bitstream-zcu102
       - hardware/Bender.lock
       - hardware/Bender.yml
@@ -1883,6 +1887,7 @@ artifacts:
       - configs/hrv_ediggenesys2_defconfig
       - package
       - support
+      ## Dependencies
       # tc-hrv-olinux
       - Makefile
       - toolchain/build.sh
@@ -1899,6 +1904,7 @@ artifacts:
       - configs/hrv_eqemu_defconfig
       - package
       - support
+      ## Dependencies
       # tc-hrv-olinux
       - Makefile
       - toolchain/build.sh
