@@ -15,6 +15,7 @@
 */
 
 #include <hero-target.h>
+#include <assert.h>
 #include <omp.h>
 #include <stdlib.h>
 #include <string.h>
@@ -114,3 +115,20 @@ int32_t
 hero_get_clk_counter(void) {
   return 0;
 }
+
+#define __hero_atomic_define(op, type) \
+  type hero_atomic_ ## op(DEVICE_PTR_CONST ptr, const type val) \
+  { \
+    assert(0 && "Atomics are not supported on the Host"); \
+    return val; \
+  }
+
+__hero_atomic_define(swap, int32_t)
+__hero_atomic_define(add,  int32_t)
+__hero_atomic_define(and,  int32_t)
+__hero_atomic_define(or,   int32_t)
+__hero_atomic_define(xor,  int32_t)
+__hero_atomic_define(max,  int32_t)
+__hero_atomic_define(maxu, uint32_t)
+__hero_atomic_define(min,  int32_t)
+__hero_atomic_define(minu, uint32_t)
