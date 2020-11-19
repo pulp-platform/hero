@@ -91,7 +91,10 @@ typedef struct hero_dma_job* hero_dma_job_t;
   \param   src  The source address from which the data shall be copied.
   \param   size The amount of data that shall be copied in Bytes.
 
-  \return  DMA job ID; This can be used with hero_dma_wait to wait for the completion of this transfer.
+  \return  DMA job ID; This MUST be used to call hero_dma_wait to wait for the
+           completion of this transfer before data is used or control passed to
+           host. Not calling the wait function exactly once per transfer
+           initiated with async can entail undefined behavior.
  */
 hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst,
                                           HOST_VOID_PTR src, uint32_t size);
