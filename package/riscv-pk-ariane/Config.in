@@ -1,23 +1,23 @@
-comment "riscv-pk-ariane needs a RISC-V Linux kernel to be built"
-	depends on BR2_riscv
-	depends on !BR2_LINUX_KERNEL
-
 config BR2_PACKAGE_RISCV_PK_ARIANE
-	bool "riscv-pk-ariane"
+	bool "RISC-V Proxy Kernel (pk) for Ariane"
 	depends on BR2_riscv
 	depends on BR2_LINUX_KERNEL
 	help
 	  The RISC-V Proxy Kernel (pk) package contains the Berkeley
 	  Boot Loader (BBL) which has been designed to boot a Linux
-	  kernel on a RISC-V processor. Modified to boot Ariane.
+	  kernel on a RISC-V processor.  Modified to boot Ariane.
 
 	  https://github.com/pulp-platform/riscv-pk
+
+comment "RISC-V pk for Ariane needs a RISC-V Linux kernel to be built"
+	depends on !BR2_riscv
+	depends on !BR2_LINUX_KERNEL
 
 if BR2_PACKAGE_RISCV_PK_ARIANE
 
 config BR2_PACKAGE_RISCV_PK_ARIANE_LOGO
 	string "extra configure opts"
 	help
-    Path to optional logo to display during load.
+	  Path to optional logo to display during load.
 
 endif

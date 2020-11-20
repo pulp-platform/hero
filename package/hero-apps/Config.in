@@ -1,5 +1,3 @@
 config BR2_PACKAGE_HERO_APPS
-	bool "hero-apps"
-  select libpulp
-	help
-	  Support applications (standalone/uart) for HERO
+	bool "Support applications (standalone/UART) for HERO"
+	select BR2_PACKAGE_LIBPULP

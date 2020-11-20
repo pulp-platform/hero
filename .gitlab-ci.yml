@@ -123,7 +123,9 @@ br-har-exilzcu102:
       fi
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get bitstream-zcu102
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp # required to build PULP SDK
     - chmod -R u-w $HERO_INSTALL
+    - make sdk-pulp # TODO: `sdk-pulp-har` does not seem to work?
     - echo 'BR2_HERO_BITSTREAM=$CI_PROJECT_DIR/hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1/hero_exilzcu102_wrapper.bit' >> local.cfg
     - make br-har-exilzcu102
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-har-exilzcu102

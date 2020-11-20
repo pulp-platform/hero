@@ -1,7 +1,9 @@
 config BR2_PACKAGE_HERO_OPENMP
-	bool "hero-openmp"
-  select BR2_PACKAGE_ELFUTILS
-  select BR2_PACKAGE_LIBFFI
-  select BR2_PACKAGE_LIBPULP
-	help
-	  LLVM OpenMP library with PULP plugin for HERO
+	bool "LLVM OpenMP offload plugin for HERO accelerators (PULP)"
+	select BR2_PACKAGE_ELFUTILS
+	select BR2_PACKAGE_LIBFFI
+	select BR2_PACKAGE_LIBPULP
+	depends on BR2_PACKAGE_HERO_PLATFORM != ""
+
+comment "LLVM OpenMP PULP plugin needs a well-defined HERO platform"
+	depends on BR2_PACKAGE_HERO_PLATFORM = ""

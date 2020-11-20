@@ -1,4 +1,2 @@
 config BR2_PACKAGE_LIBHERO_TARGET
-	bool "libhero-target"
-	help
-	  HERO target library API with stubs for host and accelerator.
+	bool "HERO target API and library for Host and accelerator"
