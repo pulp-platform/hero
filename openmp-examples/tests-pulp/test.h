@@ -25,47 +25,52 @@ static unsigned condition_or_printf(bool condition, const char* fmt, ...)
 {
   if (!condition) {
     va_list args;
+#ifdef __llvm__
+#  warning LLVM has address space problems with va_args, see #25
+    printf("ERROR: CONDITION FALSE!\n");
+#else
     va_start(args, fmt);
     char buf[256];
     vsnprintf(buf, sizeof(buf), fmt, args);
     printf("ERROR: %s!\n", buf);
+#endif
     return 1;
   } else {
     return 0;
   }
 }
 
-inline static void* pulp_l1_base()
+inline __device static void* pulp_l1_base()
 {
   extern void __pulp_l1_base;
   return &__pulp_l1_base;
 }
 
-inline static void* pulp_l1_end()
+inline __device static void* pulp_l1_end()
 {
   extern void __pulp_l1_end;
   return &__pulp_l1_end;
 }
 
-inline static void* pulp_l1_alias_base()
+inline __device static void* pulp_l1_alias_base()
 {
   extern void __pulp_l1_alias_base;
   return &__pulp_l1_alias_base;
 }
 
-inline static void* pulp_l1_alias_end()
+inline __device static void* pulp_l1_alias_end()
 {
   extern void __pulp_l1_alias_end;
   return &__pulp_l1_alias_end;
 }
 
-inline static void* pulp_l2_base()
+inline __device static void* pulp_l2_base()
 {
   extern void __pulp_l2_base;
   return &__pulp_l2_base;
 }
 
-inline static void* pulp_l2_end()
+inline __device static void* pulp_l2_end()
 {
   extern void __pulp_l2_end;
   return &__pulp_l2_end;

@@ -24,8 +24,9 @@ void __assert_func(const char* file, int line, const char* funcname, const char*
   abort();
 }
 
-unsigned report_pass_fail(int (*fn)(), const char* name)
+unsigned report_pass_fail(uint32_t fn_addr, const char* name)
 {
+  unsigned (*fn)() = fn_addr;
   printf("Testing %s ..\n", name);
   if (fn()) {
     return 0;
@@ -35,8 +36,9 @@ unsigned report_pass_fail(int (*fn)(), const char* name)
   }
 }
 
-unsigned report_n_errors(unsigned (*fn)(), const char* name)
+unsigned report_n_errors(uint32_t fn_addr, const char* name)
 {
+  unsigned (*fn)() = fn_addr;
   printf("Testing %s ..\n", name);
   const unsigned n_errors = fn();
   if (n_errors == 0) {
