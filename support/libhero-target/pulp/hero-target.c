@@ -304,7 +304,7 @@ __hero_dma_clear_finished_counters()
 // possible, and returns. Any bursts that remain are deferred to the DMA wait
 // function.
 struct hero_dma_job *
-__hero_dma_memcpy_async(const DEVICE_VOID_PTR loc, const HOST_VOID_PTR ext,
+__hero_dma_memcpy_async(DEVICE_VOID_PTR loc, HOST_VOID_PTR ext,
                         const uint32_t len, const bool ext2loc)
 {
 
@@ -367,7 +367,7 @@ hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
                            uint32_t len)
 {
   DEBUG("hero_memcpy_host2dev_async(0x%x, 0x%x, 0x%x)\n", dst, src, len);
-  return __hero_dma_memcpy_async(dst, src, len, 1);
+  return __hero_dma_memcpy_async(dst, (HOST_VOID_PTR) src, len, 1);
 }
 
 hero_dma_job_t
@@ -375,7 +375,7 @@ hero_memcpy_dev2host_async(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
                            uint32_t len)
 {
   DEBUG("hero_memcpy_dev2host_async(0x%x, 0x%x, 0x%x)\n", dst, src, len);
-  return __hero_dma_memcpy_async(src, dst, len, 0);
+  return __hero_dma_memcpy_async((DEVICE_VOID_PTR) src, dst, len, 0);
 }
 
 void
