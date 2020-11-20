@@ -3,7 +3,6 @@
 * https://github.com/gcc-mirror/gcc/blob/3ca7adc0522d479513107e2300ad14cb1d44235f/libgomp/testsuite/libgomp.c/loop-5.c
 */
 
-#include <omp.h>
 #include <stdlib.h>
 #include <string.h>
 

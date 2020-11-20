@@ -1,6 +1,5 @@
 #include <stdlib.h>
 
-#include "omp.h"
 #include "test.h"
 
 // FIXME: copied from pulp.h which cannot yet be included directly

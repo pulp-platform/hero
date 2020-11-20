@@ -15,7 +15,6 @@
  */
 
 #include <assert.h>
-#include <omp.h>
 #include <stdint.h>
 #include <stdio.h>
 #include "hero_64.h"
