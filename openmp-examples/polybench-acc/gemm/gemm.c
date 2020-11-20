@@ -15,8 +15,8 @@
 /* Include polybench common header. */
 #include <polybench.h>
 
-/* Include dma lib. */
-#include <dmatransfer.h>
+/* Include hero runtime lib. */
+#include <hero-target.h>
 
 /* Include benchmark-specific header. */
 /* Default data type is double, default size is 4000. */
@@ -78,22 +78,22 @@ void kernel_gemm_dma(int ni, int nj, int nk,
   {
     #pragma omp target
     {
-      DATA_TYPE* spm = alloc_spm();
       int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
 
-      DATA_TYPE* B_spm = spm;
-      DATA_TYPE* A_spm = spm + NJ*NK;
-      DATA_TYPE* C_spm = spm + NJ*NK + NK*rows_per_chunk;
+      __device DATA_TYPE* B_spm = (__device DATA_TYPE*) hero_l1malloc(NJ * NK * sizeof(DATA_TYPE));
+      __device DATA_TYPE* A_spm = (__device DATA_TYPE*) hero_l1malloc(NK * rows_per_chunk * sizeof(DATA_TYPE));
+      __device DATA_TYPE* C_spm = (__device DATA_TYPE*) hero_l1malloc(NK * rows_per_chunk * sizeof(DATA_TYPE));
 
-      memcpy_to_spm(B_spm, ((DATA_TYPE*) B), NJ*NK);
+      hero_memcpy_host2dev(B_spm, ((__host DATA_TYPE*) B), NJ*NK * sizeof(DATA_TYPE));
 
       /* C := alpha*A*B + beta*C */
       int row = 0;
       while (row < NI) {
         int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
-        memcpy_to_spm(A_spm, ((DATA_TYPE*) A) + row*NK, chunk_rows*NK);
-        memcpy_to_spm(C_spm, ((DATA_TYPE*) C) + row*NJ, chunk_rows*NJ);
-        dma_flush();
+        hero_dma_job_t job_A = hero_memcpy_host2dev_async(A_spm, ((__host DATA_TYPE*) A) + row*NK, chunk_rows*NK * sizeof(DATA_TYPE));
+        hero_dma_job_t job_C = hero_memcpy_host2dev_async(C_spm, ((__host DATA_TYPE*) C) + row*NJ, chunk_rows*NJ * sizeof(DATA_TYPE));
+        hero_dma_wait(job_A);
+        hero_dma_wait(job_C);
 
         #pragma omp parallel for collapse(2) num_threads(NUM_THREADS) firstprivate(alpha, beta)
         for (int i = 0; i < chunk_rows; i++) {
@@ -105,12 +105,13 @@ void kernel_gemm_dma(int ni, int nj, int nk,
           }
         }
 
-        memcpy_from_spm(((DATA_TYPE*) C) + row*NJ, C_spm, chunk_rows*NJ);
-        dma_flush();
+        hero_memcpy_dev2host(((__host DATA_TYPE*) C) + row*NJ, C_spm, chunk_rows*NJ * sizeof(DATA_TYPE));
         row += rows_per_chunk;
       }
 
-      dealloc_spm(spm);
+      hero_l1free(C_spm);
+      hero_l1free(A_spm);
+      hero_l1free(B_spm);
     }
   }
 }

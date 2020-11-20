@@ -15,92 +15,95 @@
 */
 
 #include <hero-target.h>
+#include <assert.h>
 #include <omp.h>
 #include <stdlib.h>
 #include <string.h>
 
-unsigned int hero_tryread(const unsigned int* const addr)
-{
-	return (unsigned int)(*(const volatile unsigned *) addr);
-}
-
-int
-hero_tryread_prefetch(const unsigned int* const addr)
-{
-	return 0;
-}
-
-void
-hero_trywrite(unsigned int* const addr, const unsigned int val)
-{
-	*addr = val;
-}
-
-int
-hero_trywrite_prefetch(unsigned int* const addr)
-{
-	return 0;
-}
-
-int
-hero_handle_rab_misses(void)
-{
-	return 0;
-}
-
 hero_dma_job_t 
-hero_dma_memcpy_async(void *dst, void *src, int size)
+hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
+                           uint32_t size)
 {
-	memcpy(dst, src, size);
-	return 0;
+  memcpy((HOST_VOID_PTR)dst, src, size);
+  return 0;
+}
+
+hero_dma_job_t
+hero_memcpy_dev2host_async(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
+                           uint32_t size)
+{
+  memcpy(dst, (HOST_VOID_PTR)src, size);
+  return 0;
 }
 
 void
-hero_dma_memcpy(void *dst, void *src, int size)
+hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
+                     uint32_t size)
 {
-	memcpy(dst, src, size);
+  memcpy((HOST_VOID_PTR)dst, src, size);
+}
+
+void
+hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
+                     uint32_t size)
+{
+  memcpy(dst, (HOST_VOID_PTR)src, size);
 }
 
 void
 hero_dma_wait(hero_dma_job_t id)
 {
-	return;
+  return;
 }
 
-void *
-hero_l1malloc(int size)
+DEVICE_PTR
+hero_l1malloc(int32_t size)
 {
-	return malloc(size);
+  printf("Trying to allocate L1 memory from host, which is not defined\n");
+  return (DEVICE_PTR) NULL;
 }
-void *
-hero_l2malloc(int size)
+
+DEVICE_PTR
+hero_l2malloc(int32_t size)
 {
-	return malloc(size);
+  printf("Trying to allocate L2 memory from host, which is not defined\n");
+  return (DEVICE_PTR) NULL;
 }
-void *
-hero_l3malloc(int size)
+
+HOST_VOID_PTR
+hero_l3malloc(int32_t size)
 {
-  // FIXME: use actual L3 memory
+  // The concept of L3 exposed to the HERO end-user is just L3 = DRAM, and as
+  // such this function is just a wrapper for malloc. This is different from
+  // the understandig of L3 in libpulp, where it refers to unpaged buffer
+  // memory for copy-on-offload data mappings. We don't expose this to the
+  // end-user, as for BIGPULP_MEMCPY the offloading runtime takes care of the
+  // buffer allocation, and for BIGPULP_SVM any address in DRAM can be
+  // resolved.
   return malloc(size);
 }
 
 void
-hero_l1free(void * a)
+hero_l1free(DEVICE_PTR a)
 {
-  free(a);
+  printf("Trying to free L1 memory from host, which is not defined\n");
+  return;
 }
+
 void
-hero_l2free(void * a)
+hero_l2free(DEVICE_PTR a)
 {
-  free(a);
+  printf("Trying to free L2 memory from host, which is not defined\n");
+  return;
 }
+
 void
-hero_l3free(void * a)
+hero_l3free(HOST_VOID_PTR a)
 {
   free(a);
 }
 
-int
+int32_t
 hero_rt_core_id(void)
 {
   return omp_get_thread_num();
@@ -109,10 +112,27 @@ hero_rt_core_id(void)
 // FIXME implement clock counters for host
 void
 hero_reset_clk_counter(void) {
-    return;
+  return;
 }
 
-int
+int32_t
 hero_get_clk_counter(void) {
-    return 0;
+  return 0;
 }
+
+#define __hero_atomic_define(op, type) \
+  type hero_atomic_ ## op(DEVICE_PTR_CONST ptr, const type val) \
+  { \
+    assert(0 && "Atomics are not supported on the Host"); \
+    return val; \
+  }
+
+__hero_atomic_define(swap, int32_t)
+__hero_atomic_define(add,  int32_t)
+__hero_atomic_define(and,  int32_t)
+__hero_atomic_define(or,   int32_t)
+__hero_atomic_define(xor,  int32_t)
+__hero_atomic_define(max,  int32_t)
+__hero_atomic_define(maxu, uint32_t)
+__hero_atomic_define(min,  int32_t)
+__hero_atomic_define(minu, uint32_t)

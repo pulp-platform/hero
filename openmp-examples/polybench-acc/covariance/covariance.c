@@ -15,8 +15,8 @@
 /* Include polybench common header. */
 #include <polybench.h>
 
-/* Include dma lib. */
-#include <dmatransfer.h>
+/* Include hero runtime lib. */
+#include <hero-target.h>
 
 /* Include benchmark-specific header. */
 /* Default data type is double, default size is 4000. */
@@ -72,14 +72,12 @@ void kernel_covariance_dma(int m, int n,
     map(alloc: mean[0:M]) \
     map(from: symmat[0:M][0:M])
   {
-    DATA_TYPE* const spm = (__device DATA_TYPE*)alloc_spm();
-    DATA_TYPE* const data_spm = spm;
-    DATA_TYPE* const symmat_spm = data_spm + M*N;
-    DATA_TYPE* const mean_spm = symmat_spm + M*M;
+    __device DATA_TYPE *data_spm = (__device DATA_TYPE *) hero_l1malloc(M * N * sizeof(DATA_TYPE));
+    __device DATA_TYPE *symmat_spm = (__device DATA_TYPE *) hero_l1malloc(M * N * sizeof(DATA_TYPE));
+    __device DATA_TYPE *mean_spm = (__device DATA_TYPE *) hero_l1malloc(M * sizeof(DATA_TYPE));
 
     DATA_TYPE float_n_spm = float_n;
-    memcpy_to_spm(data_spm, (DATA_TYPE*)data, M*N);
-    dma_flush();
+    hero_memcpy_host2dev(data_spm, (__host DATA_TYPE*)data, M*N * sizeof(DATA_TYPE));
 
     /* Determine mean of column vectors of input data matrix */
     #pragma omp parallel num_threads (NUM_THREADS)
@@ -109,8 +107,11 @@ void kernel_covariance_dma(int m, int n,
         }
     }
 
-    memcpy_from_spm((DATA_TYPE*)symmat, symmat_spm, M*M);
-    dma_flush();
+    hero_memcpy_dev2host((__host DATA_TYPE*)symmat, symmat_spm, M*M * sizeof(DATA_TYPE));
+
+    hero_l1free(mean_spm);
+    hero_l1free(symmat_spm);
+    hero_l1free(data_spm);
   }
 }
 

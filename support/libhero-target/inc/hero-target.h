@@ -17,73 +17,63 @@
 #ifndef __HERO_API_H__
 #define __HERO_API_H__
 
-#include <stdio.h>
+#include <stdbool.h>
 #include <stdint.h>
+
+// If LLVM, use our address space support, otherwise fall back to bit-compatible
+// data types.
+#if defined(__llvm__)
+#  define DEVICE_VOID_PTR __device void*
+#  define HOST_VOID_PTR __host void*
+#  define DEVICE_PTR __device int32_t*
+#  define HOST_PTR __host int32_t*
+#  define DEVICE_PTR_CONST __device int32_t* const
+#  define HOST_PTR_CONST __host int32_t* const
+#  define CONST_DEVICE_PTR_CONST __device const int32_t* const
+#  define CONST_HOST_PTR_CONST __host const int32_t* const
+#else
+#  ifdef __PULP__
+#    define HOST_VOID_PTR uint64_t
+#    define DEVICE_VOID_PTR void *
+#    define HOST_PTR uint64_t
+#    define DEVICE_PTR unsigned int *
+#    define HOST_PTR_CONST const uint64_t
+#    define DEVICE_PTR_CONST unsigned int * const
+#    define CONST_HOST_PTR_CONST const uint64_t
+#    define CONST_DEVICE_PTR_CONST const unsigned int * const
+#  else
+#    define HOST_VOID_PTR void *
+#    define DEVICE_VOID_PTR uint32_t
+#    define HOST_PTR int32_t *
+#    define DEVICE_PTR uint32_t
+#    define HOST_PTR_CONST int32_t * const
+#    define DEVICE_PTR_CONST const uint32_t
+#    define CONST_HOST_PTR_CONST const int32_t * const
+#    define CONST_DEVICE_PTR_CONST const uint32_t
+#  endif
+#endif
 
 #define BIGPULP_SVM     (0)
 #define BIGPULP_MEMCPY  (1)
 #define HOST            (2)
 
-typedef int hero_dma_job_t;
+#define HERO_L1_DATA __attribute__((section(".data_l1")))
+#define HERO_L1_BSS __attribute__((section(".bss_l1")))
 
-/** @name SVM-related functions
- *
- * @{
- */
+struct hero_dma_job {
+  bool active;
+  uint32_t loc;
+  uint64_t ext;
+  uint32_t len;
+  bool ext2loc;
+  uint16_t counter_mask;
+};
 
-/** Used by PULP to securely read from an address in SVM and block until the read completes.
-
-    Resolved to a normal read for the host.
-
-  \param   addr  The address that shall be read.
-
-  \return  The data stored at that address.
- */
-unsigned int hero_tryread(const unsigned int* const addr);
-
-/** Used by PULP to try to read from a memory address without blocking in case it misses in the RAB
-    and without causing a memory transaction. This function can be used to trigger the setup of a
-    RAB slice in advance of a read.
-
-    Resolved to nothing for the host.
-
-  \param   addr  The address that shall be read-prefetched.
-
-  \return  0 if the read would succeed (i.e., a slice in the RAB exists for this address); 1 if
-           the read resulted in a RAB miss; negative value with an errno on errors.
- */
-int hero_tryread_prefetch(const unsigned int* const addr);
-
-/** Used by PULP to securely write to an address in SVM and block until the write completes.
-
-    Resolved to a normal write for the host.
-
-  \param   addr  The address to which data shall be written.
-  \param   val   The value that shall be written.
- */
-void hero_trywrite(unsigned int* const addr, const unsigned int val);
-
-/** Used by PULP to Try to write to a memory address without blocking in case it misses in the RAB
-    and without causing a memory transaction. This function can be used to trigger the setup of a
-    RAB slice in advance of a write.
-
-    Resolved to nothing for the host.
-
-  \param   addr  The address that shall be write-prefetched.
-
-  \return  0 if the write would succeed (i.e., a slice in the RAB exists for this address); 1 if
-           the write resulted in a RAB miss; negative value with an errno on errors.
- */
-int hero_trywrite_prefetch(unsigned int* const addr);
-
-/** Used by PULP to handle all outstanding RAB misses (if there are any).
-
-    Resolved to nothing for the host.
-
-  \return  0 on success; negative value with an errno on errors. -ENOENT is returned in case no
-           misses were outstanding.
- */
-int hero_handle_rab_misses(void);
+#if defined(__llvm__)
+typedef __device struct hero_dma_job* hero_dma_job_t;
+#else
+typedef struct hero_dma_job* hero_dma_job_t;
+#endif
 
 //!@}
 
@@ -101,9 +91,17 @@ int hero_handle_rab_misses(void);
   \param   src  The source address from which the data shall be copied.
   \param   size The amount of data that shall be copied in Bytes.
 
-  \return  DMA job ID; This can be used with hero_dma_wait to wait for the completion of this transfer.
+  \return  DMA job ID; This MUST be used to call hero_dma_wait to wait for the
+           completion of this transfer before data is used or control passed to
+           host. Not calling the wait function exactly once per transfer
+           initiated with async can entail undefined behavior.
  */
-hero_dma_job_t hero_dma_memcpy_async(void *dst, void *src, int size);
+hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst,
+                                          const HOST_VOID_PTR src,
+                                          uint32_t size);
+hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst,
+                                          const DEVICE_VOID_PTR src,
+                                          uint32_t size);
 
 /** Used by PULP to perform a blocking memcpy using the DMA engine from the cluster-internal L1
     scratchpad memory to cluster-external memory (L1 of another cluster, L2, SVM).
@@ -114,7 +112,10 @@ hero_dma_job_t hero_dma_memcpy_async(void *dst, void *src, int size);
   \param   src  The source address from which the data shall be copied.
   \param   size The amount of data that shall be copied in Bytes.
  */
-void hero_dma_memcpy(void *dst, void *src, int size);
+void hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
+                          uint32_t size);
+void hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
+                          uint32_t size);
 
 /** Used by PULP to wait for a previously issued memcpy/DMA transfer to finish.
 
@@ -140,7 +141,7 @@ void hero_dma_wait(hero_dma_job_t id);
   \return  A pointer to the allocated memory chunk; NULL is returned in case the memory chunk could
            not be allocated.
  */
-void *hero_l1malloc(int size);
+DEVICE_VOID_PTR hero_l1malloc(int32_t size);
 
 /** Used by PULP to allocate a chunk of memory inside the shared L2 scratchpad memory.
 
@@ -151,7 +152,7 @@ void *hero_l1malloc(int size);
   \return  A pointer to the allocated memory chunk; NULL is returned in case the memory chunk could
            not be allocated.
  */
-void *hero_l2malloc(int size);
+DEVICE_VOID_PTR hero_l2malloc(int32_t size);
 
 /** Used by PULP for allocation in shared L3 memory. Useful for debugging / simulation.
 
@@ -165,7 +166,7 @@ void *hero_l2malloc(int size);
     \return  A pointer to the allocated memory chunk; NULL is returned in case the memory chunk could
     not be allocated.
 */
-void *hero_l3malloc(int size);
+HOST_VOID_PTR hero_l3malloc(int32_t size);
 
 
 /** Used by PULP to free a chunk of memory inside the shared L1 scratchpad memory.
@@ -174,7 +175,7 @@ void *hero_l3malloc(int size);
 
   \param   a The start address of the chunk to be freed.
  */
-void hero_l1free(void * a);
+void hero_l1free(DEVICE_VOID_PTR a);
 
 /** Used by PULP to free a chunk of memory inside the shared L2 scratchpad memory.
 
@@ -182,7 +183,7 @@ void hero_l1free(void * a);
 
   \param   a The start address of the chunk to be freed.
  */
-void hero_l2free(void * a);
+void hero_l2free(DEVICE_VOID_PTR a);
 
 /** Frees memory in the shared L3 memory.
 
@@ -190,7 +191,7 @@ void hero_l2free(void * a);
 
     \param   a The start address of the chunk to be freed.
 */
-void hero_l3free(void * a);
+void hero_l3free(HOST_VOID_PTR a);
 
 
 //!@}
@@ -204,7 +205,7 @@ void hero_l3free(void * a);
 
   \return  The core ID.
  */
-int hero_rt_core_id(void);
+int32_t hero_rt_core_id(void);
 
 /** Reset clock counter
  */
@@ -212,11 +213,34 @@ void hero_reset_clk_counter(void);
 
 /** Get clock counter
  */
-int hero_get_clk_counter(void);
+int32_t hero_get_clk_counter(void);
 
 //FIXME: hero_rt_info();
 //FIXME: hero_rt_error();
 
 //!@}
 
+/** @name PULP L1 Atomic Operations
+ *
+ * This API provides atomic transactions on 32-bit unsigned integers (for the
+ * maximum and minimum operations, signed variants exist).  Each function
+ * atomically executes the operation in its name on the memory pointed to by
+ * `ptr` and the provided `val` and returns the original value in memory.
+ *
+ * NOTE: These functions are only defined for operation on the PULP L1.
+ *
+ *  @{
+ */
+
+int32_t  hero_atomic_swap  (DEVICE_PTR_CONST ptr, const int32_t  val);
+int32_t  hero_atomic_add   (DEVICE_PTR_CONST ptr, const int32_t  val);
+int32_t  hero_atomic_and   (DEVICE_PTR_CONST ptr, const int32_t  val);
+int32_t  hero_atomic_or    (DEVICE_PTR_CONST ptr, const int32_t  val);
+int32_t  hero_atomic_xor   (DEVICE_PTR_CONST ptr, const int32_t  val);
+int32_t  hero_atomic_max   (DEVICE_PTR_CONST ptr, const int32_t  val);
+uint32_t hero_atomic_maxu  (DEVICE_PTR_CONST ptr, const uint32_t val);
+int32_t  hero_atomic_min   (DEVICE_PTR_CONST ptr, const int32_t  val);
+uint32_t hero_atomic_minu  (DEVICE_PTR_CONST ptr, const uint32_t val);
+
+//!@}
 #endif

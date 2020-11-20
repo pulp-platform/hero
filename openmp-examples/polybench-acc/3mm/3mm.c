@@ -15,8 +15,8 @@
 /* Include polybench common header. */
 #include <polybench.h>
 
-/* Include dma lib. */
-#include <dmatransfer.h>
+/* Include hero runtime lib. */
+#include <hero-target.h>
 
 /* Include benchmark-specific header. */
 /* Default data type is double, default size is 4000. */
@@ -83,21 +83,19 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
     /* E := A*B */
     #pragma omp target
     {
-      DATA_TYPE* spm = alloc_spm();
       int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
 
-      DATA_TYPE* B_spm = spm;
-      DATA_TYPE* A_spm = spm + NJ*NK;
-      DATA_TYPE* E_spm = spm + NJ*NK + NK*rows_per_chunk;
+      __device DATA_TYPE* B_spm = (__device DATA_TYPE *) hero_l1malloc(NJ * NK * sizeof(DATA_TYPE));
+      __device DATA_TYPE* A_spm = (__device DATA_TYPE *) hero_l1malloc(NK * rows_per_chunk * sizeof(DATA_TYPE));
+      __device DATA_TYPE* E_spm = (__device DATA_TYPE *) hero_l1malloc(NK * rows_per_chunk * sizeof(DATA_TYPE));
 
-      memcpy_to_spm(B_spm, ((DATA_TYPE*) B), NJ*NK);
+      hero_memcpy_host2dev(B_spm, ((__host DATA_TYPE*) B), NJ*NK * sizeof(DATA_TYPE));
 
       int row = 0;
       while (row < NI) {
         int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
 
-        memcpy_to_spm(A_spm, ((DATA_TYPE*) A) + row*NK, chunk_rows*NK);
-        dma_flush();
+        hero_memcpy_host2dev(A_spm, ((__host DATA_TYPE*) A) + row*NK, chunk_rows*NK * sizeof(DATA_TYPE));
 
         #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
         for (int i = 0; i < chunk_rows; i++) {
@@ -108,31 +106,30 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
           }
         }
 
-        memcpy_from_spm(((DATA_TYPE*) E) + row*NJ, E_spm, chunk_rows*NJ);
-        dma_flush();
+        hero_memcpy_dev2host(((__host DATA_TYPE*) E) + row*NJ, E_spm, chunk_rows*NJ * sizeof(DATA_TYPE));
         row += rows_per_chunk;
       }
 
-      dealloc_spm(spm);
+      hero_l1free(E_spm);
+      hero_l1free(A_spm);
+      hero_l1free(B_spm);
     }
     /* F := C*D */
     #pragma omp target
     {
-      DATA_TYPE* spm = alloc_spm();
       int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
 
-      DATA_TYPE* D_spm = spm;
-      DATA_TYPE* C_spm = spm + NJ*NK;
-      DATA_TYPE* F_spm = spm + NJ*NK + NK*rows_per_chunk;
+      __device DATA_TYPE* D_spm = (__device DATA_TYPE *) hero_l1malloc(NJ * NK * sizeof(DATA_TYPE));
+      __device DATA_TYPE* C_spm = (__device DATA_TYPE *) hero_l1malloc(NK * rows_per_chunk * sizeof(DATA_TYPE));
+      __device DATA_TYPE* F_spm = (__device DATA_TYPE *) hero_l1malloc(NK * rows_per_chunk * sizeof(DATA_TYPE));
 
-      memcpy_to_spm(D_spm, ((DATA_TYPE*) D), NJ*NK);
+      hero_memcpy_host2dev(D_spm, ((__host DATA_TYPE*) D), NJ*NK * sizeof(DATA_TYPE));
 
       int row = 0;
       while (row < NI) {
         int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
 
-        memcpy_to_spm(C_spm, ((DATA_TYPE*) C) + row*NK, chunk_rows*NK);
-        dma_flush();
+        hero_memcpy_host2dev(C_spm, ((__host DATA_TYPE*) C) + row*NK, chunk_rows*NK * sizeof(DATA_TYPE));
 
         #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
         for (int i = 0; i < chunk_rows; i++) {
@@ -143,31 +140,30 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
           }
         }
 
-        memcpy_from_spm(((DATA_TYPE*) F) + row*NJ, F_spm, chunk_rows*NJ);
-        dma_flush();
+        hero_memcpy_dev2host(((__host DATA_TYPE*) F) + row*NJ, F_spm, chunk_rows*NJ * sizeof(DATA_TYPE));
         row += rows_per_chunk;
       }
 
-      dealloc_spm(spm);
+      hero_l1free(F_spm);
+      hero_l1free(C_spm);
+      hero_l1free(D_spm);
     }
     /* G := E*F */
     #pragma omp target
     {
-      DATA_TYPE* spm = alloc_spm();
       int rows_per_chunk = NI; // (SPM_SIZE - NJ*NK) / (NJ+NK);
 
-      DATA_TYPE* F_spm = spm;
-      DATA_TYPE* G_spm = spm + NJ*NK;
-      DATA_TYPE* E_spm = spm + NJ*NK + NK*rows_per_chunk;
+      __device DATA_TYPE* F_spm = (__device DATA_TYPE *) hero_l1malloc(NJ * NK * sizeof(DATA_TYPE));
+      __device DATA_TYPE* G_spm = (__device DATA_TYPE *) hero_l1malloc(NK * rows_per_chunk * sizeof(DATA_TYPE));
+      __device DATA_TYPE* E_spm = (__device DATA_TYPE *) hero_l1malloc(NK * rows_per_chunk * sizeof(DATA_TYPE));
 
-      memcpy_to_spm(F_spm, ((DATA_TYPE*) F), NJ*NK);
+      hero_memcpy_host2dev(F_spm, ((__host DATA_TYPE*) F), NJ*NK * sizeof(DATA_TYPE));
 
       int row = 0;
       while (row < NI) {
         int chunk_rows = (rows_per_chunk < NI - row) ? rows_per_chunk : (NI - row);
 
-        memcpy_to_spm(E_spm, ((DATA_TYPE*) E) + row*NK, chunk_rows*NK);
-        dma_flush();
+        hero_memcpy_host2dev(E_spm, ((__host DATA_TYPE*) E) + row*NK, chunk_rows*NK * sizeof(DATA_TYPE));
 
         #pragma omp parallel for collapse(2) num_threads(NUM_THREADS)
         for (int i = 0; i < chunk_rows; i++) {
@@ -178,12 +174,13 @@ void kernel_3mm_dma(int ni, int nj, int nk, int nl, int nm,
           }
         }
 
-        memcpy_from_spm(((DATA_TYPE*) G) + row*NJ, G_spm, chunk_rows*NJ);
-        dma_flush();
+        hero_memcpy_dev2host(((__host DATA_TYPE*) G) + row*NJ, G_spm, chunk_rows*NJ * sizeof(DATA_TYPE));
         row += rows_per_chunk;
       }
 
-      dealloc_spm(spm);
+      hero_l1free(E_spm);
+      hero_l1free(G_spm);
+      hero_l1free(F_spm);
     }
   }
 }
