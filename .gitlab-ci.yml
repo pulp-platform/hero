@@ -207,6 +207,7 @@ compiler-smoketest:
 simulator-tests-pulp:
   stage: test
   script:
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get vsim-pulp
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-llvm
