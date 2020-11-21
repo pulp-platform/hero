@@ -24,11 +24,11 @@
 static unsigned condition_or_printf(bool condition, const char* fmt, ...)
 {
   if (!condition) {
-    va_list args;
 #ifdef __llvm__
 #  warning LLVM has address space problems with va_args, see #25
     printf("ERROR: CONDITION FALSE!\n");
 #else
+    va_list args;
     va_start(args, fmt);
     char buf[256];
     vsnprintf(buf, sizeof(buf), fmt, args);
@@ -131,7 +131,7 @@ inline static uint64_t test_l2_base()
 
 inline static uint64_t test_dram_base()
 {
-  return align_64(0x0123000000000000);
+  return align_64(0x80000000);
 }
 
 #endif

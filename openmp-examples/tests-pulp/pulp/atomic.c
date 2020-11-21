@@ -16,8 +16,7 @@
 
 #include <stdlib.h>
 
-#include "hero_atomic.h"
-#include "omp.h"
+#include "hero-target.h"
 #include "test.h"
 
 /***************************************************************************************************
@@ -190,15 +189,15 @@ inline static unsigned check_addr(int32_t* const addr)
 {
   unsigned n_errors = 0;
 
-  n_errors += check_amo(addr, 9,                              &atomic_swap, &thread_num,      &check_swap);
-  n_errors += check_amo(addr, 0,                              &atomic_add,  &one,             &check_add);
-  n_errors += check_amo(addr, 1,                              &atomic_and,  &zero,            &check_and);
-  n_errors += check_amo(addr, 0,                              &atomic_or,   &one,             &check_or);
-  n_errors += check_amo(addr, 0,                              &atomic_xor,  &one,             &check_xor);
-  n_errors += check_amo(addr, min_max_threshold,              &atomic_max,  &neg_thread_num,  &check_max);
-  n_errors += check_amo(addr, minu_maxu_threshold,  (amo_fn_t)&atomic_maxu, &thread_num,      &check_maxu);
-  n_errors += check_amo(addr, min_max_threshold,              &atomic_min,  &neg_thread_num,  &check_min);
-  n_errors += check_amo(addr, minu_maxu_threshold,  (amo_fn_t)&atomic_minu, &thread_num,      &check_minu);
+  n_errors += check_amo(addr, 9,                              &hero_atomic_swap, &thread_num,      &check_swap);
+  n_errors += check_amo(addr, 0,                              &hero_atomic_add,  &one,             &check_add);
+  n_errors += check_amo(addr, 1,                              &hero_atomic_and,  &zero,            &check_and);
+  n_errors += check_amo(addr, 0,                              &hero_atomic_or,   &one,             &check_or);
+  n_errors += check_amo(addr, 0,                              &hero_atomic_xor,  &one,             &check_xor);
+  n_errors += check_amo(addr, min_max_threshold,              &hero_atomic_max,  &neg_thread_num,  &check_max);
+  n_errors += check_amo(addr, minu_maxu_threshold,  (amo_fn_t)&hero_atomic_maxu, &thread_num,      &check_maxu);
+  n_errors += check_amo(addr, min_max_threshold,              &hero_atomic_min,  &neg_thread_num,  &check_min);
+  n_errors += check_amo(addr, minu_maxu_threshold,  (amo_fn_t)&hero_atomic_minu, &thread_num,      &check_minu);
 
   return n_errors;
 }
@@ -208,13 +207,13 @@ unsigned test_atomic()
 {
   unsigned n_errors = 0;
   printf("Testing atomic transactions on L1 ..\n");
-  n_errors += check_addr((int32_t*)test_l1_base());
+  n_errors += check_addr((__device int32_t*)test_l1_base());
   printf("Testing atomic transactions on aliased L1 ..\n");
-  n_errors += check_addr((int32_t*)test_l1_alias_base());
+  n_errors += check_addr((__device int32_t*)test_l1_alias_base());
   printf("Testing atomic transactions on L1 of other cluster ..\n");
-  n_errors += check_addr((int32_t*)test_l1_other_base());
+  n_errors += check_addr((__device int32_t*)test_l1_other_base());
   printf("Testing atomic transactions on L2 ..\n");
-  n_errors += check_addr((int32_t*)test_l2_base());
+  n_errors += check_addr((__device int32_t*)test_l2_base());
   // Atomic transactions on DRAM are not implemented yet.
   //printf("Testing atomic transactions on DRAM ..\n");
   //n_errors += check_addr((uint32_t*)test_dram_base());

@@ -1,11 +1,8 @@
-ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
+DIRECTORIES = $(wildcard */)
 
-############################ OpenMP Sources ############################
-CSRCS = $(wildcard *.c)
+.PHONY: all
+all:
+	@$(foreach dir,$(DIRECTORIES), cd $(PWD)/$(dir) &&  make clean all;)
 
-# These are PULP-only tests.
-only = pulp
-
-CFLAGS_PULP := ${CFLAGS_PULP} -DNO_MAIN -DNO_DOUBLE
-
--include $(ROOT)/../common/default.mk
+clean:
+	@$(foreach dir,$(DIRECTORIES), cd $(PWD)/$(dir) &&  make clean;)

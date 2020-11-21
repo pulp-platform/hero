@@ -41,6 +41,22 @@ unroll_cflags=( "" "-mllvm -unroll-count=1 -mllvm -unroll-full-max-count=1" )
 # vector values) once with DMA, and once without.
 polydma_cflags=( "" "-DPOLYBENCH_DMA")
 
+# Try the relevant combinations for the tests-pulp
+for only in "${only_makeflags[@]}"; do
+  makeflags="$only";
+  for unroll in "${unroll_cflags[@]}"; do
+    cflags="-v $unroll"
+    for d in openmp-examples/tests-pulp/*/; do
+      if [ $(basename $d) = "include" ]; then
+        continue
+      fi
+      echo "TEST: $d    $makeflags    $cflags"
+      make V=1 -C $d clean all $makeflags cflags="$cflags"
+    done
+  done
+done
+echo "SUCCESS TESTS-PULP!"
+
 # Try the relevant combinations for the classic openmp-examples.
 makeflags=""
 cflags=""
