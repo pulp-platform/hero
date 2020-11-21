@@ -126,11 +126,11 @@ int pulp_mbox_set_mode(MailboxMode mode)
   if (mode == MBOX_OFF) {
     // Disable all mailbox IRQs.
     pulp_mbox_set_irqen(pulp_mbox, MBOX_IRQ_MASK_NONE);
-    pr_info("PULP - MBOX: All IRQs disabled.\n");
+    pr_debug("PULP - MBOX: All IRQs disabled.\n");
   } else {
     // Enable read threshold and error IRQ.
     pulp_mbox_set_irqen(pulp_mbox, MBOX_IRQ_MASK_READ | MBOX_IRQ_MASK_ERROR);
-    pr_info("PULP - MBOX: Read threshold and error IRQ enabled.\n");
+    pr_debug("PULP - MBOX: Read threshold and error IRQ enabled.\n");
   }
 
   return 0;
@@ -172,7 +172,7 @@ void pulp_mbox_clear(void)
   // empty mbox_fifo
   if ((mbox_fifo_wr != mbox_fifo_rd) || mbox_fifo_full) {
     for (i = 0; i < 2 * MBOX_FIFO_DEPTH; i++) {
-      pr_info("mbox_fifo[%d]: %d %d %#x \n", i, (&mbox_fifo[i] == mbox_fifo_wr) ? 1 : 0,
+      pr_debug("mbox_fifo[%d]: %d %d %#x \n", i, (&mbox_fifo[i] == mbox_fifo_wr) ? 1 : 0,
              (&mbox_fifo[i] == mbox_fifo_rd) ? 1 : 0, mbox_fifo[i]);
     }
   }
@@ -183,9 +183,9 @@ void pulp_mbox_clear(void)
   n_words_to_write = 0;
 
   // Flush hardware mailbox and acknowledge any Host-side IRQs.
-  pr_info("PULP - MBOX: Flushing read and write FIFOs.\n");
+  pr_debug("PULP - MBOX: Flushing read and write FIFOs.\n");
   pulp_mbox_set_ctrl(pulp_mbox, MBOX_CTRL_MASK_FLUSH_WRITES | MBOX_CTRL_MASK_FLUSH_READS);
-  pr_info("PULP - MBOX: Acknowledging any Host-side IRQs.\n");
+  pr_debug("PULP - MBOX: Acknowledging any Host-side IRQs.\n");
   pulp_mbox_set_irqs(pulp_mbox, MBOX_IRQ_MASK_ALL);
 
   mbox_fifo_unlock_irqrestore(flags);
@@ -292,7 +292,7 @@ void pulp_mbox_intr(void *mbox)
     }
     // adjust receive interrupt threshold of mailbox interface
     else if (mbox_fifo_full) {
-      pr_info("PULP - MBOX: mbox_fifo_full %d\n", mbox_fifo_full);
+      pr_debug("PULP - MBOX: mbox_fifo_full %d\n", mbox_fifo_full);
     }
   } else if (mbox_is & MBOX_IRQ_MASK_ERROR) { // mailbox error
     pulp_mbox_ack_error_irq(mbox);
@@ -372,13 +372,13 @@ ssize_t pulp_mbox_read(struct file *filp, char __user *buf, size_t count, loff_t
           mbox_fifo_unlock_irqrestore(flags);
 
           if (RAB_UPDATE == req_type) {
-            pr_info("PULP: RAB update in MBOX read detected.\n");
+            pr_debug("PULP: RAB update in MBOX read detected.\n");
             pulp_rab_update(mbox_data);
           } else if (RAB_SWITCH == req_type) {
-            pr_info("PULP: RAB switch in MBOX read detected.\n");
+            pr_debug("PULP: RAB switch in MBOX read detected.\n");
             pulp_rab_switch();
           } else {
-            pr_info("PULP - MBOX: Unknown request type %d\n", req_type);
+            pr_warn("PULP - MBOX: Unknown request type %d\n", req_type);
           }
 
           mbox_fifo_lock_irqsave(&flags);
