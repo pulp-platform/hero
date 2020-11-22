@@ -23,39 +23,6 @@
 // Clang.
 #include <stdbool.h>
 #include <stdint.h>
-#define ARCHI_DEMUX_PERIPHERALS_ADDR  0x1B204000
-#define ARCHI_MCHAN_DEMUX_OFFSET         0x00400
-#define DMA_READ(offset) \
-  *((volatile uint32_t*)(ARCHI_DEMUX_PERIPHERALS_ADDR + ARCHI_MCHAN_DEMUX_OFFSET + (offset)))
-#define DMA_WRITE(value, offset) \
-  *((volatile uint32_t*)(ARCHI_DEMUX_PERIPHERALS_ADDR + ARCHI_MCHAN_DEMUX_OFFSET + (offset))) = value
-#define PLP_DMA_SIZE_BIT        0
-#define PLP_DMA_TYPE_BIT       16
-#define PLP_DMA_INCR_BIT       17
-#define PLP_DMA_QUEUE_OFFSET  0x0
-#define PLP_DMA_STATUS_OFFSET 0x4
-static uint32_t plp_dma_counter_alloc()
-{
-  return DMA_READ(PLP_DMA_QUEUE_OFFSET);
-}
-static void plp_dma_cmd_push(uint32_t cmd, uint32_t loc, uint32_t ext)
-{
-  DMA_WRITE(cmd, PLP_DMA_QUEUE_OFFSET);
-  DMA_WRITE(loc, PLP_DMA_QUEUE_OFFSET);
-  DMA_WRITE(ext, PLP_DMA_QUEUE_OFFSET);
-}
-static void plp_dma_counter_free(uint32_t counter)
-{
-  DMA_WRITE(1 << counter, PLP_DMA_STATUS_OFFSET);
-}
-void rt_time_wait_cycles(const unsigned cycles)
-{
-  // simplified, the one in PULP SDK is more accurate
-  for (unsigned i = 0; i < cycles; ++i) {
-    __asm__ volatile ("nop" : : : );
-  }
-  return;
-}
 
 // Verify transfers to or from L1
 static unsigned check_to_l1(__host uint32_t* const src, uint32_t* const dst, const size_t n_elem)

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 #
+# Copyright (c) 2020 ETH Zurich, University of Bologna
+# SPDX-License-Identifier: Apache-2.0
+#
 # HEROv3 PULP Tests
 # akurth@iis.ee.ethz.ch bjoernf@iis.ee.ethz.ch
 #
@@ -10,15 +13,13 @@
 # Usage:
 #   1. Set HERO_INSTALL environment variable to your HERO install path.
 #   2. cd to the root of the repository.
-#   3. Run script without arguments.
+#   3. Source an environment.
+#   4. Run script without arguments.
 # This script does not build the infrastructure, so that must be done before, in
 # accordance with the README.
 
 # Abort on first non-zero exit code.
 set -e
-
-# Source environment
-source env/esim-exilzcu102.sh
 
 # Run in console
 unset DISPLAY

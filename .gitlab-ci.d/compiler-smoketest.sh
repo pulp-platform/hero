@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 #
+# Copyright (c) 2020 ETH Zurich, University of Bologna
+# SPDX-License-Identifier: Apache-2.0
+#
 # HEROv3 Compiler Smoke Test
 # bjoernf@iis.ee.ethz.ch
 #

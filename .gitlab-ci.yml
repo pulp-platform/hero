@@ -214,6 +214,7 @@ simulator-tests-pulp:
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get sdk-pulp-and-sdk-har
     - chmod -R u-w $HERO_INSTALL
     - make sdk-pulp # PULP SDK is not relocatable
+    - source env/esim-exilzcu102.sh
     - .gitlab-ci.d/tests-pulp.sh
 
 #doc-pulp-driver:
