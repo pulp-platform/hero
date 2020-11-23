@@ -128,10 +128,6 @@ inline static void __loop_forever()
   inline static int hero_load_uint ## bits ## _noblock(\
       const uint64_t addr, __device uint ## bits ## _t* const val) { \
     __hero_64_noblock_pre(uint ## bits ## _t) \
-    /*printf("# loading 0x%llx\n", addr); */  \
-    /*val = *(__device uint ## bits ##_t *)addr; */              \
-    /*printf("# value 0x%llx\n", 0);              */              \
-    /*return 0; */                                                      \
     __device static volatile uint32_t* const addrext_reg = (__device uint32_t*)__ADDREXT_REG; \
     uint ## bits ## _t reg; \
     __asm__ volatile( \
@@ -144,8 +140,7 @@ inline static void __loop_forever()
         : [upper] "r" (upper), [addrext_reg] "r" (addrext_reg), [lower] "r" (lower) \
         : "memory" \
     ); \
-    /*printf("# value 0x%llx\n", (uint64_t)reg);  */  \
-    *val = reg;                                       \
+    *val = reg; \
     return 0; \
     __hero_64_noblock_post \
   }
@@ -154,7 +149,6 @@ inline static void __loop_forever()
   inline static int hero_store_uint ## bits ## _noblock(\
       const uint64_t addr, const uint ## bits ## _t val) { \
     __hero_64_noblock_pre(uint ## bits ## _t) \
-      /*printf("# storing 0x%llx %d\n", addr, (int32_t) val);    */     \
     __device static volatile uint32_t* const addrext_reg = (__device uint32_t*)__ADDREXT_REG; \
     __asm__ volatile( \
         __hero_64_disable_mirq_asm "\n\t" \
@@ -170,11 +164,6 @@ inline static void __loop_forever()
     return 0; \
     __hero_64_noblock_post \
   }
-
-// if (res != 0) { \
-//   printf("ERROR: Memory access violation at 0x%08x%08x!\n", __upper32(addr), __lower32(addr)); \
-//   abort(); \
-// }
 
 #define __hero_64_check_mem_access \
   // TODO: handle misses
