@@ -1,1 +1,0 @@
-../../toolchain/llvm-project/openmp/runtime/test/atomic/omp_atomic.c

@@ -204,6 +204,19 @@ compiler-smoketest:
     - source env/exilzcu102.sh
     - .gitlab-ci.d/compiler-smoketest.sh
 
+simulator-tests-pulp:
+  stage: test
+  script:
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get vsim-pulp
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-llvm
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get sdk-pulp-and-sdk-har
+    - chmod -R u-w $HERO_INSTALL
+    - make sdk-pulp # PULP SDK is not relocatable
+    - source env/esim-exilzcu102.sh
+    - .gitlab-ci.d/tests-pulp.sh
+
 #doc-pulp-driver:
 #  stage: test
 #  script:
