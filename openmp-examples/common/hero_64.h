@@ -141,7 +141,6 @@ inline static void __loop_forever()
         : "memory" \
     ); \
     *val = reg; \
-    return 0; \
     __hero_64_noblock_post \
   }
 
@@ -161,7 +160,6 @@ inline static void __loop_forever()
           [val] "r" (val), [lower] "r" (lower) \
         : "memory" \
     ); \
-    return 0; \
     __hero_64_noblock_post \
   }
 
