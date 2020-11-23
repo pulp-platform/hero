@@ -107,6 +107,61 @@ static unsigned to_or_from_l1()
   hero_l1free(loc);
   return n_errors;
 }
+static unsigned unordered_async() {
+  // This test checks that we can wait for asynchronous transfers out of order.
+  printf("Testing multiple async, waiting out of order.\n");
+  const size_t n_elem = 128;
+  const size_t size = n_elem * sizeof(uint32_t);
+  // Allocate and initialize local memory.
+  uint32_t* const loc = (__device uint32_t*)hero_l1malloc(size);
+  assert(loc);
+  for (int i = 0; i < n_elem; i++) {
+    loc[i] = i * 2;
+  }
+  __host uint32_t* const l3 = (__host uint32_t*)0x80000000;
+  for (int i = 0; i < n_elem; i++) {
+    l3[i] = 0;
+  }
+  unsigned n_errors = 0;
+
+  // Figure out each part for the async transfers.
+  const size_t segment_elem = n_elem / 4;
+  const size_t segment_size = segment_elem * sizeof(uint32_t);
+  uint32_t* const loc0 = &loc[segment_elem * 0];
+  uint32_t* const loc1 = &loc[segment_elem * 1];
+  uint32_t* const loc2 = &loc[segment_elem * 2];
+  uint32_t* const loc3 = &loc[segment_elem * 3];
+  __host uint32_t* const ext0 = &l3[segment_elem * 0];
+  __host uint32_t* const ext1 = &l3[segment_elem * 1];
+  __host uint32_t* const ext2 = &l3[segment_elem * 2];
+  __host uint32_t* const ext3 = &l3[segment_elem * 3];
+
+  // Start async transfers in order to L1
+  hero_dma_job_t dma0 = hero_memcpy_dev2host_async(ext0, loc0, segment_size);
+  hero_dma_job_t dma1 = hero_memcpy_dev2host_async(ext1, loc1, segment_size);
+  hero_dma_job_t dma2 = hero_memcpy_dev2host_async(ext2, loc2, segment_size);
+  hero_dma_job_t dma3 = hero_memcpy_dev2host_async(ext3, loc3, segment_size);
+
+  // Wait in another random order (found by dice).
+  hero_dma_wait(dma3);
+  hero_dma_wait(dma1);
+  hero_dma_wait(dma2);
+  hero_dma_wait(dma0);
+
+  // Check correctness.
+  for (int i = 0; i < n_elem; i++) {
+    if (l3[i] != loc[i]) {
+      n_errors++;
+    }
+  }
+  condition_or_printf(n_errors == 0, "%d destination elements did not match!\n",
+                      n_errors);
+
+  // Cleanup and return
+  hero_l1free(loc);
+  return n_errors;
+
+}
 
 unsigned test_dma()
 {
@@ -118,6 +173,7 @@ unsigned test_dma()
   unsigned n_errors = 0;
 
   n_errors += to_or_from_l1();
+  n_errors += unordered_async();
 
   return n_errors;
 }
