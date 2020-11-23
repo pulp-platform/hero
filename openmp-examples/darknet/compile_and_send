@@ -1,5 +1,15 @@
 #!/bin/bash
 export HERO_INSTALL=/scratch/mmaxim/hero/install
+export HERCULES_INSTALL=${HERO_INSTALL}
+export HERCULES_ARCH="PULP"
+export CMUX_ROOT="/scratch/mmaxim/cmux"
+export HERCULES_FORCE_FOOTPRINT_DENSE=1
+export HERCULES_CPU_MEMORY_SIZE=32768
+export HERCULES_DISQ_THRESHOLD=0
+export HERCULES_DMA_ENFORCE
+export HERCULES_NO_INTERVAL_CONTROLFLOW
+export HERCULES_WHITELIST="gemm_nn gemm_cpu gemm forward_convolutional_layer forward_network network_predict network_predict_image main"
+source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh
 source ${HERO_INSTALL}/../env/exilzcu102.sh
 make default-as=pulp clean all
 scp darknet root@172.31.182.80:/mnt/mmaxim/crosscompiled
