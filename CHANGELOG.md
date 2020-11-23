@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Clang/LLVM:
+  - Fix handling of function pointers in address space assignment.  Prior to this fix, Clang could
+    crash on code that contains function pointers.
+  - Machine code generation for `Xpulpv2` hardware loops:
+    - Extend code generation to cases where the basic block layout changes between pre- and
+      post-regalloc analyses.
+    - Ensure that code generation triggers only for loops whose jump offset fits in 12 bit (which is
+      the maximum encodable in the instruction).
 
 
 ## v0.1.0 - 2020-11-21
