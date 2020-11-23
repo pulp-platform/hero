@@ -1,12 +1,11 @@
 ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
-############################ OpenMP Sources ############################
+# Source files to include in test
 CSRCS = $(wildcard *.c)
 
-# These are PULP-only tests.
-only = pulp
-
-CFLAGS_PULP := ${CFLAGS_PULP} -DNO_MAIN -DNO_DOUBLE -I../include
+# This test requires linking to the API
 LDFLAGS_PULP := -lhero-target
 
+# Include common options and then the common build system
+-include $(ROOT)/../include/common.mk
 -include $(ROOT)/../../common/default.mk
