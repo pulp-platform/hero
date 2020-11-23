@@ -40,7 +40,7 @@ inline static void check_addr(const uint64_t base)
 
 inline static void check_fail(const uint64_t base)
 {
-  const uint64_t addr = base * 8*omp_get_thread_num();
+  const uint64_t addr = base + 8*omp_get_thread_num();
   uint64_t dummy;
   assert(hero_store_uint8_noblock(addr, dummy) != 0);
   assert(hero_load_uint8_noblock(addr, (__device uint8_t*)&dummy) != 0);
