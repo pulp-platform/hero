@@ -436,7 +436,6 @@ module pulp_tb #(
     // Read status of mailbox.
     read_from_pulp(64'h0000_0000_1B80_1020, data, resp);
     assert(resp == axi_pkg::RESP_OKAY);
-    $display("Read 0x%08x from mailbox.", data);
 
     // Start cluster 0.
     cl_fetch_en[0] = 1'b1;
