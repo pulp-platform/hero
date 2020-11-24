@@ -1,0 +1,404 @@
+{
+    "moore" : {
+        "foobar" : {
+            "design" : "foobar",
+            "sources" : "../test/foobar/flist.txt"
+        },
+        "axi_dma" : {
+            "design" : "synth_axi_dma_backend",
+            "sources" : "../test/axi_dma/flist.txt"
+        },
+        "snitch_cluster" : {
+            "design" : "snitch_sdma_cluster",
+            "sources" : "../test/snitch/flist.txt"
+        },
+        "a2o_core" : {
+            "design" : "c_wrapper",
+            "sources" : "../test/a2o/flist.txt"
+        },
+        "simple" : {
+            "design" : "simple",
+            "sources" : "../test/simple/flist.txt"
+        },
+        "ariane" : {
+            "design" : "ariane",
+            "sources" : "../test/ariane/flist.txt"
+        }
+    },
+    "sv2v" : {
+        "foobar" : {
+            "design" : "foobar",
+            "sources" : "../test/foobar/flist.txt"
+        },
+        "axi_dma" : {
+            "design" : "synth_axi_dma_backend",
+            "sources" : "../test/axi_dma/flist.txt"
+        },
+        "snitch_cluster" : {
+            "design" : "snitch_sdma_cluster",
+            "sources" : "../test/snitch/flist.txt"
+        },
+        "snitch" : {
+            "design" : "snitch",
+            "sources" : "../test/snitch/flist.txt",
+            "hierarchical" : true
+        },
+        "a2o_core" : {
+            "design" : "c_wrapper",
+            "sources" : "../test/a2o/flist.txt"
+        },
+        "simple" : {
+            "design" : "simple",
+            "sources" : "../test/simple/flist.txt"
+        },
+        "fifo" : {
+            "design" : "fifo_v3",
+            "sources" : "../test/snitch/flist.txt",
+            "hierarchical" : true
+        },
+        "ariane" : {
+            "design" : "ariane",
+            "sources" : "../test/ariane/flist.txt"
+        }
+    },
+    "verible" : {
+        "foobar" : {
+            "design" : "foobar",
+            "sources" : "../test/foobar/flist.txt"
+        },
+        "axi_dma" : {
+            "design" : "synth_axi_dma_backend",
+            "sources" : "../test/axi_dma/flist.txt"
+        },
+        "snitch_cluster" : {
+            "design" : "snitch_sdma_cluster",
+            "sources" : "../test/snitch/flist.txt"
+        },
+        "a2o_core" : {
+            "design" : "c_wrapper",
+            "sources" : "../test/a2o/flist.txt"
+        },
+        "simple" : {
+            "design" : "simple",
+            "sources" : "../test/simple/flist.txt"
+        },
+        "ariane" : {
+            "design" : "ariane",
+            "sources" : "../test/ariane/flist.txt"
+        }
+    },
+    "graph" : {
+        "snitch" : {
+            "design" : "snitch",
+            "sources" : "../test/snitch/flist.txt"
+        },
+        "muldiv" : {
+            "design" : "snitch_shared_muldiv",
+            "sources" : "../test/snitch/flist.txt"
+        },
+        "snitch_cc" : {
+            "design" : "snitch_cc",
+            "sources" : "../test/snitch/flist.txt"
+        },
+        "snitch_hive" : {
+            "design" : "snitch_hive",
+            "sources" : "../test/snitch/flist.txt"
+        },
+        "snitch_cluster" : {
+            "design" : "snitch_sdma_cluster",
+            "sources" : "../test/snitch/flist.txt"
+        },
+        "foobar" : {
+            "design" : "foobar",
+            "sources" : "../test/foobar/flist.txt"
+        },
+        "axi_dma" : {
+            "design" : "synth_axi_dma_backend",
+            "sources" : "../test/axi_dma/flist.txt"
+        },
+        "simple" : {
+            "design" : "simple",
+            "sources" : "../test/simple/flist.txt"
+        },
+        "ariane" : {
+            "design" : "ariane",
+            "sources" : "../test/ariane/flist.txt"
+        },
+        "a2o" : {
+            "design" : "c_wrapper",
+            "sources" : "../test/a2o/flist.txt"
+        }
+    },
+    "morty" : {
+        "foobar" : {
+            "design" : "foobar",
+            "sources" : "../test/foobar/flist.txt"
+        },
+        "axi_dma" : {
+            "design" : "synth_axi_dma_backend",
+            "sources" : "../test/axi_dma/flist.txt"
+        },
+        "snitch_cluster" : {
+            "design" : "snitch_sdma_cluster",
+            "sources" : "../test/snitch/flist.txt"
+        },
+        "snitch" : {
+            "design" : "snitch",
+            "sources" : "../test/snitch/flist.txt",
+            "hierarchical" : true
+        },
+        "a2o_core" : {
+            "design" : "c_wrapper",
+            "sources" : "../test/a2o/flist.txt"
+        },
+        "simple" : {
+            "design" : "simple",
+            "sources" : "../test/simple/flist.txt"
+        },
+        "fifo" : {
+            "design" : "fifo_v3",
+            "sources" : "../test/snitch/flist.txt",
+            "hierarchical" : true
+        },
+        "ariane" : {
+            "design" : "ariane",
+            "sources" : "../test/ariane/flist.txt"
+        }
+    },
+    "spyglass" : {
+        "snitch_cc" : {
+            "design" : "snitch_cc",
+            "sources" : "../test/snitch/flist.txt",
+            "lang" : "systemverilog"
+        },
+        "foobar" : {
+            "design" : "foobar",
+            "sources" : "../test/foobar/flist.txt",
+            "lang" : "systemverilog"
+        },
+        "axi_dma" : {
+            "design" : "synth_axi_dma_backend",
+            "sources" : "../test/axi_dma/flist.txt",
+            "lang" : "systemverilog"
+        },
+        "snitch_cluster" : {
+            "design" : "snitch_sdma_cluster",
+            "sources" : "../test/snitch/flist.txt",
+            "lang" : "systemverilog"
+        },
+        "a2o_core" : {
+            "design" : "c_wrapper",
+            "sources" : "../test/a2o/flist.txt",
+            "lang" : "verilog"
+        },
+        "simple" : {
+            "design" : "simple",
+            "sources" : "../test/simple/flist.txt",
+            "lang" : "systemverilog"
+        },
+        "ariane" : {
+            "design" : "ariane",
+            "sources" : "../test/ariane/flist.txt",
+            "lang" : "systemverilog"
+        }
+    },
+    "freepdk45": {
+        "synopsys": {
+            "foobar": {
+                "design": "foobar",
+                "analyze": "../../test/foobar/analyze.tcl",
+                "tck": 10
+            },
+            "snitch": {
+                "design": "snitch",
+                "analyze": "../../test/snitch/analyze.tcl",
+                "tck": 10
+            },
+            "axi_dma": {
+                "design": "synth_axi_dma_backend",
+                "analyze": "../../test/axi_dma/analyze.tcl",
+                "params": "AddrWidth => 64, DataWidth => 512, IdWidth => 6, AxFifoDepth => 2, ReqFifoDepth => 2, BufferDepth => 3",
+                "tck": 5
+            },
+            "simple": {
+                "design": "simple",
+                "analyze": "../../test/simple/analyze.tcl",
+                "constr": ""
+            },
+            "simple_twoclk": {
+                "design": "simple_twoclk",
+                "analyze": "../../test/simple_twoclk/analyze.tcl",
+                "constr": "../../test/simple_twoclk/constraints.tcl",
+                "bbabort": 0
+            },
+            "ariane": {
+                "design": "ariane",
+                "analyze": "../../test/ariane/analyze.tcl",
+                "tck": 10
+            }
+
+        }
+    },
+    "gf22": {
+        "synopsys": {
+            "simple": {
+                "design": "simple",
+                "analyze": "../../test/simple/analyze.tcl",
+                "tck": 10000
+            },
+            "foobar": {
+                "design": "foobar",
+                "analyze": "../../test/foobar/analyze.tcl",
+                "tck": 10000
+            },
+            "snitch_cluster": {
+                "design": "snitch_cluster_synth_fixture",
+                "analyze": "../../test/snitch/analyze.tcl",
+                "tck": 2000
+            }
+        }
+    },
+    "vivado" : {
+        "simple" : {
+            "design": "simple",
+            "analyze": "../test/simple/analyze_vivado.tcl",
+            "constr": ""
+        },
+        "snitch_cc" : {
+            "design": "snitch_cc",
+            "analyze": "../test/snitch/analyze_vivado.tcl",
+            "tck": 10
+        },
+        "snitch" : {
+            "design": "snitch",
+            "analyze": "../test/snitch/analyze_vivado.tcl",
+            "tck": 10
+        }
+    },
+    "vsim" : {
+        "axi_dma" : {
+            "compile": "../../test/axi_dma/compile_vsim.tcl",
+            "toplevel": "tb_axi_dma_backend",
+            "flags": "-suppress vsim-3009"
+        },
+
+        "axi_lite_to_axi" : {
+            "compile": "../../test/axi/compile_vsim.tcl",
+            "presim": "foreach {DW} {8 16 32 64 128 256 512 1024} {",
+            "toplevel": "tb_axi_lite_to_axi",
+            "flags": "-GDW=$DW -onfinish stop",
+            "postsim": "}"
+        },
+        "axi_dw_downsizer" : {
+            "compile": "../../test/axi/compile_vsim.tcl",
+            "presim": "foreach {DW} {8 16 32 64 128 256 512 1024} { for {set MULT 2} {$MULT <= [expr 1024/$DW]} {set MULT [expr $MULT*2]} {",
+            "toplevel": "tb_axi_dw_downsizer",
+            "flags": "-GDW=$DW -GMULT=$MULT -onfinish stop",
+            "postsim": "}}"
+        },
+        "axi_dw_upsizer" : {
+            "compile": "../../test/axi/compile_vsim.tcl",
+            "presim": "foreach {DW} {8 16 32 64 128 256 512 1024} { for {set MULT [expr 1024/$DW]} {$MULT > 1} {set MULT [expr $MULT/2]} {",
+            "toplevel": "tb_axi_dw_upsizer",
+            "flags": "-GDW=$DW -GMULT=$MULT -onfinish stop",
+            "postsim": "}}"
+        },
+        "axi_cdc" : {
+            "compile": "../../test/axi/compile_vsim.tcl",
+            "toplevel": "tb_axi_cdc"
+        },
+        "axi_delayer" : {
+            "compile": "../../test/axi/compile_vsim.tcl",
+            "toplevel": "tb_axi_delayer"
+        },
+        "axi_atop_filter" : {
+            "compile": "../../test/axi/compile_vsim.tcl",
+            "presim": "foreach {MAX_TWNS} {3 1 12} {",
+            "toplevel": "tb_axi_atop_filter",
+            "flags": "-GN_TXNS=1000 -GAXI_MAX_WRITE_TXNS=$MAX_TWNS -onfinish stop",
+            "postsim": "}"
+        },
+        "axi_lite_regs" : {
+            "compile": "../../test/axi/compile_vsim.tcl",
+            "presim": "foreach {PRIV} {0 1} { foreach {SECU} {0 1} {",
+            "toplevel": "tb_axi_lite_regs",
+            "params": "-GPrivProtOnly=$PRIV -GSecuProtOnly=$SECU  -onfinish stop",
+            "postsim": "}}"
+        },
+
+        "cdc_2phase" : {
+            "compile": "../../test/common_cells/compile_vsim.tcl",
+            "toplevel": "cdc_2phase_tb"
+        },
+        "fifo" : {
+            "compile": "../../test/common_cells/compile_vsim.tcl",
+            "toplevel": "fifo_tb"
+        },
+        "graycode" : {
+            "compile": "../../test/common_cells/compile_vsim.tcl",
+            "toplevel": "graycode_tb"
+        },
+        "id_queue" : {
+            "compile": "../../test/common_cells/compile_vsim.tcl",
+            "toplevel": "id_queue_tb"
+        },
+        "id_queue" : {
+            "compile": "../../test/common_cells/compile_vsim.tcl",
+            "toplevel": "id_queue_tb"
+        },
+        "popcount" : {
+            "compile": "../../test/common_cells/compile_vsim.tcl",
+            "toplevel": "popcount_tb"
+        },
+        "stream_register" : {
+            "compile": "../../test/common_cells/compile_vsim.tcl",
+            "toplevel": "stream_register_tb"
+        },
+        "addr_decode" : {
+            "compile": "../../test/common_cells/compile_vsim.tcl",
+            "toplevel": "addr_decode_tb"
+        },
+        "stream_xbar" : {
+            "compile": "../../test/common_cells/compile_vsim.tcl",
+            "presim": "foreach {depth} {0 1 2} {",
+            "toplevel": "stream_xbar_tb",
+            "params": "-GBufDepth=$depth  -onfinish stop",
+            "postsim": "}"
+        },
+        "rr_arb_tree" : {
+            "compile": "../../test/common_cells/compile_vsim.tcl",
+            "presim": "foreach {num} {1 4 7} {",
+            "toplevel": "rr_arb_tree_tb",
+            "params": "-suppress vsim-3009 -GNumInp=$num -onfinish stop",
+            "postsim": "}"
+        },
+        "stream_xbar" : {
+            "compile": "../../test/common_cells/compile_vsim.tcl",
+            "presim": "foreach {spill_reg} {0 1} { foreach {num_inp} {1 4 18} { foreach {num_out} {1 4 18} {",
+            "toplevel": "stream_xbar_tb",
+            "params": "-gNumInp=$num_inp -gNumOut=$num_out -gSpillReg=$spill_reg -onfinish stop",
+            "postsim": "}}}"
+        },
+        "stream_omega_net" : {
+            "compile": "../../test/common_cells/compile_vsim.tcl",
+            "presim": "foreach {radix} {2 4 8} { foreach {num_inp} {1 2 17 64} { foreach {num_out} {1 2 4 16 17 64} {",
+            "toplevel": "stream_omega_net_tb",
+            "params": "-gNumInp=$num_inp -gNumOut=$num_out -gDutRadix=$radix -onfinish stop",
+            "postsim": "}}}"
+        }
+    },
+    "verilator" : {
+        "ecc_encode" : {
+            "croot": "../test/common_cells/test/ecc",
+            "csources": "ecc_encode.cpp ecc.cpp ",
+            "flist": "../test/common_cells/verilator.flist.txt",
+            "topmodule": "ecc_encode"
+        },
+        "ecc_decode" : {
+            "croot": "../test/common_cells/test/ecc",
+            "csources": "ecc_decode.cpp ecc.cpp ",
+            "flist": "../test/common_cells/verilator.flist.txt",
+            "topmodule": "ecc_decode"
+        }
+    }
+}

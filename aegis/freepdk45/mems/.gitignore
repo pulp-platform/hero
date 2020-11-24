@@ -1,0 +1,3 @@
+out
+src/*.tc_sram.sv
+*.mems.txt

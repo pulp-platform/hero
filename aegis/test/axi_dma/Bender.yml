@@ -1,0 +1,26 @@
+package:
+  name: aegis_test
+  authors: [ "Thomas Benz <tbenz@iis.ee.ethz.ch>" ]
+
+
+export_include_dirs:
+  - include
+
+sources:
+  files:
+    - src/axi_pkg.sv
+    - src/axi_intf.sv
+    - src/fifo_v3.sv
+    - src/axi_dma_data_path.sv
+    - src/axi_dma_data_mover.sv
+    - src/axi_dma_burst_reshaper.sv
+    - src/axi_dma_backend.sv
+    - src/synth_axi_dma_backend.sv
+    - target: test
+      files:
+        - test/rand_verif_pkg.sv
+        - test/rand_id_queue.sv
+        - src/axi_test.sv
+        - test/fixture_axi_dma_backend.sv
+        - test/tb_axi_dma_backend.sv
+

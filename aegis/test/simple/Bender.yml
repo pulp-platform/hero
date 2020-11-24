@@ -1,0 +1,7 @@
+package:
+  name: simple
+  authors: [ "Thomas Benz <tbenz@iis.ee.ethz.ch>" ]
+
+sources:
+  files:
+    - src/simple.sv

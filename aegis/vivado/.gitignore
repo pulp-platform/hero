@@ -1,0 +1,8 @@
+.Xil
+*.log
+*.jou
+*.str
+logs/*
+reports/*
+scripts/*.synth.tcl
+scripts/*.mems.tcl

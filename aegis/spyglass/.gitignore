@@ -1,0 +1,5 @@
+reports/*
+scripts/*_run.tcl
+*.prj
+*.log
+

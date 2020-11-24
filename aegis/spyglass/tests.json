@@ -1,0 +1,16 @@
+{
+    "tests":
+        [
+            "lint/lint_rtl",
+            "lint/lint_rtl",
+            "lint/lint_turbo_rtl",
+            "lint/lint_functional_rtl",
+            "lint/lint_abstract",
+            "rdc/rdc_verify_struct",
+            "dft/dft_scan_ready",
+            "dft/dft_best_practice",
+            "dft/dft_bist_ready",
+            "dft/dft_dsm_best_practice",
+            "dft/dft_dsm_random_resistance"
+        ]
+}

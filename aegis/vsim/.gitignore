@@ -1,0 +1,2 @@
+*.simdir
+scripts/*.sim.tcl

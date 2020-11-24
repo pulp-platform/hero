@@ -1,0 +1,30 @@
+package:
+  name: axi_dma
+  authors: ["Thomas Benz <tbenz@ethz.ch>"]
+
+#dependencies:
+  #common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.10.0 }
+
+export_include_dirs:
+  - include
+
+sources:
+  - target: rtl 
+    files:
+    - src/axi_dma_pkg.sv
+    - src/axi_dma_data_path.sv
+    - src/axi_dma_data_mover.sv
+    - src/axi_dma_data_mover.svaxi_dma_burst_reshaper.sv
+    - src/axi_dma_data_mover.svaxi_dma_backend.sv
+
+  - target: snitch
+    - src/axi_dma_twod_ext.sv
+    - src/axi_dma_perf_counters.sv
+    - src/axi_dma_error_handler.sv
+    - src/frontend/axi_dma_tc_snitch_fe_id_gen.sv
+    - src/frontend/axi_dma_tc_snitch_fe.sv
+
+  - target: test 
+    files:
+    - test/axi_dma_tb.sv
+    - test/fixture_oned_axi_dma.sv

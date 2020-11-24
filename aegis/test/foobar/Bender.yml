@@ -1,0 +1,7 @@
+package:
+  name: aegis_test
+  authors: [ "Thomas Benz <tbenz@iis.ee.ethz.ch>" ]
+
+sources:
+  files:
+    - foobar.sv

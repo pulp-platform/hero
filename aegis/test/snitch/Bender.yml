@@ -1,0 +1,235 @@
+package:
+  name: snitch
+  authors: [ "Florian Zaruba <zarubaf@iis.ee.ethz.ch>" ]
+
+export_include_dirs:
+  - src/common_cells/include/
+  - src/axi/include/
+
+sources:
+  - defines:
+      SNITCH_ENABLE_PERF: 1
+    files:
+
+    # packages
+    - src/snitch_pma_pkg.sv
+    - src/axi/src/axi_pkg.sv
+    - src/axi_dma/src/axi_dma_pkg.sv
+    - src/riscv_instr.sv
+    - src/fpnew/src/fpnew_pkg.sv
+    - src/snitch_pkg.sv
+    - src/snitch_axi_pkg.sv
+    - target: not(any(bowtruckle, baikonur, lethifold))
+      files:
+        - src/snitch_cfg.sv
+    - target: any(bowtruckle, baikonur)
+      files:
+      - gf22/sourcecode/bowtruckle/bowtruckle_snitch_cfg.sv
+    - target: lethifold
+      files:
+      - gf22/sourcecode/lethifold/lethifold_snitch_cfg.sv
+    - src/cluster_interconnect/rtl/tcdm_interconnect/tcdm_interconnect_pkg.sv
+    - src/snitch_icache/snitch_icache_pkg.sv
+    # interfaces
+    - src/reqrsp_interface/reqrsp_intf.sv
+    # rest of RTL
+    - src/snitch.sv
+    - src/snitch_fpu_sequencer.sv
+    - src/snitch_regfile_ff.sv
+    # - src/snitch_regfile_latch.sv
+    - src/snitch_cc.sv
+    - src/snitch_sdma_cluster.sv
+    - src/snitch_hive.sv
+    - src/tcdm_shim.sv
+    - src/snitch_lsu.sv
+    - src/snitch_fp_ss.sv
+    - src/snitch_fpu.sv
+    - src/snitch_shared_muldiv.sv
+    - src/snitch_demux.sv
+    - src/snitch_addr_demux.sv
+    - src/snitch_ssr_addr_gen.sv
+    - src/snitch_ssr_streamer.sv
+    - src/snitch_ssr_switch.sv
+    - src/snitch_axi_adapter.sv
+    - src/serial/snitch_serial_link.sv
+    - src/snitch_cluster_peripheral.sv
+    - src/common_cells/src/addr_decode.sv
+    - src/common_cells/src/deprecated/fifo_v1.sv
+    - src/common_cells/src/deprecated/fifo_v2.sv
+    - src/common_cells/src/fifo_v3.sv
+    - src/common_cells/src/id_queue.sv
+    - src/common_cells/src/spill_register.sv
+    - src/common_cells/src/isochronous_spill_register.sv
+    - src/common_cells/src/isochronous_4phase_handshake.sv
+    - src/common_cells/src/stream_arbiter.sv
+    - src/common_cells/src/onehot_to_bin.sv
+    - src/common_cells/src/stream_addr_demux.sv
+    - src/common_cells/src/stream_demux.sv
+    - src/common_cells/src/stream_delay.sv
+    - src/common_cells/src/stream_register.sv
+    - src/common_cells/src/lzc.sv
+    - src/common_cells/src/rstgen.sv
+    - src/common_cells/src/popcount.sv
+    - src/common_cells/src/rstgen_bypass.sv
+    - src/common_cells/src/deprecated/rrarbiter.sv
+    - src/common_cells/src/deprecated/prioarbiter.sv
+    - src/common_cells/src/rr_arb_tree.sv
+    - src/common_cells/src/stream_arbiter_flushable.sv
+    - src/common_cells/src/lfsr.sv
+    - src/common_cells/src/lfsr_8bit.sv
+    - src/common_cells/src/lfsr_16bit.sv
+    - src/common_cells/src/delta_counter.sv
+    - src/common_cells/src/counter.sv
+    - src/common_cells/src/cdc_2phase.sv
+    # reqresp infrastructure
+    - src/reqrsp_interface/axi_to_reqrsp.sv
+    - src/reqrsp_interface/peripherals_to_reqrsp.sv
+    - src/reqrsp_interface/reqrsp_to_axi.sv
+    - src/reqrsp_interface/reqrsp_to_tcdm.sv
+    - src/snitch_icache/snitch_icache.sv
+    - src/snitch_icache/snitch_icache_l0.sv
+    - src/snitch_icache/snitch_icache_handler.sv
+    - src/snitch_icache/snitch_icache_lfsr.sv
+    - src/snitch_icache/snitch_icache_lookup.sv
+    - src/snitch_icache/snitch_icache_prefetch.sv
+    - src/snitch_icache/snitch_icache_refill.sv
+    - src/cluster_interconnect/rtl/tcdm_interconnect/addr_dec_resp_mux.sv
+    - src/cluster_interconnect/rtl/tcdm_interconnect/amo_shim.sv
+    - src/cluster_interconnect/rtl/tcdm_interconnect/bfly_net.sv
+    - src/cluster_interconnect/rtl/tcdm_interconnect/clos_net.sv
+    - src/cluster_interconnect/rtl/tcdm_interconnect/tcdm_interconnect.sv
+    - src/cluster_interconnect/rtl/tcdm_interconnect/xbar.sv
+    - src/snitch_tcdm_mux.sv
+    - src/snitch_dma_addr_decoder.sv
+    - src/fpnew/src/fpnew_cast_multi.sv
+    - src/fpnew/src/fpnew_classifier.sv
+    - src/fpnew/src/fpnew_divsqrt_multi.sv
+    - src/fpnew/src/fpnew_fma.sv
+    - src/fpnew/src/fpnew_fma_multi.sv
+    - src/fpnew/src/fpnew_noncomp.sv
+    - src/fpnew/src/fpnew_opgroup_block.sv
+    - src/fpnew/src/fpnew_opgroup_fmt_slice.sv
+    - src/fpnew/src/fpnew_opgroup_multifmt_slice.sv
+    - src/fpnew/src/fpnew_rounding.sv
+    - src/fpnew/src/fpnew_top.sv
+    - src/axi/src/axi_atop_filter.sv
+    - src/axi/src/axi_burst_splitter.sv
+    - src/axi/src/axi_cut.sv
+    - src/axi/src/axi_delayer.sv
+    - src/axi/src/axi_id_remap.sv
+    - src/axi/src/axi_intf.sv
+    - src/axi/src/axi_join.sv
+    - src/axi/src/axi_lite_join.sv
+    - src/axi/src/axi_lite_to_axi.sv
+    - src/axi/src/axi_lite_xbar.sv
+    - src/axi/src/axi_modify_address.sv
+    - src/axi/src/axi_multicut.sv
+    - src/axi/src/axi_to_axi_lite.sv
+    - src/axi/src/dma/axi_dma_data_path.sv
+    - src/axi/src/dma/axi_dma_data_mover.sv
+    - src/axi/src/dma/axi_dma_burst_reshaper.sv
+    - src/axi/src/dma/axi_dma_backend.sv
+    # AXI Xbar
+    - src/axi/src/axi_demux.sv
+    - src/axi/src/axi_mux.sv
+    - src/axi/src/axi_err_slv.sv
+    - src/axi/src/axi_id_prepend.sv
+    - src/axi/src/axi_xbar.sv
+    - src/register_interface/src/reg_intf.sv
+    - src/register_interface/src/axi_to_reg.sv
+    - src/register_interface/src/axi_lite_to_reg.sv
+    # Chip specific includes
+    - target: billywig
+      files:
+      - umcL65/sourcecode/riscv-dbg/src/dm_pkg.sv
+      - umcL65/sourcecode/riscv-dbg/src/dm_csrs.sv
+      - umcL65/sourcecode/riscv-dbg/src/dmi_cdc.sv
+      - umcL65/sourcecode/riscv-dbg/src/dmi_jtag.sv
+      - umcL65/sourcecode/riscv-dbg/src/dmi_jtag_tap.sv
+      - umcL65/sourcecode/riscv-dbg/src/dm_mem.sv
+      - umcL65/sourcecode/riscv-dbg/src/dm_sba.sv
+      - umcL65/sourcecode/riscv-dbg/src/dm_top.sv
+      - umcL65/sourcecode/axi_mem_if/src/axi2mem.sv
+      - umcL65/sourcecode/riscv-dbg/debug_rom/debug_rom.sv
+      - umcL65/sourcecode/billywig/billywig_pkg.sv
+      - umcL65/sourcecode/billywig/billywig_axi_pkg.sv
+      - umcL65/sourcecode/billywig/billywig_memory.sv
+      - umcL65/sourcecode/billywig/billywig.sv
+      - umcL65/sourcecode/billywig/bootrom/bootrom.sv
+    - target: any(bowtruckle, baikonur)
+      files:
+      - gf22/sourcecode/bowtruckle/bowtruckle_pkg.sv
+      - gf22/sourcecode/bowtruckle/bowtruckle_axi_pkg.sv
+      - gf22/sourcecode/bowtruckle/bowtruckle_soc.sv
+      - gf22/sourcecode/bowtruckle/bowtruckle_cluster.sv
+      - gf22/sourcecode/bowtruckle/bowtruckle.sv
+    - target: lethifold
+      files:
+      - gf22/sourcecode/lethifold/lethifold_pkg.sv
+      - gf22/sourcecode/lethifold/lethifold_cluster.sv
+    - target: all(simulation,umcL65)
+      files:
+      - defines:
+          functional: 1
+        files:
+        - umcL65/sourcecode/u065gioll25mvir.v
+    - target: any(not(synthesis), verilator)
+      files:
+      - src/common_cells/src/sram.sv
+      - src/tech_cells_generic/src/rtl/tc_clk.sv
+    # Synthesis (tech specific includes)
+    - target: all(umcL65,synthesis,billywig)
+      files:
+      - umcL65/sourcecode/sram_billywig.sv
+      - umcL65/sourcecode/tc_clk.sv
+    - target: all(gf22,synthesis)
+      files:
+      - gf22/sourcecode/tc_clk.sv
+    - target: all(gf22,synthesis,all(not(bowtruckle), not(lethifold)))
+      files:
+      - gf22/sourcecode/sram_snitch.sv
+    - target: all(gf22,synthesis,bowtruckle)
+      files:
+      - gf22/sourcecode/sram_bowtruckle.sv
+    - target: all(gf22,synthesis,lethifold)
+      files:
+      - gf22/sourcecode/sram_bowtruckle.sv
+    - target: baikonur
+      files:
+      - gf22/sourcecode/baikonur/baikonur_governor.sv
+    # SDMA
+    - target:
+      files:
+      - src/axi_dma/src/axi_dma_twod_ext.sv
+      - src/axi_dma/src/axi_dma_perf_counters.sv
+      - src/axi_dma/src/frontend/axi_dma_tc_snitch_fe_id_gen.sv
+      - src/axi_dma/src/frontend/axi_dma_tc_snitch_fe.sv
+    # Test
+    - target: test
+      files:
+      - src/common_verification/src/rand_id_queue.sv
+      - src/axi/src/axi_test.sv
+      - test/cluster/fixture.sv
+      - test/cluster/tb_binary.sv
+      - test/serial_link/fixture.sv
+      - test/serial_link/tb_simple.sv
+      - src/reqrsp_interface/reqrsp_test.sv
+      - test/snitch_cc/fixture_snitch_cc.sv
+      - test/snitch_cc/tb_binary_snitch_cc.sv
+      - test/frankensnitch_cc/fixture_frankensnitch_cc.sv
+      - test/frankensnitch_cc/tb_binary_frankensnitch_cc.sv
+    - target: all(test,umcL65,billywig)
+      files:
+      - umcL65/sourcecode/riscv-dbg/test/jtag_intf.sv
+      - umcL65/sourcecode/riscv-dbg/test/jtag_test.sv
+      - test/billywig/fixture_billywig.sv
+      - test/billywig/tb_binary_billywig.sv
+    - target: all(test,gf22,any(bowtruckle, baikonur))
+      files:
+      - test/baikonur/fixture_baikonur.sv
+      - test/baikonur/tb_binary_governor.sv
+      - test/baikonur/tb_binary_bowtruckle_cluster.sv
+      - test/baikonur/tb_binary_bowtruckle.sv
+      - test/baikonur/tb_memory_access.sv
+    # Used for synthesis and simulation
+    - test/cluster/snitch_cluster_synth_fixture.sv

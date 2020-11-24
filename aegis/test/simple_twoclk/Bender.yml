@@ -1,0 +1,11 @@
+package:
+  name:
+  authors:
+    - "Paul Scheffler <paulsc@iis.ee.ethz.ch>"
+
+
+dependencies:
+  common_cells: { git: "https://github.com/pulp-platform/common_cells", version: 1.19.0 }
+
+sources:
+  - src/simple_twoclk.sv

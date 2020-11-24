@@ -1,0 +1,54 @@
+# This file serves as an example for your top-level CI file.
+# The recommended use is to include a dynamic child pipeline as shown.
+
+before_script:
+  - source aegis.bashrc
+
+aegis_gen:
+  stage: build
+  script:
+    - make
+  cache: {}
+  artifacts:
+    paths:
+      - aegis-*-ci.yml
+
+aegis_synth:
+  stage: test
+  needs:
+    - aegis_gen
+  trigger:
+    include:
+      - artifact: aegis-synth-ci.yml
+        job: aegis_gen
+    strategy: depend
+
+aegis_lint:
+  stage: test
+  needs:
+    - aegis_gen
+  trigger:
+    include:
+      - artifact: aegis-lint-ci.yml
+        job: aegis_gen
+    strategy: depend
+
+aegis_sim:
+  stage: test
+  needs:
+    - aegis_gen
+  trigger:
+    include:
+      - artifact: aegis-sim-ci.yml
+        job: aegis_gen
+    strategy: depend
+
+aegis_doc:
+  stage: test
+  needs:
+    - aegis_gen
+  trigger:
+    include:
+      - artifact: aegis-doc-ci.yml
+        job: aegis_gen
+    strategy: depend

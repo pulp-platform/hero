@@ -1,0 +1,11 @@
+out
+reports
+*.log
+default*
+WORK
+.DE_log*
+*.txt
+logs/*
+scripts/*.synth.tcl
+scripts/*.mems.tcl
+alib

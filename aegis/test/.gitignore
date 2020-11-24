@@ -1,0 +1,5 @@
+**/analyze.tcl
+**/analyze_vivado.tcl
+**/compile_vsim.tcl
+**/flist.txt
+**/.bender

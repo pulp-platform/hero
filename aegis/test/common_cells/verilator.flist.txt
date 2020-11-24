@@ -1,0 +1,3 @@
+${CI_PROJECT_DIR}/test/common_cells/src/ecc_pkg.sv
+${CI_PROJECT_DIR}/test/common_cells/src/ecc_encode.sv
+${CI_PROJECT_DIR}/test/common_cells/src/ecc_decode.sv
