@@ -1,0 +1,11 @@
+{
+    "freepdk45": {
+        "synopsys": {
+            "cluster": {
+                "design": "pulp_cluster_ooc",
+                "analyze": "../../../hardware/scripts/analyze.tcl",
+                "tck": 5
+            }
+        }
+    }
+}
