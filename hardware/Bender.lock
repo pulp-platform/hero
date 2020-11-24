@@ -101,13 +101,6 @@ packages:
     source:
       Git: "https://github.com/pulp-platform/event_unit_flex.git"
     dependencies: []
-  fpga-support:
-    revision: fbf6aa54195bc4398a869886ea2a2ce286b004ca
-    version: ~
-    source:
-      Git: "https://github.com/pulp-platform/fpga-support.git"
-    dependencies:
-      - common_cells
   icache-intc:
     revision: 42aee659c80b682ceb7a74ec3f8fd9ba054fea59
     version: 1.0.0
