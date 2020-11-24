@@ -7,6 +7,7 @@
 import sys
 import json
 from os.path import dirname, realpath
+from os import getenv
 
 script_file, aegis_json, test_path, synth_tcl = sys.argv
 
@@ -27,7 +28,9 @@ if 'synth' not in design:
     design['synth'] = synth_tcl
 
 # Forward CI_PROJECT_DIR to pregenerated TCL scripts
-design['ci_project_dir'] = dirname(dirname(realpath(script_file)))
+env_ci_proj_dir = getenv('CI_PROJECT_DIR')
+if env_ci_proj_dir is not None:
+    design['ci_project_dir'] = env_ci_proj_dir
 
 # Generate synth TCL file for design
 for key, val in design.items():

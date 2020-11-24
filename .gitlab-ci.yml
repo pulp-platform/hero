@@ -10,7 +10,7 @@ before_script:
 aegis_gen:
   stage: build
   script:
-    - export AEGIS_FILE_PATH=$CI_PROJECT_DIR/
+    - export AEGIS_FILE_PATH=$CI_PROJECT_DIR
     - export AEGIS_ROOT=$CI_PROJECT_DIR/aegis
     - make -C aegis
   cache: {}

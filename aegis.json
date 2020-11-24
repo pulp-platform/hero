@@ -1,4 +1,14 @@
+
 {
+    "_build": {
+        "script": "make -C hardware/scripts all",
+        "artifacts": [
+            "hardware/scripts/analyze.tcl",
+            "hardware/scripts/analyze_vivado.tcl",
+            "hardware/scripts/compile_vsim.tcl",
+            "hardware/scripts/flist.txt"
+        ]
+    },
     "freepdk45": {
         "synopsys": {
             "cluster": {
