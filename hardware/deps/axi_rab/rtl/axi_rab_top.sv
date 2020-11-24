@@ -689,7 +689,21 @@ module axi_rab_top
    *
    */
 
-  axi_aw_slv_t aw_buf_oup;
+  axi_aw_slv_t aw_buf_oup, aw_buf_inp;
+  assign aw_buf_inp = '{ id:       s_axi4_awid[i],
+                         addr:     s_axi4_awaddr[i],
+                         len:      s_axi4_awlen[i],
+                         size:     s_axi4_awsize[i],
+                         burst:    s_axi4_awburst[i],
+                         lock:     s_axi4_awlock[i],
+                         prot:     s_axi4_awprot[i],
+                         atop:     s_axi4_awatop[i],
+                         cache:    s_axi4_awcache[i],
+                         region:   s_axi4_awregion[i],
+                         qos:      s_axi4_awqos[i],
+                         user:     s_axi4_awuser[i],
+                         default:  '0};
+
   stream_fifo #(
     .FALL_THROUGH (1'b0),
     .DEPTH        (4),
@@ -699,19 +713,7 @@ module axi_rab_top
     .rst_ni     (Rst_RBI),
     .flush_i    (1'b0),
     .testmode_i (1'b0),
-    .data_i     ('{ id:       s_axi4_awid[i],
-                    addr:     s_axi4_awaddr[i],
-                    len:      s_axi4_awlen[i],
-                    size:     s_axi4_awsize[i],
-                    burst:    s_axi4_awburst[i],
-                    lock:     s_axi4_awlock[i],
-                    prot:     s_axi4_awprot[i],
-                    atop:     s_axi4_awatop[i],
-                    cache:    s_axi4_awcache[i],
-                    region:   s_axi4_awregion[i],
-                    qos:      s_axi4_awqos[i],
-                    user:     s_axi4_awuser[i],
-                    default:  '0}),
+    .data_i     (aw_buf_inp),
     .valid_i    (s_axi4_awvalid[i]),
     .ready_o    (s_axi4_awready[i]),
     .data_o     (aw_buf_oup),
@@ -1018,7 +1020,12 @@ module axi_rab_top
    *  ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝   ╚═╝   ╚══════╝    ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝
    *
    */
-  axi_b_t b_buf_m0_oup;
+  axi_b_t b_buf_m0_oup, b_buf_m0_inp;
+  assign b_buf_m0_inp = '{ id:       m0_axi4_bid[i],
+                           resp:     m0_axi4_bresp[i],
+                           user:     m0_axi4_buser[i],
+                           default:  '0};
+
   stream_fifo #(
     .FALL_THROUGH (1'b0),
     .DEPTH        (4),
@@ -1028,10 +1035,7 @@ module axi_rab_top
     .rst_ni     (Rst_RBI),
     .flush_i    (1'b0),
     .testmode_i (1'b0),
-    .data_i     ('{ id:       m0_axi4_bid[i],
-                    resp:     m0_axi4_bresp[i],
-                    user:     m0_axi4_buser[i],
-                    default:  '0}),
+    .data_i     (b_buf_m0_inp),
     .valid_i    (m0_axi4_bvalid[i]),
     .ready_o    (m0_axi4_bready[i]),
     .data_o     (b_buf_m0_oup),
@@ -1043,7 +1047,12 @@ module axi_rab_top
   assign int_m0_bresp[i] = b_buf_m0_oup.resp;
   assign int_m0_buser[i] = b_buf_m0_oup.user;
 
-  axi_b_t b_buf_m1_oup;
+  axi_b_t b_buf_m1_oup, b_buf_m1_inp;
+  assign b_buf_m1_inp = '{ id:       m1_axi4_bid[i],
+                           resp:     m1_axi4_bresp[i],
+                           user:     m1_axi4_buser[i],
+                           default:  '0};
+
   stream_fifo #(
     .FALL_THROUGH (1'b0),
     .DEPTH        (4),
@@ -1053,10 +1062,7 @@ module axi_rab_top
     .rst_ni     (Rst_RBI),
     .flush_i    (1'b0),
     .testmode_i (1'b0),
-    .data_i     ('{ id:       m1_axi4_bid[i],
-                    resp:     m1_axi4_bresp[i],
-                    user:     m1_axi4_buser[i],
-                    default:  '0}),
+    .data_i     (b_buf_m1_inp),
     .valid_i    (m1_axi4_bvalid[i]),
     .ready_o    (m1_axi4_bready[i]),
     .data_o     (b_buf_m1_oup),
@@ -1133,7 +1139,20 @@ module axi_rab_top
    * ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝     ╚═╝  ╚═╝╚═════╝ ╚═════╝ ╚═╝  ╚═╝
    *
    */
-  axi_ar_slv_t ar_buf_oup;
+  axi_ar_slv_t ar_buf_oup, ar_buf_inp;
+  assign ar_buf_inp = '{ id:       s_axi4_arid[i],
+                         addr:     s_axi4_araddr[i],
+                         len:      s_axi4_arlen[i],
+                         size:     s_axi4_arsize[i],
+                         burst:    s_axi4_arburst[i],
+                         lock:     s_axi4_arlock[i],
+                         prot:     s_axi4_arprot[i],
+                         cache:    s_axi4_arcache[i],
+                         region:   s_axi4_arregion[i],
+                         qos:      s_axi4_arqos[i],
+                         user:     s_axi4_aruser[i],
+                         default:  '0};
+
   stream_fifo #(
     .FALL_THROUGH (1'b0),
     .DEPTH        (4),
@@ -1143,18 +1162,7 @@ module axi_rab_top
     .rst_ni     (Rst_RBI),
     .flush_i    (1'b0),
     .testmode_i (1'b0),
-    .data_i     ('{ id:       s_axi4_arid[i],
-                    addr:     s_axi4_araddr[i],
-                    len:      s_axi4_arlen[i],
-                    size:     s_axi4_arsize[i],
-                    burst:    s_axi4_arburst[i],
-                    lock:     s_axi4_arlock[i],
-                    prot:     s_axi4_arprot[i],
-                    cache:    s_axi4_arcache[i],
-                    region:   s_axi4_arregion[i],
-                    qos:      s_axi4_arqos[i],
-                    user:     s_axi4_aruser[i],
-                    default:  '0}),
+    .data_i     (ar_buf_inp),
     .valid_i    (s_axi4_arvalid[i]),
     .ready_o    (s_axi4_arready[i]),
     .data_o     (ar_buf_oup),
@@ -1318,7 +1326,14 @@ module axi_rab_top
    * ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝
    *
    */
-  axi_r_t r_buf_m0_oup;
+  axi_r_t r_buf_m0_oup, r_buf_m0_inp;
+  assign r_buf_m0_inp = '{ id:       m0_axi4_rid[i],
+                           resp:     m0_axi4_rresp[i],
+                           data:     m0_axi4_rdata[i],
+                           last:     m0_axi4_rlast[i],
+                           user:     m0_axi4_ruser[i],
+                           default:  '0};
+
   stream_fifo #(
     .FALL_THROUGH (1'b0),
     .DEPTH        (4),
@@ -1328,12 +1343,7 @@ module axi_rab_top
     .rst_ni     (Rst_RBI),
     .flush_i    (1'b0),
     .testmode_i (1'b0),
-    .data_i     ('{ id:       m0_axi4_rid[i],
-                    resp:     m0_axi4_rresp[i],
-                    data:     m0_axi4_rdata[i],
-                    last:     m0_axi4_rlast[i],
-                    user:     m0_axi4_ruser[i],
-                    default:  '0}),
+    .data_i     (r_buf_m0_inp),
     .valid_i    (m0_axi4_rvalid[i]),
     .ready_o    (m0_axi4_rready[i]),
     .data_o     (r_buf_m0_oup),
@@ -1347,7 +1357,14 @@ module axi_rab_top
   assign int_m0_rlast[i] = r_buf_m0_oup.last;
   assign int_m0_ruser[i] = r_buf_m0_oup.user;
 
-  axi_r_t r_buf_m1_oup;
+  axi_r_t r_buf_m1_oup, r_buf_m1_inp;
+  assign r_buf_m1_inp = '{ id:       m1_axi4_rid[i],
+                           resp:     m1_axi4_rresp[i],
+                           data:     m1_axi4_rdata[i],
+                           last:     m1_axi4_rlast[i],
+                           user:     m1_axi4_ruser[i],
+                           default:  '0};
+
   stream_fifo #(
     .FALL_THROUGH (1'b0),
     .DEPTH        (4),
@@ -1357,12 +1374,7 @@ module axi_rab_top
     .rst_ni     (Rst_RBI),
     .flush_i    (1'b0),
     .testmode_i (1'b0),
-    .data_i     ('{ id:       m1_axi4_rid[i],
-                    resp:     m1_axi4_rresp[i],
-                    data:     m1_axi4_rdata[i],
-                    last:     m1_axi4_rlast[i],
-                    user:     m1_axi4_ruser[i],
-                    default:  '0}),
+    .data_i     (r_buf_m1_inp),
     .valid_i    (m1_axi4_rvalid[i]),
     .ready_o    (m1_axi4_rready[i]),
     .data_o     (r_buf_m1_oup),

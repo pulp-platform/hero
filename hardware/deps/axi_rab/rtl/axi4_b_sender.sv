@@ -48,6 +48,11 @@ module axi4_b_sender
   logic                    fifo_push;
   logic                    fifo_ready;
   logic                    dropping;
+  meta_t                   data_in;
+
+  assign data_in = '{ prefetch: prefetch_i,
+                      hit:      hit_i,
+                      id:       id_i};
 
   stream_fifo #(
     .FALL_THROUGH (1'b0),
@@ -58,9 +63,7 @@ module axi4_b_sender
     .rst_ni     (axi4_arstn),
     .flush_i    (1'b0),
     .testmode_i (1'b0),
-    .data_i     ('{ prefetch: prefetch_i,
-                    hit:      hit_i,
-                    id:       id_i}),
+    .data_i     (data_in),
     .valid_i    (fifo_push),
     .ready_o    (fifo_ready),
     .data_o     (meta),

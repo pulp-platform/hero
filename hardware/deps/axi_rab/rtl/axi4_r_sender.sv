@@ -63,6 +63,13 @@ module axi4_r_sender
   logic                     burst_ongoing_d,        burst_ongoing_q;
   logic [7:0]               drop_cnt_d,             drop_cnt_q;
 
+  meta_t                    data_in;
+
+  assign data_in = '{ prefetch: prefetch_i,
+                      hit:      hit_i,
+                      id:       id_i,
+                      len:      drop_len_i};
+
   stream_fifo #(
     .FALL_THROUGH (1'b0),
     .DEPTH        (BUFFER_DEPTH),
@@ -72,10 +79,7 @@ module axi4_r_sender
     .rst_ni     (axi4_arstn),
     .flush_i    (1'b0),
     .testmode_i (1'b0),
-    .data_i     ('{ prefetch: prefetch_i,
-                    hit:      hit_i,
-                    id:       id_i,
-                    len:      drop_len_i}),
+    .data_i     (data_in),
     .valid_i    (fifo_push),
     .ready_o    (fifo_ready),
     .data_o     (meta),
