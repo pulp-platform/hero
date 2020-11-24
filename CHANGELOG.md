@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+- Add more extensive environment checks to targets in the root `Makefile`.
 
 ### Changed
 
