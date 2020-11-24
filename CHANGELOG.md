@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Clang/LLVM:
   - Fix handling of function pointers in address space assignment.  Prior to this fix, Clang could
-    crash on code that contains function pointers.
+    crash on code that used function pointers as arguments to functions.
   - Machine code generation for `Xpulpv2` hardware loops:
     - Extend code generation to cases where the basic block layout changes between pre- and
       post-regalloc analyses.
