@@ -122,8 +122,14 @@ module axi4_w_buffer
     logic                         last;
   } axi_w_t;
 
-  axi_w_t axi_w;
+  axi_w_t axi_w, data_in;
   logic   axi_w_valid, axi_w_ready;
+
+  assign data_in = '{ data: s_axi4_wdata,
+                      strb: s_axi4_wstrb,
+                      user: s_axi4_wuser,
+                      last: s_axi4_wlast};
+
   stream_fifo #(
     .FALL_THROUGH (1'b0),
     .DEPTH        (INPUT_BUFFER_DEPTH),
@@ -133,10 +139,7 @@ module axi4_w_buffer
     .rst_ni     (axi4_arstn),
     .flush_i    (1'b0),
     .testmode_i (1'b0),
-    .data_i     ('{ data: s_axi4_wdata,
-                    strb: s_axi4_wstrb,
-                    user: s_axi4_wuser,
-                    last: s_axi4_wlast}),
+    .data_i     (data_in),
     .valid_i    (s_axi4_wvalid),
     .ready_o    (s_axi4_wready),
     .data_o     (axi_w),
@@ -156,9 +159,19 @@ module axi4_w_buffer
     logic                     drop;
   } desc_t;
 
-  desc_t l1;
+  desc_t l1, l1_data_in;
   logic l1_fifo_inp_valid, l1_fifo_inp_ready,
         l1_fifo_oup_valid, l1_fifo_oup_ready;
+
+  assign data_in = '{ prefetch: l1_prefetch_i,
+                    hit:      l1_hit_i,
+                    id:       l1_id_i,
+                    len:      l1_len_i,
+                    master:   l1_master_i,
+                    accept:   l1_accept_i,
+                    save:     l1_save_i,
+                    drop:     l1_drop_i};
+
   stream_fifo #(
     .FALL_THROUGH (1'b0),
     .DEPTH        (L1_FIFO_DEPTH),
@@ -168,14 +181,7 @@ module axi4_w_buffer
     .rst_ni (axi4_arstn),
     .flush_i    (1'b0),
     .testmode_i (1'b0),
-    .data_i     ('{ prefetch: l1_prefetch_i,
-                    hit:      l1_hit_i,
-                    id:       l1_id_i,
-                    len:      l1_len_i,
-                    master:   l1_master_i,
-                    accept:   l1_accept_i,
-                    save:     l1_save_i,
-                    drop:     l1_drop_i}),
+    .data_i     (l1_data_in),
     .valid_i    (l1_fifo_inp_valid),
     .ready_o    (l1_fifo_inp_ready),
     .data_o     (l1),
@@ -267,6 +273,16 @@ module axi4_w_buffer
       .drop_len      ( hum_buf_drop_len_SP                                          )
     );
 
+    desc_t l2_data_in;
+    assign l2_data_in = '{ prefetch: l2_prefetch_i,
+                           hit:      l2_hit_i,
+                           id:       l2_id_i,
+                           len:      l2_len_i,
+                           master:   l2_master_i,
+                           accept:   l2_accept_i,
+                           save:     1'bx, /* unused in L2 */
+                           drop:     l2_drop_i};
+
     stream_fifo #(
       .FALL_THROUGH (1'b0),
       .DEPTH        (L2_FIFO_DEPTH),
@@ -276,14 +292,7 @@ module axi4_w_buffer
       .rst_ni (axi4_arstn),
       .flush_i    (1'b0),
       .testmode_i (1'b0),
-      .data_i     ('{ prefetch: l2_prefetch_i,
-                      hit:      l2_hit_i,
-                      id:       l2_id_i,
-                      len:      l2_len_i,
-                      master:   l2_master_i,
-                      accept:   l2_accept_i,
-                      save:     1'bx, /* unused in L2 */
-                      drop:     l2_drop_i}),
+      .data_i     (l2_data_in),
       .valid_i    (l2_fifo_inp_valid),
       .ready_o    (l2_fifo_inp_ready),
       .data_o     (l2),
