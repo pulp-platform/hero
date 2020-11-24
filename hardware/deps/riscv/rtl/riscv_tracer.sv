@@ -22,6 +22,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
+// pragma translate_off
 `ifndef VERILATOR
 
 import riscv_defines::*;
@@ -1055,3 +1056,4 @@ module riscv_tracer (
 
 endmodule
 `endif
+// pragma translate_on
