@@ -7,7 +7,7 @@ import sys
 import json
 
 BEFORE_SCRIPT = '''before_script:
-  - source aegis.bashrc
+  - source $AEGIS_ROOT/aegis.bashrc
 '''
 
 STAGES_FMT = '''stages:
@@ -17,95 +17,95 @@ STAGES_FMT = '''stages:
 BUILD_STAGE = '''aegis_build:
   stage: aegis_build
   script:
-    - make -C test
+    - make -C $AEGIS_ROOT/test
   artifacts:
     paths:
-      - test/*/analyze.tcl
-      - test/*/analyze_vivado.tcl
-      - test/*/compile_vsim.tcl
-      - test/*/flist.txt
-      - test/*/.bender
+      - $AEGIS_ROOT/test/*/analyze.tcl
+      - $AEGIS_ROOT/test/*/analyze_vivado.tcl
+      - $AEGIS_ROOT/test/*/compile_vsim.tcl
+      - $AEGIS_ROOT/test/*/flist.txt
+      - $AEGIS_ROOT/test/*/.bender
 '''
 
 SYNTH_TARGET_FMT = '''{tname}_{tech}_synth:
   stage: {tech}_synth
   resource_group: dc_explore
   script:
-    - make -C {tech}/synopsys synth_{tname}
+    - make -C $AEGIS_ROOT/{tech}/synopsys synth_{tname}
   dependencies:
     - aegis_build
   artifacts:
     paths:
-      - freepdk45/synopsys/reports/{tname}/*.rpt
+      - $AEGIS_ROOT/freepdk45/synopsys/reports/{tname}/*.rpt
 '''
 
 MOORE_TARGET_FMT = '''{tname}_moore:
   stage: moore
   allow_failure: true
   script:
-    - make -C moore moore_{tname}
+    - make -C $AEGIS_ROOT/moore moore_{tname}
   dependencies:
     - aegis_build
   artifacts:
     when: always
     paths:
-      - moore/reports/{tname}_moore.rpt
-      - moore/out/{tname}.llhd
+      - $AEGIS_ROOT/moore/reports/{tname}_moore.rpt
+      - $AEGIS_ROOT/moore/out/{tname}.llhd
 '''
 
 SV2V_TARGET_FMT = '''{tname}_sv2v:
   stage: sv2v
   allow_failure: true
   script:
-    - make -C sv2v sv2v_{tname}
+    - make -C $AEGIS_ROOT/sv2v sv2v_{tname}
   dependencies:
     - aegis_build
   artifacts:
     when: always
     paths:
-      - sv2v/reports/{tname}_sv2v.rpt
-      - sv2v/out/{tname}.v
+      - $AEGIS_ROOT/sv2v/reports/{tname}_sv2v.rpt
+      - $AEGIS_ROOT/sv2v/out/{tname}.v
 '''
 
 VIVADO_TARGET_FMT = '''{tname}_vivado:
   stage: vivado
   script:
-    - make -C vivado vivado_{tname}
+    - make -C $AEGIS_ROOT/vivado vivado_{tname}
   dependencies:
     - aegis_build
   artifacts:
     when: always
     paths:
-      - vivado/reports/{tname}/*.rpt
-      - vivado/reports/{tname}.vivado.log
+      - $AEGIS_ROOT/vivado/reports/{tname}/*.rpt
+      - $AEGIS_ROOT/vivado/reports/{tname}.vivado.log
 '''
 
 VERIBLE_TARGET_FMT = '''{tname}_verible:
   stage: verible
   allow_failure: true
   script:
-    - make -C verible verible_{tname}
+    - make -C $AEGIS_ROOT/verible verible_{tname}
   dependencies:
     - aegis_build
   artifacts:
     when: always
     paths:
-      - verible/reports/*.rpt
+      - $AEGIS_ROOT/verible/reports/*.rpt
 '''
 
 SPYGLASS_TARGET_FMT = '''{tname}_spyglass:
   stage: spyglass
   allow_failure: true
   script:
-    - make -C spyglass spyglass_{tname}
+    - make -C $AEGIS_ROOT/spyglass spyglass_{tname}
   dependencies:
     - aegis_build
   artifacts:
     when: always
     paths:
-      - spyglass/reports/{tname}.*.elab_summary.rpt
-      - spyglass/reports/{tname}.*.summary.rpt
-      - spyglass/reports/{tname}.*.violations.rpt
+      - $AEGIS_ROOT/spyglass/reports/{tname}.*.elab_summary.rpt
+      - $AEGIS_ROOT/spyglass/reports/{tname}.*.summary.rpt
+      - $AEGIS_ROOT/spyglass/reports/{tname}.*.violations.rpt
 '''
 
 # TODO: Really, we want everything in simdir _except_ work and modelsim.ini... but Gitlab proposal for exclusion is WIP
@@ -113,54 +113,54 @@ VSIM_TARGET_FMT = '''{tname}_vsim:
   stage: vsim
   allow_failure: false
   script:
-    - make -C vsim vsim_{tname}
+    - make -C $AEGIS_ROOT/vsim vsim_{tname}
   dependencies:
     - aegis_build
   artifacts:
     when: always
     paths:
-      - vsim/{tname}.simdir/transcript
+      - $AEGIS_ROOT/vsim/{tname}.simdir/transcript
 '''
 
 GRAPH_TARGET_FMT = '''{tname}_graph:
   stage: graph
   allow_failure: true
   script:
-    - make -C graph graph_{tname}
+    - make -C $AEGIS_ROOT/graph graph_{tname}
   dependencies:
     - aegis_build
   artifacts:
     when: always
     paths:
-      - graph/out/{tname}.gv
-      - graph/out/{tname}.*
+      - $AEGIS_ROOT/graph/out/{tname}.gv
+      - $AEGIS_ROOT/graph/out/{tname}.*
 '''
 
 MORTY_TARGET_FMT = '''{tname}_morty:
   stage: morty
   allow_failure: true
   script:
-    - make -C morty morty_{tname}
+    - make -C $AEGIS_ROOT/morty morty_{tname}
   dependencies:
     - aegis_build
   artifacts:
     when: always
     paths:
-      - morty/doc/{tname}/*
-      - morty/reports/{tname}.rpt
+      - $AEGIS_ROOT/morty/doc/{tname}/*
+      - $AEGIS_ROOT/morty/reports/{tname}.rpt
 '''
 
 # TODO: We likely need to keep separate directories for complex simulations, but this works so far
 VERILATOR_TARGET_FMT = '''{tname}_verilator:
   stage: verilator
   script:
-    - make -C verilator verilator_{tname}
+    - make -C $AEGIS_ROOT/verilator verilator_{tname}
   dependencies:
     - aegis_build
   artifacts:
     when: always
     paths:
-      - verilator/{tname}.*.log
+      - $AEGIS_ROOT/verilator/{tname}.*.log
 '''
 
 _, aegis_json, sub_pipeline = sys.argv
