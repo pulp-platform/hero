@@ -31,7 +31,7 @@ package automatic pulp_cluster_cfg_pkg;
   localparam int unsigned ICACHE_SIZE = 4096; // [B], must be a power of 2
   // -- TCDM
   localparam int unsigned N_TCDM_BANKS = 2*N_CORES; // must be a power of 2
-  localparam int unsigned TCDM_SIZE = 128*1024; // [B], must be a power of 2
+  localparam int unsigned TCDM_SIZE = 64*1024; // [B], must be a power of 2
   // -- L2 Memory (not inside cluster)
   localparam int unsigned L2_SIZE = 128*1024; // [B], must be a power of 2
 
