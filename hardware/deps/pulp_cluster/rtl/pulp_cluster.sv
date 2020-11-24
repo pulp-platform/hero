@@ -1052,18 +1052,20 @@ module pulp_cluster
     logic [$clog2(TCDM_NUM_ROWS)-1:0] addr;
     assign addr = s_tcdm_bus_sram[i].add;
 
-    sram #(
-      .N_WORDS    (TCDM_NUM_ROWS),
-      .DATA_WIDTH (32)
-    ) i_mem (
-      .clk_i    (clk_cluster),
-      .rst_ni   (rst_ni),
-      .req_i    (s_tcdm_bus_sram[i].req),
-      .addr_i   (addr),
-      .we_i     (~s_tcdm_bus_sram[i].wen),
-      .wdata_i  (s_tcdm_bus_sram[i].wdata),
-      .be_i     (s_tcdm_bus_sram[i].be),
-      .rdata_o  (s_tcdm_bus_sram[i].rdata)
+    tc_sram #(
+      .NumWords   ( TCDM_NUM_ROWS  ), // specify explicitly for aegis!
+      .DataWidth  ( 32             ), // specify explicitly for aegis!
+      .ByteWidth  ( 8              ), // specify explicitly for aegis!
+      .NumPorts   ( 1              )  // specify explicitly for aegis!
+    ) i_tc_sram (
+      .clk_i      ( clk_cluster               ),
+      .rst_ni     ( rst_ni                    ),
+      .req_i      ( s_tcdm_bus_sram[i].req    ),
+      .addr_i     ( addr                      ),
+      .we_i       ( ~s_tcdm_bus_sram[i].wen   ),
+      .wdata_i    ( s_tcdm_bus_sram[i].wdata  ),
+      .be_i       ( s_tcdm_bus_sram[i].be     ),
+      .rdata_o    ( s_tcdm_bus_sram[i].rdata  )
     );
   end
 
