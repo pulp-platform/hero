@@ -1,6 +1,5 @@
 
 # ---- Test-specific variables ----
-vsimflags_axi = --vlog-arg="-svinputport=compat" --vlog-arg="-override_timescale 1ns/1ps" --vlog-arg="-suppress 2583"
 # ---------------------------------
 
 # The CI runner may change project root after script generation -> substitute it with a variable
