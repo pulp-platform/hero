@@ -87,8 +87,8 @@ static inline void   swapfunc (char *, char *, int, int);
  */
 #define swapcode(TYPE, parmi, parmj, n) {       \
   long i = (n) / sizeof (TYPE);             \
-  TYPE *pi = (TYPE *) (parmi);      \
-  TYPE *pj = (TYPE *) (parmj);      \
+  __device TYPE *pi = (__device TYPE *) (parmi);      \
+  __device TYPE *pj = (__device TYPE *) (parmj);      \
   do {                      \
     TYPE    t = *pi;        \
     *pi++ = *pj;                \
@@ -113,9 +113,9 @@ swapfunc (char *a,
 
 #define swap(a, b)                  \
   if (swaptype == 0) {              \
-    long t = *(long *)(a);          \
-    *(long *)(a) = *(long *)(b);        \
-    *(long *)(b) = t;           \
+    long t = *(__device long *)(a);          \
+    *(__device long *)(a) = *(__device long *)(b);        \
+    *(__device long *)(b) = t;           \
   } else                        \
     swapfunc(a, b, es, swaptype)
 
@@ -189,24 +189,24 @@ qsort (void *a,
   int cmp_result;
   int swaptype, swap_cnt;
   size_t recursion_level = 0;
-  struct { void *a; size_t n; } parameter_stack[PARAMETER_STACK_LEVELS];
+  struct {__device void *a; size_t n;} parameter_stack[PARAMETER_STACK_LEVELS];
 
   SWAPINIT(a, es);
 loop:   swap_cnt = 0;
   if (n < 7) {
     /* Short arrays are insertion sorted. */
-    for (pm = (char *) a + es; pm < (char *) a + n * es; pm += es)
-      for (pl = pm; pl > (char *) a && CMP(thunk, pl - es, pl) > 0;
+    for (pm = (__device char *) a + es; pm < (__device char *) a + n * es; pm += es)
+      for (pl = pm; pl > (__device char *) a && CMP(thunk, pl - es, pl) > 0;
            pl -= es)
         swap(pl, pl - es);
     goto pop;
   }
 
   /* Select a pivot element, move it to the left. */
-  pm = (char *) a + (n / 2) * es;
+  pm = (__device char *) a + (n / 2) * es;
   if (n > 7) {
     pl = a;
-    pn = (char *) a + (n - 1) * es;
+    pn = (__device char *) a + (n - 1) * es;
     if (n > 40) {
       d = (n / 8) * es;
       pl = med3(pl, pl + d, pl + 2 * d, cmp, thunk);
@@ -221,8 +221,8 @@ loop:   swap_cnt = 0;
    * Sort the array relative the pivot in four ranges as follows:
    * { elems == pivot, elems < pivot, elems > pivot, elems == pivot }
    */
-  pa = pb = (char *) a + es;
-  pc = pd = (char *) a + (n - 1) * es;
+  pa = pb = (__device char *) a + es;
+  pc = pd = (__device char *) a + (n - 1) * es;
   for (;;) {
     /* Scan left to right stopping at first element > pivot. */
     while (pb <= pc && (cmp_result = CMP(thunk, pb, a)) <= 0) {
@@ -253,8 +253,9 @@ loop:   swap_cnt = 0;
     pc -= es;
   }
   if (swap_cnt == 0) {  /* Switch to insertion sort */
-    for (pm = (char *) a + es; pm < (char *) a + n * es; pm += es)
-      for (pl = pm; pl > (char *) a && CMP(thunk, pl - es, pl) > 0;
+    for (pm = (__device char *) a + es;
+         pm < (__device char *) a + n * es; pm += es)
+      for (pl = pm; pl > (__device char *) a && CMP(thunk, pl - es, pl) > 0;
            pl -= es)
         swap(pl, pl - es);
     goto pop;
@@ -264,8 +265,8 @@ loop:   swap_cnt = 0;
    * Rearrange the array in three parts sorted like this:
    * { elements < pivot, elements == pivot, elements > pivot }
    */
-  pn = (char *) a + n * es;
-  r = min(pa - (char *)a, pb - pa);
+  pn = (__device char *) a + n * es;
+  r = min(pa - (__device char *)a, pb - pa);
   vecswap(a, pb - r, r);
   r = min(pd - pc, pn - pd - es);
   vecswap(pb, pn - r, r);
