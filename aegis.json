@@ -11,6 +11,11 @@
     },
     "freepdk45": {
         "synopsys": {
+            "cluster": {
+                "design": "pulp_cluster_ooc",
+                "analyze": "../../../hardware/scripts/analyze.tcl",
+                "tck": 5
+            },
             "dmac": {
                 "design": "dmac_wrap_ooc",
                 "analyze": "../../../hardware/scripts/analyze.tcl",
@@ -19,6 +24,12 @@
         }
     },
     "gtable": {
+        "cluster": {
+            "gapi_key": "/home/tbenz/gapi.json",
+            "table_name": "Aegis-Hero",
+            "synde_rpt_dir": "../freepdk45/synopsys/reports/cluster",
+            "kge_conversion": 1877.2
+        },
         "dmac": {
             "gapi_key": "/home/tbenz/gapi.json",
             "table_name": "Aegis-Hero",
