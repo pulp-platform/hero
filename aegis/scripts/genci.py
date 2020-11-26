@@ -163,17 +163,20 @@ VERILATOR_TARGET_FMT = '''{tname}_verilator:
 
 GTABLE_TARGET_FMT = '''{tname}_gtable:
   stage: gtable
+  allow_failure: true
   script:
     - make -C {aegis_root}/gtable gtable_{tname}
   dependencies:
     - aegis_build
+    - {dependencies}
 '''
 
 _, aegis_json, sub_pipeline, aegis_root, aegis_file_path = sys.argv
 
-# make paths absolute
-aegis_root = os.path.abspath(aegis_root)
-aegis_file_path = os.path.abspath(aegis_file_path)
+env_ci_proj_dir = os.getenv('CI_PROJECT_DIR')
+if env_ci_proj_dir is not None:
+    aegis_root      = '$CI_PROJECT_DIR/' + aegis_root
+    aegis_file_path = '$CI_PROJECT_DIR/' + aegis_file_path
 
 stages = ['aegis_build']
 tgt_lines = []
@@ -213,7 +216,12 @@ with open(aegis_json) as file:
             elif tech == 'gtable':
                 stages.append('gtable')
                 for tname in tools:
-                    tgt_lines.append(GTABLE_TARGET_FMT.format(tname=tname, aegis_root=aegis_root))
+                    dep_candidates = []
+                    for s in stages:
+                        if 'synth' in s:
+                          dep_candidates.append(tname + '_' + s)
+                    dependencies = '    - '.join(dep_candidates)
+                    tgt_lines.append(GTABLE_TARGET_FMT.format(tname=tname, aegis_root=aegis_root, dependencies=dependencies))
         if sub_pipeline == 'sim':
             if tech == 'vsim':
                 stages.append('vsim')
