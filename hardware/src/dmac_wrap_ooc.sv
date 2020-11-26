@@ -186,8 +186,8 @@ module dmac_wrap_ooc (
   output logic  [8:0]   ctrl_r_id,
   output logic [31:0]   ctrl_r_rdata,
 
-  output logic [3:0]    term_event_o,
-  output logic [3:0]    term_irq_o,
+  output logic [7:0]    term_event_o,
+  output logic [7:0]    term_irq_o,
   output logic          term_event_pe_o,
   output logic          term_irq_pe_o,
   output logic          busy_o
