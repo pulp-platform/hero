@@ -31,6 +31,7 @@ sources:
   - src/soc_bus.sv
   - src/soc_ctrl_regs.sv
   - src/sram.sv
+  - src/dmac_wrap_ooc.sv
   # Level 1
   - src/l2_mem.sv
   - src/pulp_cluster_ooc.sv
