@@ -59,7 +59,7 @@ def synde_parse_timing(rpt: str) -> dict:
     ret_paths = []
     for path in paths:
         path = path.replace('\n  ', '\n')                     # Undo bizarre indent
-        path_basic, lpath_rows, reqarr, slack = re.split(SYNDE_TIMING_HIERDIV_REGEX, path)
+        path_basic, lpath_rows, reqarr, slack, _, _, _ = re.split(SYNDE_TIMING_HIERDIV_REGEX, path)
         lpath_rows = re.sub(r'\n\s+', '  ', lpath_rows)       # Undo table row splitting if any
         path_dict = synde_parse_keyvals(path_basic)
         path_dict['slack'] = float(re.findall(SYNDE_TIMING_SLACK_REGEX, slack)[0])
@@ -129,7 +129,13 @@ def synde_parse_dp_extraction(rpt: str) -> dict:
 
 
 def synde_parse_mismatches(rpt: str) -> dict:
-    basic, table = re.split(SYNDE_MISM_TABLEDIV_REGEX, rpt)
+    synde_mism = re.split(SYNDE_MISM_TABLEDIV_REGEX, rpt)
+    if len(synde_mism) == 2:
+        [basic, table] = synde_mism
+    else:
+        basic = synde_mism[0]
+        table = ''
+
     table.strip('\n')
     ret = synde_parse_keyvals(basic)
     mism = []

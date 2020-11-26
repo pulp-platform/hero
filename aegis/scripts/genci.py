@@ -161,6 +161,14 @@ VERILATOR_TARGET_FMT = '''{tname}_verilator:
       - {aegis_root}/verilator/{tname}.*.log
 '''
 
+GTABLE_TARGET_FMT = '''{tname}_gtable:
+  stage: gtable
+  script:
+    - make -C {aegis_root}/gtable gtable_{tname}
+  dependencies:
+    - aegis_build
+'''
+
 _, aegis_json, sub_pipeline, aegis_root, aegis_file_path = sys.argv
 
 # make paths absolute
@@ -202,6 +210,10 @@ with open(aegis_json) as file:
                 stages.append(tech + '_synth')
                 for tname in tools['synopsys']:
                     tgt_lines.append(SYNTH_TARGET_FMT.format(tname=tname, tech=tech, aegis_root=aegis_root))
+            elif tech == 'gtable':
+                stages.append('gtable')
+                for tname in tools:
+                    tgt_lines.append(GTABLE_TARGET_FMT.format(tname=tname, aegis_root=aegis_root))
         if sub_pipeline == 'sim':
             if tech == 'vsim':
                 stages.append('vsim')
