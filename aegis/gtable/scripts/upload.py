@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser(description='Upload to google docs for Aegis')
 parser.add_argument('aegis_json', type=str, help='the aegis json containing the tests')
 parser.add_argument('test_name', type=str, help='the test to execute')
 parser.add_argument('commit', type=str, help='the git commit')
+parser.add_argument('git_info', type=str, help='branch or tag')
 args = parser.parse_args()
 
 with open(args.aegis_json) as file:
@@ -37,22 +38,23 @@ current_entry = len(sheet.col_values(1)[0:]) + 1
 
 sheet.update_cell(current_entry, 1, datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
 sheet.update_cell(current_entry, 2, args.commit)
+sheet.update_cell(current_entry, 3, args.git_info)
 
 # area
-sheet.update_cell(current_entry, 3, parsed_rpt['area']['Combinational area'] / design['kge_conversion'])
-sheet.update_cell(current_entry, 4, parsed_rpt['area']['Buf/Inv area'] / design['kge_conversion'])
-sheet.update_cell(current_entry, 5, parsed_rpt['area']['Noncombinational area'] / design['kge_conversion'])
-sheet.update_cell(current_entry, 6, parsed_rpt['area']['Macro/Black Box area'] / design['kge_conversion'])
-sheet.update_cell(current_entry, 7, parsed_rpt['area']['Total cell area'] / design['kge_conversion'])
+sheet.update_cell(current_entry, 4, parsed_rpt['area']['Combinational area'] / design['kge_conversion'])
+sheet.update_cell(current_entry, 5, parsed_rpt['area']['Buf/Inv area'] / design['kge_conversion'])
+sheet.update_cell(current_entry, 6, parsed_rpt['area']['Noncombinational area'] / design['kge_conversion'])
+sheet.update_cell(current_entry, 7, parsed_rpt['area']['Macro/Black Box area'] / design['kge_conversion'])
+sheet.update_cell(current_entry, 8, parsed_rpt['area']['Total cell area'] / design['kge_conversion'])
 
 #qor
-sheet.update_cell(current_entry,  8, parsed_rpt['qor']['Levels of Logic'])
-sheet.update_cell(current_entry,  9, 1000.0 / parsed_rpt['qor']['Critical Path Length'])
-sheet.update_cell(current_entry, 10, 1000.0 / parsed_rpt['qor']['Critical Path Clk Period'])
+sheet.update_cell(current_entry,  9, parsed_rpt['qor']['Levels of Logic'])
+sheet.update_cell(current_entry, 10, 1000.0 / parsed_rpt['qor']['Critical Path Length'])
+sheet.update_cell(current_entry, 11, 1000.0 / parsed_rpt['qor']['Critical Path Clk Period'])
 
 #path
 path_eles = []
 for ele in parsed_rpt['timing']['paths'][0]['elems']:
     path_eles.append(str(ele._asdict()['point']))
-sheet.update_cell(current_entry,  11,  ' <---> '.join(path_eles))
+sheet.update_cell(current_entry,  12,  ' <---> '.join(path_eles))
 
