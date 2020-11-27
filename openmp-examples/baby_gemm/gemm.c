@@ -1,6 +1,6 @@
 #include "gemm.h"
 
-#include <dmatransfer.h>
+//#include <dmatransfer.h>
 #include <hero-target.h>
 #include <cmux.h>
 #include <cmux.c>
@@ -126,7 +126,7 @@ void gemm_zero(float ALPHA, float *A, float *B, float *C)
 //  #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:M][0:N]) map(to: matA[0:M][0:K], matB[0:K][0:N])
   //map(to: matA[0:M][0:K], matB[0:K][0:N])
     {
-//    #pragma omp parallel for private(m, n, k, temp) num_threads(8)
+    #pragma omp parallel for private(m, n, k, temp) num_threads(8)
 //    #pragma omp for collapse(2) private(m, n, k, temp)
     for(m = 0; m < M; ++m){
       for(k = 0; k < K; ++k){
