@@ -18,10 +18,12 @@ __omp_offloading_803_1108bea_gemm_zero_l126 __omp_offloading_803_1108d79_gemm_ze
 __omp_offloading_803_1108d67_gemm_zero_l125 __omp_offloading_803_1108d0b_gemm_zero_l125
 __omp_offloading_803_1108d58_gemm_zero_l125 __omp_offloading_803_1108d62_gemm_zero_l125
 __omp_offloading_803_1108d57_gemm_zero_l126 __omp_offloading_803_1108d6c_gemm_zero_l125
-__omp_offloading_803_1108d7b_gemm_zero_l125 __omp_offloading_803_1108d52_gemm_zero_l125"
+__omp_offloading_803_1108d7b_gemm_zero_l125 __omp_offloading_803_1108d52_gemm_zero_l125
+__omp_offloading_803_1108e4f_gemm_zero_l125 __omp_offloading_803_1108fb0_gemm_zero_l125
+__omp_offloading_803_1108fb1_gemm_zero_l125"
 source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh
 
 export HERO_INSTALL=/scratch/mmaxim/hero/install
 source ${HERO_INSTALL}/../env/exilzcu102.sh
 make default-as=pulp clean all
-scp baby_gemm root@172.31.182.80:/mnt/mmaxim/crosscompiled
+scp baby_gemm root@hero-zcu102-06:/home/root/mmaxim/
