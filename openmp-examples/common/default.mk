@@ -14,7 +14,6 @@ LINK := llvm-link
 COB := clang-offload-bundler
 DIS := llvm-dis
 
-DMAOBJ = /scratch/mmaxim/hero/openmp-examples/polybench-acc/common/dmatransfer.o
 TARGET_HOST = ${HERO_TOOLCHAIN_HOST_TARGET}
 TARGET_DEV = riscv32-hero-unknown-elf
 
