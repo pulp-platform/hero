@@ -1057,7 +1057,7 @@ module pulp_cluster
       .DataWidth  ( 32             ), // specify explicitly for aegis!
       .ByteWidth  ( 8              ), // specify explicitly for aegis!
       .NumPorts   ( 1              )  // specify explicitly for aegis!
-    ) i_mem (
+    ) i_tc_sram (
       .clk_i      ( clk_cluster               ),
       .rst_ni     ( rst_ni                    ),
       .req_i      ( s_tcdm_bus_sram[i].req    ),

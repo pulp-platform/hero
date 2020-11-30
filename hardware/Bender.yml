@@ -20,10 +20,13 @@ export_include_dirs:
 
 sources:
   # generic APB modules; to be moved to APB repository
+  #- src/tc_sram.sv
   - src/apb/apb_bus.sv
   - src/apb/apb_ro_regs.sv
   - src/apb/apb_rw_regs.sv
   - src/apb/apb_bus_wrap.sv
+  - src/pulp_cluster_dma_frontend_regs.sv
+  - src/pulp_cluster_dma_frontend.sv
   # Level 0
   - src/axi_rab_wrap.sv
   - src/hero_axi_mailbox.sv
@@ -31,11 +34,12 @@ sources:
   - src/soc_bus.sv
   - src/soc_ctrl_regs.sv
   - src/sram.sv
-  - src/dmac_wrap_ooc.sv
+  - src/dmac_wrap.sv
   # Level 1
   - src/l2_mem.sv
   - src/pulp_cluster_ooc.sv
   - src/soc_peripherals.sv
+  - src/dmac_wrap_ooc.sv
   # Level 2
   - src/pulp.sv
   # Level 3
