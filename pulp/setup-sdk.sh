@@ -12,6 +12,7 @@ if [ "$#" -ne 1 ] || [ ! -f "${THIS_DIR}/sdk/configs/${1}.sh" ]; then
     exit
 fi
 export PULP_RISCV_GCC_TOOLCHAIN=$HERO_INSTALL
+export CMUX_ROOT=$HERO_INSTALL/../cmux
 cd ${THIS_DIR}/sdk
 pulp_chip=${1}
 source configs/${1}.sh
