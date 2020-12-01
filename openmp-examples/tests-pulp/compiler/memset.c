@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-#include "test.h"
-#include <assert.h>
-#include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
+#include <string.h> // memset()
 #include "hero-target.h"
 
 #define SIZE 64
@@ -37,11 +34,8 @@ unsigned check_bytes(char *arr, char val, int len) {
 // Issue #25 claims that memset doesn't do anything. Here we test that.
 unsigned test_memset()
 {
-
   unsigned n_errors = 0;
-
   uint32_t *arr = (__device uint32_t *) hero_l1malloc(SIZE * sizeof(uint32_t));
-
   for (char c = 0; c < ITER; c++) {
     printf("Memset pass %d\n", (int)c);
     memset(arr, c, SIZE * sizeof(uint32_t));
@@ -50,5 +44,4 @@ unsigned test_memset()
   printf("Memset finished with %u errors\n", n_errors);
 
   return n_errors;
-
 }

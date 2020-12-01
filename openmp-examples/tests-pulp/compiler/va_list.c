@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#include "test.h"
-#include <assert.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include "hero-target.h"
 
@@ -36,7 +33,6 @@ uint32_t read_n_vaargs(uint32_t n, ...) {
 
 unsigned test_va_list()
 {
-
   unsigned n_errors = 0;
 
   printf("Read 1 argument.\n");

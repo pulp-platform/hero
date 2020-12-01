@@ -1,6 +1,10 @@
 #ifndef __REPORT_H__
 #define __REPORT_H__
 
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h> // abort()
+
 void __assert_func(const char* file, int line, const char* funcname, const char* assertion) {
   printf("Assertion `%s' in %s (%s:%d) failed!\n", assertion, funcname, file, line);
   abort();
