@@ -90,11 +90,11 @@ module dmac_wrap
   `AXI_TYPEDEF_REQ_T(req_t, aw_chan_t, w_chan_t, ar_chan_t)
   `AXI_TYPEDEF_RESP_T(resp_t, b_chan_t, r_chan_t)
   // BUS definitions
-  req_t  dma_req;
-  resp_t dma_rsp;
+  req_t  dma_req, tcdm_req, soc_req;
+  resp_t dma_rsp, tcdm_rsp, soc_rsp;
   // interface to structs
-  `AXI_ASSIGN_FROM_REQ(ext_master, dma_req)
-  `AXI_ASSIGN_TO_RESP(dma_rsp, ext_master)
+  `AXI_ASSIGN_FROM_REQ(ext_master, soc_req)
+  `AXI_ASSIGN_TO_RESP(soc_rsp, ext_master)
 
   pulp_cluster_dma_frontend #(
     .NumCores          ( NB_CORES        ),
@@ -102,8 +102,8 @@ module dmac_wrap
     .DmaAxiIdWidth     ( AXI_ID_WIDTH    ),
     .DmaDataWidth      ( AXI_DATA_WIDTH  ),
     .DmaAddrWidth      ( AXI_ADDR_WIDTH  ),
-    .AxiAxReqDepth     ( 0               ),
-    .TfReqFifoDepth    ( 0               ),
+    .AxiAxReqDepth     ( 2               ),
+    .TfReqFifoDepth    ( 2               ),
     .axi_req_t         ( req_t           ),
     .axi_res_t         ( resp_t          )
   ) i_pulp_cluster_dma_frontend (
@@ -137,5 +137,78 @@ module dmac_wrap
     .term_event_pe_o         ( term_event_pe_o         ),
     .term_irq_pe_o           ( term_irq_pe_o           )
   );
+
+  // xbar
+  localparam int unsigned NumRules = 3;
+  typedef axi_pkg::xbar_rule_32_t xbar_rule_t;
+  axi_pkg::xbar_rule_32_t [NumRules-1:0] addr_map;
+  logic [31:0] cluster_base_addr;
+  assign cluster_base_addr = 32'h1000_0000; /* + (cluster_id_i << 22);*/
+  assign addr_map = '{
+    '{ // SoC low
+      start_addr: 32'h0000_0000,
+      end_addr:   cluster_base_addr,
+      idx:        0
+    },
+    '{ // TCDM
+      start_addr: cluster_base_addr,
+      end_addr:   cluster_base_addr + 24'h10_0000,
+      idx:        1
+    },
+    '{ // SoC high
+      start_addr: cluster_base_addr + 24'h10_0000,
+      end_addr:   32'hffff_ffff,
+      idx:        0
+    }
+  };
+  localparam NumMstPorts = 2;
+  localparam NumSlvPorts = 1;
+
+  /* verilator lint_off WIDTHCONCAT */
+  localparam axi_pkg::xbar_cfg_t XbarCfg = '{
+    NoSlvPorts:                    NumSlvPorts,
+    NoMstPorts:                    NumMstPorts,
+    MaxMstTrans:                             2,
+    MaxSlvTrans:                             2,
+    FallThrough:                          1'b0,
+    LatencyMode:        axi_pkg::CUT_ALL_PORTS,
+    AxiIdWidthSlvPorts:           AXI_ID_WIDTH,
+    AxiIdUsedSlvPorts:            AXI_ID_WIDTH,
+    AxiAddrWidth:               AXI_ADDR_WIDTH,
+    AxiDataWidth:               AXI_DATA_WIDTH,
+    NoAddrRules:                      NumRules
+  };
+  /* verilator lint_on WIDTHCONCAT */
+
+  axi_xbar #(
+    .Cfg          ( XbarCfg                 ),
+    .slv_aw_chan_t( aw_chan_t               ),
+    .mst_aw_chan_t( aw_chan_t               ),
+    .w_chan_t     ( w_chan_t                ),
+    .slv_b_chan_t ( b_chan_t                ),
+    .mst_b_chan_t ( b_chan_t                ),
+    .slv_ar_chan_t( ar_chan_t               ),
+    .mst_ar_chan_t( ar_chan_t               ),
+    .slv_r_chan_t ( r_chan_t                ),
+    .mst_r_chan_t ( r_chan_t                ),
+    .slv_req_t    ( req_t                   ),
+    .slv_resp_t   ( resp_t                  ),
+    .mst_req_t    ( req_t                   ),
+    .mst_resp_t   ( resp_t                  ),
+    .rule_t       ( axi_pkg::xbar_rule_32_t )
+  ) i_dma_axi_xbar (
+    .clk_i                  ( clk_i                 ),
+    .rst_ni                 ( rst_ni                ),
+    .test_i                 ( test_mode_i           ),
+    .slv_ports_req_i        ( dma_req               ),
+    .slv_ports_resp_o       ( dma_rsp               ),
+    .mst_ports_req_o        ( { tcdm_req, soc_req } ),
+    .mst_ports_resp_i       ( { tcdm_rsp, soc_rsp } ),
+    .addr_map_i             ( addr_map              ),
+    .en_default_mst_port_i  ( '0                    ),
+    .default_mst_port_i     ( '0                    )
+  );
+
+  assign tcdm_rsp = '0;
 
 endmodule : dmac_wrap

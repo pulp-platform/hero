@@ -25,6 +25,11 @@ sources:
   - src/apb/apb_ro_regs.sv
   - src/apb/apb_rw_regs.sv
   - src/apb/apb_bus_wrap.sv
+  - src/axi_dma_data_path.sv
+  - src/axi_dma_data_mover.sv
+  - src/axi_dma_burst_reshaper.sv
+  - src/axi_dma_backend.sv
+  - src/transfer_id_gen.sv
   - src/pulp_cluster_dma_frontend_regs.sv
   - src/pulp_cluster_dma_frontend.sv
   # Level 0
