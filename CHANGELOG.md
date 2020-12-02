@@ -14,11 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Clang/LLVM:
-  - Enable compilation with debug symbols (-g). Prior to this fix, compilation with debug symbols
+  - Enable compilation with debug symbols (`-g`). Prior to this fix, compilation with debug symbols
     would fail when legalizing 64-bit load/stores.
   - Fix handling of function pointers in address space assignment.  Prior to this fix, Clang could
     crash on code that used function pointers as arguments to functions.
-  - Fix handling of va_list in address space assignment. Prior to this fix, va_list could not be
+  - Fix handling of `va_list` in address space assignment. Prior to this fix, `va_list` could not be
     used on HERO targets.
   - Machine code generation for `Xpulpv2` hardware loops:
     - Extend code generation to cases where the basic block layout changes between pre- and
