@@ -15,8 +15,12 @@
  */
 
 #include <assert.h>
-#include "tests.h"
 #include "report.h"
+
+unsigned test_atomic();
+unsigned test_floats();
+unsigned test_intrinsics();
+unsigned test_m_instrs();
 
 int main(int argc, char *argv[])
 {

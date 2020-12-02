@@ -15,8 +15,16 @@
  */
 
 #include <assert.h>
-#include "tests.h"
 #include "report.h"
+
+int test_omp_parallel_sections_firstprivate();
+int test_omp_parallel_sections_lastprivate();
+int test_omp_parallel_sections_private();
+int test_omp_parallel_sections_reduction();
+int test_omp_section_firstprivate();
+int test_omp_section_lastprivate();
+int test_omp_section_private();
+int test_omp_sections_reduction();
 
 int main(int argc, char *argv[])
 {

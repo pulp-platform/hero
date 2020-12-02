@@ -15,8 +15,9 @@
  */
 
 #include <assert.h>
-#include "tests.h"
 #include "report.h"
+
+int test_omp_atomic();
 
 int main(int argc, char *argv[])
 {

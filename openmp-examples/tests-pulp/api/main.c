@@ -15,8 +15,9 @@
  */
 
 #include <assert.h>
-#include "tests.h"
 #include "report.h"
+
+unsigned test_dma();
 
 int main(int argc, char *argv[])
 {

@@ -15,8 +15,10 @@
  */
 
 #include <assert.h>
-#include "tests.h"
 #include "report.h"
+
+int gcc_omp_parallel_for_schedule_dynamic();
+int gcc_omp_parallel_for_schedule_static();
 
 int main(int argc, char *argv[])
 {
