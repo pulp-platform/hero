@@ -17,6 +17,7 @@
 #include <hero-target.h>
 #include <assert.h>
 #include <omp.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
