@@ -43,18 +43,23 @@ unroll_cflags=( "" "-mllvm -unroll-count=1 -mllvm -unroll-full-max-count=1" )
 # macro. This vector will compile each benchmark (and combination of other
 # vector values) once with DMA, and once without.
 polydma_cflags=( "" "-DPOLYBENCH_DMA")
+# Compile with and without debug symbols. Issue 25 reports that it is not
+# possible to compile programs with debug flags.
+debug_cflags=( "-g" "")
 
 # Try the relevant combinations for the tests-pulp
 for only in "${only_makeflags[@]}"; do
   makeflags="$only";
   for unroll in "${unroll_cflags[@]}"; do
-    cflags="-v $unroll"
-    for d in openmp-examples/tests-pulp/*/; do
-      if [ $(basename $d) = "include" ]; then
-        continue
-      fi
-      echo "TEST: $d    $makeflags    $cflags"
-      make V=1 -C $d clean all $makeflags cflags="$cflags"
+    for debug in "${debug_cflags[@]}"; do
+      cflags="-v $unroll $debug"
+      for d in openmp-examples/tests-pulp/*/; do
+        if [ $(basename $d) = "include" ]; then
+          continue
+        fi
+        echo -e "\e[96mTEST: $d    $makeflags    $cflags\e[0m"
+        make V=1 -C $d clean all $makeflags cflags="$cflags"
+      done
     done
   done
 done
@@ -67,13 +72,15 @@ cflags=""
 for defas in "${defas_makeflags[@]}"; do
   makeflags="$defas";
   for unroll in "${unroll_cflags[@]}"; do
-    cflags="$unroll"
-    for d in helloworld mm-large mm-small sobel-filter; do
-      if [ $(basename $d) = "common" ]; then
-        continue
-      fi
-      echo "TEST: $d    $makeflags    $cflags"
-      make V=1 -C openmp-examples/$d clean all $makeflags cflags="$cflags"
+    for debug in "${debug_cflags[@]}"; do
+      cflags="$unroll $debug"
+      for d in helloworld mm-large mm-small sobel-filter; do
+        if [ $(basename $d) = "common" ]; then
+          continue
+        fi
+        echo -e "\e[96mTEST: $d    $makeflags    $cflags\e[0m"
+        make V=1 -C openmp-examples/$d clean all $makeflags cflags="$cflags"
+      done
     done
   done
 done
@@ -85,13 +92,15 @@ for only in "${only_makeflags[@]}"; do
     makeflags="$only $defas";
     for unroll in "${unroll_cflags[@]}"; do
       for polydma in "${polydma_cflags[@]}"; do
-        cflags="-v $unroll $polydma"
-        for d in openmp-examples/polybench-acc/*/; do
-          if [ $(basename $d) = "common" ]; then
-            continue
-          fi
-          echo "TEST: $d    $makeflags    $cflags"
-          make V=1 -C $d clean all $makeflags cflags="$cflags"
+        for debug in "${debug_cflags[@]}"; do
+          cflags="-v $unroll $polydma $debug"
+          for d in openmp-examples/polybench-acc/*/; do
+            if [ $(basename $d) = "common" ]; then
+              continue
+            fi
+            echo -e "\e[96mTEST: $d    $makeflags    $cflags\e[0m"
+            make V=1 -C $d clean all $makeflags cflags="$cflags"
+          done
         done
       done
     done

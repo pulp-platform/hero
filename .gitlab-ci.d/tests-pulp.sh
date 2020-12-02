@@ -25,7 +25,7 @@ set -e
 unset DISPLAY
 
 # Make and run
-for d in pulp api omp_atomic omp_gcc omp_sync omp_worksharing_for omp_worksharing_sections hero_64; do
+for d in api compiler hero_64 omp_atomic omp_gcc omp_sync omp_worksharing_for omp_worksharing_sections pulp; do
   make -C openmp-examples/tests-pulp/$d clean all
   pushd hardware/vsim
   ../test/gen_slm_files.sh tests-pulp/$d

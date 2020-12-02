@@ -24,16 +24,11 @@
 static unsigned condition_or_printf(bool condition, const char* fmt, ...)
 {
   if (!condition) {
-#ifdef __llvm__
-#  warning LLVM has address space problems with va_args, see #25
-    printf("ERROR: CONDITION FALSE!\n");
-#else
     va_list args;
     va_start(args, fmt);
     char buf[256];
     vsnprintf(buf, sizeof(buf), fmt, args);
     printf("ERROR: %s!\n", buf);
-#endif
     return 1;
   } else {
     return 0;
