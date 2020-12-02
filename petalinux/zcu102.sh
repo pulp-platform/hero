@@ -63,7 +63,19 @@ echo "
 rootfs_enable() {
     sed -i -e "s/# CONFIG_$1 is not set/CONFIG_$1=y/" project-spec/configs/rootfs_config
 }
-for pkg in bash bash-completion bc ed grep patch sed vim; do
+for pkg in \
+    bash \
+    bash-completion \
+    bc \
+    ed \
+    grep \
+    patch \
+    sed \
+    util-linux \
+    util-linux-blkid \
+    util-linux-lscpu \
+    vim \
+; do
   rootfs_enable $pkg
 done
 

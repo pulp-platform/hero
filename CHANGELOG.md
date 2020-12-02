@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Add more extensive environment checks to targets in the root `Makefile`.
+- PetaLinux: Add packages `util-linux{,-blkid,-lscpu}` to get essential utilities such as `taskset`.
 
 ### Changed
 
@@ -25,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       post-regalloc analyses.
     - Ensure that code generation triggers only for loops whose jump offset fits in 12 bit (which is
       the maximum encodable in the instruction).
+- PetaLinux: Fix mount after boot to use `--bind` and report an error if it fails.
 
 
 ## v0.1.0 - 2020-11-21
