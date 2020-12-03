@@ -73,40 +73,40 @@ tc-har-olinux: check_environment
 	cd $(CURDIR)/output/tc-har-olinux/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/har-olinux.config hero br_real
 
 # accelerator
-tc-pulp:
+tc-pulp: check_environment
 	mkdir -p $(CURDIR)/output/tc-pulp/
 	cd $(CURDIR)/output/tc-pulp/ && $(ROOT)/toolchain/build.sh $(ROOT)/toolchain/pulp.config hero-unknown
 	chmod -R u+w $(HERO_INSTALL) && ln -sf riscv32-unknown-elf $(HERO_INSTALL)/riscv32-hero-unknown-elf && chmod -R u-w $(HERO_INSTALL)
 
 # llvm
-tc-llvm:
+tc-llvm: check_environment
 	mkdir -p $(CURDIR)/output/tc-llvm/
 	cd $(CURDIR)/output/tc-llvm/ && $(ROOT)/toolchain/setup-llvm.sh Release
 
-tc-llvm-debug:
+tc-llvm-debug: check_environment
 	mkdir -p $(CURDIR)/output/tc-llvm-debug/
 	cd $(CURDIR)/output/tc-llvm-debug/ && $(ROOT)/toolchain/setup-llvm.sh Debug
 
 # SDK
 .PHONY: sdk-pulp-hrv sdk-pulp sdk-pulp-har sdk-hrv sdk-har
 
-sdk-pulp-hrv:
+sdk-pulp-hrv: check_environment
 	$(ROOT)/pulp/setup-sdk.sh hero-urania
 sdk-pulp: sdk-pulp-hrv
 
-sdk-pulp-har:
+sdk-pulp-har: check_environment
 	$(ROOT)/pulp/setup-sdk.sh hero-arm64
 
-sdk-hrv: br-hrv
+sdk-hrv: check_environment br-hrv
 	cd $(CURDIR)/output/br-hrv && $(ROOT)/toolchain/install-sdk.sh
 
-sdk-har: br-har
+sdk-har: check_environment br-har
 	cd $(CURDIR)/output/br-har && $(ROOT)/toolchain/install-sdk.sh
 
 # TOOLS
 .PHONY: tools-hrv-openocd
 
-tools-hrv-openocd:
+tools-hrv-openocd: check_environment
 	mkdir -p $(CURDIR)/output/tools-openocd/
 	(export CCACHE=none; \
 		export PATH=$(HERO_INSTALL)/bin:${PATH}; \
