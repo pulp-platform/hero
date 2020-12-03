@@ -15,10 +15,9 @@
  */
 
 #include <assert.h>
-#include <stdio.h>
-#include <stdlib.h> // abort()
-#include "tests.h"
 #include "report.h"
+
+int test_omp_atomic();
 
 int main(int argc, char *argv[])
 {

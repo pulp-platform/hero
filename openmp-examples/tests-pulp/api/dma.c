@@ -17,12 +17,9 @@
 #include "test.h"
 #include <assert.h>
 #include <hero-target.h>
+#include <stdint.h>
 #include <string.h>       // memset()
 
-// Mirror definitions from PULP SDK, can be removed as soon as the PULP SDK is accessible through
-// Clang.
-#include <stdbool.h>
-#include <stdint.h>
 
 // Verify transfers to or from L1
 static unsigned check_to_l1(__host uint32_t* const src, uint32_t* const dst, const size_t n_elem)

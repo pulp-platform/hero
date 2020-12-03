@@ -15,10 +15,14 @@
  */
 
 #include <assert.h>
-#include <stdio.h>
-#include <stdlib.h> // abort()
-#include "tests.h"
 #include "report.h"
+
+int test_omp_for_schedule_dynamic();
+int test_omp_for_schedule_static();
+int test_omp_parallel_for_firstprivate();
+int test_omp_parallel_for_lastprivate();
+int test_omp_parallel_for_private();
+int test_omp_parallel_for_reduction();
 
 int main(int argc, char *argv[])
 {

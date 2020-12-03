@@ -15,10 +15,9 @@
  */
 
 #include <assert.h>
-#include <stdio.h>
-#include <stdlib.h> // abort()
-#include "tests.h"
 #include "report.h"
+
+unsigned test_hero_64();
 
 int main(int argc, char *argv[])
 {

@@ -15,10 +15,12 @@
  */
 
 #include <assert.h>
-#include <stdio.h>
-#include <stdlib.h> // abort()
-#include "tests.h"
 #include "report.h"
+
+int test_omp_barrier();
+int test_omp_critical();
+int test_omp_master_3();
+int test_omp_single();
 
 int main(int argc, char *argv[])
 {
