@@ -8,10 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
-- Add more extensive environment checks to targets in the root `Makefile`.
-- PetaLinux: Add packages `util-linux{,-blkid,-lscpu}` to get essential utilities such as `taskset`.
 
 ### Changed
+
+### Fixed
+
+
+## v0.1.1 - 2020-12-03
+
+### Added
+- Add more extensive environment checks to targets in the root `Makefile`.
+- PetaLinux: Add packages `util-linux{,-blkid,-lscpu}` to get essential utilities such as `taskset`.
 
 ### Fixed
 - Clang/LLVM:
