@@ -6,7 +6,7 @@ har-exilzcu102: tc-har-olinux tc-pulp br-har-exilzcu102 sdk-pulp sdk-har tc-llvm
 hrv-ediggenesys2: tc-hrv-olinux tc-pulp br-hrv-ediggenesys2 sdk-pulp sdk-hrv tc-llvm
 
 # BUILDROOT
-.PHONY: br-hrv-ediggenesys2-base br-har-exilzcu102-base br-hrv br-har br-hrv-eqemu
+.PHONY: br-hrv-ediggenesys2-base br-hrv-ediggenesys2 br-har-exilzcu102-base br-har-exilzcu102 br-hrv br-har br-hrv-eqemu-base br-hrv-eqemu
 
 # environment
 br-hrv-ediggenesys2-base: check_environment
@@ -88,7 +88,7 @@ tc-llvm-debug:
 	cd $(CURDIR)/output/tc-llvm-debug/ && $(ROOT)/toolchain/setup-llvm.sh Debug
 
 # SDK
-.PHONY: sdk-pulp sdk-hrv sdk-har
+.PHONY: sdk-pulp-hrv sdk-pulp sdk-pulp-har sdk-hrv sdk-har
 
 sdk-pulp-hrv:
 	$(ROOT)/pulp/setup-sdk.sh hero-urania
