@@ -1,4 +1,4 @@
-cache_root_dir: /usr/scratch/dolent1/gitlabci/buildcache/hero
+cache_root_dir: /usr/scratch2/dolent1/gitlabci/buildcache/hero
 
 artifacts:
   tc-pulp:
