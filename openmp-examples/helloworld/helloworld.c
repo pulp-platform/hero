@@ -16,23 +16,20 @@
  * limitations under the License.
  */
 
+#include <hero-target.h>
 #include <omp.h>
 #include <stdio.h>
-#include <hero-target.h>
 
 #pragma omp declare target
-void helloworld (void)
-{
+void helloworld(void) {
 #pragma omp parallel
-	printf("Hello World, I am thread %d of %d\n", omp_get_thread_num(), omp_get_num_threads());
+  printf("Hello World, I am thread %d of %d\n", omp_get_thread_num(), omp_get_num_threads());
 }
 #pragma omp end declare target
 
-int main(int argc, char *argv[])
-{
-
+int main(int argc, char *argv[]) {
 #pragma omp target
-	helloworld();
+  helloworld();
 
-	return 0;
+  return 0;
 }
