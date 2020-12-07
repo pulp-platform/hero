@@ -28,7 +28,7 @@ void helloworld(void) {
 #pragma omp end declare target
 
 int main(int argc, char *argv[]) {
-#pragma omp target
+#pragma omp target device(BIGPULP_MEMCPY)
   helloworld();
 
   return 0;
