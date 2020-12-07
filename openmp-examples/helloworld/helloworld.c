@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-#include <hero-target.h>
-#include <omp.h>
-#include <stdio.h>
+#include <hero-target.h>  // BIGPULP_MEMCPY
+#include <omp.h>          // omp_get_num_threads(), omp_get_thread_num()
+#include <stdio.h>        // printf()
 
 #pragma omp declare target
 void helloworld(void) {
