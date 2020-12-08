@@ -124,7 +124,7 @@ class PhysMem {
                           `false` if it is not.
    */
   bool maps_addr(const size_t phys_addr) const {
-    return phys_addr >= this->base_addr && phys_addr < base_addr + n_bytes;
+    return (phys_addr >= this->base_addr) && (phys_addr < this->base_addr + this->n_bytes);
   }
 
  private:
