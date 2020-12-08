@@ -104,17 +104,27 @@ class PhysMem {
    */
   uint8_t read_u8(const size_t phys_addr) const { return this->read<uint8_t>(phys_addr); }
 
-  /** Write a unsigned 32-bit value to a physical address in the mapped memory region.
+  /** Write to a physical address in the mapped memory region.
 
       \param  phys_addr   Physical address to be written to
       \param  value       Value to write
 
       Throws an `std::invalid_argument` exception if `phys_addr` is not in the mapped memory region.
    */
-  void write_u32(const size_t phys_addr, const uint32_t value) const {
+  template <typename T>
+  void write(const size_t phys_addr, const T value) const {
     this->validate_addr(phys_addr);
-    LOG(DEBUG) << "Writing " << value << " to " << phys_addr << "." << std::endl;
-    *(volatile uint32_t*)this->rel_ptr(phys_addr) = value;
+    LOG(DEBUG) << "Writing " << static_cast<unsigned long>(value) << " to " << phys_addr << "."
+               << std::endl;
+    *(volatile T*)this->rel_ptr(phys_addr) = value;
+  }
+
+  /** Write an unsigned 32-bit value to a physical address in the mapped memory region.
+
+      See `write()` member function for the documentation.
+   */
+  void write_u32(const size_t phys_addr, const uint32_t value) const {
+    this->write<uint32_t>(phys_addr, value);
   }
 
   /** Determine if a physical address is in the mapped memory region.
