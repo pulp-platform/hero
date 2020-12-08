@@ -119,12 +119,36 @@ class PhysMem {
     *(volatile T*)this->rel_ptr(phys_addr) = value;
   }
 
+  /** Write an unsigned 64-bit value to a physical address in the mapped memory region.
+
+      See `write()` member function for the documentation.
+   */
+  void write_u64(const size_t phys_addr, const uint64_t value) const {
+    this->write<uint64_t>(phys_addr, value);
+  }
+
   /** Write an unsigned 32-bit value to a physical address in the mapped memory region.
 
       See `write()` member function for the documentation.
    */
   void write_u32(const size_t phys_addr, const uint32_t value) const {
     this->write<uint32_t>(phys_addr, value);
+  }
+
+  /** Write an unsigned 16-bit value to a physical address in the mapped memory region.
+
+      See `write()` member function for the documentation.
+   */
+  void write_u16(const size_t phys_addr, const uint16_t value) const {
+    this->write<uint16_t>(phys_addr, value);
+  }
+
+  /** Write an unsigned 8-bit value to a physical address in the mapped memory region.
+
+      See `write()` member function for the documentation.
+   */
+  void write_u8(const size_t phys_addr, const uint8_t value) const {
+    this->write<uint8_t>(phys_addr, value);
   }
 
   /** Determine if a physical address is in the mapped memory region.
