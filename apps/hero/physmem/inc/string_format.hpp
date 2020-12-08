@@ -5,6 +5,9 @@
  *  C++11-compatible String Formatting
  */
 
+#ifndef HERO_STRING_FORMAT_H_
+#define HERO_STRING_FORMAT_H_
+
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -18,3 +21,5 @@ std::string string_format( const std::string& format, Args ... args )
     snprintf( buf.get(), size, format.c_str(), args ... );
     return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
 }
+
+#endif // HERO_STRING_FORMAT_H_

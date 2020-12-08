@@ -6,6 +6,9 @@
  *  Author: Andreas Kurth <akurth@iis.ee.ethz.ch>
  */
 
+#ifndef HERO_PHYSMEM_H_
+#define HERO_PHYSMEM_H_
+
 #include <fcntl.h>     // open()
 #include <sys/mman.h>  // mmap(), munmap()
 #include <unistd.h>    // close()
@@ -191,3 +194,5 @@ class PhysMem {
     }
   }
 };
+
+#endif // HERO_PHYSMEM_H_
