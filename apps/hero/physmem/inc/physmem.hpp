@@ -63,7 +63,7 @@ class PhysMem {
     LOG(DEBUG) << "Closed '/dev/mem'." << std::endl;
   }
 
-  /** Read a unsigned 32-bit value from a physical address in the mapped memory region.
+  /** Read from a physical address in the mapped memory region.
 
       \param  phys_addr   Physical address to be read from
       \return             The read value.
@@ -71,13 +71,20 @@ class PhysMem {
       Throws an `std::invalid_argument` exception if `phys_addr` is not in the mapped memory
       region.
    */
-  uint32_t read_u32(const size_t phys_addr) const {
+  template <typename T>
+  T read(const size_t phys_addr) const {
     this->validate_addr(phys_addr);
     LOG(DEBUG) << "Reading from 0x" << std::hex << phys_addr << "." << std::endl;
-    const uint32_t value = *(volatile uint32_t*)this->rel_ptr(phys_addr);
-    LOG(DEBUG) << "Read 0x" << std::hex << value << "." << std::endl;
+    const T value = *(volatile T*)this->rel_ptr(phys_addr);
+    LOG(DEBUG) << "Read 0x" << std::hex << static_cast<unsigned long>(value) << "." << std::endl;
     return value;
   }
+
+  /** Read an unsigned 32-bit value from a physical address in the mapped memory region.
+
+      See `read()` member function for the documentation.
+   */
+  uint32_t read_u32(const size_t phys_addr) const { return this->read<uint32_t>(phys_addr); }
 
   /** Write a unsigned 32-bit value to a physical address in the mapped memory region.
 
