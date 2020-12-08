@@ -80,11 +80,29 @@ class PhysMem {
     return value;
   }
 
+  /** Read an unsigned 64-bit value from a physical address in the mapped memory region.
+
+      See `read()` member function for the documentation.
+   */
+  uint64_t read_u64(const size_t phys_addr) const { return this->read<uint64_t>(phys_addr); }
+
   /** Read an unsigned 32-bit value from a physical address in the mapped memory region.
 
       See `read()` member function for the documentation.
    */
   uint32_t read_u32(const size_t phys_addr) const { return this->read<uint32_t>(phys_addr); }
+
+  /** Read an unsigned 16-bit value from a physical address in the mapped memory region.
+
+      See `read()` member function for the documentation.
+   */
+  uint16_t read_u16(const size_t phys_addr) const { return this->read<uint16_t>(phys_addr); }
+
+  /** Read an unsigned 8-bit value from a physical address in the mapped memory region.
+
+      See `read()` member function for the documentation.
+   */
+  uint8_t read_u8(const size_t phys_addr) const { return this->read<uint8_t>(phys_addr); }
 
   /** Write a unsigned 32-bit value to a physical address in the mapped memory region.
 
