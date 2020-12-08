@@ -71,7 +71,7 @@ class PhysMem {
       Throws an `std::invalid_argument` exception if `phys_addr` is not in the mapped memory
       region.
    */
-  uint32_t read_u32(const size_t phys_addr) {
+  uint32_t read_u32(const size_t phys_addr) const {
     this->validate_addr(phys_addr);
     LOG(DEBUG) << "Reading from 0x" << std::hex << phys_addr << "." << std::endl;
     const uint32_t value = *(volatile uint32_t*)this->rel_ptr(phys_addr);
@@ -86,7 +86,7 @@ class PhysMem {
 
       Throws an `std::invalid_argument` exception if `phys_addr` is not in the mapped memory region.
    */
-  void write_u32(const size_t phys_addr, const uint32_t value) {
+  void write_u32(const size_t phys_addr, const uint32_t value) const {
     this->validate_addr(phys_addr);
     LOG(DEBUG) << "Writing " << value << " to " << phys_addr << "." << std::endl;
     *(volatile uint32_t*)this->rel_ptr(phys_addr) = value;
@@ -98,7 +98,7 @@ class PhysMem {
       \return             `true` if `phys_addr` is in the mapped memory region;
                           `false` if it is not.
    */
-  bool maps_addr(const size_t phys_addr) {
+  bool maps_addr(const size_t phys_addr) const {
     return phys_addr >= this->base_addr && phys_addr < base_addr + n_bytes;
   }
 
@@ -118,7 +118,7 @@ class PhysMem {
       \param  phys_addr   Physical address
       \return             Virtual address pointer that corresponds to the physical address.
     */
-  volatile void* rel_ptr(const size_t phys_addr) {
+  volatile void* rel_ptr(const size_t phys_addr) const {
     return (volatile void*)((size_t)this->map_ptr + (phys_addr & this->map_mask));
   }
 
@@ -126,7 +126,7 @@ class PhysMem {
 
       Throws an `std::invalid_argument` exception if that is not the case.
    */
-  void validate_addr(const size_t phys_addr) {
+  void validate_addr(const size_t phys_addr) const {
     if (!this->maps_addr(phys_addr)) {
       throw std::invalid_argument(string_format("Address %p is not mapped!", phys_addr));
     }
