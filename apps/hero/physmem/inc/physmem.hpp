@@ -63,19 +63,6 @@ class PhysMem {
     LOG(DEBUG) << "Closed '/dev/mem'." << std::endl;
   }
 
-  /** Write a unsigned 32-bit value to a physical address in the mapped memory region.
-
-      \param  phys_addr   Physical address to be written to
-      \param  value       Value to write
-
-      Throws an `std::invalid_argument` exception if `phys_addr` is not in the mapped memory region.
-   */
-  void write_u32(const size_t phys_addr, const uint32_t value) {
-    this->validate_addr(phys_addr);
-    LOG(DEBUG) << "Writing " << value << " to " << phys_addr << "." << std::endl;
-    *(volatile uint32_t*)this->rel_ptr(phys_addr) = value;
-  }
-
   /** Read a unsigned 32-bit value from a physical address in the mapped memory region.
 
       \param  phys_addr   Physical address to be read from
@@ -90,6 +77,19 @@ class PhysMem {
     const uint32_t value = *(volatile uint32_t*)this->rel_ptr(phys_addr);
     LOG(DEBUG) << "Read 0x" << std::hex << value << "." << std::endl;
     return value;
+  }
+
+  /** Write a unsigned 32-bit value to a physical address in the mapped memory region.
+
+      \param  phys_addr   Physical address to be written to
+      \param  value       Value to write
+
+      Throws an `std::invalid_argument` exception if `phys_addr` is not in the mapped memory region.
+   */
+  void write_u32(const size_t phys_addr, const uint32_t value) {
+    this->validate_addr(phys_addr);
+    LOG(DEBUG) << "Writing " << value << " to " << phys_addr << "." << std::endl;
+    *(volatile uint32_t*)this->rel_ptr(phys_addr) = value;
   }
 
   /** Determine if a physical address is in the mapped memory region.
