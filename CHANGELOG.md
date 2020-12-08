@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`tc-llvm`).
 
 ### Changed
+- OpenMP Examples/`helloworld`: Change to a common "Hello World!" example (instead of printing
+  pointers) and clean code up.
 
 ### Fixed
 
