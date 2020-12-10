@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   pointers) and clean code up.
 
 ### Fixed
+- `tc-har-olinux`: Fix version of `glibc` to be compatible with libraries installed in PetaLinux
+  2019.2 on ZCU102 (#95).
 
 
 ## v0.1.1 - 2020-12-03
