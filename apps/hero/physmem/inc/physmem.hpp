@@ -25,7 +25,8 @@ class PhysMem {
       \param  base_addr   Physical base address of the mapping
       \param  n_bytes     Number of bytes in the mapping
    */
-  PhysMem(const size_t base_addr, const size_t n_bytes) {
+  PhysMem(const size_t base_addr, const size_t n_bytes)
+      : base_addr(base_addr), n_bytes(n_bytes), map_mask(n_bytes - 1) {
     // Initialize logging library.  This should actually not be done in the constructor, because
     // creating two `PhysMem` objects now probably corrupts logging.  However, if `AixLog` is not
     // initialized at all, it unconditionally prints every message and does not format them
@@ -44,9 +45,6 @@ class PhysMem {
     LOG(DEBUG) << "Opened '/dev/mem' with fd=" << this->fd << "." << std::endl;
 
     // Map the specified physical memory region.
-    this->base_addr = base_addr;
-    this->n_bytes = n_bytes;
-    this->map_mask = this->n_bytes - 1;
     this->map_ptr = mmap(0, this->n_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
                          this->base_addr & ~this->map_mask);
     if (this->map_ptr == reinterpret_cast<void*>(-1)) {
@@ -168,9 +166,9 @@ class PhysMem {
   /** The file descriptor returned by `open`. */
   int fd;
   /** The `base_addr` and `n_bytes` given to the constructor. */
-  size_t base_addr, n_bytes;
+  const size_t base_addr, n_bytes;
   /** Bitmask that selects the LSBs within `n_bytes`. */
-  size_t map_mask;
+  const size_t map_mask;
   /** The pointer returned by `mmap`. */
   volatile void* map_ptr;
 
