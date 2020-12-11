@@ -49,7 +49,7 @@ class PhysMem {
     this->map_mask = this->n_bytes - 1;
     this->map_ptr = mmap(0, this->n_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
                          this->base_addr & ~this->map_mask);
-    if (this->map_ptr == (void*)-1) {
+    if (this->map_ptr == reinterpret_cast<void*>(-1)) {
       throw std::runtime_error("'mmap' failed!");
     }
     LOG(DEBUG) << "Memory mapped at address " << const_cast<void*>(this->map_ptr) << "."
@@ -57,7 +57,7 @@ class PhysMem {
   };
 
   ~PhysMem() {
-    const int res = munmap((void*)this->map_ptr, this->n_bytes);
+    const int res = munmap(const_cast<void*>(this->map_ptr), this->n_bytes);
     LOG(DEBUG) << "Unmapped memory." << std::endl;
     if (res == -1) {
       LOG(ERROR) << "'munmap' failed!" << std::endl;
@@ -78,7 +78,7 @@ class PhysMem {
   T read(const size_t phys_addr) const {
     this->validate_addr(phys_addr);
     LOG(DEBUG) << "Reading from 0x" << std::hex << phys_addr << "." << std::endl;
-    const T value = *(volatile T*)this->rel_ptr(phys_addr);
+    const T value = *reinterpret_cast<volatile T*>(this->rel_ptr(phys_addr));
     LOG(DEBUG) << "Read 0x" << std::hex << static_cast<unsigned long>(value) << "." << std::endl;
     return value;
   }
@@ -119,7 +119,7 @@ class PhysMem {
     this->validate_addr(phys_addr);
     LOG(DEBUG) << "Writing 0x" << std::hex << static_cast<unsigned long>(value) << " to 0x"
                << phys_addr << "." << std::endl;
-    *(volatile T*)this->rel_ptr(phys_addr) = value;
+    *reinterpret_cast<volatile T*>(this->rel_ptr(phys_addr)) = value;
   }
 
   /** Write an unsigned 64-bit value to a physical address in the mapped memory region.
@@ -181,7 +181,9 @@ class PhysMem {
       \return             Virtual address pointer that corresponds to the physical address.
     */
   volatile void* rel_ptr(const size_t phys_addr) const {
-    return (volatile void*)((size_t)this->map_ptr + (phys_addr & this->map_mask));
+    const size_t offset = phys_addr & this->map_mask;
+    const size_t rel_addr = reinterpret_cast<size_t>(this->map_ptr) + offset;
+    return reinterpret_cast<volatile void*>(rel_addr);
   }
 
   /** Validate that a physical address is in the mapped memory region.
