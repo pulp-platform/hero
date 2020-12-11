@@ -117,8 +117,8 @@ class PhysMem {
   template <typename T>
   void write(const size_t phys_addr, const T value) const {
     this->validate_addr(phys_addr);
-    LOG(DEBUG) << "Writing " << static_cast<unsigned long>(value) << " to " << phys_addr << "."
-               << std::endl;
+    LOG(DEBUG) << "Writing 0x" << std::hex << static_cast<unsigned long>(value) << " to 0x"
+               << phys_addr << "." << std::endl;
     *(volatile T*)this->rel_ptr(phys_addr) = value;
   }
 
