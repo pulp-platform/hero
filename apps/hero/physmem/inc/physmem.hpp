@@ -197,4 +197,4 @@ class PhysMem {
   }
 };
 
-#endif // HERO_PHYSMEM_H_
+#endif  // HERO_PHYSMEM_H_
