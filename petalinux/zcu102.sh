@@ -3,6 +3,11 @@ THIS_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 
 set -e
 
+# Change working directory to path of script, so this script can be executed from anywhere.
+cd "$THIS_DIR"
+# Resolve symlinks.
+cd "$(pwd -P)"
+
 # Initialize Python environment suitable for PetaLinux.
 python3.6 -m venv .venv
 ln -sf python3.6 .venv/bin/python3
@@ -17,8 +22,6 @@ else
 fi
 readonly PETALINUX_VER
 readonly TARGET=zcu102
-
-cd `pwd -P`
 
 # create project
 if [ ! -d "$TARGET" ]; then
