@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-THIS_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-HERO_ROOT="$(readlink -f "$THIS_DIR/..")"
-LOCAL_CFG="$HERO_ROOT/local.cfg"
+readonly THIS_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+readonly HERO_ROOT="$(readlink -f "$THIS_DIR/..")"
+readonly LOCAL_CFG="$HERO_ROOT/local.cfg"
 
 set -e
 
