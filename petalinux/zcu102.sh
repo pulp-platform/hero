@@ -10,6 +10,19 @@ cd "$THIS_DIR"
 # Resolve symlinks.
 cd "$(pwd -P)"
 
+# Obtain bitstream path from configuration.
+set +e
+readonly bitstream="$("$HERO_ROOT/tools/configfile/get_value" -s "$LOCAL_CFG" BR2_HERO_BITSTREAM \
+    | tr -d '"')";
+if test "$?" -ne 0; then
+  >&2 echo "Error: '$1' is not defined in '$LOCAL_CFG'!"
+  exit 1
+fi
+set -e
+if ! test -r "$bitstream"; then
+  echo "Error: Path to bitstream ('$bitstream') is not readable!"
+fi
+
 # Initialize Python environment suitable for PetaLinux.
 python3.6 -m venv .venv
 ln -sf python3.6 .venv/bin/python3
@@ -116,10 +129,9 @@ if [ ! -f regs.init ]; then
   echo ".set. 0xFF41A040 = 0x3;" > regs.init
 fi
 
-if [ -f "$LOCAL_CFG" ] && grep -q HERO_BITSTREAM "$LOCAL_CFG"; then
-  bitstream=$(eval echo $(sed -e 's/BR2_HERO_BITSTREAM=//;t;d' "$LOCAL_CFG" | tr -d '"'))
-  cp $bitstream hero_exil${TARGET}_wrapper.bit
-  echo "
+# Generate images including bitstream with `petalinux-package`.
+cp "$bitstream" hero_exil${TARGET}_wrapper.bit
+echo "
 the_ROM_image:
 {
   [init] regs.init
@@ -130,28 +142,9 @@ the_ROM_image:
   [destination_cpu=a53-0, exception_level=el-2] u-boot.elf
 }
 " > bootgen.bif
-
-  $PETALINUX_VER petalinux-package --boot --force \
-    --fsbl zynqmp_fsbl.elf \
-    --fpga hero_exil${TARGET}_wrapper.bit \
-    --u-boot u-boot.elf \
-    --pmufw pmufw.elf \
-    --bif bootgen.bif
-else
-  echo "
-the_ROM_image:
-{
-  [init] regs.init
-  [bootloader] zynqmp_fsbl.elf
-  [pmufw_image] pmufw.elf
-  [destination_cpu=a53-0, exception_level=el-3, trustzone] bl31.elf
-  [destination_cpu=a53-0, exception_level=el-2] u-boot.elf
-}
-" > bootgen.bif
-
-  $PETALINUX_VER petalinux-package --boot --force \
-    --fsbl zynqmp_fsbl.elf \
-    --u-boot u-boot.elf \
-    --pmufw pmufw.elf \
-    --bif bootgen.bif
-fi
+$PETALINUX_VER petalinux-package --boot --force \
+  --fsbl zynqmp_fsbl.elf \
+  --fpga hero_exil${TARGET}_wrapper.bit \
+  --u-boot u-boot.elf \
+  --pmufw pmufw.elf \
+  --bif bootgen.bif
