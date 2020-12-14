@@ -113,7 +113,7 @@ create_install_app init-exec-scripts
 cp "$HERO_ROOT/board/common/overlay/etc/sysctl.conf" "$THIS_DIR/recipes-apps/sysctl-conf/files/"
 create_install_app sysctl-conf
 
-# start build
+# Build PetaLinux.
 set +e
 $PETALINUX_VER petalinux-build
 echo "First build might fail, this is expected..."
