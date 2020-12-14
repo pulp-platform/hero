@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tc-har-olinux`: Fix version of `glibc` to be compatible with libraries installed in PetaLinux
   2019.2 on ZCU102 (#95).  Applying this fix requires rebuilding the AArch64 Host toolchain and SDK;
   please see !211 for instructions.
+- PULP linker script (`omptarget.ld`): Fix size of L2 (#96).  Applying this fix requires updating
+  the linker script installed in the PULP SDK; please see !212 for instructions.
 
 
 ## v0.1.1 - 2020-12-03
