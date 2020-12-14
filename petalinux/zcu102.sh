@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 THIS_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 HERO_ROOT="$(readlink -f "$THIS_DIR/..")"
+LOCAL_CFG="$HERO_ROOT/local.cfg"
 
 set -e
 
@@ -50,8 +51,8 @@ echo 'CONFIG_SUBSYSTEM_COMPONENT_LINUX__KERNEL_NAME_EXT_LOCAL_SRC_PATH="${TOPDIR
 echo 'CONFIG_SUBSYSTEM_SDROOT_DEV="/dev/mmcblk0p2"' >> project-spec/configs/config
 echo 'CONFIG_SUBSYSTEM_MACHINE_NAME="zcu102-revb"' >> project-spec/configs/config
 
-if [ -f "$HERO_ROOT/local.cfg" ] && grep -q PT_ETH_MAC "$HERO_ROOT/local.cfg"; then
-    sed -e 's/PT_ETH_MAC/CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_MAC/;t;d' "$HERO_ROOT/local.cfg" >> project-spec/configs/config
+if [ -f "$LOCAL_CFG" ] && grep -q PT_ETH_MAC "$LOCAL_CFG"; then
+    sed -e 's/PT_ETH_MAC/CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_MAC/;t;d' "$LOCAL_CFG" >> project-spec/configs/config
 fi
 
 $PETALINUX_VER petalinux-config --oldconfig --get-hw-description "$HERO_ROOT/hardware/fpga/hero_exil$TARGET/hero_exil$TARGET.sdk"
@@ -115,9 +116,8 @@ if [ ! -f regs.init ]; then
   echo ".set. 0xFF41A040 = 0x3;" > regs.init
 fi
 
-# add bitstream from local config
-if [ -f "$HERO_ROOT/local.cfg" ] && grep -q HERO_BITSTREAM "$HERO_ROOT/local.cfg"; then
-  bitstream=$(eval echo $(sed -e 's/BR2_HERO_BITSTREAM=//;t;d' "$HERO_ROOT/local.cfg" | tr -d '"'))
+if [ -f "$LOCAL_CFG" ] && grep -q HERO_BITSTREAM "$LOCAL_CFG"; then
+  bitstream=$(eval echo $(sed -e 's/BR2_HERO_BITSTREAM=//;t;d' "$LOCAL_CFG" | tr -d '"'))
   cp $bitstream hero_exil${TARGET}_wrapper.bit
   echo "
 the_ROM_image:
