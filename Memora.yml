@@ -1851,10 +1851,12 @@ artifacts:
       - buildroot
       - configs/har_exilzcu102_defconfig
       - package
+      - petalinux
       - support/libhero-target # package `libhero-target`
       - support/libpulp # package `libpulp`
       - support/pulp-driver # package `pulp-driver`
       - toolchain/llvm-project/openmp # package `hero-openmp`
+      - tools/configfile/get_value
       # sdk-pulp
       - pulp
       ## Dependencies
