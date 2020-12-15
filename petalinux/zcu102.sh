@@ -1,7 +1,28 @@
 #!/usr/bin/env bash
-THIS_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+readonly THIS_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+readonly HERO_ROOT="$(readlink -f "$THIS_DIR/..")"
+readonly LOCAL_CFG="$HERO_ROOT/local.cfg"
 
 set -e
+
+# Change working directory to path of script, so this script can be executed from anywhere.
+cd "$THIS_DIR"
+# Resolve symlinks.
+cd "$(pwd -P)"
+
+# Obtain bitstream path from configuration.
+set +e
+readonly bitstream="$("$HERO_ROOT/tools/configfile/get_value" -s "$LOCAL_CFG" BR2_HERO_BITSTREAM \
+    | tr -d '"')";
+if test "$?" -ne 0; then
+  >&2 echo "Error: '$1' is not defined in '$LOCAL_CFG'!"
+  exit 1
+fi
+set -e
+if ! test -r "$bitstream"; then
+  echo "Error: Path to bitstream ('$bitstream') is not readable!"
+  exit 1
+fi
 
 # Initialize Python environment suitable for PetaLinux.
 python3.6 -m venv .venv
@@ -18,8 +39,6 @@ fi
 readonly PETALINUX_VER
 readonly TARGET=zcu102
 
-cd `pwd -P`
-
 # create project
 if [ ! -d "$TARGET" ]; then
     $PETALINUX_VER petalinux-create -t project -n "$TARGET" --template zynqMP
@@ -27,7 +46,7 @@ fi
 cd "$TARGET"
 
 # initialize and set necessary configuration from config and local config
-$PETALINUX_VER petalinux-config --oldconfig --get-hw-description "../../hardware/fpga/hero_exil$TARGET/hero_exil$TARGET.sdk"
+$PETALINUX_VER petalinux-config --oldconfig --get-hw-description "$HERO_ROOT/hardware/fpga/hero_exil$TARGET/hero_exil$TARGET.sdk"
 
 mkdir -p components/ext_sources
 cd components/ext_sources
@@ -46,15 +65,15 @@ echo 'CONFIG_SUBSYSTEM_COMPONENT_LINUX__KERNEL_NAME_EXT_LOCAL_SRC_PATH="${TOPDIR
 echo 'CONFIG_SUBSYSTEM_SDROOT_DEV="/dev/mmcblk0p2"' >> project-spec/configs/config
 echo 'CONFIG_SUBSYSTEM_MACHINE_NAME="zcu102-revb"' >> project-spec/configs/config
 
-if [ -f $THIS_DIR/../local.cfg ] && grep -q PT_ETH_MAC $THIS_DIR/../local.cfg; then
-    sed -e 's/PT_ETH_MAC/CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_MAC/;t;d' $THIS_DIR/../local.cfg >> project-spec/configs/config
+if [ -f "$LOCAL_CFG" ] && grep -q PT_ETH_MAC "$LOCAL_CFG"; then
+    sed -e 's/PT_ETH_MAC/CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_MAC/;t;d' "$LOCAL_CFG" >> project-spec/configs/config
 fi
 
-$PETALINUX_VER petalinux-config --oldconfig --get-hw-description "../../hardware/fpga/hero_exil$TARGET/hero_exil$TARGET.sdk"
+$PETALINUX_VER petalinux-config --oldconfig --get-hw-description "$HERO_ROOT/hardware/fpga/hero_exil$TARGET/hero_exil$TARGET.sdk"
 
 echo "
 /include/ \"system-conf.dtsi\"
-/include/ \"${THIS_DIR}/../board/xilzcu102/hero.dtsi\"
+/include/ \"${HERO_ROOT}/board/xilzcu102/hero.dtsi\"
 / {
 };
 " > project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi
@@ -92,10 +111,10 @@ create_install_app init-mount
 # Create application that will execute scripts from SD card on boot.
 create_install_app init-exec-scripts
 # Create application to deploy custom `/etc/sysctl.conf`.
-cp "$THIS_DIR/../board/common/overlay/etc/sysctl.conf" "$THIS_DIR/recipes-apps/sysctl-conf/files/"
+cp "$HERO_ROOT/board/common/overlay/etc/sysctl.conf" "$THIS_DIR/recipes-apps/sysctl-conf/files/"
 create_install_app sysctl-conf
 
-# start build
+# Build PetaLinux.
 set +e
 $PETALINUX_VER petalinux-build
 echo "First build might fail, this is expected..."
@@ -111,11 +130,9 @@ if [ ! -f regs.init ]; then
   echo ".set. 0xFF41A040 = 0x3;" > regs.init
 fi
 
-# add bitstream from local config
-if [ -f $THIS_DIR/../local.cfg ] && grep -q HERO_BITSTREAM $THIS_DIR/../local.cfg; then
-  bitstream=$(eval echo $(sed -e 's/BR2_HERO_BITSTREAM=//;t;d' $THIS_DIR/../local.cfg | tr -d '"'))
-  cp $bitstream hero_exil${TARGET}_wrapper.bit
-  echo "
+# Generate images including bitstream with `petalinux-package`.
+cp "$bitstream" hero_exil${TARGET}_wrapper.bit
+echo "
 the_ROM_image:
 {
   [init] regs.init
@@ -126,28 +143,9 @@ the_ROM_image:
   [destination_cpu=a53-0, exception_level=el-2] u-boot.elf
 }
 " > bootgen.bif
-
-  $PETALINUX_VER petalinux-package --boot --force \
-    --fsbl zynqmp_fsbl.elf \
-    --fpga hero_exil${TARGET}_wrapper.bit \
-    --u-boot u-boot.elf \
-    --pmufw pmufw.elf \
-    --bif bootgen.bif
-else
-  echo "
-the_ROM_image:
-{
-  [init] regs.init
-  [bootloader] zynqmp_fsbl.elf
-  [pmufw_image] pmufw.elf
-  [destination_cpu=a53-0, exception_level=el-3, trustzone] bl31.elf
-  [destination_cpu=a53-0, exception_level=el-2] u-boot.elf
-}
-" > bootgen.bif
-
-  $PETALINUX_VER petalinux-package --boot --force \
-    --fsbl zynqmp_fsbl.elf \
-    --u-boot u-boot.elf \
-    --pmufw pmufw.elf \
-    --bif bootgen.bif
-fi
+$PETALINUX_VER petalinux-package --boot --force \
+  --fsbl zynqmp_fsbl.elf \
+  --fpga hero_exil${TARGET}_wrapper.bit \
+  --u-boot u-boot.elf \
+  --pmufw pmufw.elf \
+  --bif bootgen.bif

@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - OpenMP Examples/`helloworld`: Change to a common "Hello World!" example (instead of printing
   pointers) and clean code up.
+- `petalinux/zcu102.sh` now requires the path to an existing bitstream to be defined in `local.cfg`.
+  Previously, it would generate images without a bitstream, but with device tree info related to
+  hardware in the PL if a `hwdef` file existed under HW.  Such images would not boot.  This change
+  prevents the generation of such images.
 
 ### Fixed
 - `tc-har-olinux`: Fix version of `glibc` to be compatible with libraries installed in PetaLinux
