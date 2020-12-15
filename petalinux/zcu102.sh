@@ -21,6 +21,7 @@ fi
 set -e
 if ! test -r "$bitstream"; then
   echo "Error: Path to bitstream ('$bitstream') is not readable!"
+  exit 1
 fi
 
 # Initialize Python environment suitable for PetaLinux.
