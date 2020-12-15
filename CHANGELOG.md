@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+
+### Changed
+
+### Fixed
+
+
+## v0.1.2 - 2020-12-15
+
+### Added
 - Root `Makefile`: Check environment also before building the PULP toolchain (`tc-pulp`), the PULP
   SDK (`sdk-pulp`), the Host SDKs (`sdk-har` and `sdk-hrv`), and the heterogeneous LLVM toolchain
   (`tc-llvm`).
