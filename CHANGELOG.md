@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   please see !211 for instructions.
 - PULP linker script (`omptarget.ld`): Fix size of L2 (#96).  Applying this fix requires updating
   the linker script installed in the PULP SDK; please see !212 for instructions.
+- OpenMP Examples/`default.mk`: Also remove `*.elf`s in `clean` recipe.
 
 
 ## v0.1.1 - 2020-12-03
