@@ -25,10 +25,11 @@ class PhysMem {
       \param  base_addr   Physical base address of the mapping
       \param  n_bytes     Number of bytes in the mapping
    */
-  PhysMem(const size_t base_addr, const size_t n_bytes) : PhysMem(base_addr, n_bytes, false) {
-    // Delegate implementation to protected constructor (see below) with `mock_only` argument set to
-    // `false`.
-  };
+  PhysMem(const size_t base_addr, const size_t n_bytes)
+      : PhysMem(base_addr, n_bytes, false){
+            // Delegate implementation to protected constructor (see below) with `mock_only`
+            // argument set to `false`.
+        };
 
   ~PhysMem() {
     // If this object only mocked physical memory accesses, the destructor has nothing to do.
@@ -266,7 +267,7 @@ class MockPhysMem : public PhysMem {
       - `read()` always returns `0` and does not print a value (since the value that would be read
         is obviously unknown).
    */
-  MockPhysMem(const size_t base_addr, const size_t n_bytes) : PhysMem(base_addr, n_bytes, true) {};
+  MockPhysMem(const size_t base_addr, const size_t n_bytes) : PhysMem(base_addr, n_bytes, true){};
 };
 
 #endif  // HERO_PHYSMEM_H_
