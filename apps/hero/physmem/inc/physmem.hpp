@@ -14,6 +14,7 @@
 #include <unistd.h>    // close()
 
 #include <stdexcept>
+#include <vector>
 
 #include "aixlog.hpp"
 #include "string_format.hpp"
@@ -224,6 +225,113 @@ class PhysMem {
     volatile uint8_t* ptr8 = reinterpret_cast<volatile uint8_t*>(ptr64);
     while (n_bytes > 0) {
       *ptr8++ = val;
+      n_bytes--;
+    }
+  }
+
+  /** Copy buffer to the physical memory region.
+
+      \param  phys_addr   First physical address to write to.
+      \param  src         Iterator into the source buffer.  This iterator must be able to provide
+                          `n_bytes` bytes.  The iterator will be incremented `n_bytes-1` times, and
+                          if it goes out of bounds during an increment, undefined behavior occurs.
+      \param  n_bytes     Number of bytes to write.
+
+      Throws an `std::invalid_argument` exception if an address in the interval
+      [phys_addr, phys_addr+n_bytes) is not mapped.  When this exception is thrown, this function
+      has not accessed the physical memory region.
+   */
+  void copy_to(const size_t phys_addr, std::vector<uint8_t>::const_iterator src, size_t n_bytes) {
+    this->validate_addr_range(phys_addr, n_bytes);
+
+    if (this->mock_only) {
+      LOG(DEBUG) << "Would write";
+    } else {
+      LOG(DEBUG) << "Writing";
+    }
+    LOG(DEBUG) << " to address range "
+               << string_format("[0x%p, 0x%p].", phys_addr, phys_addr + n_bytes - 1) << std::endl;
+
+    // If this object only mocks physical memory accesses, return before the actual writes.
+    if (this->mock_only) {
+      return;
+    }
+
+    // If necessary, write a few bytes until the address is 64-bit aligned.
+    volatile uint8_t* ptr = reinterpret_cast<volatile uint8_t*>(this->rel_ptr(phys_addr));
+    while (reinterpret_cast<size_t>(ptr) % 8 != 0 && n_bytes > 0) {
+      *ptr++ = *src++;
+      n_bytes--;
+    }
+    // Then write as much as possible with 64-bit accesses.
+    volatile uint64_t* ptr64 = reinterpret_cast<volatile uint64_t*>(ptr);
+    while (n_bytes > 7) {
+      *ptr64++ = u64_from_u8(*src++, *src++, *src++, *src++, *src++, *src++, *src++, *src++);
+      n_bytes -= 8;
+    }
+    // Write remainder with 8-bit accesses.
+    volatile uint8_t* ptr8 = reinterpret_cast<volatile uint8_t*>(ptr64);
+    while (n_bytes > 0) {
+      *ptr8++ = *src++;
+      n_bytes--;
+    }
+  }
+
+  /** Copy from the physical memory region into a buffer.
+
+      \param  phys_addr   First physical address to read from.
+      \param  dst         Destination buffer.  This function reserves `n_bytes` in this
+                          `std::vector`, so a pre-reservation is not necessary.
+      \param  n_bytes     Number of bytes to read.
+
+      Throws an `std::invalid_argument` exception if an address in the interval
+      [phys_addr, phys_addr+n_bytes) is not mapped.  When this exception is thrown, this function
+      has not accessed the physical memory region and has not reserved capacity in `dst`.
+   */
+  void copy_from(const size_t phys_addr, std::vector<uint8_t>& dst, size_t n_bytes) const {
+    this->validate_addr_range(phys_addr, n_bytes);
+
+    if (this->mock_only) {
+      LOG(DEBUG) << "Would read";
+    } else {
+      LOG(DEBUG) << "Reading";
+    }
+    LOG(DEBUG) << " from address range "
+               << string_format("[0x%p, 0x%p].", phys_addr, phys_addr + n_bytes - 1) << std::endl;
+
+    // Reserve memory in destination buffer.
+    dst.reserve(n_bytes);
+
+    // If this object only mocks physical memory accesses, return before the actual reads.
+    if (this->mock_only) {
+      return;
+    }
+
+    // If necessary, read a few bytes until the address is 64-bit aligned.
+    const volatile uint8_t* ptr =
+        reinterpret_cast<const volatile uint8_t*>(this->rel_ptr(phys_addr));
+    while (reinterpret_cast<size_t>(ptr) % 8 != 0 && n_bytes > 0) {
+      dst.push_back(static_cast<uint8_t>(*ptr++));
+      n_bytes--;
+    }
+    // Then read as much as possible with 64-bit accesses.
+    const volatile uint64_t* ptr64 = reinterpret_cast<const volatile uint64_t*>(ptr);
+    while (n_bytes > 7) {
+      const uint64_t val = *ptr64++;
+      dst.push_back((val >> 0) & 0xFF);
+      dst.push_back((val >> 8) & 0xFF);
+      dst.push_back((val >> 16) & 0xFF);
+      dst.push_back((val >> 24) & 0xFF);
+      dst.push_back((val >> 32) & 0xFF);
+      dst.push_back((val >> 40) & 0xFF);
+      dst.push_back((val >> 48) & 0xFF);
+      dst.push_back((val >> 56) & 0xFF);
+      n_bytes -= 8;
+    }
+    // Read remainder with 8-bit accesses.
+    const volatile uint8_t* ptr8 = reinterpret_cast<const volatile uint8_t*>(ptr64);
+    while (n_bytes > 0) {
+      dst.push_back(static_cast<uint8_t>(*ptr8++));
       n_bytes--;
     }
   }
