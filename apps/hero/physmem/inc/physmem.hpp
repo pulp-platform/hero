@@ -179,6 +179,55 @@ class PhysMem {
     return this->maps_addr(phys_addr) && this->maps_addr(phys_addr + n_bytes - 1);
   }
 
+  /** Sets each byte in an address range to a given value.
+
+      This function does *not* necessarily perform byte-wise stores!  In particular, this function
+      may write multiple bytes at once if alignment and total number of bytes permit.
+
+      \param  phys_addr   First physical address to write to
+      \param  val         Byte value to write
+      \param  n_bytes     Number of bytes that shall be written
+
+      Throws an `std::invalid_argument` exception if an address in the interval
+      [phys_addr, phys_addr+n_bytes) is not mapped.
+    */
+  void set(const size_t phys_addr, const uint8_t val, size_t n_bytes) {
+    this->validate_addr_range(phys_addr, n_bytes);
+
+    if (this->mock_only) {
+      LOG(DEBUG) << "Would set";
+    } else {
+      LOG(DEBUG) << "Setting";
+    }
+    LOG(DEBUG) << " all bytes in address range "
+               << string_format("[0x%p, 0x%p] to 0x%02x.", phys_addr, phys_addr + n_bytes - 1, val)
+               << std::endl;
+
+    // If this object only mocks physical memory accesses, return before the actual writes.
+    if (this->mock_only) {
+      return;
+    }
+
+    // If necessary, write a few bytes until the address is 64-bit aligned.
+    volatile uint8_t* ptr = reinterpret_cast<volatile uint8_t*>(this->rel_ptr(phys_addr));
+    while (reinterpret_cast<size_t>(ptr) % 8 != 0 && n_bytes > 0) {
+      *ptr++ = val;
+      n_bytes--;
+    }
+    // Then write as much as possible with 64-bit accesses.
+    volatile uint64_t* ptr64 = reinterpret_cast<volatile uint64_t*>(ptr);
+    while (n_bytes > 7) {
+      *ptr64++ = u64_from_u8(val, val, val, val, val, val, val, val);
+      n_bytes -= 8;
+    }
+    // Write remainder with 8-bit accesses.
+    volatile uint8_t* ptr8 = reinterpret_cast<volatile uint8_t*>(ptr64);
+    while (n_bytes > 0) {
+      *ptr8++ = val;
+      n_bytes--;
+    }
+  }
+
  protected:
   /** Internal constructor of a physical memory mapping.  This contains the actual constructor
       implementation and takes the following parameter in addition to the public `PhysMem`
@@ -274,6 +323,15 @@ class PhysMem {
       throw std::invalid_argument(
           string_format("Address range [%p,%p) is not mapped!", phys_addr, phys_addr + n_bytes));
     }
+  }
+
+  static inline uint64_t u64_from_u8(const uint8_t byte0, const uint8_t byte1, const uint8_t byte2,
+                                     const uint8_t byte3, const uint8_t byte4, const uint8_t byte5,
+                                     const uint8_t byte6, const uint8_t byte7) {
+    return (static_cast<uint64_t>(byte0) << 0) | (static_cast<uint64_t>(byte1) << 8) |
+           (static_cast<uint64_t>(byte2) << 16) | (static_cast<uint64_t>(byte3) << 24) |
+           (static_cast<uint64_t>(byte4) << 32) | (static_cast<uint64_t>(byte5) << 40) |
+           (static_cast<uint64_t>(byte6) << 48) | (static_cast<uint64_t>(byte7) << 56);
   }
 };
 
