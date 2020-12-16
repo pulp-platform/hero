@@ -107,7 +107,7 @@ class PhysMem {
       Throws an `std::invalid_argument` exception if `phys_addr` is not in the mapped memory region.
    */
   template <typename T>
-  void write(const size_t phys_addr, const T value) const {
+  void write(const size_t phys_addr, const T value) {
     this->validate_addr(phys_addr);
 
     if (this->mock_only) {
@@ -130,7 +130,7 @@ class PhysMem {
 
       See `write()` member function for the documentation.
    */
-  void write_u64(const size_t phys_addr, const uint64_t value) const {
+  void write_u64(const size_t phys_addr, const uint64_t value) {
     this->write<uint64_t>(phys_addr, value);
   }
 
@@ -138,7 +138,7 @@ class PhysMem {
 
       See `write()` member function for the documentation.
    */
-  void write_u32(const size_t phys_addr, const uint32_t value) const {
+  void write_u32(const size_t phys_addr, const uint32_t value) {
     this->write<uint32_t>(phys_addr, value);
   }
 
@@ -146,7 +146,7 @@ class PhysMem {
 
       See `write()` member function for the documentation.
    */
-  void write_u16(const size_t phys_addr, const uint16_t value) const {
+  void write_u16(const size_t phys_addr, const uint16_t value) {
     this->write<uint16_t>(phys_addr, value);
   }
 
@@ -154,7 +154,7 @@ class PhysMem {
 
       See `write()` member function for the documentation.
    */
-  void write_u8(const size_t phys_addr, const uint8_t value) const {
+  void write_u8(const size_t phys_addr, const uint8_t value) {
     this->write<uint8_t>(phys_addr, value);
   }
 
