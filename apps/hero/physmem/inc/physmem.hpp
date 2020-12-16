@@ -235,7 +235,7 @@ class PhysMem {
       \param  phys_addr   Physical address
       \return             Virtual address pointer that corresponds to the physical address.
     */
-  volatile void* rel_ptr(const size_t phys_addr) const {
+  inline volatile void* rel_ptr(const size_t phys_addr) const {
     if (this->mock_only) {
       throw std::runtime_error("method undefined for mock PhysMem");
     }
@@ -248,7 +248,7 @@ class PhysMem {
 
       Throws an `std::invalid_argument` exception if that is not the case.
    */
-  void validate_addr(const size_t phys_addr) const {
+  inline void validate_addr(const size_t phys_addr) const {
     if (!this->maps_addr(phys_addr)) {
       throw std::invalid_argument(string_format("Address %p is not mapped!", phys_addr));
     }
