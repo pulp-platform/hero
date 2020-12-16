@@ -168,6 +168,17 @@ class PhysMem {
     return (phys_addr >= this->base_addr) && (phys_addr < this->base_addr + this->n_bytes);
   }
 
+  /** Determine if a physical address range is entirely in the mapped memory region.
+
+      \param  phys_addr   Physical address that is the start of the address range
+      \param  n_bytes     Number of bytes in the address range
+      \return             `true` if every address in the interval [phys_addr, phys_addr+n_bytes) is
+                          in the mapped memory region; `false` otherwise.
+   */
+  bool maps_addr_range(const size_t phys_addr, const size_t n_bytes) const {
+    return this->maps_addr(phys_addr) && this->maps_addr(phys_addr + n_bytes - 1);
+  }
+
  protected:
   /** Internal constructor of a physical memory mapping.  This contains the actual constructor
       implementation and takes the following parameter in addition to the public `PhysMem`
@@ -251,6 +262,17 @@ class PhysMem {
   inline void validate_addr(const size_t phys_addr) const {
     if (!this->maps_addr(phys_addr)) {
       throw std::invalid_argument(string_format("Address %p is not mapped!", phys_addr));
+    }
+  }
+
+  /** Validate that a physical address range is in the mapped memory region.
+
+      Throws an `std::invalid_argument` exception if that is not the case.
+   */
+  inline void validate_addr_range(const size_t phys_addr, const size_t n_bytes) const {
+    if (!this->maps_addr_range(phys_addr, n_bytes)) {
+      throw std::invalid_argument(
+          string_format("Address range [%p,%p) is not mapped!", phys_addr, phys_addr + n_bytes));
     }
   }
 };
