@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "physmem.hpp"
 
 int main() {
