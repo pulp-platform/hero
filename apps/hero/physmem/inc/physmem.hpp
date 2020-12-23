@@ -25,6 +25,9 @@ class PhysMem {
 
       \param  base_addr   Physical base address of the mapping
       \param  n_bytes     Number of bytes in the mapping
+
+      Throws an `std::runtime_error` exception if `/dev/mem` cannot be opened in read-write mode or
+      if the call to `mmap()` fails.
    */
   PhysMem(const size_t base_addr, const size_t n_bytes)
       : PhysMem(base_addr, n_bytes, false){
