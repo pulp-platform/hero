@@ -11,7 +11,7 @@
 
 #include <fcntl.h>     // open()
 #include <sys/mman.h>  // mmap(), munmap()
-#include <unistd.h>    // close()
+#include <unistd.h>    // close(), sysconf()
 
 #include <stdexcept>
 #include <vector>
@@ -23,9 +23,11 @@ class PhysMem {
  public:
   /** Map a physical memory region and make it accessible for reads and writes.
 
-      \param  base_addr   Physical base address of the mapping
+      \param  base_addr   Physical base address of the mapping; must be a multiple of the OS page
+                          size
       \param  n_bytes     Number of bytes in the mapping
 
+      Throws an `std::invalid_argument` exception if `base_addr` is not aligned to the OS page size.
       Throws an `std::runtime_error` exception if `/dev/mem` cannot be opened in read-write mode or
       if the call to `mmap()` fails.
    */
@@ -361,6 +363,13 @@ class PhysMem {
       AixLog::Log::init<AixLog::SinkCerr>(AixLog::Severity::debug);
     } else {
       AixLog::Log::init<AixLog::SinkCerr>(AixLog::Severity::warning);
+    }
+
+    // Ensure that base address is a multiple of the OS page size.
+    const size_t page_size = sysconf(_SC_PAGE_SIZE);
+    if (base_addr % page_size != 0) {
+      throw std::invalid_argument(string_format(
+          "'base_addr' (%p) is not aligned with OS page size (%d B)", base_addr, page_size));
     }
 
     // If this object only mocks physical memory accesses, print an info message and exit the
