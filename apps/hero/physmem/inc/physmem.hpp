@@ -13,6 +13,8 @@
 #include <sys/mman.h>  // mmap(), munmap()
 #include <unistd.h>    // close(), sysconf()
 
+#include <cerrno>   // errno
+#include <cstring>  // std::strerror()
 #include <stdexcept>
 #include <vector>
 
@@ -383,7 +385,8 @@ class PhysMem {
     // Open a file descriptor into `/dev/mem`.
     this->fd = open("/dev/mem", O_RDWR | O_SYNC);
     if (this->fd == -1) {
-      throw std::runtime_error("Could not open '/dev/mem'!");
+      throw std::runtime_error(
+          string_format("Could not open '/dev/mem': '%s'!", std::strerror(errno)));
     }
     LOG(DEBUG) << "Opened '/dev/mem' with fd=" << this->fd << "." << std::endl;
 
@@ -391,7 +394,7 @@ class PhysMem {
     this->map_ptr = mmap(0, this->n_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
                          this->base_addr & ~this->map_mask);
     if (this->map_ptr == reinterpret_cast<void*>(-1)) {
-      throw std::runtime_error("'mmap' failed!");
+      throw std::runtime_error(string_format("'mmap' failed: '%s'!", std::strerror(errno)));
     }
     LOG(DEBUG) << "Memory mapped at address " << const_cast<void*>(this->map_ptr) << "."
                << std::endl;
