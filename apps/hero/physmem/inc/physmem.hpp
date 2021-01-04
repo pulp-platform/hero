@@ -33,7 +33,7 @@ class PhysMem {
       Throws an `std::runtime_error` exception if `/dev/mem` cannot be opened in read-write mode or
       if the call to `mmap()` fails.
    */
-  PhysMem(const size_t base_addr, const size_t n_bytes)
+  PhysMem(const uintptr_t base_addr, const size_t n_bytes)
       : PhysMem(base_addr, n_bytes, false){
             // Delegate implementation to protected constructor (see below) with `mock_only`
             // argument set to `false`.
@@ -63,7 +63,7 @@ class PhysMem {
       region.
    */
   template <typename T>
-  T read(const size_t phys_addr) const {
+  T read(const uintptr_t phys_addr) const {
     this->validate_addr(phys_addr);
 
     if (this->mock_only) {
@@ -87,25 +87,25 @@ class PhysMem {
 
       See `read()` member function for the documentation.
    */
-  uint64_t read_u64(const size_t phys_addr) const { return this->read<uint64_t>(phys_addr); }
+  uint64_t read_u64(const uintptr_t phys_addr) const { return this->read<uint64_t>(phys_addr); }
 
   /** Read an unsigned 32-bit value from a physical address in the mapped memory region.
 
       See `read()` member function for the documentation.
    */
-  uint32_t read_u32(const size_t phys_addr) const { return this->read<uint32_t>(phys_addr); }
+  uint32_t read_u32(const uintptr_t phys_addr) const { return this->read<uint32_t>(phys_addr); }
 
   /** Read an unsigned 16-bit value from a physical address in the mapped memory region.
 
       See `read()` member function for the documentation.
    */
-  uint16_t read_u16(const size_t phys_addr) const { return this->read<uint16_t>(phys_addr); }
+  uint16_t read_u16(const uintptr_t phys_addr) const { return this->read<uint16_t>(phys_addr); }
 
   /** Read an unsigned 8-bit value from a physical address in the mapped memory region.
 
       See `read()` member function for the documentation.
    */
-  uint8_t read_u8(const size_t phys_addr) const { return this->read<uint8_t>(phys_addr); }
+  uint8_t read_u8(const uintptr_t phys_addr) const { return this->read<uint8_t>(phys_addr); }
 
   /** Write to a physical address in the mapped memory region.
 
@@ -115,7 +115,7 @@ class PhysMem {
       Throws an `std::invalid_argument` exception if `phys_addr` is not in the mapped memory region.
    */
   template <typename T>
-  void write(const size_t phys_addr, const T value) {
+  void write(const uintptr_t phys_addr, const T value) {
     this->validate_addr(phys_addr);
 
     if (this->mock_only) {
@@ -138,7 +138,7 @@ class PhysMem {
 
       See `write()` member function for the documentation.
    */
-  void write_u64(const size_t phys_addr, const uint64_t value) {
+  void write_u64(const uintptr_t phys_addr, const uint64_t value) {
     this->write<uint64_t>(phys_addr, value);
   }
 
@@ -146,7 +146,7 @@ class PhysMem {
 
       See `write()` member function for the documentation.
    */
-  void write_u32(const size_t phys_addr, const uint32_t value) {
+  void write_u32(const uintptr_t phys_addr, const uint32_t value) {
     this->write<uint32_t>(phys_addr, value);
   }
 
@@ -154,7 +154,7 @@ class PhysMem {
 
       See `write()` member function for the documentation.
    */
-  void write_u16(const size_t phys_addr, const uint16_t value) {
+  void write_u16(const uintptr_t phys_addr, const uint16_t value) {
     this->write<uint16_t>(phys_addr, value);
   }
 
@@ -162,7 +162,7 @@ class PhysMem {
 
       See `write()` member function for the documentation.
    */
-  void write_u8(const size_t phys_addr, const uint8_t value) {
+  void write_u8(const uintptr_t phys_addr, const uint8_t value) {
     this->write<uint8_t>(phys_addr, value);
   }
 
@@ -172,7 +172,7 @@ class PhysMem {
       \return             `true` if `phys_addr` is in the mapped memory region;
                           `false` if it is not.
    */
-  bool maps_addr(const size_t phys_addr) const {
+  bool maps_addr(const uintptr_t phys_addr) const {
     return (phys_addr >= this->base_addr) && (phys_addr < this->base_addr + this->n_bytes);
   }
 
@@ -183,7 +183,7 @@ class PhysMem {
       \return             `true` if every address in the interval [phys_addr, phys_addr+n_bytes) is
                           in the mapped memory region; `false` otherwise.
    */
-  bool maps_addr_range(const size_t phys_addr, const size_t n_bytes) const {
+  bool maps_addr_range(const uintptr_t phys_addr, const size_t n_bytes) const {
     return this->maps_addr(phys_addr) && this->maps_addr(phys_addr + n_bytes - 1);
   }
 
@@ -199,7 +199,7 @@ class PhysMem {
       Throws an `std::invalid_argument` exception if an address in the interval
       [phys_addr, phys_addr+n_bytes) is not mapped.
     */
-  void set(const size_t phys_addr, const uint8_t val, size_t n_bytes) {
+  void set(const uintptr_t phys_addr, const uint8_t val, size_t n_bytes) {
     this->validate_addr_range(phys_addr, n_bytes);
 
     if (this->mock_only) {
@@ -218,7 +218,7 @@ class PhysMem {
 
     // If necessary, write a few bytes until the address is 64-bit aligned.
     volatile uint8_t* ptr = reinterpret_cast<volatile uint8_t*>(this->rel_ptr(phys_addr));
-    while (reinterpret_cast<size_t>(ptr) % 8 != 0 && n_bytes > 0) {
+    while (reinterpret_cast<uintptr_t>(ptr) % 8 != 0 && n_bytes > 0) {
       *ptr++ = val;
       n_bytes--;
     }
@@ -248,7 +248,8 @@ class PhysMem {
       [phys_addr, phys_addr+n_bytes) is not mapped.  When this exception is thrown, this function
       has not accessed the physical memory region.
    */
-  void copy_to(const size_t phys_addr, std::vector<uint8_t>::const_iterator src, size_t n_bytes) {
+  void copy_to(const uintptr_t phys_addr, std::vector<uint8_t>::const_iterator src,
+               size_t n_bytes) {
     this->validate_addr_range(phys_addr, n_bytes);
 
     if (this->mock_only) {
@@ -266,7 +267,7 @@ class PhysMem {
 
     // If necessary, write a few bytes until the address is 64-bit aligned.
     volatile uint8_t* ptr = reinterpret_cast<volatile uint8_t*>(this->rel_ptr(phys_addr));
-    while (reinterpret_cast<size_t>(ptr) % 8 != 0 && n_bytes > 0) {
+    while (reinterpret_cast<uintptr_t>(ptr) % 8 != 0 && n_bytes > 0) {
       *ptr++ = *src++;
       n_bytes--;
     }
@@ -295,7 +296,7 @@ class PhysMem {
       [phys_addr, phys_addr+n_bytes) is not mapped.  When this exception is thrown, this function
       has not accessed the physical memory region and has not reserved capacity in `dst`.
    */
-  void copy_from(const size_t phys_addr, std::vector<uint8_t>& dst, size_t n_bytes) const {
+  void copy_from(const uintptr_t phys_addr, std::vector<uint8_t>& dst, size_t n_bytes) const {
     this->validate_addr_range(phys_addr, n_bytes);
 
     if (this->mock_only) {
@@ -317,7 +318,7 @@ class PhysMem {
     // If necessary, read a few bytes until the address is 64-bit aligned.
     const volatile uint8_t* ptr =
         reinterpret_cast<const volatile uint8_t*>(this->rel_ptr(phys_addr));
-    while (reinterpret_cast<size_t>(ptr) % 8 != 0 && n_bytes > 0) {
+    while (reinterpret_cast<uintptr_t>(ptr) % 8 != 0 && n_bytes > 0) {
       dst.push_back(static_cast<uint8_t>(*ptr++));
       n_bytes--;
     }
@@ -351,7 +352,7 @@ class PhysMem {
       \param  mock_only   Whether this only mocks a physical memory mapping (see documentation of
                           `MockPhysMem` for details).
    */
-  PhysMem(const size_t base_addr, const size_t n_bytes, const bool mock_only)
+  PhysMem(const uintptr_t base_addr, const size_t n_bytes, const bool mock_only)
       : base_addr(base_addr), n_bytes(n_bytes), map_mask(n_bytes - 1), mock_only(mock_only) {
     // Initialize logging library.  This should actually not be done in the constructor, because
     // creating two `PhysMem` objects now probably corrupts logging.  However, if `AixLog` is not
@@ -404,7 +405,8 @@ class PhysMem {
   /** The file descriptor returned by `open`. */
   int fd;
   /** The `base_addr` and `n_bytes` given to the constructor. */
-  const size_t base_addr, n_bytes;
+  const uintptr_t base_addr;
+  const size_t n_bytes;
   /** Bitmask that selects the LSBs within `n_bytes`. */
   const size_t map_mask;
   /** The pointer returned by `mmap`. */
@@ -418,12 +420,12 @@ class PhysMem {
       \param  phys_addr   Physical address
       \return             Virtual address pointer that corresponds to the physical address.
     */
-  inline volatile void* rel_ptr(const size_t phys_addr) const {
+  inline volatile void* rel_ptr(const uintptr_t phys_addr) const {
     if (this->mock_only) {
       throw std::runtime_error("method undefined for mock PhysMem");
     }
-    const size_t offset = phys_addr & this->map_mask;
-    const size_t rel_addr = reinterpret_cast<size_t>(this->map_ptr) + offset;
+    const uintptr_t offset = phys_addr & this->map_mask;
+    const uintptr_t rel_addr = reinterpret_cast<uintptr_t>(this->map_ptr) + offset;
     return reinterpret_cast<volatile void*>(rel_addr);
   }
 
@@ -431,7 +433,7 @@ class PhysMem {
 
       Throws an `std::invalid_argument` exception if that is not the case.
    */
-  inline void validate_addr(const size_t phys_addr) const {
+  inline void validate_addr(const uintptr_t phys_addr) const {
     if (!this->maps_addr(phys_addr)) {
       throw std::invalid_argument(string_format("Address %p is not mapped!", phys_addr));
     }
@@ -441,7 +443,7 @@ class PhysMem {
 
       Throws an `std::invalid_argument` exception if that is not the case.
    */
-  inline void validate_addr_range(const size_t phys_addr, const size_t n_bytes) const {
+  inline void validate_addr_range(const uintptr_t phys_addr, const size_t n_bytes) const {
     if (!this->maps_addr_range(phys_addr, n_bytes)) {
       throw std::invalid_argument(
           string_format("Address range [%p,%p) is not mapped!", phys_addr, phys_addr + n_bytes));
@@ -470,7 +472,8 @@ class MockPhysMem : public PhysMem {
       - `read()` always returns `0` and does not print a value (since the value that would be read
         is obviously unknown).
    */
-  MockPhysMem(const size_t base_addr, const size_t n_bytes) : PhysMem(base_addr, n_bytes, true){};
+  MockPhysMem(const uintptr_t base_addr, const size_t n_bytes)
+      : PhysMem(base_addr, n_bytes, true){};
 };
 
 #endif  // HERO_PHYSMEM_H_
