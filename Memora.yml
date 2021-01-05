@@ -1,4 +1,4 @@
-cache_root_dir: /usr/scratch/dolent1/gitlabci/buildcache/hero
+cache_root_dir: /usr/scratch2/dolent1/gitlabci/buildcache/hero
 
 artifacts:
   tc-pulp:
@@ -1851,10 +1851,12 @@ artifacts:
       - buildroot
       - configs/har_exilzcu102_defconfig
       - package
+      - petalinux
       - support/libhero-target # package `libhero-target`
       - support/libpulp # package `libpulp`
       - support/pulp-driver # package `pulp-driver`
       - toolchain/llvm-project/openmp # package `hero-openmp`
+      - tools/configfile/get_value
       # sdk-pulp
       - pulp
       ## Dependencies

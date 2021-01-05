@@ -75,7 +75,9 @@ public:
     Type *IST = Type::getIntNTy(M->getContext(),
                                 M->getDataLayout().getTypeAllocSizeInBits(PST));
     PtrToIntInst *PII = new PtrToIntInst(LI.getPointerOperand(), IST, "", &LI);
+    DebugLoc DL = LI.getDebugLoc();
     CallInst *CI = CallInst::Create(F, {PII}, "", &LI);
+    CI->setDebugLoc(DL);
     Instruction *CTI = CI;
     // If the type we are trying to load is not the same as dictated by the
     // hero_store function, we need to cast it. For pointers we use the IntToPtr
@@ -168,7 +170,9 @@ public:
               BitCastInst(SI.getValueOperand(), FTy->getParamType(1), "", &SI);
       }
     }
+    DebugLoc DL = SI.getDebugLoc();
     CallInst *CI = CallInst::Create(F, {PII, SVI}, "", &SI);
+    CI->setDebugLoc(DL);
 
     // Replace store with call
     SI.replaceAllUsesWith(CI);
@@ -240,11 +244,24 @@ static void handleConstExpr(ConstantExpr *CE, HostPointerVisitor &HPV,
   }
 }
 
+// The ugly expandMem*AsLoop functions don't return a handle, so after each time
+// such a function is called we need to go through the function and add it.
+void addDbgMetadataToCallsIfNonePresent(Function &F, DebugLoc &DL) {
+  for (BasicBlock &BB : F) {
+    for (Instruction &I : BB) {
+      if (I.getMetadata("dbg") == nullptr) {
+        I.setDebugLoc(DL);
+      }
+    }
+  }
+}
+
 void OmpHostPointerLegalizer::expandMemIntrinsicUses(Function &F) {
   Intrinsic::ID ID = F.getIntrinsicID();
 
   for (auto I = F.user_begin(), E = F.user_end(); I != E;) {
     Instruction *Inst = cast<Instruction>(*I);
+    Function &userF = *Inst->getParent()->getParent();
     ++I;
 
     switch (ID) {
@@ -257,7 +274,9 @@ void OmpHostPointerLegalizer::expandMemIntrinsicUses(Function &F) {
       Function *ParentFunc = Memcpy->getParent()->getParent();
       const TargetTransformInfo &TTI =
           getAnalysis<TargetTransformInfoWrapperPass>().getTTI(*ParentFunc);
+      DebugLoc DL = Memcpy->getDebugLoc();
       expandMemCpyAsLoop(Memcpy, TTI);
+      addDbgMetadataToCallsIfNonePresent(userF, DL);
       Memcpy->eraseFromParent();
       break;
     }
@@ -267,7 +286,9 @@ void OmpHostPointerLegalizer::expandMemIntrinsicUses(Function &F) {
           Memmove->getDestAddressSpace() == DeviceAS) {
         break;
       }
+      DebugLoc DL = Memmove->getDebugLoc();
       expandMemMoveAsLoop(Memmove);
+      addDbgMetadataToCallsIfNonePresent(userF, DL);
       Memmove->eraseFromParent();
       break;
     }
@@ -276,7 +297,9 @@ void OmpHostPointerLegalizer::expandMemIntrinsicUses(Function &F) {
       if (Memset->getDestAddressSpace() == DeviceAS) {
         break;
       }
+      DebugLoc DL = Memset->getDebugLoc();
       expandMemSetAsLoop(Memset);
+      addDbgMetadataToCallsIfNonePresent(userF, DL);
       Memset->eraseFromParent();
       break;
     }

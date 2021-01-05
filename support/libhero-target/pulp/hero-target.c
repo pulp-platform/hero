@@ -29,7 +29,120 @@
 #define PULP_DMA_MUTEX_BACKOFF_CYCLES 60
 #define HERO_DMA_JOB_POOL_SIZE 8
 
+#
+
 #define DEBUG(...) //printf(__VA_ARGS__)
+
+// launch simple 1D transfer
+// make sure the high address registers are correctly set!
+static inline uint32_t _hero_launch_oned(
+    _hero_dma_conf_t* _hero_dma_conf,
+    void* src_addr,
+    void* dst_addr,
+    uint32_t num_bytes
+) {
+
+    // configure the dma
+    _hero_dma_conf->src_addr_low  = (uint32_t)src_addr;
+    _hero_dma_conf->dst_addr_low  = (uint32_t)dst_addr;
+    _hero_dma_conf->num_bytes     = (uint32_t)num_bytes;
+
+    __asm__ __volatile__ ("" : : : "memory");
+
+    // launch the transfer
+    return _hero_dma_conf->tf_id;
+}
+
+// read the id of the last transaction that has been completed
+static inline uint32_t _hero_read_completed_id(
+    _hero_dma_conf_t* _hero_dma_conf
+) {
+
+    return _hero_dma_conf->done_id;
+}
+
+// wait for a given transaction to complete
+static inline void _hero_wait_for_tf_completion(
+    _hero_dma_conf_t* _hero_dma_conf,
+    uint32_t tf_id
+) {
+
+    // spin until transfer is completed
+    while (tf_id > _hero_read_completed_id(_hero_dma_conf)) {
+        asm volatile ("nop");
+    }
+}
+
+hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst,
+                                          const HOST_VOID_PTR src,
+                                          uint32_t size)
+{
+  // set the base address of the dma
+  _hero_dma_conf_t* _hero_dma_conf = (_hero_dma_conf_t*)0x1c400000;
+
+  // response
+  hero_dma_job_t hero_dma_job;
+
+  // launch transfer
+  hero_dma_job->id = _hero_launch_oned(_hero_dma_conf, (void*)src, (void*)dst, size);
+  return hero_dma_job;
+}
+
+hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst,
+                                          const DEVICE_VOID_PTR src,
+                                          uint32_t size)
+{
+  // set the base address of the dma
+  _hero_dma_conf_t* _hero_dma_conf = (_hero_dma_conf_t*)0x1c400000;
+
+  // response
+  hero_dma_job_t hero_dma_job;
+
+  // launch transfer
+  hero_dma_job->id = _hero_launch_oned(_hero_dma_conf, (void*)src, (void*)dst, size);
+  return hero_dma_job;
+}
+
+void hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
+                          uint32_t size)
+{
+
+  // response
+  hero_dma_job_t hero_dma_job;
+
+  // launch async
+  hero_dma_job = hero_memcpy_host2dev_async(dst, src, size);
+
+  // synchronize
+  hero_dma_wait(hero_dma_job);
+
+}
+
+void hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
+                          uint32_t size)
+{
+
+  // response
+  hero_dma_job_t hero_dma_job;
+
+  // launch async
+  hero_dma_job = hero_memcpy_dev2host_async(dst, src, size);
+
+  // synchronize
+  hero_dma_wait(hero_dma_job);
+
+}
+
+void hero_dma_wait(hero_dma_job_t id)
+{
+  // set the base address of the dma
+  _hero_dma_conf_t* _hero_dma_conf = (_hero_dma_conf_t*)0x1c400000;
+
+  _hero_wait_for_tf_completion(_hero_dma_conf, id->id);
+}
+
+
+/*
 
 // Lock for entering critical sections in the DMA functions.
 __attribute__((__aligned__(4))) volatile int32_t __hero_dma_lock = 0x0;
@@ -394,7 +507,7 @@ hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
   hero_dma_wait(hero_memcpy_dev2host_async(dst, src, size));
 }
 
-// -------------------------------------------------------------------------- //
+// -------------------------------------------------------------------------- //*/
 
 DEVICE_VOID_PTR
 hero_l1malloc(int32_t size)

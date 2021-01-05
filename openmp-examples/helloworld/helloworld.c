@@ -16,33 +16,20 @@
  * limitations under the License.
  */
 
-#include <omp.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <time.h>
-#include <hero-target.h>
-
-struct timespec start, stop;
-double start_ns, stop_ns, exe_time;
+#include <hero-target.h>  // BIGPULP_MEMCPY
+#include <omp.h>          // omp_get_num_threads(), omp_get_thread_num()
+#include <stdio.h>        // printf()
 
 #pragma omp declare target
-void helloworld (void)
-{
-	#pragma omp parallel
-	printf("Hello World, I am thread %d of %d\n", omp_get_thread_num(), omp_get_num_threads());
+void helloworld(void) {
+#pragma omp parallel
+  printf("Hello World, I am thread %d of %d\n", omp_get_thread_num(), omp_get_num_threads());
 }
 #pragma omp end declare target
 
-int main(int argc, char *argv[])
-{
-  omp_set_default_device(BIGPULP_MEMCPY);
+int main(int argc, char *argv[]) {
+#pragma omp target device(BIGPULP_MEMCPY)
+  helloworld();
 
-  uint64_t k = (uint64_t)&argc;
-  #pragma omp target map(tofrom: k)
-  {
-    printf("POINTER: 0x%llx\n", (uint64_t)k);
-  }
-  printf("POINTER: 0x%llx\n", (uint64_t)k);
   return 0;
 }

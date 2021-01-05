@@ -163,14 +163,14 @@ module axi4_w_buffer
   logic l1_fifo_inp_valid, l1_fifo_inp_ready,
         l1_fifo_oup_valid, l1_fifo_oup_ready;
 
-  assign data_in = '{ prefetch: l1_prefetch_i,
-                    hit:      l1_hit_i,
-                    id:       l1_id_i,
-                    len:      l1_len_i,
-                    master:   l1_master_i,
-                    accept:   l1_accept_i,
-                    save:     l1_save_i,
-                    drop:     l1_drop_i};
+  assign l1_data_in = '{ prefetch: l1_prefetch_i,
+                         hit:      l1_hit_i,
+                         id:       l1_id_i,
+                         len:      l1_len_i,
+                         master:   l1_master_i,
+                         accept:   l1_accept_i,
+                         save:     l1_save_i,
+                         drop:     l1_drop_i};
 
   stream_fifo #(
     .FALL_THROUGH (1'b0),

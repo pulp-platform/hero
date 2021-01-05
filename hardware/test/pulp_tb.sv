@@ -436,7 +436,6 @@ module pulp_tb #(
     // Read status of mailbox.
     read_from_pulp(64'h0000_0000_1B80_1020, data, resp);
     assert(resp == axi_pkg::RESP_OKAY);
-    $display("Read 0x%08x from mailbox.", data);
 
     // Start cluster 0.
     cl_fetch_en[0] = 1'b1;
@@ -451,7 +450,7 @@ module pulp_tb #(
     for (genvar iBank = 0; iBank < 16; iBank++) begin: gen_fill_tcdm_bank
       initial begin
         $readmemh($sformatf("../test/slm_files/l1_0_%01d.slm", iBank),
-          dut.gen_clusters[iCluster].gen_cluster_sync.i_cluster.i_ooc.i_bound.gen_tcdm_banks[iBank].i_mem.mem);
+          dut.gen_clusters[iCluster].gen_cluster_sync.i_cluster.i_ooc.i_bound.gen_tcdm_banks[iBank].i_tc_sram.sram);
       end
     end
   end

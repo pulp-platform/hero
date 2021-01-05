@@ -60,14 +60,30 @@
 #define HERO_L1_DATA __attribute__((section(".data_l1")))
 #define HERO_L1_BSS __attribute__((section(".bss_l1")))
 
+//struct hero_dma_job {
+//  bool active;
+//  uint32_t loc;
+//  uint64_t ext;
+//  uint32_t len;
+//  bool ext2loc;
+//  uint16_t counter_mask;
+//};
+
 struct hero_dma_job {
-  bool active;
-  uint32_t loc;
-  uint64_t ext;
-  uint32_t len;
-  bool ext2loc;
-  uint16_t counter_mask;
+  uint32_t id;
 };
+
+// base address of the dma
+typedef struct {
+    uint32_t src_addr_low;
+    uint32_t src_addr_high;
+    uint32_t dst_addr_low;
+    uint32_t dst_addr_high;
+    uint32_t num_bytes;
+    volatile uint32_t tf_id   __attribute__((aligned(8)));
+    volatile uint32_t done_id __attribute__((aligned(8)));
+    volatile uint32_t config  __attribute__((aligned(8)));
+} _hero_dma_conf_t;
 
 #if defined(__llvm__)
 typedef __device struct hero_dma_job* hero_dma_job_t;

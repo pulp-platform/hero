@@ -10,7 +10,10 @@ mkdir_if_not_existing() {
 
 _mount() {
     mkdir_if_not_existing "$1"
-    mount "$1" "$2"
+    if ! mount --bind "$1" "$2"; then
+        echo "Error mounting '$1' at '$2'!"
+        exit -1
+    fi
     echo "Mounted '$1' at '$2'."
 }
 

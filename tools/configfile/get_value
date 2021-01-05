@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+
+# Copyright (c) 2020 ETH Zurich, University of Bologna
+# SPDX-License-Identifier: Apache-2.0
+#
+# Get the value of a variable from a simple configuration file.
+# Please see `usage()` function below for details.
+#
+# Author: Andreas Kurth
+
+# Output text intended for the user (= human) on stderr.
+say() {
+    if test "$no_messages" != "true"; then
+        >&2 echo "$@"
+    fi
+}
+
+# Ensure `perl` is installed.
+if ! which perl >/dev/null; then
+    say "Fatal: 'perl' is not installed!"
+    exit 1
+fi
+
+# Document usage.
+usage() {
+    no_messages='false'
+    say -e "Get the value of a variable from a simple configuration file.\n"
+    say "Usage:"
+    say -e "\t$(basename $0) [flags] <path/to/config> <var_name>"
+
+    say -e "\nArguments:"
+    say -e "\t<path/to/config>\tPath to configuration file"
+    say -e "\t<var_name>\t\tName of variable whose value to get"
+
+    say -e "\nFlags:"
+    say -e "\t-h, --help\tPrint usage information and exit."
+    say -e "\t-s, --no-messages\tSuppress error messages about nonexistent or unreadable files."
+    say -e "\t-q, --quiet\tDo not write anything to stdout."
+
+    say -e "\nConfig File Format:"
+    say -e "\t- One \`name=value' per line.  (This doc encloses verbatim text in \`'.)"
+    say -e "\t- Comments start with \`"\#"'.  Everything after \`"\#"' on a line is ignored."
+    say -e "\t- \`name' must not contain whitespace, \`=', \`\\', or \`"\#"'."
+    say -e "\t- \`value' must not contain \`"\#"'."
+    say -e "\t- No indentation (i.e., any whitespace at the beginning of a line) is allowed."
+    say -e "\t- The first occurrence of \`name=value' defines the value."
+
+    say -e "\nExit Code:"
+    say -e "\t== 0: Success, value is printed on stdout."
+    say -e "\t!= 0: Variable not found or error, see message on stderr."
+}
+
+# Parse flags.
+params=""
+while (( "$#" )); do
+    case "$1" in
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        -s|--no-messages)
+            no_messages='true'
+            shift
+            ;;
+        -q|--quiet)
+            readonly quiet='true'
+            shift
+            ;;
+        -*|--*) # unsupported flags
+            usage
+            exit 1
+            ;;
+        *) # preserve positional arguments
+            params="$params $1"
+            shift
+            ;;
+    esac
+done
+eval set -- "$params"
+
+# Parse arguments.
+if test "$#" -ne 2; then
+    usage
+    exit 1
+fi
+readonly config_path="$1"
+if ! test -r "$config_path"; then
+    say "Error: '$config_path' is not readable!"
+    exit 1
+fi
+readonly var_name="$2"
+
+# Regex developed and verified at https://regex101.com/r/qa3wmK/1 (see "Unit Tests" function).
+readonly val="$(\
+    perl -n -e 'if (/^\Q'"$var_name"'\E=(.*?)(#.*)?$/) { print "$1"; exit }' "$config_path"\
+)"
+
+# Handle value not found.
+if test -z "$val"; then
+    say "Error: Value for '$var_name' not found in '$config_path'!"
+    exit 1
+fi
+
+# Print found value.
+if test "$quiet" != "true"; then
+    echo "$val"
+fi
