@@ -3,6 +3,8 @@ set StdArithNoWarnings 1
 set NumericStdNoWarnings 1
 set BreakOnAssertion 2;# break also on assertion errors
 
+log -r /*
+
 if { ! [batch_mode] } {
     source ../test/pulp_tb.wave.do
 }
