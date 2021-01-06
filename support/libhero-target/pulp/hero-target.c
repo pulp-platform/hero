@@ -33,6 +33,9 @@
 
 #define DEBUG(...) //printf(__VA_ARGS__)
 
+// global job
+struct hero_dma_job hero_dma_job;
+
 // launch simple 1D transfer
 // make sure the high address registers are correctly set!
 static inline uint32_t _hero_launch_oned(
@@ -78,14 +81,14 @@ hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst,
                                           uint32_t size)
 {
   // set the base address of the dma
-  _hero_dma_conf_t* _hero_dma_conf = (_hero_dma_conf_t*)0x1c400000;
+  _hero_dma_conf_t* _hero_dma_conf = (_hero_dma_conf_t*)0x1B204400;
 
   // response
-  hero_dma_job_t hero_dma_job;
+  //hero_dma_job_t hero_dma_job;
 
   // launch transfer
-  hero_dma_job->id = _hero_launch_oned(_hero_dma_conf, (void*)src, (void*)dst, size);
-  return hero_dma_job;
+  hero_dma_job.id = _hero_launch_oned(_hero_dma_conf, (void*)src, (void*)dst, size);
+  return &hero_dma_job;
 }
 
 hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst,
@@ -93,14 +96,14 @@ hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst,
                                           uint32_t size)
 {
   // set the base address of the dma
-  _hero_dma_conf_t* _hero_dma_conf = (_hero_dma_conf_t*)0x1c400000;
+  _hero_dma_conf_t* _hero_dma_conf = (_hero_dma_conf_t*)0x1B204400;
 
   // response
-  hero_dma_job_t hero_dma_job;
+  //hero_dma_job_t hero_dma_job;
 
   // launch transfer
-  hero_dma_job->id = _hero_launch_oned(_hero_dma_conf, (void*)src, (void*)dst, size);
-  return hero_dma_job;
+  hero_dma_job.id = _hero_launch_oned(_hero_dma_conf, (void*)src, (void*)dst, size);
+  return &hero_dma_job;
 }
 
 void hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
@@ -108,13 +111,13 @@ void hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
 {
 
   // response
-  hero_dma_job_t hero_dma_job;
+  //hero_dma_job_t hero_dma_job;
 
   // launch async
-  hero_dma_job = hero_memcpy_host2dev_async(dst, src, size);
+  hero_dma_job = *(hero_memcpy_host2dev_async(dst, src, size));
 
   // synchronize
-  hero_dma_wait(hero_dma_job);
+  hero_dma_wait(&hero_dma_job);
 
 }
 
@@ -123,20 +126,20 @@ void hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
 {
 
   // response
-  hero_dma_job_t hero_dma_job;
+  //hero_dma_job_t hero_dma_job;
 
   // launch async
-  hero_dma_job = hero_memcpy_dev2host_async(dst, src, size);
+  hero_dma_job = *(hero_memcpy_dev2host_async(dst, src, size));
 
   // synchronize
-  hero_dma_wait(hero_dma_job);
+  hero_dma_wait(&hero_dma_job);
 
 }
 
 void hero_dma_wait(hero_dma_job_t id)
 {
   // set the base address of the dma
-  _hero_dma_conf_t* _hero_dma_conf = (_hero_dma_conf_t*)0x1c400000;
+  _hero_dma_conf_t* _hero_dma_conf = (_hero_dma_conf_t*)0x1B204400;
 
   _hero_wait_for_tf_completion(_hero_dma_conf, id->id);
 }
