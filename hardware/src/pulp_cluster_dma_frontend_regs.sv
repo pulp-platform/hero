@@ -80,12 +80,12 @@ module pulp_cluster_dma_frontend_regs #(
 
             // only grant if a request is here
             ctrl_gnt_o = 1'b1;
+            valid_d = 1'b1;
 
             // address decoding
             case(reg_addr)
                 // source address (low)
                 6'h00 : begin
-                    valid_d = 1'b1;
                     if (ctrl_type_i) begin // read
                         rdata_d = data_store_q.words[0];
                     end else begin // write
@@ -97,7 +97,6 @@ module pulp_cluster_dma_frontend_regs #(
                 end
                 // destination address (low)
                 6'h08 : begin
-                    valid_d = 1'b1;
                     if (ctrl_type_i) begin // read
                         rdata_d = data_store_q.words[1];
                     end else begin // write
@@ -109,7 +108,6 @@ module pulp_cluster_dma_frontend_regs #(
                 end
                 // num bytes
                 6'h10 : begin
-                    valid_d = 1'b1;
                     if (ctrl_type_i) begin // read
                         rdata_d = data_store_q.words[2];
                     end else begin // write
@@ -130,14 +128,12 @@ module pulp_cluster_dma_frontend_regs #(
                 end
                 // completed id
                 6'h20 : begin
-                    valid_d = 1'b1;
                     if (ctrl_type_i) begin // read
                         rdata_d = done_id_i;
                     end
                 end
                 // status / conf
                 6'h28 : begin
-                    valid_d = 1'b1;
                     if (ctrl_type_i) begin // read
                         rdata_d = {15'h0000, be_busy_i, 13'h0000, conf_store_q};
                     end else begin // write
@@ -147,7 +143,6 @@ module pulp_cluster_dma_frontend_regs #(
                 // default case
                 default : begin
                     rdata_d = '0;
-                    valid_d = 1'b1;
                 end
             endcase
         end
