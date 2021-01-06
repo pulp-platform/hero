@@ -285,9 +285,9 @@ module dmac_wrap
   );
 
   // tie-off TCDM master port
-  for (genvar i = 0; i < 4; i++) begin : gen_tie_off_unused_tcdm_master
-      assign tcdm_master[i].r_opc   = '0;
-  end
+  // for (genvar i = 0; i < 4; i++) begin : gen_tie_off_unused_tcdm_master
+  //     assign tcdm_master[i].r_opc   = '0;
+  // end
 
   // flip we polarity
   assign tcdm_master[0].wen = !tcdm_master_we_0;
