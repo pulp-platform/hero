@@ -62,21 +62,21 @@ module dmac_wrap
     assign config_be[i]          = ctrl_slave[i].be;
     assign ctrl_slave[i].gnt     = config_gnt[i];
     assign ctrl_slave[i].r_opc   = '0;
-    assign ctrl_slave[i].r_valid = config_r_rdata[i];
-    assign ctrl_slave[i].r_rdata = config_r_valid[i];
+    assign ctrl_slave[i].r_valid = config_r_valid[i];
+    assign ctrl_slave[i].r_rdata = config_r_rdata[i];
   end
 
-  // tie-off TCDM master port
-  for (genvar i = 0; i < 4; i++) begin : gen_tcdm_master
-      assign tcdm_master[i].add   = '0;
-      assign tcdm_master[i].req   = '0;
-      assign tcdm_master[i].wdata = '0;
-      assign tcdm_master[i].wen   = '0;
-      assign tcdm_master[i].be    = '0;
-  end
+  // // tie-off TCDM master port
+  // for (genvar i = 0; i < 4; i++) begin : gen_tcdm_master
+  //     assign tcdm_master[i].add   = '0;
+  //     assign tcdm_master[i].req   = '0;
+  //     assign tcdm_master[i].wdata = '0;
+  //     assign tcdm_master[i].wen   = '0;
+  //     assign tcdm_master[i].be    = '0;
+  // end
 
   // AXI4+ATOP types
-  typedef logic [AXI_ADDR_WIDTH-1:0]   addr_t;
+  typedef logic [32-1:0]   addr_t;
   typedef logic [AXI_DATA_WIDTH-1:0]   data_t;
   typedef logic [AXI_ID_WIDTH-1:0]       id_t;
   typedef logic [AXI_DATA_WIDTH/8-1:0] strb_t;
@@ -90,8 +90,8 @@ module dmac_wrap
   `AXI_TYPEDEF_REQ_T(req_t, aw_chan_t, w_chan_t, ar_chan_t)
   `AXI_TYPEDEF_RESP_T(resp_t, b_chan_t, r_chan_t)
   // BUS definitions
-  req_t  dma_req, tcdm_req, soc_req;
-  resp_t dma_rsp, tcdm_rsp, soc_rsp;
+  req_t  dma_req, tcdm_req, soc_req, tcdm_read_req, tcdm_write_req;
+  resp_t dma_rsp, tcdm_rsp, soc_rsp, tcdm_read_rsp, tcdm_write_rsp;
   // interface to structs
   `AXI_ASSIGN_FROM_REQ(ext_master, soc_req)
   `AXI_ASSIGN_TO_RESP(soc_rsp, ext_master)
@@ -101,7 +101,7 @@ module dmac_wrap
     .PerifIdWidth      ( PE_ID_WIDTH     ),
     .DmaAxiIdWidth     ( AXI_ID_WIDTH    ),
     .DmaDataWidth      ( AXI_DATA_WIDTH  ),
-    .DmaAddrWidth      ( AXI_ADDR_WIDTH  ),
+    .DmaAddrWidth      ( 32  ),
     .AxiAxReqDepth     ( 2               ),
     .TfReqFifoDepth    ( 2               ),
     .axi_req_t         ( req_t           ),
@@ -174,7 +174,7 @@ module dmac_wrap
     LatencyMode:        axi_pkg::CUT_ALL_PORTS,
     AxiIdWidthSlvPorts:           AXI_ID_WIDTH,
     AxiIdUsedSlvPorts:            AXI_ID_WIDTH,
-    AxiAddrWidth:               AXI_ADDR_WIDTH,
+    AxiAddrWidth:               32,
     AxiDataWidth:               AXI_DATA_WIDTH,
     NoAddrRules:                      NumRules
   };
@@ -209,6 +209,90 @@ module dmac_wrap
     .default_mst_port_i     ( '0                    )
   );
 
-  assign tcdm_rsp = '0;
+  // split AXI bus in read and write
+  always_comb begin : proc_tcdm_axi_rw_split
+    tcdm_rsp.r              = tcdm_read_rsp.r;
+    tcdm_rsp.r_valid        = tcdm_read_rsp.r_valid;
+    tcdm_rsp.ar_ready       = tcdm_read_rsp.ar_ready;
+    tcdm_rsp.b              = tcdm_write_rsp.b;
+    tcdm_rsp.b_valid        = tcdm_write_rsp.b_valid;
+    tcdm_rsp.w_ready        = tcdm_write_rsp.w_ready;
+    tcdm_rsp.aw_ready       = tcdm_write_rsp.aw_ready;
+
+    tcdm_write_req          = '0;
+    tcdm_write_req.aw       = tcdm_req.aw;
+    tcdm_write_req.aw_valid = tcdm_req.aw_valid;
+    tcdm_write_req.w        = tcdm_req.w;
+    tcdm_write_req.w_valid  = tcdm_req.w_valid;
+    tcdm_write_req.b_ready  = tcdm_req.b_ready;
+
+    tcdm_read_req           = '0;
+    tcdm_read_req.ar        = tcdm_req.ar;
+    tcdm_read_req.ar_valid  = tcdm_req.ar_valid;
+    tcdm_read_req.r_ready   = tcdm_req.r_ready;
+  end
+
+  logic tcdm_master_we_0, tcdm_master_we_1, tcdm_master_we_2, tcdm_master_we_3;
+
+  axi2mem #(
+    .axi_req_t   ( req_t               ),
+    .axi_resp_t  ( resp_t              ),
+    .AddrWidth   ( 32                  ),
+    .DataWidth   ( AXI_DATA_WIDTH      ),
+    .IdWidth     ( AXI_ID_WIDTH        ),
+    .NumBanks    ( 2                   ),
+    .BufDepth    ( 1                   )
+  ) i_axi2mem_read (
+    .clk_i        ( clk_i         ),
+    .rst_ni       ( rst_ni        ),
+    .busy_o       ( ),
+    .axi_req_i    ( tcdm_read_req ),
+    .axi_resp_o   ( tcdm_read_rsp ),
+    .mem_req_o    ( { tcdm_master[0].req,     tcdm_master[1].req     } ),
+    .mem_gnt_i    ( { tcdm_master[0].gnt,     tcdm_master[1].gnt     } ),
+    .mem_addr_o   ( { tcdm_master[0].add,     tcdm_master[1].add     } ),
+    .mem_wdata_o  ( { tcdm_master[0].wdata,   tcdm_master[1].wdata   } ),
+    .mem_strb_o   ( { tcdm_master[0].be,      tcdm_master[1].be      } ),
+    .mem_atop_o   ( ),
+    .mem_we_o     ( { tcdm_master_we_0,       tcdm_master_we_1       } ),
+    .mem_rvalid_i ( { tcdm_master[0].r_valid, tcdm_master[1].r_valid } ),
+    .mem_rdata_i  ( { tcdm_master[0].r_rdata, tcdm_master[1].r_rdata } )
+  );
+
+  axi2mem #(
+    .axi_req_t   ( req_t               ),
+    .axi_resp_t  ( resp_t              ),
+    .AddrWidth   ( 32                  ),
+    .DataWidth   ( AXI_DATA_WIDTH      ),
+    .IdWidth     ( AXI_ID_WIDTH        ),
+    .NumBanks    ( 2                   ),
+    .BufDepth    ( 1                   )
+  ) i_axi2mem_write (
+    .clk_i        ( clk_i          ),
+    .rst_ni       ( rst_ni         ),
+    .busy_o       ( ),
+    .axi_req_i    ( tcdm_write_req ),
+    .axi_resp_o   ( tcdm_write_rsp ),
+    .mem_req_o    ( { tcdm_master[2].req,     tcdm_master[3].req     } ),
+    .mem_gnt_i    ( { tcdm_master[2].gnt,     tcdm_master[3].gnt     } ),
+    .mem_addr_o   ( { tcdm_master[2].add,     tcdm_master[3].add     } ),
+    .mem_wdata_o  ( { tcdm_master[2].wdata,   tcdm_master[3].wdata   } ),
+    .mem_strb_o   ( { tcdm_master[2].be,      tcdm_master[3].be      } ),
+    .mem_atop_o   ( ),
+    .mem_we_o     ( { tcdm_master_we_2,       tcdm_master_we_3       } ),
+    .mem_rvalid_i ( { tcdm_master[2].r_valid, tcdm_master[3].r_valid } ),
+    .mem_rdata_i  ( { tcdm_master[2].r_rdata, tcdm_master[3].r_rdata } )
+  );
+
+  // tie-off TCDM master port
+  for (genvar i = 0; i < 4; i++) begin : gen_tie_off_unused_tcdm_master
+      assign tcdm_master[i].r_opc   = '0;
+  end
+
+  // flip we polarity
+  assign tcdm_master[0].wen = !tcdm_master_we_0;
+  assign tcdm_master[1].wen = !tcdm_master_we_1;
+  assign tcdm_master[2].wen = !tcdm_master_we_2;
+  assign tcdm_master[3].wen = !tcdm_master_we_3;
 
 endmodule : dmac_wrap
