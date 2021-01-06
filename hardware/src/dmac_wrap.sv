@@ -168,8 +168,8 @@ module dmac_wrap
   localparam axi_pkg::xbar_cfg_t XbarCfg = '{
     NoSlvPorts:                    NumSlvPorts,
     NoMstPorts:                    NumMstPorts,
-    MaxMstTrans:                             2,
-    MaxSlvTrans:                             2,
+    MaxMstTrans:                             3,
+    MaxSlvTrans:                             3,
     FallThrough:                          1'b0,
     LatencyMode:        axi_pkg::CUT_ALL_PORTS,
     AxiIdWidthSlvPorts:           AXI_ID_WIDTH,
@@ -234,7 +234,7 @@ module dmac_wrap
 
   logic tcdm_master_we_0, tcdm_master_we_1, tcdm_master_we_2, tcdm_master_we_3;
 
-  axi2mem #(
+  axi_to_mem #(
     .axi_req_t   ( req_t               ),
     .axi_resp_t  ( resp_t              ),
     .AddrWidth   ( 32                  ),
@@ -242,7 +242,7 @@ module dmac_wrap
     .IdWidth     ( AXI_ID_WIDTH        ),
     .NumBanks    ( 2                   ),
     .BufDepth    ( 1                   )
-  ) i_axi2mem_read (
+  ) i_axi_to_mem_read (
     .clk_i        ( clk_i         ),
     .rst_ni       ( rst_ni        ),
     .busy_o       ( ),
@@ -259,7 +259,7 @@ module dmac_wrap
     .mem_rdata_i  ( { tcdm_master[0].r_rdata, tcdm_master[1].r_rdata } )
   );
 
-  axi2mem #(
+  axi_to_mem #(
     .axi_req_t   ( req_t               ),
     .axi_resp_t  ( resp_t              ),
     .AddrWidth   ( 32                  ),
@@ -267,7 +267,7 @@ module dmac_wrap
     .IdWidth     ( AXI_ID_WIDTH        ),
     .NumBanks    ( 2                   ),
     .BufDepth    ( 1                   )
-  ) i_axi2mem_write (
+  ) i_axi_to_mem_write (
     .clk_i        ( clk_i          ),
     .rst_ni       ( rst_ni         ),
     .busy_o       ( ),
