@@ -152,7 +152,7 @@ module pulp_cluster_dma_frontend_regs #(
     always_ff @(posedge clk_i or negedge rst_ni) begin : proc_data_store
         if(~rst_ni) begin
             data_store_q <= '0;
-            conf_store_q <= 3'b001;
+            conf_store_q <= 3'b101;
             rdata_q      <= '0;
             valid_q      <= '0;
         end else begin
