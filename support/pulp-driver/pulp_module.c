@@ -1087,6 +1087,7 @@ int pulp_mmap(struct file *filp, struct vm_area_struct *vma)
   unsigned long vsize;
   unsigned long psize;
   char type[12];
+  int io_remap;
 
   off = (vma->vm_pgoff) << PAGE_SHIFT;
 
@@ -1189,7 +1190,12 @@ int pulp_mmap(struct file *filp, struct vm_area_struct *vma)
     return -EINVAL; /*  spans too high */
 
   // map physical kernel space addresses to virtual user space addresses
-  io_remap_pfn_range(vma, vma->vm_start, physical, vsize, vma->vm_page_prot);
+  io_remap = io_remap_pfn_range(vma, vma->vm_start, physical, vsize, vma->vm_page_prot);
+  if (io_remap != 0) {
+    printk(KERN_ERR "PULP: io_remap_pfn_range(.., %lx, %lx, %lu, ..) failed: %d!\n", vma->vm_start,
+        physical, vsize, io_remap);
+    return -EAGAIN;
+  }
 
   return 0;
 }
