@@ -1186,6 +1186,10 @@ int pulp_mmap(struct file *filp, struct vm_area_struct *vma)
 
   // map physical kernel space addresses to virtual user space addresses
   io_remap = io_remap_pfn_range(vma, vma->vm_start, physical, vsize, vma->vm_page_prot);
+  if (DEBUG_LEVEL_PULP > 0) {
+    printk(KERN_INFO "PULP: io_remap_pfn_range(.., %lx, %lx, %lu, ..)\n", vma->vm_start, physical,
+        vsize);
+  }
   if (io_remap != 0) {
     printk(KERN_ERR "PULP: io_remap_pfn_range(.., %lx, %lx, %lu, ..) failed: %d!\n", vma->vm_start,
         physical, vsize, io_remap);
