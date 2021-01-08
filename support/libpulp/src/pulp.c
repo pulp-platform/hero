@@ -30,34 +30,22 @@
 
 uint32_t pulp_read32(const uint32_t *base_addr, uint32_t off, char off_type)
 {
+  if (off_type == 'b') off >>= 2;
+  const uint32_t* const addr = base_addr + off;
   if (DEBUG_LEVEL > 4) {
-    const uint32_t *addr;
-    if (off_type == 'b')
-      addr = base_addr + (off >> 2);
-    else
-      addr = base_addr + off;
     printf("Reading from %p\n", addr);
   }
-  if (off_type == 'b')
-    return *(base_addr + (off >> 2));
-  else
-    return *(base_addr + off);
+  return *addr;
 }
 
 void pulp_write32(uint32_t *base_addr, uint32_t off, char off_type, uint32_t value)
 {
+  if (off_type == 'b') off >>= 2;
+  uint32_t* const addr = base_addr + off;
   if (DEBUG_LEVEL > 4) {
-    uint32_t *addr;
-    if (off_type == 'b')
-      addr = base_addr + (off >> 2);
-    else
-      addr = base_addr + off;
     printf("Writing to %p\n", addr);
   }
-  if (off_type == 'b')
-    *(base_addr + (off >> 2)) = value;
-  else
-    *(base_addr + off) = value;
+  *addr = value;
 }
 
 int pulp_mbox_read(const PulpDev *pulp, uint32_t *buffer, size_t n_words)
