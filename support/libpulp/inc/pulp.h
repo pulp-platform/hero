@@ -145,7 +145,7 @@ typedef struct {
 
   \return   value read at the specified address
  */
-uint32_t pulp_read32(const uint32_t *base_addr, uint32_t off, char off_type);
+uint32_t pulp_read32(const volatile uint32_t *base_addr, uint32_t off, char off_type);
 
 /** Write 32 bits to PULP.
 
@@ -153,7 +153,7 @@ uint32_t pulp_read32(const uint32_t *base_addr, uint32_t off, char off_type);
   \param    off       offset
   \param    off_type  type of the offset, 'b' = byte offset, else word offset
  */
-void pulp_write32(uint32_t *base_addr, uint32_t off, char off_type, uint32_t value);
+void pulp_write32(volatile uint32_t *base_addr, uint32_t off, char off_type, uint32_t value);
 
 //!@}
 

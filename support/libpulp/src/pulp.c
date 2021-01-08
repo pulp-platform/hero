@@ -28,20 +28,20 @@
 #include "pulp.h"
 #include "o1heap.h"
 
-uint32_t pulp_read32(const uint32_t *base_addr, uint32_t off, char off_type)
+uint32_t pulp_read32(const volatile uint32_t *base_addr, uint32_t off, char off_type)
 {
   if (off_type == 'b') off >>= 2;
-  const uint32_t* const addr = base_addr + off;
+  const volatile uint32_t* const addr = base_addr + off;
   if (DEBUG_LEVEL > 4) {
     printf("Reading from %p\n", addr);
   }
   return *addr;
 }
 
-void pulp_write32(uint32_t *base_addr, uint32_t off, char off_type, uint32_t value)
+void pulp_write32(volatile uint32_t *base_addr, uint32_t off, char off_type, uint32_t value)
 {
   if (off_type == 'b') off >>= 2;
-  uint32_t* const addr = base_addr + off;
+  volatile uint32_t* const addr = base_addr + off;
   if (DEBUG_LEVEL > 4) {
     printf("Writing to %p\n", addr);
   }
