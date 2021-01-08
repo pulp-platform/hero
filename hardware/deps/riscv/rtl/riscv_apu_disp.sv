@@ -24,7 +24,7 @@
 
 `include "apu_macros.sv"
 
-module riscv_apu_disp (
+module riscv_apu_disp import apu_core_package::*; (
   input logic                           clk_i,
   input logic                           rst_ni,
 

@@ -41,9 +41,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-import defs_div_sqrt_mvp::*;
-
-module norm_div_sqrt_mvp
+module norm_div_sqrt_mvp import defs_div_sqrt_mvp::*;
   (//Inputs
    input logic [C_MANT_FP64+4:0]                Mant_in_DI,  // Include the needed 4-bit for rounding and hidden bit
    input logic signed [C_EXP_FP64+1:0]          Exp_in_DI,

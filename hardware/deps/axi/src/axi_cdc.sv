@@ -20,7 +20,7 @@
 /// For each of the five AXI channels, this module instantiates a CDC FIFO, whose push and pop
 /// ports are in separate clock domains.  IMPORTANT: For each AXI channel, you MUST properly
 /// constrain three paths through the FIFO; see the header of `cdc_fifo_gray` for instructions.
-module axi_cdc #(
+module axi_cdc_noslice #(
   parameter type aw_chan_t  = logic, // AW Channel Type
   parameter type w_chan_t   = logic, //  W Channel Type
   parameter type b_chan_t   = logic, //  B Channel Type
@@ -170,7 +170,7 @@ module axi_cdc_intf #(
   `AXI_ASSIGN_FROM_REQ(dst, dst_req)
   `AXI_ASSIGN_TO_RESP(dst_resp, dst)
 
-  axi_cdc #(
+  axi_cdc_noslice #(
     .aw_chan_t  ( aw_chan_t ),
     .w_chan_t   ( w_chan_t  ),
     .b_chan_t   ( b_chan_t  ),
@@ -228,7 +228,7 @@ module axi_lite_cdc_intf #(
   `AXI_LITE_ASSIGN_FROM_REQ(dst, dst_req)
   `AXI_LITE_ASSIGN_TO_RESP(dst_resp, dst)
 
-  axi_cdc #(
+  axi_cdc_noslice #(
     .aw_chan_t  ( aw_chan_t ),
     .w_chan_t   ( w_chan_t  ),
     .b_chan_t   ( b_chan_t  ),

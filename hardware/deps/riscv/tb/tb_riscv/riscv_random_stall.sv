@@ -22,12 +22,9 @@
 //                                                                                                              //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-import riscv_defines::*;
-import perturbation_defines::*;
 `include "riscv_config.sv"
 
-module riscv_random_stall
-
+module riscv_random_stall import riscv_defines::*; import perturbation_defines::*;
 #(
     parameter MAX_STALL_N = 1,
     parameter DATA_WIDTH  = 32

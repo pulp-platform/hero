@@ -16,16 +16,16 @@
  * Francesco Conti <fconti@iis.ee.ethz.ch>
  */
 
-import apu_package::*;
-
 // USER DEFINED MACROS to improve self-testing capabilities
 `ifndef PULP_FPGA_SIM
+`ifndef SYNTHESIS
   `define DEBUG_FETCH_INTERFACE
+`endif
 `endif
 //`define DATA_MISS
 //`define DUMP_INSTR_FETCH
 
-module core_region
+module core_region import apu_package::*;
 #(
   // CORE PARAMETERS
   parameter int     CORE_ID                 = 0,

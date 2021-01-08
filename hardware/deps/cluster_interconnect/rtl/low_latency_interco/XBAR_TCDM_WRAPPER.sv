@@ -100,7 +100,7 @@ module XBAR_TCDM_WRAPPER
     input  logic [N_SLAVE-1:0]                             enable_resp_pipe_i
 );
 
-  localparam ADDR_OFFSET = `ADDR_OFFSET(DATA_WIDTH);
+  localparam ADDR_OFFSET = $clog2(DATA_WIDTH - 1) - 3;
 
   logic [N_SLAVE-1:0]                                    data_req_int;
   logic [N_SLAVE-1:0]                                    data_ts_set_int;

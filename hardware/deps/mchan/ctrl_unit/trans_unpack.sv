@@ -396,14 +396,14 @@ module trans_unpack
      begin
 	
 	case(s_mchan_opc[0])
-	  
-	  `MCHAN_OP_TX:
+  
+	  0:
 	    begin
 	       tcdm_opc_o[0] = 1'b1; // READ
 	       ext_opc_o[0]  = 1'b0; // WRITE
 	    end
-	  
-	  `MCHAN_OP_RX:
+
+	  1:
 	    begin
 	       tcdm_opc_o[0] = 1'b0; // WRITE
 	       ext_opc_o[0]  = 1'b1; // READ

@@ -12,8 +12,6 @@
 // that is implemented in the core into an APU with one line, and be auto-
 // deactivated when the corresponding APU is not implemented
 
-import apu_core_package::*;
-
 // Source/Destination register instruction index
 `define REG_S1 19:15
 `define REG_S2 24:20
@@ -64,7 +62,7 @@ import apu_core_package::*;
 `define FP_3OP if (FPU==1) begin\
                  apu_en              = 1'b1;\
                  alu_en_o            = 1'b0;\
-                 apu_flags_src_o     = APU_FLAGS_FP;\
+                 apu_flags_src_o     = apu_core_package::APU_FLAGS_FP;\
                  rega_used_o         = 1'b1;\
                  regb_used_o         = 1'b1;\
                  regc_used_o         = 1'b1;\

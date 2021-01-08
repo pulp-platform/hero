@@ -1,7 +1,7 @@
-import axi_pkg::*;
-import axi_test::*;
-
 package tb_axi_pkg;
+
+    import axi_pkg::*;
+    import axi_test::*;
 
     class axi_access #(
         parameter int  AW = 32  , // AXI address width

@@ -25,10 +25,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-
-import riscv_defines::*;
-
-module riscv_if_stage
+module riscv_if_stage import riscv_defines::*;
 #(
   parameter N_HWLP          = 2,
   parameter RDATA_WIDTH     = 32,

@@ -34,10 +34,7 @@
 
 `include "apu_macros.sv"
 
-import apu_core_package::*;
-import riscv_defines::*;
-
-module riscv_ex_stage
+module riscv_ex_stage import apu_core_package::*; import riscv_defines::*;
 #(
   parameter FPU              =  0,
   parameter FP_DIVSQRT       =  0,

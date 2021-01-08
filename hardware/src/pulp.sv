@@ -36,11 +36,10 @@ package automatic pulp_pkg;
   typedef logic [AXI_LITE_DW-1:0]   lite_data_t;
   typedef logic [AXI_LITE_DW/8-1:0] lite_strb_t;
 endpackage
-import pulp_pkg::*;
 
 `include "axi/assign.svh"
 
-module pulp #(
+module pulp import pulp_pkg::*; #(
   // SoC Parameters
   parameter int unsigned  N_CLUSTERS = 4,           // must be a power of 2
   parameter int unsigned  AXI_DW = 256,             // [bit]

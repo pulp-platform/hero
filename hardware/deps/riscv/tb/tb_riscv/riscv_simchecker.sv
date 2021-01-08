@@ -24,17 +24,10 @@
 `ifndef VERILATOR
 `include "riscv_config.sv"
 
-import riscv_defines::*;
-
 // do not import anything if the simchecker is not used
 // this gets rid of warnings during simulation
-import "DPI-C" function chandle riscv_checker_init(input int boot_addr, input int core_id, input int cluster_id, input string name);
-import "DPI-C" function int     riscv_checker_step(input chandle cpu, input longint simtime, input int cycle, input logic [31:0] pc, input logic [31:0] instr);
-import "DPI-C" function void    riscv_checker_irq(input chandle cpu, input int irq, input int irq_no);
-import "DPI-C" function void    riscv_checker_mem_access(input chandle cpu, input int we, input logic [31:0] addr, input logic [31:0] data);
-import "DPI-C" function void    riscv_checker_reg_access(input chandle cpu, input logic [31:0] addr, input logic [31:0] data);
 
-module riscv_simchecker
+module riscv_simchecker import riscv_defines::*;
 (
   // Clock and Reset
   input  logic        clk,
@@ -104,6 +97,12 @@ module riscv_simchecker
 
 
 );
+
+  import "DPI-C" function chandle riscv_checker_init(input int boot_addr, input int core_id, input int cluster_id, input string name);
+  import "DPI-C" function int     riscv_checker_step(input chandle cpu, input longint simtime, input int cycle, input logic [31:0] pc, input logic [31:0] instr);
+  import "DPI-C" function void    riscv_checker_irq(input chandle cpu, input int irq, input int irq_no);
+  import "DPI-C" function void    riscv_checker_mem_access(input chandle cpu, input int we, input logic [31:0] addr, input logic [31:0] data);
+  import "DPI-C" function void    riscv_checker_reg_access(input chandle cpu, input logic [31:0] addr, input logic [31:0] data);
 
   // DPI stuff
   chandle dpi_simdata;

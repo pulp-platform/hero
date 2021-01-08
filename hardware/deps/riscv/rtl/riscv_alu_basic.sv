@@ -25,9 +25,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-import riscv_defines::*;
-
-module riscv_alu_basic
+module riscv_alu_basic import riscv_defines::*;
 (
   input  logic                     clk,
   input  logic                     rst_n,

@@ -1125,10 +1125,14 @@ module pulp_cluster
       .out    (s_data_slave)
     );
     // pragma translate_off
+`ifndef SYNTHESIS
+`ifndef VERILATOR
     always @(posedge clk_i or posedge clk_cluster) begin
       assert (clk_cluster == clk_i)
         else $error("Cluster clock differs from clock input but asynchronous input inactive!");
     end
+`endif
+`endif
     // pragma translate_on
   end
 

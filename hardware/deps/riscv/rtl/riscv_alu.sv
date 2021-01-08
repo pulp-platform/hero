@@ -26,9 +26,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-import riscv_defines::*;
-
-module riscv_alu
+module riscv_alu import riscv_defines::*;
 #(
   parameter SHARED_INT_DIV = 0,
   parameter FPU            = 0
@@ -1154,7 +1152,7 @@ module riscv_alu
 
 endmodule
 
-module alu_ff
+module alu_ff import riscv_defines::*;
 #(
   parameter LEN = 32
 )
@@ -1230,7 +1228,7 @@ module alu_ff
 endmodule
 
 // count the number of '1's in a word
-module alu_popcnt
+module alu_popcnt import riscv_defines::*;
 (
   input  logic [31:0]  in_i,
   output logic [5: 0]  result_o
