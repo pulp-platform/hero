@@ -1181,11 +1181,6 @@ int pulp_mmap(struct file *filp, struct vm_area_struct *vma)
   vma->vm_flags |= VM_IO | VM_DONTEXPAND | VM_DONTDUMP;
   vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
 
-  if (DEBUG_LEVEL_PULP > 0) {
-    printk(KERN_INFO "PULP: %s memory mapped. \nPhysical address = %#lx, user-space virtual address = %#lx, vsize = %#lx.\n",
-           type, physical << PAGE_SHIFT, vma->vm_start, vsize);
-  }
-
   if (vsize > psize)
     return -EINVAL; /*  spans too high */
 
@@ -1195,6 +1190,11 @@ int pulp_mmap(struct file *filp, struct vm_area_struct *vma)
     printk(KERN_ERR "PULP: io_remap_pfn_range(.., %lx, %lx, %lu, ..) failed: %d!\n", vma->vm_start,
         physical, vsize, io_remap);
     return -EAGAIN;
+  }
+
+  if (DEBUG_LEVEL_PULP > 0) {
+    printk(KERN_INFO "PULP: %s memory mapped. \nPhysical address = %#lx, user-space virtual address = %#lx, vsize = %#lx.\n",
+           type, physical << PAGE_SHIFT, vma->vm_start, vsize);
   }
 
   return 0;
