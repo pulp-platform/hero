@@ -1189,7 +1189,7 @@ int pulp_mmap(struct file *filp, struct vm_area_struct *vma)
     return -EINVAL; /*  spans too high */
 
   // map physical kernel space addresses to virtual user space addresses
-  remap_pfn_range(vma, vma->vm_start, physical, vsize, vma->vm_page_prot);
+  io_remap_pfn_range(vma, vma->vm_start, physical, vsize, vma->vm_page_prot);
 
   return 0;
 }
