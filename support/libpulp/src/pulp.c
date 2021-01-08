@@ -22,6 +22,7 @@
 #include <inttypes.h>
 #include <sys/ioctl.h> // ioctl()
 #include <time.h> // struct tm, localtime(), time(), time_t
+#include <sys/mman.h> // mmap()
 #include <sys/stat.h> // fstat()
 #include <errno.h>
 
