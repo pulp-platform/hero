@@ -1087,6 +1087,7 @@ int pulp_mmap(struct file *filp, struct vm_area_struct *vma)
   unsigned long vsize;
   unsigned long psize;
   char type[12];
+  int io_remap;
 
   off = (vma->vm_pgoff) << PAGE_SHIFT;
 
@@ -1177,19 +1178,28 @@ int pulp_mmap(struct file *filp, struct vm_area_struct *vma)
   psize = size_b - off;
 
   // set protection flags to avoid caching and paging
-  vma->vm_flags |= VM_IO | VM_RESERVED;
+  vma->vm_flags |= VM_IO | VM_DONTEXPAND | VM_DONTDUMP;
   vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
-
-  if (DEBUG_LEVEL_PULP > 0) {
-    printk(KERN_INFO "PULP: %s memory mapped. \nPhysical address = %#lx, user-space virtual address = %#lx, vsize = %#lx.\n",
-           type, physical << PAGE_SHIFT, vma->vm_start, vsize);
-  }
 
   if (vsize > psize)
     return -EINVAL; /*  spans too high */
 
   // map physical kernel space addresses to virtual user space addresses
-  remap_pfn_range(vma, vma->vm_start, physical, vsize, vma->vm_page_prot);
+  io_remap = io_remap_pfn_range(vma, vma->vm_start, physical, vsize, vma->vm_page_prot);
+  if (DEBUG_LEVEL_PULP > 0) {
+    printk(KERN_INFO "PULP: io_remap_pfn_range(.., %lx, %lx, %lu, ..)\n", vma->vm_start, physical,
+        vsize);
+  }
+  if (io_remap != 0) {
+    printk(KERN_ERR "PULP: io_remap_pfn_range(.., %lx, %lx, %lu, ..) failed: %d!\n", vma->vm_start,
+        physical, vsize, io_remap);
+    return -EAGAIN;
+  }
+
+  if (DEBUG_LEVEL_PULP > 0) {
+    printk(KERN_INFO "PULP: %s memory mapped. \nPhysical address = %#lx, user-space virtual address = %#lx, vsize = %#lx.\n",
+           type, physical << PAGE_SHIFT, vma->vm_start, vsize);
+  }
 
   return 0;
 }

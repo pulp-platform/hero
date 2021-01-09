@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Fix I/O memory accesses to PULP.  We have suffered from unreliable offloads to PULP (#87), and
+  that could be caused by memory accesses from the Host to PULP that are not correctly performed to
+  incorrectly configured memory mappings and/or access qualifiers.  This fixes the volatility
+  correctness of `libpulp`'s `pulp_{read,write}32()` functions, which are used, among others, to
+  communicate with PULP's mailbox.  This also updates the PULP Linux driver to fix potential issues
+  with `mmap()`ing PULP memory regions.  Applying this fix requires recompiling
+  `libomptarget.pulp.rtl.so`, `libpulp.so`, and the PULP Linux driver (`pulp.ko`); please see !214
+  for instructions.
 
 
 ## v0.1.2 - 2020-12-15
