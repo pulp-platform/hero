@@ -27,7 +27,8 @@ module dmac_wrap
   parameter TCDM_ADD_WIDTH     = 13,
   parameter DATA_WIDTH         = 32,
   parameter ADDR_WIDTH         = 32,
-  parameter BE_WIDTH           = DATA_WIDTH/8
+  parameter BE_WIDTH           = DATA_WIDTH/8,
+  parameter NUM_STREAMS        = 4
 ) (
   input logic                      clk_i,
   input logic                      rst_ni,
@@ -42,6 +43,9 @@ module dmac_wrap
   output logic                     term_irq_pe_o,
   output logic                     busy_o
 );
+
+  localparam int unsigned MstIdxWidth = AXI_ID_WIDTH;
+  localparam int unsigned SlvIdxWidth = AXI_ID_WIDTH - $clog2(NUM_STREAMS);
 
   // CORE --> MCHAN CTRL INTERFACE BUS SIGNALS
   logic [NB_CORES-1:0][DATA_WIDTH-1:0] config_wdata;
@@ -66,32 +70,32 @@ module dmac_wrap
     assign ctrl_slave[i].r_rdata = config_r_rdata[i];
   end
 
-  // // tie-off TCDM master port
-  // for (genvar i = 0; i < 4; i++) begin : gen_tcdm_master
-  //     assign tcdm_master[i].add   = '0;
-  //     assign tcdm_master[i].req   = '0;
-  //     assign tcdm_master[i].wdata = '0;
-  //     assign tcdm_master[i].wen   = '0;
-  //     assign tcdm_master[i].be    = '0;
-  // end
-
   // AXI4+ATOP types
   typedef logic [32-1:0]   addr_t;
   typedef logic [AXI_DATA_WIDTH-1:0]   data_t;
-  typedef logic [AXI_ID_WIDTH-1:0]       id_t;
+  typedef logic [SlvIdxWidth-1:0]      slv_id_t;
+  typedef logic [MstIdxWidth-1:0]      mst_id_t;
   typedef logic [AXI_DATA_WIDTH/8-1:0] strb_t;
   typedef logic [AXI_USER_WIDTH-1:0]   user_t;
   // AXI4+ATOP channels typedefs
-  `AXI_TYPEDEF_AW_CHAN_T(aw_chan_t, addr_t, id_t, user_t)
+  `AXI_TYPEDEF_AW_CHAN_T(slv_aw_chan_t, addr_t, slv_id_t, user_t)
+  `AXI_TYPEDEF_AW_CHAN_T(mst_aw_chan_t, addr_t, mst_id_t, user_t)
   `AXI_TYPEDEF_W_CHAN_T(w_chan_t, data_t, strb_t, user_t)
-  `AXI_TYPEDEF_B_CHAN_T(b_chan_t, id_t, user_t)
-  `AXI_TYPEDEF_AR_CHAN_T(ar_chan_t, addr_t, id_t, user_t)
-  `AXI_TYPEDEF_R_CHAN_T(r_chan_t, data_t, id_t, user_t)
-  `AXI_TYPEDEF_REQ_T(req_t, aw_chan_t, w_chan_t, ar_chan_t)
-  `AXI_TYPEDEF_RESP_T(resp_t, b_chan_t, r_chan_t)
+  `AXI_TYPEDEF_B_CHAN_T(slv_b_chan_t, slv_id_t, user_t)
+  `AXI_TYPEDEF_B_CHAN_T(mst_b_chan_t, mst_id_t, user_t)
+  `AXI_TYPEDEF_AR_CHAN_T(slv_ar_chan_t, addr_t, slv_id_t, user_t)
+  `AXI_TYPEDEF_AR_CHAN_T(mst_ar_chan_t, addr_t, mst_id_t, user_t)
+  `AXI_TYPEDEF_R_CHAN_T(slv_r_chan_t, data_t, slv_id_t, user_t)
+  `AXI_TYPEDEF_R_CHAN_T(mst_r_chan_t, data_t, mst_id_t, user_t)
+  `AXI_TYPEDEF_REQ_T(slv_req_t, slv_aw_chan_t, w_chan_t, slv_ar_chan_t)
+  `AXI_TYPEDEF_REQ_T(mst_req_t, mst_aw_chan_t, w_chan_t, mst_ar_chan_t)
+  `AXI_TYPEDEF_RESP_T(slv_resp_t, slv_b_chan_t, slv_r_chan_t)
+  `AXI_TYPEDEF_RESP_T(mst_resp_t, mst_b_chan_t, mst_r_chan_t)
   // BUS definitions
-  req_t  dma_req, tcdm_req, soc_req, tcdm_read_req, tcdm_write_req;
-  resp_t dma_rsp, tcdm_rsp, soc_rsp, tcdm_read_rsp, tcdm_write_rsp;
+  mst_req_t  tcdm_req, soc_req, tcdm_read_req, tcdm_write_req;
+  mst_resp_t tcdm_rsp, soc_rsp, tcdm_read_rsp, tcdm_write_rsp;
+  slv_req_t  [NUM_STREAMS-1:0] dma_req;
+  slv_resp_t [NUM_STREAMS-1:0] dma_rsp;
   // interface to structs
   `AXI_ASSIGN_FROM_REQ(ext_master, soc_req)
   `AXI_ASSIGN_TO_RESP(soc_rsp, ext_master)
@@ -104,8 +108,9 @@ module dmac_wrap
     .DmaAddrWidth      ( 32  ),
     .AxiAxReqDepth     ( 2               ),
     .TfReqFifoDepth    ( 2               ),
-    .axi_req_t         ( req_t           ),
-    .axi_res_t         ( resp_t          )
+    .NumStreams        ( NUM_STREAMS     ),
+    .axi_req_t         ( slv_req_t       ),
+    .axi_res_t         ( slv_resp_t      )
   ) i_pulp_cluster_dma_frontend (
     .clk_i                   ( clk_i                   ),
     .rst_ni                  ( rst_ni                  ),
@@ -162,7 +167,7 @@ module dmac_wrap
     }
   };
   localparam NumMstPorts = 2;
-  localparam NumSlvPorts = 1;
+  localparam NumSlvPorts = NUM_STREAMS;
 
   /* verilator lint_off WIDTHCONCAT */
   localparam axi_pkg::xbar_cfg_t XbarCfg = '{
@@ -172,9 +177,9 @@ module dmac_wrap
     MaxSlvTrans:                             3,
     FallThrough:                          1'b0,
     LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-    AxiIdWidthSlvPorts:           AXI_ID_WIDTH,
-    AxiIdUsedSlvPorts:            AXI_ID_WIDTH,
-    AxiAddrWidth:               32,
+    AxiIdWidthSlvPorts:            SlvIdxWidth,
+    AxiIdUsedSlvPorts:             SlvIdxWidth,
+    AxiAddrWidth:                           32,
     AxiDataWidth:               AXI_DATA_WIDTH,
     NoAddrRules:                      NumRules
   };
@@ -182,19 +187,19 @@ module dmac_wrap
 
   axi_xbar #(
     .Cfg          ( XbarCfg                 ),
-    .slv_aw_chan_t( aw_chan_t               ),
-    .mst_aw_chan_t( aw_chan_t               ),
+    .slv_aw_chan_t( slv_aw_chan_t           ),
+    .mst_aw_chan_t( mst_aw_chan_t           ),
     .w_chan_t     ( w_chan_t                ),
-    .slv_b_chan_t ( b_chan_t                ),
-    .mst_b_chan_t ( b_chan_t                ),
-    .slv_ar_chan_t( ar_chan_t               ),
-    .mst_ar_chan_t( ar_chan_t               ),
-    .slv_r_chan_t ( r_chan_t                ),
-    .mst_r_chan_t ( r_chan_t                ),
-    .slv_req_t    ( req_t                   ),
-    .slv_resp_t   ( resp_t                  ),
-    .mst_req_t    ( req_t                   ),
-    .mst_resp_t   ( resp_t                  ),
+    .slv_b_chan_t ( slv_b_chan_t            ),
+    .mst_b_chan_t ( mst_b_chan_t            ),
+    .slv_ar_chan_t( slv_ar_chan_t           ),
+    .mst_ar_chan_t( mst_ar_chan_t           ),
+    .slv_r_chan_t ( slv_r_chan_t            ),
+    .mst_r_chan_t ( mst_r_chan_t            ),
+    .slv_req_t    ( slv_req_t               ),
+    .slv_resp_t   ( slv_resp_t              ),
+    .mst_req_t    ( mst_req_t               ),
+    .mst_resp_t   ( mst_resp_t              ),
     .rule_t       ( axi_pkg::xbar_rule_32_t )
   ) i_dma_axi_xbar (
     .clk_i                  ( clk_i                 ),
@@ -235,11 +240,11 @@ module dmac_wrap
   logic tcdm_master_we_0, tcdm_master_we_1, tcdm_master_we_2, tcdm_master_we_3;
 
   axi_to_mem #(
-    .axi_req_t   ( req_t               ),
-    .axi_resp_t  ( resp_t              ),
+    .axi_req_t   ( mst_req_t           ),
+    .axi_resp_t  ( mst_resp_t          ),
     .AddrWidth   ( 32                  ),
     .DataWidth   ( AXI_DATA_WIDTH      ),
-    .IdWidth     ( AXI_ID_WIDTH        ),
+    .IdWidth     ( MstIdxWidth         ),
     .NumBanks    ( 2                   ),
     .BufDepth    ( 1                   )
   ) i_axi_to_mem_read (
@@ -260,11 +265,11 @@ module dmac_wrap
   );
 
   axi_to_mem #(
-    .axi_req_t   ( req_t               ),
-    .axi_resp_t  ( resp_t              ),
+    .axi_req_t   ( mst_req_t           ),
+    .axi_resp_t  ( mst_resp_t          ),
     .AddrWidth   ( 32                  ),
     .DataWidth   ( AXI_DATA_WIDTH      ),
-    .IdWidth     ( AXI_ID_WIDTH        ),
+    .IdWidth     ( MstIdxWidth         ),
     .NumBanks    ( 2                   ),
     .BufDepth    ( 1                   )
   ) i_axi_to_mem_write (

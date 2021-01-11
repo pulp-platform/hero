@@ -27,6 +27,7 @@ module pulp_cluster_dma_frontend #(
     parameter int unsigned AxiAxReqDepth  = -1,
     /// number of 1D transfers buffered in backend
     parameter int unsigned TfReqFifoDepth = -1,
+    parameter int unsigned NumStreams     = 1,
     /// data request type
     parameter type axi_req_t      = logic,
     /// data response type
@@ -57,8 +58,8 @@ module pulp_cluster_dma_frontend #(
     output logic [NumCores-1:0]       ctrl_targ_r_valid_o,
     output logic [NumCores-1:0][31:0] ctrl_targ_r_data_o,
     /// wide AXI port
-    output axi_req_t                  axi_dma_req_o,
-    input  axi_res_t                  axi_dma_res_i,
+    output axi_req_t [NumStreams-1:0] axi_dma_req_o,
+    input  axi_res_t [NumStreams-1:0] axi_dma_res_i,
     /// status signal
     output logic                      busy_o,
     /// events and interrupts (cores)
@@ -74,6 +75,9 @@ module pulp_cluster_dma_frontend #(
 
     // arbitration index width
     localparam int unsigned IdxWidth = (NumRegs + 1 > 32'd1) ? unsigned'($clog2(NumRegs + 1)) : 32'd1;
+
+    // distributer index width
+    localparam int unsigned DistrIdxWidth = (NumStreams > 32'd1) ? unsigned'($clog2(NumStreams)) : 32'd1;
 
     // DMA transfer descriptor
     typedef struct packed {
@@ -101,7 +105,7 @@ module pulp_cluster_dma_frontend #(
     burst_req_t burst_req;
 
     // transaction id
-    logic [31:0] next_id, done_id;
+    logic [NumStreams-1:0][27:0] next_id, done_id;
 
     // keep track of peripherals
     logic [PerifIdWidth-1:0] peripherals_id_q;
@@ -114,18 +118,26 @@ module pulp_cluster_dma_frontend #(
     transf_descr_t               transf_descr_arb;
     logic                        be_ready_arb;
     logic                        be_valid_arb;
+    // zero length transfer
+    // logic                        zero_length;
+    // distributed outputs
+    logic [NumStreams-1:0]       be_ready_stream;
+    logic [NumStreams-1:0]       be_valid_stream;
+    logic [NumStreams-1:0]       be_idle_stream;
+    logic [NumStreams-1:0]       trans_complete_stream;
     // the index ob the chosen pe
     logic [IdxWidth-1:0]         pe_idx_arb;
 
-    // backend idle signal
-    logic be_idle;
-    logic trans_complete;
+    // the backend chosen
+    logic [DistrIdxWidth-1:0]    be_idx_arb;
+
 
     // generate registers for cores
     for (genvar i = 0; i < NumCores; i++) begin : gen_core_regs
 
         pulp_cluster_dma_frontend_regs #(
-            .transf_descr_t ( transf_descr_t    )
+            .transf_descr_t ( transf_descr_t    ),
+            .NumStreams     ( NumStreams        )
         ) i_dma_conf_regs_cores (
             .clk_i          ( clk_i                   ),
             .rst_ni         ( rst_ni                  ),
@@ -139,6 +151,7 @@ module pulp_cluster_dma_frontend #(
             .ctrl_data_o    ( ctrl_targ_r_data_o  [i] ),
             .next_id_i      ( next_id                 ),
             .done_id_i      ( done_id                 ),
+            .be_sel_i       ( be_idx_arb              ),
             .be_ready_i     ( be_ready            [i] ),
             .be_valid_o     ( be_valid            [i] ),
             .be_busy_i      ( busy_o                  ),
@@ -148,7 +161,8 @@ module pulp_cluster_dma_frontend #(
 
     // generate registers for peripherals
     pulp_cluster_dma_frontend_regs #(
-        .transf_descr_t ( transf_descr_t    )
+        .transf_descr_t ( transf_descr_t    ),
+        .NumStreams     ( NumStreams        )
     ) i_dma_conf_regs_periphs (
         .clk_i          ( clk_i                             ),
         .rst_ni         ( rst_ni                            ),
@@ -162,6 +176,7 @@ module pulp_cluster_dma_frontend #(
         .ctrl_data_o    ( ctrl_pe_targ_r_data_o             ),
         .next_id_i      ( next_id                           ),
         .done_id_i      ( done_id                           ),
+        .be_sel_i       ( be_idx_arb                        ),
         .be_ready_i     ( be_ready               [NumCores] ),
         .be_valid_o     ( be_valid               [NumCores] ),
         .be_busy_i      ( busy_o                            ),
@@ -192,18 +207,6 @@ module pulp_cluster_dma_frontend #(
         .idx_o      ( pe_idx_arb         )
     );
 
-    // global transfer id
-    transfer_id_gen #(
-        .IdWidth      ( 32     )
-    ) i_transfer_id_gen (
-        .clk_i        ( clk_i                         ),
-        .rst_ni       ( rst_ni                        ),
-        .issue_i      ( be_ready_arb & be_valid_arb   ),
-        .retire_i     ( trans_complete                ),
-        .next_o       ( next_id                       ),
-        .completed_o  ( done_id                       )
-    );
-
     // map arbitrated transfer descriptor onto generic burst request
     always_comb begin : proc_map_to_1D_burst
         burst_req             = '0;
@@ -215,42 +218,87 @@ module pulp_cluster_dma_frontend #(
         burst_req.decouple_rw = transf_descr_arb.decouple;
         burst_req.deburst     = transf_descr_arb.deburst;
         burst_req.serialize   = transf_descr_arb.serialize;
+
+        // assign zero length signal
+        // zero_length           =  transf_descr_arb.num_bytes == 0;
     end
 
-    // instantiate backend :)
-    axi_dma_backend #(
-        .DataWidth         ( DmaDataWidth    ),
-        .AddrWidth         ( DmaAddrWidth    ),
-        .IdWidth           ( DmaAxiIdWidth   ),
-        .AxReqFifoDepth    ( AxiAxReqDepth   ),
-        .TransFifoDepth    ( TfReqFifoDepth  ),
-        .BufferDepth       ( 3               ), // minimal 3 for giving full performance
-        .axi_req_t         ( axi_req_t       ),
-        .axi_res_t         ( axi_res_t       ),
-        .burst_req_t       ( burst_req_t     ),
-        .DmaIdWidth        ( 6               ),
-        .DmaTracing        ( 0               )
-    ) i_axi_dma_backend (
-        .clk_i            ( clk_i             ),
-        .rst_ni           ( rst_ni            ),
-        .dma_id_i         ( cluster_id_i      ),
-        .axi_dma_req_o    ( axi_dma_req_o     ),
-        .axi_dma_res_i    ( axi_dma_res_i     ),
-        .burst_req_i      ( burst_req         ),
-        .valid_i          ( be_valid_arb      ),
-        .ready_o          ( be_ready_arb      ),
-        .backend_idle_o   ( be_idle           ),
-        .trans_complete_o ( trans_complete    )
+    distributor #(
+        .NumOut     ( NumStreams  )
+    ) i_distributor (
+        .clk_i      ( clk_i           ),
+        .rst_ni     ( rst_ni          ),
+        .valid_i    ( be_valid_arb    ),
+        .ready_o    ( be_ready_arb    ),
+        .payload_i  ( '0              ),
+        .valid_o    ( be_valid_stream ),
+        .ready_i    ( be_ready_stream ),
+        .payload_o  ( ),
+        .sel_o      ( be_idx_arb      )
     );
 
+    for (genvar i = 0; i < NumStreams; i++) begin : gen_backends
+
+        // // modify id
+        // burst_req_t burst_req_stream;
+        // always_comb begin : proc_modify_id
+        //     burst_req_stream    = burst_req;
+        //     burst_req_stream.id = burst_req.id + i;
+        // end
+
+        logic issue;
+
+        // instantiate backend :)
+        axi_dma_backend #(
+            .DataWidth       ( DmaDataWidth    ),
+            .AddrWidth       ( DmaAddrWidth    ),
+            .IdWidth         ( DmaAxiIdWidth   ),
+            .AxReqFifoDepth  ( AxiAxReqDepth   ),
+            .TransFifoDepth  ( TfReqFifoDepth  ),
+            .BufferDepth     ( 3               ), // minimal 3 for giving full performance
+            .axi_req_t       ( axi_req_t       ),
+            .axi_res_t       ( axi_res_t       ),
+            .burst_req_t     ( burst_req_t     ),
+            .DmaIdWidth      ( 6               ),
+            .DmaTracing      ( 0               )
+        ) i_axi_dma_backend (
+            .clk_i            ( clk_i                     ),
+            .rst_ni           ( rst_ni                    ),
+            .dma_id_i         ( cluster_id_i              ),
+            .axi_dma_req_o    ( axi_dma_req_o         [i] ),
+            .axi_dma_res_i    ( axi_dma_res_i         [i] ),
+            .burst_req_i      ( burst_req                 ),
+            .valid_i          ( be_valid_stream       [i] ),
+            .ready_o          ( be_ready_stream       [i] ),
+            .backend_idle_o   ( be_idle_stream        [i] ),
+            .trans_complete_o ( trans_complete_stream [i] )
+        );
+
+        // only increment issue counter if we have a valid transfer
+        assign issue = be_ready_stream[i] & be_valid_stream[i]; /*& !zero_length;*/
+
+        // transfer id
+        transfer_id_gen #(
+            .IdWidth      ( 28     )
+        ) i_transfer_id_gen (
+            .clk_i        ( clk_i                     ),
+            .rst_ni       ( rst_ni                    ),
+            .issue_i      ( issue                     ),
+            .retire_i     ( trans_complete_stream [i] ),
+            .next_o       ( next_id               [i] ),
+            .completed_o  ( done_id               [i] )
+        );
+
+    end
+
     // busy if not idle
-    assign busy_o = ~be_idle;
+    assign busy_o = |(~be_idle_stream);
 
     // interrupts and events (unconditionally)
-    assign term_event_o    = trans_complete ? '1 : '0;
-    assign term_irq_o      = trans_complete ? '1 : '0;
-    assign term_event_pe_o = trans_complete ? '1 : '0;
-    assign term_irq_pe_o   = trans_complete ? '1 : '0;
+    assign term_event_o    = |trans_complete_stream ? '1 : '0;
+    assign term_irq_o      = |trans_complete_stream ? '1 : '0;
+    assign term_event_pe_o = |trans_complete_stream ? '1 : '0;
+    assign term_irq_pe_o   = |trans_complete_stream ? '1 : '0;
 
     // keep id for peripherals
     always_ff @(posedge clk_i or negedge rst_ni) begin : proc_id_peripherals
