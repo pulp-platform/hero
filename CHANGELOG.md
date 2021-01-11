@@ -8,9 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
-- Add Host library for physical memory accesses (`physmem`).
 
 ### Changed
+
+### Fixed
+
+
+## v0.1.3 - 2021-01-11
+
+### Added
+- Add Host library for physical memory accesses (`physmem`).
 
 ### Fixed
 - Fix I/O memory accesses to PULP.  We have suffered from unreliable offloads to PULP (#87), and
