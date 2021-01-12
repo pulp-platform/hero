@@ -1,6 +1,6 @@
 #include "darknet.h"
 
-#define TIMECOMP
+//#define TIMECOMP
 #ifdef TIMECOMP
 #include <time.h>
 #define CLOCK_PRECISION 1E9

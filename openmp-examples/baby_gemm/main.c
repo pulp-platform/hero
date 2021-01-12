@@ -3,9 +3,43 @@
 #include<stdlib.h>
 
 int main(int argc, char *argv[]) {
-  int M = 16;
-  int N = 173056;
-  int K = 27;
+  if (argc != 2){
+    printf("Please provide the layer to be tested\n");
+    return 0;
+  }
+
+  int LAYER_COUNTER = atoi(argv[1]);
+  float ALPHA = 1;
+  int M, N, K;
+  if (LAYER_COUNTER == 0) {
+      M = 16, N = 173056, K = 27;
+    } else if (LAYER_COUNTER == 2) {
+      M = 32, N = 43264, K = 144;
+    } else if (LAYER_COUNTER == 4) {
+      M = 64, N = 10816, K = 288;
+    } else if (LAYER_COUNTER == 6) {
+      M = 128, N = 2704, K = 576;
+    } else if (LAYER_COUNTER == 8) {
+      M = 256, N = 676, K = 1152;
+    } else if (LAYER_COUNTER == 10) {
+      M = 512, N = 169, K = 2304;
+    } else if (LAYER_COUNTER == 12) {
+      M = 1024, N = 169, K = 4608;
+    } else if (LAYER_COUNTER == 13) {
+      M = 256, N = 169, K = 1024;
+    } else if (LAYER_COUNTER == 14) {
+      M = 512, N = 169, K = 2304;
+    } else if (LAYER_COUNTER == 15) {
+      M = 255, N = 169, K = 512;
+    } else if (LAYER_COUNTER == 18) {
+      M = 128, N = 169, K = 256;
+    } else if (LAYER_COUNTER == 21) {
+      M = 256, N = 676, K = 3456;
+    } else if (LAYER_COUNTER == 22) {
+      M = 255, N = 676, K = 256;
+    } else {
+      printf("layer not recognized!\n");
+    }
 
   float* A = (float*)malloc(M*K*sizeof(float));
   float* B = (float*)malloc(K*N*sizeof(float));
@@ -20,7 +54,7 @@ int main(int argc, char *argv[]) {
 
   for (int k = 0; k < K; k++) {
     for (int n = 0; n < N; n++) {
-      B[k*N+k] = (k+1)/(n+1);
+      B[k*N+n] = (k+1)/(n+1);
     }
   }
 
@@ -34,8 +68,37 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  printf("Calling gemm layer\n");
 
-  gemm(0, 0, M, N, K, 1.0, A, M, B, K, 1.0, C, M);
+  if (LAYER_COUNTER == 0) {
+      gemm_0(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 2) {
+      gemm_2(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 4) {
+      gemm_4(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 6) {
+      gemm_6(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 8) {
+      gemm_8(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 10) {
+      gemm_10(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 12) {
+      gemm_12(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 13) {
+      gemm_13(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 14) {
+      gemm_14(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 15) {
+      gemm_15(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 18) {
+      gemm_18(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 21) {
+      gemm_21(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 22) {
+      gemm_22(ALPHA, A, B, C);
+    } else {
+      printf("layer not recognized!\n");
+    }
 
   int errors = 0;
   int same = 0;
