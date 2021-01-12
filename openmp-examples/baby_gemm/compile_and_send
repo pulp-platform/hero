@@ -5,6 +5,7 @@ export HERCULES_ARCH="PULP"
 export CMUX_ROOT="/scratch/mmaxim/cmux"
 export HERCULES_FORCE_FOOTPRINT_DENSE=1
 export HERCULES_CPU_MEMORY_SIZE=32768
+#export HERCULES_GPU_MEMORY_SIZE=32768 # CAVEAT still used to manipulate PULP SPM
 export HERCULES_DISQ_THRESHOLD=0
 export HERCULES_DMA_ENFORCE
 export HERCULES_INTERVAL_STATS
@@ -12,17 +13,23 @@ export HERCULES_DEFAULT_NUM_THREADS=8
 export HERCULES_NO_INTERVAL_CONTROLFLOW
 export HERCULES_DUMP_REGIONS_PATH=/home/mmaxim/Downloads/regions-%a.xml
 export HERCULES_DUMP_INTERVALS_PATH=/home/mmaxim/Downloads/intervals-%a.xml
-export HERCULES_WHITELIST="gemm_nn gemm_cpu gemm .omp_outlined.
-__omp_offloading_803_1108d5d_gemm_zero_l125 __omp_offloading_803_1108d69_gemm_zero_l125
-__omp_offloading_803_1108bea_gemm_zero_l126 __omp_offloading_803_1108d79_gemm_zero_l125
-__omp_offloading_803_1108d67_gemm_zero_l125 __omp_offloading_803_1108d0b_gemm_zero_l125
-__omp_offloading_803_1108d58_gemm_zero_l125 __omp_offloading_803_1108d62_gemm_zero_l125
-__omp_offloading_803_1108d57_gemm_zero_l126 __omp_offloading_803_1108d6c_gemm_zero_l125
-__omp_offloading_803_1108d7b_gemm_zero_l125 __omp_offloading_803_1108d52_gemm_zero_l125
-__omp_offloading_803_1108e4f_gemm_zero_l125 __omp_offloading_803_1108fb0_gemm_zero_l125
-__omp_offloading_803_1108fb1_gemm_zero_l125 __omp_offloading_803_1107d82_gemm_zero_l125
-__omp_offloading_803_1108943_gemm_zero_l125 __omp_offloading_803_1108944_gemm_zero_l125
-__omp_offloading_803_110894e_gemm_zero_l125 __omp_offloading_803_1108959_gemm_zero_l125"
+export HERCULES_WHITELIST="gemm_nn gemm_cpu gemm .omp_outlined. .omp_outlined..1 .omp_outlined..2 .omp_outlined..3
+.omp_outlined..4 .omp_outlined..5 .omp_outlined..6 .omp_outlined..7 .omp_outlined..8
+.omp_outlined..9 .omp_outlined..10 .omp_outlined..11 .omp_outlined..12
+__omp_offloading_803_14c1eb2_gemm_0_l14
+__omp_offloading_803_14c1eb2_gemm_2_l45
+__omp_offloading_803_14c1eb2_gemm_4_l76
+__omp_offloading_803_14c1eb2_gemm_6_l107
+__omp_offloading_803_14c1eb2_gemm_8_l138
+__omp_offloading_803_14c1eb2_gemm_10_l169
+__omp_offloading_803_14c1eb2_gemm_12_l200
+__omp_offloading_803_14c1eb2_gemm_13_l231
+__omp_offloading_803_14c1eb2_gemm_14_l262
+__omp_offloading_803_14c1eb2_gemm_15_l293
+__omp_offloading_803_14c1eb2_gemm_18_l324
+__omp_offloading_803_14c1eb2_gemm_21_l355
+__omp_offloading_803_14c1eb2_gemm_22_l386"
+
 source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh
 
 export HERO_INSTALL=/scratch/mmaxim/hero/install

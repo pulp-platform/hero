@@ -8,7 +8,6 @@ LIBPATHS += -L$(HERO_INSTALL)/../openmp-examples/polybench-acc/common
 # Add new library for libpremnotify
 #LIBPATHS += -L$(HERO_INSTALL)/pulp/sdk/pkg/sdk/dev/install/lib/hero-urania
 LIBPATHS += -L$(HERO_INSTALL)/../cmux/lib
-LIBPATHS += -L$(HERO_INSTALL)/../openmp-examples/polybench-acc/common
 INCPATHS += -I$(HERO_INSTALL)/../cmux/inc
 INCPATHS += -I$(HERO_INSTALL)/../cmux/src
 

@@ -106,40 +106,38 @@ void gemm_nn(int M, int N, int K, float ALPHA,
     }
 }
 
+#include "../darknet/gemm_layers.c"
+
 void gemm_zero(float ALPHA, float *A, float *B, float *C)
 {
-  const int M = 16;
-  const int N = 173056;
-  const int K = 27;
-
+  const int M = 512;
+  const int N = 169;
+  const int K = 2304;
   int m,n,k;
   float (*matA)[K] = (float(*)[K]) A;
   float (*matB)[N] = (float(*)[N]) B;
   float (*matC)[N] = (float(*)[N]) C;
   float temp;
-
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:27][0:173056])
+  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:2304][0:169])
   {
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:16][0:27])
-  {
-  #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:16][0:173056])
-//  #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:M][0:N]) map(to: matA[0:M][0:K], matB[0:K][0:N])
-  //map(to: matA[0:M][0:K], matB[0:K][0:N])
+    #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:512][0:2304])
     {
-    #pragma omp parallel for private(m, n, k, temp) num_threads(8)
-//    #pragma omp for collapse(2) private(m, n, k, temp)
-    for(m = 0; m < M; ++m){
-      for(k = 0; k < K; ++k){
-        temp = ALPHA*matA[m][k];
-        for(n = 0; n < N; ++n){
-          matC[m][n] +=temp*matB[k][n];
+      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:512][0:169])
+      {
+        #pragma omp parallel for private(m, n, k, temp) num_threads(8)
+        for(m = 0; m < M; ++m){
+          for(k = 0; k < K; ++k){
+            temp = ALPHA*matA[m][k];
+            for(n = 0; n < N; ++n){
+              matC[m][n] +=temp*matB[k][n];
+            }
+          }
         }
       }
     }
   }
-  }
-  }
-    LAYER_COUNTER=2;
+  LAYER_COUNTER=15;
+
 }
 //#pragma omp end declare target
 
