@@ -1,0 +1,5 @@
+#!/bin/bash
+
+remotehost=$(sed -n '1 p' config)
+remotedir=$(sed -n '2 p' config)
+scp -r ${remotehost}:${remotedir}/measurements .
