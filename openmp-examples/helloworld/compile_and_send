@@ -1,0 +1,5 @@
+#!/bin/bash
+export HERO_INSTALL=/scratch/mmaxim/hero/install
+source ${HERO_INSTALL}/../env/exilzcu102.sh
+make default-as=pulp clean all
+scp helloworld root@hero-zcu102-06:/home/root/mmaxim/
