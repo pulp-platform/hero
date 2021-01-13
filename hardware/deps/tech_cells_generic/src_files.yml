@@ -12,6 +12,7 @@ tech_cells_rtl:
     src/deprecated/pulp_clk_cells.sv,
     src/deprecated/pulp_pwr_cells.sv,
     src/rtl/tc_clk.sv,
+    src/rtl/tc_sram.sv,
     src/tc_pwr.sv,
   ]
 
@@ -31,5 +32,6 @@ tech_cells_fpga:
     src/deprecated/pulp_pwr_cells.sv,
     src/deprecated/pulp_buffer.sv,
     src/fpga/tc_clk_xilinx.sv,
+    src/fpga/tc_sram_xilinx.sv,
     src/tc_pwr.sv,
   ]
