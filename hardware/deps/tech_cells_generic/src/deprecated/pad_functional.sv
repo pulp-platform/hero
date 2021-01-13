@@ -9,13 +9,12 @@
 // specific language governing permissions and limitations under the License.
 
 
-module pad_functional_pd
-(
-   input  logic             OEN,
-   input  logic             I,
-   output logic             O,
-   input  logic             PEN,
-   inout  wire              PAD
+module pad_functional_pd (
+  input  logic OEN,
+  input  logic I,
+  output logic O,
+  input  logic PEN,
+  inout  wire  PAD
 );
 
 /*
@@ -46,13 +45,12 @@ module pad_functional_pd
 
 endmodule
 
-module pad_functional_pu
-(
-   input  logic             OEN,
-   input  logic             I,
-   output logic             O,
-   input  logic             PEN,
-   inout  wire              PAD
+module pad_functional_pu (
+  input  logic OEN,
+  input  logic I,
+  output logic O,
+  input  logic PEN,
+  inout  wire  PAD
 );
 
 /*
