@@ -1,0 +1,9 @@
+#!/bin/bash
+
+export HERO_INSTALL=/scratch/mmaxim/hero/install    &&\
+export HERO_TARGET_HOST=root@hero-zcu102-06         &&\
+export HERO_TARGET_PATH_APPS=/home/root/mmaxim      &&\
+source ${HERO_INSTALL}/../env/exilzcu102.sh         &&\
+make default-as=pulp clean all                      &&\
+scp dma-perf root@hero-zcu102-06:/home/root/mmaxim/
+
