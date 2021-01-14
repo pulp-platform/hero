@@ -16,14 +16,10 @@
  * Francesco Conti <fconti@iis.ee.ethz.ch>
  */
 
-import pulp_cluster_package::*;
-import apu_package::*;
-import apu_core_package::*;
-
 `include "axi/assign.svh"
 `include "axi/typedef.svh"
 
-module pulp_cluster
+module pulp_cluster import pulp_cluster_package::*; import apu_package::*; import apu_core_package::*;
 #(
   // cluster parameters
   parameter bit ASYNC_INTF          = 1'b1,
