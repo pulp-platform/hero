@@ -71,9 +71,8 @@ module pulp_cluster import pulp_cluster_package::*; import apu_package::*; impor
   parameter int ADDR_MEM_WIDTH  = $clog2(TCDM_BANK_SIZE/4), // WORD address width per TCDM bank (the word width is 32 bits)
 
   // DMA parameters
-  parameter int TCDM_ADD_WIDTH      = ADDR_MEM_WIDTH + $clog2(NB_TCDM_BANKS) + 2, // BYTE address width TCDM
-  parameter int NB_OUTSND_BURSTS    = 8,
-  parameter int MCHAN_BURST_LENGTH  = 256,
+  parameter int NB_DMA_STREAMS   = 4,
+  parameter int NB_OUTSND_BURSTS = 8,
 
   // peripheral and periph interconnect parameters
   parameter int LOG_CLUSTER     = 5,  // unused
@@ -748,17 +747,15 @@ module pulp_cluster import pulp_cluster_package::*; import apu_package::*; impor
 
   dmac_wrap #(
     .NB_CORES           ( NB_CORES           ),
-    .NB_OUTSND_BURSTS   ( NB_OUTSND_BURSTS   ),
-    .MCHAN_BURST_LENGTH ( MCHAN_BURST_LENGTH ),
     .AXI_ADDR_WIDTH     ( AXI_ADDR_WIDTH     ),
     .AXI_DATA_WIDTH     ( AXI_DATA_C2S_WIDTH ),
     .AXI_ID_WIDTH       ( AXI_ID_IN_WIDTH    ),
     .AXI_USER_WIDTH     ( AXI_USER_WIDTH     ),
     .PE_ID_WIDTH        ( NB_CORES + 1       ),
-    .TCDM_ADD_WIDTH     ( TCDM_ADD_WIDTH     ),
     .DATA_WIDTH         ( DATA_WIDTH         ),
     .ADDR_WIDTH         ( ADDR_WIDTH         ),
-    .BE_WIDTH           ( BE_WIDTH           )
+    .BE_WIDTH           ( BE_WIDTH           ),
+    .NUM_STREAMS        ( NB_DMA_STREAMS     )
   ) dmac_wrap_i (
     .clk_i          ( clk_cluster        ),
     .rst_ni         ( rst_ni             ),
