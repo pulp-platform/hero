@@ -27,17 +27,13 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-import riscv_defines::*;
-import apu_core_package::*;
-
-
 // Source/Destination register instruction index
 `define REG_S1 19:15
 `define REG_S2 24:20
 `define REG_S4 31:27
 `define REG_D  11:07
 
-module riscv_id_stage
+module riscv_id_stage import riscv_defines::*; import apu_core_package::*;
 #(
   parameter N_HWLP            =  2,
   parameter N_HWLP_BITS       =  $clog2(N_HWLP),

@@ -38,9 +38,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-import defs_div_sqrt_mvp::*;
-
-module control_mvp
+module control_mvp import defs_div_sqrt_mvp::*;
 
   (//Input
    input logic                                        Clk_CI,

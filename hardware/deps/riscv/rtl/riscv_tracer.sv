@@ -22,10 +22,8 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
+// pragma translate_off
 `ifndef VERILATOR
-
-import riscv_defines::*;
-import riscv_tracer_defines::*;
 
 // Source/Destination register instruction index
 `define REG_S1 19:15
@@ -34,7 +32,8 @@ import riscv_tracer_defines::*;
 `define REG_S4 31:27
 `define REG_D  11:07
 
-module riscv_tracer (
+module riscv_tracer import riscv_defines::*; import riscv_tracer_defines::*;
+(
   // Clock and Reset
   input  logic        clk,
   input  logic        rst_n,
@@ -1055,3 +1054,4 @@ module riscv_tracer (
 
 endmodule
 `endif
+// pragma translate_on

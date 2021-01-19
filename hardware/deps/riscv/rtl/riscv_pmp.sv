@@ -101,9 +101,7 @@
 
 //`define DEBUG_RULE
 
-import riscv_defines::*;
-
-module riscv_pmp
+module riscv_pmp import riscv_defines::*;
 #(
    parameter N_PMP_ENTRIES = 16
 )

@@ -22,10 +22,9 @@
 //                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-import riscv_defines::*;
 `include "riscv_config.sv"
 
-module riscv_perturbation
+module riscv_perturbation import riscv_defines::*;
 #(
     parameter PERT_REGS         = 15,
     parameter INSTR_RDATA_WIDTH = 32

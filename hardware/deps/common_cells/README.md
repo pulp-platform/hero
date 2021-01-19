@@ -98,7 +98,7 @@ Please note that cells with status *deprecated* are not to be used for new desig
 | `stream_fifo`        | FIFO register with ready/valid interface        | active         |               |
 | `generic_fifo`       | FIFO register without thresholds                | *deprecated*   | `fifo_v3`     |
 | `generic_fifo_adv`   | FIFO register without thresholds                | *deprecated*   | `fifo_v3`     |
-| `sram`               | SRAM behavioral model                           | active         |               |
+| `sram`               | SRAM behavioral model                           | *removed*      | `tc_sram`     |
 | `plru_tree`          | Pseudo least recently used tree                 | active         |               |
 | `unread`             | Empty module to sink unconnected outputs into   | active         |               |
 

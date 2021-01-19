@@ -78,10 +78,6 @@ sources:
   # Level 3
   - src/stream_arbiter.sv
 
-  - target: simulation
-    files:
-      - src/sram.sv
-
   - target: test
     files:
       # Level 0

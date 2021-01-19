@@ -24,10 +24,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-
-import riscv_defines::*;
-
-module riscv_compressed_decoder
+module riscv_compressed_decoder import riscv_defines::*;
 #(
   parameter FPU = 0
 )

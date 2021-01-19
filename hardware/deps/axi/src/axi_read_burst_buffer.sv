@@ -8,13 +8,11 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
-import axi_pkg::*;
-
 // Buffer AXI read bursts (R channel) without adding latency.
 // Insert this module between an upstream (connected to the `slv` port of this module) that
 // frequently stalls on longer read bursts and a downstream (connected to the `mst` port) that often
 // does not have enough interleavable R beats to increase utilization of the downstream R channel.
-module axi_read_burst_buffer #(
+module axi_read_burst_buffer import axi_pkg::*; #(
   parameter int unsigned ADDR_WIDTH = 0,  // [bit]
   parameter int unsigned DATA_WIDTH = 0,  // [bit]
   parameter int unsigned ID_WIDTH = 0,    // [bit]

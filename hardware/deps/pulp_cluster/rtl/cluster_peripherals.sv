@@ -16,9 +16,7 @@
  * Francesco Conti <fconti@iis.ee.ethz.ch>
  */
 
-import pulp_cluster_package::*;
-
-module cluster_peripherals
+module cluster_peripherals import pulp_cluster_package::*;
 #(
   parameter NB_CORES       = 4,
   parameter NB_MPERIPHS    = 1,

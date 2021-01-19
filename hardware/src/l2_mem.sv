@@ -60,10 +60,12 @@ module l2_mem #(
     // Synthesis for Xilinx FPGAs can optimize SRAM tiling itself.
     localparam N_WORDS = N_BYTES / (AXI_DW/8);
     localparam LINE_OFF = $clog2(AXI_DW/8);
-    sram #(
-      .DATA_WIDTH (AXI_DW),
-      .N_WORDS    (N_WORDS)
-    ) i_mem (
+    tc_sram #(
+      .NumWords   ( N_WORDS ), // specify explicitly for aegis!
+      .DataWidth  ( AXI_DW  ), // specify explicitly for aegis!
+      .ByteWidth  ( 8       ), // specify explicitly for aegis!
+      .NumPorts   ( 1       )  // specify explicitly for aegis!
+    ) i_tc_sram (
       .clk_i,
       .rst_ni,
       .req_i    (req),
@@ -126,10 +128,12 @@ module l2_mem #(
 
     for (genvar iRow = 0; iRow < N_SER_CUTS; iRow++) begin: gen_rows
       for (genvar iCol = 0; iCol < N_PAR_CUTS; iCol++) begin: gen_cols
-        sram #(
-          .DATA_WIDTH (CUT_DW),
-          .N_WORDS    (CUT_N_WORDS)
-        ) i_mem_cut (
+        tc_sram #(
+          .NumWords   ( CUT_N_WORDS ), // specify explicitly for aegis!
+          .DataWidth  ( CUT_DW      ), // specify explicitly for aegis!
+          .ByteWidth  ( 8           ), // specify explicitly for aegis!
+          .NumPorts   ( 1           )  // specify explicitly for aegis!
+        ) i_tc_sram_cut (
           .clk_i,
           .rst_ni,
           .req_i    (cut_req[iRow]),

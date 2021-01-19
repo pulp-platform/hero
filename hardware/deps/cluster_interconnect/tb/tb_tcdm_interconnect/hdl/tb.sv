@@ -16,9 +16,8 @@
 `include "tb.svh"
 `include "defaults.svh"
 
-import tb_pkg::*;
-
 module tb;
+  import tb_pkg::*;
 
   // leave this
   timeunit 1ps;

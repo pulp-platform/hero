@@ -1,4 +1,4 @@
-module axi_slice_wrap #(
+module axi_slice_wrap_axi #(
     parameter AXI_ADDR_WIDTH    = 32,
     parameter AXI_DATA_WIDTH    = 64,
     parameter AXI_USER_WIDTH    = 6,

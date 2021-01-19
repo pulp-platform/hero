@@ -29,13 +29,9 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-import apu_core_package::*;
-
 `include "riscv_config.sv"
 
-import riscv_defines::*;
-
-module riscv_core
+module riscv_core import apu_core_package::*; import riscv_defines::*;
 #(
   parameter N_EXT_PERF_COUNTERS =  0,
   parameter INSTR_RDATA_WIDTH   = 32,

@@ -10,9 +10,7 @@
 
 // Davide Rossi <davide.rossi@unibo.it>
 
-import riscv_defines::*;
-
-module per2axi_req_channel
+module per2axi_req_channel import riscv_defines::*;
 #(
    // PARAMETERS
    parameter NB_CORES       = 4,

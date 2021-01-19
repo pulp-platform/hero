@@ -8,12 +8,10 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
-import axi_pkg::*;
-
 // Buffer AXI write bursts (AW and W channel) and release them as immediately consecutive beats.
 // As W bursts cannot be interleaved, this module is designed to maximize the utilization of the
 // downstream W channel (connected to the `mst` port of this module) by packing write bursts.
-module axi_write_burst_packer #(
+module axi_write_burst_packer import axi_pkg::* #(
   parameter int unsigned ADDR_WIDTH = 0,  // [bit]
   parameter int unsigned DATA_WIDTH = 0,  // [bit]
   parameter int unsigned ID_WIDTH = 0,    // [bit]

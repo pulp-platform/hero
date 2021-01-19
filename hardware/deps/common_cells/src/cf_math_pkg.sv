@@ -52,7 +52,7 @@ package cf_math_pkg;
     //
     // Use this as drop-in replacement for the `$clog2` system function where the latter is not
     // supported by your toolchain.
-    function integer clog2 (input longint unsigned val);
+    function automatic integer clog2 (input longint unsigned val);
         automatic longint unsigned tmp;
 
         // pragma translate_off

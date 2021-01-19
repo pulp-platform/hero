@@ -76,7 +76,7 @@ module grant_mask
     input logic                         rst_n
 );
 
-    localparam ADDR_OFFSET = `ADDR_OFFSET(DATA_WIDTH);
+    localparam ADDR_OFFSET = `log2(DATA_WIDTH - 1) - 3;
 
     enum logic [1:0] {IDLE, SRAM_0, SRAM_1} CS, NS;
 

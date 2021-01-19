@@ -450,7 +450,7 @@ module pulp_tb #(
     for (genvar iBank = 0; iBank < 16; iBank++) begin: gen_fill_tcdm_bank
       initial begin
         $readmemh($sformatf("../test/slm_files/l1_0_%01d.slm", iBank),
-          dut.gen_clusters[iCluster].gen_cluster_sync.i_cluster.i_ooc.i_bound.gen_tcdm_banks[iBank].i_mem.mem);
+          dut.gen_clusters[iCluster].gen_cluster_sync.i_cluster.i_ooc.i_bound.gen_tcdm_banks[iBank].i_tc_sram.sram);
       end
     end
   end
@@ -464,7 +464,7 @@ module pulp_tb #(
         int unsigned file_ser_idx = iPort*N_SER_CUTS + iRow;
         initial begin
           $readmemh($sformatf("../test/slm_files/l2_%01d_%01d.slm", file_ser_idx, iCol),
-            dut.gen_l2_ports[iPort].i_l2_mem.gen_rows[iRow].gen_cols[iCol].i_mem_cut.mem);
+            dut.gen_l2_ports[iPort].i_l2_mem.gen_rows[iRow].gen_cols[iCol].i_tc_sram_cut.sram);
         end
       end
     end

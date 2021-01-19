@@ -23,11 +23,10 @@
 //                                      - PC value-triggering                                               //
 //                                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-import riscv_defines::*;
-import perturbation_defines::*;
+
 `include "riscv_config.sv"
 
-module riscv_random_interrupt_generator
+module riscv_random_interrupt_generator import riscv_defines::*; import perturbation_defines::*;
 (
     input logic           rst_ni,
     input logic           clk_i,

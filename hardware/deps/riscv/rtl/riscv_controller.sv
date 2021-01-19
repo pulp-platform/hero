@@ -27,9 +27,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-import riscv_defines::*;
-
-module riscv_controller
+module riscv_controller import riscv_defines::*;
 #(
   parameter FPU               = 0
 )

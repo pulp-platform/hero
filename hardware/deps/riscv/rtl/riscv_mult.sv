@@ -25,9 +25,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-import riscv_defines::*;
-
-module riscv_mult
+module riscv_mult import riscv_defines::*;
 #(
   parameter SHARED_DSP_MULT = 1
   )
