@@ -23,378 +23,119 @@
 #include <vmm/vmm.h>
 
 #define L3_MEM_BASE_ADDR 0x80000000
-#define PULP_DMA_MAX_XFER_SIZE_B 32768
-#define PULP_DMA_MAX_XFERS 16
-#define PULP_DMA_MASK_DATA_TYPE uint16_t // Holds bitmask for PULP_DMA_MAX_XFERS
-#define PULP_DMA_MUTEX_BACKOFF_CYCLES 60
-#define HERO_DMA_JOB_POOL_SIZE 8
 
 #define DEBUG(...) //printf(__VA_ARGS__)
 
-// Lock for entering critical sections in the DMA functions.
-__attribute__((__aligned__(4))) volatile int32_t __hero_dma_lock = 0x0;
 
-// A zero-initialized array of DMA jobs that keeps track of asynchronous state.
-struct hero_dma_job __HERO_DMA_JOB_POOL[HERO_DMA_JOB_POOL_SIZE] HERO_L1_BSS;
+// launch simple 1D transfer
+static inline uint32_t _hero_launch_oned(
+    _hero_dma_conf_t* _hero_dma_conf,
+    void* src_addr,
+    void* dst_addr,
+    uint32_t num_bytes
+) {
 
-// How many counters we have allocated to ANY job. This should only be updated
-// while holding the lock.
-PULP_DMA_MASK_DATA_TYPE __hero_dma_status = 0x0;
+    // configure the dma
+    _hero_dma_conf->src_addr_low  = (uint32_t)src_addr;
+    _hero_dma_conf->dst_addr_low  = (uint32_t)dst_addr;
+    _hero_dma_conf->num_bytes     = (uint32_t)num_bytes;
 
-// The number of DMA counters/transfers that are currently in use. Should match
-// the number of high bits in __hero_dma_status. This should only be updated
-// while holding the lock.
-uint32_t __hero_dma_num_inflight = 0;
-
-// For debug purposes: Print the current state of a DMA job.
-void
-__hero_dma_job_print(const struct hero_dma_job * const job)
-{
-  DEBUG("Job 0x%x: ", (uint32_t) job);
-  DEBUG("  Loc = 0x%x", job->loc);
-  DEBUG("  Ext = 0x%lx", (uint32_t)job->ext);
-  DEBUG("  Len = %6d", job->len);
-  DEBUG("  E2L = %d", job->ext2loc);
-  DEBUG("  Msk = 0x%4x", job->counter_mask);
-  DEBUG("  Act = %d\n", job->active);
-}
-
-// Aquire the DMA lock.
-void
-__hero_dma_take_lock()
-{
-  // Spin for lock
-  while (hero_atomic_or((void *)&__hero_dma_lock, 0x1) != 0x0) {
-    for (int i = 0; i < PULP_DMA_MUTEX_BACKOFF_CYCLES; i++) {
-      asm volatile("nop;": : :"memory");
-    }
-  }
-  return;
-}
-
-// Release the DMA lock.
-void __hero_dma_give_lock() {
-  hero_atomic_swap((void *)&__hero_dma_lock, 0x0);
-}
-
-// Initialize the first free DMA job from the pool.
-struct hero_dma_job *
-__hero_dma_job_ctor(CONST_DEVICE_PTR_CONST loc, CONST_HOST_PTR_CONST ext,
-                    const uint32_t len, const bool ext2loc)
-{
-  __hero_dma_take_lock();
-  for (int i = 0; i < HERO_DMA_JOB_POOL_SIZE; i++) {
-    struct hero_dma_job *job = &__HERO_DMA_JOB_POOL[i];
-    if (job->active == false) {
-      job->active = true;
-      job->loc = (uint32_t)loc;
-      job->ext = (uint64_t)ext;
-      job->len = len;
-      job->ext2loc = ext2loc;
-      job->counter_mask = 0U;
-
-      DEBUG("[%d] Allocated ", hero_get_clk_counter());
-      __hero_dma_job_print(job);
-
-      __hero_dma_give_lock();
-      return job;
-    }
-  }
-  printf("ERROR: No free DMA transfer jobs to start!\n");
-  exit(-1);
-}
-
-// Release the DMA job and return it to the pool for re-selection.
-void
-__hero_dma_job_dtor(struct hero_dma_job * const job)
-{
-  DEBUG("[%d] Freeing ", hero_get_clk_counter());
-  __hero_dma_job_print(job);
-  job->active = false;
-}
-
-// Get a DMA counter, and update the global counter mask and inflight counter.
-// Must be called while holding lock.
-int32_t
-__hero_dma_global_get_next_counter()
-{
-  if (__hero_dma_num_inflight < PULP_DMA_MAX_XFERS) {
-    DEBUG("Getting DMA counter\n");
-    uint32_t counter = plp_dma_counter_alloc();
-    DEBUG("Got DMA counter %d\n", counter);
-    if (__hero_dma_status & (1 << counter)) {
-      // If another job was using this counter, make sure to unset it there, so
-      // that they do not "double-free" it.
-      for (int i = 0; i < HERO_DMA_JOB_POOL_SIZE; i++) {
-        if (__HERO_DMA_JOB_POOL[i].active == true) {
-          struct hero_dma_job *job = &__HERO_DMA_JOB_POOL[i];
-          if (job->counter_mask & (1 << counter)) {
-            job->counter_mask &= ~(1 << counter);
-          }
-        }
-      }
-    } else {
-      // If this counter is not reclaimed from another job, then we have one
-      // more in-flight counter, and need to update the global mask.
-      __hero_dma_num_inflight++;
-      __hero_dma_status |= (1 << counter);
-    }
-    return counter;
-  }
-  // If we reached end, there was no counter. Return error.
-  return -1;
-}
-
-// Free a counter from a) the global mask, b) the in-flight counter, and c) the
-// PULP runtime. This function should only be called while holding the lock.
-void
-__hero_dma_global_release_counter(const uint32_t id)
-{
-  if (__hero_dma_status & (1 << id)) {
-    __hero_dma_status &= ~(1 << id);
-    __hero_dma_num_inflight--;
-    plp_dma_counter_free(id);
-  }
-}
-
-// Set the mask of a job to include a counter. This function should only be
-// called while holding the lock.
-void
-__hero_dma_job_set_counter(struct hero_dma_job * const job,
-                           const uint32_t counter)
-{
-  job->counter_mask |= (1 << counter);
-}
-
-// Clear the bit in the mask of a job from this counter. This function should
-// only be called while holding the lock.
-void
-__hero_dma_job_unset_counter(struct hero_dma_job * const job,
-                             const uint32_t counter)
-{
-  job->counter_mask &= ~(1 << counter);
-}
-
-// Add a counter to the mask of the job. Return true if this succeeded, in which
-// case the job may enqueue one more DMA burst. Return false if it did not
-// succeed, at which point the DMA job is not allowed to enqueue another DMA
-// burst. Must be called while holding lock.
-bool
-__hero_dma_job_get_counter(struct hero_dma_job * const job)
-{
-  bool success = false;
-  int32_t counter = __hero_dma_global_get_next_counter();
-  if (counter >= 0) {
-    // There are free counters, take one, add it to our mask, and set successful
-    // state.
-    DEBUG("DMA Job 0x%x: Reserved counter %d, now %d active.\n",
-           (uint32_t) job, counter, __hero_dma_num_inflight);
-    __hero_dma_job_set_counter(job, counter);
-    success = true;
-  } else {
-    DEBUG("Didn't get a counter. There are %d active.\n",
-          __hero_dma_num_inflight);
-  }
-  return success;
-}
-
-// This is the core of the asynchronous DMA. It takes the given job and enqueues
-// as many DMA bursts as it can (up to the given length). The only limit is the
-// number of DMA counters that it can claim. Once as many bursts as possible or
-// needed are enqueued, this function returns. Any remaining bursts that require
-// enqueuing are deferred to the DMA wait function. The reasoning behind this is
-// that we want as much as possible to be done asynchronously, and thus return
-// as early as possible from this function.
-bool
-__hero_dma_job_worker(struct hero_dma_job * const job)
-{
-
-  // As long as there is more data to transfer, and we still manage to add
-  // another counter to our job, enqueue another transfer.
-  __hero_dma_take_lock();
-  while (job->len > 0 && __hero_dma_job_get_counter(job)) {
-
-    // get XFER length
-    uint32_t len_tmp = job->len;
-    if (job->len > PULP_DMA_MAX_XFER_SIZE_B) {
-      len_tmp = PULP_DMA_MAX_XFER_SIZE_B;
-    }
-
-    DEBUG("DMA Job 0x%x: Burst: loc: 0x%x ext: 0x%lx, ", (uint32_t) job,
-           job->loc, job->ext);
-    DEBUG("ext2loc: %d, len: %d\n", job->ext2loc, job->len);
-    uint32_t dma_cmd = plp_dma_getCmd(job->ext2loc, len_tmp, PLP_DMA_1D,
-                             PLP_DMA_TRIG_EVT, PLP_DMA_NO_TRIG_IRQ,
-                             PLP_DMA_PRIV);
     __asm__ __volatile__ ("" : : : "memory");
-    // FIXME: DMA commands currently only work with 32-bit addresses. When this
-    //        is fixed, we should remove the cast.
-    plp_dma_cmd_push(dma_cmd, (uint32_t) job->loc, (uint32_t) job->ext);
-    DEBUG("  Finished issuing job\n");
 
-    job->len -= len_tmp;
-    job->loc += len_tmp;
-    job->ext += len_tmp;
-
-  }
-  __hero_dma_give_lock();
-
-  // Return true if there is still data to transfer.
-  return (job->len > 0);
+    // launch the transfer
+    return _hero_dma_conf->tf_id;
 }
 
-// This function waits for all outstanding counters to finish their bursts,
-// after which they are freed in the global mask, the mask of the job, and in
-// the PULP runtime.
-void
-__hero_dma_job_wait(struct hero_dma_job * const job)
-{
-  for (int i = 0; i < PULP_DMA_MAX_XFERS; i++) {
-    if (job->counter_mask & (1 << i)) {
-      DEBUG("Waiting for job %d\n", i);
-      while(DMA_READ(PLP_DMA_STATUS_OFFSET) & (1 << i)) {
-        eu_evt_maskWaitAndClr(1<<ARCHI_CL_EVT_DMA0);
-      }
-      DEBUG("DMA Job 0x%x: Releasing counter %d...\n", (uint32_t) job, i);
-      __hero_dma_take_lock();
-      // Double check with lock, so that noone has taken our counter in the
-      // meantime -- we only want to release it if we still own it.
-      if (job->counter_mask & (1 << i)) {
-        __hero_dma_job_unset_counter(job, i);
-        __hero_dma_global_release_counter(i);
-      }
-      __hero_dma_give_lock();
+// read the id of the last transaction that has been completed
+static inline uint32_t _hero_read_completed_id(
+    _hero_dma_conf_t* _hero_dma_conf,
+    uint32_t stream_id
+) {
+
+    return _hero_dma_conf->done[stream_id].id;
+}
+
+// wait for a given transaction to complete
+static inline void _hero_wait_for_tf_completion(
+    _hero_dma_conf_t* _hero_dma_conf,
+    uint32_t stream_id,
+    uint32_t tf_id
+) {
+    // spin until transfer is completed
+    while (tf_id > _hero_read_completed_id(_hero_dma_conf, stream_id)) {
+       asm volatile ("nop");
     }
-  }
 }
 
-// This function goes through all active jobs and clears out the claim to
-// counters whose bursts have already finished. This allows them to be reused by
-// other jobs, to avoid deadlocks in case of DMA wait functions being called in
-// another order than the transfers were enqueued.
-void
-__hero_dma_clear_finished_counters()
+hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst,
+                                          const HOST_VOID_PTR src,
+                                          uint32_t size)
 {
-  __hero_dma_take_lock();
-  for (int i = 0; i < HERO_DMA_JOB_POOL_SIZE; i++) {
-    if (__HERO_DMA_JOB_POOL[i].active == true) {
-      struct hero_dma_job *job = &__HERO_DMA_JOB_POOL[i];
-      DEBUG("Clearing completed transfers for: ");
-      __hero_dma_job_print(job);
-      for (int i = 0; i < PULP_DMA_MAX_XFERS; i++) {
-        // Walk through mask, check if counter has finished, and then clear it.
-        if (job->counter_mask & (1 << i)) {
-          DEBUG("DMA Job 0x%x: Checking completion of burst %d...\n",
-                 (uint32_t) job, i);
-          if ((DMA_READ(PLP_DMA_STATUS_OFFSET) & (1 << i)) == 0) {
-            DEBUG("DMA Job 0x%x: Releasing counter %d...\n", (uint32_t) job, i);
-            __hero_dma_job_unset_counter(job, i);
-            __hero_dma_global_release_counter(i);
-          } else {
-            eu_evt_maskWaitAndClr(1<<ARCHI_CL_EVT_DMA0);
-          }
-        }
-      }
-    }
-  }
-  __hero_dma_give_lock();
+  // set the base address of the dma
+  _hero_dma_conf_t* _hero_dma_conf = (_hero_dma_conf_t*)0x1B204400;
+
+  // response
+  hero_dma_job_t hero_dma_job;
+
+  // launch transfer
+  hero_dma_job.id = _hero_launch_oned(_hero_dma_conf, (void*)src, (void*)dst, size);
+  return hero_dma_job;
 }
 
-// Sets up a DMA job with the given parameters, enqueues as many bursts as
-// possible, and returns. Any bursts that remain are deferred to the DMA wait
-// function.
-struct hero_dma_job *
-__hero_dma_memcpy_async(DEVICE_VOID_PTR loc, HOST_VOID_PTR ext,
-                        const uint32_t len, const bool ext2loc)
+hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst,
+                                          const DEVICE_VOID_PTR src,
+                                          uint32_t size)
 {
+  // set the base address of the dma
+  _hero_dma_conf_t* _hero_dma_conf = (_hero_dma_conf_t*)0x1B204400;
 
-  // TODO When DMA can handle wide jobs, remove this warning.
-  if ((uint64_t)ext > UINT32_MAX) {
-    printf("DMA cannot handle addresses this wide!\n");
-  }
+  // response
+  hero_dma_job_t hero_dma_job;
 
-  // Create the new job.
-  struct hero_dma_job *dma_job = __hero_dma_job_ctor(loc, ext, len, ext2loc);
-
-  // Try to free up some no longer used counters, so that we can enqueue as many
-  // bursts as possible.
-  __hero_dma_clear_finished_counters();
-
-  // Run as much of the job as possible
-  __hero_dma_job_worker(dma_job);
-
-  // Return the job to caller
-  return dma_job;
+  // launch transfer
+  hero_dma_job.id = _hero_launch_oned(_hero_dma_conf, (void*)src, (void*)dst, size);
+  return hero_dma_job;
 }
 
-void
-hero_dma_wait(struct hero_dma_job *job)
+void hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
+                          uint32_t size)
 {
+  // response
+  hero_dma_job_t hero_dma_job;
 
-  // Return early if nothing to do.
-  if (!job->active) {
-    return;
-  }
+  // launch async
+  hero_dma_job = hero_memcpy_host2dev_async(dst, src, size);
 
-  // First wait for all transfers we have already started.
-  __hero_dma_job_wait(job);
+  // synchronize
+  hero_dma_wait(hero_dma_job);
 
-  // If we still have bursts left to issue, issue as many as we can, wait for
-  // them to complete, and then repeat until all data has been transfered.
-  // Also clear up finished bursts from other jobs to free up more counters for
-  // us.
-  DEBUG("Job 0x%x: Issuing straggler jobs", (uint32_t) job);
-  DEBUG("  In-flight: %d, Mask = 0x%x\n", __hero_dma_num_inflight,
-        __hero_dma_status);
-  while (__hero_dma_job_worker(job)) {
-    __hero_dma_job_wait(job);
-    __hero_dma_clear_finished_counters();
-  }
-  DEBUG("Job 0x%x: All straggler jobs issued\n", (uint32_t) job);
-
-  // Once we have finished issuing commands, ensure that the last bursts
-  // complete before returning to the program.
-  __hero_dma_job_wait(job);
-
-  // Free the job
-  __hero_dma_job_dtor(job);
-
-  return;
 }
 
-hero_dma_job_t
-hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
-                           uint32_t len)
+void hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
+                          uint32_t size)
 {
-  DEBUG("hero_memcpy_host2dev_async(0x%x, 0x%x, 0x%x)\n", dst, src, len);
-  return __hero_dma_memcpy_async(dst, (HOST_VOID_PTR) src, len, 1);
+  // response
+  hero_dma_job_t hero_dma_job;
+
+  // launch async
+  hero_dma_job = hero_memcpy_dev2host_async(dst, src, size);
+
+  // synchronize
+  hero_dma_wait(hero_dma_job);
+
 }
 
-hero_dma_job_t
-hero_memcpy_dev2host_async(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
-                           uint32_t len)
+void hero_dma_wait(hero_dma_job_t id)
 {
-  DEBUG("hero_memcpy_dev2host_async(0x%x, 0x%x, 0x%x)\n", dst, src, len);
-  return __hero_dma_memcpy_async((DEVICE_VOID_PTR) src, dst, len, 0);
+  // set the base address of the dma
+  _hero_dma_conf_t* _hero_dma_conf = (_hero_dma_conf_t*)0x1B204400;
+
+  uint32_t tf_id = id.id & 0x0fffffff;
+  uint32_t stream = (id.id & 0xf0000000) >> 28;
+
+  _hero_wait_for_tf_completion(_hero_dma_conf, stream, tf_id);
 }
 
-void
-hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
-                     uint32_t size)
-{
-  DEBUG("hero_memcpy_host2dev(0x%x, 0x%x, 0x%x)\n", dst, src, size);
-  hero_dma_wait(hero_memcpy_host2dev_async(dst, src, size));
-}
-
-void
-hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
-                     uint32_t size)
-{
-  DEBUG("hero_memcpy_dev2host(0x%x, 0x%x, 0x%x)\n", dst, src, size);
-  hero_dma_wait(hero_memcpy_dev2host_async(dst, src, size));
-}
-
-// -------------------------------------------------------------------------- //
 
 DEVICE_VOID_PTR
 hero_l1malloc(int32_t size)
