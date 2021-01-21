@@ -38,6 +38,7 @@ package automatic pulp_pkg;
 endpackage
 
 `include "axi/assign.svh"
+`include "axi/typedef.svh"
 
 module pulp import pulp_pkg::*; #(
   // SoC Parameters
@@ -447,43 +448,121 @@ module pulp import pulp_pkg::*; #(
     );
   end
 
-  axi_rab_wrap #(
-    .L1NumSlicesPulp  (           32  ),
-    .L1NumSlicesHost  (            4  ),
-    .L2Enable         (         1'b1  ),
-    .L2NumSets        (           32  ),
-    .L2NumSetEntries  (           32  ),
-    .L2NumParVaRams   (            4  ),
-    .MhFifoDepth      (           16  ),
-    .AxiAddrWidth     (AXI_AW         ),
-    .AxiDataWidth     (AXI_DW         ),
-    .AxiIdWidth       (AXI_IW_SB_OUP  ),
-    .AxiUserWidth     (AXI_UW         ),
-    .axi_req_t        (axi_req_t      ),
-    .axi_resp_t       (axi_resp_t     ),
-    .axi_lite_req_t   (axi_lite_req_t ),
-    .axi_lite_resp_t  (axi_lite_resp_t)
-  ) i_rab (
+  localparam axi_pkg::xbar_cfg_t TlbCfgXbarCfg = '{
+    NoSlvPorts: 1,
+    NoMstPorts: 2,
+    MaxMstTrans: 1,
+    MaxSlvTrans: 1,
+    FallThrough: 1,
+    LatencyMode: axi_pkg::CUT_SLV_AX,
+    AxiIdWidthSlvPorts: 1, // actually no ID at all for AXI-Lite
+    AxiIdUsedSlvPorts: 1, // actually no ID at all for AXI-Lite
+    AxiAddrWidth: AXI_LITE_AW,
+    AxiDataWidth: AXI_LITE_DW,
+    NoAddrRules: 2
+  };
+  typedef axi_pkg::xbar_rule_32_t tlb_cfg_xbar_rule_t;
+  initial assert (AXI_LITE_AW == 32)
+    else $fatal(1, "Change `tlb_cfg_xbar_rule_t` for address width other than 32 bit!");
+  localparam tlb_cfg_xbar_rule_t [TlbCfgXbarCfg.NoAddrRules-1:0] TlbCfgXbarAddrMap = '{
+    '{idx: 32'd1, start_addr: 32'h1000, end_addr: 32'h2000},
+    '{idx: 32'd0, start_addr: 32'h0000, end_addr: 32'h1000}
+  };
+  `AXI_LITE_TYPEDEF_AW_CHAN_T(axi_lite_aw_chan_t, lite_addr_t)
+  `AXI_LITE_TYPEDEF_W_CHAN_T(axi_lite_w_chan_t, lite_data_t, lite_strb_t)
+  `AXI_LITE_TYPEDEF_B_CHAN_T(axi_lite_b_chan_t)
+  `AXI_LITE_TYPEDEF_AR_CHAN_T(axi_lite_ar_chan_t, lite_addr_t)
+  `AXI_LITE_TYPEDEF_R_CHAN_T(axi_lite_r_chan_t, lite_data_t)
+  axi_lite_req_t  pulp_to_host_tlb_cfg_req,
+                  host_to_pulp_tlb_cfg_req;
+  axi_lite_resp_t pulp_to_host_tlb_cfg_resp,
+                  host_to_pulp_tlb_cfg_resp;
+  axi_lite_xbar #(
+    .Cfg        (TlbCfgXbarCfg),
+    .aw_chan_t  (axi_lite_aw_chan_t),
+    .w_chan_t   (axi_lite_w_chan_t),
+    .b_chan_t   (axi_lite_b_chan_t),
+    .ar_chan_t  (axi_lite_ar_chan_t),
+    .r_chan_t   (axi_lite_r_chan_t),
+    .axi_req_t  (axi_lite_req_t),
+    .axi_resp_t (axi_lite_resp_t),
+    .rule_t     (tlb_cfg_xbar_rule_t)
+  ) i_tlb_cfg_xbar (
     .clk_i,
     .rst_ni,
-    .from_pulp_req_i        (rab_mst_req),
-    .from_pulp_resp_o       (rab_mst_resp),
-    .from_pulp_miss_irq_o   (rab_from_pulp_miss_irq_o),
-    .from_pulp_multi_irq_o  (rab_from_pulp_multi_irq_o),
-    .from_pulp_prot_irq_o   (rab_from_pulp_prot_irq_o),
-    .to_host_req_o          (ext_req_o),
-    .to_host_resp_i         (ext_resp_i),
-    .from_host_req_i        (ext_req_i),
-    .from_host_resp_o       (ext_resp_o),
-    .from_host_miss_irq_o   (rab_from_host_miss_irq_o),
-    .from_host_multi_irq_o  (rab_from_host_multi_irq_o),
-    .from_host_prot_irq_o   (rab_from_host_prot_irq_o),
-    .to_pulp_req_o          (rab_slv_req),
-    .to_pulp_resp_i         (rab_slv_resp),
-    .mh_fifo_full_irq_o     (rab_miss_fifo_full_irq_o),
-    .conf_req_i             (rab_conf_req_i),
-    .conf_resp_o            (rab_conf_resp_o)
+    .test_i                 (1'b0),
+    .slv_ports_req_i        ({rab_conf_req_i}),
+    .slv_ports_resp_o       ({rab_conf_resp_o}),
+    .mst_ports_req_o        ({pulp_to_host_tlb_cfg_req,   host_to_pulp_tlb_cfg_req}),
+    .mst_ports_resp_i       ({pulp_to_host_tlb_cfg_resp,  host_to_pulp_tlb_cfg_resp}),
+    .addr_map_i             (TlbCfgXbarAddrMap),
+    .en_default_mst_port_i  ({1'b0}),
+    .default_mst_port_i     ({1'b0})
   );
+
+  axi_tlb #(
+    .AxiSlvPortAddrWidth  (AXI_AW),
+    .AxiMstPortAddrWidth  (AXI_AW),
+    .AxiDataWidth         (AXI_DW),
+    .AxiIdWidth           (AXI_IW_SB_OUP),
+    .AxiUserWidth         (AXI_UW),
+    .AxiSlvPortMaxTxns    (4), // at most 4 host threads
+    .CfgAxiAddrWidth      (AXI_LITE_AW),
+    .CfgAxiDataWidth      (AXI_LITE_DW),
+    .L1NumEntries         (4),
+    .L1CutAx              (1),
+    .slv_req_t            (axi_req_t),
+    .mst_req_t            (axi_req_t),
+    .axi_resp_t           (axi_resp_t),
+    .lite_req_t           (axi_lite_req_t),
+    .lite_resp_t          (axi_lite_resp_t)
+  ) i_host_to_pulp_tlb (
+    .clk_i,
+    .rst_ni,
+    .test_en_i  (1'b0),
+    .slv_req_i  (ext_req_i),
+    .slv_resp_o (ext_resp_o),
+    .mst_req_o  (rab_slv_req),
+    .mst_resp_i (rab_slv_resp),
+    .cfg_req_i  (host_to_pulp_tlb_cfg_req),
+    .cfg_resp_o (host_to_pulp_tlb_cfg_resp)
+  );
+  assign rab_from_host_miss_irq_o = 1'b0;
+  assign rab_from_host_multi_irq_o = 1'b0;
+  assign rab_from_host_prot_irq_o = 1'b0;
+
+  localparam int unsigned MAX_TXNS_PER_CLUSTER =
+      pulp_cluster_cfg_pkg::N_CORES + pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS;
+  axi_tlb #(
+    .AxiSlvPortAddrWidth  (AXI_AW),
+    .AxiMstPortAddrWidth  (AXI_AW),
+    .AxiDataWidth         (AXI_DW),
+    .AxiIdWidth           (AXI_IW_SB_OUP),
+    .AxiUserWidth         (AXI_UW),
+    .AxiSlvPortMaxTxns    (N_CLUSTERS * MAX_TXNS_PER_CLUSTER),
+    .CfgAxiAddrWidth      (AXI_LITE_AW),
+    .CfgAxiDataWidth      (AXI_LITE_DW),
+    .L1NumEntries         (32),
+    .L1CutAx              (1),
+    .slv_req_t            (axi_req_t),
+    .mst_req_t            (axi_req_t),
+    .axi_resp_t           (axi_resp_t),
+    .lite_req_t           (axi_lite_req_t),
+    .lite_resp_t          (axi_lite_resp_t)
+  ) i_pulp_to_host_tlb (
+    .clk_i,
+    .rst_ni,
+    .test_en_i  (1'b0),
+    .slv_req_i  (rab_mst_req),
+    .slv_resp_o (rab_mst_resp),
+    .mst_req_o  (ext_req_o),
+    .mst_resp_i (ext_resp_i),
+    .cfg_req_i  (pulp_to_host_tlb_cfg_req),
+    .cfg_resp_o (pulp_to_host_tlb_cfg_resp)
+  );
+  assign rab_from_pulp_miss_irq_o = 1'b0;
+  assign rab_from_pulp_multi_irq_o = 1'b0;
+  assign rab_from_pulp_prot_irq_o = 1'b0;
 
   axi_id_resize #(
     .ADDR_WIDTH   (AXI_AW),

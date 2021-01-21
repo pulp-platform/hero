@@ -351,11 +351,11 @@ module pulp_tb #(
   endtask
 
   task write_rab_slice(input axi_lite_addr_t slice_addr, input axi_addr_t first,
-      input axi_addr_t last, input axi_addr_t phys_addr);
+      input axi_addr_t last, input axi_addr_t base);
     write_rab(slice_addr+8'h00, first);
     write_rab(slice_addr+8'h08, last);
-    write_rab(slice_addr+8'h10, phys_addr);
-    write_rab(slice_addr+8'h18, 64'h7);
+    write_rab(slice_addr+8'h10, base);
+    write_rab(slice_addr+8'h18, 64'h1);
   endtask
 
   task write_to_pulp(input axi_addr_t addr, input axi_data_t data, output axi_pkg::resp_t resp);
@@ -422,12 +422,10 @@ module pulp_tb #(
 
     // Set up RAB slice from PULP to external devices: all addresses (that the interconnect routes
     // through the RAB) except zero page.
-    write_rab_slice(32'hA0, 64'h0000_0000_0000_1000, 64'hFFFF_FFFF_FFFF_FFFF,
-        64'h0000_0000_0000_1000);
+    write_rab_slice(32'h1000, 52'h1, 52'hFFFF_FFFF_FFFF_F, 52'h1);
 
     // Set up RAB slice from external/Host to mailbox.
-    write_rab_slice(32'h40, 64'h0000_0000_1B80_1000, 64'h0000_0000_1B80_1FFF,
-        64'h0000_0000_1B80_1000);
+    write_rab_slice(32'h0, 52'h1B80_1, 52'h1B80_1, 52'h1B80_1);
 
     // Write word to mailbox.
     write_to_pulp(64'h0000_0000_1B80_1000, 32'h5000_600D, resp);

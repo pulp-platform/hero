@@ -1937,6 +1937,10 @@ add wave -noupdate -group {i_remap_cl_inp[1]} {/pulp_tb/dut/gen_clusters[1]/i_id
 add wave -noupdate -group {i_remap_cl_inp[1]} {/pulp_tb/dut/gen_clusters[1]/i_id_resize_cl_inp/gen_remap/i_remap/rd_full}
 add wave -noupdate -group {i_remap_cl_inp[1]} {/pulp_tb/dut/gen_clusters[1]/i_id_resize_cl_inp/gen_remap/i_remap/state_q}
 add wave -noupdate -group {i_remap_cl_inp[1]} {/pulp_tb/dut/gen_clusters[1]/i_id_resize_cl_inp/gen_remap/i_remap/ar_id_q}
+add wave -noupdate -group host_to_pulp_tlb /pulp_tb/dut/i_host_to_pulp_tlb/*
+add wave -noupdate -group host_to_pulp_tlb_l1 /pulp_tb/dut/i_host_to_pulp_tlb/i_l1_tlb/*
+add wave -noupdate -group pulp_to_host_tlb /pulp_tb/dut/i_pulp_to_host_tlb/*
+add wave -noupdate -group pulp_to_host_tlb_l1 /pulp_tb/dut/i_pulp_to_host_tlb/i_l1_tlb/*
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 11} {35680473 ps} 1} {W {35686614 ps} 1} {{Cursor 13} {35800671 ps} 1} {{Cursor 14} {16000 ps} 0}
 quietly wave cursor active 4
