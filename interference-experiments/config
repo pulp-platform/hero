@@ -1,8 +1,8 @@
 root@hero-zcu102-06
 /home/root/mmaxim/
 2048
-2mm 3mm atax axpy bicg conv2d gemm seq
-2mm 3mm atax axpy bicg conv2d gemm seq
+axpy
+
 1
 2020-04-14_roofline
 +++++++++++++++++++++++++++++++++++++++++++++

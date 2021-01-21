@@ -42,7 +42,7 @@ More details can be found [here](PREREQUISITES.md).
 All toolchains and SDKs are installed automatically to the location pointed to by the `HERO_INSTALL` environment variable. Please set it to your preferred installation location before continuing with the next step. Additionally, export `CMUX_ROOT` to build a PREM-compliant `libomptarget`.
 ```
 export HERO_INSTALL=<your_path>
-exprot CMUX_ROOT=<path_to_hero>/cmux
+export CMUX_ROOT=<path_to_hero>/cmux
 ```
 We recommend you create an `install` subdirectory in this repository and set `HERO_INSTALL` to that.
 

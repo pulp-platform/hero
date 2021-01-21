@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  printf("Calling gemm layer\n");
+  printf("Calling gemm layer %i\n", LAYER_COUNTER);
 
   if (LAYER_COUNTER == 0) {
       gemm_0(ALPHA, A, B, C);

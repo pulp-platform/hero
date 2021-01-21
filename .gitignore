@@ -16,6 +16,7 @@ openmp-examples/darknet/darknet
 openmp-examples/darknet/*.txt
 openmp-examples/darknet/*.log
 interference-experiments/pipeline_bak/
+interference-experiments/bin/
 openmp-examples/baby_gemm/baby_gemm
 .*
 !.gitignore

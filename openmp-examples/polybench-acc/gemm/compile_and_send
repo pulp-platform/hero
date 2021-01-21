@@ -1,5 +1,20 @@
 #!/bin/bash
+set -o errexit
 export HERO_INSTALL=/scratch/mmaxim/hero/install
+export HERCULES_INSTALL=${HERO_INSTALL}
+export HERCULES_ARCH="PULP"
+export CMUX_ROOT="/scratch/mmaxim/cmux"
+export HERCULES_FORCE_FOOTPRINT_DENSE=1
+export HERCULES_CPU_MEMORY_SIZE=32768
+export HERCULES_DISQ_THRESHOLD=0
+export HERCULES_DEFAULT_NUM_THREADS=8
+export HERCULES_DMA_ENFORCE
+export HERCULES_NO_INTERVAL_CONTROLFLOW
+export HERCULES_WHITELIST="
+__omp_offloading_803_110834b_kernel_gemm_l133
+.omp_outlined.
+"
+source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh
+
 source ${HERO_INSTALL}/../env/exilzcu102.sh
-make default-as=pulp all
-scp gemm root@172.31.182.80:/mnt/mmaxim/crosscompiled
+make default-as=pulp clean all

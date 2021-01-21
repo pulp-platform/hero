@@ -11,8 +11,7 @@ LIBPATHS += -L$(HERO_INSTALL)/../cmux/lib
 INCPATHS += -I$(HERO_INSTALL)/../cmux/inc
 INCPATHS += -I$(HERO_INSTALL)/../cmux/src
 
-CSRCS :=  main.c  gemm.c
-exeobjs += dmatransfer.o
+CSRCS :=  main.c gemm.c
 EXE=baby_gemm
 LDFLAGS=-v -lm -lpremnotify --for-linker --trace
 CFLAGS+= -fopenmp -fintegrated-as -v

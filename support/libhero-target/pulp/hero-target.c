@@ -23,13 +23,13 @@
 #include <vmm/vmm.h>
 
 #define L3_MEM_BASE_ADDR 0x80000000
-#define PULP_DMA_MAX_XFER_SIZE_B 32768 // Larger causes RAB problems
+#define PULP_DMA_MAX_XFER_SIZE_B 512 // Larger than 512 causes RAB problems
 #define PULP_DMA_MAX_XFERS 16
 #define PULP_DMA_MASK_DATA_TYPE uint16_t // Holds bitmask for PULP_DMA_MAX_XFERS
 #define PULP_DMA_MUTEX_BACKOFF_CYCLES 60
 #define HERO_DMA_JOB_POOL_SIZE 8
 
-#define DEBUG(...) //printf(__VA_ARGS__)
+#define DEBUG(...) printf(__VA_ARGS__)
 
 // Lock for entering critical sections in the DMA functions.
 __attribute__((__aligned__(4))) volatile int32_t __hero_dma_lock = 0x0;
