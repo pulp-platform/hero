@@ -556,16 +556,16 @@ module pulp_cluster import pulp_cluster_package::*; import apu_package::*; impor
   `AXI_ASSIGN_TO_REQ(ext_tcdm_req, s_ext_tcdm_bus);
   `AXI_ASSIGN_FROM_RESP(s_ext_tcdm_bus, ext_tcdm_resp);
   always_comb begin
-    `AXI_SET_W_CHAN(ext_tcdm_req_buf.w, ext_tcdm_req.w);
+    `AXI_SET_W_STRUCT(ext_tcdm_req_buf.w, ext_tcdm_req.w);
     ext_tcdm_req_buf.w_valid = ext_tcdm_req.w_valid;
     ext_tcdm_resp.w_ready = ext_tcdm_resp_buf.w_ready;
-    `AXI_SET_AR_CHAN(ext_tcdm_req_buf.ar, ext_tcdm_req.ar);
+    `AXI_SET_AR_STRUCT(ext_tcdm_req_buf.ar, ext_tcdm_req.ar);
     ext_tcdm_req_buf.ar_valid = ext_tcdm_req.ar_valid;
     ext_tcdm_resp.ar_ready = ext_tcdm_resp_buf.ar_ready;
-    `AXI_SET_B_CHAN(ext_tcdm_resp.b, ext_tcdm_resp_buf.b);
+    `AXI_SET_B_STRUCT(ext_tcdm_resp.b, ext_tcdm_resp_buf.b);
     ext_tcdm_resp.b_valid = ext_tcdm_resp_buf.b_valid;
     ext_tcdm_req_buf.b_ready = ext_tcdm_req.b_ready;
-    `AXI_SET_R_CHAN(ext_tcdm_resp.r, ext_tcdm_resp_buf.r);
+    `AXI_SET_R_STRUCT(ext_tcdm_resp.r, ext_tcdm_resp_buf.r);
     ext_tcdm_resp.r_valid = ext_tcdm_resp_buf.r_valid;
     ext_tcdm_req_buf.r_ready = ext_tcdm_req.r_ready;
   end
