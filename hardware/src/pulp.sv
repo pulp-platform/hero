@@ -473,10 +473,17 @@ module pulp import pulp_pkg::*; #(
   `AXI_LITE_TYPEDEF_B_CHAN_T(axi_lite_b_chan_t)
   `AXI_LITE_TYPEDEF_AR_CHAN_T(axi_lite_ar_chan_t, lite_addr_t)
   `AXI_LITE_TYPEDEF_R_CHAN_T(axi_lite_r_chan_t, lite_data_t)
-  axi_lite_req_t  pulp_to_host_tlb_cfg_req,
+  axi_lite_req_t  tlb_cfg_req,
+                  pulp_to_host_tlb_cfg_req,
                   host_to_pulp_tlb_cfg_req;
   axi_lite_resp_t pulp_to_host_tlb_cfg_resp,
                   host_to_pulp_tlb_cfg_resp;
+  // Mask upper 16 bits of config addresses.
+  always_comb begin
+    `AXI_LITE_SET_REQ_STRUCT(tlb_cfg_req, rab_conf_req_i)
+    tlb_cfg_req.aw.addr &= 32'h0000_FFFF;
+    tlb_cfg_req.ar.addr &= 32'h0000_FFFF;
+  end
   axi_lite_xbar #(
     .Cfg        (TlbCfgXbarCfg),
     .aw_chan_t  (axi_lite_aw_chan_t),
@@ -491,7 +498,7 @@ module pulp import pulp_pkg::*; #(
     .clk_i,
     .rst_ni,
     .test_i                 (1'b0),
-    .slv_ports_req_i        ({rab_conf_req_i}),
+    .slv_ports_req_i        ({tlb_cfg_req}),
     .slv_ports_resp_o       ({rab_conf_resp_o}),
     .mst_ports_req_o        ({pulp_to_host_tlb_cfg_req,   host_to_pulp_tlb_cfg_req}),
     .mst_ports_resp_i       ({pulp_to_host_tlb_cfg_resp,  host_to_pulp_tlb_cfg_resp}),
