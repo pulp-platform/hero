@@ -4,6 +4,7 @@ VLOG_ARGS += -suppress vlog-2583 -suppress vlog-13314 -suppress vlog-13233
 
 SHELL = bash
 PYTHON ?= python3
+GIT ?= git
 
 # morty config
 MORTY ?= morty
@@ -18,19 +19,19 @@ DIRTY_ERROR ?= Your branch is dirty, please commit or remove all changes to ensu
 OVERRIDE_DIRY_CHECK ?=
 
 # metadata
-COMMIT    ?= $(shell git rev-parse HEAD)
-BRANCH    ?= $(shell git rev-parse --abbrev-ref HEAD)
+COMMIT    ?= $(shell $(GIT) rev-parse HEAD)
+BRANCH    ?= $(shell $(GIT) symbolic-ref -q --short HEAD || $(GIT) describe --tags --exact-match)
 DATE      ?= $(shell date '+%d/%m/%Y %H:%M:%S')
 MORTY_VER ?= $(shell $(MORTY) -V)
 HOST      ?= $(shell hostname)
-REPO      ?= $(shell git config --get remote.origin.url)
-DIRTY     ?= $(shell git diff --quiet || echo '(dirty)')
+REPO      ?= $(shell $(GIT) config --get remote.origin.url)
+DIRTY     ?= $(shell $(GIT) diff --quiet || echo '(dirty)')
 
 define meta
 	echo '// Created automatically $(DIRTY)' >  $1
 	echo '// morty_version: $(MORTY_VER)'    >> $1
 	echo '// user:          $(USER)'         >> $1
-	echo '// time:          $(HOST)'         >> $1
+	echo '// host:          $(HOST)'         >> $1
 	echo '// date:          $(DATE)'         >> $1
 	echo '// repository:    $(REPO)'         >> $1
 	echo '// branch:        $(BRANCH)'       >> $1
@@ -60,6 +61,10 @@ vsim/compile.tcl: bender
 bender: Makefile
 	curl --proto '=https' --tlsv1.2 -sSf https://fabianschuiki.github.io/bender/init | sh -s 0.21.0
 	touch bender
+
+# --------------
+# PULP PICKLE
+# --------------
 
 hero_synth_sources.json: bender
 	./bender sources -f -t synthesis -t rtl -t default > $@
