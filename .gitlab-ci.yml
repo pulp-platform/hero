@@ -3,169 +3,31 @@ variables:
   HERO_INSTALL: '$CI_PROJECT_DIR/install'
   RUST_LOG: 'memora=debug'
   PATH: '/home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin'
+  TEMP_JOB_DIR: '$CI_PROJECT_DIR/archive/hero_gitlab_ci_$CI_JOB_ID'
 
 before_script:
   - env
   - mkdir -p $HERO_INSTALL
+  - mkdir -p "$TEMP_JOB_DIR"
 
 after_script:
   - chmod -R u+w $HERO_INSTALL
+  - chmod -R u+w "$TEMP_JOB_DIR"
+  - rm -rf "$TEMP_JOB_DIR"
 
 stages:
-  - build1
-  - build2
-  - build3
-  - build4
-  - test
+  - build_test_archive
 
-tc-pulp:
-  stage: build1
+build_test_archive:
+  stage: build_test_archive
   script:
-    - >
-      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-pulp; then
-        make tc-pulp
-        chmod -R u+w $HERO_INSTALL
-        $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-pulp
-      fi
-
-tc-har-olinux:
-  stage: build1
-  script:
-    - >
-      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-har-olinux; then
-        make tc-har-olinux
-        chmod -R u+w $HERO_INSTALL
-        $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-har-olinux
-      fi
-
-vsim-pulp:
-  stage: build1
-  script:
-    - >
-      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup vsim-pulp; then
-        exit 0
-      fi
-    - cd hardware
-    - make
-    - cd vsim
-    - ./compile.sh
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert vsim-pulp
-
-sdk-pulp-and-sdk-har:
-  stage: build2
-  script:
-    - >
-      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup sdk-pulp-and-sdk-har; then
-        exit 0
-      fi
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
-    - chmod -R u-w $HERO_INSTALL
-    - make sdk-pulp # TODO: `sdk-pulp-har` does not seem to work?
-    - make sdk-har
-    - chmod -R u+w $HERO_INSTALL
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert sdk-pulp-and-sdk-har
-
-tc-llvm:
-  stage: build3
-  script:
-    - >
-      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-llvm; then
-        .gitlab-ci.d/llvm-project-update-hero-branch.sh
-        exit 0
-      fi
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get sdk-pulp-and-sdk-har
-    - chmod -R u-w $HERO_INSTALL
-    - make tc-llvm
-    - chmod -R u+w $HERO_INSTALL
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-llvm
-    - .gitlab-ci.d/llvm-project-update-hero-branch.sh
-
-bitstream-zcu102:
-  stage: build3
-  script:
-    - >
-      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup bitstream-zcu102; then
-        cd hardware/fpga
-        make hero_exilzcu102
-        $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert bitstream-zcu102
-      fi
-
-br-har-exilzcu102:
-  stage: build4
-  script:
-    - >
-      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-har-exilzcu102; then
-        exit 0
-      fi
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get bitstream-zcu102
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp # required to build PULP SDK
-    - chmod -R u-w $HERO_INSTALL
-    - make sdk-pulp # TODO: `sdk-pulp-har` does not seem to work?
-    - echo "BR2_HERO_BITSTREAM=$CI_PROJECT_DIR/hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1/hero_exilzcu102_wrapper.bit" >> local.cfg
-    - make br-har-exilzcu102
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-har-exilzcu102
-
-test-zcu102-examples:
-  stage: test
-  script:
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get vsim-pulp
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-llvm
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get sdk-pulp-and-sdk-har
-    - chmod -R u-w $HERO_INSTALL
-    - make sdk-pulp # PULP SDK is not relocatable
-    - source env/exilzcu102.sh
-    ## build examples
-    - >
-      for d in helloworld mm-large mm-small; do
-        make -C openmp-examples/$d all
-      done
-    ## test benchmarks: compile
-    - >
-      for d in openmp-examples/polybench-acc/*/; do
-        if [ $(basename $d) = "common" ]; then
-          continue
-        fi
-        make -C $d only=pulp default-as=host clean all
-        make -C $d only=pulp clean all
-        make -C $d default-as=host clean all
-        make -C $d default-as=pulp clean all
-      done
-    ## test benchmarks: simulate
-    - source env/esim-exilzcu102.sh
-    - >
-      for d in openmp-examples/polybench-acc/*/; do
-        if [ $(basename $d) = "common" ]; then
-          continue
-        fi
-        make -C $d only=pulp clean all
-        .gitlab-ci.d/verify-bench.sh $(basename $d)
-      done
-
-compiler-smoketest:
-  stage: test
-  script:
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-llvm
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get sdk-pulp-and-sdk-har
-    - chmod -R u-w $HERO_INSTALL
-    - make sdk-pulp # PULP SDK is not relocatable
-    - source env/exilzcu102.sh
-    - .gitlab-ci.d/compiler-smoketest.sh
-
-simulator-tests-pulp:
-  stage: test
-  script:
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get vsim-pulp
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-llvm
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get sdk-pulp-and-sdk-har
-    - chmod -R u-w $HERO_INSTALL
-    - make sdk-pulp # PULP SDK is not relocatable
-    - source env/esim-exilzcu102.sh
-    - .gitlab-ci.d/tests-pulp.sh
+    - ./pack_siemens.sh
+    - cd "$TEMP_JOB_DIR"
+    - cp "$CI_PROJECT_DIR/hero_siemens.tar.gz" .
+    - tar xf hero_siemens.tar.gz && rm hero_siemens.tar.gz
+    - export HERO_INSTALL="$(pwd)/install"
+    - mkdir -p "$HERO_INSTALL"
+    - ./setup.sh
+  artifacts:
+    paths:
+      - hero_siemens.tar.gz
