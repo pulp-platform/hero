@@ -4,9 +4,9 @@ module pulp_ooc #(
   parameter int unsigned  N_CLUSTERS = 4,
   parameter int unsigned  AXI_DW = 256,         // [bit]
   parameter int unsigned  L2_N_AXI_PORTS = 1,
-  localparam type data_t = logic [AXI_DW-1:0],
-  localparam type id_t = logic [pulp_pkg::axi_iw_sb_oup(N_CLUSTERS)-1:0],
-  localparam type strb_t = logic [AXI_DW/8-1:0]
+  parameter type data_t = logic [AXI_DW-1:0],
+  parameter type id_t = logic [pulp_pkg::axi_iw_sb_oup(N_CLUSTERS)-1:0],
+  parameter type strb_t = logic [AXI_DW/8-1:0]
 ) (
   // Clocks and Resets
   input  logic              clk_i,
