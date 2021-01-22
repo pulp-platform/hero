@@ -1,9 +1,6 @@
 [submodule "buildroot"]
 	path = buildroot
 	url = git://git.buildroot.net/buildroot
-[submodule "tools/riscv-openocd"]
-	path = tools/riscv-openocd
-	url = https://github.com/riscv/riscv-openocd
 [submodule "toolchain/llvm-project"]
 	path = toolchain/llvm-project
 	url = git@iis-git.ee.ethz.ch:hero/llvm-project.git
