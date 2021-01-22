@@ -514,8 +514,8 @@ module pulp import pulp_pkg::*; #(
     .slv_req_t            (axi_req_t),
     .mst_req_t            (axi_req_t),
     .axi_resp_t           (axi_resp_t),
-    .lite_req_t           (axi_lite_req_t),
-    .lite_resp_t          (axi_lite_resp_t)
+    .axi_lite_req_t       (axi_lite_req_t),
+    .axi_lite_resp_t      (axi_lite_resp_t)
   ) i_host_to_pulp_tlb (
     .clk_i,
     .rst_ni,
@@ -547,8 +547,8 @@ module pulp import pulp_pkg::*; #(
     .slv_req_t            (axi_req_t),
     .mst_req_t            (axi_req_t),
     .axi_resp_t           (axi_resp_t),
-    .lite_req_t           (axi_lite_req_t),
-    .lite_resp_t          (axi_lite_resp_t)
+    .axi_lite_req_t       (axi_lite_req_t),
+    .axi_lite_resp_t      (axi_lite_resp_t)
   ) i_pulp_to_host_tlb (
     .clk_i,
     .rst_ni,

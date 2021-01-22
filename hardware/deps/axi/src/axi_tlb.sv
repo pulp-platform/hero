@@ -43,28 +43,28 @@ module axi_tlb #(
   /// Response type of main AXI4+ATOP slave and master ports
   parameter type axi_resp_t = logic,
   /// Request type of configuration AXI4-Lite slave port
-  parameter type lite_req_t = logic,
+  parameter type axi_lite_req_t = logic,
   /// Response type of configuration AXI4-Lite slave port
-  parameter type lite_resp_t = logic
+  parameter type axi_lite_resp_t = logic
 ) (
   /// Rising-edge clock of all ports
-  input  logic        clk_i,
+  input  logic            clk_i,
   /// Asynchronous reset, active low
-  input  logic        rst_ni,
+  input  logic            rst_ni,
   /// Test mode enable
-  input  logic        test_en_i,
+  input  logic            test_en_i,
   /// Main slave port request
-  input  slv_req_t    slv_req_i,
+  input  slv_req_t        slv_req_i,
   /// Main slave port response
-  output axi_resp_t   slv_resp_o,
+  output axi_resp_t       slv_resp_o,
   /// Main master port request
-  output mst_req_t    mst_req_o,
+  output mst_req_t        mst_req_o,
   /// Main master port response
-  input  axi_resp_t   mst_resp_i,
+  input  axi_resp_t       mst_resp_i,
   /// Configuration port request
-  input  lite_req_t   cfg_req_i,
+  input  axi_lite_req_t   cfg_req_i,
   /// Configuration port response
-  output lite_resp_t  cfg_resp_o
+  output axi_lite_resp_t  cfg_resp_o
 );
 
   typedef logic [AxiSlvPortAddrWidth-1:0] slv_addr_t;
@@ -122,8 +122,8 @@ module axi_tlb #(
     .NumEntries       ( L1NumEntries        ),
     .CfgAxiAddrWidth  ( CfgAxiAddrWidth     ),
     .CfgAxiDataWidth  ( CfgAxiDataWidth     ),
-    .axi_lite_req_t   ( lite_req_t          ),
-    .axi_lite_resp_t  ( lite_resp_t         ),
+    .axi_lite_req_t   ( axi_lite_req_t      ),
+    .axi_lite_resp_t  ( axi_lite_resp_t     ),
     .res_t            ( tlb_res_t           )
   ) i_l1_tlb (
     .clk_i,
