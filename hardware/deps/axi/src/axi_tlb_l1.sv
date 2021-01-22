@@ -24,9 +24,9 @@ module axi_tlb_l1 #(
   /// Data width of configuration AXI4-Lite port
   parameter int unsigned CfgAxiDataWidth = 0,
   /// Request type of configuration AXI4-Lite slave port
-  parameter type lite_req_t = logic,
+  parameter type axi_lite_req_t = logic,
   /// Response type of configuration AXI4-Lite slave port
-  parameter type lite_resp_t = logic,
+  parameter type axi_lite_resp_t = logic,
   /// Type of translation result.  Must have a single-bit field `hit` and an `addr` field as wide as
   /// the output address.
   parameter type res_t = logic,
@@ -36,39 +36,39 @@ module axi_tlb_l1 #(
   parameter type oup_addr_t = logic [OupAddrWidth-1:0]
 ) (
   /// Rising-edge clock of all ports
-  input  logic        clk_i,
+  input  logic            clk_i,
   /// Asynchronous reset, active low
-  input  logic        rst_ni,
+  input  logic            rst_ni,
   /// Test mode enable
-  input  logic        test_en_i,
+  input  logic            test_en_i,
   /// Write request input address
-  input  inp_addr_t   wr_req_addr_i,
+  input  inp_addr_t       wr_req_addr_i,
   /// Write request valid
-  input  logic        wr_req_valid_i,
+  input  logic            wr_req_valid_i,
   /// Write request ready
-  output logic        wr_req_ready_o,
+  output logic            wr_req_ready_o,
   /// Write translation result
-  output res_t        wr_res_o,
+  output res_t            wr_res_o,
   /// Write translation result valid
-  output logic        wr_res_valid_o,
+  output logic            wr_res_valid_o,
   /// Write translation result ready
-  input  logic        wr_res_ready_i,
+  input  logic            wr_res_ready_i,
   /// Read request input address
-  input  inp_addr_t   rd_req_addr_i,
+  input  inp_addr_t       rd_req_addr_i,
   /// Read request valid
-  input  logic        rd_req_valid_i,
+  input  logic            rd_req_valid_i,
   /// Read request ready
-  output logic        rd_req_ready_o,
+  output logic            rd_req_ready_o,
   /// Read translation result
-  output res_t        rd_res_o,
+  output res_t            rd_res_o,
   /// Read translation result valid
-  output logic        rd_res_valid_o,
+  output logic            rd_res_valid_o,
   /// Read translation result ready
-  input  logic        rd_res_ready_i,
+  input  logic            rd_res_ready_i,
   /// Configuration port request
-  input  lite_req_t   cfg_req_i,
+  input  axi_lite_req_t   cfg_req_i,
   /// Configuration port response
-  output lite_resp_t  cfg_resp_o
+  output axi_lite_resp_t  cfg_resp_o
 );
 
   localparam int unsigned InpPageNumWidth = InpAddrWidth - 12;
@@ -174,8 +174,8 @@ module axi_tlb_l1 #(
     .SecuProtOnly   ( 1'b0                  ),
     .AxiReadOnly    ( AxiReadOnly           ),
     .RegRstVal      ( '{RegNumBytes{8'h00}} ),
-    .req_lite_t     ( lite_req_t            ),
-    .resp_lite_t    ( lite_resp_t           )
+    .req_lite_t     ( axi_lite_req_t        ),
+    .resp_lite_t    ( axi_lite_resp_t       )
   ) i_regs (
     .clk_i,
     .rst_ni,

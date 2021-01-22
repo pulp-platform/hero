@@ -122,8 +122,8 @@ module axi_tlb #(
     .NumEntries       ( L1NumEntries        ),
     .CfgAxiAddrWidth  ( CfgAxiAddrWidth     ),
     .CfgAxiDataWidth  ( CfgAxiDataWidth     ),
-    .lite_req_t       ( lite_req_t          ),
-    .lite_resp_t      ( lite_resp_t         ),
+    .axi_lite_req_t   ( lite_req_t          ),
+    .axi_lite_resp_t  ( lite_resp_t         ),
     .res_t            ( tlb_res_t           )
   ) i_l1_tlb (
     .clk_i,
