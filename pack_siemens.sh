@@ -55,7 +55,6 @@ git config --local user.name 'Packager'
 git config --local user.email 'packager@localhost'
 git add -A
 git commit -m 'initial commit'
-git submodule update --init --recursive
 ../setup-sdk.sh --no-build hero-arm64
 
 # Support software: copy to destination.
