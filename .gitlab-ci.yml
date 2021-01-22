@@ -25,6 +25,7 @@ build_test_archive:
     - cd "$TEMP_JOB_DIR"
     - cp "$CI_PROJECT_DIR/hero_siemens.tar.gz" .
     - tar xf hero_siemens.tar.gz && rm hero_siemens.tar.gz
+    - export CMUX_ROOT="$(pwd)/install"
     - export HERO_INSTALL="$(pwd)/install"
     - mkdir -p "$HERO_INSTALL"
     - ./setup.sh
