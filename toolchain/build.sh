@@ -19,16 +19,16 @@ if [ -z "$HERO_INSTALL" ]; then
     exit 1
 fi
 
-conf_dir=$(readlink -f $(dirname "$1"))
+conf_dir="$(readlink -f "$(dirname "$1")")"
 
 # FIXME: install dependencies for crosstool-ng if not found on host
 # help2man might be missing, install it temporary if it is missing
-export PATH=$PATH:$(pwd)/install/bin/
+export PATH="$PATH:$(pwd)/install/bin/"
 if ! command -v help2man >/dev/null 2>&1; then
     echo "Not having help2man, installing a temporary version for crosstool..."
     curl https://ftp.gnu.org/gnu/help2man/help2man-$HELP2MAN_VERSION.tar.xz | tar -xJp
     cd help2man-$HELP2MAN_VERSION/
-    ./configure --prefix=$(pwd)/../install
+    ./configure --prefix="$(pwd)/../install"
     make -j$(nproc)
     make install
     cd ..
@@ -38,7 +38,7 @@ if ! command -v makeinfo >/dev/null 2>&1; then
     echo "Not having texinfo, installing a temporary version for crosstool..."
     curl https://ftp.gnu.org/gnu/texinfo/texinfo-$TEXINFO_VERSION.tar.xz | tar -xJp
     cd texinfo-$TEXINFO_VERSION/
-    ./configure --prefix=$(pwd)/../install
+    ./configure --prefix="$(pwd)/../install"
     make -j$(nproc)
     make install
     cd ..
@@ -47,15 +47,15 @@ fi
 mkdir -p $HERO_INSTALL
 # download and install crosstool-ng
 if [ ! -x "$HERO_INSTALL/bin/ct-ng" ]; then
-    chmod -R u+w $HERO_INSTALL
+    chmod -R u+w "$HERO_INSTALL"
     echo "No crosstool-ng found, installing..."
     curl https://codeload.github.com/crosstool-ng/crosstool-ng/tar.gz/crosstool-ng-$CROSSTOOL_VERSION | tar -xzp
     cd crosstool-ng-crosstool-ng-$CROSSTOOL_VERSION
-    for f in $conf_dir/patches/crosstool-ng/*.patch; do
-        patch -p1 < $f
+    for f in "$conf_dir/patches/crosstool-ng/"*.patch; do
+        patch -p1 < "$f"
     done
     ./bootstrap
-    ./configure --prefix=$HERO_INSTALL
+    ./configure --prefix="$HERO_INSTALL"
     if [ ! $? -eq 0 ]; then
         echo "Fatal error: failed to configure crosstool-ng"
 	      exit
@@ -69,7 +69,7 @@ fi
 # FIXME: currently only hardcoded patches directory will be used
 if [ ! -L "patches" ]; then
     echo "Symlinking patches directory to build directory"
-    ln -s $conf_dir/patches $(pwd)/patches
+    ln -s "$conf_dir/patches" "$(pwd)/patches"
 fi
 
 # initialize the configuration
@@ -89,7 +89,7 @@ fi
 $HERO_INSTALL/bin/ct-ng upgradeconfig > /dev/null
 
 # # deduce tuple, sysroot
-TUPLE=$($HERO_INSTALL/bin/ct-ng -s show-tuple)
+TUPLE="$("$HERO_INSTALL/bin/ct-ng" -s show-tuple)"
 echo "tuple: '$TUPLE'"
 if [ -z "$TUPLE" ]; then
     echo "Failed to get tuple for config $1!"
@@ -100,7 +100,7 @@ if [ -z "$ARCH" ]; then
     echo "Failed to deduce architecture from tuple $TUPLE with config $1!"
     exit 1
 fi
-SYSROOT=$HERO_INSTALL/$TUPLE/sysroot
+SYSROOT="$HERO_INSTALL/$TUPLE/sysroot"
 echo "sysroot: '$SYSROOT'"
 
 # check previous install and clear sysroot between builds if exists
@@ -111,8 +111,8 @@ if [ -x "$HERO_INSTALL/bin/$TUPLE-gcc" ]; then
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         exit 1
     elif [ -d "$SYSROOT" ]; then
-        chmod -R u+w $SYSROOT
-        rm -rf $SYSROOT/*
+        chmod -R u+w "$SYSROOT"
+        rm -rf "$SYSROOT"
     fi
 fi
 
@@ -133,10 +133,10 @@ echo "Starting toolchain build..."
 unset LD_LIBRARY_PATH
 $HERO_INSTALL/bin/ct-ng build
 
-if [ ! -d $SYSROOT ]; then
+if [ ! -d "$SYSROOT" ]; then
     SYSROOT=
 else
-    SYSROOT=$(readlink -f $SYSROOT)
+    SYSROOT="$(readlink -f "$SYSROOT")"
 fi
 echo "sysroot: '$SYSROOT'"
 
@@ -144,13 +144,13 @@ echo "sysroot: '$SYSROOT'"
 # FIXME: this should be done properly by crosstool-ng
 if grep -q "^CT_COMP_TOOLS_FOR_HOST=y" .config; then
     echo "Fixing hardcoded paths pointing to build directory..."
-    chmod -R u+w $HERO_INSTALL
-    builddir=$(readlink -f $(pwd)/.build)
-    replacedir=$(readlink -f $HERO_INSTALL)
-    find $HERO_INSTALL/bin -type f -exec sed -i "s|$builddir/tools/bin/||g" {} \;
-    find $HERO_INSTALL/bin -type f -exec sed -i "s|NM=\".*\"|NM=\"nm\"|g" {} \;
-    find $HERO_INSTALL/ -iname "*.la" -type f -exec sed -i "s|-L$builddir/.*/build/build-gdb-native/zlib ||" {} \;
-    chmod -R u-w $HERO_INSTALL
+    chmod -R u+w "$HERO_INSTALL"
+    builddir="$(readlink -f "$(pwd)"/.build)"
+    replacedir="$(readlink -f "$HERO_INSTALL")"
+    find "$HERO_INSTALL/bin" -type f -exec sed -i "s|$builddir/tools/bin/||g" {} \;
+    find "$HERO_INSTALL/bin" -type f -exec sed -i "s|NM=\".*\"|NM=\"nm\"|g" {} \;
+    find "$HERO_INSTALL/" -iname "*.la" -type f -exec sed -i "s|-L$builddir/.*/build/build-gdb-native/zlib ||" {} \;
+    chmod -R u-w "$HERO_INSTALL"
 fi
 
 # demultilib paths in riscv toolchain (needed for buildroot)
@@ -171,21 +171,21 @@ if case $ARCH in riscv*) ;; *) false;; esac; then
             exit 1
         fi
 
-        chmod -R u+w $SYSROOT
-        ORIGDIR=$(pwd)
+        chmod -R u+w "$SYSROOT"
+        ORIGDIR="$(pwd)"
         for dir in $libdir/$abidir usr/$libdir/$abidir; do
-            cd $SYSROOT/$dir
-            curdir=$(readlink -f $(pwd))
+            cd "$SYSROOT/$dir"
+            curdir="$(readlink -f "$(pwd)")"
             # move files to libdir, leaving symlink and create symlinks to symlinks
 	          for file in $(find . -type f -o -type l); do
                 if [ -e ../../lib/$file ]; then
                     echo "Warning: cannot fixup library path, $file already exists in lib"
                     continue
                 fi
-                path=$(readlink -f $file)
-                reldir=$(dirname $file)
-                mkdir -p ../../lib/$reldir
-                if [ -L $file ]; then
+                path="$(readlink -f $file)"
+                reldir="$(dirname $file)"
+                mkdir -p "../../lib/$reldir"
+                if [ -L "$file" ]; then
                     # Keep symlink where it is and link to it from `../../lib`.
                     linkfile="../../lib/$file"
                     target="../$libdir/$abidir/$file"
@@ -200,50 +200,50 @@ if case $ARCH in riscv*) ;; *) false;; esac; then
         done
 
         for dir in lib usr/lib; do
-            cd $SYSROOT/$dir
+            cd "$SYSROOT/$dir"
             # clean symlinks in libdir
             for file in $(find . -type l); do
-                destrelsysroot=$(readlink -f $file | sed "s|$SYSROOT/||")
-                reldir=$(dirname $file)
-                srcrelsysroot=$(readlink -f $reldir | sed "s|$SYSROOT||")
-                sysrootrel=$(printf '../%.0s' $(seq 1 $(echo $srcrelsysroot | tr -cd '/' | wc -c)))
-                prevdir=$(pwd)
-                cd $reldir
-                ln -sf $sysrootrel$destrelsysroot $(basename $file)
-                cd $prevdir
+                destrelsysroot="$(readlink -f "$file" | sed "s|$SYSROOT/||")"
+                reldir="$(dirname "$file")"
+                srcrelsysroot="$(readlink -f "$reldir" | sed "s|$SYSROOT||")"
+                sysrootrel="$(printf '../%.0s' "$(seq 1 "$(echo "$srcrelsysroot" | tr -cd '/' | wc -c)")")"
+                prevdir="$(pwd)"
+                cd "$reldir"
+                ln -sf "$sysrootrel$destrelsysroot" "$(basename "$file")"
+                cd "$prevdir"
             done
         done
 
         # remove original lib directories
-        rm -rf $SYSROOT/$libdir
-        rm -rf $SYSROOT/usr/$libdir
+        rm -rf "$SYSROOT/$libdir"
+        rm -rf "$SYSROOT/usr/$libdir"
 
         # create necessary symlinks to make the toolchain work
         for dir in . usr; do
-            cd $SYSROOT/$dir
-            ln -s lib $libdir
+            cd "$SYSROOT/$dir"
+            ln -s lib "$libdir"
             cd lib
-            ln -s . $abidir
+            ln -s . "$abidir"
         done
 
-        cd $ORIGDIR
-        chmod -R u-w $SYSROOT
+        cd "$ORIGDIR"
+        chmod -R u-w "$SYSROOT"
     fi
 fi
 
 # alias the toolchain if requested ($2 = vendor alias, $3 = optional suffix useful for buildroot)
 if [ ! -z "$2" ] || [ ! -z "$3" ]; then
-    chmod -R u+w $HERO_INSTALL/bin
+    chmod -R u+w "$HERO_INSTALL/bin"
     vendor=$(echo "$TUPLE" | sed -E 's/^\w*-(\w*)-.*/\1/')
     cd "$HERO_INSTALL/bin"
     for tf in $TUPLE*; do
-        alias=$(echo "$tf" | sed -e "s/$vendor/$2/")
-        ln -sf $tf $alias
+        alias="$(echo "$tf" | sed -e "s/$vendor/$2/")"
+        ln -sf "$tf" "$alias"
         if [ ! -z "$3" ]; then
-            ln -sf $tf $alias.$3
-            ln -sf $tf $tf.$3
+            ln -sf "$tf" "$alias.$3"
+            ln -sf "$tf" "$tf.$3"
         fi
     done
     cd - > /dev/null
-    chmod -R u-w $HERO_INSTALL/bin
+    chmod -R u-w "$HERO_INSTALL/bin"
 fi
