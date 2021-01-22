@@ -1,13 +1,10 @@
 source "$BR2_EXTERNAL_HERO_PATH/package/Config.in"
 
-source "$BR2_EXTERNAL_HERO_PATH/package/ariane-support/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/hero-apps/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/hero-openmp/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/libhero-target/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/libpulp/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/pulp-driver/Config.in"
-source "$BR2_EXTERNAL_HERO_PATH/package/riscv-pk-ariane/Config.in"
-source "$BR2_EXTERNAL_HERO_PATH/package/vitetris/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/zynq-mkbootimage/Config.in.host"
 
 config BR2_HERO_AUTHORIZED_KEYS
