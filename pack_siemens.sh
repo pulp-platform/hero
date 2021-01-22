@@ -12,6 +12,11 @@ copy_git_files() {
 # Create temporary destination directory.
 readonly TMP_DST="$(mktemp -d)"
 
+# Import bitstream with Memora and copy it to destination.
+memora get bitstream-zcu102
+mkdir -p "$TMP_DST/hardware/fpga"
+rsync -av "$SRC/hardware/fpga/hero_exilzcu102" "$TMP_DST/hardware/fpga/"
+
 # Env: Copy to destination.
 cd "$SRC"
 mkdir -p "$TMP_DST/env"
@@ -71,20 +76,8 @@ copy_git_files apps openmp-examples pipeline interference-experiments
 cd "$SRC"
 copy_git_files Config.in board buildroot configs external.desc external.mk package petalinux
 
-# Bitstreams: import from HERO builds.
-cd ~hero # make sure this directory is mounted
-cd "$TMP_DST"
-mkdir -p bitstreams
-cp ~hero/bitstreams/siemens-m04-deliverable/* bitstreams/
-
-# Set PULP bitstream as default for Buildroot.
-echo 'BR2_HERO_BITSTREAM="$(BR2_EXTERNAL_HERO_PATH)/bitstreams/default.bit"' >> "$TMP_DST/local.cfg"
-
-# SD card images: import from HERO builds.
-cd ~hero # make sure this directory is mounted
-cd "$TMP_DST"
-mkdir -p images
-cp -r ~hero/images/siemens-m04-deliverable/* images/
+# Set default bitstream for Buildroot.
+echo 'BR2_HERO_BITSTREAM="$(BR2_EXTERNAL_HERO_PATH)/hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1/hero_exilzcu102_wrapper.bit"' >> "$TMP_DST/local.cfg"
 
 # Create archive from temporary destination directory.
 sleep 1 # give Git time to settle
