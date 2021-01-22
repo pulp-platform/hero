@@ -4,21 +4,16 @@ module pulp_ooc #(
   parameter int unsigned  N_CLUSTERS = 4,
   parameter int unsigned  AXI_DW = 256,         // [bit]
   parameter int unsigned  L2_N_AXI_PORTS = 1,
-  localparam type addr_t = logic [pulp_pkg::AXI_AW-1:0],
   localparam type data_t = logic [AXI_DW-1:0],
   localparam type id_t = logic [pulp_pkg::axi_iw_sb_oup(N_CLUSTERS)-1:0],
-  localparam type strb_t = logic [AXI_DW/8-1:0],
-  localparam type user_t = logic [pulp_pkg::AXI_UW-1:0],
-  localparam type lite_addr_t = logic [pulp_pkg::AXI_LITE_AW-1:0],
-  localparam type lite_data_t = logic [pulp_pkg::AXI_LITE_DW-1:0],
-  localparam type lite_strb_t = logic [pulp_pkg::AXI_LITE_DW/8-1:0]
+  localparam type strb_t = logic [AXI_DW/8-1:0]
 ) (
   // Clocks and Resets
   input  logic              clk_i,
   input  logic              rst_ni,
 
   output id_t               mst_aw_id_o,
-  output addr_t             mst_aw_addr_o,
+  output pulp_pkg::addr_t   mst_aw_addr_o,
   output axi_pkg::len_t     mst_aw_len_o,
   output axi_pkg::size_t    mst_aw_size_o,
   output axi_pkg::burst_t   mst_aw_burst_o,
@@ -28,22 +23,22 @@ module pulp_ooc #(
   output axi_pkg::qos_t     mst_aw_qos_o,
   output axi_pkg::region_t  mst_aw_region_o,
   output axi_pkg::atop_t    mst_aw_atop_o,
-  output user_t             mst_aw_user_o,
+  output pulp_pkg::user_t   mst_aw_user_o,
   output logic              mst_aw_valid_o,
   input  logic              mst_aw_ready_i,
   output data_t             mst_w_data_o,
   output strb_t             mst_w_strb_o,
   output logic              mst_w_last_o,
-  output user_t             mst_w_user_o,
+  output pulp_pkg::user_t   mst_w_user_o,
   output logic              mst_w_valid_o,
   input  logic              mst_w_ready_i,
   input  id_t               mst_b_id_i,
   input  axi_pkg::resp_t    mst_b_resp_i,
-  input  user_t             mst_b_user_i,
+  input  pulp_pkg::user_t   mst_b_user_i,
   input  logic              mst_b_valid_i,
   output logic              mst_b_ready_o,
   output id_t               mst_ar_id_o,
-  output addr_t             mst_ar_addr_o,
+  output pulp_pkg::addr_t   mst_ar_addr_o,
   output axi_pkg::len_t     mst_ar_len_o,
   output axi_pkg::size_t    mst_ar_size_o,
   output axi_pkg::burst_t   mst_ar_burst_o,
@@ -52,19 +47,19 @@ module pulp_ooc #(
   output axi_pkg::prot_t    mst_ar_prot_o,
   output axi_pkg::qos_t     mst_ar_qos_o,
   output axi_pkg::region_t  mst_ar_region_o,
-  output user_t             mst_ar_user_o,
+  output pulp_pkg::user_t   mst_ar_user_o,
   output logic              mst_ar_valid_o,
   input  logic              mst_ar_ready_i,
   input  id_t               mst_r_id_i,
   input  data_t             mst_r_data_i,
   input  axi_pkg::resp_t    mst_r_resp_i,
   input  logic              mst_r_last_i,
-  input  user_t             mst_r_user_i,
+  input  pulp_pkg::user_t   mst_r_user_i,
   input  logic              mst_r_valid_i,
   output logic              mst_r_ready_o,
 
   input  id_t               slv_aw_id_i,
-  input  addr_t             slv_aw_addr_i,
+  input  pulp_pkg::addr_t   slv_aw_addr_i,
   input  axi_pkg::len_t     slv_aw_len_i,
   input  axi_pkg::size_t    slv_aw_size_i,
   input  axi_pkg::burst_t   slv_aw_burst_i,
@@ -74,22 +69,22 @@ module pulp_ooc #(
   input  axi_pkg::qos_t     slv_aw_qos_i,
   input  axi_pkg::region_t  slv_aw_region_i,
   input  axi_pkg::atop_t    slv_aw_atop_i,
-  input  user_t             slv_aw_user_i,
+  input  pulp_pkg::user_t   slv_aw_user_i,
   input  logic              slv_aw_valid_i,
   output logic              slv_aw_ready_o,
   input  data_t             slv_w_data_i,
   input  strb_t             slv_w_strb_i,
   input  logic              slv_w_last_i,
-  input  user_t             slv_w_user_i,
+  input  pulp_pkg::user_t   slv_w_user_i,
   input  logic              slv_w_valid_i,
   output logic              slv_w_ready_o,
   output id_t               slv_b_id_o,
   output axi_pkg::resp_t    slv_b_resp_o,
-  output user_t             slv_b_user_o,
+  output pulp_pkg::user_t   slv_b_user_o,
   output logic              slv_b_valid_o,
   input  logic              slv_b_ready_i,
   input  id_t               slv_ar_id_i,
-  input  addr_t             slv_ar_addr_i,
+  input  pulp_pkg::addr_t   slv_ar_addr_i,
   input  axi_pkg::len_t     slv_ar_len_i,
   input  axi_pkg::size_t    slv_ar_size_i,
   input  axi_pkg::burst_t   slv_ar_burst_i,
@@ -98,36 +93,36 @@ module pulp_ooc #(
   input  axi_pkg::prot_t    slv_ar_prot_i,
   input  axi_pkg::qos_t     slv_ar_qos_i,
   input  axi_pkg::region_t  slv_ar_region_i,
-  input  user_t             slv_ar_user_i,
+  input  pulp_pkg::user_t   slv_ar_user_i,
   input  logic              slv_ar_valid_i,
   output logic              slv_ar_ready_o,
   output id_t               slv_r_id_o,
   output data_t             slv_r_data_o,
   output axi_pkg::resp_t    slv_r_resp_o,
   output logic              slv_r_last_o,
-  output user_t             slv_r_user_o,
+  output pulp_pkg::user_t   slv_r_user_o,
   output logic              slv_r_valid_o,
   input  logic              slv_r_ready_i,
 
-  input  lite_addr_t        rab_conf_aw_addr_i,
-  input  axi_pkg::prot_t    rab_conf_aw_prot_i,
-  input  logic              rab_conf_aw_valid_i,
-  output logic              rab_conf_aw_ready_o,
-  input  lite_data_t        rab_conf_w_data_i,
-  input  lite_strb_t        rab_conf_w_strb_i,
-  input  logic              rab_conf_w_valid_i,
-  output logic              rab_conf_w_ready_o,
-  output axi_pkg::resp_t    rab_conf_b_resp_o,
-  output logic              rab_conf_b_valid_o,
-  input  logic              rab_conf_b_ready_i,
-  input  lite_addr_t        rab_conf_ar_addr_i,
-  input  axi_pkg::prot_t    rab_conf_ar_prot_i,
-  input  logic              rab_conf_ar_valid_i,
-  output logic              rab_conf_ar_ready_o,
-  output lite_data_t        rab_conf_r_data_o,
-  output axi_pkg::resp_t    rab_conf_r_resp_o,
-  output logic              rab_conf_r_valid_o,
-  input  logic              rab_conf_r_ready_i,
+  input  pulp_pkg::lite_addr_t  rab_conf_aw_addr_i,
+  input  axi_pkg::prot_t        rab_conf_aw_prot_i,
+  input  logic                  rab_conf_aw_valid_i,
+  output logic                  rab_conf_aw_ready_o,
+  input  pulp_pkg::lite_data_t  rab_conf_w_data_i,
+  input  pulp_pkg::lite_strb_t  rab_conf_w_strb_i,
+  input  logic                  rab_conf_w_valid_i,
+  output logic                  rab_conf_w_ready_o,
+  output axi_pkg::resp_t        rab_conf_b_resp_o,
+  output logic                  rab_conf_b_valid_o,
+  input  logic                  rab_conf_b_ready_i,
+  input  pulp_pkg::lite_addr_t  rab_conf_ar_addr_i,
+  input  axi_pkg::prot_t        rab_conf_ar_prot_i,
+  input  logic                  rab_conf_ar_valid_i,
+  output logic                  rab_conf_ar_ready_o,
+  output pulp_pkg::lite_data_t  rab_conf_r_data_o,
+  output axi_pkg::resp_t        rab_conf_r_resp_o,
+  output logic                  rab_conf_r_valid_o,
+  input  logic                  rab_conf_r_ready_i,
 
   // Cluster Control
   input  logic [N_CLUSTERS-1:0] cl_fetch_en_i,
@@ -146,21 +141,21 @@ module pulp_ooc #(
   output logic  mbox_irq_o
 );
 
-  `AXI_TYPEDEF_AW_CHAN_T(aw_t, addr_t, id_t, user_t)
-  `AXI_TYPEDEF_W_CHAN_T (w_t, data_t, strb_t, user_t)
-  `AXI_TYPEDEF_B_CHAN_T (b_t, id_t, user_t)
-  `AXI_TYPEDEF_AR_CHAN_T(ar_t, addr_t, id_t, user_t)
-  `AXI_TYPEDEF_R_CHAN_T (r_t, data_t, id_t, user_t)
-  `AXI_TYPEDEF_REQ_T    (req_t, aw_t, w_t, ar_t)
-  `AXI_TYPEDEF_RESP_T   (resp_t, b_t, r_t)
+  `AXI_TYPEDEF_AW_CHAN_T(aw_t, pulp_pkg::addr_t, id_t, pulp_pkg::user_t)
+  `AXI_TYPEDEF_W_CHAN_T(w_t, data_t, strb_t, pulp_pkg::user_t)
+  `AXI_TYPEDEF_B_CHAN_T(b_t, id_t, pulp_pkg::user_t)
+  `AXI_TYPEDEF_AR_CHAN_T(ar_t, pulp_pkg::addr_t, id_t, pulp_pkg::user_t)
+  `AXI_TYPEDEF_R_CHAN_T(r_t, data_t, id_t, pulp_pkg::user_t)
+  `AXI_TYPEDEF_REQ_T(req_t, aw_t, w_t, ar_t)
+  `AXI_TYPEDEF_RESP_T(resp_t, b_t, r_t)
 
-  `AXI_LITE_TYPEDEF_AW_CHAN_T (lite_aw_t, lite_addr_t)
-  `AXI_LITE_TYPEDEF_W_CHAN_T  (lite_w_t, lite_data_t, lite_strb_t)
-  `AXI_LITE_TYPEDEF_B_CHAN_T  (lite_b_t)
-  `AXI_LITE_TYPEDEF_AR_CHAN_T (lite_ar_t, lite_addr_t)
-  `AXI_LITE_TYPEDEF_R_CHAN_T  (lite_r_t, lite_data_t)
-  `AXI_LITE_TYPEDEF_REQ_T     (lite_req_t, lite_aw_t, lite_w_t, lite_ar_t)
-  `AXI_LITE_TYPEDEF_RESP_T    (lite_resp_t, lite_b_t, lite_r_t)
+  `AXI_LITE_TYPEDEF_AW_CHAN_T(lite_aw_t, pulp_pkg::lite_addr_t)
+  `AXI_LITE_TYPEDEF_W_CHAN_T(lite_w_t, pulp_pkg::lite_data_t, pulp_pkg::lite_strb_t)
+  `AXI_LITE_TYPEDEF_B_CHAN_T(lite_b_t)
+  `AXI_LITE_TYPEDEF_AR_CHAN_T(lite_ar_t, pulp_pkg::lite_addr_t)
+  `AXI_LITE_TYPEDEF_R_CHAN_T(lite_r_t, pulp_pkg::lite_data_t)
+  `AXI_LITE_TYPEDEF_REQ_T(lite_req_t, lite_aw_t, lite_w_t, lite_ar_t)
+  `AXI_LITE_TYPEDEF_RESP_T(lite_resp_t, lite_b_t, lite_r_t)
 
   req_t       to_pulp_req,
               from_pulp_req;
