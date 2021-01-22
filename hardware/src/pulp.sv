@@ -26,7 +26,7 @@ package automatic pulp_pkg;
   localparam int unsigned L2_SIZE = pulp_cluster_cfg_pkg::L2_SIZE;
   // Peripherals
   localparam int unsigned AXI_LITE_AW = 32;
-  localparam int unsigned AXI_LITE_DW = 64;
+  localparam int unsigned AXI_LITE_DW = 32;
   // AXI Interface Types
   typedef logic [AXI_AW-1:0]        addr_t;
   typedef logic [AXI_IW_SB_INP-1:0] id_slv_t;
