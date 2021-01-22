@@ -8,7 +8,6 @@ This repository contains the top-level logic and is the entry point to the HERO 
 
 ## Contents of Top-Level Directory
 - `apps`: Utility applications for the host CPU
-- `bitstreams`: Pre-built bitstreams
 - `board`: Board-specific settings for Buildroot
 - `buildroot`: The Buildroot repository
 - `Config.in`: Options file for Buildroot
@@ -47,7 +46,7 @@ export CMUX_ROOT=<path_to_hero>/cmux
 We recommend you create an `install` subdirectory in this repository and set `HERO_INSTALL` to that.
 
 ### Automated Installation
-For convenience, the `setup.sh` script in this folder can be executed to build all software components.  The manual setup of those components is explained below.  The `setup.sh` script does not generate a bitstream but uses the packaged `bitstreams/default.bit` to generate an SD card image.  After the script has completed, one can deploy the image files to the boot partition of an SD card (as described in the *Xilinx ZCU102* section).
+For convenience, the `setup.sh` script in this folder can be executed to build all software components.  The manual setup of those components is explained below.  The `setup.sh` script does not generate a bitstream but uses the packaged bitstream at `hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1/hero_exilzcu102_wrapper.bit` to generate an SD card image.  After the script has completed, one can deploy the image files to the boot partition of an SD card (as described in the *Xilinx ZCU102* section).
 
 
 ### Toolchains
