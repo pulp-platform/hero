@@ -9,13 +9,9 @@ module pulp_ooc #(
   localparam type id_t = logic [pulp_pkg::axi_iw_sb_oup(N_CLUSTERS)-1:0],
   localparam type strb_t = logic [AXI_DW/8-1:0],
   localparam type user_t = logic [pulp_pkg::AXI_UW-1:0],
-  localparam int unsigned AXI_AW_LITE = 32,
-  localparam int unsigned AXI_DW_LITE = 32,
-  localparam type lite_addr_t = logic [AXI_AW_LITE-1:0],
-  localparam type lite_data_t = logic [AXI_DW_LITE-1:0],
-  localparam type lite_id_t = logic, // only ID 0 supported
-  localparam type lite_strb_t = logic [AXI_DW_LITE/8-1:0],
-  localparam type lite_user_t = logic
+  localparam type lite_addr_t = logic [pulp_pkg::AXI_LITE_AW-1:0],
+  localparam type lite_data_t = logic [pulp_pkg::AXI_LITE_DW-1:0],
+  localparam type lite_strb_t = logic [pulp_pkg::AXI_LITE_DW/8-1:0]
 ) (
   // Clocks and Resets
   input  logic              clk_i,
