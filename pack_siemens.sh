@@ -73,6 +73,9 @@ copy_git_files README.md PREREQUISITES.md
 cd "$SRC"
 copy_git_files apps openmp-examples pipeline interference-experiments
 
+# CMUX: copy to destination.
+copy_git_files cmux
+
 # Buildroot files: copy to destination.
 cd "$SRC"
 copy_git_files Config.in board buildroot configs external.desc external.mk package petalinux
