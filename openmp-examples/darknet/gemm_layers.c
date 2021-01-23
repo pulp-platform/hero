@@ -13,8 +13,8 @@ void gemm_0(float ALPHA, float *A, float *B, float *C){
     {
       #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:16][0:173056])
       {
-        #pragma omp parallel for private(m, n, k, temp) num_threads(8)
-        for(m = 0; m < M; ++m){	
+        //#pragma omp parallel for private(m, n, k, temp) num_threads(8)
+        for(m = 0; m < M; ++m){
           for(k = 0; k < K; ++k){
             temp = ALPHA*matA[m][k];
             for(n = 0; n < N; ++n){
@@ -44,8 +44,8 @@ void gemm_2(float ALPHA, float *A, float *B, float *C){
     {
       #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:32][0:43264])
       {
-        #pragma omp parallel for private(m, n, k, temp) num_threads(8)
-        for(m = 0; m < M; ++m){	
+        //#pragma omp parallel for private(m, n, k, temp) num_threads(8)
+        for(m = 0; m < M; ++m){
           for(k = 0; k < K; ++k){
             temp = ALPHA*matA[m][k];
             for(n = 0; n < N; ++n){
@@ -75,8 +75,8 @@ void gemm_4(float ALPHA, float *A, float *B, float *C){
     {
       #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:64][0:10816])
       {
-        #pragma omp parallel for private(m, n, k, temp) num_threads(8)
-        for(m = 0; m < M; ++m){	
+        //#pragma omp parallel for private(m, n, k, temp) num_threads(8)
+        for(m = 0; m < M; ++m){
           for(k = 0; k < K; ++k){
             temp = ALPHA*matA[m][k];
             for(n = 0; n < N; ++n){
@@ -106,8 +106,8 @@ void gemm_6(float ALPHA, float *A, float *B, float *C){
     {
       #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:128][0:2704])
       {
-        #pragma omp parallel for private(m, n, k, temp) num_threads(8)
-        for(m = 0; m < M; ++m){	
+        //#pragma omp parallel for private(m, n, k, temp) num_threads(8)
+        for(m = 0; m < M; ++m){
           for(k = 0; k < K; ++k){
             temp = ALPHA*matA[m][k];
             for(n = 0; n < N; ++n){
@@ -137,8 +137,8 @@ void gemm_8(float ALPHA, float *A, float *B, float *C){
     {
       #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:256][0:676])
       {
-        #pragma omp parallel for private(m, n, k, temp) num_threads(8)
-        for(m = 0; m < M; ++m){	
+        //#pragma omp parallel for private(m, n, k, temp) num_threads(8)
+        for(m = 0; m < M; ++m){
           for(k = 0; k < K; ++k){
             temp = ALPHA*matA[m][k];
             for(n = 0; n < N; ++n){
@@ -168,8 +168,8 @@ void gemm_10(float ALPHA, float *A, float *B, float *C){
     {
       #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:512][0:169])
       {
-        #pragma omp parallel for private(m, n, k, temp) num_threads(8)
-        for(m = 0; m < M; ++m){	
+        //#pragma omp parallel for private(m, n, k, temp) num_threads(8)
+        for(m = 0; m < M; ++m){
           for(k = 0; k < K; ++k){
             temp = ALPHA*matA[m][k];
             for(n = 0; n < N; ++n){
@@ -199,8 +199,8 @@ void gemm_12(float ALPHA, float *A, float *B, float *C){
     {
       #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:1024][0:169])
       {
-        #pragma omp parallel for private(m, n, k, temp) num_threads(8)
-        for(m = 0; m < M; ++m){	
+        //#pragma omp parallel for private(m, n, k, temp) num_threads(8)
+        for(m = 0; m < M; ++m){
           for(k = 0; k < K; ++k){
             temp = ALPHA*matA[m][k];
             for(n = 0; n < N; ++n){
@@ -230,8 +230,8 @@ void gemm_13(float ALPHA, float *A, float *B, float *C){
     {
       #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:256][0:169])
       {
-        #pragma omp parallel for private(m, n, k, temp) num_threads(8)
-        for(m = 0; m < M; ++m){	
+        //#pragma omp parallel for private(m, n, k, temp) num_threads(8)
+        for(m = 0; m < M; ++m){
           for(k = 0; k < K; ++k){
             temp = ALPHA*matA[m][k];
             for(n = 0; n < N; ++n){
@@ -261,8 +261,8 @@ void gemm_14(float ALPHA, float *A, float *B, float *C){
     {
       #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:512][0:169])
       {
-        #pragma omp parallel for private(m, n, k, temp) num_threads(8)
-        for(m = 0; m < M; ++m){	
+        //#pragma omp parallel for private(m, n, k, temp) num_threads(8)
+        for(m = 0; m < M; ++m){
           for(k = 0; k < K; ++k){
             temp = ALPHA*matA[m][k];
             for(n = 0; n < N; ++n){
@@ -292,8 +292,8 @@ void gemm_15(float ALPHA, float *A, float *B, float *C){
     {
       #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:255][0:169])
       {
-        #pragma omp parallel for private(m, n, k, temp) num_threads(8)
-        for(m = 0; m < M; ++m){	
+        //#pragma omp parallel for private(m, n, k, temp) num_threads(8)
+        for(m = 0; m < M; ++m){
           for(k = 0; k < K; ++k){
             temp = ALPHA*matA[m][k];
             for(n = 0; n < N; ++n){
@@ -317,18 +317,22 @@ void gemm_18(float ALPHA, float *A, float *B, float *C){
   float (*matB)[N] = (float(*)[N]) B;
   float (*matC)[N] = (float(*)[N]) C;
   float temp;
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:256][0:169])
+  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:256][0:169], ALPHA)
   {
     #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:128][0:256])
     {
       #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:128][0:169])
       {
-        #pragma omp parallel for private(m, n, k, temp) num_threads(8)
-        for(m = 0; m < M; ++m){	
+        #pragma omp parallel for private(n, k, temp) num_threads(8)
+        for(m = 0; m < M; ++m){
           for(k = 0; k < K; ++k){
             temp = ALPHA*matA[m][k];
             for(n = 0; n < N; ++n){
+
+              //if((m==n) && (m==42)){printf("ALPHA=%f, A[][]=%f, temp=%f, B[][]=%f, C[][]=%f,", ALPHA, matA[m][k], temp, matB[k][n], matC[m][n]);}
               matC[m][n] +=temp*matB[k][n];
+              //if((m==n) && (m==42)){printf(" after the computation, C[][]=%f\n", matC[m][n]);}
+
             }
           }
         }
@@ -354,8 +358,8 @@ void gemm_21(float ALPHA, float *A, float *B, float *C){
     {
       #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:256][0:676])
       {
-        #pragma omp parallel for private(m, n, k, temp) num_threads(8)
-        for(m = 0; m < M; ++m){	
+        //#pragma omp parallel for private(m, n, k, temp) num_threads(8)
+        for(m = 0; m < M; ++m){
           for(k = 0; k < K; ++k){
             temp = ALPHA*matA[m][k];
             for(n = 0; n < N; ++n){
@@ -385,8 +389,8 @@ void gemm_22(float ALPHA, float *A, float *B, float *C){
     {
       #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:255][0:676])
       {
-        #pragma omp parallel for private(m, n, k, temp) num_threads(8)
-        for(m = 0; m < M; ++m){	
+        //#pragma omp parallel for private(m, n, k, temp) num_threads(8)
+        for(m = 0; m < M; ++m){
           for(k = 0; k < K; ++k){
             temp = ALPHA*matA[m][k];
             for(n = 0; n < N; ++n){

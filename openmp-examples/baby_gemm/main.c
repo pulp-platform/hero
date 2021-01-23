@@ -50,13 +50,15 @@ int main(int argc, char *argv[]) {
 
   for (int m = 0; m < M; m++) {
     for (int k = 0; k < K; k++) {
-      A[m*K+k] = ((m+1.0)*(k+1.0))/((M+1.0)*(K+1.0));
+      A[m*K+k] = 1.0;
+      //A[m*K+k] = ((m+1.0)*(k+1.0))/((M+1.0)*(K+1.0));
     }
   }
 
   for (int k = 0; k < K; k++) {
     for (int n = 0; n < N; n++) {
-      B[k*N+n] = ((k+1.0)*(n+1.0))/((K+1.0)*(N+1.0));
+      B[k*N+n] = 1.0;
+      //B[k*N+n] = ((k+1.0)*(n+1.0))/((K+1.0)*(N+1.0));
     }
   }
 
@@ -104,19 +106,20 @@ int main(int argc, char *argv[]) {
 
   int errors = 0;
   int same = 0;
-  for (int i = 0; i < M * N; i++) {
-    if (fabs(C[i] - E[i]) > 0.00001) {
-      //printf("ERROR: Output: %f, expected: %f\n", C[i], E[i]);
-      errors++;
-    } else {
-      same++;
+  for (int i = 0; i < M; i++) {
+    for (int j = 0; j < N; j++) {
+      if (fabs(C[i*N+j] - E[i*N+j]) > 0.00001) {
+        //printf("ERROR at C[%6d][%6d]: Output: %f, expected: %f\n", i, j, C[i*N+j], E[i*N+j]);
+        errors++;
+      } else {
+        same++;
+      }
     }
   }
   if (!errors) {
     printf("Computation successful!\n");
-  } else {
-    printf("Had %d errors and %d matches!\n", errors, same);
   }
+  printf("Had %d errors and %d matches!\n", errors, same);
 
   free(A);
   free(B);
