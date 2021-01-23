@@ -1,6 +1,5 @@
 #include "gemm.h"
 
-//#include <dmatransfer.h>
 #include <hero-target.h>
 #include <cmux.h>
 #include <cmux.c>
@@ -8,10 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
-//#include "cuda.h"
-//#include "hero_perf.h"
-//#include "utils.h"
 
 #define BILLION 1E9
 //#define TIME_DMA_AND_COMP

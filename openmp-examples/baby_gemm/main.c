@@ -1,6 +1,8 @@
 #include "gemm.h"
+#include "../darknet/gemm_layers.h"
 #include<stdio.h>
 #include<stdlib.h>
+
 
 int main(int argc, char *argv[]) {
   if (argc != 2){
@@ -9,7 +11,7 @@ int main(int argc, char *argv[]) {
   }
 
   int LAYER_COUNTER = atoi(argv[1]);
-  float ALPHA = 1;
+  float ALPHA = 1.0;
   int M, N, K;
   if (LAYER_COUNTER == 0) {
       M = 16, N = 173056, K = 27;
@@ -48,13 +50,13 @@ int main(int argc, char *argv[]) {
 
   for (int m = 0; m < M; m++) {
     for (int k = 0; k < K; k++) {
-      A[m*K+k] = (m+1)/(k+1);
+      A[m*K+k] = ((m+1.0)*(k+1.0))/((M+1.0)*(K+1.0));
     }
   }
 
   for (int k = 0; k < K; k++) {
     for (int n = 0; n < N; n++) {
-      B[k*N+n] = (k+1)/(n+1);
+      B[k*N+n] = ((k+1.0)*(n+1.0))/((K+1.0)*(N+1.0));
     }
   }
 
@@ -103,9 +105,8 @@ int main(int argc, char *argv[]) {
   int errors = 0;
   int same = 0;
   for (int i = 0; i < M * N; i++) {
-    // printf("Output: %d, expected: %d\n", C_flt[i], E[i]);
     if (fabs(C[i] - E[i]) > 0.00001) {
-      // printf("ERROR: Output: %f, expected: %f\n", C[i], E[i]);
+      //printf("ERROR: Output: %f, expected: %f\n", C[i], E[i]);
       errors++;
     } else {
       same++;

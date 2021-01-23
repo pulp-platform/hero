@@ -1,45 +1,45 @@
 #!/bin/bash
 set -o errexit
 export HERO_INSTALL=/scratch/mmaxim/hero/install
-export HERCULES_INSTALL=${HERO_INSTALL}
-export HERCULES_ARCH="PULP"
-export CMUX_ROOT="/scratch/mmaxim/cmux"
-export HERCULES_FORCE_FOOTPRINT_DENSE=1
-export HERCULES_CPU_MEMORY_SIZE=32768
-export HERCULES_DISQ_THRESHOLD=0
-export HERCULES_DEFAULT_NUM_THREADS=8
-export HERCULES_DMA_ENFORCE
-export HERCULES_NO_INTERVAL_CONTROLFLOW
-export HERCULES_WHITELIST="main gemm_nn gemm_cpu gemm
-.omp_outlined.
-.omp_outlined..1
-.omp_outlined..2
-.omp_outlined..3
-.omp_outlined..4
-.omp_outlined..5
-.omp_outlined..6
-.omp_outlined..7
-.omp_outlined..8
-.omp_outlined..9
-.omp_outlined..10
-.omp_outlined..11
-.omp_outlined..12
-.omp_outlined..13
-entryFn __omp_offloading_803_14c29a1_gemm_0_l14
-entryFn __omp_offloading_803_14c29a1_gemm_2_l45
-entryFn __omp_offloading_803_14c29a1_gemm_4_l76
-entryFn __omp_offloading_803_14c29a1_gemm_6_l107
-entryFn __omp_offloading_803_14c29a1_gemm_8_l138
-entryFn __omp_offloading_803_14c29a1_gemm_10_l169
-entryFn __omp_offloading_803_14c29a1_gemm_12_l200
-entryFn __omp_offloading_803_14c29a1_gemm_13_l231
-entryFn __omp_offloading_803_14c29a1_gemm_14_l262
-entryFn __omp_offloading_803_14c29a1_gemm_15_l293
-entryFn __omp_offloading_803_14c29a1_gemm_18_l324
-entryFn __omp_offloading_803_14c29a1_gemm_21_l355
-entryFn __omp_offloading_803_14c29a1_gemm_22_l386
-"
-source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh
+#export HERCULES_INSTALL=${HERO_INSTALL}
+#export HERCULES_ARCH="PULP"
+#export CMUX_ROOT="/scratch/mmaxim/cmux"
+#export HERCULES_FORCE_FOOTPRINT_DENSE=1
+#export HERCULES_CPU_MEMORY_SIZE=32768
+#export HERCULES_DISQ_THRESHOLD=0
+#export HERCULES_DEFAULT_NUM_THREADS=8
+#export HERCULES_DMA_ENFORCE
+#export HERCULES_NO_INTERVAL_CONTROLFLOW
+#export HERCULES_WHITELIST="main gemm_nn gemm_cpu gemm
+#.omp_outlined.
+#.omp_outlined..1
+#.omp_outlined..2
+#.omp_outlined..3
+#.omp_outlined..4
+#.omp_outlined..5
+#.omp_outlined..6
+#.omp_outlined..7
+#.omp_outlined..8
+#.omp_outlined..9
+#.omp_outlined..10
+#.omp_outlined..11
+#.omp_outlined..12
+#.omp_outlined..13
+#entryFn __omp_offloading_803_14c29a1_gemm_0_l14
+#entryFn __omp_offloading_803_14c29a1_gemm_2_l45
+#entryFn __omp_offloading_803_14c29a1_gemm_4_l76
+#entryFn __omp_offloading_803_14c29a1_gemm_6_l107
+#entryFn __omp_offloading_803_14c29a1_gemm_8_l138
+#entryFn __omp_offloading_803_14c29a1_gemm_10_l169
+#entryFn __omp_offloading_803_14c29a1_gemm_12_l200
+#entryFn __omp_offloading_803_14c29a1_gemm_13_l231
+#entryFn __omp_offloading_803_14c29a1_gemm_14_l262
+#entryFn __omp_offloading_803_14c29a1_gemm_15_l293
+#entryFn __omp_offloading_803_14c29a1_gemm_18_l324
+#entryFn __omp_offloading_803_14c29a1_gemm_21_l355
+#entryFn __omp_offloading_803_14c29a1_gemm_22_l386
+#"
+#source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh
 
 source ${HERO_INSTALL}/../env/exilzcu102.sh
 make default-as=pulp clean all

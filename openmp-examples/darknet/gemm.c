@@ -1,4 +1,5 @@
 #include "gemm.h"
+#include "gemm_layers.h"
 
 #include <hero-target.h>
 #include <cmux.h>
