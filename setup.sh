@@ -13,9 +13,10 @@ if [ -z "$CMUX_ROOT" ]; then
   exit 1
 fi
 
-make -C "$ROOT" tc-pulp
-make -C "$ROOT" tc-har-olinux
-make -C "$ROOT" sdk-pulp
-make -C "$ROOT" sdk-har
-make -C "$ROOT" tc-llvm
-make -C "$ROOT" br-har-exilzcu102
+cd "$ROOT"
+make tc-pulp
+make tc-har-olinux
+make sdk-pulp
+make sdk-har
+make tc-llvm
+make br-har-exilzcu102
