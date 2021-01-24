@@ -8,7 +8,7 @@ export HERO_INSTALL="$SRC/install"
 
 # Helper function to copy git-indexed files.
 copy_git_files() {
-  git ls-files -z --recurse-submodules -- $@ | rsync -av --files-from=- -0 . "$TMP_DST/"
+  git ls-files -z --recurse-submodules -- $@ | rsync -a --files-from=- -0 . "$TMP_DST/"
 }
 
 # Create temporary destination directory.
@@ -17,12 +17,12 @@ readonly TMP_DST="$(mktemp -d)"
 # Import bitstream with Memora and copy it to destination.
 memora get bitstream-zcu102
 mkdir -p "$TMP_DST/hardware/fpga"
-rsync -av "$SRC/hardware/fpga/hero_exilzcu102" "$TMP_DST/hardware/fpga/"
+rsync -a "$SRC/hardware/fpga/hero_exilzcu102" "$TMP_DST/hardware/fpga/"
 
 # Env: Copy to destination.
 cd "$SRC"
 mkdir -p "$TMP_DST/env"
-rsync -av env/* "$TMP_DST/env/"
+rsync -a env/* "$TMP_DST/env/"
 
 # Hardware: Copy to destination.
 copy_git_files hardware
@@ -63,7 +63,7 @@ copy_git_files support
 
 # Setup script: copy to destination.
 cd "$SRC"
-rsync -av setup.sh "$TMP_DST/"
+rsync -a setup.sh "$TMP_DST/"
 
 # ReadMe and Prerequisites: copy to destination.
 cd "$SRC"
