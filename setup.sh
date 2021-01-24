@@ -19,4 +19,9 @@ make tc-har-olinux
 make sdk-pulp
 make sdk-har
 make tc-llvm
+
+cd "$CMUX_ROOT"
+make
+
+cd "$ROOT"
 make br-har-exilzcu102
