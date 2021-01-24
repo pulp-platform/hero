@@ -81,7 +81,7 @@ cd "$SRC"
 copy_git_files Config.in board buildroot configs external.desc external.mk package petalinux
 
 # Set default bitstream for Buildroot.
-echo 'BR2_HERO_BITSTREAM="$(BR2_EXTERNAL_HERO_PATH)/hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1/hero_exilzcu102_wrapper.bit"' >> "$TMP_DST/local.cfg"
+echo 'BR2_HERO_BITSTREAM=$BR2_EXTERNAL_HERO_PATH/hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1/hero_exilzcu102_wrapper.bit' >> "$TMP_DST/local.cfg"
 
 # Create archive from temporary destination directory.
 sleep 1 # give Git time to settle
