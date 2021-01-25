@@ -21,7 +21,9 @@ make sdk-har
 make tc-llvm
 
 cd "$CMUX_ROOT"
-make
+make cmux
+cd src/pulp
+./build-pulp-lib.sh
 
 cd "$ROOT"
 make br-har-exilzcu102
