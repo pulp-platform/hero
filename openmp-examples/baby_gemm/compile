@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export HERO_INSTALL=/scratch/mmaxim/hero/install
+export HERCULES_INSTALL=${HERO_INSTALL}
+export HERCULES_ARCH="PULP"
+export CMUX_ROOT="/scratch/mmaxim/cmux"
+export HERCULES_FORCE_FOOTPRINT_DENSE=1
+export HERCULES_CPU_MEMORY_SIZE=32768
+export HERCULES_DISQ_THRESHOLD=0
+export HERCULES_DEFAULT_NUM_THREADS=8
+export HERCULES_DMA_ENFORCE
+export HERCULES_NO_INTERVAL_CONTROLFLOW
+export HERCULES_WHITELIST="main gemm_nn gemm_cpu gemm
+.omp_outlined.
+.omp_outlined..1
+.omp_outlined..2
+.omp_outlined..3
+.omp_outlined..4
+.omp_outlined..5
+.omp_outlined..6
+.omp_outlined..7
+.omp_outlined..8
+.omp_outlined..9
+.omp_outlined..10
+.omp_outlined..11
+.omp_outlined..12
+__omp_offloading_803_14c1ea7_gemm_18_l324
+__omp_offloading_803_14c1cbe_gemm_18_l324
+__omp_offloading_803_14c1cbe_gemm_12_l200
+__omp_offloading_803_14c1cbe_gemm_22_l390
+__omp_offloading_803_14c1_gemm_18_l324
+__omp_offloading_803_14c1cbe_gemm_0_l14
+__omp_offloading_803_14c1cbe_gemm_4_l76
+__omp_offloading_803_14c1cbe_gemm_2_l45
+__omp_offloading_803_14c1cbe_gemm_8_l138
+__omp_offloading_803_1108fa8_gemm_zero_l120
+__omp_offloading_803_14c1cbe_gemm_6_l107
+__omp_offloading_803_14c1cbe_gemm_10_l169
+__omp_offloading_803_14c1cbe_gemm_21_l359
+__omp_offloading_803_14c1cbe_gemm_13_l231
+__omp_offloading_803_14c1cbe_gemm_14_l262
+__omp_offloading_803_14c1cbe_gemm_15_l293
+__omp_offloading_803_14c1ea7_gemm_22_l397
+__omp_offloading_803_c1cbe_gemm_18_l324
+__omp_offloading_803_14c1ea7_gemm_0_l14
+__omp_offloading_803_14c1ea7_gemm_4_l76
+__omp_offloading_803_14c1ea7_gemm_2_l45
+__omp_offloading_803_14c1ea7_gemm_8_l138
+__omp_offloading_803_14c1ea7_gemm_zero_l120
+__omp_offloading_803_14c1ea7_gemm_12_l200
+__omp_offloading_803_14c1ea7_gemm_6_l107
+__omp_offloading_803_14c1ea7_gemm_10_l169
+__omp_offloading_803_14c1ea7_gemm_13_l231
+__omp_offloading_803_14c1ea7_gemm_21_l366
+__omp_offloading_803_14c1ea7_gemm_14_l262
+__omp_offloading_803_14c1ea7_gemm_15_l293
+"
+source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh
+
+source ${HERO_INSTALL}/../env/exilzcu102.sh
+make default-as=pulp clean all
