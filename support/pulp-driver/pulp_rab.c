@@ -209,7 +209,7 @@ int pulp_rab_init(PulpDev *pulp_ptr)
   // initialize management structures and L2 hardware
   pulp_rab_l1_init();
 #if PLATFORM != ZEDBOARD
-  pulp_rab_l2_init(pulp->rab_config);
+  //pulp_rab_l2_init(pulp->rab_config);
 #endif
 
   // initialize miss handling control
@@ -1358,6 +1358,7 @@ long pulp_rab_req(void *rab_config, RabSliceReq *rab_slice_req)
       rab_use_l1 = rab_lvl % 2;
     }
   }
+  rab_use_l1 = 1; // currently only use L1 TLB
 
   if (rab_use_l1 == 1) { // use L1 TLB
 
@@ -2035,7 +2036,7 @@ void pulp_rab_free(void *rab_config, unsigned date, bool fixed)
 
 #if PLATFORM != ZEDBOARD
   // free L2TLB
-  pulp_rab_l2_invalidate_all_entries(rab_config, 1);
+  //pulp_rab_l2_invalidate_all_entries(rab_config, 1);
 #endif
 
   return;
@@ -2717,6 +2718,7 @@ void pulp_rab_handle_miss(unsigned unused)
             use_l1 = 0;
         }
       }
+      use_l1 = 1; // currently only use L1 TLB
       err = 0;
       if (use_l1 == 0) { // Use L2
         l2_entry->flags = rab_slice_req->flags_hw;
