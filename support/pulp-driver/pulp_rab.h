@@ -45,6 +45,7 @@
   #define RAB_MH_FIFO_DEPTH 8
 #else
   #define RAB_L1_N_SLICES_PORT_0 4
+  #define RAB_L1_PORT_1_OFFSET 0x1000
   #define RAB_L1_N_SLICES_PORT_1 32
   #define RAB_MH_FIFO_DEPTH 64
 #endif
