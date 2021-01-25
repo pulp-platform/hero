@@ -279,8 +279,9 @@ int pulp_rab_release(bool driver)
 
   // free RAB slices (L1 TLB) managed by SoC
   for (i = rab_n_slices_host; i < RAB_L1_N_SLICES_PORT_1; i++) {
-    offset = 0x20 * (RAB_L1_N_SLICES_PORT_0 + i);
-    iowrite32(0, (void *)((unsigned long)pulp->rab_config + offset + 0x38));
+    offset = RAB_SLICE_BASE_OFFSET_B + RAB_SLICE_SIZE_B * (RAB_L1_N_SLICES_PORT_0 + slice) +
+      RAB_SLICE_FLAGS_OFFSET_B;
+    iowrite32(0, (void *)((unsigned long)pulp->rab_config + offset));
   }
 
   /* Free RAB entries managed by host and SoC and reset driver management
