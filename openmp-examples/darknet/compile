@@ -2,10 +2,8 @@
 
 set -euo pipefail
 
-export HERO_INSTALL=/scratch/mmaxim/hero/install
 export HERCULES_INSTALL=${HERO_INSTALL}
 export HERCULES_ARCH="PULP"
-export CMUX_ROOT="/scratch/mmaxim/cmux"
 export HERCULES_FORCE_FOOTPRINT_DENSE=1
 export HERCULES_CPU_MEMORY_SIZE=32768
 export HERCULES_DISQ_THRESHOLD=0
