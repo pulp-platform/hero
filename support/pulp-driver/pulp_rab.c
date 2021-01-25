@@ -2512,6 +2512,11 @@ void pulp_rab_handle_miss(unsigned unused)
   int use_l1 = 1;
   int err_l2 = 0;
 
+  if (RAB_SLICE_BASE_OFFSET_B >= RAB_MH_META_FIFO_OFFSET_B) {
+    printk(KERN_WARNING "PULP: RAB miss handling aborted because HW FIFO does not exist!\n");
+    return;
+  }
+
   if (DEBUG_LEVEL_RAB_MH > 1)
     printk(KERN_INFO "PULP: RAB miss handling routine started.\n");
 
