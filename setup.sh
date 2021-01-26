@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
-set -e
+set -euo pipefail
 
 if [ -z "$HERO_INSTALL" ]; then
   echo "Fatal: 'HERO_INSTALL' environment variable is not set!"
