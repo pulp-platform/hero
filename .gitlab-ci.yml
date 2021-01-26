@@ -30,6 +30,7 @@ build_test_archive:
       export HERO_INSTALL="$(pwd)/install"
       mkdir -p "$HERO_INSTALL"
       ./setup.sh
+    - $CI_PROJECT_DIR/pack_siemens_append.sh $CI_PROJECT_DIR/hero_siemens.tar.gz
   artifacts:
     paths:
       - hero_siemens.tar.gz
