@@ -55,7 +55,7 @@ git config --local user.name 'Packager'
 git config --local user.email 'packager@localhost'
 git add -A
 git commit -m 'initial commit'
-../setup-sdk.sh --no-build hero-arm64
+../setup-sdk.sh --no-build hero-urania
 
 # Support software: copy to destination.
 cd "$SRC"
