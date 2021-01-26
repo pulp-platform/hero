@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 readonly SRC="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
