@@ -7,9 +7,13 @@ if [ -z "$HERO_INSTALL" ]; then
   exit 1
 fi
 THIS_DIR=$(dirname "$(readlink -f "$0")")
-if [ "$#" -ne 1 ] || [ ! -f "${THIS_DIR}/sdk/configs/${1}.sh" ]; then
-    echo "Fatal error: expects a single argument with existing pulp chip"
-    exit
+if [ "$#" -ne 1 ]; then
+    echo 'Fatal: expects a single argument'
+    exit 1
+fi
+if [ ! -f "${THIS_DIR}/sdk/configs/${1}.sh" ]; then
+    echo "Fatal: Config for PULP chip '$1' does not exist"
+    exit 1
 fi
 export PULP_RISCV_GCC_TOOLCHAIN=$HERO_INSTALL
 export CMUX_ROOT=$HERO_INSTALL/../cmux
