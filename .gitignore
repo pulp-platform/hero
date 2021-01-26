@@ -1,6 +1,6 @@
 *.bin
 *.mcs
 /install/
-output/*
-local.mk
-local.cfg
+/local.cfg
+/local.mk
+/output/*
