@@ -4,7 +4,3 @@
 output/*
 local.mk
 local.cfg
-*.swp
-*.gch
-.*
-!.gitignore
