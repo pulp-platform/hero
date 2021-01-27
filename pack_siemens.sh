@@ -86,7 +86,7 @@ echo 'BR2_HERO_BITSTREAM=$BR2_EXTERNAL_HERO_PATH/hardware/fpga/hero_exilzcu102/h
 
 # Create archive from temporary destination directory.
 sleep 1 # give Git time to settle
-tar -C "$TMP_DST" -czf "$SRC/hero_siemens.tar.gz" .
+tar -C "$TMP_DST" -czf "$SRC/hero_siemens.tar.gz" --transform 's|./||' .
 
 # Remove temporary directories.
 rm -rf "$TMP_DST"
