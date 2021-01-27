@@ -426,14 +426,19 @@ module pulp_tb #(
     write_rab_slice(32'h1000, 52'h1, 52'hFFFF_FFFF_FFFF_F, 52'h1);
 
     // Set up RAB slice from external/Host to mailbox.
-    write_rab_slice(32'h0, 52'h1B80_1, 52'h1B80_1, 52'h1B80_1);
+    write_rab_slice(32'h0, 52'hA600_0, 52'hA600_0, 52'h1B80_1); // Host mbox IF
+    write_rab_slice(32'h1C, 52'hA600_1, 52'hA600_1, 52'h1B80_0); // PULP mbox IF
 
     // Write word to mailbox.
-    write_to_pulp(64'h0000_0000_1B80_1000, 32'h5000_600D, resp);
+    write_to_pulp(64'h0000_0000_A600_0000, 32'h5000_600D, resp);
     assert(resp == axi_pkg::RESP_OKAY);
 
-    // Read status of mailbox.
-    read_from_pulp(64'h0000_0000_1B80_1020, data, resp);
+    // Read status of mailbox via Host interface.
+    read_from_pulp(64'h0000_0000_A600_0020, data, resp);
+    assert(resp == axi_pkg::RESP_OKAY);
+
+    // Read status of mailbox via PULP interface.
+    read_from_pulp(64'h0000_0000_A600_1020, data, resp);
     assert(resp == axi_pkg::RESP_OKAY);
 
     // Start cluster 0.
