@@ -78,12 +78,16 @@ module axi_tlb_l1 #(
   typedef logic [InpPageNumWidth-1:0] inp_page_t;
   /// Page number in output address space
   typedef logic [OupPageNumWidth-1:0] oup_page_t;
+  typedef struct packed {
+    /// Defines whether an entry can only be used for read accesses.
+    logic read_only;
+    /// Defines whether this entry is valid.
+    logic valid;
+  } flags_t;
   /// Translation table entry with 4 KiB page granularity
   typedef struct packed {
-    /// Defines whether this entry can only be used for read accesses.
-    logic       read_only;
-    /// Defines whether this entry is valid.
-    logic       valid;
+    /// Flags of this entry.
+    flags_t     flags;
     /// Number of first page in output address segment; that is, the output address segment starts
     /// at this `base` page.
     oup_page_t  base;
@@ -140,7 +144,8 @@ module axi_tlb_l1 #(
   localparam int unsigned InpPageNumBytesAligned = cf_math_pkg::ceil_div(InpPageNumBytes, 4) * 4;
   localparam int unsigned OupPageNumBytes = cf_math_pkg::ceil_div(OupPageNumWidth, 8);
   localparam int unsigned OupPageNumBytesAligned = cf_math_pkg::ceil_div(OupPageNumBytes, 4) * 4;
-  localparam int unsigned FlagBytes = cf_math_pkg::ceil_div(2, 8);
+  localparam int unsigned FlagBits = $bits(flags_t);
+  localparam int unsigned FlagBytes = cf_math_pkg::ceil_div(FlagBits, 8);
   localparam int unsigned FlagBytesAligned = cf_math_pkg::ceil_div(FlagBytes, 4) * 4;
   localparam int unsigned EntryBytesAligned =
       2 * InpPageNumBytesAligned + OupPageNumBytesAligned + FlagBytesAligned;
@@ -193,8 +198,7 @@ module axi_tlb_l1 #(
     assign entries[i].first = entries_padded[i].first[InpPageNumWidth-1:0];
     assign entries[i].last = entries_padded[i].last[InpPageNumWidth-1:0];
     assign entries[i].base = entries_padded[i].base[OupPageNumWidth-1:0];
-    assign entries[i].valid = entries_padded[i].flags[0];
-    assign entries[i].read_only = entries_padded[i].flags[1];
+    assign entries[i].flags = entries_padded[i].flags[FlagBits-1:0];
   end
 
   `ifndef VERILATOR
@@ -253,10 +257,10 @@ module axi_tlb_l1_chan #(
   // Determine all entries matching a request.
   logic [NumEntries-1:0] entry_matches;
   for (genvar i = 0; i < NumEntries; i++) begin : gen_matches
-    assign entry_matches[i] = entries_i[i].valid & req_valid_i
+    assign entry_matches[i] = entries_i[i].flags.valid & req_valid_i
         & ((req_addr_i >> 12) >= entries_i[i].first)
         & ((req_addr_i >> 12) <= entries_i[i].last)
-        & (~IsWriteChannel | ~entries_i[i].read_only);
+        & (~IsWriteChannel | ~entries_i[i].flags.read_only);
   end
 
   // Determine entry with lowest index that matches the request.
