@@ -50,15 +50,15 @@ int main(int argc, char *argv[]) {
 
   for (int m = 0; m < M; m++) {
     for (int k = 0; k < K; k++) {
-      A[m*K+k] = 1.0;
-      //A[m*K+k] = ((m+1.0)*(k+1.0))/((M+1.0)*(K+1.0));
+      //A[m*K+k] = 1.0;
+      A[m*K+k] = ((m+1.0)*(k+1.0))/((M+1.0)*(K+1.0));
     }
   }
 
   for (int k = 0; k < K; k++) {
     for (int n = 0; n < N; n++) {
-      B[k*N+n] = 1.0;
-      //B[k*N+n] = ((k+1.0)*(n+1.0))/((K+1.0)*(N+1.0));
+      //B[k*N+n] = 1.0;
+      B[k*N+n] = ((k+1.0)*(n+1.0))/((K+1.0)*(N+1.0));
     }
   }
 
@@ -101,7 +101,10 @@ int main(int argc, char *argv[]) {
     } else if (LAYER_COUNTER == 22) {
       gemm_22(ALPHA, A, B, C);
     } else {
-      printf("layer not recognized!\n");
+      printf("layer not recognized");
+      //printf(", using manual DMA");
+      //gemm_nn_manual_DMA(M, N, K, ALPHA, A, 0, B, 0, C, 0);
+      printf("!\n");
     }
 
   int errors = 0;

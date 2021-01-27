@@ -135,6 +135,7 @@ void gemm_zero(float ALPHA, float *A, float *B, float *C)
 //#pragma omp end declare target
 
 // gemm kernel offloaded, with manual DMA transactions
+
 /*
 void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
         float *A, int lda,
@@ -188,15 +189,15 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
     const int blockSize = sqrt(L1_flt / 3);
 
     // Allocate memory in L3
-    int *spm = alloc_spm();
+    int *spm = l1_malloc();
     float *A_spm = spm;
     float *B_spm = A_spm + blockSize * blockSize;
     float *C_spm = B_spm + blockSize * blockSize;
 
     // Compute kernel
-#pragma omp parallel num_threads(8)
+//#pragma omp parallel num_threads(8)
     {
-      const uint32_t ld_stalls_before = hero_perf_get(STALLS_LOAD);  // per core
+      //const uint32_t ld_stalls_before = hero_perf_get(STALLS_LOAD);  // per core
       for (int bn = 0; bn < N && N - bn - 1 != 0; bn += my_min(N - bn - 1, blockSize)) {
         for (int bk = 0; bk < K && K - bk - 1 != 0; bk += my_min(K - bk - 1, blockSize)) {
 #pragma omp single
@@ -206,7 +207,8 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
 #endif
             for (int r = 0; r < blockSize; r++) {
               // Copy in B with K rows of length N
-              memcpy_to_spm(B_spm + r * blockSize, B + (bk + r) * N + bn, blockSize);
+              //memcpy_to_spm(B_spm + r * blockSize, B + (bk + r) * N + bn, blockSize);
+              hero_memcpy_host2dev(B_spm+r*blockSize, (uint64_t) B+(bk+r)*N+bn, blockSize);
             }
 #ifdef TIME_DMA_AND_COMP
             dma_cycles += hero_perf_get(CYCLES) - cycles_before;
@@ -220,11 +222,13 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
 #endif
               for (int r = 0; r < blockSize; r++) {
                 // Copy in A, with M rows of length K
-                memcpy_to_spm(A_spm + r * blockSize, A + (bm + r) * K + bk, blockSize);
+                //memcpy_to_spm(A_spm + r * blockSize, A + (bm + r) * K + bk, blockSize);
+                hero_memcpy_host2dev(A_spm+r*blockSize, (uint64_t) A+(bm+r)*K+bk, blockSize);
                 // Copy in C with M rows of length N
-                memcpy_to_spm(C_spm + r * blockSize, C + (bm + r) * N + bn, blockSize);
+                //memcpy_to_spm(C_spm + r * blockSize, C + (bm + r) * N + bn, blockSize);
+                hero_memcpy_host2dev(C_spm+r*blockSize, (uint64_t) C+(bm+r)*N+bn, blockSize);
               }
-              dma_flush();
+              //dma_flush();
 #ifdef TIME_DMA_AND_COMP
               dma_cycles += hero_perf_get(CYCLES) - cycles_before;
 #endif
@@ -259,9 +263,10 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
 #endif
               // Copy out C with M rows of length N
               for (int r = 0; r < blockSize; r++) {
-                memcpy_from_spm(C + (bm + r) * N + bn, C_spm + r * blockSize, blockSize);
+                //memcpy_from_spm(C + (bm + r) * N + bn, C_spm + r * blockSize, blockSize);
+                hero_memcpy_dev2host((uint64_t) C+(bm+r)*N+bn, C_spm+r*blockSize, blockSize);
               }
-              dma_flush();
+              //dma_flush();
 #ifdef TIME_DMA_AND_COMP
               dma_cycles += hero_perf_get(CYCLES) - cycles_before;
 #endif
@@ -278,7 +283,7 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
 #endif
     }
 
-    dealloc_spm(spm);
+    l1_dealloc(spm);
   }
 #ifdef TIME_DMA_AND_COMP
   printf("DMA cycles:  %u\n", dma_cycles);
@@ -314,7 +319,6 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
   free(E_flt);
 #endif
 }
-
 
 // gemm kernel offloaded to PULP without manual DMA
 void gemm_nn_noDMA(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int ldb, float *C,
