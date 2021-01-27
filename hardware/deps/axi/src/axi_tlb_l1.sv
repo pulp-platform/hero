@@ -79,8 +79,10 @@ module axi_tlb_l1 #(
   /// Page number in output address space
   typedef logic [OupPageNumWidth-1:0] oup_page_t;
   typedef struct packed {
-    /// Defines whether an entry can only be used for read accesses.
-    logic read_only;
+    /// Defines whether an entry can be used for write accesses.
+    logic writable;
+    /// Defines whether an entry can be used for read accesses.
+    logic readable;
     /// Defines whether this entry is valid.
     logic valid;
   } flags_t;
@@ -260,7 +262,10 @@ module axi_tlb_l1_chan #(
     assign entry_matches[i] = entries_i[i].flags.valid & req_valid_i
         & ((req_addr_i >> 12) >= entries_i[i].first)
         & ((req_addr_i >> 12) <= entries_i[i].last)
-        & (~IsWriteChannel | ~entries_i[i].flags.read_only);
+        & (
+            (IsWriteChannel & entries_i[i].flags.writable)
+            | (~IsWriteChannel & entries_i[i].flags.readable)
+          );
   end
 
   // Determine entry with lowest index that matches the request.

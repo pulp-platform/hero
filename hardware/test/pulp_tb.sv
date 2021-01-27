@@ -356,7 +356,7 @@ module pulp_tb #(
     write_rab(slice_base_addr+8'h00, first);
     write_rab(slice_base_addr+8'h08, last);
     write_rab(slice_base_addr+8'h10, base);
-    write_rab(slice_base_addr+8'h18, 64'h1);
+    write_rab(slice_base_addr+8'h18, 64'b111);
   endtask
 
   task write_to_pulp(input axi_addr_t addr, input axi_data_t data, output axi_pkg::resp_t resp);
