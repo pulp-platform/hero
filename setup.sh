@@ -23,7 +23,7 @@ make tc-llvm
 cd "$CMUX_ROOT"
 make cmux
 cd src/pulp
-./build-pulp-lib.sh
+HERO_ROOT="$ROOT" ./build-pulp-lib.sh
 
 cd "$ROOT"
 make br-har-exilzcu102
