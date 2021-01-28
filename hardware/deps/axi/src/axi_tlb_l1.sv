@@ -153,24 +153,36 @@ module axi_tlb_l1 #(
       2 * InpPageNumBytesAligned + OupPageNumBytesAligned + FlagBytesAligned;
   localparam int unsigned RegNumBytes = NumEntries * EntryBytesAligned;
   typedef struct packed {
-    bit [FlagBytesAligned-1:0]        flags;
-    bit [OupPageNumBytesAligned-1:0]  base;
-    bit [InpPageNumBytesAligned-1:0]  last;
-    bit [InpPageNumBytesAligned-1:0]  first;
-  } entry_bits_t;
-  localparam entry_bits_t [NumEntries-1:0] AxiReadOnly = '{NumEntries{'{
-    flags:              {{FlagBytesAligned-FlagBytes{1'b1}},       {FlagBytes{1'b0}}},
-    base:   {{OupPageNumBytesAligned-OupPageNumBytes{1'b1}}, {OupPageNumBytes{1'b0}}},
-    last:   {{InpPageNumBytesAligned-InpPageNumBytes{1'b1}}, {InpPageNumBytes{1'b0}}},
-    first:  {{InpPageNumBytesAligned-InpPageNumBytes{1'b1}}, {InpPageNumBytes{1'b0}}},
-    default: 1'b0 // this should not be needed, but in doubt better make the bytes writeable
-  }}};
+    logic [FlagBytesAligned-FlagBytes-1:0]              flags_padding;
+    logic [FlagBytes-1:0]                               flags;
+    logic [OupPageNumBytesAligned-OupPageNumBytes-1:0]  base_padding;
+    logic [OupPageNumBytes-1:0]                         base;
+    logic [InpPageNumBytesAligned-InpPageNumBytes-1:0]  last_padding;
+    logic [InpPageNumBytes-1:0]                         last;
+    logic [InpPageNumBytesAligned-InpPageNumBytes-1:0]  first_padding;
+    logic [InpPageNumBytes-1:0]                         first;
+  } entry_mask_t;
   typedef struct packed {
     logic [FlagBytesAligned*8-1:0]        flags;
     logic [OupPageNumBytesAligned*8-1:0]  base;
     logic [InpPageNumBytesAligned*8-1:0]  last;
     logic [InpPageNumBytesAligned*8-1:0]  first;
   } entry_padded_t;
+  entry_mask_t entry_read_only;
+  assign entry_read_only = '{
+    flags_padding:  '1,
+    flags:          '0,
+    base_padding:   '1,
+    base:           '0,
+    last_padding:   '1,
+    last:           '0,
+    first_padding:  '1,
+    first:          '0
+  };
+  logic [RegNumBytes-1:0] read_only;
+  for (genvar iEntry = 0; iEntry < NumEntries; iEntry++) begin : gen_read_only
+    assign read_only[iEntry*EntryBytesAligned+:EntryBytesAligned] = entry_read_only;
+  end
   typedef logic [7:0] byte_t;
   byte_t [RegNumBytes-1:0] reg_q;
   axi_lite_regs #(
@@ -179,20 +191,20 @@ module axi_tlb_l1 #(
     .AxiDataWidth   ( CfgAxiDataWidth       ),
     .PrivProtOnly   ( 1'b0                  ),
     .SecuProtOnly   ( 1'b0                  ),
-    .AxiReadOnly    ( AxiReadOnly           ),
     .RegRstVal      ( '{RegNumBytes{8'h00}} ),
     .req_lite_t     ( axi_lite_req_t        ),
     .resp_lite_t    ( axi_lite_resp_t       )
   ) i_regs (
     .clk_i,
     .rst_ni,
-    .axi_req_i    ( cfg_req_i             ),
-    .axi_resp_o   ( cfg_resp_o            ),
-    .wr_active_o  ( /* unused */          ),
-    .rd_active_o  ( /* unused */          ),
-    .reg_d_i      ( '{RegNumBytes{8'h00}} ),
-    .reg_load_i   ( '{RegNumBytes{1'b0}}  ),
-    .reg_q_o      ( reg_q                 )
+    .axi_req_i        ( cfg_req_i             ),
+    .axi_resp_o       ( cfg_resp_o            ),
+    .wr_active_o      ( /* unused */          ),
+    .rd_active_o      ( /* unused */          ),
+    .reg_d_i          ( '{RegNumBytes{8'h00}} ),
+    .reg_load_i       ( '{RegNumBytes{1'b0}}  ),
+    .reg_read_only_i  ( read_only             ),
+    .reg_q_o          ( reg_q                 )
   );
   entry_padded_t [NumEntries-1:0] entries_padded;
   assign {>>{entries_padded}} = reg_q;
