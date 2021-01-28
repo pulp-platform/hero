@@ -26,14 +26,13 @@
 
 #define BUF_L3 (void*) 0x80000000
 
-void perform_benchmark(unsigned buf_size_kb) {
-    unsigned cyc_31 = 0;
-    unsigned cyc_13 = 0;
-    unsigned buf_size = buf_size_kb * 1024;
+void perform_benchmark(const unsigned buf_size_kb) {
+    unsigned cyc_31, cyc_13;
+    const unsigned buf_size = buf_size_kb * 1024;
 
     #pragma omp target device(BIGPULP_MEMCPY) map(to: buf_size) map(from: cyc_13, cyc_31)
     {
-        __device uint32_t* buf_l1 = (__device uint32_t*) hero_l1malloc(buf_size);
+        __device uint32_t* const buf_l1 = (__device uint32_t*) hero_l1malloc(buf_size);
         if (buf_l1 == NULL){
           printf("ERROR: hero_l1malloc() failed\n");
         }
@@ -52,8 +51,8 @@ void perform_benchmark(unsigned buf_size_kb) {
         hero_l1free(buf_l1);
     }
 
-    double perf_31 = ((double) buf_size) / cyc_31;
-    double perf_13 = ((double) buf_size) / cyc_13;
+    const double perf_31 = ((double) buf_size) / cyc_31;
+    const double perf_13 = ((double) buf_size) / cyc_13;
     printf("For buffer size %dkB:\n", buf_size_kb);
     printf("L3 -> L1 DMA:  %f bytes / cycle\n", perf_31);
     printf("L1 -> L3 DMA:  %f bytes / cycle\n", perf_13);
@@ -63,7 +62,7 @@ int main(int argc, char *argv[]) {
   omp_set_default_device(BIGPULP_SVM);
 
   //unsigned buffer_sizes[] = {1, 2, 4, 8, 16, 32, 64};
-  unsigned buffer_sizes[] = {110};
+  const unsigned buffer_sizes[] = {110};
   for(unsigned i = 0; i < sizeof(buffer_sizes) / sizeof(unsigned); i++) {
     perform_benchmark(buffer_sizes[i]);
   }
