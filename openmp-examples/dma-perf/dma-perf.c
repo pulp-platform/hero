@@ -26,10 +26,10 @@
 
 #define BUF_L3 (void*) 0x80000000
 
-void perform_benchmark(int buf_size_kb) {
-    int cyc_31 = 0;
-    int cyc_13 = 0;
-    int buf_size = buf_size_kb * 1024;
+void perform_benchmark(unsigned buf_size_kb) {
+    unsigned cyc_31 = 0;
+    unsigned cyc_13 = 0;
+    unsigned buf_size = buf_size_kb * 1024;
 
     #pragma omp target device(BIGPULP_MEMCPY) map(to: buf_size) map(from: cyc_13, cyc_31)
     {
@@ -62,9 +62,9 @@ void perform_benchmark(int buf_size_kb) {
 int main(int argc, char *argv[]) {
   omp_set_default_device(BIGPULP_SVM);
 
-  //int buffer_sizes[] = {1, 2, 4, 8, 16, 32, 64};
-  int buffer_sizes[] = {110};
-  for(int i = 0; i < sizeof(buffer_sizes) / sizeof(int); i++) {
+  //unsigned buffer_sizes[] = {1, 2, 4, 8, 16, 32, 64};
+  unsigned buffer_sizes[] = {110};
+  for(unsigned i = 0; i < sizeof(buffer_sizes) / sizeof(unsigned); i++) {
     perform_benchmark(buffer_sizes[i]);
   }
 
