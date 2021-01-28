@@ -65,7 +65,7 @@ int *__errno() { return &errno; }
 static void __rt_io_unlock();
 static void __rt_io_lock();
 
-static void *domain_malloc(size_t size, int domain)
+static void *domain_malloc(const size_t size, const int domain)
 {
   void * ptr = rt_alloc(domain, size + 0x4U);
   if ((uint32_t) ptr == 0x0)
@@ -77,7 +77,7 @@ static void *domain_malloc(size_t size, int domain)
   return user_ptr;
 }
 
-static void domain_free(void *ptr, int domain)
+static void domain_free(void* const ptr, const int domain)
 {
   void *alloc_ptr = (void *)(((uint32_t *)ptr)-1);
   uint32_t size = *((uint32_t *)alloc_ptr);
