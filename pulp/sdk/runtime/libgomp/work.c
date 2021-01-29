@@ -125,7 +125,7 @@ gomp_pull_ws_pool ( )
 ALWAYS_INLINE gomp_work_share_t *
 gomp_malloc_ws ( )
 {
-    gomp_work_share_t *ws = (gomp_work_share_t *)shmalloc(sizeof(gomp_work_share_t));
+    gomp_work_share_t *ws = (gomp_work_share_t *)l1malloc(sizeof(gomp_work_share_t));
     ws->next_free = (gomp_work_share_t *) NULL;
     ws->embedded = WS_NOT_EMBEDDED;
     return ws;
@@ -135,7 +135,7 @@ gomp_malloc_ws ( )
 ALWAYS_INLINE void
 gomp_free_ws ( gomp_work_share_t *ws )
 {
-    shfree(ws);
+    l1free(ws);
 }
 
 /* Get a work share from the pool of ws*/

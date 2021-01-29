@@ -34,7 +34,7 @@
 #define __OMP_LOCK_H__
 
 #include "appsupport.h"
-#include "memutils.h"
+#include "rt/rt_alloc.h"
 
 typedef uint32_t omp_lock_t;
 

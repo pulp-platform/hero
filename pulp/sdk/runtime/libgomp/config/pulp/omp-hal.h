@@ -48,7 +48,6 @@
 
 #include "appsupport.h"
 #include "omp-bar.h"
-#include "memutils.h"
 #include "omp-lock.h"
 #include "mutex.h"
 
