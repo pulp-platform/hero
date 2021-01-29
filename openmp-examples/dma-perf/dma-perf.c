@@ -54,8 +54,8 @@ void perform_benchmark(const unsigned buf_size_kib) {
     const double perf_31 = ((double) buf_size_bytes) / cyc_31;
     const double perf_13 = ((double) buf_size_bytes) / cyc_13;
     printf("For transfer size %d KiB:\n", buf_size_kib);
-    printf("L3 -> L1 DMA:  %.3f bytes / cycle\n", perf_31);
-    printf("L1 -> L3 DMA:  %.3f bytes / cycle\n", perf_13);
+    printf("L3 -> L1 DMA: %.3f bytes/cycle\n", perf_31);
+    printf("L1 -> L3 DMA: %.3f bytes/cycle\n", perf_13);
 }
 
 int main(int argc, char *argv[]) {
