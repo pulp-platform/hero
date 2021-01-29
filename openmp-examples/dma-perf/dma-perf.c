@@ -30,7 +30,6 @@ uint16_t lfsr3(uint16_t prev) {
 }
 
 void perform_benchmark(const unsigned buf_size_kib) {
-  unsigned cyc_31, cyc_13;
   const unsigned buf_size_bytes = buf_size_kib * 1024;
 
   // Allocate source and destination buffers on heap of Host.
@@ -49,6 +48,7 @@ void perform_benchmark(const unsigned buf_size_kib) {
     lfsr = lfsr3(lfsr);
   }
 
+  unsigned cyc_31, cyc_13;
 #pragma omp target device(BIGPULP_MEMCPY) map(to : buf_size_bytes, src_buf[0 : buf_size_bytes]) \
     map(from : cyc_13, cyc_31, dst_buf[0 : buf_size_bytes])
   {
@@ -104,6 +104,7 @@ void perform_benchmark(const unsigned buf_size_kib) {
 int main(int argc, char* argv[]) {
   omp_set_default_device(BIGPULP_SVM);
 
+  // Test a couple different buffer sizes up to the maximum the L1 heap can allocate.
   unsigned buf_size_kib[] = {1, 2, 4, 8, 16, 32, 64, 96, 110};
   for (unsigned i = 0; i < sizeof(buf_size_kib) / sizeof(unsigned); i++) {
     perform_benchmark(buf_size_kib[i]);
@@ -111,5 +112,3 @@ int main(int argc, char* argv[]) {
 
   return 0;
 }
-
-
