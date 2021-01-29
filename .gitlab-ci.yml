@@ -76,6 +76,21 @@ sdk-pulp-and-sdk-har:
     - chmod -R u+w $HERO_INSTALL
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert sdk-pulp-and-sdk-har
 
+sdk-pulp-and-sdk-har-prem:
+  stage: build2
+  script:
+    - >
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup sdk-pulp-and-sdk-har-prem; then
+        exit 0
+      fi
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
+    - chmod -R u-w $HERO_INSTALL
+    - make sdk-pulp # TODO: `sdk-pulp-har` does not seem to work?
+    - make sdk-har-prem
+    - chmod -R u+w $HERO_INSTALL
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert sdk-pulp-and-sdk-har-prem
+
 sdk-pulp-and-sdk-hrv:
   stage: build2
   script:

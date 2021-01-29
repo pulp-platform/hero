@@ -1,2 +1,3 @@
 config BR2_PACKAGE_PREM_CMUX
 	bool "CMUX PREM Arbitrator and interfacing library"
+	depends on BR2_PACKAGE_HERO_PLATFORM != ""

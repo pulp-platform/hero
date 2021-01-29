@@ -20,11 +20,6 @@ make sdk-pulp
 make sdk-har
 make tc-llvm
 
-cd "$CMUX_ROOT"
-make cmux
-cd src/pulp
-HERO_ROOT="$ROOT" ./build-pulp-lib.sh
-
 cd "$ROOT"
 make br-har-exilzcu102
 
