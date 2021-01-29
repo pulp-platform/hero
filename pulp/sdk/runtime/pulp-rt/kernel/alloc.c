@@ -361,13 +361,43 @@ void __rt_allocs_init()
 #endif
 }
 
+// Compute canary value for a pointer.
+static inline uint8_t canary(const void* const ptr) {
+  return (uint32_t)ptr & 0xFF;
+}
+
+typedef struct {
+  size_t size;
+  uint8_t canary;
+} canary_and_size_t;
+
+// Encode canary and size into 32-bit value.
+static inline uint32_t canary_and_size_encode(const void* const ptr, const size_t size) {
+  return (size << 8) | canary(ptr);
+}
+
+// Decode 32-bit value into canary and size.
+static inline canary_and_size_t canary_and_size_decode(const uint32_t val) {
+  return (canary_and_size_t){
+    .canary = val & 0xFF,
+    .size = val >> 8
+  };
+}
+
 static void *domain_malloc(const size_t _size, const int domain)
 {
   const size_t size = _size + 4;
+  if (size >= (1 << 24)) {
+    // Size exceeds maximum value that can be stored next to canary.
+    return NULL;
+  }
+
   void * ptr = rt_alloc(domain, size);
   if ((uint32_t) ptr == 0x0)
     return (void *) 0x0;
-  *(uint32_t *)(ptr) = size;
+
+  // Store canary in first byte of memory segment, then size in next three bytes.
+  *(uint32_t *)(ptr) = canary_and_size_encode(ptr, size);
 
   void *user_ptr = (void *)(((uint32_t *)ptr)+1);
 
@@ -377,8 +407,17 @@ static void *domain_malloc(const size_t _size, const int domain)
 static void domain_free(void* const ptr, const int domain)
 {
   void *alloc_ptr = (void *)(((uint32_t *)ptr)-1);
-  uint32_t size = *((uint32_t *)alloc_ptr);
-  rt_free(domain, alloc_ptr, size);
+
+  // Retrieve canary and size.
+  const canary_and_size_t canary_and_size = canary_and_size_decode(*(const uint32_t*)alloc_ptr);
+
+  // Ensure canary is valid.
+  if (canary_and_size.canary != canary(alloc_ptr)) {
+    printf("Memory overflow detected at %p due to corrupt fragment!\n", alloc_ptr);
+    abort();
+  }
+
+  rt_free(domain, alloc_ptr, canary_and_size.size);
 }
 
 void *malloc(size_t size)
