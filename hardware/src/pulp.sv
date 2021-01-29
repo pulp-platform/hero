@@ -246,18 +246,22 @@ module pulp import pulp_pkg::*; #(
   ) mbox_pulp();
 
   for (genvar i = 0; i < N_CLUSTERS; i++) begin: gen_clusters
-    axi_id_resize #(
-      .ADDR_WIDTH   (AXI_AW),
-      .DATA_WIDTH   (AXI_DW),
-      .USER_WIDTH   (AXI_UW),
-      .ID_WIDTH_IN  (AXI_IW_SB_OUP),
-      .ID_WIDTH_OUT (AXI_IW_CL_INP),
-      .TABLE_SIZE   (4)
-    ) i_id_resize_cl_inp (
+    axi_iw_converter_intf #(
+      .AXI_SLV_PORT_ID_WIDTH        (AXI_IW_SB_OUP),
+      .AXI_MST_PORT_ID_WIDTH        (AXI_IW_CL_INP),
+      .AXI_SLV_PORT_MAX_UNIQ_IDS    (4),
+      .AXI_SLV_PORT_MAX_TXNS_PER_ID (4),
+      .AXI_SLV_PORT_MAX_TXNS        (16),
+      .AXI_MST_PORT_MAX_UNIQ_IDS    (4),
+      .AXI_MST_PORT_MAX_TXNS_PER_ID (4),
+      .AXI_ADDR_WIDTH               (AXI_AW),
+      .AXI_DATA_WIDTH               (AXI_DW),
+      .AXI_USER_WIDTH               (AXI_UW)
+    ) i_iwc_cl_inp (
       .clk_i,
       .rst_ni,
-      .in     (cl_inp[i]),
-      .out    (cl_inp_remapped[i])
+      .slv    (cl_inp[i]),
+      .mst    (cl_inp_remapped[i])
     );
 
     axi_dw_converter_intf #(
@@ -571,18 +575,22 @@ module pulp import pulp_pkg::*; #(
   assign rab_from_pulp_multi_irq_o = 1'b0;
   assign rab_from_pulp_prot_irq_o = 1'b0;
 
-  axi_id_resize #(
-    .ADDR_WIDTH   (AXI_AW),
-    .DATA_WIDTH   (AXI_DW),
-    .USER_WIDTH   (AXI_UW),
-    .ID_WIDTH_IN  (AXI_IW_SB_OUP),
-    .ID_WIDTH_OUT (AXI_IW_SB_INP),
-    .TABLE_SIZE   (4)
-  ) i_id_resize_rab_slv (
+  axi_iw_converter_intf #(
+    .AXI_SLV_PORT_ID_WIDTH        (AXI_IW_SB_OUP),
+    .AXI_MST_PORT_ID_WIDTH        (AXI_IW_SB_INP),
+    .AXI_SLV_PORT_MAX_UNIQ_IDS    (4),  // maximum 4 host cores
+    .AXI_SLV_PORT_MAX_TXNS_PER_ID (1),  // one I/O memory access from host at a time
+    .AXI_SLV_PORT_MAX_TXNS        (4),
+    .AXI_MST_PORT_MAX_UNIQ_IDS    (4),
+    .AXI_MST_PORT_MAX_TXNS_PER_ID (1),
+    .AXI_ADDR_WIDTH               (AXI_AW),
+    .AXI_DATA_WIDTH               (AXI_DW),
+    .AXI_USER_WIDTH               (AXI_UW)
+  ) i_iwc_rab_slv (
     .clk_i,
     .rst_ni,
-    .in     (rab_slv),
-    .out    (rab_slv_remapped)
+    .slv    (rab_slv),
+    .mst    (rab_slv_remapped)
   );
 
   axi_dw_converter_intf #(
