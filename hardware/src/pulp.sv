@@ -17,7 +17,7 @@ package automatic pulp_pkg;
   localparam int unsigned AXI_IW_CL_OUP = pulp_cluster_cfg_pkg::AXI_IW_MST;
   localparam int unsigned AXI_IW_CL_INP = pulp_cluster_cfg_pkg::AXI_IW_SLV;
   // SoC Bus
-  localparam int unsigned AXI_IW_SB_INP = AXI_IW_CL_OUP;
+  localparam int unsigned AXI_IW_SB_INP = 3;
   localparam int unsigned AXI_UW = pulp_cluster_cfg_pkg::AXI_UW;
   function int unsigned axi_iw_sb_oup(input int unsigned n_clusters);
     return soc_bus_pkg::oup_id_w(n_clusters, AXI_IW_SB_INP);
@@ -128,9 +128,12 @@ module pulp import pulp_pkg::*; #(
     .AXI_USER_WIDTH (AXI_UW),
     .BUFFER_WIDTH   (pulp_cluster_cfg_pkg::DC_BUF_W)
   ) cl_oup_async[N_CLUSTERS-1:0]();
-  // pragma translate_off
-  initial assert (AXI_IW_CL_OUP == AXI_IW_SB_INP);
-  // pragma translate_on
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH (AXI_AW),
+    .AXI_DATA_WIDTH (AXI_DW_CL),
+    .AXI_ID_WIDTH   (AXI_IW_CL_OUP),
+    .AXI_USER_WIDTH (AXI_UW)
+  ) cl_oup_preiwc[N_CLUSTERS-1:0]();
   AXI_BUS #(
     .AXI_ADDR_WIDTH (AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW_CL),
@@ -321,7 +324,7 @@ module pulp import pulp_pkg::*; #(
         .isolate_i        (1'b0),
         .incoming_req_o   (),
         .axi_slave_async  (cl_oup_async[i]),
-        .axi_master       (cl_oup_predwc[i])
+        .axi_master       (cl_oup_preiwc[i])
       );
 
     end else begin : gen_cluster_sync
@@ -334,12 +337,30 @@ module pulp import pulp_pkg::*; #(
         .eoc_o        (cl_eoc_o[i]),
         .busy_o       (cl_busy_o[i]),
         .slv          (cl_inp_dwced[i]),
-        .mst          (cl_oup_predwc[i])
+        .mst          (cl_oup_preiwc[i])
       );
     end
 
+    axi_iw_converter_intf #(
+      .AXI_SLV_PORT_ID_WIDTH        (AXI_IW_CL_OUP),
+      .AXI_MST_PORT_ID_WIDTH        (AXI_IW_SB_INP),
+      .AXI_SLV_PORT_MAX_UNIQ_IDS    (8),
+      .AXI_SLV_PORT_MAX_TXNS_PER_ID (16),
+      .AXI_SLV_PORT_MAX_TXNS        (64),
+      .AXI_MST_PORT_MAX_UNIQ_IDS    (8),
+      .AXI_MST_PORT_MAX_TXNS_PER_ID (16),
+      .AXI_ADDR_WIDTH               (AXI_AW),
+      .AXI_DATA_WIDTH               (AXI_DW_CL),
+      .AXI_USER_WIDTH               (AXI_UW)
+    ) i_iwc_cl_oup (
+      .clk_i,
+      .rst_ni,
+      .slv    (cl_oup_preiwc[i]),
+      .mst    (cl_oup_predwc[i])
+    );
+
     axi_dw_converter_intf #(
-      .AXI_ID_WIDTH             (AXI_IW_CL_OUP),
+      .AXI_ID_WIDTH             (AXI_IW_SB_INP),
       .AXI_ADDR_WIDTH           (AXI_AW),
       .AXI_SLV_PORT_DATA_WIDTH  (AXI_DW_CL),
       .AXI_MST_PORT_DATA_WIDTH  (AXI_DW),
@@ -355,7 +376,7 @@ module pulp import pulp_pkg::*; #(
     //axi_write_burst_packer_wrap #(
     //  .ADDR_WIDTH   (AXI_AW),
     //  .DATA_WIDTH   (AXI_DW),
-    //  .ID_WIDTH     (AXI_IW_CL_OUP),
+    //  .ID_WIDTH     (AXI_IW_SB_INP),
     //  .USER_WIDTH   (AXI_UW),
     //  .BUF_DEPTH    (pulp_cluster_cfg_pkg::DMA_MAX_BURST_LEN)
     //) i_packer_cl_oup (
@@ -368,7 +389,7 @@ module pulp import pulp_pkg::*; #(
     //axi_read_burst_buffer_wrap #(
     //  .ADDR_WIDTH   (AXI_AW),
     //  .DATA_WIDTH   (AXI_DW),
-    //  .ID_WIDTH     (AXI_IW_CL_OUP),
+    //  .ID_WIDTH     (AXI_IW_SB_INP),
     //  .USER_WIDTH   (AXI_UW),
     //  .BUF_DEPTH    (pulp_cluster_cfg_pkg::DMA_MAX_BURST_LEN)
     //) i_r_buf_cl_oup (
