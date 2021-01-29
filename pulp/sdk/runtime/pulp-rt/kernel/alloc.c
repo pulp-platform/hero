@@ -361,6 +361,35 @@ void __rt_allocs_init()
 #endif
 }
 
+static void *domain_malloc(const size_t _size, const int domain)
+{
+  const size_t size = _size + 4;
+  void * ptr = rt_alloc(domain, size);
+  if ((uint32_t) ptr == 0x0)
+    return (void *) 0x0;
+  *(uint32_t *)(ptr) = size;
+
+  void *user_ptr = (void *)(((uint32_t *)ptr)+1);
+
+  return user_ptr;
+}
+
+static void domain_free(void* const ptr, const int domain)
+{
+  void *alloc_ptr = (void *)(((uint32_t *)ptr)-1);
+  uint32_t size = *((uint32_t *)alloc_ptr);
+  rt_free(domain, alloc_ptr, size);
+}
+
+void *malloc(size_t size)
+{
+  return domain_malloc(size, RT_ALLOC_FC_DATA);
+}
+
+void free(void *ptr)
+{
+  domain_free(ptr, RT_ALLOC_FC_DATA);
+}
 
 #if defined(ARCHI_HAS_CLUSTER)
 
@@ -408,5 +437,32 @@ void rt_free_cluster(rt_alloc_e flags, void *chunk, int size, rt_free_req_t *req
   __rt_cluster_push_fc_event(&req->event);
 }
 
+#endif
+
+#if defined(ARCHI_HAS_L1)
+
+void *l1malloc(size_t size)
+{
+  return domain_malloc(size, RT_ALLOC_CL_DATA);
+}
+
+void l1free(void *ptr)
+{
+  domain_free(ptr, RT_ALLOC_CL_DATA);
+}
+
+#endif
+
+#if defined(ARCHI_HAS_L2)
+
+void *l2malloc(size_t size)
+{
+  return domain_malloc(size, RT_ALLOC_L2_CL_DATA);
+}
+
+void l2free(void *ptr)
+{
+  domain_free(ptr, RT_ALLOC_L2_CL_DATA);
+}
 
 #endif

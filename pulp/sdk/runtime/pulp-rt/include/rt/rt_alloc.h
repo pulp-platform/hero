@@ -275,6 +275,10 @@ typedef enum {
  */
 void *rt_alloc(rt_alloc_e flags, int size);
 
+void* l1malloc(size_t size);
+void l1free(void* ptr);
+void* l2malloc(size_t size);
+void l2free(void* ptr);
 
 
 /** \brief Free memory for the specified usage.
