@@ -1,0 +1,2 @@
+config BR2_PACKAGE_PREM_CMUX
+	bool "CMUX PREM Arbitrator and interfacing library"
