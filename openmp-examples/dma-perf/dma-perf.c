@@ -61,8 +61,7 @@ void perform_benchmark(const unsigned buf_size_kib) {
 int main(int argc, char *argv[]) {
   omp_set_default_device(BIGPULP_SVM);
 
-  //unsigned buf_size_kib[] = {1, 2, 4, 8, 16, 32, 64};
-  const unsigned buf_size_kib[] = {110};
+  unsigned buf_size_kib[] = {1, 2, 4, 8, 16, 32, 64, 96, 110};
   for(unsigned i = 0; i < sizeof(buf_size_kib) / sizeof(unsigned); i++) {
     perform_benchmark(buf_size_kib[i]);
   }
