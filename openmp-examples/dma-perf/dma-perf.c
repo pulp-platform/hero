@@ -35,6 +35,7 @@ void perform_benchmark(const unsigned buf_size_kib) {
         __device uint32_t* const buf_l1 = (__device uint32_t*) hero_l1malloc(buf_size_bytes);
         if (buf_l1 == NULL){
           printf("ERROR: hero_l1malloc() failed\n");
+          abort();
         }
 
         // L1 to L3 (RAM) with DMA
