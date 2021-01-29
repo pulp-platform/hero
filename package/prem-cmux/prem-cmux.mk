@@ -19,8 +19,11 @@ endef
 
 define PREM_CMUX_INSTALL_STAGING_CMDS
 	$(INSTALL) -D -m 0755 $(@D)/bin/cmux $(STAGING_DIR)/usr/bin/cmux
-	$(INSTALL) -D -m 0644 $(@D)/lib/libcmux.a $(STAGING_DIR)/usr/lib/libcmux.a
+	$(INSTALL) -D -m 0644 $(@D)/lib/libcmux-vote.a $(STAGING_DIR)/usr/lib/libcmux-vote.a
 	$(INSTALL) -D -m 0644 $(@D)/lib/libpremnotify-cpu.so $(STAGING_DIR)/usr/lib/libpremnotify.so
+	mkdir -p $(STAGING_DIR)/usr/include/cmux
+	$(INSTALL) -D -m 0644 $(@D)/inc/cmuxif.h $(STAGING_DIR)/usr/include/prem/cmuxif.h
+	$(INSTALL) -D -m 0644 $(@D)/inc/vote.h $(STAGING_DIR)/usr/include/prem/vote.h
 endef
 
 define LIBHERO_TARGET_INSTALL_TARGET_CMDS
