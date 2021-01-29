@@ -16,13 +16,11 @@
  * limitations under the License.
  */
 
-#include <omp.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <time.h>
 #include <hero-target.h>
-//#include "pulp.h"
+#include <omp.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define BUF_L3 (void*) 0x80000000
 
