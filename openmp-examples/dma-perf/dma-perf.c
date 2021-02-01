@@ -29,7 +29,7 @@ uint16_t lfsr3(uint16_t prev) {
   return prev;
 }
 
-void perform_benchmark(const unsigned buf_size_kib) {
+unsigned perform_benchmark(const unsigned buf_size_kib) {
   const unsigned buf_size_bytes = buf_size_kib * 1024;
 
   // Allocate source and destination buffers on heap of Host.
@@ -99,16 +99,19 @@ void perform_benchmark(const unsigned buf_size_kib) {
   } else {
     printf("%d mismatches!\n", mismatches);
   }
+
+  return mismatches;
 }
 
 int main(int argc, char* argv[]) {
   omp_set_default_device(BIGPULP_SVM);
 
   // Test a couple different buffer sizes up to the maximum the L1 heap can allocate.
+  unsigned mismatches = 0;
   unsigned buf_size_kib[] = {1, 2, 4, 8, 16, 32, 64, 96, 110};
   for (unsigned i = 0; i < sizeof(buf_size_kib) / sizeof(unsigned); i++) {
-    perform_benchmark(buf_size_kib[i]);
+    mismatches += perform_benchmark(buf_size_kib[i]);
   }
 
-  return 0;
+  return mismatches != 0;
 }
