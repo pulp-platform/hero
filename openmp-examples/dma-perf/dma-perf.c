@@ -104,8 +104,6 @@ unsigned perform_benchmark(const unsigned buf_size_kib) {
 }
 
 int main(int argc, char* argv[]) {
-  omp_set_default_device(BIGPULP_SVM);
-
   // Test a couple different buffer sizes up to the maximum the L1 heap can allocate.
   unsigned mismatches = 0;
   unsigned buf_size_kib[] = {1, 2, 4, 8, 16, 32, 64, 96, 110};
