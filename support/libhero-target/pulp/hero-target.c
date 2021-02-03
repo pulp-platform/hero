@@ -453,6 +453,69 @@ hero_get_clk_counter(void)
   return get_time();
 }
 
+void __compiler_barrier(void) {
+  asm volatile("" : : : "memory");
+}
+
+void hero_perf_reset(const hero_perf_event_t event) {
+  __compiler_barrier();
+
+  switch (event) {
+    case hero_perf_event_load_local:      asm volatile("csrw 0x785, x0"); break;
+    case hero_perf_event_store_local:     asm volatile("csrw 0x786, x0"); break;
+    case hero_perf_event_load_external:   asm volatile("csrw 0x78C, x0"); break;
+    case hero_perf_event_store_external:  asm volatile("csrw 0x78D, x0"); break;
+    default:
+      printf("Error: Unsupported event %d!\n", event);
+  }
+
+  __compiler_barrier();
+}
+
+uint32_t __pcer_mask(const hero_perf_event_t event) {
+  uint8_t shift_amount;
+  switch (event) {
+    case hero_perf_event_load_local:      shift_amount = 5; break;
+    case hero_perf_event_store_local:     shift_amount = 6; break;
+    case hero_perf_event_load_external:   shift_amount = 12; break;
+    case hero_perf_event_store_external:  shift_amount = 13; break;
+    default:
+      printf("Error: Unsupported event %d!\n", event);
+      return 0;
+  }
+  return 1 << shift_amount;
+}
+
+void hero_perf_continue(const hero_perf_event_t event) {
+  __compiler_barrier();
+  asm volatile("csrrs x0, 0x7E0, %0" : : "r" (__pcer_mask(event)));
+  __compiler_barrier();
+}
+
+void hero_perf_pause(const hero_perf_event_t event) {
+  __compiler_barrier();
+  asm volatile("csrrc x0, 0x7E0, %0" : : "r" (__pcer_mask(event)));
+  __compiler_barrier();
+}
+
+uint32_t hero_perf_read(const hero_perf_event_t event) {
+  __compiler_barrier();
+
+  uint32_t val;
+  switch (event) {
+    case hero_perf_event_load_local:      asm volatile("csrr %0, 0x785" : "=r" (val)); break;
+    case hero_perf_event_store_local:     asm volatile("csrr %0, 0x786" : "=r" (val)); break;
+    case hero_perf_event_load_external:   asm volatile("csrr %0, 0x78C" : "=r" (val)); break;
+    case hero_perf_event_store_external:  asm volatile("csrr %0, 0x78D" : "=r" (val)); break;
+    default:
+      printf("Error: Unsupported event %d!\n", event);
+      val = 0;
+  }
+
+  __compiler_barrier();
+  return val;
+}
+
 // -------------------------------------------------------------------------- //
 
 #define __hero_atomic_define(op, type) \
