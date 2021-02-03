@@ -215,6 +215,18 @@ void hero_reset_clk_counter(void);
  */
 int32_t hero_get_clk_counter(void);
 
+typedef enum {
+  hero_perf_event_load_local,
+  hero_perf_event_store_local,
+  hero_perf_event_load_external,
+  hero_perf_event_store_external
+} hero_perf_event_t;
+
+void hero_perf_reset(hero_perf_event_t event);
+void hero_perf_continue(hero_perf_event_t event);
+void hero_perf_pause(hero_perf_event_t event);
+uint32_t hero_perf_read(hero_perf_event_t event);
+
 //FIXME: hero_rt_info();
 //FIXME: hero_rt_error();
 
