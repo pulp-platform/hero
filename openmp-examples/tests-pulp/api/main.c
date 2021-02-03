@@ -18,12 +18,14 @@
 #include "report.h"
 
 unsigned test_dma();
+unsigned test_perf();
 
 int main(int argc, char *argv[])
 {
   unsigned n_errors = 0;
 
   n_errors += report_n_errors(test_dma, "DMA transfers");
+  n_errors += report_n_errors(test_perf, "performance counters");
 
   assert(n_errors == 0);
   return n_errors;
