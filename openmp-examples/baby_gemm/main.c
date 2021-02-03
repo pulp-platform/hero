@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
   printf("Calling gemm layer %i\n", LAYER_COUNTER);
 
   // Hack to call the manual DMA layer (non-PREM only!)
-  LAYER_COUNTER = -1;
+  //LAYER_COUNTER = -1;
 
   if (LAYER_COUNTER == 0) {
       gemm_0(ALPHA, A, B, C);
