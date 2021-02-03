@@ -21,7 +21,7 @@ for i in range(len(layer)):
     {\n\
       #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:" + M[i] + "][0:" + N[i] + "])\n\
       {\n\
-        //#pragma omp parallel for private(m, n, k, temp) num_threads(8)\n\
+        #pragma omp parallel for private(m, n, k, temp) num_threads(8)\n\
         for(m = 0; m < M; ++m){	\n\
           for(k = 0; k < K; ++k){\n\
             temp = ALPHA*matA[m][k];\n\

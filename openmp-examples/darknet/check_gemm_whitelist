@@ -34,6 +34,7 @@ export HERCULES_FORCE_FOOTPRINT_DENSE=1\n\
 export HERCULES_CPU_MEMORY_SIZE=32768\n\
 export HERCULES_DEFAULT_NUM_THREADS=8\n\
 export HERCULES_DMA_ENFORCE\n\
+export HERCULES_QUIET\n\
 export HERCULES_NO_INTERVAL_CONTROLFLOW\n\
 export HERCULES_WHITELIST="main gemm_nn gemm_cpu gemm\n\
 ' + gemms + '.omp_outlined.\n\

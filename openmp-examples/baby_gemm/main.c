@@ -40,7 +40,8 @@ int main(int argc, char *argv[]) {
     } else if (LAYER_COUNTER == 22) {
       M = 255, N = 676, K = 256;
     } else {
-      printf("layer not recognized!\n");
+      printf("layer not recognized, using smallest size!\n");
+      return 1;
     }
 
   float* A = (float*)malloc(M*K*sizeof(float));
@@ -74,6 +75,9 @@ int main(int argc, char *argv[]) {
 
   printf("Calling gemm layer %i\n", LAYER_COUNTER);
 
+  // Hack to call the manual DMA layer (non-PREM only!)
+  LAYER_COUNTER = -1;
+
   if (LAYER_COUNTER == 0) {
       gemm_0(ALPHA, A, B, C);
     } else if (LAYER_COUNTER == 2) {
@@ -100,11 +104,12 @@ int main(int argc, char *argv[]) {
       gemm_21(ALPHA, A, B, C);
     } else if (LAYER_COUNTER == 22) {
       gemm_22(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER > 0) {
+      printf("layer not recognized!\n");
+      return 1;
     } else {
-      printf("layer not recognized");
-      //printf(", using manual DMA");
-      //gemm_nn_manual_DMA(M, N, K, ALPHA, A, 0, B, 0, C, 0);
-      printf("!\n");
+      printf("Using manual DMA!\n");
+      gemm_nn_manual_DMA(M, N, K, ALPHA, A, 0, B, 0, C, 0);
     }
 
   int errors = 0;
