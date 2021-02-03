@@ -29,7 +29,7 @@
 #define PULP_DMA_MUTEX_BACKOFF_CYCLES 60
 #define HERO_DMA_JOB_POOL_SIZE 8
 
-#define DEBUG(...) printf(__VA_ARGS__)
+#define DEBUG(...) //printf(__VA_ARGS__)
 
 // Lock for entering critical sections in the DMA functions.
 __attribute__((__aligned__(4))) volatile int32_t __hero_dma_lock = 0x0;
@@ -310,7 +310,7 @@ __hero_dma_memcpy_async(DEVICE_VOID_PTR loc, HOST_VOID_PTR ext,
 
   // TODO When DMA can handle wide jobs, remove this warning.
   if ((uint64_t)ext > UINT32_MAX) {
-    printf("DMA cannot handle addresses this wide!\n");
+   // printf("DMA cannot handle addresses this wide!\n");
   }
 
   // Create the new job.
