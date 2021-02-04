@@ -42,25 +42,34 @@ unsigned local_accesses(void)
 
 unsigned external_accesses(void)
 {
-  // Initialize pointer to L2 and DRAM and reset counters.
+  // Initialize pointer to L1, L2, and DRAM and reset counters.
+  volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
   volatile uint32_t* const l2 = (volatile __device uint32_t*)test_l2_base();
   volatile uint32_t* const dram = (volatile __device uint32_t*)test_dram_base();
+  hero_perf_reset(hero_perf_event_load);
+  hero_perf_reset(hero_perf_event_store);
   hero_perf_reset(hero_perf_event_load_external);
   hero_perf_reset(hero_perf_event_store_external);
 
-  // Start counters, do four reads and six writes, and stop counters.
+  // Start counters, do five reads, of which four are external, and seven writes, of which six are external, and stop counters.
+  hero_perf_continue(hero_perf_event_load);
+  hero_perf_continue(hero_perf_event_store);
   hero_perf_continue(hero_perf_event_load_external);
   hero_perf_continue(hero_perf_event_store_external);
   const uint32_t foo = *l2;
   const uint32_t bar = *dram;
+  const uint32_t some = *l1;
   const uint32_t bugu = *dram;
   const uint32_t bla = *l2;
   *l2 = 123;
   *dram = 6789;
+  *l1 = 4578;
   *l2 = 9076;
   *l2 = 321;
   *dram = 9876;
   *l2 = 6709;
+  hero_perf_pause(hero_perf_event_load);
+  hero_perf_pause(hero_perf_event_store);
   hero_perf_pause(hero_perf_event_load_external);
   hero_perf_pause(hero_perf_event_store_external);
 
@@ -71,6 +80,8 @@ unsigned external_accesses(void)
   *l2 = 8606;
 
   // Read counters.
+  const uint32_t load = hero_perf_read(hero_perf_event_load);
+  const uint32_t store = hero_perf_read(hero_perf_event_store);
   const uint32_t load_external = hero_perf_read(hero_perf_event_load_external);
   const uint32_t store_external = hero_perf_read(hero_perf_event_store_external);
 
@@ -78,8 +89,12 @@ unsigned external_accesses(void)
   unsigned n_errors = 0;
   n_errors += condition_or_printf(load_external == 4,
       "hero_perf_event_load_external was %d instead of 4", load_external);
+  n_errors += condition_or_printf(load == 5,
+      "hero_perf_event_load was %d instead of 5", load);
   n_errors += condition_or_printf(store_external == 6,
       "hero_perf_event_store_external was %d instead of 6", store_external);
+  n_errors += condition_or_printf(store == 7,
+      "hero_perf_event_store was %d instead of 7", store);
 
   return n_errors;
 }
