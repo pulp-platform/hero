@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 
+#include <assert.h>
 #include <stdbool.h>
 #include <hero-target.h>
 #include <pulp.h>
@@ -450,63 +451,178 @@ void __compiler_barrier(void) {
   asm volatile("" : : : "memory");
 }
 
-void hero_perf_reset(const hero_perf_event_t event) {
-  __compiler_barrier();
+typedef struct {
+  uint32_t pcer, pcer_pre_init;
+  uint8_t pcmr_pre_init;
+} hero_perf_t;
 
-  switch (event) {
-    case hero_perf_event_load_local:      asm volatile("csrw 0x785, x0"); break;
-    case hero_perf_event_store_local:     asm volatile("csrw 0x786, x0"); break;
-    case hero_perf_event_load_external:   asm volatile("csrw 0x78C, x0"); break;
-    case hero_perf_event_store_external:  asm volatile("csrw 0x78D, x0"); break;
-    default:
-      printf("Error: Unsupported event %d!\n", event);
-  }
+HERO_L1_BSS hero_perf_t* hero_perf[8]; // one pointer for each core in the cluster
 
-  __compiler_barrier();
+int hero_perf_init(void) {
+  // Abort early if already initialized.
+  if (hero_perf[hero_rt_core_id()] != NULL) return -HERO_EALREADY;
+
+  // Allocate memory for tracking state of performance counters.
+  hero_perf[hero_rt_core_id()] = hero_l1malloc(sizeof(hero_perf_t));
+  if (hero_perf[hero_rt_core_id()] == NULL) return -HERO_ENOMEM;
+
+  // Disable all performance counters individually.
+  hero_perf[hero_rt_core_id()]->pcer = 0;
+  asm volatile("csrrw %0, 0x7E0, %1"
+      : "=r"(hero_perf[hero_rt_core_id()]->pcer_pre_init)
+      : "r"(hero_perf[hero_rt_core_id()]->pcer)
+      : "memory");
+
+  // Globally enable performance counters and enable saturation.
+  asm volatile("csrrwi %0, 0x7E1, 3"
+      : "=r"(hero_perf[hero_rt_core_id()]->pcmr_pre_init)
+      :
+      : "memory");
+
+  return 0;
 }
 
-uint32_t __pcer_mask(const hero_perf_event_t event) {
+void hero_perf_term(void) {
+  // Abort early if not allocated.
+  if (hero_perf[hero_rt_core_id()] == NULL) return;
+
+  // Restore PCER and PCMR to pre-init state.
+  asm volatile("csrw 0x7E0, %0"
+      :
+      : "r"(hero_perf[hero_rt_core_id()]->pcer_pre_init)
+      : "memory");
+  asm volatile("csrw 0x7E1, %0"
+      :
+      : "r"(hero_perf[hero_rt_core_id()]->pcmr_pre_init)
+      : "memory");
+
+  // Free allocated memory and reset pointer.
+  hero_l1free(hero_perf[hero_rt_core_id()]);
+  hero_perf[hero_rt_core_id()] = 0;
+};
+
+static inline uint32_t pcer_mask(const hero_perf_event_t event) {
   uint8_t shift_amount;
   switch (event) {
-    case hero_perf_event_load_local:      shift_amount = 5; break;
-    case hero_perf_event_store_local:     shift_amount = 6; break;
+    case hero_perf_event_load:            shift_amount = 5; break;
+    case hero_perf_event_store:           shift_amount = 6; break;
     case hero_perf_event_load_external:   shift_amount = 12; break;
     case hero_perf_event_store_external:  shift_amount = 13; break;
     default:
-      printf("Error: Unsupported event %d!\n", event);
       return 0;
   }
   return 1 << shift_amount;
 }
 
-void hero_perf_continue(const hero_perf_event_t event) {
+int hero_perf_alloc(const hero_perf_event_t event) {
+  // Obtain PCER mask for event.
+  const uint32_t mask = pcer_mask(event);
+  if (mask == 0) return -HERO_ENODEV;
+  hero_perf[hero_rt_core_id()]->pcer |= mask;
+
+  int ret = hero_perf_pause(event);
+  assert(ret >= 0);
+  ret = hero_perf_reset(event);
+  assert(ret >= 0);
+
+  return 0;
+}
+
+int hero_perf_dealloc(const hero_perf_event_t event) {
+  // Obtain PCER mask for event.
+  const uint32_t mask = pcer_mask(event);
+  if (mask == 0) return -HERO_ENODEV;
+  hero_perf[hero_rt_core_id()]->pcer &= ~mask;
+
+  return 0;
+}
+
+int hero_perf_reset(const hero_perf_event_t event) {
   __compiler_barrier();
-  asm volatile("csrrs x0, 0x7E0, %0" : : "r" (__pcer_mask(event)));
+  int retval = 0;
+  switch (event) {
+    case hero_perf_event_load:            asm volatile("csrw 0x785, x0"); break;
+    case hero_perf_event_store:           asm volatile("csrw 0x786, x0"); break;
+    case hero_perf_event_load_external:   asm volatile("csrw 0x78C, x0"); break;
+    case hero_perf_event_store_external:  asm volatile("csrw 0x78D, x0"); break;
+    default:
+      retval = -HERO_EINVAL;
+  }
+  __compiler_barrier();
+  return retval;
+}
+
+void hero_perf_reset_all(void) {
+  __compiler_barrier();
+  asm volatile("csrw 0x79F, x0");
+  hal_timer_reset(hal_timer_cl_addr(0, 0));
   __compiler_barrier();
 }
 
-void hero_perf_pause(const hero_perf_event_t event) {
+int hero_perf_pause(const hero_perf_event_t event) {
   __compiler_barrier();
-  asm volatile("csrrc x0, 0x7E0, %0" : : "r" (__pcer_mask(event)));
+  int ret = 0;
+  const uint32_t mask = pcer_mask(event);
+  if (mask == 0) {
+    ret = -HERO_ENODEV;
+    goto __pause_end;
+  }
+  asm volatile("csrc 0x7E0, %0" : : "r"(mask));
+
+__pause_end:
+  __compiler_barrier();
+  return ret;
+}
+
+void hero_perf_pause_all(void) {
+  __compiler_barrier();
+  asm volatile("csrw 0x7E0, x0");
   __compiler_barrier();
 }
 
-uint32_t hero_perf_read(const hero_perf_event_t event) {
+int hero_perf_continue(hero_perf_event_t event) {
+  __compiler_barrier();
+  int ret = 0;
+  const uint32_t mask = pcer_mask(event);
+  if (mask == 0) {
+    ret = -HERO_ENODEV;
+    goto __continue_end;
+  }
+  asm volatile("csrs 0x7E0, %0" : : "r"(mask));
+
+__continue_end:
+  __compiler_barrier();
+  return ret;
+}
+
+void hero_perf_continue_all(void) {
+  __compiler_barrier();
+  asm volatile("csrs 0x7E0, %0" : : "r"(hero_perf[hero_rt_core_id()]->pcer));
+  __compiler_barrier();
+}
+
+int hero_perf_read(const hero_perf_event_t event) {
   __compiler_barrier();
 
+  int retval = 0;
   uint32_t val;
   switch (event) {
-    case hero_perf_event_load_local:      asm volatile("csrr %0, 0x785" : "=r" (val)); break;
-    case hero_perf_event_store_local:     asm volatile("csrr %0, 0x786" : "=r" (val)); break;
+    case hero_perf_event_load:            asm volatile("csrr %0, 0x785" : "=r" (val)); break;
+    case hero_perf_event_store:           asm volatile("csrr %0, 0x786" : "=r" (val)); break;
     case hero_perf_event_load_external:   asm volatile("csrr %0, 0x78C" : "=r" (val)); break;
     case hero_perf_event_store_external:  asm volatile("csrr %0, 0x78D" : "=r" (val)); break;
     default:
-      printf("Error: Unsupported event %d!\n", event);
-      val = 0;
+      retval = -HERO_EINVAL;
   }
+  if (retval < 0) goto __read_end;
+  if (val > INT32_MAX)
+    retval = -HERO_EOVERFLOW;
+  else
+    retval = (int)val;
 
+__read_end:
   __compiler_barrier();
-  return val;
+  return retval;
 }
 
 // -------------------------------------------------------------------------- //

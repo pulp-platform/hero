@@ -20,6 +20,15 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+// Error codes that are relevant from this library.  Names and values inspired by (but not
+// guaranteed to be consistent with) the Linux kernel.
+#define HERO_ENOMEM     12
+#define HERO_EBUSY      16
+#define HERO_ENODEV     19
+#define HERO_EINVAL     22
+#define HERO_EOVERFLOW  75
+#define HERO_EALREADY  114
+
 // If LLVM, use our address space support, otherwise fall back to bit-compatible
 // data types.
 #if defined(__llvm__)
@@ -211,17 +220,109 @@ int32_t hero_rt_core_id(void);
  */
 int32_t hero_get_clk_counter(void);
 
+/** @name Performance Measurement API
+ *
+ * @{
+ */
+
+/** Performance Measurement Events
+ */
 typedef enum {
-  hero_perf_event_load_local,
-  hero_perf_event_store_local,
+  /// Number of loads by a core.  Misaligned accesses are counted twice.
+  hero_perf_event_load,
+  /// Number of stores by a core.  Misaligned accesses are counted twice.
+  hero_perf_event_store,
+  /// Number of loads from non-local memory by a core.  Misaligned accesses are counted twice.
   hero_perf_event_load_external,
+  /// Number of stores to non-local memory by a core.  Misaligned accesses are counted twice.
   hero_perf_event_store_external
 } hero_perf_event_t;
 
-void hero_perf_reset(hero_perf_event_t event);
-void hero_perf_continue(hero_perf_event_t event);
-void hero_perf_pause(hero_perf_event_t event);
-uint32_t hero_perf_read(hero_perf_event_t event);
+/** Initialize the performance measurement library and hardware counters for a specific core.
+ *
+ *  This function MUST be called before any other `hero_perf_*` functions are called on a core!
+ *  That is, you must call this function on every core on which you want to call `hero_perf_*`
+ *  functions.
+ *
+ *  \return 0 on success;
+ *          -HERO_ENOMEM if memory allocation failed.
+ */
+int hero_perf_init(void);
+
+/** Terminate the performance library and free any resources it has taken.
+ *
+ *  After this function has been called, `hero_perf_init` MUST be called before any other
+ *  `hero_perf_*` function (with the same conditions as `hero_perf_init`).
+ */
+void hero_perf_term(void);
+
+/** Allocate a counter for an event.
+ *
+ *  This function assigns the given event to a free hardware counter and resets the counter.
+ *
+ *  \return 0 on success;
+ *          -HERO_EBUSY if there are no free counters available;
+ *          -HERO_ENODEV if the event is not supported by the hardware.
+ */
+int hero_perf_alloc(hero_perf_event_t event);
+
+/** Deallocate a counter for an event.
+ *
+ * \return Same as `hero_perf_enable`.
+ */
+int hero_perf_dealloc(hero_perf_event_t event);
+
+/** Reset the counter for an event.
+ *
+ *  This does not disable the counter if it was enabled.
+ *
+ *  \return 0 on success;
+ *          -HERO_EINVAL if no counter is allocated for this event.
+ */
+int hero_perf_reset(hero_perf_event_t event);
+
+/** Reset all counters.
+ */
+void hero_perf_reset_all(void);
+
+/** Pause counting an event for which a counter has been allocated.
+ *
+ *  \return 0 on success;
+ *          -HERO_ENODEV if the event is not supported by the hardware;
+ *          -HERO_EINVAL if no counter is allocated for this event.
+ */
+int hero_perf_pause(hero_perf_event_t event);
+
+/** Pause counting all events.
+ *
+ *  This function is designed to pause all counters as promptly and closely together as possible.
+ *  It takes the first of the following actions that is supported by the hardware:
+ *  - Stop all allocated counters together.
+ *  - Stop all counters together.
+ *  - Stop each allocated counter, one after another.
+ */
+void hero_perf_pause_all(void);
+
+/** Continue counting an event for which a counter has been allocated.
+ *
+ *  \return Same as `hero_perf_pause`.
+ */
+int hero_perf_continue(hero_perf_event_t event);
+
+/** Continue counting all allocated events.
+ */
+void hero_perf_continue_all(void);
+
+/** Read the counter value for an event.
+ *
+ *  \return >=0 counter value on success;
+ *          -HERO_EINVAL if no counter is allocated for this event;
+ *          -HERO_EOVERFLOW if the counter overflowed.
+ */
+int hero_perf_read(hero_perf_event_t event);
+
+//!@}
+
 
 //FIXME: hero_rt_info();
 //FIXME: hero_rt_error();
