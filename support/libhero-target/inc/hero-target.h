@@ -207,10 +207,6 @@ void hero_l3free(HOST_VOID_PTR a);
  */
 int32_t hero_rt_core_id(void);
 
-/** Reset clock counter
- */
-void hero_reset_clk_counter(void);
-
 /** Get clock counter
  */
 int32_t hero_get_clk_counter(void);

@@ -440,13 +440,6 @@ hero_rt_core_id(void)
   return rt_core_id();
 }
 
-void
-hero_reset_clk_counter(void)
-{
-  reset_timer();
-  start_timer();
-}
-
 int32_t
 hero_get_clk_counter(void)
 {
