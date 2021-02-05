@@ -10,15 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
-- hardware:
+- Hardware:
   - Upgrade `tech_cells_generic` dependency to current `master`.
   - Replace custom `sram` with `tc_sram` from the `tech_cells_generic` repository.
 
 ### Fixed
-- hardware: Improve compatibility with Synopsys DC 2019.2 and Morty 0.5.0.
+- Hardware:
+  - RI5CY/CV32E40P core: Fix clearing of performance CSRs.
+  - Improve compatibility with Synopsys DC 2019.2 and Morty 0.5.0.
 
 ### Removed
-- hardware: Remove deprecated `fpga-support` dependency.
+- Hardware: Remove deprecated `fpga-support` dependency.
 
 
 ## v0.1.3 - 2021-01-11
