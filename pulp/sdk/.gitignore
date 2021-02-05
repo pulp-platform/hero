@@ -8,6 +8,7 @@ __pycache__
 !/runtime/archi
 !/runtime/archi-host
 !/runtime/hal
+!/runtime/libgomp
 !/runtime/libomptarget-pulp-rtl
 !/runtime/libvmm
 !/runtime/pulp-rt

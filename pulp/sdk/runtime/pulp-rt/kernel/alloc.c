@@ -130,9 +130,17 @@ void *rt_user_alloc(rt_alloc_t *a, int size)
       return (void *)pt;
     } else {
       // The free block is bigger than needed
-      // Return the end of the block in order to just update the free block size
-      void *result = (void *)((char *)pt + pt->size - size);
-      pt->size = pt->size - size;
+      // Return the beginning of the block to be contiguous with statically allocated data
+      void *result = (void *)((char *)pt);
+      rt_alloc_chunk_t *new_pt = (rt_alloc_chunk_t *)((char *)pt + size);
+      new_pt->size = pt->size - size;
+      new_pt->next = pt->next;
+
+      if (prev)
+        prev->next = new_pt;
+      else
+        a->first_free = new_pt;
+
       rt_trace(RT_TRACE_ALLOC, "Allocated memory chunk (alloc: %p, base: %p)\n", a, result);
       return result;
     }
@@ -353,6 +361,74 @@ void __rt_allocs_init()
 #endif
 }
 
+// Compute canary value for a pointer.
+static inline uint8_t canary(const void* const ptr) {
+  return (uint32_t)ptr & 0xFF;
+}
+
+typedef struct {
+  size_t size;
+  uint8_t canary;
+} canary_and_size_t;
+
+// Encode canary and size into 32-bit value.
+static inline uint32_t canary_and_size_encode(const void* const ptr, const size_t size) {
+  return (size << 8) | canary(ptr);
+}
+
+// Decode 32-bit value into canary and size.
+static inline canary_and_size_t canary_and_size_decode(const uint32_t val) {
+  return (canary_and_size_t){
+    .canary = val & 0xFF,
+    .size = val >> 8
+  };
+}
+
+static void *domain_malloc(const size_t _size, const int domain)
+{
+  const size_t size = _size + 4;
+  if (size >= (1 << 24)) {
+    // Size exceeds maximum value that can be stored next to canary.
+    return NULL;
+  }
+
+  void * ptr = rt_alloc(domain, size);
+  if ((uint32_t) ptr == 0x0)
+    return (void *) 0x0;
+
+  // Store canary in first byte of memory segment, then size in next three bytes.
+  *(uint32_t *)(ptr) = canary_and_size_encode(ptr, size);
+
+  void *user_ptr = (void *)(((uint32_t *)ptr)+1);
+
+  return user_ptr;
+}
+
+static void domain_free(void* const ptr, const int domain)
+{
+  void *alloc_ptr = (void *)(((uint32_t *)ptr)-1);
+
+  // Retrieve canary and size.
+  const canary_and_size_t canary_and_size = canary_and_size_decode(*(const uint32_t*)alloc_ptr);
+
+  // Ensure canary is valid.
+  if (canary_and_size.canary != canary(alloc_ptr)) {
+    printf("Memory overflow detected at %p due to corrupt fragment!\n", alloc_ptr);
+    abort();
+  }
+
+  rt_free(domain, alloc_ptr, canary_and_size.size);
+}
+
+void *malloc(size_t size)
+{
+  return domain_malloc(size, RT_ALLOC_FC_DATA);
+}
+
+void free(void *ptr)
+{
+  domain_free(ptr, RT_ALLOC_FC_DATA);
+}
 
 #if defined(ARCHI_HAS_CLUSTER)
 
@@ -400,5 +476,32 @@ void rt_free_cluster(rt_alloc_e flags, void *chunk, int size, rt_free_req_t *req
   __rt_cluster_push_fc_event(&req->event);
 }
 
+#endif
+
+#if defined(ARCHI_HAS_L1)
+
+void *l1malloc(size_t size)
+{
+  return domain_malloc(size, RT_ALLOC_CL_DATA);
+}
+
+void l1free(void *ptr)
+{
+  domain_free(ptr, RT_ALLOC_CL_DATA);
+}
+
+#endif
+
+#if defined(ARCHI_HAS_L2)
+
+void *l2malloc(size_t size)
+{
+  return domain_malloc(size, RT_ALLOC_L2_CL_DATA);
+}
+
+void l2free(void *ptr)
+{
+  domain_free(ptr, RT_ALLOC_L2_CL_DATA);
+}
 
 #endif

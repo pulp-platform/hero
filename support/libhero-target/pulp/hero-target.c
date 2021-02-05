@@ -18,7 +18,7 @@
 #include <hero-target.h>
 #include <pulp.h>
 #include <bench/bench.h>
-#include <libgomp/pulp/memutils.h>
+#include <rt/rt_alloc.h>
 #include <archi-host/pgtable_hwdef.h>
 #include <vmm/vmm.h>
 
