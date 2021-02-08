@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Hardware:
   - RI5CY/CV32E40P core: Fix clearing of performance CSRs.
+  - PULP cluster: Do not count accesses to the TRYX register as external memory accesses.  Even
+    though such accesses target a peripheral instead of the TCDM, they have the same latency as a
+    TCDM access, and they do not access any external memory.  Thus, counting them as external
+    access is misleading and disturbs measurements of real external accesses.
   - Improve compatibility with Synopsys DC 2019.2 and Morty 0.5.0.
 - PULP runtime: Update memory allocator from upstream to fix memory that was not freed.
 
