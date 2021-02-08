@@ -14,7 +14,6 @@
 * limitations under the License.
 */
 
-#include <assert.h>
 #include <stdbool.h>
 #include <hero-target.h>
 #include <pulp.h>
@@ -525,9 +524,11 @@ int hero_perf_alloc(const hero_perf_event_t event) {
   hero_perf[hero_rt_core_id()]->pcer |= mask;
 
   int ret = hero_perf_pause(event);
-  assert(ret >= 0);
+  if (ret != 0)
+    return -HERO_EBUSY;
   ret = hero_perf_reset(event);
-  assert(ret >= 0);
+  if (ret != 0)
+    return -HERO_EBUSY;
 
   return 0;
 }
