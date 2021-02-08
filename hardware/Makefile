@@ -59,7 +59,7 @@ vsim/compile.tcl: bender
 		| grep -v "set ROOT" >> $@
 
 bender: Makefile
-	curl --proto '=https' --tlsv1.2 -sSf https://fabianschuiki.github.io/bender/init | sh -s 0.21.0
+	curl --proto '=https' --tlsv1.2 -sSf https://pulp-platform.github.io/bender/init | sh -s 0.21.0
 	touch bender
 
 # --------------
