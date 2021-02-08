@@ -6,13 +6,16 @@ unsigned local_accesses(void)
   // Initialize pointer to L1 (and alias) and allocate counters.
   volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
   volatile uint32_t* const l1_alias = (volatile __device uint32_t*)test_l1_alias_base();
+  unsigned n_errors = 0;
   if (hero_perf_alloc(hero_perf_event_load) != 0) {
     printf("Error allocating counter for loads!\n");
-    return 1;
+    n_errors += 1;
+    goto __ret;
   }
   if (hero_perf_alloc(hero_perf_event_store) != 0) {
     printf("Error allocating counter for stores!\n");
-    return 1;
+    n_errors += 1;
+    goto __dealloc_loads;
   }
 
   // Start counters, do two reads and three writes, and pause counters.
@@ -35,18 +38,19 @@ unsigned local_accesses(void)
   const uint32_t store_local = hero_perf_read(hero_perf_event_store);
 
   // Evaluate result.
-  unsigned n_errors = 0;
   n_errors += condition_or_printf(load_local == 2,
       "hero_perf_event_load_local was %d instead of 2", load_local);
   n_errors += condition_or_printf(store_local == 3,
       "hero_perf_event_store_local was %d instead of 3", store_local);
 
   // Deallocate counters.
-  n_errors += condition_or_printf(hero_perf_dealloc(hero_perf_event_load) == 0,
-      "Error deallocating counter for loads");
   n_errors += condition_or_printf(hero_perf_dealloc(hero_perf_event_store) == 0,
       "Error deallocating counter for stores");
+__dealloc_loads:
+  n_errors += condition_or_printf(hero_perf_dealloc(hero_perf_event_load) == 0,
+      "Error deallocating counter for loads");
 
+__ret:
   return n_errors;
 }
 
@@ -56,21 +60,26 @@ unsigned external_accesses(void)
   volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
   volatile uint32_t* const l2 = (volatile __device uint32_t*)test_l2_base();
   volatile uint32_t* const dram = (volatile __device uint32_t*)test_dram_base();
+  unsigned n_errors = 0;
   if (hero_perf_alloc(hero_perf_event_load) != 0) {
     printf("Error allocating counter for loads!\n");
-    return 1;
+    n_errors += 1;
+    goto __ret;
   }
   if (hero_perf_alloc(hero_perf_event_store) != 0) {
     printf("Error allocating counter for stores!\n");
-    return 1;
+    n_errors += 1;
+    goto __dealloc_loads;
   }
   if (hero_perf_alloc(hero_perf_event_load_external) != 0) {
     printf("Error allocating counter for external loads!\n");
-    return 1;
+    n_errors += 1;
+    goto __dealloc_stores_and_loads;
   }
   if (hero_perf_alloc(hero_perf_event_store_external) != 0) {
     printf("Error allocating counter for external stores!\n");
-    return 1;
+    n_errors += 1;
+    goto __dealloc_external_loads_and_stores_and_loads;
   }
 
   // Start counters, do five reads, of which four are external, and seven writes, of which six are
@@ -103,7 +112,6 @@ unsigned external_accesses(void)
   const uint32_t store_external = hero_perf_read(hero_perf_event_store_external);
 
   // Evaluate result.
-  unsigned n_errors = 0;
   n_errors += condition_or_printf(load_external == 4,
       "hero_perf_event_load_external was %d instead of 4", load_external);
   n_errors += condition_or_printf(load == 5,
@@ -114,15 +122,19 @@ unsigned external_accesses(void)
       "hero_perf_event_store was %d instead of 7", store);
 
   // Deallocate counters.
-  n_errors += condition_or_printf(hero_perf_dealloc(hero_perf_event_load) == 0,
-      "Error deallocating counter for loads");
-  n_errors += condition_or_printf(hero_perf_dealloc(hero_perf_event_store) == 0,
-      "Error deallocating counter for stores");
-  n_errors += condition_or_printf(hero_perf_dealloc(hero_perf_event_load_external) == 0,
-      "Error deallocating counter for external loads");
   n_errors += condition_or_printf(hero_perf_dealloc(hero_perf_event_store_external) == 0,
       "Error deallocating counter for external stores");
+__dealloc_external_loads_and_stores_and_loads:
+  n_errors += condition_or_printf(hero_perf_dealloc(hero_perf_event_load_external) == 0,
+      "Error deallocating counter for external loads");
+__dealloc_stores_and_loads:
+  n_errors += condition_or_printf(hero_perf_dealloc(hero_perf_event_store) == 0,
+      "Error deallocating counter for stores");
+__dealloc_loads:
+  n_errors += condition_or_printf(hero_perf_dealloc(hero_perf_event_load) == 0,
+      "Error deallocating counter for loads");
 
+__ret:
   return n_errors;
 }
 
