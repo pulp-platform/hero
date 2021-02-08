@@ -103,6 +103,7 @@ void gemm_nn(int M, int N, int K, float ALPHA,
 
 #include "../darknet/gemm_layers.c"
 
+/*
 void gemm_zero(float ALPHA, float *A, float *B, float *C)
 {
   const int M = 16;
@@ -314,7 +315,6 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
 #endif
 }
 
-/*
 // gemm kernel offloaded to PULP without manual DMA
 void gemm_nn_noDMA(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int ldb, float *C,
              int ldc) {
@@ -482,12 +482,12 @@ void gemm_cpu(int TA, int TB, int M, int N, int K, float ALPHA, float *A, int ld
   }
   printf("Layer counter is set to %i\n", LAYER_COUNTER);
   if (!TA && !TB){
-    if (LAYER_COUNTER == 0){
-      gemm_zero(ALPHA, A, B, C);
-    }
-    else{
+    //if (LAYER_COUNTER == 0){
+      //gemm_zero(ALPHA, A, B, C);
+    //}
+    //else{
       gemm_nn(M, N, K, ALPHA, A, lda, B, ldb, C, ldc);
-    }
+    //}
   }
   else if (TA && !TB)
     gemm_tn(M, N, K, ALPHA, A, lda, B, ldb, C, ldc);

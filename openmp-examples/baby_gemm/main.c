@@ -108,8 +108,9 @@ int main(int argc, char *argv[]) {
       printf("layer not recognized!\n");
       return 1;
     } else {
-      printf("Using manual DMA!\n");
-      gemm_nn_manual_DMA(M, N, K, ALPHA, A, 0, B, 0, C, 0);
+      printf("layer not recognized!\n");
+      //printf("Using manual DMA!\n");
+      //gemm_nn_manual_DMA(M, N, K, ALPHA, A, 0, B, 0, C, 0);
     }
 
   int errors = 0;

@@ -494,7 +494,7 @@ void hero_perf_continue(const hero_perf_event_t event) {
 
 void hero_perf_pause(const hero_perf_event_t event) {
   __compiler_barrier();
-  asm volatile("csrrc x0, 0x7E0, %0" : : "r" (__pcer_mask(event)));
+  asm volatile("csrw 0x7E0, x0");
   __compiler_barrier();
 }
 
