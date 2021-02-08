@@ -22,8 +22,14 @@
 #include <stdlib.h>
 
 int measure_event(const hero_perf_event_t event) {
+  volatile uint32_t* const l3_ptr = (volatile uint32_t*)hero_l3malloc(sizeof(uint32_t));
+  if (l3_ptr == NULL) {
+    printf("Error allocating L3 memory!\n");
+    abort();
+  }
+
   int counter;
-#pragma omp target device(BIGPULP_MEMCPY) map(to : event) map(from : counter)
+#pragma omp target device(BIGPULP_MEMCPY) map(to : event, l3_ptr) map(from : counter)
   {
     volatile uint32_t* const l1_ptr = (__device volatile uint32_t*)hero_l1malloc(sizeof(uint32_t));
     if (l1_ptr == NULL) {
@@ -37,18 +43,29 @@ int measure_event(const hero_perf_event_t event) {
       goto __free;
     }
 
+    // Load pointer to local memory before measurements.
+    volatile __host uint32_t* const local_l3_ptr = l3_ptr;
+
     hero_perf_continue_all();
     // 3 local loads
     const uint32_t l1_var = *l1_ptr;
     const uint32_t l1_var_1 = *l1_ptr;
     const uint32_t l1_var_2 = *l1_ptr;
-    // 1 local stores
+    // 1 local store
     *l1_ptr = 42;
+    // 1 external load = 1 local store, 1 external load, 1 local load
+    const uint32_t l3_var_3 = *local_l3_ptr;
+    // 2 external stores = 2 local stores, 2 external stores, 2 local loads
+    *local_l3_ptr = 17;
+    *local_l3_ptr = 483;
     hero_perf_pause_all();
 
     // 1 local load and 1 local store, which must not be counted.
     *l1_ptr = 178;
-    const uint32_t l1_var_3 = *l1_ptr;
+    const uint32_t l1_var_4 = *l1_ptr;
+    // 1 external load and 1 external store, which must not be counted.
+    *local_l3_ptr = 918;
+    const uint32_t l1_var_5 = *local_l3_ptr;
 
     counter = hero_perf_read(event);
 
@@ -60,6 +77,8 @@ int measure_event(const hero_perf_event_t event) {
     hero_l1free(l1_ptr);
   __end : {}
   }
+
+  hero_l3free(l3_ptr);
   return counter;
 }
 
@@ -83,10 +102,10 @@ int main(int argc, char* argv[]) {
   }
 
   unsigned n_errors = 0;
-  n_errors += measure_compare(hero_perf_event_load, "load", 3);
-  n_errors += measure_compare(hero_perf_event_store, "store", 1);
-  n_errors += measure_compare(hero_perf_event_load_external, "load_external", 0);
-  n_errors += measure_compare(hero_perf_event_store_external, "store_external", 0);
+  n_errors += measure_compare(hero_perf_event_load, "load", 6);
+  n_errors += measure_compare(hero_perf_event_store, "store", 4);
+  n_errors += measure_compare(hero_perf_event_load_external, "load_external", 1);
+  n_errors += measure_compare(hero_perf_event_store_external, "store_external", 2);
 
 #pragma omp target device(BIGPULP_MEMCPY)
   { hero_perf_term(); }
