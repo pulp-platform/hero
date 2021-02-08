@@ -26,11 +26,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-`ifndef PULP_FPGA_EMUL
- `ifdef SYNTHESIS
-  `define ASIC_SYNTHESIS
- `endif
-`endif
+`define ASIC_SYNTHESIS
 
 module riscv_cs_registers import riscv_defines::*;
 #(
