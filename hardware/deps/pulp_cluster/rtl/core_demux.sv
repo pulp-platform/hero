@@ -548,10 +548,23 @@ module core_demux
   );
 
   // Performance Counters
-  assign perf_l2_ld_o     = data_req_to_L2 & data_gnt_from_L2 & data_wen_i;
-  assign perf_l2_st_o     = data_req_to_L2 & data_gnt_from_L2 & (~data_wen_i);
-  assign perf_l2_ld_cyc_o = data_req_to_L2 & data_wen_i;
-  assign perf_l2_st_cyc_o = data_req_to_L2 & (~data_wen_i);
+  logic perf_ext_access;
+  always_comb begin
+    perf_ext_access = data_req_to_L2;
+    if (data_req_to_L2) begin
+      if (destination == PE && addrext_i == '0) begin
+        // Peripheral access with disabled address extension
+        if (data_add_int[20:0] == 21'hBF8 || data_add_int[20:0] == 21'hBFC) begin
+          // TRYX register
+          perf_ext_access = 1'b0; // does not count as external access
+        end
+      end
+    end
+  end
+  assign perf_l2_ld_o     = perf_ext_access & data_gnt_from_L2 & data_wen_i;
+  assign perf_l2_st_o     = perf_ext_access & data_gnt_from_L2 & (~data_wen_i);
+  assign perf_l2_ld_cyc_o = perf_ext_access & data_wen_i;
+  assign perf_l2_st_cyc_o = perf_ext_access & (~data_wen_i);
 
 `ifdef PERF_CNT
   logic [31:0] STALL_TCDM;
