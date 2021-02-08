@@ -515,6 +515,10 @@ static inline uint32_t pcer_mask(const hero_perf_event_t event) {
 }
 
 int hero_perf_alloc(const hero_perf_event_t event) {
+  // The hardware only contains one counter.  If that counter is already allocated to an event,
+  // abort early.
+  if (hero_perf[hero_rt_core_id()]->pcer != 0) return -HERO_EBUSY;
+
   // Obtain PCER mask for event.
   const uint32_t mask = pcer_mask(event);
   if (mask == 0) return -HERO_ENODEV;
@@ -540,6 +544,13 @@ int hero_perf_dealloc(const hero_perf_event_t event) {
 int hero_perf_reset(const hero_perf_event_t event) {
   __compiler_barrier();
   int retval = 0;
+
+  // Abort early if no counter is allocated for the given event.
+  if ((hero_perf[hero_rt_core_id()]->pcer & pcer_mask(event)) == 0) {
+    retval = -HERO_EINVAL;
+    goto __reset_end;
+  }
+
   switch (event) {
     case hero_perf_event_load:            asm volatile("csrw 0x785, x0"); break;
     case hero_perf_event_store:           asm volatile("csrw 0x786, x0"); break;
@@ -548,6 +559,8 @@ int hero_perf_reset(const hero_perf_event_t event) {
     default:
       retval = -HERO_EINVAL;
   }
+
+__reset_end:
   __compiler_barrier();
   return retval;
 }
@@ -602,8 +615,14 @@ void hero_perf_continue_all(void) {
 
 int hero_perf_read(const hero_perf_event_t event) {
   __compiler_barrier();
-
   int retval = 0;
+
+  // Abort early if no counter is allocated for the given event.
+  if ((hero_perf[hero_rt_core_id()]->pcer & pcer_mask(event)) == 0) {
+    retval = -HERO_EINVAL;
+    goto __read_end;
+  }
+
   uint32_t val;
   switch (event) {
     case hero_perf_event_load:            asm volatile("csrr %0, 0x785" : "=r" (val)); break;
