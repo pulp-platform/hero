@@ -555,7 +555,6 @@ int hero_perf_reset(const hero_perf_event_t event) {
 void hero_perf_reset_all(void) {
   __compiler_barrier();
   asm volatile("csrw 0x79F, x0");
-  hal_timer_reset(hal_timer_cl_addr(0, 0));
   __compiler_barrier();
 }
 
