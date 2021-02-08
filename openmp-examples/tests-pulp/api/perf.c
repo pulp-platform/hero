@@ -56,7 +56,7 @@ unsigned _external_accesses(const hero_perf_event_t event, const char* event_suf
   // Initialize pointer to L1, L2, and DRAM.
   volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
   volatile uint32_t* const l2 = (volatile __device uint32_t*)test_l2_base();
-  volatile uint32_t* const dram = (volatile __device uint32_t*)test_dram_base();
+  volatile __host uint32_t* const dram = (volatile __host uint32_t*)test_dram_base();
 
   // Allocate counter.
   if (hero_perf_alloc(event) != 0) {
@@ -64,9 +64,26 @@ unsigned _external_accesses(const hero_perf_event_t event, const char* event_suf
     return 1;
   }
 
-  // Start counters, do five reads, of which four are external, and seven writes, of which six are
-  // external, and pause counters.
+  // Start counters.
   hero_perf_continue_all();
+
+  // Do some memory accesses, which give rise to loads and stores as follows:
+  //
+  // | Memory access | loads | of which external | stores | of which external |
+  // |:--------------|------:|------------------:|-------:|------------------:|
+  // | 1 L1 read     |     1 |                 0 |      0 |                 0 |
+  // | 2 L2 reads    |     2 |                 2 |      0 |                 0 |
+  // | 2 DRAM reads  | 2*2=4 |             2*1=2 |  2*1=2 |                 0 |
+  // |---------------|-------|-------------------|--------|-------------------|
+  // | 1 L1 write    |     0 |                 0 |      1 |                 0 |
+  // | 4 L2 writes   |     0 |                 0 |      4 |                 4 |
+  // | 2 DRAM writes | 2*1=2 |                 0 |  2*2=4 |             2*1=2 |
+  // |---------------|-------|-------------------|--------|-------------------|
+  // | Total         |     9 |                 4 |     11 |                 6 |
+  //
+  // The reason each DRAM read and write gives rise to 1 local store and 1 local load in addition to
+  // the external load or store is the write to the address extension register and the load from the
+  // memory access check register.
   const uint32_t foo = *l2;
   const uint32_t bar = *dram;
   const uint32_t some = *l1;
@@ -79,6 +96,8 @@ unsigned _external_accesses(const hero_perf_event_t event, const char* event_suf
   *l2 = 321;
   *dram = 9876;
   *l2 = 6709;
+
+  // Pause counters.
   hero_perf_pause_all();
 
   // Do more reads and writes, which must not be counted.
@@ -105,9 +124,9 @@ unsigned external_accesses(void)
 {
   unsigned n_errors = 0;
   n_errors += _external_accesses(hero_perf_event_load_external, "load_external", 4);
-  n_errors += _external_accesses(hero_perf_event_load, "load", 5);
+  n_errors += _external_accesses(hero_perf_event_load, "load", 9);
   n_errors += _external_accesses(hero_perf_event_store_external, "store_external", 6);
-  n_errors += _external_accesses(hero_perf_event_store, "store", 7);
+  n_errors += _external_accesses(hero_perf_event_store, "store", 11);
 
   return n_errors;
 }
