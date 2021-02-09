@@ -12,3 +12,4 @@ void gemm_18(float ALPHA, float *A, float *B, float *C);
 void gemm_21(float ALPHA, float *A, float *B, float *C);
 void gemm_22(float ALPHA, float *A, float *B, float *C);
 void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int ldb, float *C, int ldc);
+void gemm_nn_tiled(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int ldb, float *C, int ldc);
