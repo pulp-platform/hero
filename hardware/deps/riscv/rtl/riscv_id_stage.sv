@@ -1505,7 +1505,7 @@ module riscv_id_stage import riscv_defines::*; import apu_core_package::*;
         prepost_useincr_ex_o        <= prepost_useincr;
 
         data_misaligned_ex_o        <= 1'b1;
-        stack_access_o              <= stack_access;
+        stack_access_o              <= 1'b0;
       end
     end else if (mult_multicycle_i) begin
       mult_operand_c_ex_o <= alu_operand_c;
