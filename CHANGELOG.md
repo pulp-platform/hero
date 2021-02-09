@@ -21,7 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Hardware:
-  - RI5CY/CV32E40P core: Fix clearing of performance CSRs.
+  - RI5CY/CV32E40P core:
+    - Fix clearing of performance CSRs.
+    - Fix stack protector (RTL simulation only) after unaligned memory access.
   - PULP cluster: Do not count accesses to the TRYX register as external memory accesses.  Even
     though such accesses target a peripheral instead of the TCDM, they have the same latency as a
     TCDM access, and they do not access any external memory.  Thus, counting them as external
