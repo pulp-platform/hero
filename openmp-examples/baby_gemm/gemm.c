@@ -108,7 +108,7 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
       __host float *C, int ldc) {
 
   // Compute memory allocation block sizes
-  const int L1_b = 80 * 1024;
+  const int L1_b = 1024 * 1024;
   const int L1_flt = L1_b / sizeof(float);
   const int blockSize = sqrt(L1_flt / 3);
   //printf("blockSize is %i, %i\n", blockSize, blockSize);
@@ -132,7 +132,6 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
     }
   }
 
-  printf("gemm.c: C[0,0] is %f\n", C[0]);
 }
 /*
 void gemm_zero(float ALPHA, float *A, float *B, float *C)
