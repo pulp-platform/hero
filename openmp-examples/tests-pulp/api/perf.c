@@ -1,18 +1,7 @@
 #include <hero-target.h>
 #include "test.h"
 
-unsigned _local_accesses(const hero_perf_event_t event, const char* event_suffix,
-                         const unsigned expected) {
-  // Initialize pointer to L1 and L1 alias.
-  volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
-  volatile uint32_t* const l1_alias = (volatile __device uint32_t*)test_l1_alias_base();
-
-  // Allocate counter.
-  if (hero_perf_alloc(event) != 0) {
-    printf("Error allocating counter for hero_perf_event_%s!\n", event_suffix);
-    return 1;
-  }
-
+inline void local_accesses_kernel(volatile uint32_t* const l1, volatile uint32_t* const l1_alias) {
   // Start counters, do two reads and three writes, and pause counters.
   hero_perf_continue_all();
   const uint32_t foo = *l1;
@@ -27,6 +16,21 @@ unsigned _local_accesses(const hero_perf_event_t event, const char* event_suffix
   const uint32_t ba = *l1;
   *l1_alias = 3014;
   *l1 = 8606;
+}
+
+unsigned local_accesses_one_counter(const hero_perf_event_t event, const char* event_suffix,
+                                    const unsigned expected) {
+  // Initialize pointer to L1 and L1 alias.
+  volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
+  volatile uint32_t* const l1_alias = (volatile __device uint32_t*)test_l1_alias_base();
+
+  // Allocate counter.
+  if (hero_perf_alloc(event) != 0) {
+    printf("Error allocating counter for hero_perf_event_%s!\n", event_suffix);
+    return 1;
+  }
+
+  local_accesses_kernel(l1, l1_alias);
 
   // Read counter.
   const int64_t actual = hero_perf_read(event);
@@ -44,26 +48,55 @@ unsigned _local_accesses(const hero_perf_event_t event, const char* event_suffix
   return n_errors;
 }
 
-unsigned local_accesses() {
-  unsigned n_errors = 0;
-  n_errors += _local_accesses(hero_perf_event_load, "load", 2);
-  n_errors += _local_accesses(hero_perf_event_store, "store", 3);
-  return n_errors;
-}
-
-unsigned _external_accesses(const hero_perf_event_t event, const char* event_suffix,
-                            const unsigned expected) {
-  // Initialize pointer to L1, L2, and DRAM.
+unsigned local_accesses_two_counters(const unsigned expected_loads,
+                                     const unsigned expected_stores) {
+  // Initialize pointer to L1 and L1 alias.
   volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
-  volatile uint32_t* const l2 = (volatile __device uint32_t*)test_l2_base();
-  volatile __host uint32_t* const dram = (volatile __host uint32_t*)test_dram_base();
+  volatile uint32_t* const l1_alias = (volatile __device uint32_t*)test_l1_alias_base();
 
-  // Allocate counter.
-  if (hero_perf_alloc(event) != 0) {
-    printf("Error allocating counter for hero_perf_event_%s!\n", event_suffix);
+  // Allocate both counters.
+  if (hero_perf_alloc(hero_perf_event_load) != 0) {
+    printf("Error allocating counter for hero_perf_event_load!\n");
+    return 1;
+  }
+  if (hero_perf_alloc(hero_perf_event_store) != 0) {
+    printf("Error allocating counter for hero_perf_event_store!\n");
     return 1;
   }
 
+  local_accesses_kernel(l1, l1_alias);
+
+  // Read counters.
+  const int64_t actual_loads = hero_perf_read(hero_perf_event_load);
+  const int64_t actual_stores = hero_perf_read(hero_perf_event_store);
+
+  // Compare and report results.
+  unsigned n_errors = condition_or_printf(actual_loads == (int64_t)expected_loads,
+                                          "hero_perf_event_load was %d instead of %d", actual_loads,
+                                          expected_loads);
+  n_errors += condition_or_printf(actual_stores == (int64_t)expected_stores,
+                                  "hero_perf_event_store was %d instead of %d", actual_stores,
+                                  expected_stores);
+
+  // Deallocate counters.
+  n_errors += condition_or_printf(hero_perf_dealloc(hero_perf_event_load) == 0,
+                                  "Error deallocating counter for hero_perf_event_load");
+  n_errors += condition_or_printf(hero_perf_dealloc(hero_perf_event_store) == 0,
+                                  "Error deallocating counter for hero_perf_event_store");
+
+  return n_errors;
+}
+
+unsigned local_accesses() {
+  unsigned n_errors = 0;
+  n_errors += local_accesses_one_counter(hero_perf_event_load, "load", 2);
+  n_errors += local_accesses_one_counter(hero_perf_event_store, "store", 3);
+  n_errors += local_accesses_two_counters(2, 3);
+  return n_errors;
+}
+
+inline void external_accesses_kernel(volatile uint32_t* const l1, volatile uint32_t* const l2,
+                                     volatile __host uint32_t* const dram) {
   // Start counters.
   hero_perf_continue_all();
 
@@ -105,6 +138,22 @@ unsigned _external_accesses(const hero_perf_event_t event, const char* event_suf
   const uint32_t ba = *l2;
   *dram = 3014;
   *l2 = 8606;
+}
+
+unsigned external_accesses_one_counter(const hero_perf_event_t event, const char* event_suffix,
+                                       const unsigned expected) {
+  // Initialize pointer to L1, L2, and DRAM.
+  volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
+  volatile uint32_t* const l2 = (volatile __device uint32_t*)test_l2_base();
+  volatile __host uint32_t* const dram = (volatile __host uint32_t*)test_dram_base();
+
+  // Allocate counter.
+  if (hero_perf_alloc(event) != 0) {
+    printf("Error allocating counter for hero_perf_event_%s!\n", event_suffix);
+    return 1;
+  }
+
+  external_accesses_kernel(l1, l2, dram);
 
   // Read counter.
   const int64_t actual = hero_perf_read(event);
@@ -122,12 +171,61 @@ unsigned _external_accesses(const hero_perf_event_t event, const char* event_suf
   return n_errors;
 }
 
+unsigned external_accesses_two_counters(const hero_perf_event_t event1, const char* event1_suffix,
+                                        const unsigned expected1, const hero_perf_event_t event2,
+                                        const char* event2_suffix, const unsigned expected2) {
+  // Initialize pointer to L1, L2, and DRAM.
+  volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
+  volatile uint32_t* const l2 = (volatile __device uint32_t*)test_l2_base();
+  volatile __host uint32_t* const dram = (volatile __host uint32_t*)test_dram_base();
+
+  // Allocate counters.
+  if (hero_perf_alloc(event1) != 0) {
+    printf("Error allocating counter for hero_perf_event_%s!\n", event1_suffix);
+    return 1;
+  }
+  if (hero_perf_alloc(event2) != 0) {
+    printf("Error allocating counter for hero_perf_event_%s!\n", event2_suffix);
+    return 1;
+  }
+
+  external_accesses_kernel(l1, l2, dram);
+
+  // Read counters.
+  const int64_t actual1 = hero_perf_read(event1);
+  const int64_t actual2 = hero_perf_read(event2);
+
+  // Compare and report results.
+  unsigned n_errors =
+      condition_or_printf(actual1 == (int64_t)expected1, "hero_perf_event_%s was %d instead of %d",
+                          event1_suffix, actual1, expected1);
+  n_errors +=
+      condition_or_printf(actual2 == (int64_t)expected2, "hero_perf_event_%s was %d instead of %d",
+                          event1_suffix, actual2, expected2);
+
+  // Deallocate counters.
+  n_errors +=
+      condition_or_printf(hero_perf_dealloc(event1) == 0,
+                          "Error deallocating counter for hero_perf_event_%s", event1_suffix);
+  n_errors +=
+      condition_or_printf(hero_perf_dealloc(event2) == 0,
+                          "Error deallocating counter for hero_perf_event_%s", event2_suffix);
+
+  return n_errors;
+}
+
 unsigned external_accesses(void) {
   unsigned n_errors = 0;
-  n_errors += _external_accesses(hero_perf_event_load_external, "load_external", 4);
-  n_errors += _external_accesses(hero_perf_event_load, "load", 9);
-  n_errors += _external_accesses(hero_perf_event_store_external, "store_external", 6);
-  n_errors += _external_accesses(hero_perf_event_store, "store", 11);
+  n_errors += external_accesses_one_counter(hero_perf_event_load_external, "load_external", 4);
+  n_errors += external_accesses_one_counter(hero_perf_event_load, "load", 9);
+  n_errors += external_accesses_one_counter(hero_perf_event_store_external, "store_external", 6);
+  n_errors += external_accesses_one_counter(hero_perf_event_store, "store", 11);
+  n_errors += external_accesses_two_counters(hero_perf_event_load_external, "load_external", 4,
+                                             hero_perf_event_load, "load", 9);
+  n_errors += external_accesses_two_counters(hero_perf_event_load_external, "load_external", 4,
+                                             hero_perf_event_store_external, "store_external", 6);
+  n_errors += external_accesses_two_counters(hero_perf_event_store, "store", 11,
+                                             hero_perf_event_load_external, "load_external", 4);
 
   return n_errors;
 }
