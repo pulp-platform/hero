@@ -43,8 +43,6 @@ __omp_offloading_803_14c1cfe_gemm_15_l293
 source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh
 ## End of region to be commented out
 
-./compile
-
 source ${HERO_INSTALL}/../env/exilzcu102.sh
 make default-as=pulp clean all
 scp baby_gemm root@hero-zcu102-06:/home/root/mmaxim/
