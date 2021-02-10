@@ -38,7 +38,7 @@ unsigned local_accesses_one_counter(const hero_perf_event_t event, const char* e
   // Compare and report result.
   unsigned n_errors =
       condition_or_printf(actual == (int64_t)expected, "hero_perf_event_%s was %d instead of %d",
-                          event_suffix, actual, expected);
+                          event_suffix, (int32_t)actual, expected);
 
   // Deallocate counter.
   n_errors +=
@@ -72,11 +72,11 @@ unsigned local_accesses_two_counters(const unsigned expected_loads,
 
   // Compare and report results.
   unsigned n_errors = condition_or_printf(actual_loads == (int64_t)expected_loads,
-                                          "hero_perf_event_load was %d instead of %d", actual_loads,
-                                          expected_loads);
+                                          "hero_perf_event_load was %d instead of %d",
+                                          (int32_t)actual_loads, expected_loads);
   n_errors += condition_or_printf(actual_stores == (int64_t)expected_stores,
-                                  "hero_perf_event_store was %d instead of %d", actual_stores,
-                                  expected_stores);
+                                  "hero_perf_event_store was %d instead of %d",
+                                  (int32_t)actual_stores, expected_stores);
 
   // Deallocate counters.
   n_errors += condition_or_printf(hero_perf_dealloc(hero_perf_event_load) == 0,
@@ -161,7 +161,7 @@ unsigned external_accesses_one_counter(const hero_perf_event_t event, const char
   // Compare and report result.
   unsigned n_errors =
       condition_or_printf(actual == (int64_t)expected, "hero_perf_event_%s was %d instead of %d",
-                          event_suffix, actual, expected);
+                          event_suffix, (int32_t)actual, expected);
 
   // Deallocate counter.
   n_errors +=
@@ -198,10 +198,10 @@ unsigned external_accesses_two_counters(const hero_perf_event_t event1, const ch
   // Compare and report results.
   unsigned n_errors =
       condition_or_printf(actual1 == (int64_t)expected1, "hero_perf_event_%s was %d instead of %d",
-                          event1_suffix, actual1, expected1);
+                          event1_suffix, (int32_t)actual1, expected1);
   n_errors +=
       condition_or_printf(actual2 == (int64_t)expected2, "hero_perf_event_%s was %d instead of %d",
-                          event1_suffix, actual2, expected2);
+                          event1_suffix, (int32_t)actual2, expected2);
 
   // Deallocate counters.
   n_errors +=
