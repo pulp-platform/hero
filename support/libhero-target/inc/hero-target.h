@@ -228,6 +228,11 @@ int32_t hero_get_clk_counter(void);
 /** Performance Measurement Events
  */
 typedef enum {
+  /// Number of clock cycles for a core.  Cannot be used as an indication of wall-clock time due to
+  /// clock gating.
+  hero_perf_event_cycle,
+  /// Number of instructions retired by a core.
+  hero_perf_event_instr_retired,
   /// Number of loads by a core.  Misaligned accesses are counted twice.
   hero_perf_event_load,
   /// Number of stores by a core.  Misaligned accesses are counted twice.
@@ -258,17 +263,20 @@ void hero_perf_term(void);
 
 /** Allocate a counter for an event.
  *
- *  This function assigns the given event to a free hardware counter and resets the counter.
+ *  This function allocates a free hardware counter, assigns the event to the counter, and resets
+ *  the counter.
  *
  *  \return 0 on success;
  *          -HERO_EBUSY if there are no free counters available;
- *          -HERO_ENODEV if the event is not supported by the hardware.
+ *          -HERO_ENODEV if the event is not supported by the hardware;
+ *          -HERO_EALREADY if a counter is already allocated for the event.
  */
 int hero_perf_alloc(hero_perf_event_t event);
 
 /** Deallocate a counter for an event.
  *
- * \return Same as `hero_perf_enable`.
+ *  \return 0 on success;
+ *          -HERO_EALREADY if no counter had been allocated for the event.
  */
 int hero_perf_dealloc(hero_perf_event_t event);
 
@@ -288,7 +296,6 @@ void hero_perf_reset_all(void);
 /** Pause counting an event for which a counter has been allocated.
  *
  *  \return 0 on success;
- *          -HERO_ENODEV if the event is not supported by the hardware;
  *          -HERO_EINVAL if no counter is allocated for this event.
  */
 int hero_perf_pause(hero_perf_event_t event);
