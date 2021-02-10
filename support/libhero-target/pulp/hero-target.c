@@ -614,7 +614,7 @@ void hero_perf_continue_all(void) {
   __compiler_barrier();
 }
 
-int hero_perf_read(const hero_perf_event_t event) {
+int64_t hero_perf_read(const hero_perf_event_t event) {
   __compiler_barrier();
   int retval = 0;
 
@@ -641,7 +641,7 @@ int hero_perf_read(const hero_perf_event_t event) {
 
 __read_end:
   __compiler_barrier();
-  return retval;
+  return (int64_t)retval;
 }
 
 // -------------------------------------------------------------------------- //

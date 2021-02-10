@@ -30,10 +30,10 @@ unsigned _local_accesses(const hero_perf_event_t event, const char* event_suffix
   *l1 = 8606;
 
   // Read counter.
-  const uint32_t actual = hero_perf_read(event);
+  const int64_t actual = hero_perf_read(event);
 
   // Compare and report result.
-  unsigned n_errors = condition_or_printf(actual == expected,
+  unsigned n_errors = condition_or_printf(actual == (int64_t)expected,
       "hero_perf_event_%s was %d instead of %d", event_suffix, actual, expected);
 
   // Deallocate counter.
@@ -107,10 +107,10 @@ unsigned _external_accesses(const hero_perf_event_t event, const char* event_suf
   *l2 = 8606;
 
   // Read counter.
-  const uint32_t actual = hero_perf_read(event);
+  const int64_t actual = hero_perf_read(event);
 
   // Compare and report result.
-  unsigned n_errors = condition_or_printf(actual == expected,
+  unsigned n_errors = condition_or_printf(actual == (int64_t)expected,
       "hero_perf_event_%s was %d instead of %d", event_suffix, actual, expected);
 
   // Deallocate counter.

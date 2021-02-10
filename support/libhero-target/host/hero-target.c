@@ -142,7 +142,7 @@ void hero_perf_pause_all(void) {
 void hero_perf_continue_all(void) {
 }
 
-int hero_perf_read(const hero_perf_event_t event) {
+int64_t hero_perf_read(const hero_perf_event_t event) {
   return -HERO_EINVAL;
 }
 

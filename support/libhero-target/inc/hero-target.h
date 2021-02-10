@@ -319,7 +319,7 @@ void hero_perf_continue_all(void);
  *          -HERO_EINVAL if no counter is allocated for this event;
  *          -HERO_EOVERFLOW if the counter overflowed.
  */
-int hero_perf_read(hero_perf_event_t event);
+int64_t hero_perf_read(hero_perf_event_t event);
 
 //!@}
 
