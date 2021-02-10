@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+
+### Changed
+
+### Fixed
+
+
+## v0.1.4 - 2021-02-10
+
+### Added
 - PULP runtime: Add a simple heap overflow protection mechanism (with very low runtime overhead).
 
 ### Changed
