@@ -37,6 +37,7 @@ export HERCULES_DMA_ENFORCE\n\
 export HERCULES_QUIET\n\
 export HERCULES_NO_INTERVAL_CONTROLFLOW\n\
 export HERCULES_WHITELIST="main gemm_nn gemm_cpu gemm\n\
+forward_convolutional_layer forward_network network_predict network_predict_image main\n\
 ' + gemms + '.omp_outlined.\n\
 .omp_outlined..1\n\
 .omp_outlined..2\n\

@@ -92,7 +92,8 @@ int main(int argc, char *argv[]) {
 #endif // TIME_LAYERS
 
   // Hack to call the manual layer (non-PREM only!)
-  LAYER_COUNTER = -1;
+  // LAYER_COUNTER = -1;
+
   if (LAYER_COUNTER == 0) {
       gemm_0(ALPHA, A, B, C);
     } else if (LAYER_COUNTER == 2) {
@@ -123,13 +124,13 @@ int main(int argc, char *argv[]) {
       printf("layer not recognized!\n");
       return 1;
     } else {
-      //printf("Using manual DMA!\n");
+      // Call manual layer
       gemm_nn_tiled(M, N, K, ALPHA, A, 0, B, 0, C, 0);
     }
 
 #ifdef TIME_LAYERS
   clock_gettime(CLOCK_REALTIME, &toc);
-  printf("%lf\n", timediff(tic, toc));
+  printf("execution time: %lf\n", timediff(tic, toc));
 #endif // TIME_LAYERS
 
 
