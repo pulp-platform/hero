@@ -2,8 +2,7 @@
 #include "test.h"
 
 unsigned _local_accesses(const hero_perf_event_t event, const char* event_suffix,
-    const unsigned expected)
-{
+                         const unsigned expected) {
   // Initialize pointer to L1 and L1 alias.
   volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
   volatile uint32_t* const l1_alias = (volatile __device uint32_t*)test_l1_alias_base();
@@ -33,12 +32,14 @@ unsigned _local_accesses(const hero_perf_event_t event, const char* event_suffix
   const int64_t actual = hero_perf_read(event);
 
   // Compare and report result.
-  unsigned n_errors = condition_or_printf(actual == (int64_t)expected,
-      "hero_perf_event_%s was %d instead of %d", event_suffix, actual, expected);
+  unsigned n_errors =
+      condition_or_printf(actual == (int64_t)expected, "hero_perf_event_%s was %d instead of %d",
+                          event_suffix, actual, expected);
 
   // Deallocate counter.
-  n_errors += condition_or_printf(hero_perf_dealloc(event) == 0,
-      "Error deallocating counter for hero_perf_event_%s", event_suffix);
+  n_errors +=
+      condition_or_printf(hero_perf_dealloc(event) == 0,
+                          "Error deallocating counter for hero_perf_event_%s", event_suffix);
 
   return n_errors;
 }
@@ -51,8 +52,7 @@ unsigned local_accesses() {
 }
 
 unsigned _external_accesses(const hero_perf_event_t event, const char* event_suffix,
-    const unsigned expected)
-{
+                            const unsigned expected) {
   // Initialize pointer to L1, L2, and DRAM.
   volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
   volatile uint32_t* const l2 = (volatile __device uint32_t*)test_l2_base();
@@ -110,18 +110,19 @@ unsigned _external_accesses(const hero_perf_event_t event, const char* event_suf
   const int64_t actual = hero_perf_read(event);
 
   // Compare and report result.
-  unsigned n_errors = condition_or_printf(actual == (int64_t)expected,
-      "hero_perf_event_%s was %d instead of %d", event_suffix, actual, expected);
+  unsigned n_errors =
+      condition_or_printf(actual == (int64_t)expected, "hero_perf_event_%s was %d instead of %d",
+                          event_suffix, actual, expected);
 
   // Deallocate counter.
-  n_errors += condition_or_printf(hero_perf_dealloc(event) == 0,
-      "Error deallocating counter for hero_perf_event_%s", event_suffix);
+  n_errors +=
+      condition_or_printf(hero_perf_dealloc(event) == 0,
+                          "Error deallocating counter for hero_perf_event_%s", event_suffix);
 
   return n_errors;
 }
 
-unsigned external_accesses(void)
-{
+unsigned external_accesses(void) {
   unsigned n_errors = 0;
   n_errors += _external_accesses(hero_perf_event_load_external, "load_external", 4);
   n_errors += _external_accesses(hero_perf_event_load, "load", 9);
@@ -131,8 +132,7 @@ unsigned external_accesses(void)
   return n_errors;
 }
 
-unsigned test_perf(void)
-{
+unsigned test_perf(void) {
 
   if (hero_rt_core_id() != 0) {
     return 0;
