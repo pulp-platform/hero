@@ -115,7 +115,7 @@ module pulp_tb #(
     .AXI_DATA_WIDTH (AXI_DW),
     .AXI_ID_WIDTH   (AXI_IW),
     .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
-  ) from_pulp[1:0] ();
+  ) from_pulp[0:0] ();
   AXI_BUS #(
     .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
@@ -141,7 +141,7 @@ module pulp_tb #(
   };
   // Crossbar Configuration and Instantiation
   localparam axi_pkg::xbar_cfg_t XbarCfg = '{
-    NoSlvPorts:         2,
+    NoSlvPorts:         1,
     NoMstPorts:         2,
     MaxMstTrans:        8,
     MaxSlvTrans:        8,
