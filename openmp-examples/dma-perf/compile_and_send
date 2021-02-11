@@ -1,10 +1,8 @@
 #!/bin/bash
 set -o errexit
 
-export HERO_INSTALL=/scratch/mmaxim/hero/install
 export HERCULES_INSTALL=${HERO_INSTALL}
 export HERCULES_ARCH="PULP"
-export CMUX_ROOT="/scratch/mmaxim/cmux"
 export HERCULES_FORCE_FOOTPRINT_DENSE=1
 export HERCULES_CPU_MEMORY_SIZE=32768
 export HERCULES_DISQ_THRESHOLD=0
@@ -16,4 +14,4 @@ source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh
 
 source ${HERO_INSTALL}/../env/exilzcu102.sh
 make default-as=pulp clean all
-scp dma-perf root@hero-zcu102-06:/home/root/mmaxim/
+scp dma-perf root@hero-zcu102-06:${HERO_TARGET_PATH_APPS}

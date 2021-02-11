@@ -1,6 +1,5 @@
 #! /bin/bash
 # This script crosscompiles benchmarks and sends them to the Zynq board
-export HERO_INSTALL="/scratch/mmaxim/hero/install"
 
 if [ $# -ne 2 ]
 then
@@ -42,7 +41,6 @@ then
     export HERCULES_INSTALL=${HERO_INSTALL}
     source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh
     export HERCULES_ARCH="PULP"
-    export CMUX_ROOT="/scratch/mmaxim/hero/cmux"
     export HERCULES_FORCE_FOOTPRINT_DENSE=1
     export HERCULES_CPU_MEMORY_SIZE=32768
     export HERCULES_DMA_ENFORCE

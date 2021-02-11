@@ -1,5 +1,5 @@
 root@hero-zcu102-06
-/home/root/mmaxim/
+${HERO_TARGET_PATH_APPS}
 2048
 axpy
 

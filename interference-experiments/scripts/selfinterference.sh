@@ -10,7 +10,7 @@ progs=(axpy)
 back=(seq)
 samples=8
 board="root@hero-zcu102-06"
-routine="cd /home/root/mmaxim; \
+routine="cd ${HERO_TARGET_PATH}; \
          source ./sourceme.sh; \
          ./prepare_board.sh &> /dev/null; \
          renice -n -20 \$$ &> /dev/null"

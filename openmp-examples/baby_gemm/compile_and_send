@@ -45,4 +45,4 @@ source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh
 
 source ${HERO_INSTALL}/../env/exilzcu102.sh
 make default-as=pulp clean all
-scp baby_gemm root@hero-zcu102-06:/home/root/mmaxim/
+scp baby_gemm root@hero-zcu102-06:${HERO_TARGET_PATH_APPS}

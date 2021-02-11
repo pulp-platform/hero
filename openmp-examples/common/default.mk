@@ -1,14 +1,5 @@
 ############################ OpenMP Sources ############################
 
-#export HERCULES_INSTALL=${HERO_INSTALL}
-#export HERCULES_ARCH="PULP"
-#export CMUX_ROOT="/scratch/mmaxim/cmux"
-#export HERCULES_FORCE_FOOTPRINT_DENSE=1
-#export HERCULES_CPU_MEMORY_SIZE=32768
-#export HERCULES_DMA_ENFORCE
-#export HERCULES_NO_INTERVAL_CONTROLFLOW
-
-
 CC := clang
 LINK := llvm-link
 COB := clang-offload-bundler

@@ -1,4 +1,3 @@
 #!/bin/bash
-export HERO_INSTALL=/scratch/mmaxim/hero/install
 source ${HERO_INSTALL}/../env/exilzcu102.sh
 make clean default-as=pulp all
