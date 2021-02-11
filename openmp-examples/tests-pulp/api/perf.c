@@ -87,11 +87,58 @@ unsigned local_accesses_two_counters(const unsigned expected_loads,
   return n_errors;
 }
 
+unsigned local_accesses_cycles_and_instrs(const unsigned max_cycles, const unsigned max_instrs) {
+  // Initialize pointer to L1 and L1 alias.
+  volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
+  volatile uint32_t* const l1_alias = (volatile __device uint32_t*)test_l1_alias_base();
+
+  // Allocate both counters.
+  if (hero_perf_alloc(hero_perf_event_cycle) != 0) {
+    printf("Error allocating counter for hero_perf_event_cycle!\n");
+    return 1;
+  }
+  if (hero_perf_alloc(hero_perf_event_instr_retired) != 0) {
+    printf("Error allocating counter for hero_perf_event_instr_retired!\n");
+    return 1;
+  }
+
+  local_accesses_kernel(l1, l1_alias);
+
+  // Read counters.
+  const int64_t actual_cycle = hero_perf_read(hero_perf_event_cycle);
+  const int64_t actual_instr_retired = hero_perf_read(hero_perf_event_instr_retired);
+
+  // Compare and report results.
+  unsigned n_errors = 0;
+  n_errors += condition_or_printf(
+      actual_cycle > 0, "hero_perf_event_cycle (%d) was not larger than 0", (int32_t)actual_cycle);
+  n_errors +=
+      condition_or_printf(actual_cycle <= max_cycles,
+                          "hero_perf_event_cycle (%d) was larger than expected maximum (%d)",
+                          (int32_t)actual_cycle, (int32_t)max_cycles);
+  n_errors += condition_or_printf(actual_instr_retired > 0,
+                                  "hero_perf_event_instr_retired (%d) was not larger than 0",
+                                  (int32_t)actual_instr_retired);
+  n_errors += condition_or_printf(
+      actual_instr_retired <= max_instrs,
+      "hero_perf_event_instr_retired (%d) was larger than expected maximum (%d)",
+      (int32_t)actual_instr_retired, (int32_t)max_instrs);
+
+  // Deallocate counters.
+  n_errors += condition_or_printf(hero_perf_dealloc(hero_perf_event_cycle) == 0,
+                                  "Error deallocating counter for hero_perf_event_cycle");
+  n_errors += condition_or_printf(hero_perf_dealloc(hero_perf_event_instr_retired) == 0,
+                                  "Error deallocating counter for hero_perf_event_instr_retired");
+
+  return n_errors;
+}
+
 unsigned local_accesses() {
   unsigned n_errors = 0;
   n_errors += local_accesses_one_counter(hero_perf_event_load, "load", 2);
   n_errors += local_accesses_one_counter(hero_perf_event_store, "store", 3);
   n_errors += local_accesses_two_counters(2, 3);
+  n_errors += local_accesses_cycles_and_instrs(80, 16);
   return n_errors;
 }
 
@@ -226,6 +273,8 @@ unsigned external_accesses(void) {
                                              hero_perf_event_store_external, "store_external", 6);
   n_errors += external_accesses_two_counters(hero_perf_event_store, "store", 11,
                                              hero_perf_event_load_external, "load_external", 4);
+  n_errors += external_accesses_two_counters(hero_perf_event_store_external, "store_external", 6,
+                                             hero_perf_event_instr_retired, "instr_retired", 10);
 
   return n_errors;
 }
