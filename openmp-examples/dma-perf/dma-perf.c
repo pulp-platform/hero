@@ -29,7 +29,7 @@ uint16_t lfsr3(uint16_t prev) {
   return prev;
 }
 
-unsigned perform_benchmark(const unsigned buf_size_kib) {
+unsigned benchmark_l3(const unsigned buf_size_kib) {
   const unsigned buf_size_bytes = buf_size_kib * 1024;
 
   // Allocate source and destination buffers on heap of Host.
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
   unsigned mismatches = 0;
   unsigned buf_size_kib[] = {1, 2, 4, 8, 16, 32, 64, 96, 110};
   for (unsigned i = 0; i < sizeof(buf_size_kib) / sizeof(unsigned); i++) {
-    mismatches += perform_benchmark(buf_size_kib[i]);
+    mismatches += benchmark_l3(buf_size_kib[i]);
   }
 
   return mismatches != 0;
