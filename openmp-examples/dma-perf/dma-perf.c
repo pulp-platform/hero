@@ -59,14 +59,14 @@ unsigned benchmark_l3(const unsigned buf_size_kib) {
     }
 
     // L1 to L3 (RAM) with DMA
-    hero_reset_clk_counter();
-    hero_memcpy_host2dev(buf_l1, (__host void*)src_buf, buf_size_bytes);
     cyc_31 = hero_get_clk_counter();
+    hero_memcpy_host2dev(buf_l1, (__host void*)src_buf, buf_size_bytes);
+    cyc_31 = hero_get_clk_counter() - cyc_31;
 
     // L3 (RAM) to L1 with DMA
-    hero_reset_clk_counter();
-    hero_memcpy_dev2host((__host void*)dst_buf, buf_l1, buf_size_bytes);
     cyc_13 = hero_get_clk_counter();
+    hero_memcpy_dev2host((__host void*)dst_buf, buf_l1, buf_size_bytes);
+    cyc_13 = hero_get_clk_counter() - cyc_13;
 
     hero_l1free(buf_l1);
   }
