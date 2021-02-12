@@ -28,6 +28,8 @@ append --transform 's|petalinux/zcu102/images/linux/||' \
 
 append output/br-har-exilzcu102/target/{lib/modules/4.19.0/extra/pulp.ko,usr/lib}
 
+append cmux/bin/cmux
+
 if $COMPRESSED; then
   gzip "$ARCHIVE"
 fi
