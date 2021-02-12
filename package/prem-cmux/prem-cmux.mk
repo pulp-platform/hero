@@ -21,7 +21,7 @@ define PREM_CMUX_INSTALL_STAGING_CMDS
 	$(INSTALL) -D -m 0644 $(PREM_CMUX_SITE)/lib/libcmux-vote.a $(STAGING_DIR)/usr/lib/libcmux-vote.a
 	$(INSTALL) -D -m 0644 $(PREM_CMUX_SITE)/lib/libpremnotify-cpu.so $(STAGING_DIR)/usr/lib/libpremnotify.so
   # TODO We should move all of these headers to the prem subdirectory to keep them organized
-	mkdir -p $(STAGING_DIR)/usr/include/cmux
+	mkdir -p $(STAGING_DIR)/usr/include/prem
 	$(INSTALL) -D -m 0644 $(PREM_CMUX_SITE)/inc/cmuxif.h $(STAGING_DIR)/usr/include/prem/cmuxif.h
 	$(INSTALL) -D -m 0644 $(PREM_CMUX_SITE)/inc/vote.h $(STAGING_DIR)/usr/include/prem/vote.h
 	$(INSTALL) -D -m 0644 $(PREM_CMUX_SITE)/inc/vote.h $(STAGING_DIR)/usr/include/vote.h
