@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
 
 export HERCULES_INSTALL=${HERO_INSTALL}
 export HERCULES_ARCH="PULP"
