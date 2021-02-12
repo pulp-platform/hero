@@ -49,8 +49,11 @@ unsigned benchmark_l3(const unsigned buf_size_kib) {
   }
 
   unsigned cyc_31, cyc_13;
-#pragma omp target device(BIGPULP_MEMCPY) map(to : buf_size_bytes, src_buf[0 : buf_size_bytes]) \
-    map(from : cyc_13, cyc_31, dst_buf[0 : buf_size_bytes])
+  // clang-format off
+  #pragma omp target device(BIGPULP_MEMCPY) \
+      map(to: buf_size_bytes, src_buf[0:buf_size_bytes]) \
+      map(from: cyc_13, cyc_31, dst_buf[0:buf_size_bytes])
+  // clang-format on
   {
     __device uint32_t* const buf_l1 = (__device uint32_t*)hero_l1malloc(buf_size_bytes);
     if (buf_l1 == NULL) {
