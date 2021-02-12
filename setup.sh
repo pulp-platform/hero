@@ -22,6 +22,7 @@ make tc-llvm
 
 cd "$CMUX_ROOT"
 make cmux
+cp lib/libpremnotify{-cpu,}.so
 cd src/pulp
 HERO_ROOT="$ROOT" ./build-pulp-lib.sh
 
