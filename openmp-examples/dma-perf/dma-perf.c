@@ -22,12 +22,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#pragma omp declare target
+
 uint16_t lfsr3(uint16_t prev) {
   prev ^= prev >> 7;
   prev ^= prev << 9;
   prev ^= prev >> 13;
   return prev;
 }
+
+void init_lfsr(__device uint16_t* const dst, const unsigned n_bytes, const uint16_t init_val) {
+  uint16_t lfsr = init_val;
+  for (unsigned i = 0; i < n_bytes / 2; i++) {
+    dst[i] = lfsr;
+    lfsr = lfsr3(lfsr);
+  }
+}
+
+unsigned compare_lfsr(const __device uint16_t* const buf, const unsigned n_bytes,
+                      const uint16_t init_val) {
+  unsigned mismatches = 0;
+  uint16_t lfsr = init_val;
+  for (unsigned i = 0; i < n_bytes / 2; i++) {
+    if (buf[i] != lfsr) mismatches++;
+    lfsr = lfsr3(lfsr);
+  }
+  return mismatches;
+}
+
+#pragma omp end declare target
 
 unsigned benchmark_l3(const unsigned buf_size_kib) {
   const unsigned buf_size_bytes = buf_size_kib * 1024;
@@ -106,12 +129,83 @@ unsigned benchmark_l3(const unsigned buf_size_kib) {
   return mismatches;
 }
 
+unsigned benchmark_l2(const unsigned buf_size_kib) {
+  const unsigned buf_size_bytes = buf_size_kib * 1024;
+
+  unsigned cyc_12, cyc_21, mismatches_12 = 0, mismatches_21 = 0;
+  // clang-format off
+  #pragma omp target device(BIGPULP_MEMCPY) \
+      map(to: buf_size_bytes) \
+      map(tofrom: mismatches_12, mismatches_21) \
+      map(from: cyc_12, cyc_21)
+  // clang-format on
+  {
+    // Allocate buffer on L2 heap.
+    __device uint16_t* const l2_buf = (__device uint16_t*)hero_l2malloc(buf_size_bytes);
+    if (l2_buf == NULL) {
+      printf("Error: hero_l2malloc() failed!\n");
+      abort();
+    }
+
+    // Allocate buffer on L1 heap.
+    __device uint16_t* const l1_buf = (__device uint16_t*)hero_l1malloc(buf_size_bytes);
+    if (l1_buf == NULL) {
+      printf("ERROR: hero_l1malloc() failed\n");
+      abort();
+    }
+
+    // Initialize buffer in L2 with pseudo-random data.
+    init_lfsr(l2_buf, buf_size_bytes, 0xF0EEu);
+
+    // L2 to L1 with DMA
+    cyc_21 = hero_get_clk_counter();
+    hero_memcpy_host2dev(l1_buf, (__host void*)l2_buf, buf_size_bytes);
+    cyc_21 = hero_get_clk_counter() - cyc_21;
+
+    // Compare destination buffer to pseudo-random values.
+    mismatches_21 = compare_lfsr(l1_buf, buf_size_bytes, 0xF0EEu);
+
+    // Initialize buffer in L1 with different pseudo-random data.
+    init_lfsr(l1_buf, buf_size_bytes, 0xF1EEu);
+
+    // Transfer data from L1 to L2 with the DMA engine.
+    cyc_12 = hero_get_clk_counter();
+    hero_memcpy_dev2host((__host void*)l2_buf, l1_buf, buf_size_bytes);
+    cyc_12 = hero_get_clk_counter() - cyc_12;
+
+    // Compare destination buffer to pseudo-random values.
+    mismatches_12 = compare_lfsr(l2_buf, buf_size_bytes, 0xF1EEu);
+
+    // Free buffers.
+    hero_l1free(l1_buf);
+    hero_l2free(l2_buf);
+  }
+
+  // Print result.
+  printf("For transfer size %d KiB:\n", buf_size_kib);
+  if (mismatches_21 == 0) {
+    const double perf_21 = ((double)buf_size_bytes) / cyc_21;
+    printf("L2 -> L1 DMA: %.3f bytes/cycle\n", perf_21);
+  } else {
+    printf("%d mismatches for L2 -> L1!\n", mismatches_21);
+  }
+  if (mismatches_12 == 0) {
+    const double perf_12 = ((double)buf_size_bytes) / cyc_12;
+    printf("L1 -> L2 DMA: %.3f bytes/cycle\n", perf_12);
+  } else {
+    printf("%d mismatches for L1 -> L2!\n", mismatches_12);
+  }
+
+  return mismatches_21 + mismatches_12;
+}
+
 int main(int argc, char* argv[]) {
   // Test a couple different buffer sizes up to the maximum the L1 heap can allocate.
   unsigned mismatches = 0;
   unsigned buf_size_kib[] = {1, 2, 4, 8, 16, 32, 64, 96, 110};
   for (unsigned i = 0; i < sizeof(buf_size_kib) / sizeof(unsigned); i++) {
     mismatches += benchmark_l3(buf_size_kib[i]);
+    mismatches += benchmark_l2(buf_size_kib[i]);
   }
 
   return mismatches != 0;
