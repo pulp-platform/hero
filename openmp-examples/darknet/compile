@@ -44,4 +44,3 @@ source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh
 
 source ${HERO_INSTALL}/../env/exilzcu102.sh
 make default-as=pulp clean all
-scp darknet root@hero-zcu102-06:${HERO_TARGET_PATH_APPS}
