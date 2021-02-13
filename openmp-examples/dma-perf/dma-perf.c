@@ -107,7 +107,7 @@ unsigned benchmark_l3(const unsigned buf_size_kib) {
   for (unsigned i = 0; i < buf_size_bytes / 2; i++) {
     if (((uint16_t*)dst_buf)[i] != lfsr) {
       mismatches++;
-      printf("[%04d] 0x%04x != 0x%04x\n", i, ((uint16_t*)dst_buf)[i], lfsr);
+      // printf("[%04d] 0x%04x != 0x%04x\n", i, ((uint16_t*)dst_buf)[i], lfsr);
     }
     lfsr = lfsr3(lfsr);
   }
