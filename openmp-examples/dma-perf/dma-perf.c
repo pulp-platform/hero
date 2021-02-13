@@ -16,11 +16,16 @@
  * limitations under the License.
  */
 
+#include <assert.h>
 #include <hero-target.h>
 #include <omp.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#define L1_BUS_DATA_WIDTH_BYTES 8
+#define L2_BUS_DATA_WIDTH_BYTES 16
+#define L3_BUS_DATA_WIDTH_BYTES 16
 
 #pragma omp declare target
 
@@ -52,16 +57,28 @@ unsigned compare_lfsr(const __device uint16_t* const buf, const unsigned n_bytes
 
 #pragma omp end declare target
 
-unsigned benchmark_l3(const unsigned buf_size_kib) {
+unsigned benchmark_l3(const unsigned buf_size_kib, const unsigned l1_misalignment,
+                      const unsigned l3_misalignment) {
   const unsigned buf_size_bytes = buf_size_kib * 1024;
 
+  assert(l1_misalignment < L1_BUS_DATA_WIDTH_BYTES);
+  assert(l3_misalignment < L3_BUS_DATA_WIDTH_BYTES);
+
   // Allocate source and destination buffers on heap of Host.
-  uint8_t* const src_buf = (uint8_t*)malloc(buf_size_bytes);
-  uint8_t* const dst_buf = (uint8_t*)malloc(buf_size_bytes);
-  if (src_buf == NULL || dst_buf == NULL) {
+  uint8_t* const _src_buf = (uint8_t*)malloc(buf_size_bytes + 2 * L3_BUS_DATA_WIDTH_BYTES);
+  uint8_t* const _dst_buf = (uint8_t*)malloc(buf_size_bytes + 2 * L3_BUS_DATA_WIDTH_BYTES);
+  if (_src_buf == NULL || _dst_buf == NULL) {
     printf("Error: malloc() on host failed!\n");
     exit(-1);
   }
+
+  // Misalign buffers.
+  const uint8_t* const src_buf = (uint8_t*)((((uintptr_t)_src_buf + L3_BUS_DATA_WIDTH_BYTES) &
+                                             ~(L3_BUS_DATA_WIDTH_BYTES - 1)) +
+                                            l3_misalignment);
+  const uint8_t* const dst_buf = (uint8_t*)((((uintptr_t)_dst_buf + L3_BUS_DATA_WIDTH_BYTES) &
+                                             ~(L3_BUS_DATA_WIDTH_BYTES - 1)) +
+                                            l3_misalignment);
 
   // Initialize source buffer with pseudo-random data.
   const uint16_t lfsr_init = 0xB1AAu;
@@ -74,15 +91,22 @@ unsigned benchmark_l3(const unsigned buf_size_kib) {
   unsigned cyc_31, cyc_13;
   // clang-format off
   #pragma omp target device(BIGPULP_MEMCPY) \
-      map(to: buf_size_bytes, src_buf[0:buf_size_bytes]) \
+      map(to: buf_size_bytes, l1_misalignment, src_buf[0:buf_size_bytes]) \
       map(from: cyc_13, cyc_31, dst_buf[0:buf_size_bytes])
   // clang-format on
   {
-    __device uint32_t* const buf_l1 = (__device uint32_t*)hero_l1malloc(buf_size_bytes);
-    if (buf_l1 == NULL) {
+    __device uint32_t* const _buf_l1 =
+        (__device uint32_t*)hero_l1malloc(buf_size_bytes + 2 * L1_BUS_DATA_WIDTH_BYTES);
+    if (_buf_l1 == NULL) {
       printf("ERROR: hero_l1malloc() failed\n");
       abort();
     }
+
+    // Misalign L1 buffer.
+    __device uint32_t* const buf_l1 =
+        (__device uint32_t*)((((uintptr_t)_buf_l1 + L1_BUS_DATA_WIDTH_BYTES) &
+                              ~(L1_BUS_DATA_WIDTH_BYTES - 1)) +
+                             l1_misalignment);
 
     // L1 to L3 (RAM) with DMA
     cyc_31 = hero_get_clk_counter();
@@ -94,12 +118,12 @@ unsigned benchmark_l3(const unsigned buf_size_kib) {
     hero_memcpy_dev2host((__host void*)dst_buf, buf_l1, buf_size_bytes);
     cyc_13 = hero_get_clk_counter() - cyc_13;
 
-    hero_l1free(buf_l1);
+    hero_l1free(_buf_l1);
   }
 
   // Free source buffer.  We do not use it to compare with the destination buffer because they could
   // be both corrupted in the same way.
-  free(src_buf);
+  free(_src_buf);
 
   // Compare destination buffer to pseudo-random values.
   unsigned mismatches = 0;
@@ -113,10 +137,11 @@ unsigned benchmark_l3(const unsigned buf_size_kib) {
   }
 
   // Free destination buffer.
-  free(dst_buf);
+  free(_dst_buf);
 
   // Print result.
-  printf("For transfer size %d KiB:\n", buf_size_kib);
+  printf("For transfer size %d KiB, L1 misalignment %d B, L3 misalignment %d B:\n", buf_size_kib,
+         l1_misalignment, l3_misalignment);
   if (mismatches == 0) {
     const double perf_31 = ((double)buf_size_bytes) / cyc_31;
     const double perf_13 = ((double)buf_size_bytes) / cyc_13;
@@ -129,30 +154,48 @@ unsigned benchmark_l3(const unsigned buf_size_kib) {
   return mismatches;
 }
 
-unsigned benchmark_l2(const unsigned buf_size_kib) {
+unsigned benchmark_l2(const unsigned buf_size_kib, const unsigned l1_misalignment,
+                      const unsigned l2_misalignment) {
   const unsigned buf_size_bytes = buf_size_kib * 1024;
+
+  assert(l1_misalignment < L1_BUS_DATA_WIDTH_BYTES);
+  assert(l2_misalignment < L2_BUS_DATA_WIDTH_BYTES);
 
   unsigned cyc_12, cyc_21, mismatches_12 = 0, mismatches_21 = 0;
   // clang-format off
   #pragma omp target device(BIGPULP_MEMCPY) \
-      map(to: buf_size_bytes) \
+      map(to: buf_size_bytes, l1_misalignment, l2_misalignment) \
       map(tofrom: mismatches_12, mismatches_21) \
       map(from: cyc_12, cyc_21)
   // clang-format on
   {
     // Allocate buffer on L2 heap.
-    __device uint16_t* const l2_buf = (__device uint16_t*)hero_l2malloc(buf_size_bytes);
-    if (l2_buf == NULL) {
+    __device uint16_t* const _l2_buf =
+        (__device uint16_t*)hero_l2malloc(buf_size_bytes + 2 * L2_BUS_DATA_WIDTH_BYTES);
+    if (_l2_buf == NULL) {
       printf("Error: hero_l2malloc() failed!\n");
       abort();
     }
 
+    // Misalign L2 buffer.
+    __device uint16_t* const l2_buf =
+        (__device uint16_t*)((((uint64_t)_l2_buf + L2_BUS_DATA_WIDTH_BYTES) &
+                              ~(L2_BUS_DATA_WIDTH_BYTES - 1)) +
+                             l2_misalignment);
+
     // Allocate buffer on L1 heap.
-    __device uint16_t* const l1_buf = (__device uint16_t*)hero_l1malloc(buf_size_bytes);
-    if (l1_buf == NULL) {
+    __device uint16_t* const _l1_buf =
+        (__device uint16_t*)hero_l1malloc(buf_size_bytes + 2 * L1_BUS_DATA_WIDTH_BYTES);
+    if (_l1_buf == NULL) {
       printf("ERROR: hero_l1malloc() failed\n");
       abort();
     }
+
+    // Misalign L1 buffer.
+    __device uint16_t* const l1_buf =
+        (__device uint16_t*)((((uint64_t)_l1_buf + L1_BUS_DATA_WIDTH_BYTES) &
+                              ~(L1_BUS_DATA_WIDTH_BYTES - 1)) +
+                             l1_misalignment);
 
     // Initialize buffer in L2 with pseudo-random data.
     init_lfsr(l2_buf, buf_size_bytes, 0xF0EEu);
@@ -177,12 +220,13 @@ unsigned benchmark_l2(const unsigned buf_size_kib) {
     mismatches_12 = compare_lfsr(l2_buf, buf_size_bytes, 0xF1EEu);
 
     // Free buffers.
-    hero_l1free(l1_buf);
-    hero_l2free(l2_buf);
+    hero_l1free(_l1_buf);
+    hero_l2free(_l2_buf);
   }
 
   // Print result.
-  printf("For transfer size %d KiB:\n", buf_size_kib);
+  printf("For transfer size %d KiB, L1 misalignment %d B, L2 misalignment %d B:\n", buf_size_kib,
+         l1_misalignment, l2_misalignment);
   if (mismatches_21 == 0) {
     const double perf_21 = ((double)buf_size_bytes) / cyc_21;
     printf("L2 -> L1 DMA: %.3f bytes/cycle\n", perf_21);
@@ -204,8 +248,14 @@ int main(int argc, char* argv[]) {
   unsigned mismatches = 0;
   unsigned buf_size_kib[] = {1, 2, 4, 8, 16, 32, 64, 96, 110};
   for (unsigned i = 0; i < sizeof(buf_size_kib) / sizeof(unsigned); i++) {
-    mismatches += benchmark_l3(buf_size_kib[i]);
-    mismatches += benchmark_l2(buf_size_kib[i]);
+    for (unsigned m_l1 = 0; m_l1 < L1_BUS_DATA_WIDTH_BYTES; m_l1++) {
+      for (unsigned m_l3 = 0; m_l3 < L3_BUS_DATA_WIDTH_BYTES; m_l3++) {
+        mismatches += benchmark_l3(buf_size_kib[i], m_l1, m_l3);
+      }
+      for (unsigned m_l2 = 0; m_l2 < L2_BUS_DATA_WIDTH_BYTES; m_l2++) {
+        mismatches += benchmark_l2(buf_size_kib[i], m_l1, m_l2);
+      }
+    }
   }
 
   return mismatches != 0;
