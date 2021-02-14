@@ -57,7 +57,7 @@ unsigned compare_lfsr(const __device uint16_t* const buf, const unsigned n_bytes
 
 #pragma omp end declare target
 
-unsigned benchmark_l3(const unsigned buf_size_kib, const unsigned l1_misalignment,
+unsigned benchmark_l3(const float buf_size_kib, const unsigned l1_misalignment,
                       const unsigned l3_misalignment) {
   const unsigned buf_size_bytes = buf_size_kib * 1024;
 
@@ -144,7 +144,7 @@ unsigned benchmark_l3(const unsigned buf_size_kib, const unsigned l1_misalignmen
   free(_dst_buf);
 
   // Print result.
-  printf("For transfer size %d KiB, L1 misalignment %d B, L3 misalignment %d B:\n", buf_size_kib,
+  printf("For transfer size %.9g KiB, L1 misalignment %d B, L3 misalignment %d B:\n", buf_size_kib,
          l1_misalignment, l3_misalignment);
   if (mismatches == 0) {
     const double perf_31 = ((double)buf_size_bytes) / cyc_31;
@@ -158,7 +158,7 @@ unsigned benchmark_l3(const unsigned buf_size_kib, const unsigned l1_misalignmen
   return mismatches;
 }
 
-unsigned benchmark_l2(const unsigned buf_size_kib, const unsigned l1_misalignment,
+unsigned benchmark_l2(const float buf_size_kib, const unsigned l1_misalignment,
                       const unsigned l2_misalignment) {
   const unsigned buf_size_bytes = buf_size_kib * 1024;
 
@@ -229,7 +229,7 @@ unsigned benchmark_l2(const unsigned buf_size_kib, const unsigned l1_misalignmen
   }
 
   // Print result.
-  printf("For transfer size %d KiB, L1 misalignment %d B, L2 misalignment %d B:\n", buf_size_kib,
+  printf("For transfer size %.9g KiB, L1 misalignment %d B, L2 misalignment %d B:\n", buf_size_kib,
          l1_misalignment, l2_misalignment);
   if (mismatches_21 == 0) {
     const double perf_21 = ((double)buf_size_bytes) / cyc_21;
@@ -250,7 +250,7 @@ unsigned benchmark_l2(const unsigned buf_size_kib, const unsigned l1_misalignmen
 int main(int argc, char* argv[]) {
   // Test a couple different buffer sizes up to the maximum the L1 heap can allocate.
   unsigned mismatches = 0;
-  unsigned buf_size_kib[] = {1, 2, 4, 8, 16, 32, 64, 96, 110};
+  float buf_size_kib[] = {0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 96, 110};
   for (unsigned i = 0; i < sizeof(buf_size_kib) / sizeof(unsigned); i++) {
     for (unsigned m_l1 = 0; m_l1 < L1_BUS_DATA_WIDTH_BYTES; m_l1++) {
       for (unsigned m_l3 = 0; m_l3 < L3_BUS_DATA_WIDTH_BYTES; m_l3++) {
