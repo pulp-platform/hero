@@ -65,20 +65,24 @@ unsigned benchmark_l3(const unsigned buf_size_kib, const unsigned l1_misalignmen
   assert(l3_misalignment < L3_BUS_DATA_WIDTH_BYTES);
 
   // Allocate source and destination buffers on heap of Host.
-  uint8_t* const _src_buf = (uint8_t*)malloc(buf_size_bytes + 2 * L3_BUS_DATA_WIDTH_BYTES);
-  uint8_t* const _dst_buf = (uint8_t*)malloc(buf_size_bytes + 2 * L3_BUS_DATA_WIDTH_BYTES);
+  __host uint8_t* const _src_buf =
+      (__host uint8_t*)malloc(buf_size_bytes + 2 * L3_BUS_DATA_WIDTH_BYTES);
+  __host uint8_t* const _dst_buf =
+      (__host uint8_t*)malloc(buf_size_bytes + 2 * L3_BUS_DATA_WIDTH_BYTES);
   if (_src_buf == NULL || _dst_buf == NULL) {
     printf("Error: malloc() on host failed!\n");
     exit(-1);
   }
 
   // Misalign buffers.
-  const uint8_t* const src_buf = (uint8_t*)((((uintptr_t)_src_buf + L3_BUS_DATA_WIDTH_BYTES) &
-                                             ~(L3_BUS_DATA_WIDTH_BYTES - 1)) +
-                                            l3_misalignment);
-  const uint8_t* const dst_buf = (uint8_t*)((((uintptr_t)_dst_buf + L3_BUS_DATA_WIDTH_BYTES) &
-                                             ~(L3_BUS_DATA_WIDTH_BYTES - 1)) +
-                                            l3_misalignment);
+  const __host uint8_t* const src_buf =
+      (__host uint8_t*)((((uint64_t)_src_buf + L3_BUS_DATA_WIDTH_BYTES) &
+                         ~(L3_BUS_DATA_WIDTH_BYTES - 1)) +
+                        l3_misalignment);
+  const __host uint8_t* const dst_buf =
+      (__host uint8_t*)((((uint64_t)_dst_buf + L3_BUS_DATA_WIDTH_BYTES) &
+                         ~(L3_BUS_DATA_WIDTH_BYTES - 1)) +
+                        l3_misalignment);
 
   // Initialize source buffer with pseudo-random data.
   const uint16_t lfsr_init = 0xB1AAu;
@@ -104,7 +108,7 @@ unsigned benchmark_l3(const unsigned buf_size_kib, const unsigned l1_misalignmen
 
     // Misalign L1 buffer.
     __device uint32_t* const buf_l1 =
-        (__device uint32_t*)((((uintptr_t)_buf_l1 + L1_BUS_DATA_WIDTH_BYTES) &
+        (__device uint32_t*)((((uint64_t)_buf_l1 + L1_BUS_DATA_WIDTH_BYTES) &
                               ~(L1_BUS_DATA_WIDTH_BYTES - 1)) +
                              l1_misalignment);
 
