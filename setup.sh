@@ -32,4 +32,4 @@ make br-har-exilzcu102
 cp "$CMUX_ROOT/lib/libpremnotify-cpu.so" "$HERO_INSTALL/../output/br-har-exilzcu102/target/usr/lib/"
 
 cd output/br-har-exilzcu102
-../../toolchain/install-sdk.sh
+../../toolchain/install-sdk.sh --force
