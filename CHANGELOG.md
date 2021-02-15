@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+- Add benchmark (`openmp-examples/dma-perf`) to measure DMA throughput and verify the correctness of
+  transferred data for different transfer sizes and source and destination memory alignments.
 
 ### Changed
 
