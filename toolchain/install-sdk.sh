@@ -23,6 +23,9 @@ prefix="${prefix%\"}"
 prefix="${prefix#\"}"
 
 # copy the toolchain wrapper to architecture specific location
+if [ -f host/bin/$prefix-toolchain-wrapper ]; then
+  rm host/bin/$prefix-toolchain-wrapper
+fi
 cp host/bin/toolchain-wrapper host/bin/$prefix-toolchain-wrapper
 
 # fix binary symlinks to toolchain wrapper
