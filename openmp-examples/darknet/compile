@@ -2,13 +2,15 @@
 
 set -eo pipefail
 
+
+## Comment out the region below to avoid PREM compilation ##
 export HERCULES_INSTALL=${HERO_INSTALL}
 export HERCULES_ARCH="PULP"
 export HERCULES_FORCE_FOOTPRINT_DENSE=1
 export HERCULES_CPU_MEMORY_SIZE=32768
-export HERCULES_DISQ_THRESHOLD=0
 export HERCULES_DEFAULT_NUM_THREADS=8
 export HERCULES_DMA_ENFORCE
+export HERCULES_QUIET
 export HERCULES_NO_INTERVAL_CONTROLFLOW
 export HERCULES_WHITELIST="gemm_nn gemm_cpu gemm
 forward_convolutional_layer forward_network network_predict network_predict_image main
@@ -25,9 +27,12 @@ forward_convolutional_layer forward_network network_predict network_predict_imag
 .omp_outlined..10
 .omp_outlined..11
 .omp_outlined..12
-.omp_outlined..13
-"
+.omp_outlined..13"
 source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh
+## End of region to be commented out
+
 
 source ${HERO_INSTALL}/../env/exilzcu102.sh
+make default-as=pulp clean all &> >(tee output.txt)
+export HERCULES_WHITELIST="${HERCULES_WHITELIST} $(grep "blacklisted" output.txt | cut -d " " -f 6)"
 make default-as=pulp clean all
