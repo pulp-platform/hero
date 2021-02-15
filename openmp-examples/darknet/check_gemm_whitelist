@@ -1,12 +1,13 @@
 #!/bin/python3
 import sys
+import os
 
 if len(sys.argv) != 2:
   print("Error: compiler output file required!")
   sys.exit(2)
 
 compilation = sys.argv[1]
-script = 'compile_and_send'
+script = 'compile'
 
 with open(compilation, 'r') as f:
   lines = f.read().split('\n')
@@ -17,7 +18,7 @@ for line in lines:
     gemms+=line.split(' ')[5]+'\n'
 
 if gemms == "":
-  print("No blacklisted gemm layers detected")
+  print("Done! Press any key to continue.")
   sys.exit(0)
 
 print("Detected the following blacklisted gemm kernels:\n", gemms)
@@ -57,9 +58,11 @@ source ${HERCULES_INSTALL}/../toolchain/HerculesCompiler-public/environment.sh\n
 \n\
 \n\
 source ${HERO_INSTALL}/../env/exilzcu102.sh\n\
-make default-as=pulp clean all\n\
-scp baby_gemm root@hero-zcu102-06:${HERO_TARGET_PATH_APPS}'
+make default-as=pulp clean all &> >(tee output.txt)\n\
+./check_gemm_whitelist output.txt &'
 
 with open(script, 'w') as f:
   f.write(output)
-sys.exit(1)
+
+os.system('./'+script)
+sys.exit(0)
