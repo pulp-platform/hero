@@ -250,7 +250,7 @@ unsigned benchmark_l2(const float buf_size_kib, const unsigned l1_misalignment,
 int main(int argc, char* argv[]) {
   // Test a couple different buffer sizes up to the maximum the L1 heap can allocate.
   unsigned mismatches = 0;
-  float buf_size_kib[] = {0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 96, 110};
+  float buf_size_kib[] = {0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 96};
   for (unsigned i = 0; i < sizeof(buf_size_kib) / sizeof(unsigned); i++) {
     for (unsigned m_l1 = 0; m_l1 < L1_BUS_DATA_WIDTH_BYTES; m_l1++) {
       for (unsigned m_l3 = 0; m_l3 < L3_BUS_DATA_WIDTH_BYTES; m_l3++) {
