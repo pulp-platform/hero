@@ -24,12 +24,22 @@ build_test_archive:
     - ./pack_siemens.sh
     - cd "$TEMP_JOB_DIR"
     - cp "$CI_PROJECT_DIR/hero_siemens.tar.gz" .
+    # Extract archive and run setup.
     - tar xf hero_siemens.tar.gz && rm hero_siemens.tar.gz
     - |
       export CMUX_ROOT="$(pwd)/cmux"
       export HERO_INSTALL="$(pwd)/install"
       mkdir -p "$HERO_INSTALL"
       ./setup.sh
+    # Build `baby_gemm` and `darknet` with PREM enabled.
+    - |
+      export CMUX_ROOT="$(pwd)/cmux"
+      export HERO_INSTALL="$(pwd)/install"
+      cd openmp-examples/baby_gemm
+      ./compile
+      cd ../darknet
+      ./compile
+    # Append binaries built during CI run.
     - $CI_PROJECT_DIR/pack_siemens_append.sh $CI_PROJECT_DIR/hero_siemens.tar.gz
   artifacts:
     paths:
