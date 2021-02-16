@@ -26,7 +26,7 @@
 
 #define DEBUG(...)  // printf(__VA_ARGS__)
 
-#define MAX_NUM_STREAMS 8
+#define DMA_MAX_NUM_STREAMS 8
 
 typedef struct {
   uint32_t id;
@@ -42,7 +42,7 @@ typedef struct {
   uint32_t num_bytes;
   uint32_t config __attribute__((aligned(8)));
   uint32_t tf_id __attribute__((aligned(8)));
-  _hero_dma_done_id_t done[MAX_NUM_STREAMS] __attribute__((aligned(8)));
+  _hero_dma_done_id_t done[DMA_MAX_NUM_STREAMS] __attribute__((aligned(8)));
 } _hero_dma_conf_t;
 
 static volatile _hero_dma_conf_t* const _hero_dma_conf = (_hero_dma_conf_t*)0x1B204400;
