@@ -30,6 +30,9 @@ append output/br-har-exilzcu102/target/{lib/modules/4.19.0/extra/pulp.ko,usr/lib
 
 append cmux/bin/cmux
 
+append openmp-examples/baby_gemm/baby_gemm
+append openmp-examples/darknet/darknet
+
 if $COMPRESSED; then
   gzip "$ARCHIVE"
 fi
