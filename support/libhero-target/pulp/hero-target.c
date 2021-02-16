@@ -22,8 +22,6 @@
 #include <archi-host/pgtable_hwdef.h>
 #include <vmm/vmm.h>
 
-#define L3_MEM_BASE_ADDR 0x80000000
-
 #define DEBUG(...)  // printf(__VA_ARGS__)
 
 // Hardware Interface of the DMA Engine (I/O-memory-mapped)
