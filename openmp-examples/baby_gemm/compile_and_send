@@ -3,4 +3,4 @@ set -o errexit
 
 ./compile
 
-scp darknet root@hero-zcu102-06:${HERO_TARGET_PATH_APPS}
+scp baby_gemm root@hero-zcu102-06:${HERO_TARGET_PATH_APPS}
