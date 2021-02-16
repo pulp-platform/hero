@@ -86,25 +86,11 @@ hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst, const DEVICE_VOID_P
 }
 
 void hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src, uint32_t size) {
-  // response
-  hero_dma_job_t hero_dma_job;
-
-  // launch async
-  hero_dma_job = hero_memcpy_host2dev_async(dst, src, size);
-
-  // synchronize
-  hero_dma_wait(hero_dma_job);
+  hero_dma_wait(hero_memcpy_host2dev_async(dst, src, size));
 }
 
 void hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src, uint32_t size) {
-  // response
-  hero_dma_job_t hero_dma_job;
-
-  // launch async
-  hero_dma_job = hero_memcpy_dev2host_async(dst, src, size);
-
-  // synchronize
-  hero_dma_wait(hero_dma_job);
+  hero_dma_wait(hero_memcpy_dev2host_async(dst, src, size));
 }
 
 void hero_dma_wait(hero_dma_job_t id) {
