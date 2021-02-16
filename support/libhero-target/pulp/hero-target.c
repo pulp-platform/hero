@@ -43,20 +43,20 @@ typedef struct {
 static volatile _hero_dma_conf_t* const _hero_dma_conf = (_hero_dma_conf_t*)0x1B204400;
 
 // Read the id of the last transaction that has been completed.
-static inline uint32_t _hero_read_completed_id(uint32_t stream_id) {
+static inline uint32_t _hero_read_completed_id(const uint32_t stream_id) {
   return _hero_dma_conf->done[stream_id].id;
 }
 
 // Wait for a given transaction to complete.
-static inline void _hero_wait_for_tf_completion(uint32_t stream_id, uint32_t tf_id) {
+static inline void _hero_wait_for_tf_completion(const uint32_t stream_id, const uint32_t tf_id) {
   // Spin until transfer is completed.
   while (tf_id > _hero_read_completed_id(stream_id)) {
     asm volatile("nop");
   }
 }
 
-hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
-                                          uint32_t size) {
+hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR const dst, const HOST_VOID_PTR const src,
+                                          const uint32_t size) {
   // Configure the DMA engine.
   _hero_dma_conf->src_addr_low = (uint32_t)src;
   _hero_dma_conf->dst_addr_low = (uint32_t)dst;
@@ -68,8 +68,8 @@ hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst, const HOST_VOID_P
   return hero_dma_job;
 }
 
-hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
-                                          uint32_t size) {
+hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR const dst, const DEVICE_VOID_PTR const src,
+                                          const uint32_t size) {
   // Configure the DMA engine.
   _hero_dma_conf->src_addr_low = (uint32_t)src;
   _hero_dma_conf->dst_addr_low = (uint32_t)dst;
@@ -81,15 +81,17 @@ hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst, const DEVICE_VOID_P
   return hero_dma_job;
 }
 
-void hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src, uint32_t size) {
+void hero_memcpy_host2dev(DEVICE_VOID_PTR const dst, const HOST_VOID_PTR const src,
+                          const uint32_t size) {
   hero_dma_wait(hero_memcpy_host2dev_async(dst, src, size));
 }
 
-void hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src, uint32_t size) {
+void hero_memcpy_dev2host(HOST_VOID_PTR const dst, const DEVICE_VOID_PTR const src,
+                          const uint32_t size) {
   hero_dma_wait(hero_memcpy_dev2host_async(dst, src, size));
 }
 
-void hero_dma_wait(hero_dma_job_t id) {
+void hero_dma_wait(const hero_dma_job_t id) {
   uint32_t tf_id = id.id & 0x0fffffff;
   uint32_t stream = (id.id & 0xf0000000) >> 28;
   _hero_wait_for_tf_completion(stream, tf_id);
