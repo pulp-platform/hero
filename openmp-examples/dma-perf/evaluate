@@ -113,7 +113,7 @@ def set_box_color(bp, color):
         plt.setp(bp[elem], color=color)
 
 
-fig = plt.figure()
+fig = plt.figure(figsize=(6, 12))
 ax = fig.add_subplot(111)
 
 assert (len(l31) == len(l13))
@@ -130,7 +130,10 @@ def pos(idx):
 
 
 def bp(data, color, idx):
-    flierprops = dict(marker='o', markeredgecolor=color)
+    flierprops = dict(marker='o',
+                      markeredgecolor=color,
+                      markersize=2.5,
+                      markeredgewidth=.25)
     _bp = ax.boxplot(data,
                      positions=pos(idx),
                      widths=width,
@@ -175,8 +178,8 @@ ybottom, ytop = ax.get_ylim()
 aspect_ratio = .5
 ax.set_aspect(abs((xright - xleft) / (ybottom - ytop)) * aspect_ratio)
 
-plt.show()
 fig.savefig(args.type + '_throughput.pdf', bbox_inches='tight')
+plt.show()
 
 # This file is formatted according to PEP 8.  (Use `yapf --style pep8` or
 # equivalent to auto-format.)
