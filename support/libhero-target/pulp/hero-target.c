@@ -26,14 +26,12 @@
 
 #define DEBUG(...)  // printf(__VA_ARGS__)
 
+// Hardware Interface of the DMA Engine (I/O-memory-mapped)
 #define DMA_MAX_NUM_STREAMS 8
-
 typedef struct {
   uint32_t id;
   uint32_t padding;
 } _hero_dma_done_id_t;
-
-// base address struct of the dma
 typedef struct {
   uint32_t src_addr_low;
   uint32_t src_addr_high;
@@ -44,17 +42,16 @@ typedef struct {
   uint32_t tf_id __attribute__((aligned(8)));
   _hero_dma_done_id_t done[DMA_MAX_NUM_STREAMS] __attribute__((aligned(8)));
 } _hero_dma_conf_t;
-
 static volatile _hero_dma_conf_t* const _hero_dma_conf = (_hero_dma_conf_t*)0x1B204400;
 
-// read the id of the last transaction that has been completed
+// Read the id of the last transaction that has been completed.
 static inline uint32_t _hero_read_completed_id(uint32_t stream_id) {
   return _hero_dma_conf->done[stream_id].id;
 }
 
-// wait for a given transaction to complete
+// Wait for a given transaction to complete.
 static inline void _hero_wait_for_tf_completion(uint32_t stream_id, uint32_t tf_id) {
-  // spin until transfer is completed
+  // Spin until transfer is completed.
   while (tf_id > _hero_read_completed_id(stream_id)) {
     asm volatile("nop");
   }
@@ -62,12 +59,12 @@ static inline void _hero_wait_for_tf_completion(uint32_t stream_id, uint32_t tf_
 
 hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
                                           uint32_t size) {
-  // configure the dma
+  // Configure the DMA engine.
   _hero_dma_conf->src_addr_low = (uint32_t)src;
   _hero_dma_conf->dst_addr_low = (uint32_t)dst;
   _hero_dma_conf->num_bytes = size;
 
-  // launch the transfer
+  // Launch transfer and obtain ID.
   hero_dma_job_t hero_dma_job;
   hero_dma_job.id = _hero_dma_conf->tf_id;
   return hero_dma_job;
@@ -75,12 +72,12 @@ hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst, const HOST_VOID_P
 
 hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
                                           uint32_t size) {
-  // configure the dma
+  // Configure the DMA engine.
   _hero_dma_conf->src_addr_low = (uint32_t)src;
   _hero_dma_conf->dst_addr_low = (uint32_t)dst;
   _hero_dma_conf->num_bytes = size;
 
-  // launch the transfer
+  // Launch transfer and obtain ID.
   hero_dma_job_t hero_dma_job;
   hero_dma_job.id = _hero_dma_conf->tf_id;
   return hero_dma_job;
