@@ -2,6 +2,25 @@
 
 ## INSTALL A SDK FROM A BUILDROOT ENVIRONMENT ##
 
+# Parse options.
+FORCE=false
+PARAMS=""
+while (( "$#" )); do
+  case "$1" in
+    -f|--force)
+      FORCE=true
+      shift;;
+    *-|*--)
+      echo "Error: Unsupported flag '$1'" >&2
+      exit 1;;
+    *) # preserve positional arguments
+      PARAMS="$PARAMS $1"
+      shift;;
+  esac
+done
+readonly FORCE
+readonly PARAMS
+
 if [ -z "$HERO_INSTALL" ]; then
   echo "Fatal error: set HERO_INSTALL to location to install the SDK"
   exit 1
@@ -23,6 +42,9 @@ prefix="${prefix%\"}"
 prefix="${prefix#\"}"
 
 # copy the toolchain wrapper to architecture specific location
+if [ -f host/bin/$prefix-toolchain-wrapper ]; then
+  rm host/bin/$prefix-toolchain-wrapper
+fi
 cp host/bin/toolchain-wrapper host/bin/$prefix-toolchain-wrapper
 
 # fix binary symlinks to toolchain wrapper
@@ -48,15 +70,16 @@ br_prefix=${sdk_name%_sdk-buildroot}
 # check previous install and clear sysroot between builds if exists
 if [ -d "$HERO_INSTALL/$br_prefix" ]; then
   echo "Warning: HERO_INSTALL directory already seems to contain a SDK for $br_prefix";
-  read -p "Are you sure you want replace it (N/y)? " -n 1 -r
-  echo
-  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    exit 1
-  else
-    chmod -R u+w ${HERO_INSTALL}
-    rm -rf ${HERO_INSTALL}/$br_prefix
-    chmod -R u-w ${HERO_INSTALL}
+  if ! $FORCE; then
+    read -p "Are you sure you want replace it (N/y)? " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+      exit 1
+    fi
   fi
+  chmod -R u+w ${HERO_INSTALL}
+  rm -rf ${HERO_INSTALL}/$br_prefix
+  chmod -R u-w ${HERO_INSTALL}
 fi
 
 # find paths to exclude from install
