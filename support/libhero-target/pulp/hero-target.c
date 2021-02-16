@@ -24,7 +24,7 @@
 
 #define L3_MEM_BASE_ADDR 0x80000000
 
-#define DEBUG(...) //printf(__VA_ARGS__)
+#define DEBUG(...)  // printf(__VA_ARGS__)
 
 #define DMA_BASE_ADDR 0x1b204400
 #define MAX_NUM_STREAMS 8
@@ -36,60 +36,49 @@ typedef struct {
 
 // base address struct of the dma
 typedef struct {
-    uint32_t src_addr_low;
-    uint32_t src_addr_high;
-    uint32_t dst_addr_low;
-    uint32_t dst_addr_high;
-    uint32_t num_bytes;
-    volatile uint32_t config  __attribute__((aligned(8)));
-    volatile uint32_t tf_id   __attribute__((aligned(8)));
-    volatile _hero_dma_done_id_t done [MAX_NUM_STREAMS] __attribute__((aligned(8)));
+  uint32_t src_addr_low;
+  uint32_t src_addr_high;
+  uint32_t dst_addr_low;
+  uint32_t dst_addr_high;
+  uint32_t num_bytes;
+  volatile uint32_t config __attribute__((aligned(8)));
+  volatile uint32_t tf_id __attribute__((aligned(8)));
+  volatile _hero_dma_done_id_t done[MAX_NUM_STREAMS] __attribute__((aligned(8)));
 } _hero_dma_conf_t;
 
 // launch simple 1D transfer
-static inline uint32_t _hero_launch_oned(
-    _hero_dma_conf_t* _hero_dma_conf,
-    void* src_addr,
-    void* dst_addr,
-    uint32_t num_bytes
-) {
+static inline uint32_t _hero_launch_oned(_hero_dma_conf_t* _hero_dma_conf, void* src_addr,
+                                         void* dst_addr, uint32_t num_bytes) {
 
-    // configure the dma
-    _hero_dma_conf->src_addr_low  = (uint32_t)src_addr;
-    _hero_dma_conf->dst_addr_low  = (uint32_t)dst_addr;
-    _hero_dma_conf->num_bytes     = (uint32_t)num_bytes;
+  // configure the dma
+  _hero_dma_conf->src_addr_low = (uint32_t)src_addr;
+  _hero_dma_conf->dst_addr_low = (uint32_t)dst_addr;
+  _hero_dma_conf->num_bytes = (uint32_t)num_bytes;
 
-    __asm__ __volatile__ ("" : : : "memory");
+  __asm__ __volatile__("" : : : "memory");
 
-    // launch the transfer
-    return _hero_dma_conf->tf_id;
+  // launch the transfer
+  return _hero_dma_conf->tf_id;
 }
 
 // read the id of the last transaction that has been completed
-static inline uint32_t _hero_read_completed_id(
-    _hero_dma_conf_t* _hero_dma_conf,
-    uint32_t stream_id
-) {
+static inline uint32_t _hero_read_completed_id(_hero_dma_conf_t* _hero_dma_conf,
+                                               uint32_t stream_id) {
 
-    return _hero_dma_conf->done[stream_id].id;
+  return _hero_dma_conf->done[stream_id].id;
 }
 
 // wait for a given transaction to complete
-static inline void _hero_wait_for_tf_completion(
-    _hero_dma_conf_t* _hero_dma_conf,
-    uint32_t stream_id,
-    uint32_t tf_id
-) {
-    // spin until transfer is completed
-    while (tf_id > _hero_read_completed_id(_hero_dma_conf, stream_id)) {
-       asm volatile ("nop");
-    }
+static inline void _hero_wait_for_tf_completion(_hero_dma_conf_t* _hero_dma_conf,
+                                                uint32_t stream_id, uint32_t tf_id) {
+  // spin until transfer is completed
+  while (tf_id > _hero_read_completed_id(_hero_dma_conf, stream_id)) {
+    asm volatile("nop");
+  }
 }
 
-hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst,
-                                          const HOST_VOID_PTR src,
-                                          uint32_t size)
-{
+hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
+                                          uint32_t size) {
   // set the base address of the dma
   _hero_dma_conf_t* _hero_dma_conf = (_hero_dma_conf_t*)0x1B204400;
 
@@ -101,10 +90,8 @@ hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst,
   return hero_dma_job;
 }
 
-hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst,
-                                          const DEVICE_VOID_PTR src,
-                                          uint32_t size)
-{
+hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
+                                          uint32_t size) {
   // set the base address of the dma
   _hero_dma_conf_t* _hero_dma_conf = (_hero_dma_conf_t*)0x1B204400;
 
@@ -116,9 +103,7 @@ hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst,
   return hero_dma_job;
 }
 
-void hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
-                          uint32_t size)
-{
+void hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src, uint32_t size) {
   // response
   hero_dma_job_t hero_dma_job;
 
@@ -127,12 +112,9 @@ void hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
 
   // synchronize
   hero_dma_wait(hero_dma_job);
-
 }
 
-void hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
-                          uint32_t size)
-{
+void hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src, uint32_t size) {
   // response
   hero_dma_job_t hero_dma_job;
 
@@ -141,11 +123,9 @@ void hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
 
   // synchronize
   hero_dma_wait(hero_dma_job);
-
 }
 
-void hero_dma_wait(hero_dma_job_t id)
-{
+void hero_dma_wait(hero_dma_job_t id) {
   // set the base address of the dma
   _hero_dma_conf_t* _hero_dma_conf = (_hero_dma_conf_t*)0x1B204400;
 
@@ -155,56 +135,30 @@ void hero_dma_wait(hero_dma_job_t id)
   _hero_wait_for_tf_completion(_hero_dma_conf, stream, tf_id);
 }
 
+DEVICE_VOID_PTR
+hero_l1malloc(int32_t size) { return l1malloc(size); }
 
 DEVICE_VOID_PTR
-hero_l1malloc(int32_t size)
-{
-  return l1malloc(size);
-}
-
-DEVICE_VOID_PTR
-hero_l2malloc(int32_t size)
-{
-  return l2malloc(size);
-}
+hero_l2malloc(int32_t size) { return l2malloc(size); }
 
 HOST_VOID_PTR
-hero_l3malloc(int32_t size)
-{
+hero_l3malloc(int32_t size) {
   printf("Trying to allocate L3 memory from PULP, which is not defined\n");
   return (HOST_VOID_PTR)0;
 }
 
-void
-hero_l1free(DEVICE_VOID_PTR a)
-{
-  l1free(a);
-}
+void hero_l1free(DEVICE_VOID_PTR a) { l1free(a); }
 
-void
-hero_l2free(DEVICE_VOID_PTR a)
-{
-  l2free(a);
-}
+void hero_l2free(DEVICE_VOID_PTR a) { l2free(a); }
 
-void
-hero_l3free(HOST_VOID_PTR a)
-{
+void hero_l3free(HOST_VOID_PTR a) {
   printf("Trying to free L3 memory from PULP, which is not defined\n");
   return;
 }
 
-int32_t
-hero_rt_core_id(void)
-{
-  return rt_core_id();
-}
+int32_t hero_rt_core_id(void) { return rt_core_id(); }
 
-int32_t
-hero_get_clk_counter(void)
-{
-  return get_time();
-}
+int32_t hero_get_clk_counter(void) { return get_time(); }
 
 void __compiler_barrier(void) {
   asm volatile("" : : : "memory");
@@ -631,25 +585,23 @@ __read_end:
 
 // -------------------------------------------------------------------------- //
 
-#define __hero_atomic_define(op, type) \
-  type hero_atomic_ ## op(DEVICE_PTR_CONST ptr, const type val) \
-  { \
+#define __hero_atomic_define(op, type)                                                           \
+  type hero_atomic_##op(DEVICE_PTR_CONST ptr, const type val) {                                  \
     /*assert(((uint32_t)ptr & 0x3) == 0);*/ /* only four-byte aligned addresses are supported */ \
-    type orig; \
-    __asm__ volatile("amo" #op ".w %[orig], %[val], (%[ptr])" \
-        : [orig] "=r" (orig), "+m" (*ptr) \
-        : [val] "r" (val), [ptr] "r" (ptr) \
-        : "memory" \
-    ); \
-    return orig; \
+    type orig;                                                                                   \
+    __asm__ volatile("amo" #op ".w %[orig], %[val], (%[ptr])"                                    \
+                     : [orig] "=r"(orig), "+m"(*ptr)                                             \
+                     : [val] "r"(val), [ptr] "r"(ptr)                                            \
+                     : "memory");                                                                \
+    return orig;                                                                                 \
   }
 
 __hero_atomic_define(swap, int32_t)
-__hero_atomic_define(add,  int32_t)
-__hero_atomic_define(and,  int32_t)
-__hero_atomic_define(or,   int32_t)
-__hero_atomic_define(xor,  int32_t)
-__hero_atomic_define(max,  int32_t)
+__hero_atomic_define(add, int32_t)
+__hero_atomic_define(and, int32_t)
+__hero_atomic_define(or, int32_t)
+__hero_atomic_define(xor, int32_t)
+__hero_atomic_define(max, int32_t)
 __hero_atomic_define(maxu, uint32_t)
-__hero_atomic_define(min,  int32_t)
+__hero_atomic_define(min, int32_t)
 __hero_atomic_define(minu, uint32_t)
