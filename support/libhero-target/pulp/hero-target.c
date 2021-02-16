@@ -26,6 +26,25 @@
 
 #define DEBUG(...) //printf(__VA_ARGS__)
 
+#define DMA_BASE_ADDR 0x1b204400
+#define MAX_NUM_STREAMS 8
+
+typedef struct {
+  uint32_t id;
+  uint32_t padding;
+} _hero_dma_done_id_t;
+
+// base address struct of the dma
+typedef struct {
+    uint32_t src_addr_low;
+    uint32_t src_addr_high;
+    uint32_t dst_addr_low;
+    uint32_t dst_addr_high;
+    uint32_t num_bytes;
+    volatile uint32_t config  __attribute__((aligned(8)));
+    volatile uint32_t tf_id   __attribute__((aligned(8)));
+    volatile _hero_dma_done_id_t done [MAX_NUM_STREAMS] __attribute__((aligned(8)));
+} _hero_dma_conf_t;
 
 // launch simple 1D transfer
 static inline uint32_t _hero_launch_oned(
