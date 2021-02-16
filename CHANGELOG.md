@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Replace RAB by AXI TLB.  This fixes the DMA burst size limitation due to a bug in the RAB (#84).
   - RI5CY/CV32E40P core: Replace PULP-custom hardware counters with RISC-V standard Hardware
     Performance Monitor (currently parametrized to two dynamically assignable hardware counters).
+  - Replace `mchan` DMA engine by AXI DMA engine.  This significantly improves the throughput of DMA
+    transfers (see !216 for details).
 
 ### Fixed
 
