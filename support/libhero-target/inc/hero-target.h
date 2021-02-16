@@ -69,11 +69,9 @@
 #define HERO_L1_DATA __attribute__((section(".data_l1")))
 #define HERO_L1_BSS __attribute__((section(".bss_l1")))
 
-struct hero_dma_job {
+typedef struct {
   uint32_t id;
-};
-
-typedef struct hero_dma_job hero_dma_job_t;
+} hero_dma_job_t;
 
 //!@}
 
