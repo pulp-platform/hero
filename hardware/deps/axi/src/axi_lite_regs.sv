@@ -32,9 +32,9 @@
 ///
 /// ## Read-Only Bytes
 ///
-/// Any set of bytes can be configured as read-only by setting the `AxiReadOnly` parameter
+/// Any set of bytes can be configured as read-only by setting the `reg_read_only_i` input signal
 /// accordingly.  A read-only byte cannot be written via the AXI interface, but it can be changed
-/// from the logic interface.
+/// from the logic interface.  (Also see *Exposing Constants* below.)
 ///
 /// When one or multiple bytes in a write transaction are read-only, they are not modified.  A write
 /// transaction is responded with `OKAY` if it wrote at least one byte.  Write transactions / that
@@ -46,7 +46,8 @@
 ///
 /// To make a byte with constant value (e.g., implemented as LUT instead of FF after synthesis)
 /// readable from the AXI4-Lite port:
-/// - Make the byte read-only from the AXI4-Lite port by setting its `AxiReadOnly` bit to `1`.
+/// - Make the byte read-only from the AXI4-Lite port by constantly driving its bit in
+///   `reg_read_only_i` to `1`.
 /// - Disable loading the byte from logic by driving its `reg_load_i` bit to `0`.
 /// - Define the value of the byte by setting its `RegRstVal` entry.
 ///
@@ -76,12 +77,6 @@ module axi_lite_regs #(
   /// `AxProt[1]` bit set.  If a transaction does not have the `AxProt[1]` bit set, this module
   /// replies with `SLVERR` and does not read or write register data.
   parameter bit SecuProtOnly = 1'b0,
-  /// Define individual bytes as *read-only from the AXI4-Lite port*.
-  ///
-  /// This parameter is an array with one bit for each byte.  If that bit is `0`, the byte can be
-  /// read and written on the AXI4-Lite port; if that bit is `1`, the byte can only be read on the
-  /// AXI4-Lite port.
-  parameter logic [RegNumBytes-1:0] AxiReadOnly = {RegNumBytes{1'b0}},
   /// Constant (=**do not overwrite!**); type of a byte is 8 bit.
   parameter type byte_t = logic [7:0],
   /// Reset value for the whole register array.
@@ -103,7 +98,7 @@ module axi_lite_regs #(
   /// AXI4-Lite slave response
   output resp_lite_t axi_resp_o,
   /// Signals that a byte is being written from the AXI4-Lite port in the current clock cycle.  This
-  /// signal is asserted regardless of the value of `AxiReadOnly` and can therefore be used by
+  /// signal is asserted regardless of the value of `reg_read_only_i` and can therefore be used by
   /// surrounding logic to react to write-on-read-only-byte errors.
   output logic [RegNumBytes-1:0] wr_active_o,
   /// Signals that a byte is being read from the AXI4-Lite port in the current clock cycle.
@@ -117,12 +112,18 @@ module axi_lite_regs #(
   /// If `reg_load_i` is `1` for a byte defined as non-read-only in a clock cycle, an AXI4-Lite
   /// write transaction is stalled when it tries to write the same byte.  That is, a write
   /// transaction is stalled if all of the following conditions are true for the byte at index `i`:
-  /// - `AxiReadOnly[i]` is `0`,
+  /// - `reg_read_only_i[i]` is `0`,
   /// - `reg_load_i[i]` is `1`,
   /// - the bit in `axi_req_i.w.strb` that affects the byte is `1`.
   ///
   /// If unused, set this input to `'0`.
   input  logic  [RegNumBytes-1:0] reg_load_i,
+  /// Define individual bytes as *read-only from the AXI4-Lite port*.
+  ///
+  /// This input is an array with one bit for each byte.  If that bit is `0`, the byte can be read
+  /// and written on the AXI4-Lite port; if that bit is `1`, the byte can only be read on the
+  /// AXI4-Lite port.
+  input  logic  [RegNumBytes-1:0] reg_read_only_i,
   /// The registered value of each byte.
   output byte_t [RegNumBytes-1:0] reg_q_o
 );
@@ -197,9 +198,9 @@ module axi_lite_regs #(
     assign reg_w_idx = byte_w_addr + addr_t'(i);
     // Only assert load flag for non read only bytes.
     assign load[i]      = (reg_w_idx < RegNumBytes) ?
-        (reg_load_i[reg_w_idx] && !AxiReadOnly[reg_w_idx]) : 1'b0;
+        (reg_load_i[reg_w_idx] && !reg_read_only_i[reg_w_idx]) : 1'b0;
     // Flag to find out that all bytes of the chunk are read only.
-    assign read_only[i] = (reg_w_idx < RegNumBytes) ? AxiReadOnly[reg_w_idx] : 1'b1;
+    assign read_only[i] = (reg_w_idx < RegNumBytes) ? reg_read_only_i[reg_w_idx] : 1'b1;
   end
   // Only assert the loaded flag if there could be a load conflict between a strobe and load
   // signal.
@@ -249,7 +250,7 @@ module axi_lite_regs #(
               // Only update the reg from an AXI write if it is not `ReadOnly`.
               // Only connect the data and load to the reg, if the byte is written from AXI.
               // This allows for simultaneous direct load onto unwritten bytes.
-              if (!AxiReadOnly[reg_byte_idx] && axi_req_i.w.strb[i]) begin
+              if (!reg_read_only_i[reg_byte_idx] && axi_req_i.w.strb[i]) begin
                 reg_d[reg_byte_idx]      = axi_req_i.w.data[8*i+:8];
                 reg_update[reg_byte_idx] = 1'b1;
               end
@@ -391,12 +392,12 @@ module axi_lite_regs #(
           $fatal(1, "AxiDataWidth has to be: AxiDataWidth == $bits(axi_req_i.w.data)!");
       assert (AxiDataWidth == $bits(axi_resp_o.r.data)) else
           $fatal(1, "AxiDataWidth has to be: AxiDataWidth == $bits(axi_resp_o.r.data)!");
-      assert (RegNumBytes == $bits(AxiReadOnly)) else
+      assert (RegNumBytes == $bits(reg_read_only_i)) else
           $fatal(1, "Each register needs a `ReadOnly` flag!");
     end
     default disable iff (~rst_ni);
     for (genvar i = 0; i < RegNumBytes; i++) begin
-      assert property (@(posedge clk_i) (!reg_load_i[i] && AxiReadOnly[i] |=> $stable(reg_q_o[i])))
+      assert property (@(posedge clk_i) (!reg_load_i[i] && reg_read_only_i[i] |=> $stable(reg_q_o[i])))
           else $fatal(1, "Read-only register at `byte_index: %0d` was changed by AXI!", i);
     end
   `endif
@@ -415,7 +416,6 @@ module axi_lite_regs_intf #(
   parameter int unsigned                AXI_DATA_WIDTH = 32'd0,
   parameter bit                         PRIV_PROT_ONLY = 1'd0,
   parameter bit                         SECU_PROT_ONLY = 1'd0,
-  parameter logic  [REG_NUM_BYTES-1:0]  AXI_READ_ONLY = {REG_NUM_BYTES{1'b0}},
   parameter byte_t [REG_NUM_BYTES-1:0]  REG_RST_VAL = {REG_NUM_BYTES{8'h00}}
 ) (
   input  logic                      clk_i,
@@ -425,6 +425,7 @@ module axi_lite_regs_intf #(
   output logic  [REG_NUM_BYTES-1:0] rd_active_o,
   input  byte_t [REG_NUM_BYTES-1:0] reg_d_i,
   input  logic  [REG_NUM_BYTES-1:0] reg_load_i,
+  input  logic  [REG_NUM_BYTES-1:0] reg_read_only_i,
   output byte_t [REG_NUM_BYTES-1:0] reg_q_o
 );
 
@@ -451,7 +452,6 @@ module axi_lite_regs_intf #(
     .AxiDataWidth ( AXI_DATA_WIDTH ),
     .PrivProtOnly ( PRIV_PROT_ONLY ),
     .SecuProtOnly ( SECU_PROT_ONLY ),
-    .AxiReadOnly  ( AXI_READ_ONLY  ),
     .RegRstVal    ( REG_RST_VAL    ),
     .req_lite_t   ( req_lite_t     ),
     .resp_lite_t  ( resp_lite_t    )
@@ -464,6 +464,7 @@ module axi_lite_regs_intf #(
     .rd_active_o,
     .reg_d_i,
     .reg_load_i,
+    .reg_read_only_i,
     .reg_q_o
   );
 

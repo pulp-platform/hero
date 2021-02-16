@@ -23,7 +23,7 @@
 #include <vmm/vmm.h>
 
 #define L3_MEM_BASE_ADDR 0x80000000
-#define PULP_DMA_MAX_XFER_SIZE_B 512 // Larger causes RAB problems
+#define PULP_DMA_MAX_XFER_SIZE_B 32768
 #define PULP_DMA_MAX_XFERS 16
 #define PULP_DMA_MASK_DATA_TYPE uint16_t // Holds bitmask for PULP_DMA_MAX_XFERS
 #define PULP_DMA_MUTEX_BACKOFF_CYCLES 60

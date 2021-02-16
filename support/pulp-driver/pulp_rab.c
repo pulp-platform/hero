@@ -209,7 +209,7 @@ int pulp_rab_init(PulpDev *pulp_ptr)
   // initialize management structures and L2 hardware
   pulp_rab_l1_init();
 #if PLATFORM != ZEDBOARD
-  pulp_rab_l2_init(pulp->rab_config);
+  //pulp_rab_l2_init(pulp->rab_config);
 #endif
 
   // initialize miss handling control
@@ -279,8 +279,9 @@ int pulp_rab_release(bool driver)
 
   // free RAB slices (L1 TLB) managed by SoC
   for (i = rab_n_slices_host; i < RAB_L1_N_SLICES_PORT_1; i++) {
-    offset = 0x20 * (RAB_L1_N_SLICES_PORT_0 + i);
-    iowrite32(0, (void *)((unsigned long)pulp->rab_config + offset + 0x38));
+    offset = RAB_SLICE_BASE_OFFSET_B + RAB_L1_PORT_1_OFFSET + RAB_SLICE_SIZE_B * i +
+      RAB_SLICE_FLAGS_OFFSET_B;
+    iowrite32(0, (void *)((unsigned long)pulp->rab_config + offset));
   }
 
   /* Free RAB entries managed by host and SoC and reset driver management
@@ -475,7 +476,8 @@ void pulp_rab_slice_free(void *rab_config, RabSliceReq *rab_slice_req)
   flags_drv = rab_slice_req->flags_drv;
 
   // fetch latest flags from driver
-  entry = RAB_SLICE_BASE_OFFSET_B + RAB_SLICE_SIZE_B * (port * RAB_L1_N_SLICES_PORT_0 + slice);
+  entry = RAB_SLICE_BASE_OFFSET_B + RAB_SLICE_SIZE_B * slice;
+  if (port == 1) entry += RAB_L1_PORT_1_OFFSET;
   flags_hw = ioread32((void *)((unsigned long)rab_config + entry + RAB_SLICE_FLAGS_OFFSET_B));
 
   if (!pulp_rab_slice_is_managed_by_host(rab_slice_req)) {
@@ -646,11 +648,12 @@ int pulp_rab_slice_setup(void *rab_config, RabSliceReq *rab_slice_req, struct pa
 
   // set up new slice, configure the hardware
   if ((port == 0) || (l1.port_1.mapping_active == mapping)) {
-    offset = RAB_SLICE_BASE_OFFSET_B + RAB_SLICE_SIZE_B * (port * RAB_L1_N_SLICES_PORT_0 + slice);
+    offset = RAB_SLICE_BASE_OFFSET_B + RAB_SLICE_SIZE_B * slice;
+    if (port == 1) offset += RAB_L1_PORT_1_OFFSET;
 
-    iowrite32(rab_slice_req->addr_start, (void *)((unsigned long)rab_config + offset + RAB_SLICE_ADDR_START_OFFSET_B));
-    iowrite32(rab_slice_req->addr_end, (void *)((unsigned long)rab_config + offset + RAB_SLICE_ADDR_END_OFFSET_B));
-    IOWRITE_L(rab_slice_req->addr_offset, (void *)((unsigned long)rab_config + offset + RAB_SLICE_ADDR_OFFSET_OFFSET_B));
+    iowrite32(rab_slice_req->addr_start >> 12, (void *)((unsigned long)rab_config + offset + RAB_SLICE_ADDR_START_OFFSET_B));
+    iowrite32(rab_slice_req->addr_end >> 12, (void *)((unsigned long)rab_config + offset + RAB_SLICE_ADDR_END_OFFSET_B));
+    IOWRITE_L(rab_slice_req->addr_offset >> 12, (void *)((unsigned long)rab_config + offset + RAB_SLICE_ADDR_OFFSET_OFFSET_B));
     iowrite32(rab_slice_req->flags_hw, (void *)((unsigned long)rab_config + offset + RAB_SLICE_FLAGS_OFFSET_B));
 
     if (DEBUG_LEVEL_RAB > 1) {
@@ -715,7 +718,7 @@ void pulp_rab_mapping_switch(void *rab_config, unsigned rab_mapping)
     RAB_GET_PROT(prot, l1.port_1.mappings[mapping_active].slices[i].flags_hw);
     if (prot) { // de-activate slices with old active config
 
-      offset = RAB_SLICE_BASE_OFFSET_B + RAB_SLICE_SIZE_B * (1 * RAB_L1_N_SLICES_PORT_0 + i);
+      offset = RAB_SLICE_BASE_OFFSET_B + RAB_L1_PORT_1_OFFSET + RAB_SLICE_SIZE_B * i;
       iowrite32(0x0, (void *)((unsigned long)rab_config + offset + RAB_SLICE_FLAGS_OFFSET_B));
 
       if (DEBUG_LEVEL_RAB > 0)
@@ -727,13 +730,13 @@ void pulp_rab_mapping_switch(void *rab_config, unsigned rab_mapping)
   for (i = 0; i < RAB_L1_N_SLICES_PORT_1; i++) {
     RAB_GET_PROT(prot, l1.port_1.mappings[rab_mapping].slices[i].flags_hw);
     if (prot & 0x1) { // activate slices with new active config
-      offset = RAB_SLICE_BASE_OFFSET_B + RAB_SLICE_SIZE_B * (1 * RAB_L1_N_SLICES_PORT_0 + i);
+      offset = RAB_SLICE_BASE_OFFSET_B + RAB_L1_PORT_1_OFFSET + RAB_SLICE_SIZE_B * i;
 
-      iowrite32(l1.port_1.mappings[rab_mapping].slices[i].addr_start,
+      iowrite32(l1.port_1.mappings[rab_mapping].slices[i].addr_start >> 12,
                 (void *)((unsigned long)rab_config + offset + RAB_SLICE_ADDR_START_OFFSET_B));
-      iowrite32(l1.port_1.mappings[rab_mapping].slices[i].addr_end,
+      iowrite32(l1.port_1.mappings[rab_mapping].slices[i].addr_end >> 12,
                 (void *)((unsigned long)rab_config + offset + RAB_SLICE_ADDR_END_OFFSET_B));
-      IOWRITE_L(l1.port_1.mappings[rab_mapping].slices[i].addr_offset,
+      IOWRITE_L(l1.port_1.mappings[rab_mapping].slices[i].addr_offset >> 12,
                 (void *)((unsigned long)rab_config + offset + RAB_SLICE_ADDR_OFFSET_OFFSET_B));
       iowrite32(l1.port_1.mappings[rab_mapping].slices[i].flags_hw,
                 (void *)((unsigned long)rab_config + offset + RAB_SLICE_FLAGS_OFFSET_B));
@@ -795,7 +798,8 @@ void pulp_rab_mapping_print(void *rab_config, unsigned rab_mapping)
         n_slices = RAB_L1_N_SLICES_PORT_1;
 
       for (i = 0; i < n_slices; i++) {
-        offset = RAB_SLICE_BASE_OFFSET_B + RAB_SLICE_SIZE_B * (j * RAB_L1_N_SLICES_PORT_0 + i);
+        offset = RAB_SLICE_BASE_OFFSET_B + RAB_SLICE_SIZE_B * i;
+        if (j == 1) offset += RAB_L1_PORT_1_OFFSET;
 
         flags_hw = ioread32((void *)((unsigned long)rab_config + offset + RAB_SLICE_FLAGS_OFFSET_B));
         RAB_GET_PROT(prot, flags_hw);
@@ -895,7 +899,7 @@ void pulp_rab_update(unsigned update_req)
     // process every slice independently
     for (j = 0; j < n_slices; j++) {
       offset =
-        RAB_SLICE_BASE_OFFSET_B + RAB_SLICE_SIZE_B * (1 * RAB_L1_N_SLICES_PORT_0 + elem->slice_idxs[set_sel * n_slices + j]);
+        RAB_SLICE_BASE_OFFSET_B + RAB_L1_PORT_1_OFFSET + RAB_SLICE_SIZE_B * elem->slice_idxs[set_sel * n_slices + j];
 
       if (DEBUG_LEVEL_RAB_STR > 3) {
         printk("stripe_idx = %d, n_slices = %d, j = %d, offset = %#x\n", stripe_idx, elem->stripes[stripe_idx].n_slices, j,
@@ -907,11 +911,11 @@ void pulp_rab_update(unsigned update_req)
 
       // set up new translations rule
       if (j < elem->stripes[stripe_idx].n_slices) {
-        iowrite32(elem->stripes[stripe_idx].slice_configs[j].addr_start,
+        iowrite32(elem->stripes[stripe_idx].slice_configs[j].addr_start >> 12,
                   (void *)((unsigned long)(pulp->rab_config) + offset + RAB_SLICE_ADDR_START_OFFSET_B)); // start_addr
-        iowrite32(elem->stripes[stripe_idx].slice_configs[j].addr_end,
+        iowrite32(elem->stripes[stripe_idx].slice_configs[j].addr_end >> 12,
                   (void *)((unsigned long)(pulp->rab_config) + offset + RAB_SLICE_ADDR_END_OFFSET_B)); // end_addr
-        IOWRITE_L(elem->stripes[stripe_idx].slice_configs[j].addr_offset,
+        IOWRITE_L(elem->stripes[stripe_idx].slice_configs[j].addr_offset >> 12,
                   (void *)((unsigned long)(pulp->rab_config) + offset + RAB_SLICE_ADDR_OFFSET_OFFSET_B)); // offset
         iowrite32(elem->flags_hw, (void *)((unsigned long)(pulp->rab_config) + offset + RAB_SLICE_FLAGS_OFFSET_B));
 #ifdef PROFILE_RAB_STR
@@ -1357,6 +1361,7 @@ long pulp_rab_req(void *rab_config, RabSliceReq *rab_slice_req)
       rab_use_l1 = rab_lvl % 2;
     }
   }
+  rab_use_l1 = 1; // currently only use L1 TLB
 
   if (rab_use_l1 == 1) { // use L1 TLB
 
@@ -2034,7 +2039,7 @@ void pulp_rab_free(void *rab_config, unsigned date, bool fixed)
 
 #if PLATFORM != ZEDBOARD
   // free L2TLB
-  pulp_rab_l2_invalidate_all_entries(rab_config, 1);
+  //pulp_rab_l2_invalidate_all_entries(rab_config, 1);
 #endif
 
   return;
@@ -2511,6 +2516,11 @@ void pulp_rab_handle_miss(unsigned unused)
   int use_l1 = 1;
   int err_l2 = 0;
 
+  if (RAB_SLICE_BASE_OFFSET_B >= RAB_MH_META_FIFO_OFFSET_B) {
+    printk(KERN_WARNING "PULP: RAB miss handling aborted because HW FIFO does not exist!\n");
+    return;
+  }
+
   if (DEBUG_LEVEL_RAB_MH > 1)
     printk(KERN_INFO "PULP: RAB miss handling routine started.\n");
 
@@ -2711,6 +2721,7 @@ void pulp_rab_handle_miss(unsigned unused)
             use_l1 = 0;
         }
       }
+      use_l1 = 1; // currently only use L1 TLB
       err = 0;
       if (use_l1 == 0) { // Use L2
         l2_entry->flags = rab_slice_req->flags_hw;

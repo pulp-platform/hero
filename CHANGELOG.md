@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   transferred data for different transfer sizes and source and destination memory alignments.
 
 ### Changed
+- Replace RAB by AXI TLB.  This fixes the DMA burst size limitation due to a bug in the RAB (#84).
 
 ### Fixed
 
