@@ -47,17 +47,6 @@ typedef struct {
 
 static volatile _hero_dma_conf_t* const _hero_dma_conf = (_hero_dma_conf_t*)0x1B204400;
 
-// launch simple 1D transfer
-static inline uint32_t _hero_launch_oned(void* src_addr, void* dst_addr, uint32_t num_bytes) {
-  // configure the dma
-  _hero_dma_conf->src_addr_low = (uint32_t)src_addr;
-  _hero_dma_conf->dst_addr_low = (uint32_t)dst_addr;
-  _hero_dma_conf->num_bytes = (uint32_t)num_bytes;
-
-  // launch the transfer
-  return _hero_dma_conf->tf_id;
-}
-
 // read the id of the last transaction that has been completed
 static inline uint32_t _hero_read_completed_id(uint32_t stream_id) {
   return _hero_dma_conf->done[stream_id].id;
@@ -73,15 +62,27 @@ static inline void _hero_wait_for_tf_completion(uint32_t stream_id, uint32_t tf_
 
 hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
                                           uint32_t size) {
+  // configure the dma
+  _hero_dma_conf->src_addr_low = (uint32_t)src;
+  _hero_dma_conf->dst_addr_low = (uint32_t)dst;
+  _hero_dma_conf->num_bytes = size;
+
+  // launch the transfer
   hero_dma_job_t hero_dma_job;
-  hero_dma_job.id = _hero_launch_oned((void*)src, (void*)dst, size);
+  hero_dma_job.id = _hero_dma_conf->tf_id;
   return hero_dma_job;
 }
 
 hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
                                           uint32_t size) {
+  // configure the dma
+  _hero_dma_conf->src_addr_low = (uint32_t)src;
+  _hero_dma_conf->dst_addr_low = (uint32_t)dst;
+  _hero_dma_conf->num_bytes = size;
+
+  // launch the transfer
   hero_dma_job_t hero_dma_job;
-  hero_dma_job.id = _hero_launch_oned((void*)src, (void*)dst, size);
+  hero_dma_job.id = _hero_dma_conf->tf_id;
   return hero_dma_job;
 }
 
