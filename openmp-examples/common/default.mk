@@ -35,6 +35,10 @@ DEFMK_ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 CFLAGS_COMMON += $(cflags) -fopenmp=libomp -O$(opt) -static
 ifeq ($(default-as),pulp)
   CFLAGS_COMMON += -fhero-device-default-as=device
+else
+ifdef HERCULES_INSTALL
+	export HERCULES_HERO_PULP_AS=1
+endif
 endif
 CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -I$(HERO_PULP_INC_DIR)
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
