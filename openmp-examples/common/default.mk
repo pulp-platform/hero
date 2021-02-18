@@ -39,6 +39,9 @@ endif
 CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -I$(HERO_PULP_INC_DIR)
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
 LDFLAGS_COMMON ?= $(ldflags) -static
+ifdef HERCULES_INSTALL
+	LDFLAGS_COMMON += -lpremnotify
+endif
 LDFLAGS_PULP += $(LDFLAGS_COMMON)
 LDFLAGS += $(LDFLAGS_COMMON) -lhero-target
 ifeq ($(TARGET_HOST),riscv64-hero-linux-gnu)

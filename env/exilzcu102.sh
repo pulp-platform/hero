@@ -39,3 +39,11 @@ fi
 # TODO: determine correct sysroot in ToolChain
 unset LDFLAGS
 export CFLAGS="--sysroot=${HERO_INSTALL}/aarch64-hero-linux-gnu/"
+
+# If PREM passes enabled, source the corresponding environment.
+if [ ! -z "$HERCULES_INSTALL" ]; then
+  echo "Configuring HERCULES at: $HERCULES_INSTALL"
+  source ${HERCULES_INSTALL}/prem-environment.sh > /dev/null
+  echo "Configuring HERCULES for architecture HERO/PULP"
+  export HERCULES_ARCH="PULP"
+fi

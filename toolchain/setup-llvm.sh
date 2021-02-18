@@ -87,6 +87,9 @@ $HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL \
 cmake --build . --target install
 cd ..
 
+# install HERCULES environment script.
+echo "Installing PREM environment script"
+cp $THIS_DIR/HerculesCompiler-public/environment.sh $HERO_INSTALL/prem-environment.sh
 
 # install wrapper script
 # FIXME: this wrapper script should be transparantly included in the HC compiler
