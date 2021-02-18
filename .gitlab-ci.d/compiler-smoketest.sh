@@ -21,6 +21,13 @@
 # This script does not build the infrastructure, so that must be done before, in
 # accordance with the README.
 
+# Test PREM runtime generation?
+TEST_PREM="NO"
+if [ "$1" = "test-prem" ]; then
+  echo "Including tests for PREM runtime generation."
+  TEST_PREM="YES"
+fi
+
 # Abort on first non-zero exit code.
 set -e
 
@@ -59,6 +66,22 @@ for only in "${only_makeflags[@]}"; do
         fi
         echo -e "\e[96mTEST: $d    $makeflags    $cflags\e[0m"
         make V=1 -C $d clean all $makeflags cflags="$cflags"
+        if [ "$TEST_PREM" = "YES" ]; then
+          # Check PULP disassembly if exists.
+          if [ -f "$d/$(basename $d).pulp.dis" ]; then
+            CNT=$(cat "$d/$(basename $d).pulp.dis" | grep "__prem_notify" | wc -l)
+            if [ "$CNT" -le 0 ]; then
+              echo "No PREM runtime calls generated!"
+              exit 1
+            fi
+          fi
+          # Check main disassembly
+          CNT=$(cat "$d/$(basename $d).dis" | grep "__prem_notify" | wc -l)
+          if [ "$CNT" -le 0 ]; then
+            echo "No PREM runtime calls generated!"
+            exit 1
+          fi
+        fi
       done
     done
   done
@@ -80,6 +103,22 @@ for defas in "${defas_makeflags[@]}"; do
         fi
         echo -e "\e[96mTEST: $d    $makeflags    $cflags\e[0m"
         make V=1 -C openmp-examples/$d clean all $makeflags cflags="$cflags"
+        if [ "$TEST_PREM" = "YES" ]; then
+          # Check PULP disassembly if exists.
+          if [ -f "openmp-examples/$d/$d.pulp.dis" ]; then
+            CNT=$(cat "openmp-examples/$d/$d.pulp.dis" | grep "__prem_notify" | wc -l)
+            if [ "$CNT" -le 0 ]; then
+              echo "No PREM runtime calls generated!"
+              exit 1
+            fi
+          fi
+          # Check main disassembly
+          CNT=$(cat "openmp-examples/$d/$d.dis" | grep "__prem_notify" | wc -l)
+          if [ "$CNT" -le 0 ]; then
+            echo "No PREM runtime calls generated!"
+            exit 1
+          fi
+        fi
       done
     done
   done
@@ -100,6 +139,22 @@ for only in "${only_makeflags[@]}"; do
             fi
             echo -e "\e[96mTEST: $d    $makeflags    $cflags\e[0m"
             make V=1 -C $d clean all $makeflags cflags="$cflags"
+            if [ "$TEST_PREM" = "YES" ]; then
+              # Check PULP disassembly if exists.
+              if [ -f "$d/$(basename $d).pulp.dis" ]; then
+                CNT=$(cat "$d/$(basename $d).pulp.dis" | grep "__prem_notify" | wc -l)
+                if [ "$CNT" -le 0 ]; then
+                  echo "No PREM runtime calls generated!"
+                  exit 1
+                fi
+              fi
+              # Check main disassembly
+              CNT=$(cat "$d/$(basename $d).dis" | grep "__prem_notify" | wc -l)
+              if [ "$CNT" -le 0 ]; then
+                echo "No PREM runtime calls generated!"
+                exit 1
+              fi
+            fi
           done
         done
       done
