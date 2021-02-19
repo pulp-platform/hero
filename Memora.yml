@@ -2148,6 +2148,7 @@ artifacts:
       - install/lib/libomp.so
       - install/lib/libomptarget.rtl.x86_64.so
       - install/lib/libomptarget.so
+      - install/lib/hercules
       - install/libexec/c++-analyzer
       - install/libexec/ccc-analyzer
       - install/share/clang
