@@ -87,10 +87,6 @@ $HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL \
 cmake --build . --target install
 cd ..
 
-# install PULP libpremnotify
-echo "Installing PULP PREM library"
-$THIS_DIR/setup-libprem-pulp.sh "$THIS_DIR/.."
-
 # install HERCULES environment script.
 echo "Installing PREM environment script"
 cp $THIS_DIR/HerculesCompiler-public/environment.sh $HERO_INSTALL/prem-environment.sh
