@@ -1130,6 +1130,7 @@ artifacts:
       - support/pulp-driver # package `pulp-driver`
       - toolchain/install-sdk.sh
       - toolchain/llvm-project/openmp # package `hero-openmp`
+      - toolchain/HerculesCompiler-public/runtime/cmux # CMUX
       ## Dependencies
       # tc-pulp
       - Makefile
@@ -1817,6 +1818,7 @@ artifacts:
       - toolchain/hc-omp-pass
       - toolchain/llvm-support
       - toolchain/llvm-project
+      - toolchain/HerculesCompiler-public # PREM passes
       - toolchain/setup-llvm.sh
       ## Dependencies
       # sdk-pulp-and-sdk-har
