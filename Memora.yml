@@ -1123,7 +1123,7 @@ artifacts:
       - apps/hero # package `hero-apps`
       - board
       - buildroot
-      - configs/har_defconfig
+      - configs/har_prem_defconfig
       - package
       - support/libhero-target # package `libhero-target`
       - support/libpulp # package `libpulp`
