@@ -1,4 +1,4 @@
-BENDER := ../bender script vivado
+BENDER := ../bender script vivado -t fpga -t xilinx
 BENDER_FILES := ../bender ../Bender.yml ../Bender.lock
 DEFINE_TCLS := \
     vivado_ips/define_defines_includes.tcl \
