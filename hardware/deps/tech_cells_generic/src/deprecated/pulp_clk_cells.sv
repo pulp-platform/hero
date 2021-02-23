@@ -14,7 +14,11 @@ module pulp_clock_and2 (
   output logic clk_o
 );
 
-  assign clk_o = clk0_i & clk1_i;
+  tc_clk_and2 i_tc_clk_and2 (
+    .clk0_i,
+    .clk1_i,
+    .clk_o
+  );
 
 endmodule
 
@@ -23,7 +27,10 @@ module pulp_clock_buffer (
   output logic clk_o
 );
 
-  assign clk_o = clk_i;
+  tc_clk_buffer i_tc_clk_buffer (
+    .clk_i,
+    .clk_o
+  );
 
 endmodule
 
@@ -35,13 +42,12 @@ module pulp_clock_gating (
    output logic clk_o
 );
 
-  logic clk_en;
-
-  always_latch begin
-    if (clk_i == 1'b0) clk_en <= en_i | test_en_i;
-  end
-
-  assign clk_o = clk_i & clk_en;
+  tc_clk_gating i_tc_clk_gating (
+     .clk_i,
+     .en_i,
+     .test_en_i,
+     .clk_o
+  );
 
 endmodule
 
@@ -50,7 +56,10 @@ module pulp_clock_inverter (
   output logic clk_o
 );
 
-  assign clk_o = ~clk_i;
+  tc_clk_inverter i_tc_clk_inverter (
+    .clk_i,
+    .clk_o
+  );
 
 endmodule
 
@@ -61,7 +70,12 @@ module pulp_clock_mux2 (
   output logic clk_o
 );
 
-  assign clk_o = (clk_sel_i) ? clk1_i : clk0_i;
+  tc_clk_mux2 i_tc_clk_mux2 (
+    .clk0_i,
+    .clk1_i,
+    .clk_sel_i,
+    .clk_o
+  );
 
 endmodule
 
@@ -71,7 +85,11 @@ module pulp_clock_xor2 (
   output logic clk_o
 );
 
-  assign clk_o = clk0_i ^ clk1_i;
+  tc_clk_xor2 i_tc_clk_xor2 (
+    .clk0_i,
+    .clk1_i,
+    .clk_o
+  );
 
 endmodule
 
