@@ -42,15 +42,18 @@ static inline double bench_stop(void);
 
 #ifdef __PULP__
 
+static unsigned last_bench_start_time;
+
 // FIXME: Implement benchmarking properly in standalone
 static inline void bench_start(const char* const format, ...) {
   __device const char *format_dev = (__device const char*)format;
   printf("BENCH -- %s!\n", format_dev);
-  hero_reset_clk_counter();
+  last_bench_start_time = hero_get_clk_counter();
 }
 
 static inline double bench_stop(void) {
-  int time = hero_get_clk_counter();
+  const unsigned stop_time = hero_get_clk_counter();
+  const unsigned time = stop_time - last_bench_start_time;
   printf("BENCH cycles %d!\n", time);
   return time;
 }
