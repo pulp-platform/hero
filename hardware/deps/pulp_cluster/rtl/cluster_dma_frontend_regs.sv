@@ -74,7 +74,6 @@ module cluster_dma_frontend_regs #(
         // defaults
         ctrl_gnt_o   = 1'b0;
         rdata_d      =   '0;
-        valid_d      = 1'b0;
         be_valid_o   = 1'b0;
         data_store_d = data_store_q;
         conf_store_d = conf_store_q;
@@ -84,7 +83,6 @@ module cluster_dma_frontend_regs #(
 
             // only grant if a request is here
             ctrl_gnt_o = 1'b1;
-            valid_d = 1'b1;
 
             // address decoding
             case(reg_addr)
@@ -131,7 +129,6 @@ module cluster_dma_frontend_regs #(
                 end
                 // next_id
                 8'h20 : begin
-                    // valid_d    = be_ready_i;
                     if (ctrl_type_i) begin // read
                         if (data_store_q.transfer.num_bytes == '0) begin
                             rdata_d = '0;
@@ -157,6 +154,7 @@ module cluster_dma_frontend_regs #(
             endcase
         end
     end
+    assign valid_d = ctrl_req_i & ctrl_gnt_o;
 
     // data store
     always_ff @(posedge clk_i or negedge rst_ni) begin : proc_data_store
