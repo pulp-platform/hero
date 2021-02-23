@@ -248,7 +248,7 @@ unsigned external_accesses_two_counters(const hero_perf_event_t event1, const ch
                           event1_suffix, (int32_t)actual1, expected1);
   n_errors +=
       condition_or_printf(actual2 == (int64_t)expected2, "hero_perf_event_%s was %d instead of %d",
-                          event1_suffix, (int32_t)actual2, expected2);
+                          event2_suffix, (int32_t)actual2, expected2);
 
   // Deallocate counters.
   n_errors +=
