@@ -1,0 +1,186 @@
+#!/usr/bin/env python3
+#
+# Copyright 2021 ETH Zurich, University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Authors:
+# - Andreas Kurth <akurth@iis.ee.ethz.ch>
+#
+# Evaluate and plot DMA throughput measurements.
+
+import argparse
+from dataclasses import dataclass
+from enum import Enum
+import matplotlib.cbook as cbook
+from matplotlib import cm
+import matplotlib.pyplot as plt
+import numpy as np
+import re
+
+
+class MemoryRegion(Enum):
+    L1 = 'L1'
+    L2 = 'L2'
+    L3 = 'L3'
+
+    def __str__(self):
+        return self.name
+
+
+@dataclass
+class DmaTxResult:
+    src: MemoryRegion
+    dst: MemoryRegion
+    n_bytes: int
+    src_misalignment: int
+    dst_misalignment: int
+    n_bytes_per_cycle: float
+
+
+parser = argparse.ArgumentParser(
+    description='Evaluate and plot DMA throughput measurements.')
+parser.add_argument('type',
+                    choices=['axi_dma', 'mchan'],
+                    help='type of DMA engine')
+args = parser.parse_args()
+
+# Parse result log.
+re_TRANSFER = re.compile(
+    r"For transfer size (\d+(?:\.\d+)?) KiB, (\w+) misalignment (\d+) B, (\w+) misalignment (\d+) B"
+)
+re_RESULT = re.compile(r"(\w+) -> (\w+) DMA: (\d+\.\d+) bytes/cycle")
+results = []
+with open(args.type + '.txt', 'r') as f:
+    n_bytes = None
+    misalignments = {}
+    for line in [l.strip() for l in f]:
+        m = re_TRANSFER.match(line)
+        if m:
+            n_bytes = float(m.group(1)) * 1024
+            misalignments[MemoryRegion(m.group(2))] = int(m.group(3))
+            misalignments[MemoryRegion(m.group(4))] = int(m.group(5))
+            continue
+        m = re_RESULT.match(line)
+        if m:
+            src = MemoryRegion(m.group(1))
+            dst = MemoryRegion(m.group(2))
+            result = DmaTxResult(src=src,
+                                 dst=dst,
+                                 n_bytes=n_bytes,
+                                 src_misalignment=misalignments[src],
+                                 dst_misalignment=misalignments[dst],
+                                 n_bytes_per_cycle=float(m.group(3)))
+            results += [result]
+
+l31 = []
+l13 = []
+l21 = []
+l12 = []
+kib = []
+for n_bytes in sorted(set([r.n_bytes for r in results])):
+    n_kib = float(n_bytes) / 1024
+    if n_kib > 64:  # non-power-of-two increments after 64 KiB
+        continue
+    l31 += [[
+        r.n_bytes_per_cycle for r in results
+        if r.src == MemoryRegion.L3 and r.n_bytes == n_bytes
+    ]]
+    l13 += [[
+        r.n_bytes_per_cycle for r in results
+        if r.dst == MemoryRegion.L3 and r.n_bytes == n_bytes
+    ]]
+    l21 += [[
+        r.n_bytes_per_cycle for r in results
+        if r.src == MemoryRegion.L2 and r.n_bytes == n_bytes
+    ]]
+    l12 += [[
+        r.n_bytes_per_cycle for r in results
+        if r.dst == MemoryRegion.L2 and r.n_bytes == n_bytes
+    ]]
+    kib += [n_kib]
+
+count = 4
+cmap = cm.get_cmap('plasma', count + 1)
+color_l31 = cmap(0 / count)
+color_l13 = cmap(1 / count)
+color_l21 = cmap(2 / count)
+color_l12 = cmap(3 / count)
+
+
+def set_box_color(bp, color):
+    for elem in ['boxes', 'caps', 'medians', 'whiskers']:
+        plt.setp(bp[elem], color=color)
+
+
+fig = plt.figure(figsize=(6, 12))
+ax = fig.add_subplot(111)
+
+assert (len(l31) == len(l13))
+assert (len(l21) == len(l12))
+assert (len(l31) == len(l21))
+ln = len(l31)
+
+width = (1 - .2) / count
+
+
+def pos(idx):
+    return np.array(
+        range(ln)) - width / 2 - width * (count / 2 - 1) + idx * width
+
+
+def bp(data, color, idx):
+    flierprops = dict(marker='o',
+                      markeredgecolor=color,
+                      markersize=2.5,
+                      markeredgewidth=.25)
+    _bp = ax.boxplot(data,
+                     positions=pos(idx),
+                     widths=width,
+                     showcaps=False,
+                     flierprops=flierprops)
+    set_box_color(_bp, color)
+    return _bp
+
+
+bp(l31, color_l31, 0)
+bp(l13, color_l13, 1)
+bp(l21, color_l21, 2)
+bp(l12, color_l12, 3)
+
+ax.plot([], c=color_l31, label='L3->L1')
+ax.plot([], c=color_l13, label='L1->L3')
+ax.plot([], c=color_l21, label='L2->L1')
+ax.plot([], c=color_l12, label='L1->L2')
+ax.legend(loc='upper left')
+
+ticks = np.arange(0, len(kib), 1)
+xlabels = ['{} Ki'.format(int(k)) if k >= 1 else int(k * 1024) for k in kib]
+ax.set_xticks(ticks)
+ax.set_xticklabels(xlabels)
+ax.tick_params(axis='x', which='major', bottom=False)
+ax.set_xticks(ticks + 0.5, minor=True)
+
+ax.set_xlim(min(pos(0)) - width, max(pos(count - 1)) + width)
+ax.set_ylim(0, 8)
+ax.grid(axis='y', color='lightgrey')
+
+title = {
+    'mchan': 'mchan',
+    'axi_dma': 'AXI DMA engine',
+}[args.type] + ' with HERO API (single transfer)'
+ax.set_title(title)
+ax.set_xlabel('Transfer Size [B]')
+ax.set_ylabel('Throughput [B/cycle]')
+
+xleft, xright = ax.get_xlim()
+ybottom, ytop = ax.get_ylim()
+aspect_ratio = .5
+ax.set_aspect(abs((xright - xleft) / (ybottom - ytop)) * aspect_ratio)
+
+fig.savefig(args.type + '_throughput.pdf', bbox_inches='tight')
+plt.show()
+
+# This file is formatted according to PEP 8.  (Use `yapf --style pep8` or
+# equivalent to auto-format.)
+# vim: sw=4 sts=4 et tw=79

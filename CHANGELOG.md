@@ -8,17 +8,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+- Add benchmark (`openmp-examples/dma-perf`) to measure DMA throughput and verify the correctness of
+  transferred data for different transfer sizes and source and destination memory alignments.
 
 ### Changed
-- hardware:
-  - Upgrade `tech_cells_generic` dependency to current `master`.
-  - Replace custom `sram` with `tc_sram` from the `tech_cells_generic` repository.
+- Replace RAB by AXI TLB.  This fixes the DMA burst size limitation due to a bug in the RAB (#84).
 
 ### Fixed
-- hardware: Improve compatibility with Synopsys DC 2019.2 and Morty 0.5.0.
+
+
+## v0.1.4 - 2021-02-10
+
+### Added
+- PULP runtime: Add a simple heap overflow protection mechanism (with very low runtime overhead).
+
+### Changed
+- Hardware:
+  - RI5CY/CV32E40P core: Remove performance counter registers that were only available in
+    simulation.  RTL simulation now has the same number of performance counter registers available
+    as on the FPGA.
+  - Upgrade `tech_cells_generic` dependency to current `master`.
+  - Replace custom `sram` with `tc_sram` from the `tech_cells_generic` repository.
+- PULP runtime: Move memory allocators from `io` library and `libgomp` to the kernel.
+
+### Fixed
+- Hardware:
+  - RI5CY/CV32E40P core:
+    - Fix clearing of performance CSRs.
+    - Fix stack protector (RTL simulation only) after unaligned memory access.
+  - PULP cluster: Do not count accesses to the TRYX register as external memory accesses.  Even
+    though such accesses target a peripheral instead of the TCDM, they have the same latency as a
+    TCDM access, and they do not access any external memory.  Thus, counting them as external
+    access is misleading and disturbs measurements of real external accesses.
+  - Improve compatibility with Synopsys DC 2019.2 and Morty 0.5.0.
+- PULP runtime: Update memory allocator from upstream to fix memory that was not freed.
 
 ### Removed
-- hardware: Remove deprecated `fpga-support` dependency.
+- Hardware: Remove deprecated `fpga-support` dependency.
 
 
 ## v0.1.3 - 2021-01-11

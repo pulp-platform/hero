@@ -37,13 +37,6 @@ packages:
       Git: "https://github.com/pulp-platform/axi2per.git"
     dependencies:
       - axi_slice
-  axi_rab:
-    revision: 1a74fac92af1f3a2dfd851fb5f409bf1838f6367
-    version: ~
-    source:
-      Git: "https://github.com/pulp-platform/axi_rab.git"
-    dependencies:
-      - axi
   axi_riscv_atomics:
     revision: eafccfb892fd34cf6c89f766c2852cb52ea19b54
     version: ~

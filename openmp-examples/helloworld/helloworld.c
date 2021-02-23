@@ -17,7 +17,6 @@
  */
 
 #include <hero-target.h>  // BIGPULP_MEMCPY
-#include <omp.h>          // omp_get_num_threads(), omp_get_thread_num()
 #include <stdio.h>        // printf()
 
 #pragma omp declare target

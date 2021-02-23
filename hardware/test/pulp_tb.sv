@@ -19,7 +19,7 @@ module pulp_tb #(
   // TB Parameters
   parameter time          CLK_PERIOD = 1000ps,
   // SoC Parameters
-  parameter int unsigned  N_CLUSTERS = 4,
+  parameter int unsigned  N_CLUSTERS = 2,
   parameter int unsigned  AXI_DW = 128,
   parameter int unsigned  L2_N_AXI_PORTS = 1
 );
@@ -351,11 +351,12 @@ module pulp_tb #(
   endtask
 
   task write_rab_slice(input axi_lite_addr_t slice_addr, input axi_addr_t first,
-      input axi_addr_t last, input axi_addr_t phys_addr);
-    write_rab(slice_addr+8'h00, first);
-    write_rab(slice_addr+8'h08, last);
-    write_rab(slice_addr+8'h10, phys_addr);
-    write_rab(slice_addr+8'h18, 64'h7);
+      input axi_addr_t last, input axi_addr_t base);
+    automatic axi_lite_addr_t slice_base_addr = 32'hA800_0000 + slice_addr;
+    write_rab(slice_base_addr+8'h00, first);
+    write_rab(slice_base_addr+8'h08, last);
+    write_rab(slice_base_addr+8'h10, base);
+    write_rab(slice_base_addr+8'h18, 64'b111);
   endtask
 
   task write_to_pulp(input axi_addr_t addr, input axi_data_t data, output axi_pkg::resp_t resp);
@@ -422,19 +423,22 @@ module pulp_tb #(
 
     // Set up RAB slice from PULP to external devices: all addresses (that the interconnect routes
     // through the RAB) except zero page.
-    write_rab_slice(32'hA0, 64'h0000_0000_0000_1000, 64'hFFFF_FFFF_FFFF_FFFF,
-        64'h0000_0000_0000_1000);
+    write_rab_slice(32'h1000, 52'h1, 52'hFFFF_FFFF_FFFF_F, 52'h1);
 
     // Set up RAB slice from external/Host to mailbox.
-    write_rab_slice(32'h40, 64'h0000_0000_1B80_1000, 64'h0000_0000_1B80_1FFF,
-        64'h0000_0000_1B80_1000);
+    write_rab_slice(32'h0, 52'hA600_0, 52'hA600_0, 52'h1B80_1); // Host mbox IF
+    write_rab_slice(32'h1C, 52'hA600_1, 52'hA600_1, 52'h1B80_0); // PULP mbox IF
 
     // Write word to mailbox.
-    write_to_pulp(64'h0000_0000_1B80_1000, 32'h5000_600D, resp);
+    write_to_pulp(64'h0000_0000_A600_0000, 32'h5000_600D, resp);
     assert(resp == axi_pkg::RESP_OKAY);
 
-    // Read status of mailbox.
-    read_from_pulp(64'h0000_0000_1B80_1020, data, resp);
+    // Read status of mailbox via Host interface.
+    read_from_pulp(64'h0000_0000_A600_0020, data, resp);
+    assert(resp == axi_pkg::RESP_OKAY);
+
+    // Read status of mailbox via PULP interface.
+    read_from_pulp(64'h0000_0000_A600_1020, data, resp);
     assert(resp == axi_pkg::RESP_OKAY);
 
     // Start cluster 0.

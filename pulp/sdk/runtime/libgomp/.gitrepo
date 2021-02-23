@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/pulp-platform/pulp-libgomp
+	branch = 421fe1754df6b75d803475c0efa14c85cf01b4da
+	commit = 421fe1754df6b75d803475c0efa14c85cf01b4da
+	parent = 253f0dfc90e68737d4225d7234102e7c97a20fe3
+	method = merge
+	cmdver = 0.4.3

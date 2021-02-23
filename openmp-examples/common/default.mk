@@ -81,13 +81,13 @@ $(EXE): $(SRC:.c=.OMP.ll)
 slm: $(EXE)_l1.slm $(EXE)_l2.slm
 
 $(EXE)_l2.slm: $(EXE)
-	$(DEV_OBJDUMP) -s --start-address=0x1c000000 --stop-address=0x1cffffff $^ | rg '^ ' | cut -c 2-45 \
+	$(DEV_OBJDUMP) -s --start-address=0x1c000000 --stop-address=0x1cffffff $^ | grep '^ ' | cut -c 2-45 \
       | sort \
       > $@
 	$(DEFMK_ROOT)/one_word_per_line.py $@
 
 $(EXE)_l1.slm: $(EXE)
-	$(DEV_OBJDUMP) -s --start-address=0x10000000 --stop-address=0x1bffffff $^ | rg '^ ' | cut -c 2-45 \
+	$(DEV_OBJDUMP) -s --start-address=0x10000000 --stop-address=0x1bffffff $^ | grep '^ ' | cut -c 2-45 \
       | perl -p -e 's/^1b/10/' \
       | sort \
       > $@

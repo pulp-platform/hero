@@ -65,44 +65,6 @@ int *__errno() { return &errno; }
 static void __rt_io_unlock();
 static void __rt_io_lock();
 
-static void *domain_malloc(size_t size, int domain)
-{
-  void * ptr = rt_alloc(domain, size + 0x4U);
-  if ((uint32_t) ptr == 0x0)
-    return (void *) 0x0;
-  *(uint32_t *)(ptr) = size + 0x4U;
-
-  void *user_ptr = (void *)(((uint32_t *)ptr)+1);
-
-  return user_ptr;
-}
-
-static void domain_free(void *ptr, int domain)
-{
-  void *alloc_ptr = (void *)(((uint32_t *)ptr)-1);
-  uint32_t size = *((uint32_t *)alloc_ptr);
-  rt_free(domain, alloc_ptr, size);
-}
-
-void *malloc(size_t size)
-{
-  return domain_malloc(size, RT_ALLOC_FC_DATA);
-}
-
-void free(void *ptr)
-{
-  domain_free(ptr, RT_ALLOC_FC_DATA);
-}
-
-void *l1malloc(size_t size)
-{
-  return domain_malloc(size, RT_ALLOC_CL_DATA);
-}
-
-void l1free(void *ptr)
-{
-  domain_free(ptr, RT_ALLOC_CL_DATA);
-}
 
 int strcmp(const char *s1, const char *s2)
 {
