@@ -254,12 +254,12 @@ typedef enum {
  */
 int hero_perf_init(void);
 
-/** Terminate the performance library and free any resources it has taken.
+/** Deinitialize the performance library and free any resources it has taken.
  *
  *  After this function has been called, `hero_perf_init` MUST be called before any other
  *  `hero_perf_*` function (with the same conditions as `hero_perf_init`).
  */
-void hero_perf_term(void);
+void hero_perf_deinit(void);
 
 /** Allocate a counter for an event.
  *

@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
   n_errors += measure_compare(hero_perf_event_store_external, "store_external", 2);
 
 #pragma omp target device(BIGPULP_MEMCPY)
-  { hero_perf_term(); }
+  { hero_perf_deinit(); }
 
   if (n_errors == 0) {
     printf("Test successful.\n");

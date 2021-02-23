@@ -122,7 +122,7 @@ hero_perf_init(void) {
 }
 
 void
-hero_perf_term(void) {
+hero_perf_deinit(void) {
   return 0;
 }
 

@@ -551,7 +551,7 @@ int hero_perf_init(void) {
   return 0;
 }
 
-void hero_perf_term(void) {
+void hero_perf_deinit(void) {
   // Return if not allocated.
   if (hero_perf[hero_rt_core_id()] == NULL) return;
 

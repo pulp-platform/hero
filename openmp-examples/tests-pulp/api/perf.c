@@ -296,7 +296,7 @@ unsigned test_perf(void) {
   n_errors += local_accesses();
   n_errors += external_accesses();
 
-  hero_perf_term();
+  hero_perf_deinit();
 
   return n_errors;
 }
