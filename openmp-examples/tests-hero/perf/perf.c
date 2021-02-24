@@ -47,15 +47,16 @@ int measure_event(const hero_perf_event_t event) {
     volatile __host uint32_t* const local_l3_ptr = l3_ptr;
 
     hero_perf_continue_all();
-    // 3 local loads
+    // 3 local loads = 3 loads
     const uint32_t l1_var = *l1_ptr;
     const uint32_t l1_var_1 = *l1_ptr;
     const uint32_t l1_var_2 = *l1_ptr;
-    // 1 local store
+    // 1 local store = 1 store
     *l1_ptr = 42;
-    // 1 external load = 1 local store, 1 external load, 1 local load
+    // 1 external load (+ 1 local load and 1 local store) = 1 external load, 2 loads, 1 store
     const uint32_t l3_var_3 = *local_l3_ptr;
-    // 2 external stores = 2 local stores, 2 external stores, 2 local loads
+    // 2 external stores (+ 2*(1 local load and 1 local store)
+    // = 2 external stores, 2 loads, 4 stores
     *local_l3_ptr = 17;
     *local_l3_ptr = 483;
     hero_perf_pause_all();
@@ -102,8 +103,8 @@ int main(int argc, char* argv[]) {
   }
 
   unsigned n_errors = 0;
-  n_errors += measure_compare(hero_perf_event_load, "load", 6);
-  n_errors += measure_compare(hero_perf_event_store, "store", 4);
+  n_errors += measure_compare(hero_perf_event_load, "load", 7);
+  n_errors += measure_compare(hero_perf_event_store, "store", 6);
   n_errors += measure_compare(hero_perf_event_load_external, "load_external", 1);
   n_errors += measure_compare(hero_perf_event_store_external, "store_external", 2);
 
