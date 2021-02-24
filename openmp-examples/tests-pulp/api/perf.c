@@ -187,8 +187,16 @@ inline void external_accesses_kernel(volatile uint32_t* const l1, volatile uint3
   *l2 = 8606;
 }
 
+// Type of comparison function
+// - Arguments:
+//   1. actual value
+//   2. expected value
+//   3. event suffix
+// - Returns the number of errors in the comparison.
+typedef unsigned (*cmp_fn_t)(int64_t, int64_t, const char*);
+
 unsigned external_accesses_one_counter(const hero_perf_event_t event, const char* event_suffix,
-                                       const unsigned expected) {
+                                       const unsigned expected, cmp_fn_t cmp) {
   // Initialize pointer to L1, L2, and DRAM.
   volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
   volatile uint32_t* const l2 = (volatile __device uint32_t*)test_l2_base();
@@ -206,9 +214,7 @@ unsigned external_accesses_one_counter(const hero_perf_event_t event, const char
   const int64_t actual = hero_perf_read(event);
 
   // Compare and report result.
-  unsigned n_errors =
-      condition_or_printf(actual == (int64_t)expected, "hero_perf_event_%s was %d instead of %d",
-                          event_suffix, (int32_t)actual, expected);
+  unsigned n_errors = cmp(actual, (int64_t)expected, event_suffix);
 
   // Deallocate counter.
   n_errors +=
@@ -219,8 +225,9 @@ unsigned external_accesses_one_counter(const hero_perf_event_t event, const char
 }
 
 unsigned external_accesses_two_counters(const hero_perf_event_t event1, const char* event1_suffix,
-                                        const unsigned expected1, const hero_perf_event_t event2,
-                                        const char* event2_suffix, const unsigned expected2) {
+                                        const unsigned expected1, cmp_fn_t cmp1,
+                                        const hero_perf_event_t event2, const char* event2_suffix,
+                                        const unsigned expected2, cmp_fn_t cmp2) {
   // Initialize pointer to L1, L2, and DRAM.
   volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
   volatile uint32_t* const l2 = (volatile __device uint32_t*)test_l2_base();
@@ -243,12 +250,9 @@ unsigned external_accesses_two_counters(const hero_perf_event_t event1, const ch
   const int64_t actual2 = hero_perf_read(event2);
 
   // Compare and report results.
-  unsigned n_errors =
-      condition_or_printf(actual1 == (int64_t)expected1, "hero_perf_event_%s was %d instead of %d",
-                          event1_suffix, (int32_t)actual1, expected1);
-  n_errors +=
-      condition_or_printf(actual2 == (int64_t)expected2, "hero_perf_event_%s was %d instead of %d",
-                          event2_suffix, (int32_t)actual2, expected2);
+  unsigned n_errors = 0;
+  n_errors += cmp1(actual1, (int64_t)expected1, event1_suffix);
+  n_errors += cmp2(actual2, (int64_t)expected2, event2_suffix);
 
   // Deallocate counters.
   n_errors +=
@@ -261,20 +265,31 @@ unsigned external_accesses_two_counters(const hero_perf_event_t event1, const ch
   return n_errors;
 }
 
+// Assert that the actual value equals the expected value.
+unsigned cmp_eq(const int64_t actual, const int64_t expected, const char* const suffix) {
+  return condition_or_printf(actual == expected, "hero_perf_event_%s was %d instead of %d", suffix,
+                             (int32_t)actual, (int32_t)expected);
+}
+
 unsigned external_accesses(void) {
   unsigned n_errors = 0;
-  n_errors += external_accesses_one_counter(hero_perf_event_load_external, "load_external", 4);
-  n_errors += external_accesses_one_counter(hero_perf_event_load, "load", 9);
-  n_errors += external_accesses_one_counter(hero_perf_event_store_external, "store_external", 6);
-  n_errors += external_accesses_one_counter(hero_perf_event_store, "store", 11);
+  n_errors +=
+      external_accesses_one_counter(hero_perf_event_load_external, "load_external", 4, &cmp_eq);
+  n_errors += external_accesses_one_counter(hero_perf_event_load, "load", 9, &cmp_eq);
+  n_errors +=
+      external_accesses_one_counter(hero_perf_event_store_external, "store_external", 6, &cmp_eq);
+  n_errors += external_accesses_one_counter(hero_perf_event_store, "store", 11, &cmp_eq);
   n_errors += external_accesses_two_counters(hero_perf_event_load_external, "load_external", 4,
-                                             hero_perf_event_load, "load", 9);
-  n_errors += external_accesses_two_counters(hero_perf_event_load_external, "load_external", 4,
-                                             hero_perf_event_store_external, "store_external", 6);
-  n_errors += external_accesses_two_counters(hero_perf_event_store, "store", 11,
-                                             hero_perf_event_load_external, "load_external", 4);
-  n_errors += external_accesses_two_counters(hero_perf_event_store_external, "store_external", 6,
-                                             hero_perf_event_instr_retired, "instr_retired", 10);
+                                             &cmp_eq, hero_perf_event_load, "load", 9, &cmp_eq);
+  n_errors +=
+      external_accesses_two_counters(hero_perf_event_load_external, "load_external", 4, &cmp_eq,
+                                     hero_perf_event_store_external, "store_external", 6, &cmp_eq);
+  n_errors +=
+      external_accesses_two_counters(hero_perf_event_store, "store", 11, &cmp_eq,
+                                     hero_perf_event_load_external, "load_external", 4, &cmp_eq);
+  n_errors +=
+      external_accesses_two_counters(hero_perf_event_store_external, "store_external", 6, &cmp_eq,
+                                     hero_perf_event_instr_retired, "instr_retired", 10, &cmp_eq);
 
   return n_errors;
 }
