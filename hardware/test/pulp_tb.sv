@@ -201,7 +201,7 @@ module pulp_tb #(
     .DataWidth          (AXI_DW),
     .IdWidth            (AXI_IW + 1),
     .UserWidth          (pulp_pkg::AXI_UW),
-    .WarnUninitialized  (1'b1),
+    .WarnUninitialized  (1'b0),
     .ApplDelay          (CLK_PERIOD / 5 * 1),
     .AcqDelay           (CLK_PERIOD / 5 * 4)
   ) i_sim_mem (
