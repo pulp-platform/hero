@@ -10,12 +10,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add benchmark (`openmp-examples/dma-perf`) to measure DMA throughput and verify the correctness of
   transferred data for different transfer sizes and source and destination memory alignments.
+- `libhero-target`: Add `hero_perf_*` performance measurement API.  This API provides a uniform
+  interface for counting events on different devices, does not require all events to be supported on
+  every device, and works with hardware counters dynamically assigned an to event as well as with
+  hardware counters statically bound ("hardwired") to an event.  See !223 for details.
 
 ### Changed
-- Replace RAB by AXI TLB.  This fixes the DMA burst size limitation due to a bug in the RAB (#84).
+- Hardware:
+  - Replace RAB by AXI TLB.  This fixes the DMA burst size limitation due to a bug in the RAB (#84).
+  - RI5CY/CV32E40P core: Replace PULP-custom hardware counters with RISC-V standard Hardware
+    Performance Monitor (currently parametrized to two dynamically assignable hardware counters).
 
 ### Fixed
 
+### Removed
+- `libhero-target`: Remove `hero_reset_clk_counter()`, thereby making the clock counter
+  non-resettable and thus monotonically increasing.  The monotonicity property is important so that
+  different usages of the cycle counter do not interfere.
 
 ## v0.1.4 - 2021-02-10
 
