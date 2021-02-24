@@ -111,14 +111,38 @@ hero_rt_core_id(void)
 }
 
 // FIXME implement clock counters for host
-void
-hero_reset_clk_counter(void) {
-  return;
-}
-
 int32_t
 hero_get_clk_counter(void) {
   return 0;
+}
+
+int
+hero_perf_init(void) {
+  return 0;
+}
+
+void
+hero_perf_deinit(void) {
+}
+
+int
+hero_perf_alloc(const hero_perf_event_t event) {
+  return -HERO_ENODEV;
+}
+
+int
+hero_perf_dealloc(const hero_perf_event_t event) {
+  return -HERO_ENODEV;
+}
+
+void hero_perf_pause_all(void) {
+}
+
+void hero_perf_continue_all(void) {
+}
+
+int64_t hero_perf_read(const hero_perf_event_t event) {
+  return -HERO_EINVAL;
 }
 
 #define __hero_atomic_define(op, type) \

@@ -30,7 +30,6 @@ extern void hero_l2free(void*);
 extern void* hero_l3malloc(int num);
 extern void hero_l3free(void*);
 extern int hero_get_clk_counter(void);
-extern void hero_reset_clk_counter(void);
 extern int polybench_hero_mem_level;
 
 static void* hero_malloc(int num) {
@@ -382,9 +381,6 @@ void polybench_papi_print()
 
 void polybench_prepare_instruments()
 {
-#if defined(PULP) && defined(POLYBENCH_TIME)
-  hero_reset_clk_counter();
-#endif
 #ifndef POLYBENCH_NO_FLUSH_CACHE
   polybench_flush_cache ();
 #endif
