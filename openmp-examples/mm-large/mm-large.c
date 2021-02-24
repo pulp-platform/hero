@@ -171,7 +171,9 @@ int double_buf_mm(__host uint32_t * __restrict__ a,
     } // n_stripes
 
     // wait for second to last c stripe
-    hero_dma_wait(c_dma[!c_idx]);
+    if (thread_id == 2) {
+      hero_dma_wait(c_dma[!c_idx]);
+    }
 
     // copy out last c stripe
     if (thread_id == 2)
