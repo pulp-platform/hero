@@ -271,6 +271,20 @@ unsigned cmp_eq(const int64_t actual, const int64_t expected, const char* const 
                              (int32_t)actual, (int32_t)expected);
 }
 
+// Assert that the actual value is within 10% of the expected value.
+unsigned cmp_within_10pct(const int64_t actual, const int64_t expected, const char* const suffix) {
+  const int64_t expected_plus_10pct = (int64_t)((float)expected * 1.1);
+  const int64_t expected_minus_10pct = (int64_t)((float)expected * 0.9);
+  unsigned n_errors = 0;
+  n_errors += condition_or_printf(actual <= expected_plus_10pct,
+                                  "hero_perf_event_%s was %d instead of at most %d", suffix,
+                                  (int32_t)actual, (int32_t)expected_plus_10pct);
+  n_errors += condition_or_printf(actual >= expected_minus_10pct,
+                                  "hero_perf_event_%s was %d instead of at least %d", suffix,
+                                  (int32_t)actual, (int32_t)expected_minus_10pct);
+  return n_errors;
+}
+
 unsigned external_accesses(void) {
   unsigned n_errors = 0;
   n_errors +=
@@ -287,9 +301,9 @@ unsigned external_accesses(void) {
   n_errors +=
       external_accesses_two_counters(hero_perf_event_store, "store", 11, &cmp_eq,
                                      hero_perf_event_load_external, "load_external", 4, &cmp_eq);
-  n_errors +=
-      external_accesses_two_counters(hero_perf_event_store_external, "store_external", 6, &cmp_eq,
-                                     hero_perf_event_instr_retired, "instr_retired", 10, &cmp_eq);
+  n_errors += external_accesses_two_counters(hero_perf_event_store_external, "store_external", 6,
+                                             &cmp_eq, hero_perf_event_instr_retired,
+                                             "instr_retired", 45, &cmp_within_10pct);
 
   return n_errors;
 }
