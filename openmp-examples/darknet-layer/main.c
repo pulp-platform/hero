@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "gemm.h"
-#include "../darknet/gemm_layers.h"
+#include "gemm_layers.h"
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>

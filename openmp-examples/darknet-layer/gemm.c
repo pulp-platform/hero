@@ -103,7 +103,6 @@ void gemm_nn(int M, int N, int K, float ALPHA,
     }
 }
 
-#include "../darknet/gemm_layers.c"
 void gemm_nn_tiled(int M, int N, int K, float ALPHA,
       __host float *A, int lda,
       __host float *B, int ldb,
