@@ -1,3 +1,7 @@
+#include <hero-target.h>
+
+extern int LAYER_COUNTER;
+
 void gemm_0(float ALPHA, float *A, float *B, float *C){
   const int M = 16;
   const int N = 173056;

@@ -485,9 +485,6 @@ void gemm_tt(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int 
   }
 }
 
-#include "gemm_layers.c"
-
-
 double timediff(struct timespec start, struct timespec stop) {
   double diff = (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec) / BILLION;
   return diff;
