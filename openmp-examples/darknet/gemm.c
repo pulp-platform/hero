@@ -99,55 +99,6 @@ void gemm_nn(int M, int N, int K, float ALPHA,
         }
     }
 }
-void gemm_zero(float ALPHA,
-        float *A, int lda,
-        float *B, int ldb,
-        float *C, int ldc)
-{
-    int i,j,k;
-    /*
-    float matC[16][173056];
-    float matB[27][173056];
-    float matA[16][27];
-
-    int m, n, k;
-
-    for(m=0; m<16; m++){
-      for(k=0; k<27; k++){
-        matA[m][k]=A[m*27+k];
-      }
-    }
-
-    for(n=0; n<173056; n++){
-      for(k=0; k<27; k++){
-        matB[k][n]=B[k*173056+n]
-      }
-    }
-
-    for(m=0; m<16; m++){
-      for(n=0; n<173056; n++){
-        matC[m][n]=C[m*173056+n]
-      }
-    }
-*/
-
-//#pragma omp target device(BIGPULP_MEMCPY) \
-    map(tofrom: C [0:2768896]) \
-    map(to: A [0:432], B [0:4672512])
-  {
-//    #pragma omp parallel for collapse(2) private(i, k, j) num_threads(8)
-    for(i = 0; i < 16; ++i){
-        for(k = 0; k < 27; ++k){
-            for(j = 0; j < 173056; ++j){
-              //C[m][n] += A[m][k]*B[k][n];
-              C[i*173056+j] += ALPHA*A[i*27+k]*B[k*173056+j];
-            }
-        }
-    }
-  }
-    LAYER_COUNTER=2;
-}
-//#pragma omp end declare target
 
 // gemm kernel offloaded, with manual DMA transactions
 /*
