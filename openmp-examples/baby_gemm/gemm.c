@@ -100,16 +100,47 @@ void gemm_nn(int M, int N, int K, float ALPHA,
 }
 
 #include "../darknet/gemm_layers.c"
+void gemm_nn_tiled(int M, int N, int K, float ALPHA,
+      __host float *A, int lda,
+      __host float *B, int ldb,
+      __host float *C, int ldc) {
 
+  // Compute memory allocation block sizes
+  const int L1_b = 1024 * 1024;
+  const int L1_flt = L1_b / sizeof(float);
+  const int blockSize = sqrt(L1_flt / 3);
+  //printf("blockSize is %i, %i\n", blockSize, blockSize);
+
+  // Compute tiled matrix multiplication
+  for (int bn = 0; bn < N && N - bn - 1 != 0; bn += my_min(N - bn - 1, blockSize)) {
+    for (int bk = 0; bk < K && K - bk - 1 != 0; bk += my_min(K - bk - 1, blockSize)) {
+      for (int bm = 0; bm < M && M - bm - 1 != 0; bm += my_min(M - bm - 1, blockSize)) {
+        int limitM = my_min(M - bm, blockSize);
+        int limitN = my_min(N - bn, blockSize);
+        int limitK = my_min(K - bk, blockSize);
+        for (int m = bm; m < bm+limitM; m++) {
+          for (int n = bn; n < bn+limitN; n++) {
+            for (int k = bk; k < bk+limitK; k++) {
+              C[m*N+n] += A[m*K+k] * B[k*N+n];
+              //printf("C is %f\n", C[m * blockSize + n]);
+            }
+          }
+        }
+      }
+    }
+  }
+
+}
+/*
 void gemm_zero(float ALPHA, float *A, float *B, float *C)
 {
   const int M = 16;
   const int N = 173056;
   const int K = 27;
   int m,n,k;
-  float (*matA)[K] = (__host float(*)[K]) A;
-  float (*matB)[N] = (__host float(*)[N]) B;
-  float (*matC)[N] = (__host float(*)[N]) C;
+  float (*matA)[K] = (float(*)[K]) A;
+  float (*matB)[N] = (float(*)[N]) B;
+  float (*matC)[N] = (float(*)[N]) C;
   float temp;
   #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:27][0:173056])
   {
@@ -134,30 +165,11 @@ void gemm_zero(float ALPHA, float *A, float *B, float *C)
 
 // gemm kernel offloaded, with manual DMA transactions
 
-/*
 void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
-        float *A, int lda,
-        float *B, int ldb,
-        float *C, int ldc) {
+        __host float *A, int lda,
+        __host float *B, int ldb,
+        __host float *C, int ldc) {
   // For correctness check
-//#define TIMELAYERS
-//#define CORRECTNESS
-#ifdef CORRECTNESS
-  float *E_flt = (float *)malloc(M * N * sizeof(float));
-  for (int m = 0; m < M; m++) {
-    for (int n = 0; n < N; n++) {
-      E_flt[m * N + n] = 0.0;
-      for (int k = 0; k < K; k++) {
-        E_flt[m * N + n] += A[m * K + k] * B[k * N + n];
-      }
-    }
-  }
-
-#endif
-#ifdef TIMELAYERS
-  struct timespec requestStart, requestEnd;
-  clock_gettime(CLOCK_REALTIME, &requestStart);
-#endif
 #ifdef TIME_DMA_AND_COMP
   unsigned int dma_cycles = 0;
   unsigned int comp_cycles = 0;
@@ -185,9 +197,21 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
     const int L1_b = 80 * 1024;
     const int L1_flt = L1_b / sizeof(float);
     const int blockSize = sqrt(L1_flt / 3);
+    printf("blockSize is %i, %i\n", blockSize, blockSize);
+
+    int xfers = 0;
+#ifndef PULP_DMA_MAX_XFERS
+#define PULP_DMA_MAX_XFERS 8
+#endif//PULP_DMA_MAX_XFERS
+    hero_dma_job_t dma_jobs[PULP_DMA_MAX_XFERS];
 
     // Allocate memory in L3
-    int *spm = l1_malloc();
+    float *spm = hero_l1malloc(3*blockSize*blockSize*sizeof(float));
+    if (spm == NULL){
+      printf("hero_malloc failed\n");
+      abort();
+    }
+    printf("SPM allocation returns address: %x, %x\n", spm, spm);
     float *A_spm = spm;
     float *B_spm = A_spm + blockSize * blockSize;
     float *C_spm = B_spm + blockSize * blockSize;
@@ -198,7 +222,7 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
       //const uint32_t ld_stalls_before = hero_perf_get(STALLS_LOAD);  // per core
       for (int bn = 0; bn < N && N - bn - 1 != 0; bn += my_min(N - bn - 1, blockSize)) {
         for (int bk = 0; bk < K && K - bk - 1 != 0; bk += my_min(K - bk - 1, blockSize)) {
-#pragma omp single
+#pragma omp master
           {
 #ifdef TIME_DMA_AND_COMP
             const uint32_t cycles_before = hero_perf_get(CYCLES);
@@ -206,27 +230,48 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
             for (int r = 0; r < blockSize; r++) {
               // Copy in B with K rows of length N
               //memcpy_to_spm(B_spm + r * blockSize, B + (bk + r) * N + bn, blockSize);
-              hero_memcpy_host2dev(B_spm+r*blockSize, (uint64_t) B+(bk+r)*N+bn, blockSize);
+              if (xfers == PULP_DMA_MAX_XFERS){
+                for (int i = 0; i < PULP_DMA_MAX_XFERS; i++){
+                  hero_dma_wait(dma_jobs[i]);
+                }
+                xfers = 0;
+              }
+              //printf("Matrix B: copying from %x, %x to %x, %lx\n", B+(bk+r)*N+bn, B_spm+r*blockSize, B+(bk+r)*N+bn, B_spm+r*blockSize);
+              dma_jobs[xfers] = hero_memcpy_host2dev_async(B_spm+r*blockSize, B+(bk+r)*N+bn, blockSize*sizeof(float));
+              xfers += 1;
             }
 #ifdef TIME_DMA_AND_COMP
             dma_cycles += hero_perf_get(CYCLES) - cycles_before;
 #endif
           }
           for (int bm = 0; bm < M && M - bm - 1 != 0; bm += my_min(M - bm - 1, blockSize)) {
-#pragma omp single
+#pragma omp master
             {
 #ifdef TIME_DMA_AND_COMP
               const uint32_t cycles_before = hero_perf_get(CYCLES);
 #endif
               for (int r = 0; r < blockSize; r++) {
+                if (xfers == PULP_DMA_MAX_XFERS){
+                  for (int i = 0; i < PULP_DMA_MAX_XFERS; i++){
+                    hero_dma_wait(dma_jobs[i]);
+                  }
+                  xfers = 0;
+                }
                 // Copy in A, with M rows of length K
                 //memcpy_to_spm(A_spm + r * blockSize, A + (bm + r) * K + bk, blockSize);
-                hero_memcpy_host2dev(A_spm+r*blockSize, (uint64_t) A+(bm+r)*K+bk, blockSize);
+                //printf("Matrix A: copying from %x, %x to %x, %lx\n", A+(bm+r)*K+bk, A_spm+r*blockSize, A+(bm+r)*K+bk, A_spm+r*blockSize);
+                dma_jobs[xfers] = hero_memcpy_host2dev_async(A_spm+r*blockSize, A+(bm+r)*K+bk, blockSize*sizeof(float));
+                xfers += 1;
                 // Copy in C with M rows of length N
                 //memcpy_to_spm(C_spm + r * blockSize, C + (bm + r) * N + bn, blockSize);
-                hero_memcpy_host2dev(C_spm+r*blockSize, (uint64_t) C+(bm+r)*N+bn, blockSize);
+                //printf("Matrix C: copying from %x, %x to %x, %lx\n", C+(bm+r)*N+bn, C_spm+r*blockSize, C+(bm+r)*N+bn, C_spm+r*blockSize);
+                dma_jobs[xfers] = hero_memcpy_host2dev_async(C_spm+r*blockSize, C+(bm+r)*N+bn, blockSize*sizeof(float));
+                xfers += 1;
               }
-              //dma_flush();
+              for (int i = 0; i < xfers; i++){
+                hero_dma_wait(dma_jobs[i]);
+              }
+              xfers = 0;
 #ifdef TIME_DMA_AND_COMP
               dma_cycles += hero_perf_get(CYCLES) - cycles_before;
 #endif
@@ -241,7 +286,7 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
 #pragma omp master
             cycles_before = hero_perf_get(CYCLES);
 #endif
-#pragma omp for collapse(2)
+//#pragma omp for collapse(2) // Hangs up the execution on PULP
             for (int m = 0; m < limitM; m++) {
               for (int n = 0; n < limitN; n++) {
                 for (int k = 0; k < limitK; k++) {
@@ -254,15 +299,23 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
             comp_cycles += hero_perf_get(CYCLES) - cycles_before;
 #endif
 
-#pragma omp single
+#pragma omp master
             {
 #ifdef TIME_DMA_AND_COMP
               const uint32_t cycles_before = hero_perf_get(CYCLES);
 #endif
               // Copy out C with M rows of length N
               for (int r = 0; r < blockSize; r++) {
+                if (xfers == PULP_DMA_MAX_XFERS){
+                  for (int i = 0; i < PULP_DMA_MAX_XFERS; i++){
+                    hero_dma_wait(dma_jobs[i]);
+                  }
+                  xfers = 0;
+                }
+
                 //memcpy_from_spm(C + (bm + r) * N + bn, C_spm + r * blockSize, blockSize);
-                hero_memcpy_dev2host((uint64_t) C+(bm+r)*N+bn, C_spm+r*blockSize, blockSize);
+                hero_memcpy_dev2host_async( C+(bm+r)*N+bn, C_spm+r*blockSize, blockSize*sizeof(float));
+                xfers += 1;
               }
               //dma_flush();
 #ifdef TIME_DMA_AND_COMP
@@ -274,47 +327,19 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
       }
 
 #ifdef TIME_DMA_AND_COMP
-#pragma omp single
+#pragma omp master
       // TODO: this should be `atomic update` to take all cores into account, but that freezes
       // execution
       { ld_stalls += hero_perf_get(STALLS_LOAD) - ld_stalls_before; }
 #endif
     }
 
-    l1_dealloc(spm);
+    hero_l1free(spm);
   }
 #ifdef TIME_DMA_AND_COMP
   printf("DMA cycles:  %u\n", dma_cycles);
   printf("Computation: %u\n", comp_cycles);
   printf("Load stalls: %u\n", ld_stalls);
-#endif
-
-#ifdef TIMELAYERS
-  clock_gettime(CLOCK_REALTIME, &requestEnd);
-  double accum = (requestEnd.tv_sec - requestStart.tv_sec) +
-                 (requestEnd.tv_nsec - requestStart.tv_nsec) / BILLION;
-  printf("Time spent on layer: %lf\n", accum);
-#endif
-
-#ifdef CORRECTNESS
-  // Compare correctness.
-  int errors = 0;
-  int same = 0;
-  for (int i = 0; i < M * N; i++) {
-    // printf("Output: %d, expected: %d\n", C_flt[i], E_flt[i]);
-    if (fabs(C[i] - E_flt[i]) > 0.00001) {
-      // printf("ERROR: Output: %f, expected: %f\n", C[i], E_flt[i]);
-      errors++;
-    } else {
-      same++;
-    }
-  }
-  if (!errors) {
-    printf("Computation successful!\n");
-  } else {
-    printf("Had %d errors and %d matches!\n", errors, same);
-  }
-  free(E_flt);
 #endif
 }
 
@@ -485,12 +510,12 @@ void gemm_cpu(int TA, int TB, int M, int N, int K, float ALPHA, float *A, int ld
   }
   printf("Layer counter is set to %i\n", LAYER_COUNTER);
   if (!TA && !TB){
-    if (LAYER_COUNTER == 0){
-      gemm_zero(ALPHA, A, B, C);
-    }
-    else{
+    //if (LAYER_COUNTER == 0){
+      //gemm_zero(ALPHA, A, B, C);
+    //}
+    //else{
       gemm_nn(M, N, K, ALPHA, A, lda, B, ldb, C, ldc);
-    }
+    //}
   }
   else if (TA && !TB)
     gemm_tn(M, N, K, ALPHA, A, lda, B, ldb, C, ldc);

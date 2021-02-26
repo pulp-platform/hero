@@ -2,7 +2,15 @@
 #include "../darknet/gemm_layers.h"
 #include<stdio.h>
 #include<stdlib.h>
+#include<math.h>
+#include <time.h>
 
+#define BILLION 1E9
+
+double timediff(struct timespec start, struct timespec stop) {
+  double diff = (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec) / BILLION;
+  return diff;
+}
 
 int main(int argc, char *argv[]) {
   if (argc != 2){
@@ -40,7 +48,8 @@ int main(int argc, char *argv[]) {
     } else if (LAYER_COUNTER == 22) {
       M = 255, N = 676, K = 256;
     } else {
-      printf("layer not recognized!\n");
+      printf("layer not recognized, using smallest size!\n");
+      return 1;
     }
 
   float* A = (float*)malloc(M*K*sizeof(float));
@@ -74,6 +83,17 @@ int main(int argc, char *argv[]) {
 
   printf("Calling gemm layer %i\n", LAYER_COUNTER);
 
+
+#define TIME_LAYERS
+#ifdef TIME_LAYERS
+  printf("\nLayer %i\n========\n", LAYER_COUNTER);
+  struct timespec tic, toc;
+  clock_gettime(CLOCK_REALTIME, &tic);
+#endif // TIME_LAYERS
+
+  // Hack to call the manual layer (non-PREM only!)
+  // LAYER_COUNTER = -1;
+
   if (LAYER_COUNTER == 0) {
       gemm_0(ALPHA, A, B, C);
     } else if (LAYER_COUNTER == 2) {
@@ -100,12 +120,19 @@ int main(int argc, char *argv[]) {
       gemm_21(ALPHA, A, B, C);
     } else if (LAYER_COUNTER == 22) {
       gemm_22(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER > 0) {
+      printf("layer not recognized!\n");
+      return 1;
     } else {
-      printf("layer not recognized");
-      //printf(", using manual DMA");
-      //gemm_nn_manual_DMA(M, N, K, ALPHA, A, 0, B, 0, C, 0);
-      printf("!\n");
+      // Call manual layer
+      gemm_nn_tiled(M, N, K, ALPHA, A, 0, B, 0, C, 0);
     }
+
+#ifdef TIME_LAYERS
+  clock_gettime(CLOCK_REALTIME, &toc);
+  printf("execution time: %lf\n", timediff(tic, toc));
+#endif // TIME_LAYERS
+
 
   int errors = 0;
   int same = 0;
