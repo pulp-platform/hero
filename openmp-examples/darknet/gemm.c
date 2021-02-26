@@ -162,27 +162,27 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
     // Compute kernel
 #pragma omp parallel num_threads(8)
     {
-      const uint32_t ld_stalls_before = hero_perf_get(STALLS_LOAD);  // per core
+      //const uint32_t ld_stalls_before = hero_perf_get(STALLS_LOAD); // TODO: port to perf API
       for (int bn = 0; bn < N && N - bn - 1 != 0; bn += my_min(N - bn - 1, blockSize)) {
         for (int bk = 0; bk < K && K - bk - 1 != 0; bk += my_min(K - bk - 1, blockSize)) {
 #pragma omp single
           {
 #ifdef TIME_DMA_AND_COMP
-            const uint32_t cycles_before = hero_perf_get(CYCLES);
+            const uint32_t cycles_before = hero_get_clk_counter();
 #endif
             for (int r = 0; r < blockSize; r++) {
               // Copy in B with K rows of length N
               memcpy_to_spm(B_spm + r * blockSize, B + (bk + r) * N + bn, blockSize);
             }
 #ifdef TIME_DMA_AND_COMP
-            dma_cycles += hero_perf_get(CYCLES) - cycles_before;
+            dma_cycles += hero_get_clk_counter() - cycles_before;
 #endif
           }
           for (int bm = 0; bm < M && M - bm - 1 != 0; bm += my_min(M - bm - 1, blockSize)) {
 #pragma omp single
             {
 #ifdef TIME_DMA_AND_COMP
-              const uint32_t cycles_before = hero_perf_get(CYCLES);
+              const uint32_t cycles_before = hero_get_clk_counter();
 #endif
               for (int r = 0; r < blockSize; r++) {
                 // Copy in A, with M rows of length K
@@ -192,7 +192,7 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
               }
               dma_flush();
 #ifdef TIME_DMA_AND_COMP
-              dma_cycles += hero_perf_get(CYCLES) - cycles_before;
+              dma_cycles += hero_get_clk_counter() - cycles_before;
 #endif
             }
 
@@ -203,7 +203,7 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
 #ifdef TIME_DMA_AND_COMP
             uint32_t cycles_before = 0;
 #pragma omp master
-            cycles_before = hero_perf_get(CYCLES);
+            cycles_before = hero_get_clk_counter();
 #endif
 #pragma omp for collapse(2)
             for (int m = 0; m < limitM; m++) {
@@ -215,13 +215,13 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
             }
 #ifdef TIME_DMA_AND_COMP
 #pragma omp master
-            comp_cycles += hero_perf_get(CYCLES) - cycles_before;
+            comp_cycles += hero_get_clk_counter() - cycles_before;
 #endif
 
 #pragma omp single
             {
 #ifdef TIME_DMA_AND_COMP
-              const uint32_t cycles_before = hero_perf_get(CYCLES);
+              const uint32_t cycles_before = hero_get_clk_counter();
 #endif
               // Copy out C with M rows of length N
               for (int r = 0; r < blockSize; r++) {
@@ -229,7 +229,7 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
               }
               dma_flush();
 #ifdef TIME_DMA_AND_COMP
-              dma_cycles += hero_perf_get(CYCLES) - cycles_before;
+              dma_cycles += hero_get_clk_counter() - cycles_before;
 #endif
             }
           }
@@ -240,7 +240,9 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
 #pragma omp single
       // TODO: this should be `atomic update` to take all cores into account, but that freezes
       // execution
-      { ld_stalls += hero_perf_get(STALLS_LOAD) - ld_stalls_before; }
+      {
+        //ld_stalls += hero_perf_get(STALLS_LOAD) - ld_stalls_before; // TODO: port to perf API
+      }
 #endif
     }
 
