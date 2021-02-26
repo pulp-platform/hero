@@ -1,3 +1,7 @@
+// Copyright (c) 2020 ETH Zurich and University of Bologna
+// Licensed under the Apache License, Version 2.0; see LICENSE.Apache-2.0 for details.
+// SPDX-License-Identifier: Apache-2.0
+
 void gemm_0(float ALPHA, float *A, float *B, float *C);
 void gemm_2(float ALPHA, float *A, float *B, float *C);
 void gemm_4(float ALPHA, float *A, float *B, float *C);

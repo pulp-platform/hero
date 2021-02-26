@@ -1,3 +1,7 @@
+// Copyright (c) 2017 Joseph Redmon
+// Licensed under the MIT License, see LICENSE.MIT for details.
+// SPDX-License-Identifier: MIT
+
 #ifndef UTILS_H
 #define UTILS_H
 #include <stdio.h>

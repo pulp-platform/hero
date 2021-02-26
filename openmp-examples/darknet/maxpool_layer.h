@@ -1,3 +1,7 @@
+// Copyright (c) 2017 Joseph Redmon
+// Licensed under the MIT License, see LICENSE.MIT for details.
+// SPDX-License-Identifier: MIT
+
 #ifndef MAXPOOL_LAYER_H
 #define MAXPOOL_LAYER_H
 

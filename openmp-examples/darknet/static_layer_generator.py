@@ -1,8 +1,15 @@
+# Copyright (c) 2020 ETH Zurich and University of Bologna
+# Licensed under the Apache License, Version 2.0; see LICENSE.Apache-2.0 for details.
+# SPDX-License-Identifier: Apache-2.0
 
 layer = ["0", "2", "4", "6", "8", "10", "12", "13", "14", "15", "18", "21", "22"]
 M = ["16", "32", "64", "128", "256", "512", "1024", "256", "512", "255", "128", "256", "255"]
 N = ["173056", "43264", "10816","2704","676", "169", "169", "169", "169", "169", "169", "676", "676"]
 K = ["27", "144", "288", "576", "1152", "2304", "4608", "1024", "2304", "512", "256", "3456", "256"]
+
+print('// Copyright (c) 2020 ETH Zurich and University of Bologna')
+print('// Licensed under the Apache License, Version 2.0; see LICENSE.Apache-2.0 for details.')
+print('// SPDX-License-Identifier: Apache-2.0\n')
 
 print('#include <hero-target.h>\n')
 print("extern int LAYER_COUNTER;\n")

@@ -1,3 +1,7 @@
+// Copyright (c) 2017 Joseph Redmon
+// Licensed under the MIT License, see LICENSE.MIT for details.
+// SPDX-License-Identifier: MIT
+
 #include <math.h>
 #include <stdio.h>
 void col2im_add_pixel(float* im, int height, int width, int channels, int row, int col, int channel,

@@ -1,3 +1,7 @@
+// Copyright (c) 2017 Joseph Redmon
+// Licensed under the MIT License, see LICENSE.MIT for details.
+// SPDX-License-Identifier: MIT
+
 #ifndef IMAGE_H
 #define IMAGE_H
 

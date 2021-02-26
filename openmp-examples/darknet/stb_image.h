@@ -1,3 +1,7 @@
+// Copyright (c) 2017 Joseph Redmon
+// Licensed under the MIT License, see LICENSE.MIT for details.
+// SPDX-License-Identifier: MIT
+
 /* stb_image - v2.19 - public domain image loader - http://nothings.org/stb
                                   no warranty implied; use at your own risk
 
