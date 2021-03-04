@@ -109,6 +109,9 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
       __host float *B, int ldb,
       __host float *C, int ldc) {
 
+  // Main implementation without offload.
+#if !defined(GEMM_NN_TILED_OFFLOAD_NO_DMA) && !defined(GEMM_NN_TILED_OFFLOAD_MANUAL_DMA)
+
   // Compute memory allocation block sizes
   const int L1_b = 1024 * 1024;
   const int L1_flt = L1_b / sizeof(float);
@@ -133,15 +136,13 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
       }
     }
   }
+#endif
 
-}
-/*
-
-// gemm kernel offloaded, with manual DMA transactions
-void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
-        __host float *A, int lda,
-        __host float *B, int ldb,
-        __host float *C, int ldc) {
+// Alternative implementation with offload and manual DMA.
+#if defined(GEMM_NN_TILED_OFFLOAD_MANUAL_DMA)
+#if defined(GEMM_NN_TILED_OFFLOAD_NO_DMA)
+#error Only one of GEMM_NN_TILED_OFFLOAD_MANUAL_DMA and GEMM_NN_TILED_OFFLOAD_NO_DMA may be defined!
+#endif
   // For correctness check
 #ifdef TIME_DMA_AND_COMP
   unsigned int dma_cycles = 0;
@@ -314,16 +315,14 @@ void gemm_nn_manual_DMA(int M, int N, int K, float ALPHA,
   printf("Computation: %u\n", comp_cycles);
   printf("Load stalls: %u\n", ld_stalls);
 #endif
-}
+#endif
 
-// gemm kernel offloaded to PULP without manual DMA
-void gemm_nn_noDMA(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int ldb, float *C,
-             int ldc) {
+  // Alternative implementation with offload and no DMA.
+#if defined(GEMM_NN_TILED_OFFLOAD_NO_DMA)
+#if defined(GEMM_NN_TILED_OFFLOAD_MANUAL_DMA)
+#error Only one of GEMM_NN_TILED_OFFLOAD_NO_DMA and GEMM_NN_TILED_OFFLOAD_MANUAL_DMA may be defined!
+#endif
   // For correctness check
-//#define TIMELAYERS
-//#define CORRECTNESS
-//#define BLOCKEDMM
-//#define SEPARATE_SCOPE
 #ifdef CORRECTNESS
   float *E_flt = (float *)malloc(M * N * sizeof(float));
   for (int m = 0; m < M; m++) {
@@ -424,9 +423,9 @@ void gemm_nn_noDMA(int M, int N, int K, float ALPHA, float *A, int lda, float *B
   }
   free(E_flt);
 #endif
+#endif
 }
 
-*/
 void gemm_nt(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int ldb, float *C,
              int ldc) {
   int i, j, k;
