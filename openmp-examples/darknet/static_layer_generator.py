@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+#
 # Copyright (c) 2020 ETH Zurich and University of Bologna
 # Licensed under the Apache License, Version 2.0; see LICENSE.Apache-2.0 for details.
 # SPDX-License-Identifier: Apache-2.0
@@ -7,16 +9,17 @@ M = ["16", "32", "64", "128", "256", "512", "1024", "256", "512", "255", "128", 
 N = ["173056", "43264", "10816","2704","676", "169", "169", "169", "169", "169", "169", "676", "676"]
 K = ["27", "144", "288", "576", "1152", "2304", "4608", "1024", "2304", "512", "256", "3456", "256"]
 
-print('// Copyright (c) 2020 ETH Zurich and University of Bologna')
-print('// Licensed under the Apache License, Version 2.0; see LICENSE.Apache-2.0 for details.')
-print('// SPDX-License-Identifier: Apache-2.0\n')
+with open('./gemm_layers.c', 'w') as f:
+  f.write('// Copyright (c) 2020 ETH Zurich and University of Bologna\n')
+  f.write('// Licensed under the Apache License, Version 2.0; see LICENSE.Apache-2.0 for details.\n')
+  f.write('// SPDX-License-Identifier: Apache-2.0\n\n')
 
-print('#include <hero-target.h>\n')
-print("extern int LAYER_COUNTER;\n")
+  f.write('#include <hero-target.h>\n\n')
+  f.write("extern int LAYER_COUNTER;\n\n")
 
-for i in range(len(layer)):
+  for i in range(len(layer)):
 
-	print("void gemm_" + layer[i] + "(float ALPHA, float *A, float *B, float *C){\n\
+      f.write("void gemm_" + layer[i] + "(float ALPHA, float *A, float *B, float *C){\n\
   const int M = " + M[i] + ";\n\
   const int N = " + N[i] + ";\n\
   const int K = " + K[i] + ";\n\
@@ -42,4 +45,4 @@ for i in range(len(layer)):
     }\n\
   }\n\
   LAYER_COUNTER=" + layer[(i+1)%len(layer)] + ";\n\
-}\n\n")
+}\n\n\n")
