@@ -161,11 +161,6 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
 #endif
 // clang-format on
   {
-#ifdef TIME_DMA_AND_COMP
-    hero_perf_enable(CYCLES);
-    hero_perf_enable(STALLS_LOAD);
-#endif
-
     // Compute memory allocation block sizes
     const int L1_b = 80 * 1024;
     const int L1_flt = L1_b / sizeof(float);
@@ -192,13 +187,20 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
     // Compute kernel
 //#pragma omp parallel num_threads(8)
     {
-      //const uint32_t ld_stalls_before = hero_perf_get(STALLS_LOAD);  // TODO: port to perf API
+      hero_perf_init();
+      uint32_t ld_stalls_before;
+      if (hero_perf_alloc(hero_perf_event_stall_load) != 0) {
+        printf("Failed to allocate performance counter for load stalls!\n");
+        ld_stalls_before = 0;
+      } else {
+        ld_stalls_before = hero_perf_read(hero_perf_event_stall_load);
+      }
       for (int bn = 0; bn < N && N - bn - 1 != 0; bn += my_min(N - bn - 1, blockSize)) {
         for (int bk = 0; bk < K && K - bk - 1 != 0; bk += my_min(K - bk - 1, blockSize)) {
 #pragma omp master
           {
 #ifdef TIME_DMA_AND_COMP
-            const uint32_t cycles_before = hero_perf_get_clk_counter();
+            const uint32_t cycles_before = hero_get_clk_counter();
 #endif
             for (int r = 0; r < blockSize; r++) {
               // Copy in B with K rows of length N
@@ -214,14 +216,14 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
               xfers += 1;
             }
 #ifdef TIME_DMA_AND_COMP
-            dma_cycles += hero_perf_get_clk_counter() - cycles_before;
+            dma_cycles += hero_get_clk_counter() - cycles_before;
 #endif
           }
           for (int bm = 0; bm < M && M - bm - 1 != 0; bm += my_min(M - bm - 1, blockSize)) {
 #pragma omp master
             {
 #ifdef TIME_DMA_AND_COMP
-              const uint32_t cycles_before = hero_perf_get_clk_counter();
+              const uint32_t cycles_before = hero_get_clk_counter();
 #endif
               for (int r = 0; r < blockSize; r++) {
                 if (xfers == PULP_DMA_MAX_XFERS){
@@ -246,7 +248,7 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
               }
               xfers = 0;
 #ifdef TIME_DMA_AND_COMP
-              dma_cycles += hero_perf_get_clk_counter() - cycles_before;
+              dma_cycles += hero_get_clk_counter() - cycles_before;
 #endif
             }
 
@@ -257,7 +259,7 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
 #ifdef TIME_DMA_AND_COMP
             uint32_t cycles_before = 0;
 #pragma omp master
-            cycles_before = hero_perf_get_clk_counter();
+            cycles_before = hero_get_clk_counter();
 #endif
 //#pragma omp for collapse(2) // Hangs up the execution on PULP
             for (int m = 0; m < limitM; m++) {
@@ -269,13 +271,13 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
             }
 #ifdef TIME_DMA_AND_COMP
 #pragma omp master
-            comp_cycles += hero_perf_get_clk_counter() - cycles_before;
+            comp_cycles += hero_get_clk_counter() - cycles_before;
 #endif
 
 #pragma omp master
             {
 #ifdef TIME_DMA_AND_COMP
-              const uint32_t cycles_before = hero_perf_get_clk_counter();
+              const uint32_t cycles_before = hero_get_clk_counter();
 #endif
               // Copy out C with M rows of length N
               for (int r = 0; r < blockSize; r++) {
@@ -292,7 +294,7 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
               }
               //dma_flush();
 #ifdef TIME_DMA_AND_COMP
-              dma_cycles += hero_perf_get_clk_counter() - cycles_before;
+              dma_cycles += hero_get_clk_counter() - cycles_before;
 #endif
             }
           }
@@ -303,10 +305,9 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
 #pragma omp master
       // TODO: this should be `atomic update` to take all cores into account, but that freezes
       // execution
-      {
-        //ld_stalls += hero_perf_get(STALLS_LOAD) - ld_stalls_before; // TODO: port to perf API
-      }
+      { ld_stalls += hero_perf_read(hero_perf_event_stall_load) - ld_stalls_before; }
 #endif
+      hero_perf_deinit();
     }
 
     hero_l1free(spm);
