@@ -570,6 +570,7 @@ static inline uint8_t event_num(const hero_perf_event_t event) {
     case hero_perf_event_cycle:         return 0;
     case hero_perf_event_instr_retired: return 2;
     // dynamically assigned events
+    case hero_perf_event_stall_load:      return  1;
     case hero_perf_event_load:            return  4;
     case hero_perf_event_store:           return  5;
     case hero_perf_event_load_external:   return 15;
