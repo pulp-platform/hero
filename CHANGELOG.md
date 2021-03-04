@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add benchmark (`openmp-examples/dma-perf`) to measure DMA throughput and verify the correctness
     of transferred data for different transfer sizes and source and destination memory alignments.
   - Add TinyYOLOv3 (`openmp-examples/darknet`) as a benchmark, with the convolution layers ported to
-    run on PULP.  This also comes with a reduced version (`openmp-examples/baby_gemm`), which
+    run on PULP.  This also comes with a reduced version (`openmp-examples/darknet-layer`), which
     executes a single convolutional layer at a time, checks correctness and then exits.
 
 ### Changed
