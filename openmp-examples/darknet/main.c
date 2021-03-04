@@ -2,6 +2,9 @@
 // Licensed under the Apache License, Version 2.0; see LICENSE.Apache-2.0 for details.
 // SPDX-License-Identifier: Apache-2.0
 
+#include <math.h>  // fabs()
+#include <stdbool.h>
+
 #include "darknet.h"
 
 //#define TIMECOMP
@@ -81,14 +84,39 @@ int main() {
   compute_delta("non-max suppression");
 #endif  // TIMECOMP
 
+  typedef struct {
+    char name[16];
+    float prob;
+  } result_t;
+  result_t expected_results[] = {{.name = "car", .prob = 0.615291},
+                                 {.name = "car", .prob = 0.517267},
+                                 {.name = "truck", .prob = 0.557827},
+                                 {.name = "bicycle", .prob = 0.585022},
+                                 {.name = "dog", .prob = 0.570732}};
+  const unsigned num_expected_results = sizeof(expected_results) / sizeof(result_t);
+
   // Loop over results
+  bool output_correct = true;
+  unsigned num_correct = 0;
   printf("\nDETECTED OBJECTS:\n");
   for (int j = 0; j < num; j++) {
     for (int i = 0; i < meta.classes; i++) {
       if (dets[j].prob[i] > 0) {
-        printf("%s: %f\n", meta.names[i], dets[j].prob[i]);
+        printf("%s: %f = ", meta.names[i], dets[j].prob[i]);
+        if (num_correct < num_expected_results && strncmp(expected_results[num_correct].name, meta.names[i], 16) == 0 &&
+            fabs(expected_results[num_correct].prob - dets[j].prob[i]) < 0.01) {
+          printf("correct!\n");
+          num_correct++;
+        } else {
+          printf("wrong!\n");
+          output_correct = false;
+        }
       }
     }
+  }
+  if (num_correct != num_expected_results) {
+    printf("%d detections missing or wrong!\n", num_expected_results - num_correct);
+    output_correct = false;
   }
 
 #ifdef TIMECOMP
@@ -104,5 +132,9 @@ int main() {
   compute_delta("freeing memory");
 #endif  // TIMECOMP
 
-  return 0;
+  if (output_correct) {
+    return 0;
+  } else {
+    return 1;
+  }
 }
