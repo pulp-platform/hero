@@ -458,6 +458,11 @@ void gemm_cpu(int TA, int TB, int M, int N, int K, float ALPHA, float *A, int ld
 #endif // TIME_LAYERS
 
   if (!TA && !TB){
+#if defined(GEMM_NN_TILED_OFFLOAD_NO_DMA) || defined(GEMM_NN_TILED_OFFLOAD_MANUAL_DMA)
+    // Use `gemm_nn_tiled` for tiled GEMM.
+    gemm_nn_tiled(M, N, K, ALPHA, A, lda, B, ldb, C, ldc);
+#else
+    // Use `gemm_` functions from `gemm_layers`.
     if (LAYER_COUNTER == 0) {
       gemm_0(ALPHA, A, B, C);
     } else if (LAYER_COUNTER == 2) {
@@ -487,6 +492,7 @@ void gemm_cpu(int TA, int TB, int M, int N, int K, float ALPHA, float *A, int ld
     } else{
       gemm_nn(M, N, K, ALPHA, A, lda, B, ldb, C, ldc);
     }
+#endif
   }
   else if (TA && !TB)
     gemm_tn(M, N, K, ALPHA, A, lda, B, ldb, C, ldc);
