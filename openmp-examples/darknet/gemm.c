@@ -12,7 +12,7 @@
 #include <time.h>
 
 #define BILLION 1E9
-//#define TIME_DMA_AND_COMP
+#define TIME_DMA_AND_COMP
 
 extern int LAYER_COUNTER;
 
