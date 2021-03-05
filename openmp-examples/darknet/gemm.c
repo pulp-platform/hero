@@ -344,17 +344,17 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
     const int L1_flt = L1_b / sizeof(float);
     const int blockSize = sqrt(L1_flt / 3);
 
-    for(int bn=0; bn<N && N-bn-1 != 0; bn+=my_min(N-bn-1, blockSize)) {
-      for(int bk=0; bk<K && K-bk-1 != 0; bk+=my_min(K-bk-1, blockSize)) {
-        for (int bm=0; bm<M && M-bm-1 != 0; bm+=my_min(M-bm-1, blockSize)) {
-          const int limitM = my_min(M-bm, blockSize);
-          const int limitN = my_min(N-bn, blockSize);
-          const int limitK = my_min(K-bk, blockSize);
+    for (int bn = 0; bn < N && N - bn - 1 != 0; bn += my_min(N - bn - 1, blockSize)) {
+      for (int bk = 0; bk < K && K - bk - 1 != 0; bk += my_min(K - bk - 1, blockSize)) {
+        for (int bm = 0; bm < M && M - bm - 1 != 0; bm += my_min(M - bm - 1, blockSize)) {
+          const int limitM = my_min(M - bm, blockSize);
+          const int limitN = my_min(N - bn, blockSize);
+          const int limitK = my_min(K - bk, blockSize);
 #pragma omp parallel for collapse(2) num_threads(8)
-          for(int m=bm; m<bm+limitM; m++){
-            for(int n=bn; n<bn+limitN; n++){
-              for(int k=bk; k<bk+limitK; k++){
-                C[m*N+n] += A[m*K+k]*B[k*N+n];
+          for (int m = bm; m < bm + limitM; m++) {
+            for (int n = bn; n < bn + limitN; n++) {
+              for (int k = bk; k < bk + limitK; k++) {
+                C[m * N + n] += A[m * K + k] * B[k * N + n];
               }
             }
           }
