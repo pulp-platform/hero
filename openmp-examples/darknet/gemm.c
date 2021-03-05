@@ -188,13 +188,17 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
     // Compute kernel
 #pragma omp parallel num_threads(8)
     {
-      hero_perf_init();
       uint32_t ld_stalls_before;
-      if (hero_perf_alloc(hero_perf_event_stall_load) != 0) {
-        printf("Failed to allocate performance counter for load stalls!\n");
-        ld_stalls_before = 0;
-      } else {
-        ld_stalls_before = hero_perf_read(hero_perf_event_stall_load);
+#pragma omp master
+      {
+        hero_perf_init(); // allocates memory, thus is not thread-safe
+        if (hero_perf_alloc(hero_perf_event_stall_load) != 0) {
+          printf("Failed to allocate performance counter for load stalls!\n");
+          ld_stalls_before = 0;
+        } else {
+          ld_stalls_before = hero_perf_read(hero_perf_event_stall_load);
+        }
+        hero_perf_continue_all();
       }
       for (int bn = 0; bn < N && N - bn - 1 != 0; bn += my_min(N - bn - 1, blockSize)) {
         for (int bk = 0; bk < K && K - bk - 1 != 0; bk += my_min(K - bk - 1, blockSize)) {
@@ -297,11 +301,11 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
 
 #ifdef TIME_DMA_AND_COMP
 #pragma omp master
-      // TODO: this should be `atomic update` to take all cores into account, but that freezes
-      // execution
-      { ld_stalls += hero_perf_read(hero_perf_event_stall_load) - ld_stalls_before; }
+      {
+        ld_stalls = hero_perf_read(hero_perf_event_stall_load) - ld_stalls_before;
+        hero_perf_deinit(); // deallocates memory, thus is not thread-safe
+      }
 #endif
-      hero_perf_deinit();
     }
 
     hero_l1free(spm);
