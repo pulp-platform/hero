@@ -20,38 +20,15 @@ int main(int argc, char *argv[]) {
   }
 
   LAYER_COUNTER = atoi(argv[1]);
-  float ALPHA = 1.0;
-  int M, N, K;
-  if (LAYER_COUNTER == 0) {
-      M = 16, N = 173056, K = 27;
-    } else if (LAYER_COUNTER == 2) {
-      M = 32, N = 43264, K = 144;
-    } else if (LAYER_COUNTER == 4) {
-      M = 64, N = 10816, K = 288;
-    } else if (LAYER_COUNTER == 6) {
-      M = 128, N = 2704, K = 576;
-    } else if (LAYER_COUNTER == 8) {
-      M = 256, N = 676, K = 1152;
-    } else if (LAYER_COUNTER == 10) {
-      M = 512, N = 169, K = 2304;
-    } else if (LAYER_COUNTER == 12) {
-      M = 1024, N = 169, K = 4608;
-    } else if (LAYER_COUNTER == 13) {
-      M = 256, N = 169, K = 1024;
-    } else if (LAYER_COUNTER == 14) {
-      M = 512, N = 169, K = 2304;
-    } else if (LAYER_COUNTER == 15) {
-      M = 255, N = 169, K = 512;
-    } else if (LAYER_COUNTER == 18) {
-      M = 128, N = 169, K = 256;
-    } else if (LAYER_COUNTER == 21) {
-      M = 256, N = 676, K = 3456;
-    } else if (LAYER_COUNTER == 22) {
-      M = 255, N = 676, K = 256;
-    } else {
-      printf("layer not recognized!\n");
-      return 1;
-    }
+  if (LAYER_COUNTER >= sizeof(LAYER_NEXT) / sizeof(unsigned) || LAYER_NEXT[LAYER_COUNTER] == -1) {
+    printf("layer not recognized!\n");
+    return 1;
+  }
+
+  const float ALPHA = 1.0;
+  const int M = LAYER_M[LAYER_COUNTER];
+  const int N = LAYER_N[LAYER_COUNTER];
+  const int K = LAYER_K[LAYER_COUNTER];
 
   float* A = (float*)malloc(M*K*sizeof(float));
   float* B = (float*)malloc(K*N*sizeof(float));
