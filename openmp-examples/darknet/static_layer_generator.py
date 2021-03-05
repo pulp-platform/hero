@@ -53,3 +53,34 @@ void gemm_{layer}(float ALPHA, float *A, float *B, float *C){{
 }}
 
 """.format(layer=layer[i], M=M[i], N=N[i], K=K[i], next_layer=layer[(i+1)%len(layer)]))
+
+# Write header file.
+with open('./gemm_layers.h', 'w') as f:
+  write_copyright_header(f)
+  # Add dimensions and next layer for each layer.
+  f.write("""
+// The following arrays are indexed by the layer number.  The value for non-existing layers is `-1`.
+""")
+  M_C = []
+  N_C = []
+  K_C = []
+  next_C = [] # TODO
+  for i in range(max(layer)+1):
+    try:
+      pos = layer.index(i)
+      M_C.append(str(M[pos]))
+      N_C.append(str(N[pos]))
+      K_C.append(str(K[pos]))
+      next_C.append(str(layer[(pos + 1)]) if pos + 1 < len(layer) else '-1')
+    except ValueError:
+      M_C.append('-1')
+      N_C.append('-1')
+      K_C.append('-1')
+      next_C.append('-1')
+  f.write('static const int LAYER_M[] = {' + ', '.join(M_C) + '};\n')
+  f.write('static const int LAYER_N[] = {' + ', '.join(N_C) + '};\n')
+  f.write('static const int LAYER_K[] = {' + ', '.join(K_C) + '};\n')
+  f.write('static const int LAYER_NEXT[] = {' + ', '.join(next_C) + '};\n')
+  f.write('\n')
+  for l in layer:
+    f.write('void gemm_{l}(float ALPHA, float *A, float *B, float *C);\n'.format(l=l))
