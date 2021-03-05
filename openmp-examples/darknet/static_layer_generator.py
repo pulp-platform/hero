@@ -31,20 +31,17 @@ void gemm_{layer}(float ALPHA, float *A, float *B, float *C){{
   __host float (*matA)[K] = (__host float(*)[K]) A;
   __host float (*matB)[N] = (__host float(*)[N]) B;
   __host float (*matC)[N] = (__host float(*)[N]) C;
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:{K}][0:{N}])
+  #pragma omp target device(BIGPULP_MEMCPY) \\
+      map(to: matA[0:{M}][0:{K}]) \\
+      map(to: matB[0:{K}][0:{N}]) \\
+      map(tofrom: matC[0:{M}][0:{N}])
   {{
-    #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:{M}][0:{K}])
-    {{
-      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:{M}][0:{N}])
-      {{
-        #pragma omp parallel for num_threads(8) schedule(static, 1)
-        for(int m = 0; m < M; ++m){{
-          for(int k = 0; k < K; ++k){{
-            float temp = ALPHA*matA[m][k];
-            for(int n = 0; n < N; ++n){{
-              matC[m][n] +=temp*matB[k][n];
-            }}
-          }}
+    #pragma omp parallel for num_threads(8) schedule(static, 1)
+    for(int m = 0; m < M; ++m){{
+      for(int k = 0; k < K; ++k){{
+        float temp = ALPHA*matA[m][k];
+        for(int n = 0; n < N; ++n){{
+          matC[m][n] +=temp*matB[k][n];
         }}
       }}
     }}

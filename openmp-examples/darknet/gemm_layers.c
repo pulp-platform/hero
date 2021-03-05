@@ -13,20 +13,17 @@ void gemm_0(float ALPHA, float *A, float *B, float *C){
   __host float (*matA)[K] = (__host float(*)[K]) A;
   __host float (*matB)[N] = (__host float(*)[N]) B;
   __host float (*matC)[N] = (__host float(*)[N]) C;
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:27][0:173056])
+  #pragma omp target device(BIGPULP_MEMCPY) \
+      map(to: matA[0:16][0:27]) \
+      map(to: matB[0:27][0:173056]) \
+      map(tofrom: matC[0:16][0:173056])
   {
-    #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:16][0:27])
-    {
-      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:16][0:173056])
-      {
-        #pragma omp parallel for num_threads(8) schedule(static, 1)
-        for(int m = 0; m < M; ++m){
-          for(int k = 0; k < K; ++k){
-            float temp = ALPHA*matA[m][k];
-            for(int n = 0; n < N; ++n){
-              matC[m][n] +=temp*matB[k][n];
-            }
-          }
+    #pragma omp parallel for num_threads(8) schedule(static, 1)
+    for(int m = 0; m < M; ++m){
+      for(int k = 0; k < K; ++k){
+        float temp = ALPHA*matA[m][k];
+        for(int n = 0; n < N; ++n){
+          matC[m][n] +=temp*matB[k][n];
         }
       }
     }
@@ -42,20 +39,17 @@ void gemm_2(float ALPHA, float *A, float *B, float *C){
   __host float (*matA)[K] = (__host float(*)[K]) A;
   __host float (*matB)[N] = (__host float(*)[N]) B;
   __host float (*matC)[N] = (__host float(*)[N]) C;
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:144][0:43264])
+  #pragma omp target device(BIGPULP_MEMCPY) \
+      map(to: matA[0:32][0:144]) \
+      map(to: matB[0:144][0:43264]) \
+      map(tofrom: matC[0:32][0:43264])
   {
-    #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:32][0:144])
-    {
-      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:32][0:43264])
-      {
-        #pragma omp parallel for num_threads(8) schedule(static, 1)
-        for(int m = 0; m < M; ++m){
-          for(int k = 0; k < K; ++k){
-            float temp = ALPHA*matA[m][k];
-            for(int n = 0; n < N; ++n){
-              matC[m][n] +=temp*matB[k][n];
-            }
-          }
+    #pragma omp parallel for num_threads(8) schedule(static, 1)
+    for(int m = 0; m < M; ++m){
+      for(int k = 0; k < K; ++k){
+        float temp = ALPHA*matA[m][k];
+        for(int n = 0; n < N; ++n){
+          matC[m][n] +=temp*matB[k][n];
         }
       }
     }
@@ -71,20 +65,17 @@ void gemm_4(float ALPHA, float *A, float *B, float *C){
   __host float (*matA)[K] = (__host float(*)[K]) A;
   __host float (*matB)[N] = (__host float(*)[N]) B;
   __host float (*matC)[N] = (__host float(*)[N]) C;
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:288][0:10816])
+  #pragma omp target device(BIGPULP_MEMCPY) \
+      map(to: matA[0:64][0:288]) \
+      map(to: matB[0:288][0:10816]) \
+      map(tofrom: matC[0:64][0:10816])
   {
-    #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:64][0:288])
-    {
-      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:64][0:10816])
-      {
-        #pragma omp parallel for num_threads(8) schedule(static, 1)
-        for(int m = 0; m < M; ++m){
-          for(int k = 0; k < K; ++k){
-            float temp = ALPHA*matA[m][k];
-            for(int n = 0; n < N; ++n){
-              matC[m][n] +=temp*matB[k][n];
-            }
-          }
+    #pragma omp parallel for num_threads(8) schedule(static, 1)
+    for(int m = 0; m < M; ++m){
+      for(int k = 0; k < K; ++k){
+        float temp = ALPHA*matA[m][k];
+        for(int n = 0; n < N; ++n){
+          matC[m][n] +=temp*matB[k][n];
         }
       }
     }
@@ -100,20 +91,17 @@ void gemm_6(float ALPHA, float *A, float *B, float *C){
   __host float (*matA)[K] = (__host float(*)[K]) A;
   __host float (*matB)[N] = (__host float(*)[N]) B;
   __host float (*matC)[N] = (__host float(*)[N]) C;
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:576][0:2704])
+  #pragma omp target device(BIGPULP_MEMCPY) \
+      map(to: matA[0:128][0:576]) \
+      map(to: matB[0:576][0:2704]) \
+      map(tofrom: matC[0:128][0:2704])
   {
-    #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:128][0:576])
-    {
-      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:128][0:2704])
-      {
-        #pragma omp parallel for num_threads(8) schedule(static, 1)
-        for(int m = 0; m < M; ++m){
-          for(int k = 0; k < K; ++k){
-            float temp = ALPHA*matA[m][k];
-            for(int n = 0; n < N; ++n){
-              matC[m][n] +=temp*matB[k][n];
-            }
-          }
+    #pragma omp parallel for num_threads(8) schedule(static, 1)
+    for(int m = 0; m < M; ++m){
+      for(int k = 0; k < K; ++k){
+        float temp = ALPHA*matA[m][k];
+        for(int n = 0; n < N; ++n){
+          matC[m][n] +=temp*matB[k][n];
         }
       }
     }
@@ -129,20 +117,17 @@ void gemm_8(float ALPHA, float *A, float *B, float *C){
   __host float (*matA)[K] = (__host float(*)[K]) A;
   __host float (*matB)[N] = (__host float(*)[N]) B;
   __host float (*matC)[N] = (__host float(*)[N]) C;
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:1152][0:676])
+  #pragma omp target device(BIGPULP_MEMCPY) \
+      map(to: matA[0:256][0:1152]) \
+      map(to: matB[0:1152][0:676]) \
+      map(tofrom: matC[0:256][0:676])
   {
-    #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:256][0:1152])
-    {
-      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:256][0:676])
-      {
-        #pragma omp parallel for num_threads(8) schedule(static, 1)
-        for(int m = 0; m < M; ++m){
-          for(int k = 0; k < K; ++k){
-            float temp = ALPHA*matA[m][k];
-            for(int n = 0; n < N; ++n){
-              matC[m][n] +=temp*matB[k][n];
-            }
-          }
+    #pragma omp parallel for num_threads(8) schedule(static, 1)
+    for(int m = 0; m < M; ++m){
+      for(int k = 0; k < K; ++k){
+        float temp = ALPHA*matA[m][k];
+        for(int n = 0; n < N; ++n){
+          matC[m][n] +=temp*matB[k][n];
         }
       }
     }
@@ -158,20 +143,17 @@ void gemm_10(float ALPHA, float *A, float *B, float *C){
   __host float (*matA)[K] = (__host float(*)[K]) A;
   __host float (*matB)[N] = (__host float(*)[N]) B;
   __host float (*matC)[N] = (__host float(*)[N]) C;
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:2304][0:169])
+  #pragma omp target device(BIGPULP_MEMCPY) \
+      map(to: matA[0:512][0:2304]) \
+      map(to: matB[0:2304][0:169]) \
+      map(tofrom: matC[0:512][0:169])
   {
-    #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:512][0:2304])
-    {
-      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:512][0:169])
-      {
-        #pragma omp parallel for num_threads(8) schedule(static, 1)
-        for(int m = 0; m < M; ++m){
-          for(int k = 0; k < K; ++k){
-            float temp = ALPHA*matA[m][k];
-            for(int n = 0; n < N; ++n){
-              matC[m][n] +=temp*matB[k][n];
-            }
-          }
+    #pragma omp parallel for num_threads(8) schedule(static, 1)
+    for(int m = 0; m < M; ++m){
+      for(int k = 0; k < K; ++k){
+        float temp = ALPHA*matA[m][k];
+        for(int n = 0; n < N; ++n){
+          matC[m][n] +=temp*matB[k][n];
         }
       }
     }
@@ -187,20 +169,17 @@ void gemm_12(float ALPHA, float *A, float *B, float *C){
   __host float (*matA)[K] = (__host float(*)[K]) A;
   __host float (*matB)[N] = (__host float(*)[N]) B;
   __host float (*matC)[N] = (__host float(*)[N]) C;
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:4608][0:169])
+  #pragma omp target device(BIGPULP_MEMCPY) \
+      map(to: matA[0:1024][0:4608]) \
+      map(to: matB[0:4608][0:169]) \
+      map(tofrom: matC[0:1024][0:169])
   {
-    #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:1024][0:4608])
-    {
-      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:1024][0:169])
-      {
-        #pragma omp parallel for num_threads(8) schedule(static, 1)
-        for(int m = 0; m < M; ++m){
-          for(int k = 0; k < K; ++k){
-            float temp = ALPHA*matA[m][k];
-            for(int n = 0; n < N; ++n){
-              matC[m][n] +=temp*matB[k][n];
-            }
-          }
+    #pragma omp parallel for num_threads(8) schedule(static, 1)
+    for(int m = 0; m < M; ++m){
+      for(int k = 0; k < K; ++k){
+        float temp = ALPHA*matA[m][k];
+        for(int n = 0; n < N; ++n){
+          matC[m][n] +=temp*matB[k][n];
         }
       }
     }
@@ -216,20 +195,17 @@ void gemm_13(float ALPHA, float *A, float *B, float *C){
   __host float (*matA)[K] = (__host float(*)[K]) A;
   __host float (*matB)[N] = (__host float(*)[N]) B;
   __host float (*matC)[N] = (__host float(*)[N]) C;
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:1024][0:169])
+  #pragma omp target device(BIGPULP_MEMCPY) \
+      map(to: matA[0:256][0:1024]) \
+      map(to: matB[0:1024][0:169]) \
+      map(tofrom: matC[0:256][0:169])
   {
-    #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:256][0:1024])
-    {
-      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:256][0:169])
-      {
-        #pragma omp parallel for num_threads(8) schedule(static, 1)
-        for(int m = 0; m < M; ++m){
-          for(int k = 0; k < K; ++k){
-            float temp = ALPHA*matA[m][k];
-            for(int n = 0; n < N; ++n){
-              matC[m][n] +=temp*matB[k][n];
-            }
-          }
+    #pragma omp parallel for num_threads(8) schedule(static, 1)
+    for(int m = 0; m < M; ++m){
+      for(int k = 0; k < K; ++k){
+        float temp = ALPHA*matA[m][k];
+        for(int n = 0; n < N; ++n){
+          matC[m][n] +=temp*matB[k][n];
         }
       }
     }
@@ -245,20 +221,17 @@ void gemm_14(float ALPHA, float *A, float *B, float *C){
   __host float (*matA)[K] = (__host float(*)[K]) A;
   __host float (*matB)[N] = (__host float(*)[N]) B;
   __host float (*matC)[N] = (__host float(*)[N]) C;
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:2304][0:169])
+  #pragma omp target device(BIGPULP_MEMCPY) \
+      map(to: matA[0:512][0:2304]) \
+      map(to: matB[0:2304][0:169]) \
+      map(tofrom: matC[0:512][0:169])
   {
-    #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:512][0:2304])
-    {
-      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:512][0:169])
-      {
-        #pragma omp parallel for num_threads(8) schedule(static, 1)
-        for(int m = 0; m < M; ++m){
-          for(int k = 0; k < K; ++k){
-            float temp = ALPHA*matA[m][k];
-            for(int n = 0; n < N; ++n){
-              matC[m][n] +=temp*matB[k][n];
-            }
-          }
+    #pragma omp parallel for num_threads(8) schedule(static, 1)
+    for(int m = 0; m < M; ++m){
+      for(int k = 0; k < K; ++k){
+        float temp = ALPHA*matA[m][k];
+        for(int n = 0; n < N; ++n){
+          matC[m][n] +=temp*matB[k][n];
         }
       }
     }
@@ -274,20 +247,17 @@ void gemm_15(float ALPHA, float *A, float *B, float *C){
   __host float (*matA)[K] = (__host float(*)[K]) A;
   __host float (*matB)[N] = (__host float(*)[N]) B;
   __host float (*matC)[N] = (__host float(*)[N]) C;
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:512][0:169])
+  #pragma omp target device(BIGPULP_MEMCPY) \
+      map(to: matA[0:255][0:512]) \
+      map(to: matB[0:512][0:169]) \
+      map(tofrom: matC[0:255][0:169])
   {
-    #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:255][0:512])
-    {
-      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:255][0:169])
-      {
-        #pragma omp parallel for num_threads(8) schedule(static, 1)
-        for(int m = 0; m < M; ++m){
-          for(int k = 0; k < K; ++k){
-            float temp = ALPHA*matA[m][k];
-            for(int n = 0; n < N; ++n){
-              matC[m][n] +=temp*matB[k][n];
-            }
-          }
+    #pragma omp parallel for num_threads(8) schedule(static, 1)
+    for(int m = 0; m < M; ++m){
+      for(int k = 0; k < K; ++k){
+        float temp = ALPHA*matA[m][k];
+        for(int n = 0; n < N; ++n){
+          matC[m][n] +=temp*matB[k][n];
         }
       }
     }
@@ -303,20 +273,17 @@ void gemm_18(float ALPHA, float *A, float *B, float *C){
   __host float (*matA)[K] = (__host float(*)[K]) A;
   __host float (*matB)[N] = (__host float(*)[N]) B;
   __host float (*matC)[N] = (__host float(*)[N]) C;
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:256][0:169])
+  #pragma omp target device(BIGPULP_MEMCPY) \
+      map(to: matA[0:128][0:256]) \
+      map(to: matB[0:256][0:169]) \
+      map(tofrom: matC[0:128][0:169])
   {
-    #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:128][0:256])
-    {
-      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:128][0:169])
-      {
-        #pragma omp parallel for num_threads(8) schedule(static, 1)
-        for(int m = 0; m < M; ++m){
-          for(int k = 0; k < K; ++k){
-            float temp = ALPHA*matA[m][k];
-            for(int n = 0; n < N; ++n){
-              matC[m][n] +=temp*matB[k][n];
-            }
-          }
+    #pragma omp parallel for num_threads(8) schedule(static, 1)
+    for(int m = 0; m < M; ++m){
+      for(int k = 0; k < K; ++k){
+        float temp = ALPHA*matA[m][k];
+        for(int n = 0; n < N; ++n){
+          matC[m][n] +=temp*matB[k][n];
         }
       }
     }
@@ -332,20 +299,17 @@ void gemm_21(float ALPHA, float *A, float *B, float *C){
   __host float (*matA)[K] = (__host float(*)[K]) A;
   __host float (*matB)[N] = (__host float(*)[N]) B;
   __host float (*matC)[N] = (__host float(*)[N]) C;
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:3456][0:676])
+  #pragma omp target device(BIGPULP_MEMCPY) \
+      map(to: matA[0:256][0:3456]) \
+      map(to: matB[0:3456][0:676]) \
+      map(tofrom: matC[0:256][0:676])
   {
-    #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:256][0:3456])
-    {
-      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:256][0:676])
-      {
-        #pragma omp parallel for num_threads(8) schedule(static, 1)
-        for(int m = 0; m < M; ++m){
-          for(int k = 0; k < K; ++k){
-            float temp = ALPHA*matA[m][k];
-            for(int n = 0; n < N; ++n){
-              matC[m][n] +=temp*matB[k][n];
-            }
-          }
+    #pragma omp parallel for num_threads(8) schedule(static, 1)
+    for(int m = 0; m < M; ++m){
+      for(int k = 0; k < K; ++k){
+        float temp = ALPHA*matA[m][k];
+        for(int n = 0; n < N; ++n){
+          matC[m][n] +=temp*matB[k][n];
         }
       }
     }
@@ -361,20 +325,17 @@ void gemm_22(float ALPHA, float *A, float *B, float *C){
   __host float (*matA)[K] = (__host float(*)[K]) A;
   __host float (*matB)[N] = (__host float(*)[N]) B;
   __host float (*matC)[N] = (__host float(*)[N]) C;
-  #pragma omp target data device(BIGPULP_MEMCPY) map(to: matB[0:256][0:676])
+  #pragma omp target device(BIGPULP_MEMCPY) \
+      map(to: matA[0:255][0:256]) \
+      map(to: matB[0:256][0:676]) \
+      map(tofrom: matC[0:255][0:676])
   {
-    #pragma omp target data device(BIGPULP_MEMCPY) map(to: matA[0:255][0:256])
-    {
-      #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: matC[0:255][0:676])
-      {
-        #pragma omp parallel for num_threads(8) schedule(static, 1)
-        for(int m = 0; m < M; ++m){
-          for(int k = 0; k < K; ++k){
-            float temp = ALPHA*matA[m][k];
-            for(int n = 0; n < N; ++n){
-              matC[m][n] +=temp*matB[k][n];
-            }
-          }
+    #pragma omp parallel for num_threads(8) schedule(static, 1)
+    for(int m = 0; m < M; ++m){
+      for(int k = 0; k < K; ++k){
+        float temp = ALPHA*matA[m][k];
+        for(int n = 0; n < N; ++n){
+          matC[m][n] +=temp*matB[k][n];
         }
       }
     }
