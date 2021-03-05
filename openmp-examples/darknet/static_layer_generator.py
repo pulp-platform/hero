@@ -37,11 +37,11 @@ void gemm_{layer}(float ALPHA, float *A, float *B, float *C){{
       map(tofrom: matC[0:{M}][0:{N}])
   {{
     #pragma omp parallel for num_threads(8) schedule(static, 1)
-    for(int m = 0; m < M; ++m){{
-      for(int k = 0; k < K; ++k){{
-        float temp = ALPHA*matA[m][k];
-        for(int n = 0; n < N; ++n){{
-          matC[m][n] +=temp*matB[k][n];
+    for (int m = 0; m < M; ++m) {{
+      for (int k = 0; k < K; ++k) {{
+        float temp = ALPHA * matA[m][k];
+        for (int n = 0; n < N; ++n) {{
+          matC[m][n] += temp * matB[k][n];
         }}
       }}
     }}
