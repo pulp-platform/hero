@@ -166,7 +166,7 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
     const int L1_b = 80 * 1024;
     const int L1_flt = L1_b / sizeof(float);
     const int blockSize = sqrt(L1_flt / 3);
-    printf("blockSize is %i, %i\n", blockSize, blockSize);
+    //printf("blockSize is %i, %i\n", blockSize, blockSize);
 
     int xfers = 0;
 #ifndef PULP_DMA_MAX_XFERS
@@ -180,7 +180,7 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
       printf("hero_malloc failed\n");
       abort();
     }
-    printf("SPM allocation returns address: %x, %x\n", spm, spm);
+    //printf("SPM allocation returns address: %x, %x\n", spm, spm);
     float *A_spm = spm;
     float *B_spm = A_spm + blockSize * blockSize;
     float *C_spm = B_spm + blockSize * blockSize;
