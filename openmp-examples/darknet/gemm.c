@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "gemm.h"
+#include "gemm_layers.h"
 
 #include <hero-target.h>
 #include <math.h>
@@ -472,6 +473,11 @@ void gemm_tt(int M, int N, int K, float ALPHA, float *A, int lda, float *B, int 
   }
 }
 
+double timediff(struct timespec start, struct timespec stop) {
+  double diff = (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec) / BILLION;
+  return diff;
+}
+
 void gemm_cpu(int TA, int TB, int M, int N, int K, float ALPHA, float *A, int lda, float *B,
               int ldb, float BETA, float *C, int ldc) {
   // printf("cpu: TA=%d, TB=%d, M=%d, N=%d, K=%d, alpha=%f, lda=%d, ldb=%d, beta=%f, ldc=%d\n",TA,
@@ -482,14 +488,43 @@ void gemm_cpu(int TA, int TB, int M, int N, int K, float ALPHA, float *A, int ld
       C[i * ldc + j] *= BETA;
     }
   }
-  printf("Layer counter is set to %i\n", LAYER_COUNTER);
+#define TIME_LAYERS
+#ifdef TIME_LAYERS
+  printf("\nLayer %i\n========\n", LAYER_COUNTER);
+  struct timespec tic, toc;
+  clock_gettime(CLOCK_REALTIME, &tic);
+#endif // TIME_LAYERS
+
   if (!TA && !TB){
-    //if (LAYER_COUNTER == 0){
-      //gemm_zero(ALPHA, A, B, C);
-    //}
-    //else{
+    if (LAYER_COUNTER == 0) {
+      gemm_0(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 2) {
+      gemm_2(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 4) {
+      gemm_4(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 6) {
+      gemm_6(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 8) {
+      gemm_8(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 10) {
+      gemm_10(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 12) {
+      gemm_12(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 13) {
+      gemm_13(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 14) {
+      gemm_14(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 15) {
+      gemm_15(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 18) {
+      gemm_18(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 21) {
+      gemm_21(ALPHA, A, B, C);
+    } else if (LAYER_COUNTER == 22) {
+      gemm_22(ALPHA, A, B, C);
+    } else{
       gemm_nn(M, N, K, ALPHA, A, lda, B, ldb, C, ldc);
-    //}
+    }
   }
   else if (TA && !TB)
     gemm_tn(M, N, K, ALPHA, A, lda, B, ldb, C, ldc);
@@ -497,6 +532,12 @@ void gemm_cpu(int TA, int TB, int M, int N, int K, float ALPHA, float *A, int ld
     gemm_nt(M, N, K, ALPHA, A, lda, B, ldb, C, ldc);
   else
     gemm_tt(M, N, K, ALPHA, A, lda, B, ldb, C, ldc);
+
+#ifdef TIME_LAYERS
+  clock_gettime(CLOCK_REALTIME, &toc);
+  printf("%lf\n", timediff(tic, toc));
+#endif // TIME_LAYERS
+
 }
 
 #ifdef GPU
