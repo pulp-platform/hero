@@ -262,6 +262,7 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
 #pragma omp master
             cycles_before = hero_get_clk_counter();
 #endif
+#pragma omp barrier
 #pragma omp for
             for (int m = 0; m < limitM; m++) {
               for (int n = 0; n < limitN; n++) {
