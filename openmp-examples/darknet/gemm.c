@@ -14,7 +14,7 @@
 #define BILLION 1E9
 //#define TIME_DMA_AND_COMP
 
-int LAYER_COUNTER=0;
+extern int LAYER_COUNTER;
 
 void gemm_bin(int M, int N, int K, float ALPHA, char *A, int lda, float *B, int ldb, float *C,
               int ldc) {

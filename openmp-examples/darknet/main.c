@@ -22,6 +22,8 @@ void compute_delta(char* message) {
 }
 #endif  // TIMECOMP
 
+int LAYER_COUNTER = 0;
+
 int main() {
 #ifdef TIMECOMP
   clock_gettime(CLOCK_REALTIME, &tic);

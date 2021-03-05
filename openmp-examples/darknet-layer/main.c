@@ -11,6 +11,7 @@
 
 #define BILLION 1E9
 
+int LAYER_COUNTER;
 
 int main(int argc, char *argv[]) {
   if (argc != 2){
@@ -18,7 +19,7 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  int LAYER_COUNTER = atoi(argv[1]);
+  LAYER_COUNTER = atoi(argv[1]);
   float ALPHA = 1.0;
   int M, N, K;
   if (LAYER_COUNTER == 0) {
