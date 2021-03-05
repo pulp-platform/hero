@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     } else if (LAYER_COUNTER == 22) {
       M = 255, N = 676, K = 256;
     } else {
-      printf("layer not recognized, using smallest size!\n");
+      printf("layer not recognized!\n");
       return 1;
     }
 
