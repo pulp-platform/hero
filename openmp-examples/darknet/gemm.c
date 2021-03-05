@@ -342,26 +342,18 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
     // Compute memory allocation block sizes if required
     int i, m, n, k;
     float temp;
-#ifdef BLOCKEDMM
     const int L1_b = 80 * 1024;
     const int L1_flt = L1_b / sizeof(float);
     const int blockSize = sqrt(L1_flt / 3);
     int limitM, limitN, limitK;
     int bm, bn, bk;
-#else
-    int bm=0, bn=0, bk=0;
-    int limitM=M, limitN=N, limitK=K;
-#endif
 
-
-#ifdef BLOCKEDMM
     for(bn=0; bn<N && N-bn-1 != 0; bn+=my_min(N-bn-1, blockSize)) {
       for(bk=0; bk<K && K-bk-1 != 0; bk+=my_min(K-bk-1, blockSize)) {
         for (bm=0; bm<M && M-bm-1 != 0; bm+=my_min(M-bm-1, blockSize)) {
           limitM = my_min(M-bm, blockSize);
           limitN = my_min(N-bn, blockSize);
           limitK = my_min(K-bk, blockSize);
-#endif
 #pragma omp parallel for collapse(2) private(m, n, k) num_threads(8)
           for(m=bm; m<bm+limitM; m++){
             for(n=bn; n<bn+limitN; n++){
@@ -370,11 +362,9 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
               }
             }
           }
-#ifdef BLOCKEDMM
         }
       }
     }
-#endif
   }
 
 #ifdef TIMELAYERS
