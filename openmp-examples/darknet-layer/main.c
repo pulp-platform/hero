@@ -84,56 +84,7 @@ int main(int argc, char *argv[]) {
 
   printf("Calling gemm layer %i\n", LAYER_COUNTER);
 
-
-#define TIME_LAYERS
-#ifdef TIME_LAYERS
-  printf("\nLayer %i\n========\n", LAYER_COUNTER);
-  struct timespec tic, toc;
-  clock_gettime(CLOCK_REALTIME, &tic);
-#endif // TIME_LAYERS
-
-  // Hack to call the manual layer (non-PREM only!)
-  // LAYER_COUNTER = -1;
-
-  if (LAYER_COUNTER == 0) {
-      gemm_0(ALPHA, A, B, C);
-    } else if (LAYER_COUNTER == 2) {
-      gemm_2(ALPHA, A, B, C);
-    } else if (LAYER_COUNTER == 4) {
-      gemm_4(ALPHA, A, B, C);
-    } else if (LAYER_COUNTER == 6) {
-      gemm_6(ALPHA, A, B, C);
-    } else if (LAYER_COUNTER == 8) {
-      gemm_8(ALPHA, A, B, C);
-    } else if (LAYER_COUNTER == 10) {
-      gemm_10(ALPHA, A, B, C);
-    } else if (LAYER_COUNTER == 12) {
-      gemm_12(ALPHA, A, B, C);
-    } else if (LAYER_COUNTER == 13) {
-      gemm_13(ALPHA, A, B, C);
-    } else if (LAYER_COUNTER == 14) {
-      gemm_14(ALPHA, A, B, C);
-    } else if (LAYER_COUNTER == 15) {
-      gemm_15(ALPHA, A, B, C);
-    } else if (LAYER_COUNTER == 18) {
-      gemm_18(ALPHA, A, B, C);
-    } else if (LAYER_COUNTER == 21) {
-      gemm_21(ALPHA, A, B, C);
-    } else if (LAYER_COUNTER == 22) {
-      gemm_22(ALPHA, A, B, C);
-    } else if (LAYER_COUNTER > 0) {
-      printf("layer not recognized!\n");
-      return 1;
-    } else {
-      // Call manual layer
-      gemm_nn_tiled(M, N, K, ALPHA, A, 0, B, 0, C, 0);
-    }
-
-#ifdef TIME_LAYERS
-  clock_gettime(CLOCK_REALTIME, &toc);
-  printf("execution time: %lf\n", timediff(tic, toc));
-#endif // TIME_LAYERS
-
+  gemm_cpu(0, 0, M, N, K, ALPHA, A, 0, B, 0, 1, C, 0);
 
   int errors = 0;
   int same = 0;
