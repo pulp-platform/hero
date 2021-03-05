@@ -75,6 +75,7 @@ for d in \
     mm-small \
     polybench-acc/{2mm,3mm,atax,bicg,convolution-2d,covariance,gemm} \
     tests-hero/* \
+    darknet \
     ; do
   cd $d
   echo "Building '$d' .."
