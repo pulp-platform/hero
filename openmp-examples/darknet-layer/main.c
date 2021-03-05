@@ -2,17 +2,18 @@
 // Licensed under the Apache License, Version 2.0; see LICENSE.Apache-2.0 for details.
 // SPDX-License-Identifier: Apache-2.0
 
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
 #include "gemm.h"
 #include "gemm_layers.h"
-#include<stdio.h>
-#include<stdlib.h>
-#include<math.h>
-#include <time.h>
 
 int LAYER_COUNTER;
 
-int main(int argc, char *argv[]) {
-  if (argc != 2){
+int main(int argc, char* argv[]) {
+  if (argc != 2) {
     printf("Please provide the layer to be tested\n");
     return 0;
   }
@@ -28,29 +29,29 @@ int main(int argc, char *argv[]) {
   const int N = LAYER_N[LAYER_COUNTER];
   const int K = LAYER_K[LAYER_COUNTER];
 
-  float* A = (float*)malloc(M*K*sizeof(float));
-  float* B = (float*)malloc(K*N*sizeof(float));
-  float* C = (float*)malloc(M*N*sizeof(float));
-  float* E = (float*)malloc(M*N*sizeof(float));
+  float* A = (float*)malloc(M * K * sizeof(float));
+  float* B = (float*)malloc(K * N * sizeof(float));
+  float* C = (float*)malloc(M * N * sizeof(float));
+  float* E = (float*)malloc(M * N * sizeof(float));
 
   for (int m = 0; m < M; m++) {
     for (int k = 0; k < K; k++) {
-      A[m*K+k] = ((m+1.0)*(k+1.0))/((M+1.0)*(K+1.0));
+      A[m * K + k] = ((m + 1.0) * (k + 1.0)) / ((M + 1.0) * (K + 1.0));
     }
   }
 
   for (int k = 0; k < K; k++) {
     for (int n = 0; n < N; n++) {
-      B[k*N+n] = ((k+1.0)*(n+1.0))/((K+1.0)*(N+1.0));
+      B[k * N + n] = ((k + 1.0) * (n + 1.0)) / ((K + 1.0) * (N + 1.0));
     }
   }
 
   for (int m = 0; m < M; m++) {
     for (int n = 0; n < N; n++) {
-      E[m*N+n] = 0.0;
-      C[m*N+n] = 0.0;
+      E[m * N + n] = 0.0;
+      C[m * N + n] = 0.0;
       for (int k = 0; k < K; k++) {
-        E[m*N+n] += A[m*K+k]*B[k*N+n];
+        E[m * N + n] += A[m * K + k] * B[k * N + n];
       }
     }
   }
@@ -63,8 +64,8 @@ int main(int argc, char *argv[]) {
   int same = 0;
   for (int i = 0; i < M; i++) {
     for (int j = 0; j < N; j++) {
-      if (fabs(C[i*N+j] - E[i*N+j]) > 0.00001) {
-        //printf("ERROR at C[%6d][%6d]: Output: %f, expected: %f\n", i, j, C[i*N+j], E[i*N+j]);
+      if (fabs(C[i * N + j] - E[i * N + j]) > 0.00001) {
+        // printf("ERROR at C[%6d][%6d]: Output: %f, expected: %f\n", i, j, C[i*N+j], E[i*N+j]);
         errors++;
       } else {
         same++;
