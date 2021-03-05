@@ -186,7 +186,7 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
     float *C_spm = B_spm + blockSize * blockSize;
 
     // Compute kernel
-//#pragma omp parallel num_threads(8)
+#pragma omp parallel num_threads(8)
     {
       hero_perf_init();
       uint32_t ld_stalls_before;
@@ -262,7 +262,7 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
 #pragma omp master
             cycles_before = hero_get_clk_counter();
 #endif
-//#pragma omp for collapse(2) // Hangs up the execution on PULP
+#pragma omp for
             for (int m = 0; m < limitM; m++) {
               for (int n = 0; n < limitN; n++) {
                 for (int k = 0; k < limitK; k++) {
