@@ -337,16 +337,7 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
 #endif
 
 // Control granularity: map matrices individually or all at once
-#ifdef SEPARATE_SCOPE
-#pragma omp target data device(BIGPULP_MEMCPY) map(to: B [0:K * N])
-{
-#pragma omp target data device(BIGPULP_MEMCPY) map(tofrom: C [0:M * N])
-{
-#pragma omp target device(BIGPULP_MEMCPY) map(to: A [0:M * K])
-#else
 #pragma omp target device(BIGPULP_MEMCPY) map(tofrom: C [0:M * N]) map(to: A [0:M * K], B [0:K * N])
-#endif
-// clang-format on
   {
     // Compute memory allocation block sizes if required
     int i, m, n, k;
@@ -363,9 +354,6 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
 #endif
 
 
-//#pragma omp parallel for num_threads(8) private(bn, bk, bm, m, n, k)
-//#pragma omp parallel num_threads(8)
-  {
 #ifdef BLOCKEDMM
     for(bn=0; bn<N && N-bn-1 != 0; bn+=my_min(N-bn-1, blockSize)) {
       for(bk=0; bk<K && K-bk-1 != 0; bk+=my_min(K-bk-1, blockSize)) {
@@ -388,12 +376,7 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
     }
 #endif
   }
-  }
 
-#ifdef SEPARATE_SCOPE
-}
-}
-#endif
 #ifdef TIMELAYERS
   clock_gettime(CLOCK_REALTIME, &requestEnd);
   double accum = (requestEnd.tv_sec - requestStart.tv_sec) +
