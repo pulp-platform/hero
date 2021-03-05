@@ -11,10 +11,6 @@
 
 #define BILLION 1E9
 
-double timediff(struct timespec start, struct timespec stop) {
-  double diff = (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec) / BILLION;
-  return diff;
-}
 
 int main(int argc, char *argv[]) {
   if (argc != 2){
