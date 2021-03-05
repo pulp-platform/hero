@@ -9,12 +9,17 @@ M = [16, 32, 64, 128, 256, 512, 1024, 256, 512, 255, 128, 256, 255]
 N = [173056, 43264, 10816, 2704, 676, 169, 169, 169, 169, 169, 169, 676, 676]
 K = [27, 144, 288, 576, 1152, 2304, 4608, 1024, 2304, 512, 256, 3456, 256]
 
-with open('./gemm_layers.c', 'w') as f:
+def write_copyright_header(f):
   f.write("""\
 // Copyright (c) 2020 ETH Zurich and University of Bologna
 // Licensed under the Apache License, Version 2.0; see LICENSE.Apache-2.0 for details.
 // SPDX-License-Identifier: Apache-2.0
 
+""")
+
+with open('./gemm_layers.c', 'w') as f:
+  write_copyright_header(f)
+  f.write("""\
 #include <hero-target.h>
 
 extern int LAYER_COUNTER;
