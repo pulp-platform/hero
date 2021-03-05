@@ -9,8 +9,6 @@
 #include<math.h>
 #include <time.h>
 
-#define BILLION 1E9
-
 int LAYER_COUNTER;
 
 int main(int argc, char *argv[]) {
@@ -37,14 +35,12 @@ int main(int argc, char *argv[]) {
 
   for (int m = 0; m < M; m++) {
     for (int k = 0; k < K; k++) {
-      //A[m*K+k] = 1.0;
       A[m*K+k] = ((m+1.0)*(k+1.0))/((M+1.0)*(K+1.0));
     }
   }
 
   for (int k = 0; k < K; k++) {
     for (int n = 0; n < N; n++) {
-      //B[k*N+n] = 1.0;
       B[k*N+n] = ((k+1.0)*(n+1.0))/((K+1.0)*(N+1.0));
     }
   }
