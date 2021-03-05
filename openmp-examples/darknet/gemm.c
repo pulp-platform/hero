@@ -205,14 +205,12 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
 #endif
             for (int r = 0; r < blockSize; r++) {
               // Copy in B with K rows of length N
-              //memcpy_to_spm(B_spm + r * blockSize, B + (bk + r) * N + bn, blockSize);
               if (xfers == PULP_DMA_MAX_XFERS){
                 for (int i = 0; i < PULP_DMA_MAX_XFERS; i++){
                   hero_dma_wait(dma_jobs[i]);
                 }
                 xfers = 0;
               }
-              //printf("Matrix B: copying from %x, %x to %x, %lx\n", B+(bk+r)*N+bn, B_spm+r*blockSize, B+(bk+r)*N+bn, B_spm+r*blockSize);
               dma_jobs[xfers] = hero_memcpy_host2dev_async(B_spm+r*blockSize, B+(bk+r)*N+bn, blockSize*sizeof(float));
               xfers += 1;
             }
@@ -234,13 +232,9 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
                   xfers = 0;
                 }
                 // Copy in A, with M rows of length K
-                //memcpy_to_spm(A_spm + r * blockSize, A + (bm + r) * K + bk, blockSize);
-                //printf("Matrix A: copying from %x, %x to %x, %lx\n", A+(bm+r)*K+bk, A_spm+r*blockSize, A+(bm+r)*K+bk, A_spm+r*blockSize);
                 dma_jobs[xfers] = hero_memcpy_host2dev_async(A_spm+r*blockSize, A+(bm+r)*K+bk, blockSize*sizeof(float));
                 xfers += 1;
                 // Copy in C with M rows of length N
-                //memcpy_to_spm(C_spm + r * blockSize, C + (bm + r) * N + bn, blockSize);
-                //printf("Matrix C: copying from %x, %x to %x, %lx\n", C+(bm+r)*N+bn, C_spm+r*blockSize, C+(bm+r)*N+bn, C_spm+r*blockSize);
                 dma_jobs[xfers] = hero_memcpy_host2dev_async(C_spm+r*blockSize, C+(bm+r)*N+bn, blockSize*sizeof(float));
                 xfers += 1;
               }
@@ -290,11 +284,9 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
                   xfers = 0;
                 }
 
-                //memcpy_from_spm(C + (bm + r) * N + bn, C_spm + r * blockSize, blockSize);
                 hero_memcpy_dev2host_async( C+(bm+r)*N+bn, C_spm+r*blockSize, blockSize*sizeof(float));
                 xfers += 1;
               }
-              //dma_flush();
 #ifdef TIME_DMA_AND_COMP
               dma_cycles += hero_get_clk_counter() - cycles_before;
 #endif
