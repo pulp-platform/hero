@@ -343,4 +343,3 @@ void gemm_22(float ALPHA, float *A, float *B, float *C){
   LAYER_COUNTER=0;
 }
 
-

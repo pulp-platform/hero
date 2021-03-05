@@ -14,21 +14,19 @@ def write_copyright_header(f):
 // Copyright (c) 2020 ETH Zurich and University of Bologna
 // Licensed under the Apache License, Version 2.0; see LICENSE.Apache-2.0 for details.
 // SPDX-License-Identifier: Apache-2.0
-
 """)
 
 with open('./gemm_layers.c', 'w') as f:
   write_copyright_header(f)
-  f.write("""\
+  f.write("""
 #include <hero-target.h>
 
 extern int LAYER_COUNTER;
-
 """)
 
   for i in range(len(layer)):
 
-    f.write("""\
+    f.write("""
 void gemm_{layer}(float ALPHA, float *A, float *B, float *C){{
   const int M = {M};
   const int N = {N};
@@ -53,6 +51,5 @@ void gemm_{layer}(float ALPHA, float *A, float *B, float *C){{
   }}
   LAYER_COUNTER={next_layer};
 }}
-
 
 """.format(layer=layer[i], M=M[i], N=N[i], K=K[i], next_layer=layer[(i+1)%len(layer)]))
