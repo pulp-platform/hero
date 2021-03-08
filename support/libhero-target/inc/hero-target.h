@@ -80,19 +80,20 @@ typedef struct {
  * @{
  */
 
-/** Used by PULP to perform a non-blocking memcpy using the DMA engine from the cluster-internal L1
-    scratchpad memory to cluster-external memory (L1 of another cluster, L2, SVM).
+/** Non-blocking memcpy from host to device (`host2dev`) or from device to host (`dev2host`).
 
-    Resolved to a blocking memcpy() for the host.
+  On PULP, this is implemented using the DMA engine to or from cluster-internal L1 scratchpad memory
+  from or to cluster-external memory.
+
+  On the host, this is implemented as a `memcpy` and may block.
 
   \param   dst  The destination address to which the data shall be copied.
   \param   src  The source address from which the data shall be copied.
-  \param   size The amount of data that shall be copied in Bytes.
+  \param   size The amount of data that shall be copied in bytes.
 
-  \return  DMA job ID; This MUST be used to call hero_dma_wait to wait for the
-           completion of this transfer before data is used or control passed to
-           host. Not calling the wait function exactly once per transfer
-           initiated with async can entail undefined behavior.
+  \return  DMA job, which MUST be used to call hero_dma_wait to wait for the completion of this
+           transfer before data is used.  Not calling the wait function exactly once per transfer
+           initiated with these functions can entail undefined behavior.
  */
 hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst,
                                           const HOST_VOID_PTR src,
@@ -101,22 +102,22 @@ hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst,
                                           const DEVICE_VOID_PTR src,
                                           uint32_t size);
 
-/** Used by PULP to wait for a previously issued memcpy/DMA transfer to finish.
+/** Wait for a previously issued non-blocking memcpy to finish.
 
-    Resolved to nothing for the host.
-
-  \param   id   The DMA job ID previously obtained from hero_dma_memcpy_async().
+  \param   job  The DMA job obtained from a previous call to hero_memcpy_*_async().
  */
-void hero_dma_wait(hero_dma_job_t id);
+void hero_dma_wait(hero_dma_job_t job);
 
-/** Used by PULP to perform a blocking memcpy using the DMA engine from the cluster-internal L1
-    scratchpad memory to cluster-external memory (L1 of another cluster, L2, SVM).
+/** Blocking memcpy from host to device (`host2dev`) or from device to host (`dev2host`).
 
-    Resolved to a blocking memcpy() for the host.
+  On PULP, this is implemented using the DMA engine to or from cluster-internal L1 scratchpad memory
+  from or to cluster-external memory.
+
+  On the host, this is implemented as `memcpy`.
 
   \param   dst  The destination address to which the data shall be copied.
   \param   src  The source address from which the data shall be copied.
-  \param   size The amount of data that shall be copied in Bytes.
+  \param   size The amount of data that shall be copied in bytes.
  */
 void hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
                           uint32_t size);
