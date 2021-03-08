@@ -74,7 +74,7 @@ for defas in "${defas_makeflags[@]}"; do
   for unroll in "${unroll_cflags[@]}"; do
     for debug in "${debug_cflags[@]}"; do
       cflags="$unroll $debug"
-      for d in helloworld mm-large mm-small sobel-filter; do
+      for d in helloworld mm-large mm-small sobel-filter darknet-layer; do
         if [ $(basename $d) = "common" ]; then
           continue
         fi

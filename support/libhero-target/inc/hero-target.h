@@ -240,7 +240,9 @@ typedef enum {
   /// Number of loads from non-local memory by a core.  Misaligned accesses are counted twice.
   hero_perf_event_load_external,
   /// Number of stores to non-local memory by a core.  Misaligned accesses are counted twice.
-  hero_perf_event_store_external
+  hero_perf_event_store_external,
+  /// Number of stall cycles by a core due to waiting for a load to complete.
+  hero_perf_event_stall_load
 } hero_perf_event_t;
 
 /** Initialize the performance measurement library and hardware counters for a specific core.
