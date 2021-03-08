@@ -101,6 +101,14 @@ hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR dst,
                                           const DEVICE_VOID_PTR src,
                                           uint32_t size);
 
+/** Used by PULP to wait for a previously issued memcpy/DMA transfer to finish.
+
+    Resolved to nothing for the host.
+
+  \param   id   The DMA job ID previously obtained from hero_dma_memcpy_async().
+ */
+void hero_dma_wait(hero_dma_job_t id);
+
 /** Used by PULP to perform a blocking memcpy using the DMA engine from the cluster-internal L1
     scratchpad memory to cluster-external memory (L1 of another cluster, L2, SVM).
 
@@ -114,14 +122,6 @@ void hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
                           uint32_t size);
 void hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
                           uint32_t size);
-
-/** Used by PULP to wait for a previously issued memcpy/DMA transfer to finish.
-
-    Resolved to nothing for the host.
-
-  \param   id   The DMA job ID previously obtained from hero_dma_memcpy_async().
- */
-void hero_dma_wait(hero_dma_job_t id);
 
 //!@}
 
