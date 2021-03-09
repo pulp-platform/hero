@@ -168,12 +168,6 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
     const int blockSize = sqrt(L1_flt / 3);
     //printf("blockSize is %i, %i\n", blockSize, blockSize);
 
-    int xfers = 0;
-#ifndef PULP_DMA_MAX_XFERS
-#define PULP_DMA_MAX_XFERS 8
-#endif//PULP_DMA_MAX_XFERS
-    hero_dma_job_t dma_jobs[PULP_DMA_MAX_XFERS];
-
     // Allocate memory in L3
     float *spm = hero_l1malloc(3*blockSize*blockSize*sizeof(float));
     if (spm == NULL){
@@ -207,17 +201,9 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
 #ifdef TIME_DMA_AND_COMP
             const uint32_t cycles_before = hero_get_clk_counter();
 #endif
-            for (int r = 0; r < blockSize; r++) {
-              // Copy in B with K rows of length N
-              if (xfers == PULP_DMA_MAX_XFERS){
-                for (int i = 0; i < PULP_DMA_MAX_XFERS; i++){
-                  hero_dma_wait(dma_jobs[i]);
-                }
-                xfers = 0;
-              }
-              dma_jobs[xfers] = hero_memcpy_host2dev_async(B_spm+r*blockSize, B+(bk+r)*N+bn, blockSize*sizeof(float));
-              xfers += 1;
-            }
+            // Copy in B, with K rows of length N
+            hero_memcpy2d_host2dev(B_spm, B + bn + N * bk, sizeof(float) * blockSize,
+                sizeof(float) * blockSize, sizeof(float) * N, blockSize);
 #ifdef TIME_DMA_AND_COMP
             dma_cycles += hero_get_clk_counter() - cycles_before;
 #endif
@@ -228,24 +214,13 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
 #ifdef TIME_DMA_AND_COMP
               const uint32_t cycles_before = hero_get_clk_counter();
 #endif
-              for (int r = 0; r < blockSize; r++) {
-                if (xfers == PULP_DMA_MAX_XFERS){
-                  for (int i = 0; i < PULP_DMA_MAX_XFERS; i++){
-                    hero_dma_wait(dma_jobs[i]);
-                  }
-                  xfers = 0;
-                }
-                // Copy in A, with M rows of length K
-                dma_jobs[xfers] = hero_memcpy_host2dev_async(A_spm+r*blockSize, A+(bm+r)*K+bk, blockSize*sizeof(float));
-                xfers += 1;
-                // Copy in C with M rows of length N
-                dma_jobs[xfers] = hero_memcpy_host2dev_async(C_spm+r*blockSize, C+(bm+r)*N+bn, blockSize*sizeof(float));
-                xfers += 1;
-              }
-              for (int i = 0; i < xfers; i++){
-                hero_dma_wait(dma_jobs[i]);
-              }
-              xfers = 0;
+              // Copy in A, with M rows of length K
+              hero_memcpy2d_host2dev(A_spm, A + bk + K * bm, sizeof(float) * blockSize,
+                  sizeof(float) * blockSize, sizeof(float) * K, blockSize);
+
+              // Copy in C, with M rows of length N
+              hero_memcpy2d_host2dev(C_spm, C + bn + N * bm, sizeof(float) * blockSize,
+                  sizeof(float) * blockSize, sizeof(float) * N, blockSize);
 #ifdef TIME_DMA_AND_COMP
               dma_cycles += hero_get_clk_counter() - cycles_before;
 #endif
@@ -279,18 +254,9 @@ void gemm_nn_tiled(int M, int N, int K, float ALPHA,
 #ifdef TIME_DMA_AND_COMP
               const uint32_t cycles_before = hero_get_clk_counter();
 #endif
-              // Copy out C with M rows of length N
-              for (int r = 0; r < blockSize; r++) {
-                if (xfers == PULP_DMA_MAX_XFERS){
-                  for (int i = 0; i < PULP_DMA_MAX_XFERS; i++){
-                    hero_dma_wait(dma_jobs[i]);
-                  }
-                  xfers = 0;
-                }
-
-                hero_memcpy_dev2host_async( C+(bm+r)*N+bn, C_spm+r*blockSize, blockSize*sizeof(float));
-                xfers += 1;
-              }
+              // Copy out C, with M rows of length N
+              hero_memcpy2d_dev2host(C + bn + N * bm, C_spm, sizeof(float) * blockSize,
+                  sizeof(float) * N, sizeof(float) * blockSize, blockSize);
 #ifdef TIME_DMA_AND_COMP
               dma_cycles += hero_get_clk_counter() - cycles_before;
 #endif

@@ -22,9 +22,6 @@ cluster_interconnect:
 event_unit_flex:
   commit: tags/pulp-v1.0
   group: pulp-platform
-mchan:
-  commit: tags/pulp-v1.0
-  group: pulp-platform
 icache-intc:
   commit: tags/pulp-v1.0
   group: pulp-platform

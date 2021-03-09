@@ -26,7 +26,9 @@ hero_memcpy_host2dev_async(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
                            uint32_t size)
 {
   memcpy((HOST_VOID_PTR)dst, src, size);
-  return 0;
+  hero_dma_job_t hero_dma_job;
+  hero_dma_job.id = 0;
+  return hero_dma_job;
 }
 
 hero_dma_job_t
@@ -34,7 +36,9 @@ hero_memcpy_dev2host_async(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
                            uint32_t size)
 {
   memcpy(dst, (HOST_VOID_PTR)src, size);
-  return 0;
+  hero_dma_job_t hero_dma_job;
+  hero_dma_job.id = 0;
+  return hero_dma_job;
 }
 
 void
@@ -49,6 +53,36 @@ hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
                      uint32_t size)
 {
   memcpy(dst, (HOST_VOID_PTR)src, size);
+}
+
+void hero_memcpy2d_host2dev(DEVICE_VOID_PTR dst,
+                            const HOST_VOID_PTR src,
+                            uint32_t inner_size,
+                            uint32_t inner_stride_dst,
+                            uint32_t inner_stride_src,
+                            uint32_t outer_num) {
+  uint64_t dst_addr = (uint64_t)dst;
+  uint64_t src_addr = (uint64_t)src;
+  for (uint32_t i = 0; i < outer_num; i++) {
+    hero_memcpy_host2dev((DEVICE_VOID_PTR)dst_addr, (const HOST_VOID_PTR)src_addr, inner_size);
+    dst_addr += inner_stride_dst;
+    src_addr += inner_stride_src;
+  }
+}
+
+void hero_memcpy2d_dev2host(HOST_VOID_PTR dst,
+                            const DEVICE_VOID_PTR src,
+                            uint32_t inner_size,
+                            uint32_t inner_stride_dst,
+                            uint32_t inner_stride_src,
+                            uint32_t outer_num) {
+  uint64_t dst_addr = (uint64_t)dst;
+  uint64_t src_addr = (uint64_t)src;
+  for (uint32_t i = 0; i < outer_num; i++) {
+    hero_memcpy_dev2host((HOST_VOID_PTR)dst_addr, (const DEVICE_VOID_PTR)src_addr, inner_size);
+    dst_addr += inner_stride_dst;
+    src_addr += inner_stride_src;
+  }
 }
 
 void

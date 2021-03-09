@@ -24,4 +24,7 @@ pulp_cluster:
     rtl/per2axi_wrap.sv,
     rtl/tryx_ctrl.sv,
     rtl/pulp_cluster.sv,
+    rtl/cluster_dma_transfer_id_gen.sv,
+    rtl/cluster_dma_frontend_regs.sv,
+    rtl/cluster_dma_frontend.sv
   ]

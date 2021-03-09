@@ -2,8 +2,11 @@
 // Licensed under the Apache License, Version 2.0; see LICENSE.Apache-2.0 for details.
 // SPDX-License-Identifier: Apache-2.0
 
+#include <assert.h>
+#include <hero-target.h> // BIGPULP_MEMCPY
 #include <math.h>  // fabs()
 #include <stdbool.h>
+#include <stdio.h> // printf()
 
 #include "darknet.h"
 
@@ -29,8 +32,19 @@ int main() {
   clock_gettime(CLOCK_REALTIME, &tic);
 #endif  // TIMECOMP
 
-  // Load the network
+  // Initialize accelerator with a first "dummy" offload.  This ensures that the slight runtime
+  // overhead of initializing the accelerator offload manager does not incur on the first measured
+  // offload.
+  printf("Initializing accelerator with a \"dummy\" offload.\n");
+  uint32_t dummy = 0;
+#pragma omp target device(BIGPULP_MEMCPY) map(tofrom: dummy)
+  {
+    dummy = 1;
+  }
+  assert(dummy == 1);
+  printf("\n");
 
+  // Load the network
   char* cfg = "cfg/yolov3-tiny.cfg";
   char* weights = "yolov3-tiny.weights";
   network* net = load_network(cfg, weights, 0);
