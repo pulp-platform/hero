@@ -124,6 +124,32 @@ void hero_memcpy_host2dev(DEVICE_VOID_PTR dst, const HOST_VOID_PTR src,
 void hero_memcpy_dev2host(HOST_VOID_PTR dst, const DEVICE_VOID_PTR src,
                           uint32_t size);
 
+/** Blocking two-dimensional memcpy from host to device (`host2dev`) or from device to host
+    (`dev2host`).
+
+  \param  dst               The destination address to which the first byte of data shall be copied.
+  \param  src               The source address from which the first byte of data shall be copied.
+  \param  inner_size        The amount of data (in bytes) that shall be copied by each inner
+                            transfer.
+  \param  inner_stride_dst  The offset (in bytes) to apply to the destination address after each
+                            inner transfer.
+  \param  inner_stride_src  The offset (in bytes) to apply to the source address after each inner
+                            transfer.
+  \param  outer_num         The number of inner transfers to execute for one outer transfer.
+ */
+void hero_memcpy2d_host2dev(DEVICE_VOID_PTR dst,
+                            const HOST_VOID_PTR src,
+                            uint32_t inner_size,
+                            uint32_t inner_stride_dst,
+                            uint32_t inner_stride_src,
+                            uint32_t outer_num);
+void hero_memcpy2d_dev2host(HOST_VOID_PTR dst,
+                            const DEVICE_VOID_PTR src,
+                            uint32_t inner_size,
+                            uint32_t inner_stride_dst,
+                            uint32_t inner_stride_src,
+                            uint32_t outer_num);
+
 //!@}
 
 /** @name Memory management functions
