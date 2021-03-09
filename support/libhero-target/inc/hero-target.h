@@ -80,12 +80,20 @@ typedef struct {
  * @{
  */
 
-/** Non-blocking memcpy from host to device (`host2dev`) or from device to host (`dev2host`).
+/** Asynchronous memcpy from host to device (`host2dev`) or from device to host (`dev2host`).
+
+  These functions make a "best effort" to start the requested memcpy and then immediately return to
+  the caller, so that the memcpy is executed in the "background" while the thread executes other
+  code.  However, this is not always possible (e.g., when HW queues are full).  Thus, these
+  functions may block for an undefined (but limited) number of cycles.  In short, these functions:
+  - guarantee that the memcpy transfer has been started when they return;
+  - do not guarantee to always return after a fixed number of cycles.
 
   On PULP, this is implemented using the DMA engine to or from cluster-internal L1 scratchpad memory
   from or to cluster-external memory.
 
-  On the host, this is implemented as a `memcpy` and may block.
+  On the host, this is implemented with a call to `memcpy` and blocks until the entire memcpy has
+  completed.
 
   \param   dst  The destination address to which the data shall be copied.
   \param   src  The source address from which the data shall be copied.
