@@ -8,10 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
-- `libhero-target`: Add `hero_perf_*` performance measurement API.  This API provides a uniform
-  interface for counting events on different devices, does not require all events to be supported on
-  every device, and works with hardware counters dynamically assigned an to event as well as with
-  hardware counters statically bound ("hardwired") to an event.  See !223 for details.
+- `libhero-target`:
+  - Add `hero_perf_*` performance measurement API.  This API provides a uniform interface for
+    counting events on different devices, does not require all events to be supported on every
+    device, and works with hardware counters dynamically assigned an to event as well as with
+    hardware counters statically bound ("hardwired") to an event.  See !223 for details.
+  - Add two-dimensional memory copy functions (`hero_memcpy2d_*`).
 - Benchmarks and example applications:
   - Add benchmark (`openmp-examples/dma-perf`) to measure DMA throughput and verify the correctness
     of transferred data for different transfer sizes and source and destination memory alignments.
