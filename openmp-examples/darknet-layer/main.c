@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0; see LICENSE.Apache-2.0 for details.
 // SPDX-License-Identifier: Apache-2.0
 
+#include <assert.h>
+#include <hero-target.h> // BIGPULP_MEMCPY
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,6 +57,18 @@ int main(int argc, char* argv[]) {
       }
     }
   }
+
+  // Initialize accelerator with a first "dummy" offload.  This ensures that the slight runtime
+  // overhead of initializing the accelerator offload manager does not incur on the first measured
+  // offload.
+  printf("Initializing accelerator with a \"dummy\" offload.\n");
+  uint32_t dummy = 0;
+#pragma omp target device(BIGPULP_MEMCPY) map(tofrom: dummy)
+  {
+    dummy = 1;
+  }
+  assert(dummy == 1);
+  printf("\n");
 
   printf("Calling gemm layer %i\n", LAYER_COUNTER);
 
