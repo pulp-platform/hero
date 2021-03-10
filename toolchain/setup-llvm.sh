@@ -60,7 +60,7 @@ $HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DLIBOMPTARGET_NVPTX_BUILD=OFF \
       -DLIBOMPTARGET_PULP_BUILD=OFF \
       $THIS_DIR/llvm-project/llvm
-cmake --build . --target install
+$HERO_INSTALL/bin/cmake --build . --target install
 cd ..
 
 # setup hercules passes build
@@ -73,7 +73,7 @@ echo "Building LLVM support passes"
 $HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DLLVM_DIR:STRING=$HERO_INSTALL/lib/cmake/llvm \
       $THIS_DIR/llvm-support/
-cmake --build . --target install
+$HERO_INSTALL/bin/cmake --build . --target install
 cd ..
 
 mkdir -p hercules_build
@@ -84,7 +84,7 @@ $HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL \
       -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DLLVM_DIR:STRING=$HERO_INSTALL/lib/cmake/llvm \
       $THIS_DIR/HerculesCompiler-public/llvm-passes/
-cmake --build . --target install
+$HERO_INSTALL/bin/cmake --build . --target install
 cd ..
 
 # install HERCULES environment script.
