@@ -1128,9 +1128,9 @@ artifacts:
       - support/libhero-target # package `libhero-target`
       - support/libpulp # package `libpulp`
       - support/pulp-driver # package `pulp-driver`
+      - toolchain/HerculesCompiler-public/runtime/cmux # package `prem-cmux`
       - toolchain/install-sdk.sh
       - toolchain/llvm-project/openmp # package `hero-openmp`
-      - toolchain/HerculesCompiler-public/runtime/cmux # package `prem-cmux`
       ## Dependencies
       # tc-pulp
       - Makefile
@@ -1815,10 +1815,10 @@ artifacts:
   tc-llvm:
     inputs:
       - Makefile
-      - toolchain/hc-omp-pass
-      - toolchain/llvm-support
-      - toolchain/llvm-project
       - toolchain/HerculesCompiler-public # PREM passes
+      - toolchain/hc-omp-pass
+      - toolchain/llvm-project
+      - toolchain/llvm-support
       - toolchain/setup-llvm.sh
       ## Dependencies
       # sdk-pulp-and-sdk-har
@@ -1930,7 +1930,7 @@ artifacts:
       - install/lib/clang
       - install/lib/cmake/clang
       - install/lib/cmake/llvm
-      - install/lib/llvm-support
+      - install/lib/hercules
       - install/lib/libLLVMAArch64AsmParser.so
       - install/lib/libLLVMAArch64AsmParser.so.9
       - install/lib/libLLVMAArch64CodeGen.so
@@ -2150,14 +2150,14 @@ artifacts:
       - install/lib/libomp.so
       - install/lib/libomptarget.rtl.x86_64.so
       - install/lib/libomptarget.so
-      - install/lib/hercules
+      - install/lib/llvm-support
       - install/libexec/c++-analyzer
       - install/libexec/ccc-analyzer
+      - install/prem-environment.sh
       - install/share/clang
       - install/share/opt-viewer
       - install/share/scan-build
       - install/share/scan-view
-      - install/prem-environment.sh
 
   bitstream-zcu102:
     inputs:
