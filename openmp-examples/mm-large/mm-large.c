@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
 {
   printf("HERO matrix multiplication started.\n");
 
-  uint32_t height  = 128;
+  uint32_t height  = 256;
   if( argc > 1 ) {
     height  = strtoul(argv[1], NULL, 0);
   }
