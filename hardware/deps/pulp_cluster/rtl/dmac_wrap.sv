@@ -147,7 +147,7 @@ module dmac_wrap
   // xbar
   localparam int unsigned NumRules = 3;
   typedef axi_pkg::xbar_rule_32_t xbar_rule_t;
-  axi_pkg::xbar_rule_32_t [NumRules-1:0] addr_map;
+  xbar_rule_t [NumRules-1:0] addr_map;
   logic [31:0] cluster_base_addr;
   assign cluster_base_addr = 32'h1000_0000; /* + (cluster_id_i << 22);*/
   assign addr_map = '{
@@ -187,21 +187,21 @@ module dmac_wrap
   /* verilator lint_on WIDTHCONCAT */
 
   axi_xbar #(
-    .Cfg          ( XbarCfg                 ),
-    .slv_aw_chan_t( slv_aw_chan_t           ),
-    .mst_aw_chan_t( mst_aw_chan_t           ),
-    .w_chan_t     ( w_chan_t                ),
-    .slv_b_chan_t ( slv_b_chan_t            ),
-    .mst_b_chan_t ( mst_b_chan_t            ),
-    .slv_ar_chan_t( slv_ar_chan_t           ),
-    .mst_ar_chan_t( mst_ar_chan_t           ),
-    .slv_r_chan_t ( slv_r_chan_t            ),
-    .mst_r_chan_t ( mst_r_chan_t            ),
-    .slv_req_t    ( slv_req_t               ),
-    .slv_resp_t   ( slv_resp_t              ),
-    .mst_req_t    ( mst_req_t               ),
-    .mst_resp_t   ( mst_resp_t              ),
-    .rule_t       ( axi_pkg::xbar_rule_32_t )
+    .Cfg          ( XbarCfg       ),
+    .slv_aw_chan_t( slv_aw_chan_t ),
+    .mst_aw_chan_t( mst_aw_chan_t ),
+    .w_chan_t     ( w_chan_t      ),
+    .slv_b_chan_t ( slv_b_chan_t  ),
+    .mst_b_chan_t ( mst_b_chan_t  ),
+    .slv_ar_chan_t( slv_ar_chan_t ),
+    .mst_ar_chan_t( mst_ar_chan_t ),
+    .slv_r_chan_t ( slv_r_chan_t  ),
+    .mst_r_chan_t ( mst_r_chan_t  ),
+    .slv_req_t    ( slv_req_t     ),
+    .slv_resp_t   ( slv_resp_t    ),
+    .mst_req_t    ( mst_req_t     ),
+    .mst_resp_t   ( mst_resp_t    ),
+    .rule_t       ( xbar_rule_t   )
   ) i_dma_axi_xbar (
     .clk_i                  ( clk_i                 ),
     .rst_ni                 ( rst_ni                ),
