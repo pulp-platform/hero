@@ -114,17 +114,17 @@ sdk-har: check_environment br-har
 sdk-har-prem: check_environment br-har-prem
 	cd $(CURDIR)/output/br-har-prem && $(ROOT)/toolchain/install-sdk.sh
 
-# TOOLS
-.PHONY: tools-hrv-openocd
+# Utilities
+.PHONY: util-hrv-openocd
 
-tools-hrv-openocd: check_environment
-	mkdir -p $(CURDIR)/output/tools-openocd/
+util-hrv-openocd: check_environment
+	mkdir -p $(CURDIR)/output/util-riscv-openocd/
 	(export CCACHE=none; \
 		export PATH=$(HERO_INSTALL)/bin:${PATH}; \
-		cd $(ROOT)/tools/riscv-openocd/; \
+		cd $(ROOT)/util/riscv-openocd/; \
 		./bootstrap; \
-		cd $(CURDIR)/output/tools-openocd/; \
-		$(ROOT)/tools/riscv-openocd/configure --prefix=$(HERO_INSTALL); \
+		cd $(CURDIR)/output/util-riscv-openocd/; \
+		$(ROOT)/util/riscv-openocd/configure --prefix=$(HERO_INSTALL); \
 		$(MAKE); \
 		chmod -R u+w $(HERO_INSTALL); \
 		$(MAKE) install; \
