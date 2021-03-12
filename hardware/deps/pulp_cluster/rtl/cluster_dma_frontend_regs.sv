@@ -51,18 +51,11 @@ module cluster_dma_frontend_regs #(
         logic [31:0] src_addr;
     } transf_descr_regular_t;
 
-    // data stored
-    typedef union packed {
-        logic [2:0][31:0]      words;
-        logic [2:0][ 3:0][7:0] bytes;
-        transf_descr_regular_t transfer;
-    } dma_data_store_t;
-
     // have up to 256 registers per PE
     logic [7:0] reg_addr;
     // 6 registers are r/w so we need to keep a state
-    dma_data_store_t data_store_d, data_store_q;
-    logic [2:0]      conf_store_d, conf_store_q;
+    transf_descr_regular_t data_store_d, data_store_q;
+    logic [2:0]            conf_store_d, conf_store_q;
     // data is delayed one cycle
     logic [31:0] rdata_d, rdata_q;
     logic        valid_d, valid_q;
@@ -106,23 +99,23 @@ module cluster_dma_frontend_regs #(
             unique case (reg_addr)
                 // source address (low)
                 8'h00 : begin
-                    rdata_d = data_store_q.words[0];
+                    rdata_d = data_store_q.src_addr[31:0];
                     if (ctrl_write) begin
-                        data_store_d.words[0] = write_data;
+                        data_store_d.src_addr[31:0] = write_data;
                     end
                 end
                 // destination address (low)
                 8'h08 : begin
-                    rdata_d = data_store_q.words[1];
+                    rdata_d = data_store_q.dst_addr[31:0];
                     if (ctrl_write) begin
-                        data_store_d.words[1] = write_data;
+                        data_store_d.dst_addr[31:0] = write_data;
                     end
                 end
                 // num bytes
                 8'h10 : begin
-                    rdata_d = data_store_q.words[2];
+                    rdata_d = data_store_q.num_bytes;
                     if (ctrl_write) begin
-                        data_store_d.words[2] = write_data;
+                        data_store_d.num_bytes = write_data;
                     end
                 end
                 // status / conf
@@ -135,7 +128,7 @@ module cluster_dma_frontend_regs #(
                 // next_id
                 8'h20 : begin
                     if (ctrl_read) begin
-                        if (data_store_q.transfer.num_bytes == '0) begin
+                        if (data_store_q.num_bytes == '0) begin
                             rdata_d = '0;
                         end else begin
                             ctrl_gnt_o = be_ready_i;
@@ -179,9 +172,9 @@ module cluster_dma_frontend_regs #(
     assign ctrl_valid_o = valid_q;
     assign ctrl_data_o  = rdata_q;
 
-    assign transf_descr_o.num_bytes = data_store_q.transfer.num_bytes;
-    assign transf_descr_o.dst_addr  = data_store_q.transfer.dst_addr;
-    assign transf_descr_o.src_addr  = data_store_q.transfer.src_addr;
+    assign transf_descr_o.num_bytes = data_store_q.num_bytes;
+    assign transf_descr_o.dst_addr  = data_store_q.dst_addr;
+    assign transf_descr_o.src_addr  = data_store_q.src_addr;
     assign transf_descr_o.decouple  = conf_store_q[0];
     assign transf_descr_o.deburst   = conf_store_q[1];
     assign transf_descr_o.serialize = conf_store_q[2];
