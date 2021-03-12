@@ -8,17 +8,6 @@
 # - Andreas Kurth <akurth@iis.ee.ethz.ch>
 
 set -euo pipefail
-readonly SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
-source "$SCRIPT_DIR/../common.sh"
 
-cd "$HERO_ROOT/output/br-har-exilzcu102"
-
-make pulp-driver-dirclean
-make pulp-driver-rebuild
-make pulp-driver-reinstall
-
-if defined_or_warning_and_exit HERO_BOARD_HOSTNAME "Will not copy driver to board."; then
-  if defined_or_warning_and_exit HERO_BOARD_DRIVER_PATH "Will not copy driver to board."; then
-    scpv build/pulp-driver-0.1/pulp.ko $HERO_BOARD_HOSTNAME:"$HERO_BOARD_DRIVER_PATH"
-  fi
-fi
+readonly BR_OUTPUT_SUBDIR="br-har-exilzcu102"
+source "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/pulp-driver.sh"

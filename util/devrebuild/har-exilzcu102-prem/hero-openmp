@@ -9,5 +9,5 @@
 
 set -euo pipefail
 
-readonly BR_OUTPUT_SUBDIR="br-har-exilzcu102"
-source "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/libpulp.sh"
+readonly BR_OUTPUT_SUBDIR="br-har-exilzcu102-prem"
+source "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/../har-exilzcu102/hero-openmp.sh"
