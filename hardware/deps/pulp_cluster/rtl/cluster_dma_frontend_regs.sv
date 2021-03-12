@@ -68,6 +68,11 @@ module cluster_dma_frontend_regs #(
     // assign address to register address
     assign reg_addr = ctrl_add_i[7:0];
 
+    // determine if an access on the control interface is a read or a write
+    logic ctrl_read, ctrl_write;
+    assign ctrl_read = ctrl_req_i & ctrl_type_i;
+    assign ctrl_write = ctrl_req_i & ~ctrl_type_i;
+
     // address decode
     always_comb begin : proc_address_decode
 
@@ -88,9 +93,10 @@ module cluster_dma_frontend_regs #(
             case(reg_addr)
                 // source address (low)
                 8'h00 : begin
-                    if (ctrl_type_i) begin // read
+                    if (ctrl_read) begin
                         rdata_d = data_store_q.words[0];
-                    end else begin // write
+                    end
+                    if (ctrl_write) begin
                         for (int i = 0; i < 4; i++) begin
                             if (ctrl_be_i[i])
                                 data_store_d.bytes[0][i] = ctrl_data_i[8 * i +: 8];
@@ -99,9 +105,10 @@ module cluster_dma_frontend_regs #(
                 end
                 // destination address (low)
                 8'h08 : begin
-                    if (ctrl_type_i) begin // read
+                    if (ctrl_read) begin
                         rdata_d = data_store_q.words[1];
-                    end else begin // write
+                    end
+                    if (ctrl_write) begin
                         for (int i = 0; i < 4; i++) begin
                             if (ctrl_be_i[i])
                                 data_store_d.bytes[1][i] = ctrl_data_i[8 * i +: 8];
@@ -110,9 +117,10 @@ module cluster_dma_frontend_regs #(
                 end
                 // num bytes
                 8'h10 : begin
-                    if (ctrl_type_i) begin // read
+                    if (ctrl_read) begin
                         rdata_d = data_store_q.words[2];
-                    end else begin // write
+                    end
+                    if (ctrl_write) begin
                         for (int i = 0; i < 4; i++) begin
                             if (ctrl_be_i[i])
                                 data_store_d.bytes[2][i] = ctrl_data_i[8 * i +: 8];
@@ -121,15 +129,16 @@ module cluster_dma_frontend_regs #(
                 end
                 // status / conf
                 8'h18 : begin
-                    if (ctrl_type_i) begin // read
+                    if (ctrl_read) begin
                         rdata_d = {15'h0000, be_busy_i, 13'h0000, conf_store_q};
-                    end else begin // write
+                    end
+                    if (ctrl_write) begin
                         conf_store_d = ctrl_data_i[2:0];
                     end
                 end
                 // next_id
                 8'h20 : begin
-                    if (ctrl_type_i) begin // read
+                    if (ctrl_read) begin
                         if (data_store_q.transfer.num_bytes == '0) begin
                             rdata_d = '0;
                         end else begin
@@ -143,7 +152,7 @@ module cluster_dma_frontend_regs #(
                 default : begin
                     // complete ids
                     if (reg_addr >= 8'h28 & reg_addr < 8'h28 + NumStreams * 8) begin
-                        if (ctrl_type_i) begin // read
+                        if (ctrl_read) begin
                             rdata_d = {4'h0, done_id_i[(reg_addr - 8'h28) >> 3]};
                         end
                     // invalid access
