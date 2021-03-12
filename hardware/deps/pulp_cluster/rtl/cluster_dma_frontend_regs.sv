@@ -90,7 +90,7 @@ module cluster_dma_frontend_regs #(
             ctrl_gnt_o = 1'b1;
 
             // address decoding
-            case(reg_addr)
+            unique case (reg_addr)
                 // source address (low)
                 8'h00 : begin
                     if (ctrl_read) begin
