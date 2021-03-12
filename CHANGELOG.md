@@ -41,6 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     HERO_VERBOSITY should be set to 5 (NOTICE) or higher.
 
 ### Fixed
+- Hardware: Fix decoding of 64-bit addresses in PULP's cluster bus.  Previously, addresses outside
+  the 32-bit range would lead to a decode error in the cluster bus.
 
 ### Removed
 - `libhero-target`: Remove `hero_reset_clk_counter()`, thereby making the clock counter
