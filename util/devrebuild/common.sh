@@ -23,5 +23,5 @@ defined_or_warning_and_exit() {
 
 scpv() {
   say "'$1' -> '${@:2}'"
-  scp "$1" "$@"
+  scp "$@"
 }
