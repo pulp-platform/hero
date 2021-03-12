@@ -129,4 +129,9 @@ inline static uint64_t test_dram_base()
   return align_64(0x80000000);
 }
 
+inline static uint64_t test_dram_64bit_addr()
+{
+  return align_64(0x123480000000);
+}
+
 #endif

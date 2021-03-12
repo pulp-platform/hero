@@ -63,6 +63,7 @@ unsigned test_hero_64()
       check_addr(test_l1_other_base() + offset);
       check_addr(test_l2_base() + offset);
       check_addr(test_dram_base() + offset);
+      check_addr(test_dram_64bit_addr() + offset);
     }
     printf("Testing failure response to zero page with offset %d...\n", offset);
     #pragma omp parallel

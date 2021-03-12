@@ -100,13 +100,13 @@ module cluster_bus_wrap
   xbar_rule_t [N_RULES-1:0] addr_map;
   assign addr_map[0] = '{ // everything below cluster to ext_slave
     idx:  2,
-    start_addr: 64'h0000_0000_0000_0000,
+    start_addr: '0,
     end_addr:   cluster_base_addr
   };
   assign addr_map[1] = '{ // everything above cluster to ext_slave
     idx:  2,
     start_addr: cluster_base_addr + 64'h0000_0000_0040_0000,
-    end_addr:   64'h0000_0000_FFFF_FFFF
+    end_addr:   '1
   };
   assign addr_map[2] = '{ // TCDM
     idx:  0,
