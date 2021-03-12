@@ -17,6 +17,7 @@
 
 module cluster_dma_frontend_regs #(
     parameter type transf_descr_t     = logic,
+    parameter int unsigned AddrWidth  = 32,
     parameter int unsigned NumStreams = 1,
     parameter int unsigned IdxWidth   = (NumStreams > 32'd1) ? unsigned'($clog2(NumStreams)) : 32'd1,
     parameter type         idx_t      = logic [IdxWidth-1:0]
@@ -46,9 +47,9 @@ module cluster_dma_frontend_regs #(
 
     // DMA transfer descriptor
     typedef struct packed {
-        logic [31:0] num_bytes;
-        logic [31:0] dst_addr;
-        logic [31:0] src_addr;
+        logic          [31:0] num_bytes;
+        logic [AddrWidth-1:0] dst_addr;
+        logic [AddrWidth-1:0] src_addr;
     } transf_descr_regular_t;
 
     // have up to 256 registers per PE
@@ -96,37 +97,51 @@ module cluster_dma_frontend_regs #(
             ctrl_gnt_o = 1'b1;
 
             // address decoding
-            unique case (reg_addr)
-                // source address (low)
-                8'h00 : begin
+            unique casez ({reg_addr, AddrWidth >= 64})
+                // source address (lower 32 bit)
+                {8'h00, 1'b?}: begin
                     rdata_d = data_store_q.src_addr[31:0];
                     if (ctrl_write) begin
                         data_store_d.src_addr[31:0] = write_data;
                     end
                 end
-                // destination address (low)
-                8'h08 : begin
+                // source address (upper 32 bit)
+                {8'h04, 1'b1}: begin
+                    rdata_d = data_store_q.src_addr[63:32];
+                    if (ctrl_write) begin
+                        data_store_d.src_addr[63:32] = write_data;
+                    end
+                end
+                // destination address (lower 32 bit)
+                {8'h08, 1'b?}: begin
                     rdata_d = data_store_q.dst_addr[31:0];
                     if (ctrl_write) begin
                         data_store_d.dst_addr[31:0] = write_data;
                     end
                 end
+                // destination address (upper 32 bit)
+                {8'h0C, 1'b1}: begin
+                    rdata_d = data_store_q.dst_addr[63:32];
+                    if (ctrl_write) begin
+                        data_store_d.dst_addr[63:32] = write_data;
+                    end
+                end
                 // num bytes
-                8'h10 : begin
+                {8'h10, 1'b?}: begin
                     rdata_d = data_store_q.num_bytes;
                     if (ctrl_write) begin
                         data_store_d.num_bytes = write_data;
                     end
                 end
                 // status / conf
-                8'h18 : begin
+                {8'h18, 1'b?}: begin
                     rdata_d = {15'h0000, be_busy_i, 13'h0000, conf_store_q};
                     if (ctrl_write) begin
                         conf_store_d = ctrl_data_i[2:0];
                     end
                 end
                 // next_id
-                8'h20 : begin
+                {8'h20, 1'b?}: begin
                     if (ctrl_read) begin
                         if (data_store_q.num_bytes == '0) begin
                             rdata_d = '0;
@@ -178,5 +193,14 @@ module cluster_dma_frontend_regs #(
     assign transf_descr_o.decouple  = conf_store_q[0];
     assign transf_descr_o.deburst   = conf_store_q[1];
     assign transf_descr_o.serialize = conf_store_q[2];
+
+// pragma translate_off
+`ifndef VERILATOR
+    initial begin : p_assertions
+        assert (AddrWidth == 32 || AddrWidth == 64)
+            else $fatal(1, "Only 32 or 64 bit wide addresses are supported!");
+    end
+`endif
+// pragma translate_on
 
 endmodule : cluster_dma_frontend_regs
