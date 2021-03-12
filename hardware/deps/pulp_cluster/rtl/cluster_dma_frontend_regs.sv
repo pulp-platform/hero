@@ -140,7 +140,7 @@ module cluster_dma_frontend_regs #(
                 // default case
                 default : begin
                     // complete ids
-                    if (reg_addr >= 8'h28 & reg_addr < 8'h28 + NumStreams * 8) begin
+                    if (reg_addr >= 8'h28 && reg_addr < 8'h28 + NumStreams * 8) begin
                         if (ctrl_read) begin
                             rdata_d = {4'h0, done_id_i[(reg_addr - 8'h28) >> 3]};
                         end
