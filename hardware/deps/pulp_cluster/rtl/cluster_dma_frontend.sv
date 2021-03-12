@@ -80,8 +80,8 @@ module cluster_dma_frontend #(
     localparam int unsigned DistrIdxWidth = (NumStreams > 32'd1) ? unsigned'($clog2(NumStreams)) : 32'd1;
 
     // DMA transfer descriptor
-    typedef logic [31:0] addr_t;
-    typedef logic [31:0] num_bytes_t;
+    typedef logic [DmaAddrWidth-1:0] addr_t;
+    typedef logic             [31:0] num_bytes_t;
     typedef struct packed {
         num_bytes_t num_bytes;
         addr_t      dst_addr;
@@ -139,6 +139,7 @@ module cluster_dma_frontend #(
 
         cluster_dma_frontend_regs #(
             .transf_descr_t ( transf_descr_t    ),
+            .AddrWidth      ( DmaAddrWidth      ),
             .NumStreams     ( NumStreams        )
         ) i_dma_conf_regs_cores (
             .clk_i          ( clk_i                   ),
@@ -164,6 +165,7 @@ module cluster_dma_frontend #(
     // generate registers for peripherals
     cluster_dma_frontend_regs #(
         .transf_descr_t ( transf_descr_t    ),
+        .AddrWidth      ( DmaAddrWidth      ),
         .NumStreams     ( NumStreams        )
     ) i_dma_conf_regs_periphs (
         .clk_i          ( clk_i                             ),
