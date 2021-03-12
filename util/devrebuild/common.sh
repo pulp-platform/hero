@@ -22,6 +22,9 @@ defined_or_warning_and_exit() {
 }
 
 scpv() {
-  say "'$1' -> '${@:2}'"
+  local -r len=$(($#-1))
+  for src in "${@:1:$len}"; do
+    say "'$src' -> '${!#}'"
+  done
   scp "$@"
 }
