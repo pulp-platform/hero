@@ -8,7 +8,9 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 //
-// Thomas Benz <tbenz@ethz.ch>
+// Authors:
+// - Thomas Benz <tbenz@ethz.ch>
+// - Andreas Kurth <akurth@iis.ee.ethz.ch>
 
 // register file for one pe in the pulp_cluster_frontend
 // strictly 32 bit on TCDM side.
@@ -73,6 +75,17 @@ module cluster_dma_frontend_regs #(
     assign ctrl_read = ctrl_req_i & ctrl_type_i;
     assign ctrl_write = ctrl_req_i & ~ctrl_type_i;
 
+    // compute data to write from previous value and write enable mask
+    logic [31:0] write_data;
+    always_comb begin
+        for (int i = 0; i < 4; i++) begin
+            write_data[8 * i +: 8] = rdata_d[8 * i +: 8];
+            if (ctrl_req_i && !ctrl_type_i && ctrl_be_i[i]) begin
+                write_data[8 * i +: 8] = ctrl_data_i[8 * i +: 8];
+            end
+        end
+    end
+
     // address decode
     always_comb begin : proc_address_decode
 
@@ -93,45 +106,28 @@ module cluster_dma_frontend_regs #(
             unique case (reg_addr)
                 // source address (low)
                 8'h00 : begin
-                    if (ctrl_read) begin
-                        rdata_d = data_store_q.words[0];
-                    end
+                    rdata_d = data_store_q.words[0];
                     if (ctrl_write) begin
-                        for (int i = 0; i < 4; i++) begin
-                            if (ctrl_be_i[i])
-                                data_store_d.bytes[0][i] = ctrl_data_i[8 * i +: 8];
-                        end
+                        data_store_d.words[0] = write_data;
                     end
                 end
                 // destination address (low)
                 8'h08 : begin
-                    if (ctrl_read) begin
-                        rdata_d = data_store_q.words[1];
-                    end
+                    rdata_d = data_store_q.words[1];
                     if (ctrl_write) begin
-                        for (int i = 0; i < 4; i++) begin
-                            if (ctrl_be_i[i])
-                                data_store_d.bytes[1][i] = ctrl_data_i[8 * i +: 8];
-                        end
+                        data_store_d.words[1] = write_data;
                     end
                 end
                 // num bytes
                 8'h10 : begin
-                    if (ctrl_read) begin
-                        rdata_d = data_store_q.words[2];
-                    end
+                    rdata_d = data_store_q.words[2];
                     if (ctrl_write) begin
-                        for (int i = 0; i < 4; i++) begin
-                            if (ctrl_be_i[i])
-                                data_store_d.bytes[2][i] = ctrl_data_i[8 * i +: 8];
-                        end
+                        data_store_d.words[2] = write_data;
                     end
                 end
                 // status / conf
                 8'h18 : begin
-                    if (ctrl_read) begin
-                        rdata_d = {15'h0000, be_busy_i, 13'h0000, conf_store_q};
-                    end
+                    rdata_d = {15'h0000, be_busy_i, 13'h0000, conf_store_q};
                     if (ctrl_write) begin
                         conf_store_d = ctrl_data_i[2:0];
                     end
