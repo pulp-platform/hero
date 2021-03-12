@@ -39,6 +39,8 @@ void compare_matrices(uint32_t* a, uint32_t* b, uint32_t width, uint32_t height)
 
 #pragma omp declare target
 
+//#define TIME_DMA_AND_COMP // measure and print cycles spent on DMA transfers and computations
+
 int double_buf_mm(__host uint32_t * __restrict__ a,
                   __host uint32_t * __restrict__ b,
                   __host uint32_t * __restrict__ c,
@@ -82,12 +84,30 @@ int double_buf_mm(__host uint32_t * __restrict__ a,
   {
     const int thread_id = omp_get_thread_num();
 
+#ifdef TIME_DMA_AND_COMP
+    unsigned comp_cycles = 0;
+    unsigned dma_setup_cycles = 0;
+    unsigned dma_wait_cycles = 0;
+#endif
+
     // get the first stripes
     if (thread_id == 0) {
+#ifdef TIME_DMA_AND_COMP
+      const unsigned cycles_prev = hero_get_clk_counter();
+#endif
       a_dma[a_idx] = hero_memcpy_host2dev_async(a_ptrs[a_idx], a, stripe_size_b);
+#ifdef TIME_DMA_AND_COMP
+      dma_setup_cycles += hero_get_clk_counter() - cycles_prev;
+#endif
     }
     else if (thread_id == 1) {
+#ifdef TIME_DMA_AND_COMP
+      const unsigned cycles_prev = hero_get_clk_counter();
+#endif
       b_dma[b_idx] = hero_memcpy_host2dev_async(b_ptrs[b_idx], b, stripe_size_b);
+#ifdef TIME_DMA_AND_COMP
+      dma_setup_cycles += hero_get_clk_counter() - cycles_prev;
+#endif
     }
 
     // horizontal a and c stripes
@@ -102,11 +122,23 @@ int double_buf_mm(__host uint32_t * __restrict__ a,
           const uint64_t ext_addr = (uint64_t)a + (s+1)*stripe_size_b;
 
           // set up DMA XFER
+#ifdef TIME_DMA_AND_COMP
+          const unsigned cycles_prev = hero_get_clk_counter();
+#endif
           a_dma[a_idx] = hero_memcpy_host2dev_async(a_ptrs[a_idx], (__host void *)ext_addr, stripe_size_b);
+#ifdef TIME_DMA_AND_COMP
+          dma_setup_cycles += hero_get_clk_counter() - cycles_prev;
+#endif
         }
 
         // wait for previous DMA XFER
+#ifdef TIME_DMA_AND_COMP
+        const unsigned cycles_prev = hero_get_clk_counter();
+#endif
         hero_dma_wait(a_dma[!a_idx]);
+#ifdef TIME_DMA_AND_COMP
+        dma_wait_cycles += hero_get_clk_counter() - cycles_prev;
+#endif
       }
       else if ( (thread_id == 2) && (s > 0) ) {
         // swap buffer
@@ -116,7 +148,13 @@ int double_buf_mm(__host uint32_t * __restrict__ a,
         const uint64_t ext_addr = (uint64_t)c + (s-1)*stripe_size_b;
 
         // set up DMA XFER
+#ifdef TIME_DMA_AND_COMP
+        const unsigned cycles_prev = hero_get_clk_counter();
+#endif
         c_dma[!c_idx] = hero_memcpy_dev2host_async((__host void *)ext_addr, c_ptrs[!c_idx], stripe_size_b);
+#ifdef TIME_DMA_AND_COMP
+        dma_setup_cycles += hero_get_clk_counter() - cycles_prev;
+#endif
 
         // wait for previous DMA XFER
         if (s > 1)
@@ -135,21 +173,43 @@ int double_buf_mm(__host uint32_t * __restrict__ a,
             const uint64_t ext_addr = (uint64_t)b + (t+1)*stripe_size_b;
 
             // set up DMA XFER
+#ifdef TIME_DMA_AND_COMP
+            const unsigned cycles_prev = hero_get_clk_counter();
+#endif
             b_dma[b_idx] = hero_memcpy_host2dev_async(b_ptrs[b_idx], (__host void *)ext_addr, stripe_size_b);
+#ifdef TIME_DMA_AND_COMP
+            dma_setup_cycles += hero_get_clk_counter() - cycles_prev;
+#endif
           }
           else if (s < n_stripes-1) {
             // determine next DMA XFER
             const uint64_t ext_addr = (uint64_t)b;
 
             // set up DMA XFER
+#ifdef TIME_DMA_AND_COMP
+            const unsigned cycles_prev = hero_get_clk_counter();
+#endif
             b_dma[b_idx] = hero_memcpy_host2dev_async(b_ptrs[b_idx], (__host void *)ext_addr, stripe_size_b);
+#ifdef TIME_DMA_AND_COMP
+            dma_setup_cycles += hero_get_clk_counter() - cycles_prev;
+#endif
           }
 
           // wait for previous DMA XFER
+#ifdef TIME_DMA_AND_COMP
+          const unsigned cycles_prev = hero_get_clk_counter();
+#endif
           hero_dma_wait(b_dma[!b_idx]);
+#ifdef TIME_DMA_AND_COMP
+          dma_wait_cycles += hero_get_clk_counter() - cycles_prev;
+#endif
         }
 
         #pragma omp barrier
+
+#ifdef TIME_DMA_AND_COMP
+        const unsigned cycles_prev = hero_get_clk_counter();
+#endif
 
         #pragma omp for collapse(2)
 
@@ -166,18 +226,42 @@ int double_buf_mm(__host uint32_t * __restrict__ a,
             c_ptrs[c_idx][i*width+t*stripe_height+j] = sum;
           } // j < stripe_height
         } // i < stripe_height
+
+#ifdef TIME_DMA_AND_COMP
+        comp_cycles += hero_get_clk_counter() - cycles_prev;
+#endif
+
       } // t < n_stripes
 
     } // n_stripes
 
     // wait for second to last c stripe
     if (thread_id == 2) {
+#ifdef TIME_DMA_AND_COMP
+      const unsigned cycles_prev = hero_get_clk_counter();
+#endif
       hero_dma_wait(c_dma[!c_idx]);
+#ifdef TIME_DMA_AND_COMP
+      dma_wait_cycles += hero_get_clk_counter() - cycles_prev;
+#endif
     }
 
     // copy out last c stripe
-    if (thread_id == 2)
+    if (thread_id == 2) {
+#ifdef TIME_DMA_AND_COMP
+      const unsigned cycles_prev = hero_get_clk_counter();
+#endif
       hero_memcpy_dev2host((__host void *)((uint64_t)c+(n_stripes-1)*stripe_size_b), c_ptrs[c_idx], stripe_size_b);
+#ifdef TIME_DMA_AND_COMP
+      dma_setup_cycles += hero_get_clk_counter() - cycles_prev;
+#endif
+    }
+
+#ifdef TIME_DMA_AND_COMP
+    printf("Computation cycles: %d %10d\n", comp_cycles);
+    printf("DMA setup cycles:   %d %10d\n", dma_setup_cycles);
+    printf("DMA wait cycles:    %d %10d\n", dma_wait_cycles);
+#endif
 
   } // parallel
 
@@ -197,7 +281,7 @@ int main(int argc, char *argv[])
 {
   printf("HERO matrix multiplication started.\n");
 
-  uint32_t height  = 128;
+  uint32_t height  = 256;
   if( argc > 1 ) {
     height  = strtoul(argv[1], NULL, 0);
   }
@@ -286,6 +370,12 @@ int main(int argc, char *argv[])
     map(from: c[0:width*height])
   double_buf_mm(a, b, c, width, height, stripe_height);
   bench_stop();
+#ifdef TIME_DMA_AND_COMP
+  printf("Warning: The time measured on the host is meaningless ");
+  printf("because it includes `printf`s on the device.  ");
+  printf("Recompile the benchmark without `TIME_DMA_AND_COMP` ");
+  printf("to get meaningful timing measurements on the host.\n");
+#endif
   compare_matrices(c, d, width, height);
   memset(c, 0, (size_t)(width*height));
 
