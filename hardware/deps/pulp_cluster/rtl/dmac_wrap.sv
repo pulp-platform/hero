@@ -217,23 +217,23 @@ module dmac_wrap
 
   // split AXI bus in read and write
   always_comb begin : proc_tcdm_axi_rw_split
-    tcdm_rsp.r              = tcdm_read_rsp.r;
+    `AXI_SET_R_STRUCT(tcdm_rsp.r, tcdm_read_rsp.r)
     tcdm_rsp.r_valid        = tcdm_read_rsp.r_valid;
     tcdm_rsp.ar_ready       = tcdm_read_rsp.ar_ready;
-    tcdm_rsp.b              = tcdm_write_rsp.b;
+    `AXI_SET_B_STRUCT(tcdm_rsp.b, tcdm_read_rsp.b)
     tcdm_rsp.b_valid        = tcdm_write_rsp.b_valid;
     tcdm_rsp.w_ready        = tcdm_write_rsp.w_ready;
     tcdm_rsp.aw_ready       = tcdm_write_rsp.aw_ready;
 
     tcdm_write_req          = '0;
-    tcdm_write_req.aw       = tcdm_req.aw;
+    `AXI_SET_AW_STRUCT(tcdm_write_req.aw, tcdm_req.aw)
     tcdm_write_req.aw_valid = tcdm_req.aw_valid;
-    tcdm_write_req.w        = tcdm_req.w;
+    `AXI_SET_W_STRUCT(tcdm_write_req.w, tcdm_req.w)
     tcdm_write_req.w_valid  = tcdm_req.w_valid;
     tcdm_write_req.b_ready  = tcdm_req.b_ready;
 
     tcdm_read_req           = '0;
-    tcdm_read_req.ar        = tcdm_req.ar;
+    `AXI_SET_AR_STRUCT(tcdm_read_req.ar, tcdm_req.ar)
     tcdm_read_req.ar_valid  = tcdm_req.ar_valid;
     tcdm_read_req.r_ready   = tcdm_req.r_ready;
   end
