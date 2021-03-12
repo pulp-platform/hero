@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add TinyYOLOv3 (`openmp-examples/darknet`) as a benchmark, with the convolution layers ported to
     run on PULP.  This also comes with a reduced version (`openmp-examples/darknet-layer`), which
     executes a single convolutional layer at a time, checks correctness and then exits.
+- Support for PREM from HERCULES PREMizing compiler. Activate with
+  `export HERCULES_INSTALL=$HERO_INSTALL` before sourcing the `exilzcu102.sh` environment file (this
+  is the only setup currently supported). The environment script has been extended to also configure
+  the toolchain for PREM transformation. To build the required runtime libraries, build the target
+  `sdk-har-prem` instead of `sdk-har`, but otherwise follow instructions as previously.
 
 ### Changed
 - Hardware:

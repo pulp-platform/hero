@@ -24,8 +24,6 @@ export HERO_TOOLCHAIN_HOST_LINUX_ARCH="${ARCH}"
 export KERNEL_ARCH=${ARCH}
 export KERNEL_CROSS_COMPILE=${CROSS_COMPILE}
 
-export HERCULES_ARCH=ZYNQMP
-
 export PULP_RISCV_GCC_TOOLCHAIN=${HERO_INSTALL}
 
 export HERO_PULP_SDK_DIR=$(readlink -f "$THIS_DIR/../pulp/sdk")
@@ -39,3 +37,11 @@ fi
 # TODO: determine correct sysroot in ToolChain
 unset LDFLAGS
 export CFLAGS="--sysroot=${HERO_INSTALL}/aarch64-hero-linux-gnu/"
+
+# If PREM passes enabled, source the corresponding environment.
+if [ ! -z "$HERCULES_INSTALL" ]; then
+  echo "Configuring HERCULES at: $HERCULES_INSTALL"
+  source ${HERCULES_INSTALL}/prem-environment.sh > /dev/null
+  echo "Configuring HERCULES for architecture HERO/PULP"
+  export HERCULES_ARCH="PULP"
+fi

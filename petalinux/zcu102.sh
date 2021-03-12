@@ -12,13 +12,14 @@ cd "$(pwd -P)"
 
 # Obtain bitstream path from configuration.
 set +e
-readonly bitstream="$("$HERO_ROOT/tools/configfile/get_value" -s "$LOCAL_CFG" BR2_HERO_BITSTREAM \
+bitstream="$("$HERO_ROOT/tools/configfile/get_value" -s "$LOCAL_CFG" BR2_HERO_BITSTREAM \
     | tr -d '"')";
 if test "$?" -ne 0; then
   >&2 echo "Error: '$1' is not defined in '$LOCAL_CFG'!"
   exit 1
 fi
 set -e
+readonly bitstream="${bitstream//\$BR2_EXTERNAL_HERO_PATH/$HERO_ROOT}"
 if ! test -r "$bitstream"; then
   echo "Error: Path to bitstream ('$bitstream') is not readable!"
   exit 1
