@@ -229,8 +229,17 @@ module pulp_tb #(
       input axi_addr_t last, input axi_addr_t base);
     automatic axi_lite_addr_t slice_base_addr = 32'hA800_0000 + slice_addr;
     write_rab(slice_base_addr+8'h00, first);
+    if (pulp_pkg::AXI_LITE_DW < pulp_pkg::AXI_AW) begin
+      write_rab(slice_base_addr+8'h04, first[$left(first)-:pulp_pkg::AXI_AW-pulp_pkg::AXI_LITE_DW]);
+    end
     write_rab(slice_base_addr+8'h08, last);
+    if (pulp_pkg::AXI_LITE_DW < pulp_pkg::AXI_AW) begin
+      write_rab(slice_base_addr+8'h0C, last[$left(last)-:pulp_pkg::AXI_AW-pulp_pkg::AXI_LITE_DW]);
+    end
     write_rab(slice_base_addr+8'h10, base);
+    if (pulp_pkg::AXI_LITE_DW < pulp_pkg::AXI_AW) begin
+      write_rab(slice_base_addr+8'h14, base[$left(base)-:pulp_pkg::AXI_AW-pulp_pkg::AXI_LITE_DW]);
+    end
     write_rab(slice_base_addr+8'h18, 64'b111);
   endtask
 
