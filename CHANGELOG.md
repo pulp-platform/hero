@@ -33,6 +33,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     Performance Monitor (currently parametrized to two dynamically assignable hardware counters).
   - Replace `mchan` DMA engine by AXI DMA engine.  This significantly improves the throughput of DMA
     transfers (see !216 for details).
+- Clang verbosity
+  - Clang does not longer by default print notices to stderr on custom address space handling
+    decisions, as this obscures standard compiler warnings that are more useful to the end user.
+    Instead, the HERO_VERBOSITY environment variable has been added to control this. The verbosity
+    levels go from 0 (EMERGENCY, used by default) to 7 (DEBUG). To reenable the previous behavior
+    HERO_VERBOSITY should be set to 5 (NOTICE) or higher.
 
 ### Fixed
 
