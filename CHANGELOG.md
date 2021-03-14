@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is the only setup currently supported). The environment script has been extended to also configure
   the toolchain for PREM transformation. To build the required runtime libraries, build the target
   `sdk-har-prem` instead of `sdk-har`, but otherwise follow instructions as previously.
+- Add `util/devrebuild`: programs to rebuild (and optionally redeploy) components of the HERO SDK
+  during development.
 
 ### Changed
 - Hardware:
@@ -39,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     Instead, the HERO_VERBOSITY environment variable has been added to control this. The verbosity
     levels go from 0 (EMERGENCY, used by default) to 7 (DEBUG). To reenable the previous behavior
     HERO_VERBOSITY should be set to 5 (NOTICE) or higher.
+- Rename folder containing development machine utilities from `tools` to `util`.
 
 ### Fixed
 - Hardware: Fix decoding of 64-bit addresses in PULP's cluster bus.  Previously, addresses outside
