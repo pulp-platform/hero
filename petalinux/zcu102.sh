@@ -12,7 +12,7 @@ cd "$(pwd -P)"
 
 # Obtain bitstream path from configuration.
 set +e
-bitstream="$("$HERO_ROOT/tools/configfile/get_value" -s "$LOCAL_CFG" BR2_HERO_BITSTREAM \
+bitstream="$("$HERO_ROOT/util/configfile/get_value" -s "$LOCAL_CFG" BR2_HERO_BITSTREAM \
     | tr -d '"')";
 if test "$?" -ne 0; then
   >&2 echo "Error: '$1' is not defined in '$LOCAL_CFG'!"

@@ -171,8 +171,8 @@ cd hardware/vsim
 ```
 where `<app_name>` is the path to the directory from the `openmp-examples` directory (for example `polybench-acc/2mm`).
 
-### Tools
-For development with RISC-V hardware the OpenOCD debugger can be useful. To simplify installation a target is provided that installs the debugger automatically to the `HERO_INSTALL` toolchain installation directory using
+### Utilities for the Development Machine
+`util` contains utilities for the development machine to facilitate working with HERO.  One of them, the OpenOCD debugger for RISC-V, can be installed to `HERO_INSTALL` with
 ```
-make tools-hrv-openocd
+make util-hrv-openocd
 ```
