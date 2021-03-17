@@ -20,11 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add TinyYOLOv3 (`openmp-examples/darknet`) as a benchmark, with the convolution layers ported to
     run on PULP.  This also comes with a reduced version (`openmp-examples/darknet-layer`), which
     executes a single convolutional layer at a time, checks correctness and then exits.
-- Support for PREM from HERCULES PREMizing compiler. Activate with
-  `export HERCULES_INSTALL=$HERO_INSTALL` before sourcing the `exilzcu102.sh` environment file (this
-  is the only setup currently supported). The environment script has been extended to also configure
-  the toolchain for PREM transformation. To build the required runtime libraries, build the target
-  `sdk-har-prem` instead of `sdk-har`, but otherwise follow instructions as previously.
+- Add support for the Predictable Execution Model (PREM) from the HERCULES PREMizing compiler.
+  Activate it with `export HERCULES_INSTALL=$HERO_INSTALL` before sourcing the `exilzcu102.sh`
+  environment file (this is the only setup currently supported).  The environment script has been
+  extended to also configure the toolchain for PREM transformation.  To build the required runtime
+  libraries, build the target `sdk-har-prem` instead of `sdk-har`, but otherwise follow instructions
+  as previously.
 - Add `util/devrebuild`: programs to rebuild (and optionally redeploy) components of the HERO SDK
   during development.
 
@@ -35,12 +36,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     Performance Monitor (currently parametrized to two dynamically assignable hardware counters).
   - Replace `mchan` DMA engine by AXI DMA engine.  This significantly improves the throughput of DMA
     transfers (see !216 for details).
-- Clang verbosity
-  - Clang does not longer by default print notices to stderr on custom address space handling
-    decisions, as this obscures standard compiler warnings that are more useful to the end user.
-    Instead, the HERO_VERBOSITY environment variable has been added to control this. The verbosity
-    levels go from 0 (EMERGENCY, used by default) to 7 (DEBUG). To reenable the previous behavior
-    HERO_VERBOSITY should be set to 5 (NOTICE) or higher.
+- Clang verbosity: Clang by default no longer prints notices to `stderr` on custom address space
+  handling decisions, because these obscure compiler warnings that are more useful to the end user.
+  Instead, the `HERO_VERBOSITY` environment variable has been added to control the verbosity.  The
+  verbosity levels go from `0` (meaning "only print emergency messages") to 7 (meaning "print all
+  debug messages").  To re-enable the previous behavior, set `HERO_VERBOSITY` to `5` or higher.
 - Rename folder containing development machine utilities from `tools` to `util`.
 
 ### Fixed
@@ -51,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `libhero-target`: Remove `hero_reset_clk_counter()`, thereby making the clock counter
   non-resettable and thus monotonically increasing.  The monotonicity property is important so that
   different usages of the cycle counter do not interfere.
+
 
 ## v0.1.4 - 2021-02-10
 
