@@ -23,10 +23,9 @@ chmod -R u+w $HERO_INSTALL
 
 # Apply patch to LLVM
 HC_PATCH_LOC="$THIS_DIR/HerculesCompiler-public/setup/llvm-patches/llvm901_clang.patch"
-if ! patch -d $THIS_DIR/llvm-project -N -p1 < $HC_PATCH_LOC; then
-  if [ $? -gt 1 ]; then
-    exit 1;
-  fi
+if ! patch -d "$THIS_DIR/llvm-project" -R -p1 -s -f --dry-run < "$HC_PATCH_LOC" >/dev/null; then
+  # Patch not already applied.
+  patch -d "$THIS_DIR/llvm-project" -p1 < "$HC_PATCH_LOC"
 fi
 
 
