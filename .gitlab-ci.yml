@@ -117,6 +117,7 @@ tc-llvm:
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get sdk-pulp-and-sdk-har
     - chmod -R u-w $HERO_INSTALL
     - make tc-llvm
+    - git diff --exit-code # assert that applied patches made no difference
     - chmod -R u+w $HERO_INSTALL
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-llvm
     - .gitlab-ci.d/llvm-project-update-hero-branch.sh
