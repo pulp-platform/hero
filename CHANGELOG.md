@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+
+### Changed
+
+### Fixed
+
+
+## v0.2.0 - 2021-03-18
+
+### Added
 - `libhero-target`:
   - Add `hero_perf_*` performance measurement API.  This API provides a uniform interface for
     counting events on different devices, does not require all events to be supported on every
