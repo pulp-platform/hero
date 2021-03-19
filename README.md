@@ -124,8 +124,6 @@ in every session on the board.  You may also want to place your binaries and dat
 
 To develop applications for this setup, the dynamic environment on the development machine can be loaded using `source env/exilzcu102.sh`. Afterwards applications can be built and transferred directly to the board.
 
-The host processor is implemented as a hard-macro, allowing the FPGA implementation of the accelerator to be loaded later during boot. A bitstream with the hardware implementation can be loaded automatically by adding `BR2_HERO_BITSTREAM=<path_to_bitstream>` in `local.cfg` and rebuilding the image with `make br-har-exilzcu102`.
-
 ##### QEMU RISC-V
 For host debugging it can be useful to test the environment first with the QEMU machine emulator. A clone of the RISC-V Ariane environment without specific hardware patches and including virtual drivers can be built with:
 ```
