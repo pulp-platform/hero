@@ -28,4 +28,16 @@ define PREM_CMUX_INSTALL_STAGING_CMDS
 	$(INSTALL) -D -m 0644 $(PREM_CMUX_SITE)/inc/prem/logprint.h $(STAGING_DIR)/usr/include/prem/logprint.h
 endef
 
+define PREM_CMUX_INSTALL_TARGET_CMDS
+	$(INSTALL) -D -m 0755 $(STAGING_DIR)/usr/bin/cmux $(TARGET_DIR)/usr/bin/cmux
+	$(INSTALL) -D -m 0644 $(STAGING_DIR)/usr/lib/libcmux-vote.a $(TARGET_DIR)/usr/lib/libcmux-vote.a
+	$(INSTALL) -D -m 0644 $(STAGING_DIR)/usr/lib/libpremnotify.so $(TARGET_DIR)/usr/lib/libpremnotify.so
+	mkdir -p $(TARGET_DIR)/usr/include/prem
+	$(INSTALL) -D -m 0644 $(STAGING_DIR)/usr/include/prem/cmuxif.h $(TARGET_DIR)/usr/include/prem/cmuxif.h
+	$(INSTALL) -D -m 0644 $(STAGING_DIR)/usr/include/prem/vote.h $(TARGET_DIR)/usr/include/prem/vote.h
+	$(INSTALL) -D -m 0644 $(STAGING_DIR)/usr/include/prem/libpremnotify.h $(TARGET_DIR)/usr/include/prem/libpremnotify.h
+	$(INSTALL) -D -m 0644 $(STAGING_DIR)/usr/include/prem/channel.h $(TARGET_DIR)/usr/include/prem/channel.h
+	$(INSTALL) -D -m 0644 $(STAGING_DIR)/usr/include/prem/logprint.h $(TARGET_DIR)/usr/include/prem/logprint.h
+endef
+
 $(eval $(generic-package))
