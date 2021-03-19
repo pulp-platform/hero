@@ -122,6 +122,12 @@ export LD_LIBRARY_PATH=/mnt/usr/lib:/mnt/lib
 ```
 in every session on the board.  You may also want to place your binaries and data under `/mnt` to not lose them on a reboot (or kernel panic).
 
+Once the board boots from the SD card and you have SSH access to it, you can remotely update the image files and reboot the board:
+```sh
+scp output/br-har-exilzcu102/images/{BOOT.BIN,image.ub} root@zcu102-hostname:/run/media/mmcblk0p1/
+ssh root@zcu102-hostname /sbin/reboot
+```
+
 To develop applications for this setup, the dynamic environment on the development machine can be loaded using `source env/exilzcu102.sh`. Afterwards applications can be built and transferred directly to the board.
 
 ##### QEMU RISC-V
