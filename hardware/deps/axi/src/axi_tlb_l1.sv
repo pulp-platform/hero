@@ -191,7 +191,7 @@ module axi_tlb_l1 #(
     .AxiDataWidth   ( CfgAxiDataWidth       ),
     .PrivProtOnly   ( 1'b0                  ),
     .SecuProtOnly   ( 1'b0                  ),
-    .RegRstVal      ( '{RegNumBytes{8'h00}} ),
+    .RegRstVal      ( {RegNumBytes{8'h00}}  ),
     .req_lite_t     ( axi_lite_req_t        ),
     .resp_lite_t    ( axi_lite_resp_t       )
   ) i_regs (
@@ -201,8 +201,8 @@ module axi_tlb_l1 #(
     .axi_resp_o       ( cfg_resp_o            ),
     .wr_active_o      ( /* unused */          ),
     .rd_active_o      ( /* unused */          ),
-    .reg_d_i          ( '{RegNumBytes{8'h00}} ),
-    .reg_load_i       ( '{RegNumBytes{1'b0}}  ),
+    .reg_d_i          ( {RegNumBytes{8'h00}}  ),
+    .reg_load_i       ( {RegNumBytes{1'b0}}   ),
     .reg_read_only_i  ( read_only             ),
     .reg_q_o          ( reg_q                 )
   );
