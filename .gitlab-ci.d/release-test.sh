@@ -74,6 +74,8 @@ for d in \
     mm-large \
     mm-small \
     polybench-acc/{2mm,3mm,atax,bicg,convolution-2d,covariance,gemm} \
+    tests-hero/* \
+    darknet \
     ; do
   cd $d
   echo "Building '$d' .."
@@ -84,4 +86,11 @@ for d in \
   ssh "$board_hostname" "./run_binary.sh $app_name"
   cd - >/dev/null
 done
+cd darknet
+echo "Building 'darknet' with manual tiling and DMA transfers .."
+CFLAGS="$CFLAGS -DGEMM_NN_TILED_OFFLOAD_MANUAL_DMA" make clean all >/dev/null 2>&1
+scp darknet "$board_hostname":.
+ssh "$board_hostname" "./run_binary.sh darknet"
+cd - >/dev/null
+
 cd ..

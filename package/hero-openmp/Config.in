@@ -5,5 +5,10 @@ config BR2_PACKAGE_HERO_OPENMP
 	select BR2_PACKAGE_LIBPULP
 	depends on BR2_PACKAGE_HERO_PLATFORM != ""
 
+config BR2_PACKAGE_HERO_OPENMP_ENABLE_PREM
+	bool "Enable support for PREM in HERO OpenMP"
+	select BR2_PACKAGE_PREM_CMUX
+	depends on BR2_PACKAGE_HERO_PLATFORM != ""
+
 comment "LLVM OpenMP PULP plugin needs a well-defined HERO platform"
 	depends on BR2_PACKAGE_HERO_PLATFORM = ""

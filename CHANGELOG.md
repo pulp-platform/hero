@@ -8,13 +8,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
-- Add benchmark (`openmp-examples/dma-perf`) to measure DMA throughput and verify the correctness of
-  transferred data for different transfer sizes and source and destination memory alignments.
 
 ### Changed
-- Replace RAB by AXI TLB.  This fixes the DMA burst size limitation due to a bug in the RAB (#84).
 
 ### Fixed
+
+
+## v0.2.0 - 2021-03-18
+
+### Added
+- `libhero-target`:
+  - Add `hero_perf_*` performance measurement API.  This API provides a uniform interface for
+    counting events on different devices, does not require all events to be supported on every
+    device, and works with hardware counters dynamically assigned an to event as well as with
+    hardware counters statically bound ("hardwired") to an event.  See !223 for details.
+  - Add two-dimensional memory copy functions (`hero_memcpy2d_*`).
+- Benchmarks and example applications:
+  - Add benchmark (`openmp-examples/dma-perf`) to measure DMA throughput and verify the correctness
+    of transferred data for different transfer sizes and source and destination memory alignments.
+  - Add TinyYOLOv3 (`openmp-examples/darknet`) as a benchmark, with the convolution layers ported to
+    run on PULP.  This also comes with a reduced version (`openmp-examples/darknet-layer`), which
+    executes a single convolutional layer at a time, checks correctness and then exits.
+- Add support for the Predictable Execution Model (PREM) from the HERCULES PREMizing compiler.
+  Activate it with `export HERCULES_INSTALL=$HERO_INSTALL` before sourcing the `exilzcu102.sh`
+  environment file (this is the only setup currently supported).  The environment script has been
+  extended to also configure the toolchain for PREM transformation.  To build the required runtime
+  libraries, build the target `sdk-har-prem` instead of `sdk-har`, but otherwise follow instructions
+  as previously.
+- Add `util/devrebuild`: programs to rebuild (and optionally redeploy) components of the HERO SDK
+  during development.
+
+### Changed
+- Hardware:
+  - Replace RAB by AXI TLB.  This fixes the DMA burst size limitation due to a bug in the RAB (#84).
+  - RI5CY/CV32E40P core: Replace PULP-custom hardware counters with RISC-V standard Hardware
+    Performance Monitor (currently parametrized to two dynamically assignable hardware counters).
+  - Replace `mchan` DMA engine by AXI DMA engine.  This significantly improves the throughput of DMA
+    transfers (see !216 for details).
+- Clang verbosity: Clang by default no longer prints notices to `stderr` on custom address space
+  handling decisions, because these obscure compiler warnings that are more useful to the end user.
+  Instead, the `HERO_VERBOSITY` environment variable has been added to control the verbosity.  The
+  verbosity levels go from `0` (meaning "only print emergency messages") to 7 (meaning "print all
+  debug messages").  To re-enable the previous behavior, set `HERO_VERBOSITY` to `5` or higher.
+- Rename folder containing development machine utilities from `tools` to `util`.
+
+### Fixed
+- Hardware: Fix decoding of 64-bit addresses in PULP's cluster bus.  Previously, addresses outside
+  the 32-bit range would lead to a decode error in the cluster bus.
+
+### Removed
+- `libhero-target`: Remove `hero_reset_clk_counter()`, thereby making the clock counter
+  non-resettable and thus monotonically increasing.  The monotonicity property is important so that
+  different usages of the cycle counter do not interfere.
 
 
 ## v0.1.4 - 2021-02-10

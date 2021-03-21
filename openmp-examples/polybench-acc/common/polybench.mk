@@ -12,6 +12,10 @@ endif
 
 PBFLAGS = -DPOLYBENCH_USE_SCALAR_LB -DNUM_TEAMS=1 -DNUM_THREADS=$(threads) -DPOLYBENCH_HERO_MEM_LEVEL=$(mem) -I$(HERO_PULP_INC_DIR)
 
+ifdef HERCULES_INSTALL
+	export HERCULES_DEFAULT_NUM_THREADS=$(threads)
+endif
+
 ifneq ($(dma),n)
 	PBFLAGS += -DPOLYBENCH_DMA
 ifneq ($(dma),optnone)

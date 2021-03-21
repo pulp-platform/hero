@@ -111,13 +111,6 @@ packages:
       - common_cells
       - icache-intc
       - scm
-  mchan:
-    revision: 528ec79ddef60b9dd0bb1db8beaac5d4bf34bf79
-    version: ~
-    source:
-      Git: "https://github.com/pulp-platform/mchan.git"
-    dependencies:
-      - common_cells
   per2axi:
     revision: 3095411ea20f8f97cb72f0febff07a74e69b5d14
     version: ~
@@ -141,7 +134,6 @@ packages:
       - cluster_peripherals
       - event_unit_flex
       - icache_mp_128_pf
-      - mchan
       - per2axi
       - riscv
       - timer_unit

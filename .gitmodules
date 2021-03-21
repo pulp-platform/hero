@@ -2,7 +2,7 @@
 	path = buildroot
 	url = git://git.buildroot.net/buildroot
 [submodule "tools/riscv-openocd"]
-	path = tools/riscv-openocd
+	path = util/riscv-openocd
 	url = https://github.com/riscv/riscv-openocd
 [submodule "toolchain/llvm-project"]
 	path = toolchain/llvm-project
@@ -14,3 +14,6 @@
 [submodule "pulp/sdk/json-tools"]
 	path = pulp/sdk/json-tools
 	url = https://github.com/pulp-platform/json-tools.git
+[submodule "toolchain/HerculesCompiler-public"]
+	path = toolchain/HerculesCompiler-public
+	url = git@iis-git.ee.ethz.ch:H2020-Compiler/HerculesCompiler-public.git

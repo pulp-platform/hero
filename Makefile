@@ -42,6 +42,14 @@ br-har: check_environment
 	cp $(CURDIR)/output/br-har/images/rootfs.ext4 $(CURDIR)/output/har-rootfs.ext4
 	cp $(CURDIR)/output/br-har/images/rootfs.tar $(CURDIR)/output/har-rootfs.tar
 
+br-har-prem: check_environment
+	mkdir -p $(CURDIR)/output/br-har-prem
+	$(MAKE) O=$(CURDIR)/output/br-har-prem BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot har_prem_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-har-prem/.config; fi
+	$(MAKE) -C $(CURDIR)/output/br-har-prem
+	cp $(CURDIR)/output/br-har-prem/images/rootfs.ext4 $(CURDIR)/output/har-rootfs.ext4
+	cp $(CURDIR)/output/br-har-prem/images/rootfs.tar $(CURDIR)/output/har-rootfs.tar
+
 # simulation images
 br-hrv-eqemu-base: check_environment
 	mkdir -p $(CURDIR)/output/br-hrv-eqemu
@@ -103,17 +111,20 @@ sdk-hrv: check_environment br-hrv
 sdk-har: check_environment br-har
 	cd $(CURDIR)/output/br-har && $(ROOT)/toolchain/install-sdk.sh
 
-# TOOLS
-.PHONY: tools-hrv-openocd
+sdk-har-prem: check_environment br-har-prem
+	cd $(CURDIR)/output/br-har-prem && $(ROOT)/toolchain/install-sdk.sh
 
-tools-hrv-openocd: check_environment
-	mkdir -p $(CURDIR)/output/tools-openocd/
+# Utilities
+.PHONY: util-hrv-openocd
+
+util-hrv-openocd: check_environment
+	mkdir -p $(CURDIR)/output/util-riscv-openocd/
 	(export CCACHE=none; \
 		export PATH=$(HERO_INSTALL)/bin:${PATH}; \
-		cd $(ROOT)/tools/riscv-openocd/; \
+		cd $(ROOT)/util/riscv-openocd/; \
 		./bootstrap; \
-		cd $(CURDIR)/output/tools-openocd/; \
-		$(ROOT)/tools/riscv-openocd/configure --prefix=$(HERO_INSTALL); \
+		cd $(CURDIR)/output/util-riscv-openocd/; \
+		$(ROOT)/util/riscv-openocd/configure --prefix=$(HERO_INSTALL); \
 		$(MAKE); \
 		chmod -R u+w $(HERO_INSTALL); \
 		$(MAKE) install; \

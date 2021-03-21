@@ -8,6 +8,7 @@ package:
     - "Manuel Eggimann <meggimann@iis.ee.ethz.ch>"
     - "Stefan Mach <smach@iis.ee.ethz.ch>"
     - "Wolfgang Roenninger <wroennin@student.ethz.ch>"
+    - "Thomas Benz <tbenz@iis.ee.ethz.ch>"
 
 dependencies:
   common_verification: { git: "https://github.com/pulp-platform/common_verification.git", version: 0.1.1 }
@@ -53,6 +54,7 @@ sources:
   - src/sync.sv
   - src/sync_wedge.sv
   - src/unread.sv
+  - src/rr_distributor.sv
   # Level 1
   - src/addr_decode.sv
   - src/cb_filter.sv

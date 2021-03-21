@@ -194,7 +194,7 @@ module pulp_cluster_ooc (
     .TEST_SET_BIT             (20),
     // DMA Parameters
     .NB_OUTSND_BURSTS         (pulp_cluster_cfg_pkg::DMA_MAX_N_TXNS),
-    .MCHAN_BURST_LENGTH       (pulp_cluster_cfg_pkg::DMA_MAX_BURST_SIZE)
+    .NB_DMA_STREAMS           (pulp_cluster_cfg_pkg::DMA_STREAMS   )
   ) i_bound (
     .clk_i,
     .rst_ni,

@@ -76,6 +76,21 @@ sdk-pulp-and-sdk-har:
     - chmod -R u+w $HERO_INSTALL
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert sdk-pulp-and-sdk-har
 
+sdk-pulp-and-sdk-har-prem:
+  stage: build2
+  script:
+    - >
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup sdk-pulp-and-sdk-har-prem; then
+        exit 0
+      fi
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
+    - chmod -R u-w $HERO_INSTALL
+    - make sdk-pulp # TODO: `sdk-pulp-har` does not seem to work?
+    - make sdk-har-prem
+    - chmod -R u+w $HERO_INSTALL
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert sdk-pulp-and-sdk-har-prem
+
 sdk-pulp-and-sdk-hrv:
   stage: build2
   script:
@@ -102,6 +117,7 @@ tc-llvm:
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get sdk-pulp-and-sdk-har
     - chmod -R u-w $HERO_INSTALL
     - make tc-llvm
+    - git diff --exit-code # assert that applied patches made no difference
     - chmod -R u+w $HERO_INSTALL
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-llvm
     - .gitlab-ci.d/llvm-project-update-hero-branch.sh
@@ -205,6 +221,19 @@ compiler-smoketest:
     - make sdk-pulp # PULP SDK is not relocatable
     - source env/exilzcu102.sh
     - .gitlab-ci.d/compiler-smoketest.sh
+
+compiler-smoketest-prem:
+  stage: test
+  script:
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-llvm
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get sdk-pulp-and-sdk-har-prem
+    - chmod -R u-w $HERO_INSTALL
+    - make sdk-pulp # PULP SDK is not relocatable
+    - export HERCULES_INSTALL=$HERO_INSTALL # Enable PREM
+    - source env/exilzcu102.sh
+    - .gitlab-ci.d/compiler-smoketest.sh test-prem # Run with PREM test
 
 simulator-tests-pulp:
   stage: test

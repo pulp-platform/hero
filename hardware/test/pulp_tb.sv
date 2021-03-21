@@ -115,7 +115,7 @@ module pulp_tb #(
     .AXI_DATA_WIDTH (AXI_DW),
     .AXI_ID_WIDTH   (AXI_IW),
     .AXI_USER_WIDTH (pulp_pkg::AXI_UW)
-  ) from_pulp[1:0] ();
+  ) from_pulp[0:0] ();
   AXI_BUS #(
     .AXI_ADDR_WIDTH (pulp_pkg::AXI_AW),
     .AXI_DATA_WIDTH (AXI_DW),
@@ -141,7 +141,7 @@ module pulp_tb #(
   };
   // Crossbar Configuration and Instantiation
   localparam axi_pkg::xbar_cfg_t XbarCfg = '{
-    NoSlvPorts:         2,
+    NoSlvPorts:         1,
     NoMstPorts:         2,
     MaxMstTrans:        8,
     MaxSlvTrans:        8,
@@ -196,144 +196,19 @@ module pulp_tb #(
   );
 
   // Emulate infinite memory with AXI slave port.
-  initial begin
-    automatic logic [7:0] mem[axi_addr_t];
-    automatic axi_ar_t ar_queue[$];
-    automatic axi_aw_t aw_queue[$];
-    automatic axi_b_t b_queue[$];
-    automatic shortint unsigned r_cnt = 0, w_cnt = 0;
-    from_xbar[0].aw_ready = 1'b0;
-    from_xbar[0].w_ready = 1'b0;
-    from_xbar[0].b_id = '0;
-    from_xbar[0].b_resp = '0;
-    from_xbar[0].b_user = '0;
-    from_xbar[0].b_valid = 1'b0;
-    from_xbar[0].ar_ready = 1'b0;
-    from_xbar[0].r_id = '0;
-    from_xbar[0].r_data = '0;
-    from_xbar[0].r_resp = '0;
-    from_xbar[0].r_last = 1'b0;
-    from_xbar[0].r_user = '0;
-    from_xbar[0].r_valid = 1'b0;
-    wait (rst_n);
-    @(posedge clk);
-    fork
-      // AW
-      forever begin
-        from_xbar[0].aw_ready = 1'b1;
-        if (from_xbar[0].aw_valid) begin
-          automatic axi_aw_t aw;
-          `AXI_SET_TO_AW(aw, from_xbar[0]);
-          aw_queue.push_back(aw);
-        end
-        @(posedge clk);
-      end
-      // W
-      forever begin
-        if (aw_queue.size() != 0) begin
-          from_xbar[0].w_ready = 1'b1;
-          if (from_xbar[0].w_valid) begin
-            automatic axi_pkg::burst_t burst = aw_queue[0].burst;
-            automatic axi_pkg::len_t len = aw_queue[0].len;
-            automatic axi_pkg::size_t size = aw_queue[0].size;
-            automatic axi_addr_t addr = axi_pkg::beat_addr(aw_queue[0].addr, size, len, burst,
-                w_cnt);
-            for (shortint unsigned
-                i_byte = axi_pkg::beat_lower_byte(addr, size, len, burst, AXI_SW, w_cnt);
-                i_byte <= axi_pkg::beat_upper_byte(addr, size, len, burst, AXI_SW, w_cnt);
-                i_byte++) begin
-              if (from_xbar[0].w_strb[i_byte]) begin
-                automatic axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
-                mem[byte_addr] = from_xbar[0].w_data[i_byte*8+:8];
-              end
-            end
-            if (w_cnt == aw_queue[0].len) begin
-              automatic axi_b_t b_beat = '0;
-              assert (from_xbar[0].w_last) else $error("Expected last beat of W burst!");
-              b_beat.id = aw_queue[0].id;
-              b_beat.resp = axi_pkg::RESP_OKAY;
-              b_queue.push_back(b_beat);
-              w_cnt = 0;
-              void'(aw_queue.pop_front());
-            end else begin
-              assert (!from_xbar[0].w_last) else $error("Did not expect last beat of W burst!");
-              w_cnt++;
-            end
-          end
-        end else begin
-          from_xbar[0].w_ready = 1'b0;
-        end
-        @(posedge clk);
-      end
-      // B
-      forever begin
-        if (b_queue.size() != 0) begin
-          `AXI_SET_FROM_B(from_xbar[0], b_queue[0]);
-          from_xbar[0].b_valid = 1'b1;
-          @(posedge clk);
-          if (from_xbar[0].b_ready) begin
-            void'(b_queue.pop_front());
-          end
-        end else begin
-          @(posedge clk);
-        end
-        from_xbar[0].b_valid = 1'b0;
-      end
-      // AR
-      forever begin
-        from_xbar[0].ar_ready = 1'b1;
-        if (from_xbar[0].ar_valid) begin
-          automatic axi_ar_t ar;
-          `AXI_SET_TO_AR(ar, from_xbar[0]);
-          ar_queue.push_back(ar);
-        end
-        @(posedge clk);
-      end
-      // R
-      forever begin
-        if (ar_queue.size() != 0) begin
-          automatic axi_pkg::burst_t burst = ar_queue[0].burst;
-          automatic axi_pkg::len_t len = ar_queue[0].len;
-          automatic axi_pkg::size_t size = ar_queue[0].size;
-          automatic axi_addr_t addr = axi_pkg::beat_addr(ar_queue[0].addr, size, len, burst, r_cnt);
-          automatic axi_r_t r_beat = '0;
-          r_beat.data = 'x;
-          r_beat.id = ar_queue[0].id;
-          r_beat.resp = axi_pkg::RESP_OKAY;
-          for (shortint unsigned
-              i_byte = axi_pkg::beat_lower_byte(addr, size, len, burst, AXI_SW, r_cnt);
-              i_byte <= axi_pkg::beat_upper_byte(addr, size, len, burst, AXI_SW, r_cnt);
-              i_byte++) begin
-            automatic axi_addr_t byte_addr = (addr / AXI_SW) * AXI_SW + i_byte;
-            if (!mem.exists(byte_addr)) begin
-              $warning("Access to non-initialized byte at address 0x%016x by ID 0x%x.", byte_addr,
-                  r_beat.id);
-              r_beat.data[i_byte*8+:8] = 'x;
-            end else begin
-              r_beat.data[i_byte*8+:8] = mem[byte_addr];
-            end
-          end
-          if (r_cnt == ar_queue[0].len) begin
-            r_beat.last = 1'b1;
-          end
-          `AXI_SET_FROM_R(from_xbar[0], r_beat);
-          from_xbar[0].r_valid = 1'b1;
-          @(posedge clk);
-          if (from_xbar[0].r_ready) begin
-            if (r_beat.last) begin
-              r_cnt = 0;
-              void'(ar_queue.pop_front());
-            end else begin
-              r_cnt++;
-            end
-          end
-        end else begin
-          @(posedge clk);
-        end
-        from_xbar[0].r_valid = 1'b0;
-      end
-    join
-  end
+  axi_sim_mem_intf #(
+    .AddrWidth          (pulp_pkg::AXI_AW),
+    .DataWidth          (AXI_DW),
+    .IdWidth            (AXI_IW + 1),
+    .UserWidth          (pulp_pkg::AXI_UW),
+    .WarnUninitialized  (1'b0),
+    .ApplDelay          (CLK_PERIOD / 5 * 1),
+    .AcqDelay           (CLK_PERIOD / 5 * 4)
+  ) i_sim_mem (
+    .clk_i    (clk),
+    .rst_ni   (rst_n),
+    .axi_slv  (from_xbar[0])
+  );
 
   task write_rab(input axi_lite_addr_t addr, input axi_lite_data_t data);
     rab_conf_req.aw.addr = addr;
@@ -354,8 +229,17 @@ module pulp_tb #(
       input axi_addr_t last, input axi_addr_t base);
     automatic axi_lite_addr_t slice_base_addr = 32'hA800_0000 + slice_addr;
     write_rab(slice_base_addr+8'h00, first);
+    if (pulp_pkg::AXI_LITE_DW < pulp_pkg::AXI_AW) begin
+      write_rab(slice_base_addr+8'h04, first[$left(first)-:pulp_pkg::AXI_AW-pulp_pkg::AXI_LITE_DW]);
+    end
     write_rab(slice_base_addr+8'h08, last);
+    if (pulp_pkg::AXI_LITE_DW < pulp_pkg::AXI_AW) begin
+      write_rab(slice_base_addr+8'h0C, last[$left(last)-:pulp_pkg::AXI_AW-pulp_pkg::AXI_LITE_DW]);
+    end
     write_rab(slice_base_addr+8'h10, base);
+    if (pulp_pkg::AXI_LITE_DW < pulp_pkg::AXI_AW) begin
+      write_rab(slice_base_addr+8'h14, base[$left(base)-:pulp_pkg::AXI_AW-pulp_pkg::AXI_LITE_DW]);
+    end
     write_rab(slice_base_addr+8'h18, 64'b111);
   endtask
 

@@ -37,6 +37,7 @@ module riscv_cs_registers import riscv_defines::*;
   parameter FPU           = 0,
   parameter PULP_SECURE   = 0,
   parameter USE_PMP       = 0,
+  parameter NUM_MHPMCOUNTERS = 2,
   parameter N_PMP_ENTRIES = 16
 )
 (
@@ -157,7 +158,8 @@ module riscv_cs_registers import riscv_defines::*;
 
 
 `ifdef ASIC_SYNTHESIS
-  localparam N_PERF_REGS     = 1;
+  localparam N_PERF_REGS     = 4;
+  localparam PERF_REG_ADDR_WIDTH = cf_math_pkg::idx_width(N_PERF_REGS);
 `else
   localparam N_PERF_REGS     = N_PERF_COUNTERS;
 `endif
@@ -263,21 +265,22 @@ module riscv_cs_registers import riscv_defines::*;
   logic [MAX_N_PMP_ENTRIES-1:0] pmpaddr_we;
   logic [MAX_N_PMP_ENTRIES-1:0] pmpcfg_we;
 
-  // Performance Counter Signals
-  logic                          id_valid_q;
-  logic [N_PERF_COUNTERS-1:0]    PCCR_in;  // input signals for each counter category
-  logic [N_PERF_COUNTERS-1:0]    PCCR_inc, PCCR_inc_q; // should the counter be increased?
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  // Hardware Performance Monitor (HPM) Constants and Signals
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  localparam int unsigned NUM_INTERNAL_EVENTS = 15;
+  localparam int unsigned NUM_HPMEVENTS = NUM_INTERNAL_EVENTS + N_EXT_CNT;
+  localparam int unsigned HPM_EVENT_IDX_WIDTH = cf_math_pkg::idx_width(NUM_HPMEVENTS);
 
-  logic [N_PERF_REGS-1:0] [31:0] PCCR_q, PCCR_n; // performance counters counter register
-  logic [1:0]                    PCMR_n, PCMR_q; // mode register, controls saturation and global enable
-  logic [N_PERF_COUNTERS-1:0]    PCER_n, PCER_q; // selected counter input
+  logic [31:0]  mcounteren_d, mcounteren_q;
 
-  logic [31:0]                   perf_rdata;
-  logic [4:0]                    pccr_index;
-  logic                          pccr_all_sel;
-  logic                          is_pccr;
-  logic                          is_pcer;
-  logic                          is_pcmr;
+  logic [31:0]  mcountinhibit_d, mcountinhibit_q;
+
+  logic [31:0][31:0]  mhpmcounter_q;
+  logic [31:0]        mhpmcounter_increment,
+                      mhpmcounter_write_lower;
+
+  logic [31:0][HPM_EVENT_IDX_WIDTH-1:0] mhpmevent_d, mhpmevent_q;
 
 
   assign is_irq = csr_cause_i[5];
@@ -324,6 +327,40 @@ if(PULP_SECURE==1) begin
       12'h301: csr_rdata_int = MISA_VALUE;
       // mtvec: machine trap-handler base address
       12'h305: csr_rdata_int = {mtvec_q, 6'h0, MTVEC_MODE};
+
+      CSR_MCOUNTEREN: csr_rdata_int = mcounteren_q;
+      CSR_MCOUNTINHIBIT: csr_rdata_int = mcountinhibit_q;
+
+      CSR_MHPMEVENT3:   csr_rdata_int = mhpmevent_q[ 3];
+      CSR_MHPMEVENT4:   csr_rdata_int = mhpmevent_q[ 4];
+      CSR_MHPMEVENT5:   csr_rdata_int = mhpmevent_q[ 5];
+      CSR_MHPMEVENT6:   csr_rdata_int = mhpmevent_q[ 6];
+      CSR_MHPMEVENT7:   csr_rdata_int = mhpmevent_q[ 7];
+      CSR_MHPMEVENT8:   csr_rdata_int = mhpmevent_q[ 8];
+      CSR_MHPMEVENT9:   csr_rdata_int = mhpmevent_q[ 9];
+      CSR_MHPMEVENT10:  csr_rdata_int = mhpmevent_q[10];
+      CSR_MHPMEVENT11:  csr_rdata_int = mhpmevent_q[11];
+      CSR_MHPMEVENT12:  csr_rdata_int = mhpmevent_q[12];
+      CSR_MHPMEVENT13:  csr_rdata_int = mhpmevent_q[13];
+      CSR_MHPMEVENT14:  csr_rdata_int = mhpmevent_q[14];
+      CSR_MHPMEVENT15:  csr_rdata_int = mhpmevent_q[15];
+      CSR_MHPMEVENT16:  csr_rdata_int = mhpmevent_q[16];
+      CSR_MHPMEVENT17:  csr_rdata_int = mhpmevent_q[17];
+      CSR_MHPMEVENT18:  csr_rdata_int = mhpmevent_q[18];
+      CSR_MHPMEVENT19:  csr_rdata_int = mhpmevent_q[19];
+      CSR_MHPMEVENT20:  csr_rdata_int = mhpmevent_q[20];
+      CSR_MHPMEVENT21:  csr_rdata_int = mhpmevent_q[21];
+      CSR_MHPMEVENT22:  csr_rdata_int = mhpmevent_q[22];
+      CSR_MHPMEVENT23:  csr_rdata_int = mhpmevent_q[23];
+      CSR_MHPMEVENT24:  csr_rdata_int = mhpmevent_q[24];
+      CSR_MHPMEVENT25:  csr_rdata_int = mhpmevent_q[25];
+      CSR_MHPMEVENT26:  csr_rdata_int = mhpmevent_q[26];
+      CSR_MHPMEVENT27:  csr_rdata_int = mhpmevent_q[27];
+      CSR_MHPMEVENT28:  csr_rdata_int = mhpmevent_q[28];
+      CSR_MHPMEVENT29:  csr_rdata_int = mhpmevent_q[29];
+      CSR_MHPMEVENT30:  csr_rdata_int = mhpmevent_q[30];
+      CSR_MHPMEVENT31:  csr_rdata_int = mhpmevent_q[31];
+
       // mscratch: machine scratch
       12'h340: csr_rdata_int = mscratch_q;
       // mepc: exception program counter
@@ -333,6 +370,39 @@ if(PULP_SECURE==1) begin
       // stack base and size
       12'h400: csr_rdata_int = stack_base_q;
       12'h404: csr_rdata_int = stack_size_q;
+
+      CSR_MCYCLE:         csr_rdata_int = mhpmcounter_q[ 0];
+      CSR_MINSTRET:       csr_rdata_int = mhpmcounter_q[ 2];
+      CSR_MHPMCOUNTER3:   csr_rdata_int = mhpmcounter_q[ 3];
+      CSR_MHPMCOUNTER4:   csr_rdata_int = mhpmcounter_q[ 4];
+      CSR_MHPMCOUNTER5:   csr_rdata_int = mhpmcounter_q[ 5];
+      CSR_MHPMCOUNTER6:   csr_rdata_int = mhpmcounter_q[ 6];
+      CSR_MHPMCOUNTER7:   csr_rdata_int = mhpmcounter_q[ 7];
+      CSR_MHPMCOUNTER8:   csr_rdata_int = mhpmcounter_q[ 8];
+      CSR_MHPMCOUNTER9:   csr_rdata_int = mhpmcounter_q[ 9];
+      CSR_MHPMCOUNTER10:  csr_rdata_int = mhpmcounter_q[10];
+      CSR_MHPMCOUNTER11:  csr_rdata_int = mhpmcounter_q[11];
+      CSR_MHPMCOUNTER12:  csr_rdata_int = mhpmcounter_q[12];
+      CSR_MHPMCOUNTER13:  csr_rdata_int = mhpmcounter_q[13];
+      CSR_MHPMCOUNTER14:  csr_rdata_int = mhpmcounter_q[14];
+      CSR_MHPMCOUNTER15:  csr_rdata_int = mhpmcounter_q[15];
+      CSR_MHPMCOUNTER16:  csr_rdata_int = mhpmcounter_q[16];
+      CSR_MHPMCOUNTER17:  csr_rdata_int = mhpmcounter_q[17];
+      CSR_MHPMCOUNTER18:  csr_rdata_int = mhpmcounter_q[18];
+      CSR_MHPMCOUNTER19:  csr_rdata_int = mhpmcounter_q[19];
+      CSR_MHPMCOUNTER20:  csr_rdata_int = mhpmcounter_q[20];
+      CSR_MHPMCOUNTER21:  csr_rdata_int = mhpmcounter_q[21];
+      CSR_MHPMCOUNTER22:  csr_rdata_int = mhpmcounter_q[22];
+      CSR_MHPMCOUNTER23:  csr_rdata_int = mhpmcounter_q[23];
+      CSR_MHPMCOUNTER24:  csr_rdata_int = mhpmcounter_q[24];
+      CSR_MHPMCOUNTER25:  csr_rdata_int = mhpmcounter_q[25];
+      CSR_MHPMCOUNTER26:  csr_rdata_int = mhpmcounter_q[26];
+      CSR_MHPMCOUNTER27:  csr_rdata_int = mhpmcounter_q[27];
+      CSR_MHPMCOUNTER28:  csr_rdata_int = mhpmcounter_q[28];
+      CSR_MHPMCOUNTER29:  csr_rdata_int = mhpmcounter_q[29];
+      CSR_MHPMCOUNTER30:  csr_rdata_int = mhpmcounter_q[30];
+      CSR_MHPMCOUNTER31:  csr_rdata_int = mhpmcounter_q[31];
+
       // mhartid: unique hardware thread id
       12'hF14: csr_rdata_int = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]};
 
@@ -412,6 +482,40 @@ end else begin //PULP_SECURE == 0
       12'h301: csr_rdata_int = MISA_VALUE;
       // mtvec: machine trap-handler base address
       12'h305: csr_rdata_int = {mtvec_q, 6'h0, MTVEC_MODE};
+
+      CSR_MCOUNTEREN: csr_rdata_int = mcounteren_q;
+      CSR_MCOUNTINHIBIT: csr_rdata_int = mcountinhibit_q;
+
+      CSR_MHPMEVENT3:   csr_rdata_int = mhpmevent_q[ 3];
+      CSR_MHPMEVENT4:   csr_rdata_int = mhpmevent_q[ 4];
+      CSR_MHPMEVENT5:   csr_rdata_int = mhpmevent_q[ 5];
+      CSR_MHPMEVENT6:   csr_rdata_int = mhpmevent_q[ 6];
+      CSR_MHPMEVENT7:   csr_rdata_int = mhpmevent_q[ 7];
+      CSR_MHPMEVENT8:   csr_rdata_int = mhpmevent_q[ 8];
+      CSR_MHPMEVENT9:   csr_rdata_int = mhpmevent_q[ 9];
+      CSR_MHPMEVENT10:  csr_rdata_int = mhpmevent_q[10];
+      CSR_MHPMEVENT11:  csr_rdata_int = mhpmevent_q[11];
+      CSR_MHPMEVENT12:  csr_rdata_int = mhpmevent_q[12];
+      CSR_MHPMEVENT13:  csr_rdata_int = mhpmevent_q[13];
+      CSR_MHPMEVENT14:  csr_rdata_int = mhpmevent_q[14];
+      CSR_MHPMEVENT15:  csr_rdata_int = mhpmevent_q[15];
+      CSR_MHPMEVENT16:  csr_rdata_int = mhpmevent_q[16];
+      CSR_MHPMEVENT17:  csr_rdata_int = mhpmevent_q[17];
+      CSR_MHPMEVENT18:  csr_rdata_int = mhpmevent_q[18];
+      CSR_MHPMEVENT19:  csr_rdata_int = mhpmevent_q[19];
+      CSR_MHPMEVENT20:  csr_rdata_int = mhpmevent_q[20];
+      CSR_MHPMEVENT21:  csr_rdata_int = mhpmevent_q[21];
+      CSR_MHPMEVENT22:  csr_rdata_int = mhpmevent_q[22];
+      CSR_MHPMEVENT23:  csr_rdata_int = mhpmevent_q[23];
+      CSR_MHPMEVENT24:  csr_rdata_int = mhpmevent_q[24];
+      CSR_MHPMEVENT25:  csr_rdata_int = mhpmevent_q[25];
+      CSR_MHPMEVENT26:  csr_rdata_int = mhpmevent_q[26];
+      CSR_MHPMEVENT27:  csr_rdata_int = mhpmevent_q[27];
+      CSR_MHPMEVENT28:  csr_rdata_int = mhpmevent_q[28];
+      CSR_MHPMEVENT29:  csr_rdata_int = mhpmevent_q[29];
+      CSR_MHPMEVENT30:  csr_rdata_int = mhpmevent_q[30];
+      CSR_MHPMEVENT31:  csr_rdata_int = mhpmevent_q[31];
+
       // mscratch: machine scratch
       12'h340: csr_rdata_int = mscratch_q;
       // mepc: exception program counter
@@ -421,6 +525,39 @@ end else begin //PULP_SECURE == 0
       // stack base and size
       12'h400: csr_rdata_int = stack_base_q;
       12'h404: csr_rdata_int = stack_size_q;
+
+      CSR_MCYCLE:         csr_rdata_int = mhpmcounter_q[ 0];
+      CSR_MINSTRET:       csr_rdata_int = mhpmcounter_q[ 2];
+      CSR_MHPMCOUNTER3:   csr_rdata_int = mhpmcounter_q[ 3];
+      CSR_MHPMCOUNTER4:   csr_rdata_int = mhpmcounter_q[ 4];
+      CSR_MHPMCOUNTER5:   csr_rdata_int = mhpmcounter_q[ 5];
+      CSR_MHPMCOUNTER6:   csr_rdata_int = mhpmcounter_q[ 6];
+      CSR_MHPMCOUNTER7:   csr_rdata_int = mhpmcounter_q[ 7];
+      CSR_MHPMCOUNTER8:   csr_rdata_int = mhpmcounter_q[ 8];
+      CSR_MHPMCOUNTER9:   csr_rdata_int = mhpmcounter_q[ 9];
+      CSR_MHPMCOUNTER10:  csr_rdata_int = mhpmcounter_q[10];
+      CSR_MHPMCOUNTER11:  csr_rdata_int = mhpmcounter_q[11];
+      CSR_MHPMCOUNTER12:  csr_rdata_int = mhpmcounter_q[12];
+      CSR_MHPMCOUNTER13:  csr_rdata_int = mhpmcounter_q[13];
+      CSR_MHPMCOUNTER14:  csr_rdata_int = mhpmcounter_q[14];
+      CSR_MHPMCOUNTER15:  csr_rdata_int = mhpmcounter_q[15];
+      CSR_MHPMCOUNTER16:  csr_rdata_int = mhpmcounter_q[16];
+      CSR_MHPMCOUNTER17:  csr_rdata_int = mhpmcounter_q[17];
+      CSR_MHPMCOUNTER18:  csr_rdata_int = mhpmcounter_q[18];
+      CSR_MHPMCOUNTER19:  csr_rdata_int = mhpmcounter_q[19];
+      CSR_MHPMCOUNTER20:  csr_rdata_int = mhpmcounter_q[20];
+      CSR_MHPMCOUNTER21:  csr_rdata_int = mhpmcounter_q[21];
+      CSR_MHPMCOUNTER22:  csr_rdata_int = mhpmcounter_q[22];
+      CSR_MHPMCOUNTER23:  csr_rdata_int = mhpmcounter_q[23];
+      CSR_MHPMCOUNTER24:  csr_rdata_int = mhpmcounter_q[24];
+      CSR_MHPMCOUNTER25:  csr_rdata_int = mhpmcounter_q[25];
+      CSR_MHPMCOUNTER26:  csr_rdata_int = mhpmcounter_q[26];
+      CSR_MHPMCOUNTER27:  csr_rdata_int = mhpmcounter_q[27];
+      CSR_MHPMCOUNTER28:  csr_rdata_int = mhpmcounter_q[28];
+      CSR_MHPMCOUNTER29:  csr_rdata_int = mhpmcounter_q[29];
+      CSR_MHPMCOUNTER30:  csr_rdata_int = mhpmcounter_q[30];
+      CSR_MHPMCOUNTER31:  csr_rdata_int = mhpmcounter_q[31];
+
       // mhartid: unique hardware thread id
       12'hF14: csr_rdata_int = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]};
 
@@ -899,10 +1036,6 @@ end //PULP_SECURE
   always_comb
   begin
     csr_rdata_o = csr_rdata_int;
-
-    // performance counters
-    if (is_pccr || is_pcer || is_pcmr)
-      csr_rdata_o = perf_rdata;
   end
 
 
@@ -1060,188 +1193,167 @@ end //PULP_SECURE
   assign stack_base_o = stack_base_q;
   assign stack_limit_o = stack_base_q - stack_size_q;
 
-  /////////////////////////////////////////////////////////////////
-  //   ____            __     ____                  _            //
-  // |  _ \ ___ _ __ / _|   / ___|___  _   _ _ __ | |_ ___ _ __  //
-  // | |_) / _ \ '__| |_   | |   / _ \| | | | '_ \| __/ _ \ '__| //
-  // |  __/  __/ |  |  _|  | |__| (_) | |_| | | | | ||  __/ |    //
-  // |_|   \___|_|  |_|(_)  \____\___/ \__,_|_| |_|\__\___|_|    //
-  //                                                             //
-  /////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  // Hardware Performance Monitor (HPM) Implementation
+  //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  assign PCCR_in[0]  = 1'b1;                                          // cycle counter
-  assign PCCR_in[1]  = id_valid_i & is_decoding_i;                    // instruction counter
-  assign PCCR_in[2]  = ld_stall_i & id_valid_q;                       // nr of load use hazards
-  assign PCCR_in[3]  = jr_stall_i & id_valid_q;                       // nr of jump register hazards
-  assign PCCR_in[4]  = imiss_i & (~pc_set_i);                         // cycles waiting for instruction fetches, excluding jumps and branches
-  assign PCCR_in[5]  = mem_load_i;                                    // nr of loads
-  assign PCCR_in[6]  = mem_store_i;                                   // nr of stores
-  assign PCCR_in[7]  = jump_i                     & id_valid_q;       // nr of jumps (unconditional)
-  assign PCCR_in[8]  = branch_i                   & id_valid_q;       // nr of branches (conditional)
-  assign PCCR_in[9]  = branch_i & branch_taken_i  & id_valid_q;       // nr of taken branches (conditional)
-  assign PCCR_in[10] = id_valid_i & is_decoding_i & is_compressed_i;  // compressed instruction counter
-  assign PCCR_in[11] = pipeline_stall_i;                              //extra cycles from elw
-
-  if (APU == 1) begin
-     assign PCCR_in[PERF_APU_ID  ] = apu_typeconflict_i & ~apu_dep_i;
-     assign PCCR_in[PERF_APU_ID+1] = apu_contention_i;
-     assign PCCR_in[PERF_APU_ID+2] = apu_dep_i & ~apu_contention_i;
-     assign PCCR_in[PERF_APU_ID+3] = apu_wb_i;
+  // HPM Events
+  logic [NUM_HPMEVENTS-1:0] hpm_events;
+  logic id_valid_q;
+  always_comb begin
+    hpm_events = '0;
+    hpm_events[1]  = ld_stall_i & id_valid_q;                       // nr of load use hazards
+    hpm_events[2]  = jr_stall_i & id_valid_q;                       // nr of jump register hazards
+    hpm_events[3]  = imiss_i & (~pc_set_i);                         // cycles waiting for instruction fetches, excluding jumps and branches
+    hpm_events[4]  = mem_load_i;                                    // nr of loads
+    hpm_events[5]  = mem_store_i;                                   // nr of stores
+    hpm_events[6]  = jump_i                     & id_valid_q;       // nr of jumps (unconditional)
+    hpm_events[7]  = branch_i                   & id_valid_q;       // nr of branches (conditional)
+    hpm_events[8]  = branch_i & branch_taken_i  & id_valid_q;       // nr of taken branches (conditional)
+    hpm_events[9] = id_valid_i & is_decoding_i & is_compressed_i;   // compressed instruction counter
+    hpm_events[10] = pipeline_stall_i;                              // extra cycles from ELW
+    hpm_events[11] = !APU ? 1'b0 : apu_typeconflict_i & ~apu_dep_i;
+    hpm_events[12] = !APU ? 1'b0 : apu_contention_i;
+    hpm_events[13] = !APU ? 1'b0 : apu_dep_i & ~apu_contention_i;
+    hpm_events[14] = !APU ? 1'b0 : apu_wb_i;
+    hpm_events[NUM_HPMEVENTS-1:NUM_INTERNAL_EVENTS] = ext_counters_i;
   end
-
-  // assign external performance counters
-  generate
-    genvar i;
-    for(i = 0; i < N_EXT_CNT; i++)
-    begin
-      assign PCCR_in[PERF_EXT_ID + i] = ext_counters_i[i];
-    end
-  endgenerate
-
-  // address decoder for performance counter registers
-  always_comb
-  begin
-    is_pccr      = 1'b0;
-    is_pcmr      = 1'b0;
-    is_pcer      = 1'b0;
-    pccr_all_sel = 1'b0;
-    pccr_index   = '0;
-    perf_rdata   = '0;
-
-    // only perform csr access if we actually care about the read data
-    if (csr_access_i) begin
-      unique case (csr_addr_i)
-        PCER_USER, PCER_MACHINE: begin
-          is_pcer = 1'b1;
-          perf_rdata[N_PERF_COUNTERS-1:0] = PCER_q;
-        end
-        PCMR_USER, PCMR_MACHINE: begin
-          is_pcmr = 1'b1;
-          perf_rdata[1:0] = PCMR_q;
-        end
-        12'h79F: begin // last pccr register selects all
-          is_pccr = 1'b1;
-          pccr_all_sel = 1'b1;
-        end
-        default:;
-      endcase
-
-      // look for 780 to 79F, Performance Counter Counter Registers
-      if (csr_addr_i[11:5] == 7'b0111100) begin
-        is_pccr     = 1'b1;
-
-        pccr_index = csr_addr_i[4:0];
-`ifdef  ASIC_SYNTHESIS
-        perf_rdata = PCCR_q[0];
-`else
-        perf_rdata = csr_addr_i[4:0] < N_PERF_COUNTERS ? PCCR_q[csr_addr_i[4:0]] : '0;
-`endif
-      end
-    end
-  end
-
-
-  // performance counter counter update logic
-`ifdef ASIC_SYNTHESIS
-  // for synthesis we just have one performance counter register
-  assign PCCR_inc[0] = (|(PCCR_in & PCER_q)) & PCMR_q[0];
-
-  always_comb
-  begin
-    PCCR_n[0]   = PCCR_q[0];
-
-    if ((PCCR_inc_q[0] == 1'b1) && ((PCCR_q[0] != 32'hFFFFFFFF) || (PCMR_q[1] == 1'b0)))
-      PCCR_n[0] = PCCR_q[0] + 1;
-
-    if (is_pccr == 1'b1) begin
-      unique case (csr_op_i)
-        CSR_OP_NONE:   ;
-        CSR_OP_WRITE:  PCCR_n[0] = csr_wdata_i;
-        CSR_OP_SET:    PCCR_n[0] = csr_wdata_i | PCCR_q[0];
-        CSR_OP_CLEAR:  PCCR_n[0] = ~csr_wdata_i & PCCR_q[0];
-      endcase
-    end
-  end
-`else
-  always_comb
-  begin
-    for(int i = 0; i < N_PERF_COUNTERS; i++)
-    begin : PERF_CNT_INC
-      PCCR_inc[i] = PCCR_in[i] & PCER_q[i] & PCMR_q[0];
-
-      PCCR_n[i]   = PCCR_q[i];
-
-      if ((PCCR_inc_q[i] == 1'b1) && ((PCCR_q[i] != 32'hFFFFFFFF) || (PCMR_q[1] == 1'b0)))
-        PCCR_n[i] = PCCR_q[i] + 1;
-
-      if (is_pccr == 1'b1 && (pccr_all_sel == 1'b1 || pccr_index == i)) begin
-        unique case (csr_op_i)
-          CSR_OP_NONE:   ;
-          CSR_OP_WRITE:  PCCR_n[i] = csr_wdata_i;
-          CSR_OP_SET:    PCCR_n[i] = csr_wdata_i | PCCR_q[i];
-          CSR_OP_CLEAR:  PCCR_n[i] = ~csr_wdata_i & PCCR_q[i];
-        endcase
-      end
-    end
-  end
-`endif
-
-  // update PCMR and PCER
-  always_comb
-  begin
-    PCMR_n = PCMR_q;
-    PCER_n = PCER_q;
-
-    if (is_pcmr) begin
-      unique case (csr_op_i)
-        CSR_OP_NONE:   ;
-        CSR_OP_WRITE:  PCMR_n = csr_wdata_i[1:0];
-        CSR_OP_SET:    PCMR_n = csr_wdata_i[1:0] | PCMR_q;
-        CSR_OP_CLEAR:  PCMR_n = ~(csr_wdata_i[1:0]) & PCMR_q;
-      endcase
-    end
-
-    if (is_pcer) begin
-      unique case (csr_op_i)
-        CSR_OP_NONE:   ;
-        CSR_OP_WRITE:  PCER_n = csr_wdata_i[N_PERF_COUNTERS-1:0];
-        CSR_OP_SET:    PCER_n = csr_wdata_i[N_PERF_COUNTERS-1:0] | PCER_q;
-        CSR_OP_CLEAR:  PCER_n = ~(csr_wdata_i[N_PERF_COUNTERS-1:0]) & PCER_q;
-      endcase
-    end
-  end
-
-  // Performance Counter Registers
-  always_ff @(posedge clk, negedge rst_n)
-  begin
-    if (rst_n == 1'b0)
-    begin
+  always_ff @(posedge clk, negedge rst_n) begin
+    if (!rst_n) begin
       id_valid_q <= 1'b0;
+    end else begin
+      id_valid_q <= id_valid_i;
+    end
+  end
 
-      PCER_q <= '0;
-      PCMR_q <= 2'h3;
-
-      for(int i = 0; i < N_PERF_REGS; i++)
-      begin
-        PCCR_q[i]     <= '0;
-        PCCR_inc_q[i] <= '0;
+  // M-Mode HPM Inhibit Register
+  for (genvar i = 0; i < 32; i++) begin : gen_mcountinhibit
+    if (i == 1 || // counter at index 1 not implemented
+        i >= (NUM_MHPMCOUNTERS + 3) // programmable counters start at index 3
+    ) begin : gen_not_implemented
+      assign mcountinhibit_q[i] = 1'b0;
+    end else begin : gen_implemented
+      always_ff @(posedge clk, negedge rst_n) begin
+        if (!rst_n) begin
+          mcountinhibit_q[i] <= 1'b1; // disabled after reset
+        end else begin
+          mcountinhibit_q[i] <= mcountinhibit_d[i];
+        end
       end
     end
-    else
-    begin
-      id_valid_q <= id_valid_i;
+  end
 
-      PCER_q <= PCER_n;
-      PCMR_q <= PCMR_n;
+  // M-Mode HPM Inhibit CSR Write Logic
+  always_comb begin
+    if (csr_we_int && csr_addr_i == CSR_MCOUNTINHIBIT) begin
+      mcountinhibit_d = csr_wdata_int;
+    end else begin
+      mcountinhibit_d = mcountinhibit_q;
+    end
+  end
 
-      for(int i = 0; i < N_PERF_REGS; i++)
-      begin
-        PCCR_q[i]     <= PCCR_n[i];
-        PCCR_inc_q[i] <= PCCR_inc[i];
+  // M-Mode HPM Event Registers
+  for (genvar i = 0; i < 32; i++) begin : gen_mhpmevent
+    // programmable HPM events start at index 3
+    if (i < 3 || i >= (NUM_MHPMCOUNTERS + 3)) begin : gen_not_implemented
+      assign mhpmevent_q[i] = '0;
+    end else begin : gen_implemented
+      always_ff @(posedge clk, negedge rst_n) begin
+        if (!rst_n) begin
+          mhpmevent_q[i] <= '0;
+        end else begin
+          mhpmevent_q[i] <= mhpmevent_d[i];
+        end
       end
+    end
+  end
 
+  // M-Mode HPM Event CSR Write Logic
+  for (genvar i = 0; i < 32; i++) begin : gen_mhpmevent_d
+    if (i == 1 || i >= (NUM_MHPMCOUNTERS + 3)) begin : gen_not_implemented
+      assign mhpmevent_d[i] = '0;
+    end else begin : gen_implemented
+      always_comb begin
+        if (csr_we_int && csr_addr_i == (CSR_MHPMEVENT3 + i - 3)) begin
+          mhpmevent_d[i] = csr_wdata_int;
+        end else begin
+          mhpmevent_d[i] = mhpmevent_q[i];
+        end
+      end
+    end
+  end
+
+  // M-Mode HPM Counter Registers
+  for (genvar i = 0; i < 32; i++) begin : gen_mhpmcounter
+    if (i == 1 || // counter at index 1 not implemented
+        i >= (NUM_MHPMCOUNTERS + 3) // programmable counters start at index 3
+    ) begin : gen_not_implemented
+      assign mhpmcounter_q[i] = '0;
+    end else begin : gen_implemented
+      always_ff @(posedge clk, negedge rst_n) begin
+        if (!rst_n) begin
+          mhpmcounter_q[i] <= '0;
+        end else begin
+          if (mhpmcounter_write_lower[i]) begin
+            mhpmcounter_q[i][31:0] <= csr_wdata_int;
+          end else if (mhpmcounter_increment[i]) begin
+            mhpmcounter_q[i] <= mhpmcounter_q[i] + 1;
+          end
+        end
+      end
+    end
+  end
+
+  // M-Mode HPM Counter CSR Write Logic
+  for (genvar i = 0; i < 32; i++) begin : gen_mhpmcounter_write
+    if (i == 1 || // counter at index 1 not implemented
+        i >= (NUM_MHPMCOUNTERS + 3) // programmable counters start at index 3
+    ) begin : gen_not_implemented
+      assign mhpmcounter_write_lower[i] = 1'b0;
+    end else begin : gen_implemented
+      assign mhpmcounter_write_lower[i] = csr_we_int && (csr_addr_i == (CSR_MCYCLE + i));
+    end
+  end
+
+  // M-Mode HPM Counter Increment Logic
+  for (genvar i = 0; i < 32; i++) begin : gen_mhpmcounter_increment
+    if (i == 0) begin : gen_mcycle
+      assign mhpmcounter_increment[i] = ~mcountinhibit_q[i];
+    end else if (i == 1) begin : gen_mtime_not_implemented
+      assign mhpmcounter_increment[i] = 1'b0;
+    end else if (i == 2) begin : gen_minstret
+      assign mhpmcounter_increment[i] = ~mcountinhibit_q[i] & id_valid_i & is_decoding_i;
+    end else if (i < (NUM_MHPMCOUNTERS + 3)) begin : gen_mhpmcounter
+      assign mhpmcounter_increment[i] = ~mcountinhibit_q[i] & hpm_events[mhpmevent_q[i]];
+    end else begin : gen_not_implemented
+      assign mhpmcounter_increment[i] = 1'b0;
+    end
+  end
+
+  // M-Mode HPM Enable Register
+  for (genvar i = 0; i < 32; i++) begin : gen_mcounteren
+    if (i == 1 || // counter at index 1 not implemented
+        i >= (NUM_MHPMCOUNTERS + 3) // programmable counters start at index 3
+    ) begin : gen_not_implemented
+      assign mcounteren_q[i] = 1'b0;
+    end else begin : gen_implemented
+      always_ff @(posedge clk, negedge rst_n) begin
+        if (!rst_n) begin
+          mcounteren_q[i] <= 1'b0;
+        end else begin
+          mcounteren_q[i] <= mcounteren_d[i];
+        end
+      end
+    end
+  end
+
+  // M-Mode HPM Enable CSR Write Logic
+  always_comb begin
+    if (csr_we_int && csr_addr_i == CSR_MCOUNTEREN) begin
+      mcounteren_d = csr_wdata_int;
+    end else begin
+      mcounteren_d = mcounteren_q;
     end
   end
 
 endmodule
-
