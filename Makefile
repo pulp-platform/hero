@@ -1,5 +1,8 @@
 ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
+PREM_BR_CMUX_CONFSTR := BR2_PACKAGE_PREM_CMUX=y
+PREM_BR_OMP_CONFSTR := BR2_PACKAGE_HERO_OPENMP_ENABLE_PREM=y
+
 # GLOBAL TARGETS
 .PHONY: har-exilzcu102 hrv-ediggenesys2
 har-exilzcu102: tc-har-olinux tc-pulp br-har-exilzcu102 sdk-pulp sdk-har tc-llvm
@@ -7,6 +10,21 @@ hrv-ediggenesys2: tc-hrv-olinux tc-pulp br-hrv-ediggenesys2 sdk-pulp sdk-hrv tc-
 
 # BUILDROOT
 .PHONY: br-hrv-ediggenesys2-base br-hrv-ediggenesys2 br-har-exilzcu102-base br-har-exilzcu102 br-hrv br-har br-hrv-eqemu-base br-hrv-eqemu
+
+# PREM configuration
+.PHONY: prem-set prem-unset
+prem-set:
+	# Remove if already exists
+	if [ -a $(CURDIR)/local.cfg ]; then grep -v "$(PREM_BR_CMUX_CONFSTR)" local.cfg > local.tmp.cfg; mv local.tmp.cfg local.cfg; fi
+	if [ -a $(CURDIR)/local.cfg ]; then grep -v "$(PREM_BR_OMP_CONFSTR)" local.cfg > local.tmp.cfg; mv local.tmp.cfg local.cfg; fi
+	# Re-add
+	echo "$(PREM_BR_CMUX_CONFSTR)" >> $(CURDIR)/local.cfg
+	echo "$(PREM_BR_OMP_CONFSTR)" >> $(CURDIR)/local.cfg
+
+prem-unset:
+	# Remove local buildroot config lines if they exist
+	if [ -a $(CURDIR)/local.cfg ]; then grep -v "$(PREM_BR_CMUX_CONFSTR)" local.cfg > local.tmp.cfg; mv local.tmp.cfg local.cfg; fi
+	if [ -a $(CURDIR)/local.cfg ]; then grep -v "$(PREM_BR_OMP_CONFSTR)" local.cfg > local.tmp.cfg; mv local.tmp.cfg local.cfg; fi
 
 # environment
 br-hrv-ediggenesys2-base: check_environment
