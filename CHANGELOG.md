@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- `prem-cmux` Buildroot package: Add missing commands for installing into target directory.
 
 
 ## v0.2.0 - 2021-03-18
