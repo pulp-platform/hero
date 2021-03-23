@@ -129,12 +129,14 @@ bitstream-zcu102:
         $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert bitstream-zcu102
       fi
 
-br-har-exilzcu102:
+br-har-exilzcu102-and-prem:
   stage: build4
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-har-exilzcu102; then
-        exit 0
+        if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-har-exilzcu102-prem; then
+          exit 0
+        fi
       fi
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get bitstream-zcu102
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
@@ -144,6 +146,9 @@ br-har-exilzcu102:
     - echo "BR2_HERO_BITSTREAM=$CI_PROJECT_DIR/hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1/hero_exilzcu102_wrapper.bit" >> local.cfg
     - make br-har-exilzcu102
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-har-exilzcu102
+    - make prem-set
+    - make br-har-exilzcu102
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-har-exilzcu102-prem
 
 br-hrv-ediggenesys2:
   stage: build4

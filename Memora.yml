@@ -2207,6 +2207,43 @@ artifacts:
     outputs:
       - output/br-har-exilzcu102/images
 
+  br-har-exilzcu102-prem:
+    inputs:
+      - Makefile
+      - board
+      - buildroot
+      - configs/har_exilzcu102_defconfig
+      - package
+      - petalinux
+      - support/libhero-target # package `libhero-target`
+      - support/libpulp # package `libpulp`
+      - support/pulp-driver # package `pulp-driver`
+      - toolchain/HerculesCompiler-public/runtime/cmux # package `prem-cmux`
+      - toolchain/llvm-project/openmp # package `hero-openmp`
+      - util/configfile/get_value
+      # sdk-pulp
+      - pulp
+      ## Dependencies
+      # bitstream-zcu102
+      - hardware/Bender.lock
+      - hardware/Bender.yml
+      - hardware/Makefile
+      - hardware/deps
+      - hardware/fpga
+      - hardware/src
+      # tc-har-olinux
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/har-olinux.config
+      # tc-pulp
+      - Makefile
+      - toolchain/build.sh
+      - toolchain/patches
+      - toolchain/pulp.config
+    outputs:
+      - output/br-har-exilzcu102/images
+
   br-hrv-ediggenesys2:
     inputs:
       - Makefile
