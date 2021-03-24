@@ -1,5 +1,8 @@
 ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
+PREM_BR_CMUX_CONFSTR := BR2_PACKAGE_PREM_CMUX=y
+PREM_BR_OMP_CONFSTR := BR2_PACKAGE_HERO_OPENMP_ENABLE_PREM=y
+
 # GLOBAL TARGETS
 .PHONY: har-exilzcu102 hrv-ediggenesys2
 har-exilzcu102: tc-har-olinux tc-pulp br-har-exilzcu102 sdk-pulp sdk-har tc-llvm
@@ -7,6 +10,21 @@ hrv-ediggenesys2: tc-hrv-olinux tc-pulp br-hrv-ediggenesys2 sdk-pulp sdk-hrv tc-
 
 # BUILDROOT
 .PHONY: br-hrv-ediggenesys2-base br-hrv-ediggenesys2 br-har-exilzcu102-base br-har-exilzcu102 br-hrv br-har br-hrv-eqemu-base br-hrv-eqemu
+
+# PREM configuration
+.PHONY: prem-set prem-unset
+prem-set:
+	# Remove if already exists
+	if [ -a $(CURDIR)/local.cfg ]; then grep -v "$(PREM_BR_CMUX_CONFSTR)" local.cfg > local.tmp.cfg; mv local.tmp.cfg local.cfg; fi
+	if [ -a $(CURDIR)/local.cfg ]; then grep -v "$(PREM_BR_OMP_CONFSTR)" local.cfg > local.tmp.cfg; mv local.tmp.cfg local.cfg; fi
+	# Re-add
+	echo "$(PREM_BR_CMUX_CONFSTR)" >> $(CURDIR)/local.cfg
+	echo "$(PREM_BR_OMP_CONFSTR)" >> $(CURDIR)/local.cfg
+
+prem-unset:
+	# Remove local buildroot config lines if they exist
+	if [ -a $(CURDIR)/local.cfg ]; then grep -v "$(PREM_BR_CMUX_CONFSTR)" local.cfg > local.tmp.cfg; mv local.tmp.cfg local.cfg; fi
+	if [ -a $(CURDIR)/local.cfg ]; then grep -v "$(PREM_BR_OMP_CONFSTR)" local.cfg > local.tmp.cfg; mv local.tmp.cfg local.cfg; fi
 
 # environment
 br-hrv-ediggenesys2-base: check_environment
@@ -41,14 +59,6 @@ br-har: check_environment
 	$(MAKE) -C $(CURDIR)/output/br-har
 	cp $(CURDIR)/output/br-har/images/rootfs.ext4 $(CURDIR)/output/har-rootfs.ext4
 	cp $(CURDIR)/output/br-har/images/rootfs.tar $(CURDIR)/output/har-rootfs.tar
-
-br-har-prem: check_environment
-	mkdir -p $(CURDIR)/output/br-har-prem
-	$(MAKE) O=$(CURDIR)/output/br-har-prem BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot har_prem_defconfig
-	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-har-prem/.config; fi
-	$(MAKE) -C $(CURDIR)/output/br-har-prem
-	cp $(CURDIR)/output/br-har-prem/images/rootfs.ext4 $(CURDIR)/output/har-rootfs.ext4
-	cp $(CURDIR)/output/br-har-prem/images/rootfs.tar $(CURDIR)/output/har-rootfs.tar
 
 # simulation images
 br-hrv-eqemu-base: check_environment
@@ -110,9 +120,6 @@ sdk-hrv: check_environment br-hrv
 
 sdk-har: check_environment br-har
 	cd $(CURDIR)/output/br-har && $(ROOT)/toolchain/install-sdk.sh
-
-sdk-har-prem: check_environment br-har-prem
-	cd $(CURDIR)/output/br-har-prem && $(ROOT)/toolchain/install-sdk.sh
 
 # Utilities
 .PHONY: util-hrv-openocd

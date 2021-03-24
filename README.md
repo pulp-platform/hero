@@ -29,6 +29,18 @@ export HERO_INSTALL=<your_path>
 ```
 We recommend you create an `install` subdirectory in this repository and set `HERO_INSTALL` to that.
 
+If you want to build the HERO SDK and the board images with PREM support, please run
+```
+make prem-set
+```
+before continuing. This writes the necessary commands to your local configuration file. The command must be run before building the `sdk-h*`, `br-h*` targets. To disable PREM, run
+```
+make prem-unset
+```
+and then rebuild your `sdk-h*` and `br-h*` targets.
+
+PREM support is disabled by default, and no action is necessary to setup HERO without PREM support. PREM has only been tested for `exilzcu102`.
+
 ### Toolchains
 
 HERO has configurations for multiple base toolchains. The project relies on Crosstool-NG for easily building the different toolchains. The toolchains are installed to the `HERO_INSTALL` directory.

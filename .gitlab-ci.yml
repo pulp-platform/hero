@@ -61,12 +61,14 @@ vsim-pulp:
     - ./compile.sh
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert vsim-pulp
 
-sdk-pulp-and-sdk-har:
+sdk-pulp-and-sdk-har-and-prem:
   stage: build2
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup sdk-pulp-and-sdk-har; then
-        exit 0
+        if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup sdk-pulp-and-sdk-har-prem; then
+          exit 0
+        fi
       fi
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
@@ -75,20 +77,15 @@ sdk-pulp-and-sdk-har:
     - make sdk-har
     - chmod -R u+w $HERO_INSTALL
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert sdk-pulp-and-sdk-har
-
-sdk-pulp-and-sdk-har-prem:
-  stage: build2
-  script:
-    - >
-      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup sdk-pulp-and-sdk-har-prem; then
-        exit 0
-      fi
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
+    - rm -r "$HERO_INSTALL/aarch64-buildroot-linux-gnu" # To allow new install
     - chmod -R u-w $HERO_INSTALL
-    - make sdk-pulp # TODO: `sdk-pulp-har` does not seem to work?
-    - make sdk-har-prem
+    - make prem-set
+    - make sdk-har
     - chmod -R u+w $HERO_INSTALL
+    - test -f $CI_PROJECT_DIR/output/br-har/target/usr/bin/cmux
+    - test -f $HERO_INSTALL/aarch64-buildroot-linux-gnu/sysroot/usr/bin/cmux
+    - test -f $CI_PROJECT_DIR/output/br-har/target/usr/lib/libpremnotify.so
+    - test -f $HERO_INSTALL/aarch64-buildroot-linux-gnu/sysroot/usr/lib/libpremnotify.so
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert sdk-pulp-and-sdk-har-prem
 
 sdk-pulp-and-sdk-hrv:
@@ -132,12 +129,14 @@ bitstream-zcu102:
         $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert bitstream-zcu102
       fi
 
-br-har-exilzcu102:
+br-har-exilzcu102-and-prem:
   stage: build4
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-har-exilzcu102; then
-        exit 0
+        if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-har-exilzcu102-prem; then
+          exit 0
+        fi
       fi
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get bitstream-zcu102
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
@@ -147,6 +146,9 @@ br-har-exilzcu102:
     - echo "BR2_HERO_BITSTREAM=$CI_PROJECT_DIR/hardware/fpga/hero_exilzcu102/hero_exilzcu102.runs/impl_1/hero_exilzcu102_wrapper.bit" >> local.cfg
     - make br-har-exilzcu102
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-har-exilzcu102
+    - make prem-set
+    - make br-har-exilzcu102
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-har-exilzcu102-prem
 
 br-hrv-ediggenesys2:
   stage: build4

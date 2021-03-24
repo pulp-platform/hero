@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- PREM support is now activated with `make prem-set` at the beginning of the HERO setup.  This
+  replaces the previous configuration where special make-targets with a `-prem` suffix were used.
 
 ### Fixed
 - `prem-cmux` Buildroot package: Add missing commands for installing into target directory.
