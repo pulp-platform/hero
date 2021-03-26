@@ -223,6 +223,7 @@ test-zcu102-examples:
         make -C $d only=pulp clean all
         .gitlab-ci.d/verify-bench.sh $(basename $d)
       done
+      cat vsim-polybench-perf-stats.txt
 
 compiler-smoketest:
   stage: test
