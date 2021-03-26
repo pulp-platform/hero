@@ -95,7 +95,7 @@ sdk-pulp-and-sdk-har-and-prem:
 
 sdk-pulp-and-sdk-hrv:
   stage: build2
-  needs: ["tc-pulp", "tc-har-olinux"]
+  needs: ["tc-pulp", "tc-hrv-olinux"]
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup sdk-pulp-and-sdk-hrv; then
