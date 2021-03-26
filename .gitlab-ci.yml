@@ -20,6 +20,7 @@ stages:
 
 tc-pulp:
   stage: build1
+  needs: []
   script:
     - >
       if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-pulp; then
@@ -30,6 +31,7 @@ tc-pulp:
 
 tc-har-olinux:
   stage: build1
+  needs: []
   script:
     - >
       if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-har-olinux; then
@@ -40,6 +42,7 @@ tc-har-olinux:
 
 tc-hrv-olinux:
   stage: build1
+  needs: []
   script:
     - >
       if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-hrv-olinux; then
@@ -50,6 +53,7 @@ tc-hrv-olinux:
 
 vsim-pulp:
   stage: build1
+  needs: []
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup vsim-pulp; then
@@ -124,6 +128,7 @@ tc-llvm:
 
 bitstream-zcu102:
   stage: build3
+  needs: []
   script:
     - >
       if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup bitstream-zcu102; then
