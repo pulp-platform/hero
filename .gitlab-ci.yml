@@ -223,8 +223,9 @@ test-zcu102-examples:
         make -C $d only=pulp clean all
         .gitlab-ci.d/verify-bench.sh $(basename $d)
       done
-      echo "Cycle counts for Polybench:"
-      cat vsim-polybench-perf-stats.txt
+    - echo "Cycle counts for Polybench:"
+    - cat vsim-polybench-perf-stats.txt
+    - >
       for d in openmp-examples/polybench-acc/*/; do
         if [ $(basename $d) = "common" ]; then
           continue
