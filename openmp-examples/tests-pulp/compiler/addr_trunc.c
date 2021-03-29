@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-#include "report.h"
-#include "hero-target.h"
-
-unsigned test_addr_trunc();
-unsigned test_va_list(void);
-unsigned test_memset(void);
-
-int main(int argc, char *argv[])
+unsigned test_addr_trunc()
 {
-  unsigned n_errors = 0;
-  if (hero_rt_core_id() != 0) {
-    return 0;
+  // This tests the issue discussed in
+  // https://iis-git.ee.ethz.ch/hero/hero/-/merge_requests/238#note_20128
+  // in which Clang would incorrectly truncate 64-bit addresses to 32-bit if
+  // default-as=pulp. This is all evaluated in Clang before the optimization
+  // phase, so if all works this function is statically evaluated to "return 0",
+  // otherwise to "return 1".
+  __host uint32_t * const l3_wide = (__host uint32_t*)0x123480000000LL;
+  if ((uint64_t)l3_wide != 0x123480000000LL) {
+    return 1;
   }
-
-  n_errors += report_n_errors(test_addr_trunc, "64-bit addr trunc");
-  n_errors += report_n_errors(test_va_list, "Variable argument functions");
-  n_errors += report_n_errors(test_memset, "Memset");
-
-  assert(n_errors == 0);
-  return n_errors;
+  return 0;
 }
