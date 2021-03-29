@@ -42,7 +42,9 @@ if [ "$CI_COMMIT_BRANCH" = "master" ]; then
   cp "$HERE/../vsim-polybench-perf-stats.txt" "$MASTER_REF_PATH/$MASTER_REF_FILE"
 fi
 
-# Exit with "allow_failure" exit code if has warnings
-if [ ! $HAS_WARNINGS -eq 0 ]; then
-  exit 4
+# Exit with "allow_failure" exit code if has warnings (but never fail on master)
+if [ ! "$CI_COMMIT_BRANCH" = "master" ]; then
+  if [ ! $HAS_WARNINGS -eq 0 ]; then
+    exit 4
+  fi
 fi
