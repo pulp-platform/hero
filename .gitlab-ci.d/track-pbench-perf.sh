@@ -3,13 +3,20 @@
 HERE=$(dirname "$(readlink -f "$0")")
 BENCH=$1
 
+MASTER_REF_FILE=pbench-perf-tracker.txt
+MASTER_REF_PATH=$HOME/hero
+
+# Ensure the path where we store the reference counts from the master branch
+# exists.
+mkdir -p "$MASTER_REF_PATH"
+
 # Get the current execution time for the benchmark
 NEW_TIME=$(cat "$HERE/../vsim-polybench-perf-stats.txt" | grep "^$BENCH:" | cut -d' ' -f2)
 
 # Get the master execution time for the benchmark
 OLD_TIME=
-if [ -f "/usr/scratch/dolent4/gitlabci/hero-pbench-perf-tracker.txt" ]; then
-  OLD_TIME=$(cat "/usr/scratch/dolent4/gitlabci/hero-pbench-perf-tracker.txt" | grep "^$BENCH:" | cut -d' ' -f2)
+if [ -f "$MASTER_REF_PATH/$MASTER_REF_FILE" ]; then
+  OLD_TIME=$(cat "$MASTER_REF_PATH/$MASTER_REF_FILE" | grep "^$BENCH:" | cut -d' ' -f2)
 fi
 
 # If we got no time, use OLD_TIME 1.
@@ -32,7 +39,7 @@ fi
 # If this is the master branch, keep these results as the baseline.
 if [ "$CI_COMMIT_BRANCH" = "master" ]; then
   echo "This is the master branch, storing the new cycle counts as reference."
-  cp "$HERE/../vsim-polybench-perf-stats.txt" "/usr/scratch/dolent4/gitlabci/hero-pbench-perf-tracker.txt"
+  cp "$HERE/../vsim-polybench-perf-stats.txt" "$MASTER_REF_PATH/$MASTER_REF_FILE"
 fi
 
 # Exit with "allow_failure" exit code if has warnings
