@@ -20,6 +20,7 @@ stages:
 
 tc-pulp:
   stage: build1
+  needs: []
   script:
     - >
       if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-pulp; then
@@ -30,6 +31,7 @@ tc-pulp:
 
 tc-har-olinux:
   stage: build1
+  needs: []
   script:
     - >
       if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-har-olinux; then
@@ -40,6 +42,7 @@ tc-har-olinux:
 
 tc-hrv-olinux:
   stage: build1
+  needs: []
   script:
     - >
       if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-hrv-olinux; then
@@ -50,6 +53,7 @@ tc-hrv-olinux:
 
 vsim-pulp:
   stage: build1
+  needs: []
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup vsim-pulp; then
@@ -63,6 +67,7 @@ vsim-pulp:
 
 sdk-pulp-and-sdk-har-and-prem:
   stage: build2
+  needs: ["tc-pulp", "tc-har-olinux"]
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup sdk-pulp-and-sdk-har; then
@@ -90,6 +95,7 @@ sdk-pulp-and-sdk-har-and-prem:
 
 sdk-pulp-and-sdk-hrv:
   stage: build2
+  needs: ["tc-pulp", "tc-hrv-olinux"]
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup sdk-pulp-and-sdk-hrv; then
@@ -105,6 +111,7 @@ sdk-pulp-and-sdk-hrv:
 
 tc-llvm:
   stage: build3
+  needs: ["sdk-pulp-and-sdk-har-and-prem"]
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-llvm; then
@@ -121,6 +128,7 @@ tc-llvm:
 
 bitstream-zcu102:
   stage: build3
+  needs: []
   script:
     - >
       if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup bitstream-zcu102; then
@@ -131,6 +139,7 @@ bitstream-zcu102:
 
 br-har-exilzcu102-and-prem:
   stage: build4
+  needs: ["bitstream-zcu102", "tc-har-olinux", "tc-pulp"]
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-har-exilzcu102; then
@@ -152,6 +161,7 @@ br-har-exilzcu102-and-prem:
 
 br-hrv-ediggenesys2:
   stage: build4
+  needs: ["tc-hrv-olinux"]
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-hrv-ediggenesys2; then
@@ -164,6 +174,7 @@ br-hrv-ediggenesys2:
 
 br-hrv-eqemu:
   stage: build4
+  needs: ["tc-hrv-olinux"]
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-hrv-eqemu; then
@@ -176,6 +187,7 @@ br-hrv-eqemu:
 
 test-zcu102-examples:
   stage: test
+  needs: ["vsim-pulp", "tc-pulp", "tc-har-olinux", "tc-llvm", "sdk-pulp-and-sdk-har-and-prem"]
   script:
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get vsim-pulp
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
@@ -214,6 +226,7 @@ test-zcu102-examples:
 
 compiler-smoketest:
   stage: test
+  needs: ["tc-pulp", "tc-har-olinux", "tc-llvm", "sdk-pulp-and-sdk-har-and-prem"]
   script:
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
@@ -226,6 +239,7 @@ compiler-smoketest:
 
 compiler-smoketest-prem:
   stage: test
+  needs: ["tc-pulp", "tc-har-olinux", "tc-llvm", "sdk-pulp-and-sdk-har-and-prem"]
   script:
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-har-olinux
@@ -239,6 +253,7 @@ compiler-smoketest-prem:
 
 simulator-tests-pulp:
   stage: test
+  needs: ["vsim-pulp", "tc-pulp", "tc-har-olinux", "tc-llvm", "sdk-pulp-and-sdk-har-and-prem"]
   script:
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get vsim-pulp
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-pulp
