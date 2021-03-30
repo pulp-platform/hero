@@ -76,7 +76,7 @@ static unsigned to_or_from_l1()
   uint32_t* const loc = (__device uint32_t*)hero_l1malloc(size);
   assert(loc);
 
-  __host uint32_t* const l3 = (__host uint32_t*)0x80000000;
+  __host uint32_t* const l3 = (__host uint32_t*)test_dram_64bit_addr();
   uint32_t* const l2 = (__device uint32_t*)pulp_l2_end() - 0x1000;
   uint32_t* const other_l1 = (__device uint32_t*)pulp_cluster_base(1) + 0x1000;
   unsigned n_errors = 0;
@@ -115,7 +115,7 @@ static unsigned unordered_async() {
   for (int i = 0; i < n_elem; i++) {
     loc[i] = i * 2;
   }
-  __host uint32_t* const l3 = (__host uint32_t*)0x80000000;
+  __host uint32_t* const l3 = (__host uint32_t*)test_dram_64bit_addr();
   for (int i = 0; i < n_elem; i++) {
     l3[i] = 0;
   }

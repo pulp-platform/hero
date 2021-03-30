@@ -72,7 +72,8 @@ module dmac_wrap
   end
 
   // AXI4+ATOP types
-  typedef logic [32-1:0]   addr_t;
+  typedef logic [AXI_ADDR_WIDTH-1:0]   addr_t;
+  typedef logic [ADDR_WIDTH-1:0]       mem_addr_t;
   typedef logic [AXI_DATA_WIDTH-1:0]   data_t;
   typedef logic [SlvIdxWidth-1:0]      slv_id_t;
   typedef logic [MstIdxWidth-1:0]      mst_id_t;
@@ -81,19 +82,23 @@ module dmac_wrap
   // AXI4+ATOP channels typedefs
   `AXI_TYPEDEF_AW_CHAN_T(slv_aw_chan_t, addr_t, slv_id_t, user_t)
   `AXI_TYPEDEF_AW_CHAN_T(mst_aw_chan_t, addr_t, mst_id_t, user_t)
+  `AXI_TYPEDEF_AW_CHAN_T(mem_aw_chan_t, mem_addr_t, mst_id_t, user_t)
   `AXI_TYPEDEF_W_CHAN_T(w_chan_t, data_t, strb_t, user_t)
   `AXI_TYPEDEF_B_CHAN_T(slv_b_chan_t, slv_id_t, user_t)
   `AXI_TYPEDEF_B_CHAN_T(mst_b_chan_t, mst_id_t, user_t)
   `AXI_TYPEDEF_AR_CHAN_T(slv_ar_chan_t, addr_t, slv_id_t, user_t)
   `AXI_TYPEDEF_AR_CHAN_T(mst_ar_chan_t, addr_t, mst_id_t, user_t)
+  `AXI_TYPEDEF_AR_CHAN_T(mem_ar_chan_t, mem_addr_t, mst_id_t, user_t)
   `AXI_TYPEDEF_R_CHAN_T(slv_r_chan_t, data_t, slv_id_t, user_t)
   `AXI_TYPEDEF_R_CHAN_T(mst_r_chan_t, data_t, mst_id_t, user_t)
   `AXI_TYPEDEF_REQ_T(slv_req_t, slv_aw_chan_t, w_chan_t, slv_ar_chan_t)
   `AXI_TYPEDEF_REQ_T(mst_req_t, mst_aw_chan_t, w_chan_t, mst_ar_chan_t)
+  `AXI_TYPEDEF_REQ_T(mem_req_t, mem_aw_chan_t, w_chan_t, mem_ar_chan_t)
   `AXI_TYPEDEF_RESP_T(slv_resp_t, slv_b_chan_t, slv_r_chan_t)
   `AXI_TYPEDEF_RESP_T(mst_resp_t, mst_b_chan_t, mst_r_chan_t)
   // BUS definitions
-  mst_req_t  tcdm_req, soc_req, tcdm_read_req, tcdm_write_req;
+  mst_req_t  tcdm_req, soc_req;
+  mem_req_t  tcdm_read_req, tcdm_write_req;
   mst_resp_t tcdm_rsp, soc_rsp, tcdm_read_rsp, tcdm_write_rsp;
   slv_req_t  [NUM_STREAMS-1:0] dma_req;
   slv_resp_t [NUM_STREAMS-1:0] dma_rsp;
@@ -106,7 +111,7 @@ module dmac_wrap
     .PerifIdWidth      ( PE_ID_WIDTH     ),
     .DmaAxiIdWidth     ( AXI_ID_WIDTH    ),
     .DmaDataWidth      ( AXI_DATA_WIDTH  ),
-    .DmaAddrWidth      ( 32  ),
+    .DmaAddrWidth      ( AXI_ADDR_WIDTH  ),
     .AxiAxReqDepth     ( 2               ),
     .TfReqFifoDepth    ( 2               ),
     .NumStreams        ( NUM_STREAMS     ),
@@ -146,13 +151,16 @@ module dmac_wrap
 
   // xbar
   localparam int unsigned NumRules = 3;
-  typedef axi_pkg::xbar_rule_32_t xbar_rule_t;
-  axi_pkg::xbar_rule_32_t [NumRules-1:0] addr_map;
-  logic [31:0] cluster_base_addr;
+  if (AXI_ADDR_WIDTH != 64) begin : gen_non_64bit_addr_error
+    $error("Non-64-bit AXI addresses require changes to code.");
+  end
+  typedef axi_pkg::xbar_rule_64_t xbar_rule_t; // change this to different width if required
+  xbar_rule_t [NumRules-1:0] addr_map;
+  logic [AXI_ADDR_WIDTH-1:0] cluster_base_addr;
   assign cluster_base_addr = 32'h1000_0000; /* + (cluster_id_i << 22);*/
   assign addr_map = '{
     '{ // SoC low
-      start_addr: 32'h0000_0000,
+      start_addr: '0,
       end_addr:   cluster_base_addr,
       idx:        0
     },
@@ -163,7 +171,7 @@ module dmac_wrap
     },
     '{ // SoC high
       start_addr: cluster_base_addr + 24'h10_0000,
-      end_addr:   32'hffff_ffff,
+      end_addr:   '1,
       idx:        0
     }
   };
@@ -180,28 +188,28 @@ module dmac_wrap
     LatencyMode:        axi_pkg::CUT_ALL_PORTS,
     AxiIdWidthSlvPorts:            SlvIdxWidth,
     AxiIdUsedSlvPorts:             SlvIdxWidth,
-    AxiAddrWidth:                           32,
+    AxiAddrWidth:               AXI_ADDR_WIDTH,
     AxiDataWidth:               AXI_DATA_WIDTH,
     NoAddrRules:                      NumRules
   };
   /* verilator lint_on WIDTHCONCAT */
 
   axi_xbar #(
-    .Cfg          ( XbarCfg                 ),
-    .slv_aw_chan_t( slv_aw_chan_t           ),
-    .mst_aw_chan_t( mst_aw_chan_t           ),
-    .w_chan_t     ( w_chan_t                ),
-    .slv_b_chan_t ( slv_b_chan_t            ),
-    .mst_b_chan_t ( mst_b_chan_t            ),
-    .slv_ar_chan_t( slv_ar_chan_t           ),
-    .mst_ar_chan_t( mst_ar_chan_t           ),
-    .slv_r_chan_t ( slv_r_chan_t            ),
-    .mst_r_chan_t ( mst_r_chan_t            ),
-    .slv_req_t    ( slv_req_t               ),
-    .slv_resp_t   ( slv_resp_t              ),
-    .mst_req_t    ( mst_req_t               ),
-    .mst_resp_t   ( mst_resp_t              ),
-    .rule_t       ( axi_pkg::xbar_rule_32_t )
+    .Cfg          ( XbarCfg       ),
+    .slv_aw_chan_t( slv_aw_chan_t ),
+    .mst_aw_chan_t( mst_aw_chan_t ),
+    .w_chan_t     ( w_chan_t      ),
+    .slv_b_chan_t ( slv_b_chan_t  ),
+    .mst_b_chan_t ( mst_b_chan_t  ),
+    .slv_ar_chan_t( slv_ar_chan_t ),
+    .mst_ar_chan_t( mst_ar_chan_t ),
+    .slv_r_chan_t ( slv_r_chan_t  ),
+    .mst_r_chan_t ( mst_r_chan_t  ),
+    .slv_req_t    ( slv_req_t     ),
+    .slv_resp_t   ( slv_resp_t    ),
+    .mst_req_t    ( mst_req_t     ),
+    .mst_resp_t   ( mst_resp_t    ),
+    .rule_t       ( xbar_rule_t   )
   ) i_dma_axi_xbar (
     .clk_i                  ( clk_i                 ),
     .rst_ni                 ( rst_ni                ),
@@ -217,23 +225,25 @@ module dmac_wrap
 
   // split AXI bus in read and write
   always_comb begin : proc_tcdm_axi_rw_split
-    tcdm_rsp.r              = tcdm_read_rsp.r;
+    `AXI_SET_R_STRUCT(tcdm_rsp.r, tcdm_read_rsp.r)
     tcdm_rsp.r_valid        = tcdm_read_rsp.r_valid;
     tcdm_rsp.ar_ready       = tcdm_read_rsp.ar_ready;
-    tcdm_rsp.b              = tcdm_write_rsp.b;
+    `AXI_SET_B_STRUCT(tcdm_rsp.b, tcdm_read_rsp.b)
     tcdm_rsp.b_valid        = tcdm_write_rsp.b_valid;
     tcdm_rsp.w_ready        = tcdm_write_rsp.w_ready;
     tcdm_rsp.aw_ready       = tcdm_write_rsp.aw_ready;
 
     tcdm_write_req          = '0;
-    tcdm_write_req.aw       = tcdm_req.aw;
+    `AXI_SET_AW_STRUCT(tcdm_write_req.aw, tcdm_req.aw)
+    tcdm_write_req.aw.addr  = tcdm_req.aw.addr[ADDR_WIDTH-1:0];
     tcdm_write_req.aw_valid = tcdm_req.aw_valid;
-    tcdm_write_req.w        = tcdm_req.w;
+    `AXI_SET_W_STRUCT(tcdm_write_req.w, tcdm_req.w)
     tcdm_write_req.w_valid  = tcdm_req.w_valid;
     tcdm_write_req.b_ready  = tcdm_req.b_ready;
 
     tcdm_read_req           = '0;
-    tcdm_read_req.ar        = tcdm_req.ar;
+    `AXI_SET_AR_STRUCT(tcdm_read_req.ar, tcdm_req.ar)
+    tcdm_read_req.ar.addr   = tcdm_req.ar.addr[ADDR_WIDTH-1:0];
     tcdm_read_req.ar_valid  = tcdm_req.ar_valid;
     tcdm_read_req.r_ready   = tcdm_req.r_ready;
   end
@@ -241,9 +251,9 @@ module dmac_wrap
   logic tcdm_master_we_0, tcdm_master_we_1, tcdm_master_we_2, tcdm_master_we_3;
 
   axi2mem #(
-    .axi_req_t   ( mst_req_t           ),
+    .axi_req_t   ( mem_req_t           ),
     .axi_resp_t  ( mst_resp_t          ),
-    .AddrWidth   ( 32                  ),
+    .AddrWidth   ( ADDR_WIDTH          ),
     .DataWidth   ( AXI_DATA_WIDTH      ),
     .IdWidth     ( MstIdxWidth         ),
     .NumBanks    ( 2                   ),
@@ -266,9 +276,9 @@ module dmac_wrap
   );
 
   axi2mem #(
-    .axi_req_t   ( mst_req_t           ),
+    .axi_req_t   ( mem_req_t           ),
     .axi_resp_t  ( mst_resp_t          ),
-    .AddrWidth   ( 32                  ),
+    .AddrWidth   ( ADDR_WIDTH          ),
     .DataWidth   ( AXI_DATA_WIDTH      ),
     .IdWidth     ( MstIdxWidth         ),
     .NumBanks    ( 2                   ),

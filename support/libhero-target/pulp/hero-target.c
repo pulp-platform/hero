@@ -59,7 +59,9 @@ hero_dma_job_t hero_memcpy_host2dev_async(DEVICE_VOID_PTR const dst, const HOST_
                                           const uint32_t size) {
   // Configure the DMA engine.
   _hero_dma_conf->src_addr_low = (uint32_t)src;
+  _hero_dma_conf->src_addr_high = (uint32_t)((uint64_t)src >> 32);
   _hero_dma_conf->dst_addr_low = (uint32_t)dst;
+  _hero_dma_conf->dst_addr_high = 0;
   _hero_dma_conf->num_bytes = size;
 
   // Launch transfer and obtain ID.
@@ -72,7 +74,9 @@ hero_dma_job_t hero_memcpy_dev2host_async(HOST_VOID_PTR const dst, const DEVICE_
                                           const uint32_t size) {
   // Configure the DMA engine.
   _hero_dma_conf->src_addr_low = (uint32_t)src;
+  _hero_dma_conf->src_addr_high = 0;
   _hero_dma_conf->dst_addr_low = (uint32_t)dst;
+  _hero_dma_conf->dst_addr_high = (uint32_t)((uint64_t)dst >> 32);
   _hero_dma_conf->num_bytes = size;
 
   // Launch transfer and obtain ID.

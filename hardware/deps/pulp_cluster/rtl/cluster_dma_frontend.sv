@@ -80,21 +80,23 @@ module cluster_dma_frontend #(
     localparam int unsigned DistrIdxWidth = (NumStreams > 32'd1) ? unsigned'($clog2(NumStreams)) : 32'd1;
 
     // DMA transfer descriptor
+    typedef logic [DmaAddrWidth-1:0] addr_t;
+    typedef logic             [31:0] num_bytes_t;
     typedef struct packed {
-        logic [31:0] num_bytes;
-        logic [31:0] dst_addr;
-        logic [31:0] src_addr;
-        logic        deburst;
-        logic        decouple;
-        logic        serialize;
+        num_bytes_t num_bytes;
+        addr_t      dst_addr;
+        addr_t      src_addr;
+        logic       deburst;
+        logic       decouple;
+        logic       serialize;
     } transf_descr_t;
 
     // 1D burst request
-    typedef logic [DmaAddrWidth-1 :0] addr_t;
     typedef logic [DmaAxiIdWidth-1:0] axi_id_t;
     typedef struct packed {
         axi_id_t            id;
-        addr_t              src, dst, num_bytes;
+        addr_t              src, dst;
+        num_bytes_t         num_bytes;
         axi_pkg::cache_t    cache_src, cache_dst;
         axi_pkg::burst_t    burst_src, burst_dst;
         logic               decouple_rw;
@@ -137,6 +139,7 @@ module cluster_dma_frontend #(
 
         cluster_dma_frontend_regs #(
             .transf_descr_t ( transf_descr_t    ),
+            .AddrWidth      ( DmaAddrWidth      ),
             .NumStreams     ( NumStreams        )
         ) i_dma_conf_regs_cores (
             .clk_i          ( clk_i                   ),
@@ -162,6 +165,7 @@ module cluster_dma_frontend #(
     // generate registers for peripherals
     cluster_dma_frontend_regs #(
         .transf_descr_t ( transf_descr_t    ),
+        .AddrWidth      ( DmaAddrWidth      ),
         .NumStreams     ( NumStreams        )
     ) i_dma_conf_regs_periphs (
         .clk_i          ( clk_i                             ),
