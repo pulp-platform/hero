@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#
+# Copyright (c) 2020 ETH Zurich, University of Bologna
+# Licensed under the Apache License, Version 2.0.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Authors:
+# - Andreas Kurth <akurth@iis.ee.ethz.ch>
+
+set -euo pipefail
+
+readonly BR_OUTPUT_SUBDIR="br-har-exilzcu102"
+source "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/prem-cmux.sh"
