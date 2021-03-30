@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   replaces the previous configuration where special make-targets with a `-prem` suffix were used.
 
 ### Fixed
+- Clang: Fix truncation of 64-bit addresses when compiling with `only=pulp` address spaces (!243).
 - `prem-cmux` Buildroot package: Add missing commands for installing into target directory.
 
 
