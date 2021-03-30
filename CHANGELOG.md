@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+- PULP DMA engine: Add support for 64-bit external addresses.
 
 ### Changed
 - PREM support is now activated with `make prem-set` at the beginning of the HERO setup.  This
