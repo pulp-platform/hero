@@ -38,6 +38,7 @@ module riscv_cs_registers import riscv_defines::*;
   parameter PULP_SECURE   = 0,
   parameter USE_PMP       = 0,
   parameter NUM_MHPMCOUNTERS = 2,
+  parameter SIM_COUNT_HPMEVENTS = 1'b0,
   parameter N_PMP_ENTRIES = 16
 )
 (
@@ -1225,6 +1226,37 @@ end //PULP_SECURE
       id_valid_q <= id_valid_i;
     end
   end
+
+  // Count HPM events in simulation, so no software modifications are required to display all the
+  // accumulated value of all HPM event counters at the end of simulation.
+`ifndef TARGET_SYNTHESIS
+// pragma translate_off
+  if (SIM_COUNT_HPMEVENTS) begin : gen_sim_count_hpmevents
+    typedef logic [31:0] sim_cnt_t;
+    sim_cnt_t [NUM_HPMEVENTS-1:1] sim_cnt_d, sim_cnt_q;
+    always_ff @(posedge clk, negedge rst_n) begin
+      if (!rst_n) begin
+        sim_cnt_q <= '0;
+      end else begin
+        sim_cnt_q <= sim_cnt_d;
+      end
+    end
+    for (genvar i = 1; i < NUM_HPMEVENTS; i++) begin : gen_sim_cnt_d
+      always_comb begin
+        sim_cnt_d[i] = sim_cnt_q[i];
+        if (hpm_events[i]) begin
+          sim_cnt_d[i]++;
+        end
+      end
+    end
+    final begin
+      for (int unsigned i = 1; i < NUM_HPMEVENTS; i++) begin
+        $display("%m: counter for hpm_event[%02d] = %0d", i, sim_cnt_q[i]);
+      end
+    end
+  end
+// pragma translate_on
+`endif
 
   // M-Mode HPM Inhibit Register
   for (genvar i = 0; i < 32; i++) begin : gen_mcountinhibit
