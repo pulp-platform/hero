@@ -8,6 +8,10 @@
 # - Andreas Kurth <akurth@iis.ee.ethz.ch>
 
 set -euo pipefail
+readonly THIS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
-readonly BR_OUTPUT_SUBDIR="br-har-exilzcu102-prem"
-source "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/../har-exilzcu102/hero-openmp.sh"
+"$THIS_DIR/libpulp"
+"$THIS_DIR/pulp-driver"
+"$THIS_DIR/hero-openmp"
+"$THIS_DIR/libhero-target"
+"$THIS_DIR/prem-cmux"
