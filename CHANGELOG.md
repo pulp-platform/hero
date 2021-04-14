@@ -34,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - The `HERCULES_QUIET` environment variable now suppresses more non-expert output.
   - Add `HERCULES_GLOBAL_INTERVAL_IDS` environment variable that allows PREM interval numbering to
     be unique over several compilation units.
+- Hardware -> RI5CY/CV32E40P core: Fix cancelling of ALU operation after taken branch (!253).  Prior
+  to this fix, ALU instructions following a taken branch would not be cancelled properly, causing a
+  delay up to the full number of cycles taken to execute the instruction (which can be >30 for
+  division and remainder instructions).
 
 
 ## v0.2.0 - 2021-03-18
