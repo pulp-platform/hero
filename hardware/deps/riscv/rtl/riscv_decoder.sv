@@ -188,6 +188,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
 
   logic [1:0] csr_op;
 
+  logic       alu_en;
   logic       mult_int_en;
   logic       mult_dot_en;
   logic       apu_en;
@@ -216,7 +217,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
     jump_in_id                  = BRANCH_NONE;
     jump_target_mux_sel_o       = JT_JAL;
 
-    alu_en_o                    = 1'b1;
+    alu_en                      = 1'b1;
     alu_operator_o              = ALU_SLTU;
     alu_op_a_mux_sel_o          = OP_A_REGA_OR_FWD;
     alu_op_b_mux_sel_o          = OP_B_REGB_OR_FWD;
@@ -502,7 +503,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
       OPCODE_AMO: begin
         if (instr_rdata_i[14:12] == 3'b010) begin // RV32A Extension (word)
           data_req          = 1'b1;
-          // alu_en_o          = 1'b0;
+          // alu_en            = 1'b0;
           data_type_o       = 2'b00;
           rega_used_o       = 1'b1;
           regb_used_o       = 1'b1;
@@ -727,7 +728,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
 
               // using APU instead of ALU
               apu_en           = 1'b1;
-              alu_en_o         = 1'b0;
+              alu_en           = 1'b0;
               apu_flags_src_o  = APU_FLAGS_FPNEW;
               // by default, set all registers to FP registers and use 2
               rega_used_o      = 1'b1;
@@ -1150,13 +1151,13 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
 
             // supported RV32M instructions
             {6'b00_0001, 3'b000}: begin // mul
-              alu_en_o        = 1'b0;
+              alu_en          = 1'b0;
               mult_int_en     = 1'b1;
               mult_operator_o = MUL_MAC32;
               regc_mux_o      = REGC_ZERO;
             end
             {6'b00_0001, 3'b001}: begin // mulh
-              alu_en_o           = 1'b0;
+              alu_en             = 1'b0;
               regc_used_o        = 1'b1;
               regc_mux_o         = REGC_ZERO;
               mult_signed_mode_o = 2'b11;
@@ -1165,7 +1166,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
               instr_multicycle_o = 1'b1;
             end
             {6'b00_0001, 3'b010}: begin // mulhsu
-              alu_en_o           = 1'b0;
+              alu_en             = 1'b0;
               regc_used_o        = 1'b1;
               regc_mux_o         = REGC_ZERO;
               mult_signed_mode_o = 2'b01;
@@ -1174,7 +1175,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
               instr_multicycle_o = 1'b1;
             end
             {6'b00_0001, 3'b011}: begin // mulhu
-              alu_en_o           = 1'b0;
+              alu_en             = 1'b0;
               regc_used_o        = 1'b1;
               regc_mux_o         = REGC_ZERO;
               mult_signed_mode_o = 2'b00;
@@ -1229,7 +1230,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
 
             // PULP specific instructions
             {6'b10_0001, 3'b000}: begin // p.mac
-              alu_en_o        = 1'b0;
+              alu_en          = 1'b0;
               regc_used_o     = 1'b1;
               regc_mux_o      = REGC_RD;
               mult_int_en     = 1'b1;
@@ -1237,7 +1238,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
               `USE_APU_INT_MULT
             end
             {6'b10_0001, 3'b001}: begin // p.msu
-              alu_en_o        = 1'b0;
+              alu_en          = 1'b0;
               regc_used_o     = 1'b1;
               regc_mux_o      = REGC_RD;
               mult_int_en     = 1'b1;
@@ -1309,7 +1310,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
 
           // using APU instead of ALU
           apu_en           = 1'b1;
-          alu_en_o         = 1'b0;
+          alu_en           = 1'b0;
           // Private and new shared FP use FPnew
           apu_flags_src_o  = (SHARED_FP==1) ? APU_FLAGS_FP : APU_FLAGS_FPNEW;
           // by default, set all registers to FP registers and use 2
@@ -1406,7 +1407,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
               // old FPU needs ALU
               if (SHARED_FP==1) begin
                 apu_en         = 1'b0;
-                alu_en_o       = 1'b1;
+                alu_en         = 1'b1;
                 regfile_alu_we = 1'b1;
                 case (instr_rdata_i[14:12])
                   //fsgnj.s
@@ -1445,7 +1446,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
               // old FPU needs ALU
               if (SHARED_FP==1) begin
                 apu_en         = 1'b0;
-                alu_en_o       = 1'b1;
+                alu_en         = 1'b1;
                 regfile_alu_we = 1'b1;
                 case (instr_rdata_i[14:12])
                   //fmin.s
@@ -1481,7 +1482,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
               // old FPU has hacky fcvt.s.d
               if (SHARED_FP==1) begin
                 apu_en         = 1'b0;
-                alu_en_o       = 1'b1;
+                alu_en         = 1'b1;
                 regfile_alu_we = 1'b1;
                 regb_used_o    = 1'b0;
                 alu_operator_o = ALU_FKEEP;
@@ -1546,7 +1547,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
               // old FPU needs ALU
               if (SHARED_FP==1) begin
                 apu_en         = 1'b0;
-                alu_en_o       = 1'b1;
+                alu_en         = 1'b1;
                 regfile_alu_we = 1'b1;
                 reg_fp_d_o     = 1'b0;
                 case (instr_rdata_i[14:12])
@@ -1637,7 +1638,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
               // old fpu maps this to ALU ops
               if (SHARED_FP==1) begin
                 apu_en         = 1'b0;
-                alu_en_o       = 1'b1;
+                alu_en         = 1'b1;
                 regfile_alu_we = 1'b1;
                 case (instr_rdata_i[14:12])
                   // fmv.x.s - move from floating point to gp register
@@ -1692,7 +1693,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
               // old fpu maps this to ALU ops
               if (SHARED_FP==1) begin
                 apu_en         = 1'b0;
-                alu_en_o       = 1'b1;
+                alu_en         = 1'b1;
                 regfile_alu_we = 1'b1;
                 reg_fp_a_o     = 1'b0; // go from integer regfile
                 alu_operator_o = ALU_ADD;
@@ -1800,7 +1801,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
         if (FPU==1) begin
           // using APU instead of ALU
           apu_en           = 1'b1;
-          alu_en_o         = 1'b0;
+          alu_en           = 1'b0;
           // Private and new shared FP use FPnew
           apu_flags_src_o  = (SHARED_FP==1) ? APU_FLAGS_FP : APU_FLAGS_FPNEW;
           apu_type_o       = APUTYPE_MAC;
@@ -2005,7 +2006,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
 
         case (instr_rdata_i[13:12])
           2'b00: begin // multiply with subword selection
-            alu_en_o           = 1'b0;
+            alu_en             = 1'b0;
 
             mult_sel_subword_o = instr_rdata_i[30];
             mult_signed_mode_o = {2{instr_rdata_i[31]}};
@@ -2023,7 +2024,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
           end
 
           2'b01: begin // MAC with subword selection
-            alu_en_o           = 1'b0;
+            alu_en             = 1'b0;
 
             mult_sel_subword_o = instr_rdata_i[30];
             mult_signed_mode_o = {2{instr_rdata_i[31]}};
@@ -2189,26 +2190,26 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
           end
 
           6'b10000_0: begin // pv.dotup
-            alu_en_o          = 1'b0;
+            alu_en            = 1'b0;
             mult_dot_en       = 1'b1;
             mult_dot_signed_o = 2'b00;
             imm_b_mux_sel_o   = IMMB_VU;
             `USE_APU_DSP_MULT
           end
           6'b10001_0: begin // pv.dotusp
-            alu_en_o          = 1'b0;
+            alu_en            = 1'b0;
             mult_dot_en       = 1'b1;
             mult_dot_signed_o = 2'b01;
             `USE_APU_DSP_MULT
           end
           6'b10011_0: begin // pv.dotsp
-            alu_en_o          = 1'b0;
+            alu_en            = 1'b0;
             mult_dot_en       = 1'b1;
             mult_dot_signed_o = 2'b11;
             `USE_APU_DSP_MULT
           end
           6'b10100_0: begin // pv.sdotup
-            alu_en_o          = 1'b0;
+            alu_en            = 1'b0;
             mult_dot_en       = 1'b1;
             mult_dot_signed_o = 2'b00;
             regc_used_o       = 1'b1;
@@ -2217,7 +2218,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
             `USE_APU_DSP_MULT
           end
           6'b10101_0: begin // pv.sdotusp
-            alu_en_o          = 1'b0;
+            alu_en            = 1'b0;
             mult_dot_en       = 1'b1;
             mult_dot_signed_o = 2'b01;
             regc_used_o       = 1'b1;
@@ -2225,7 +2226,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
             `USE_APU_DSP_MULT
           end
           6'b10111_0: begin // pv.sdotsp
-            alu_en_o          = 1'b0;
+            alu_en            = 1'b0;
             mult_dot_en       = 1'b1;
             mult_dot_signed_o = 2'b11;
             regc_used_o       = 1'b1;
@@ -2236,7 +2237,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
           /*  COMPLEX INSTRUCTIONS */
 
           6'b01010_1: begin // pc.clpxmul.h.{r,i}.{/,div2,div4,div8}
-            alu_en_o             = 1'b0;
+            alu_en               = 1'b0;
             mult_dot_en          = 1'b1;
             mult_dot_signed_o    = 2'b11;
             is_clpx_o            = 1'b1;
@@ -2516,6 +2517,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
   end
 
   // deassert we signals (in case of stalls)
+  assign alu_en_o          = (deassert_we_i) ? 1'b0          : alu_en;
   assign apu_en_o          = (deassert_we_i) ? 1'b0          : apu_en;
   assign mult_int_en_o     = (deassert_we_i) ? 1'b0          : mult_int_en;
   assign mult_dot_en_o     = (deassert_we_i) ? 1'b0          : mult_dot_en;

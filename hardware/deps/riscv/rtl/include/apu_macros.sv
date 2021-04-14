@@ -41,7 +41,7 @@
                          end
 
 `define USE_APU_INT_DIV if (SHARED_INT_DIV) begin\
-                           alu_en_o = 1'b0;\
+                           alu_en = 1'b0;\
                            apu_en = 1'b1;\
                            apu_type_o = APUTYPE_INT_DIV;\
                            apu_op_o = alu_operator_o;\
