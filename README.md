@@ -39,7 +39,7 @@ make prem-unset
 ```
 and then rebuild your `sdk-h*` and `br-h*` targets.
 
-PREM support is disabled by default, and no action is necessary to setup HERO without PREM support. PREM has only been tested for `exilzcu102`.
+PREM support is disabled by default, and no action is necessary to setup HERO without PREM support. PREM has only been tested for `exilzcu102`, and is known to not work correctly with the `teams distribute` OpenMP construct.
 
 ### Toolchains
 

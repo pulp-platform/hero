@@ -19,6 +19,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fix truncation of 64-bit addresses when compiling with `only=pulp` address spaces (!243).
   - Fix persistence of `xpulpv2` feature flag in RISC-V backend (!252).
 - `prem-cmux` Buildroot package: Add missing commands for installing into target directory.
+- `toolchain/HerculesCompiler-public` (!247):
+  - Fix several bugs where OpenMP variables (`iv`, `lb`, `ub`, `stride`) would cause failures during
+    scalar evolution loop analysis.
+  - Several OpenMP runtime functions (notably `static_init`) are now treated as external symbols,
+    handled in compatible intervals.  This prevents crashes in nested `parallel for` regions.
+  - Remove unmaintained multi-cluster support for PREM offloading with OpenMP (CMUX VOTE).  The new
+    implementation is instead leaner and better optimized for single cluster offloading.
+  - Remove the artifact compatible interval with major ID `INT_MAX`, previously generated at the
+    beginning of each program entry point.  This interval was there for legacy reasons and not
+    reported by the compiler.
+  - CMUX now includes `cmuxperf` make target, which builds a CMUX version that traces and dumps
+    statistics about PREMized binaries.  Not built by default by the `prem-cmux` Buildroot package.
+  - The `HERCULES_QUIET` environment variable now suppresses more non-expert output.
+  - Add `HERCULES_GLOBAL_INTERVAL_IDS` environment variable that allows PREM interval numbering to
+    be unique over several compilation units.
 
 
 ## v0.2.0 - 2021-03-18
