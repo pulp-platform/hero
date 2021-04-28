@@ -208,10 +208,8 @@ test-zcu102-examples:
         if [ $(basename $d) = "common" ]; then
           continue
         fi
-        make -C $d only=pulp default-as=host clean all
         make -C $d only=pulp clean all
-        make -C $d default-as=host clean all
-        make -C $d default-as=pulp clean all
+        make -C $d clean all
       done
     ## test benchmarks: simulate
     - source env/esim-exilzcu102.sh
