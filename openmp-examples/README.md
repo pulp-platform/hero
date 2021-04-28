@@ -6,7 +6,6 @@ The applications are split in several basic heterogeneous examples together with
 
 Applications can be built by running `make` in the respective directory. Various options are supported to adjust the compilation flow which are as follows:
  * `only`: Set to `pulp` to create standalone applications, otherwise heterogeneous applications are built (default).
- * `default-as`: Set to `pulp` to use the 32-bit local address space as generic address space, otherwise the 64-bit host address space is used as generic address space (default). The generic address space determines to which address space all pointers are assigned to by default. From there the address space are optimized either by attempting to convert all 64-bit pointers coming from the host to the auxiliary address space or vice-versa proving that a pointer will never come from the host and therefore converting it back to the additional 32-bit address space.
  * `opt`: determines the level of optimizations between all passes, default to `3` (`-O3`).
  * `cflags`: additional compilation flags to pass during compilation (can for example be used in the benchmarks to change the dataset).
 
