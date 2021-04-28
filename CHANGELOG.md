@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- Clang/LLVM: Deprecated the use of configurable host/device address spaces for HERO device (PULP).
+  All builds are now fixed (static) at the native address space as AS 0, and the wider address space
+  as AS 0. This addresses issue #105, enabling better integration with statistics, and alignment
+  with upstream pending update to latest LLVM.
 
 ### Fixed
 
