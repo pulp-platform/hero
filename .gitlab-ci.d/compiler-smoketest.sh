@@ -36,10 +36,6 @@ set -e
 # If only=pulp is given, then also the main function etc. is compiled with the
 # HERO RISCV compiler, giving a lot larger code coverage.
 only_makeflags=( "only=pulp" "" )
-# DEFAS: Compiles the benchmarks with the "default" default address space (host
-# for heterogeneous compilation, pulp for pulp-only compilation), or explicitly
-# configures it to be host or pulp.
-defas_makeflags=( "" "default-as=host" "default-as=pulp" )
 # UNROLL: I used these flags when testing the hardware loops merge request, to
 # ensure that there were more loops to transform, by avoiding unrolling. I
 # therefore included this as well. Don't know if it is relevant outside that
@@ -89,37 +85,33 @@ done
 echo "SUCCESS TESTS-PULP!"
 
 # Try the relevant combinations for the classic openmp-examples.
-makeflags=""
 cflags=""
 ## build examples
-for defas in "${defas_makeflags[@]}"; do
-  makeflags="$defas";
-  for unroll in "${unroll_cflags[@]}"; do
-    for debug in "${debug_cflags[@]}"; do
-      cflags="$unroll $debug"
-      for d in helloworld mm-large mm-small sobel-filter darknet-layer; do
-        if [ $(basename $d) = "common" ]; then
-          continue
-        fi
-        echo -e "\e[96mTEST: $d    $makeflags    $cflags\e[0m"
-        make V=1 -C openmp-examples/$d clean all $makeflags cflags="$cflags"
-        if [ "$TEST_PREM" = "YES" ]; then
-          # Check PULP disassembly if exists.
-          if [ -f "openmp-examples/$d/$d.pulp.dis" ]; then
-            CNT=$(cat "openmp-examples/$d/$d.pulp.dis" | grep "__prem_notify" | wc -l)
-            if [ "$CNT" -le 0 ]; then
-              echo "No PREM runtime calls generated!"
-              exit 1
-            fi
-          fi
-          # Check main disassembly
-          CNT=$(cat "openmp-examples/$d/$d.dis" | grep "__prem_notify" | wc -l)
+for unroll in "${unroll_cflags[@]}"; do
+  for debug in "${debug_cflags[@]}"; do
+    cflags="$unroll $debug"
+    for d in helloworld mm-large mm-small sobel-filter darknet-layer; do
+      if [ $(basename $d) = "common" ]; then
+        continue
+      fi
+      echo -e "\e[96mTEST: $d    $cflags\e[0m"
+      make V=1 -C openmp-examples/$d clean all cflags="$cflags"
+      if [ "$TEST_PREM" = "YES" ]; then
+        # Check PULP disassembly if exists.
+        if [ -f "openmp-examples/$d/$d.pulp.dis" ]; then
+          CNT=$(cat "openmp-examples/$d/$d.pulp.dis" | grep "__prem_notify" | wc -l)
           if [ "$CNT" -le 0 ]; then
             echo "No PREM runtime calls generated!"
             exit 1
           fi
         fi
-      done
+        # Check main disassembly
+        CNT=$(cat "openmp-examples/$d/$d.dis" | grep "__prem_notify" | wc -l)
+        if [ "$CNT" -le 0 ]; then
+          echo "No PREM runtime calls generated!"
+          exit 1
+        fi
+      fi
     done
   done
 done
@@ -127,35 +119,33 @@ echo "SUCCESS OPENMP-EXAMPLES!"
 
 # Try the relevant combinations for the polybench benchmarks.
 for only in "${only_makeflags[@]}"; do
-  for defas in "${defas_makeflags[@]}"; do
-    makeflags="$only $defas";
-    for unroll in "${unroll_cflags[@]}"; do
-      for polydma in "${polydma_cflags[@]}"; do
-        for debug in "${debug_cflags[@]}"; do
-          cflags="-v $unroll $polydma $debug"
-          for d in openmp-examples/polybench-acc/*/; do
-            if [ $(basename $d) = "common" ]; then
-              continue
-            fi
-            echo -e "\e[96mTEST: $d    $makeflags    $cflags\e[0m"
-            make V=1 -C $d clean all $makeflags cflags="$cflags"
-            if [ "$TEST_PREM" = "YES" ]; then
-              # Check PULP disassembly if exists.
-              if [ -f "$d/$(basename $d).pulp.dis" ]; then
-                CNT=$(cat "$d/$(basename $d).pulp.dis" | grep "__prem_notify" | wc -l)
-                if [ "$CNT" -le 0 ]; then
-                  echo "No PREM runtime calls generated!"
-                  exit 1
-                fi
-              fi
-              # Check main disassembly
-              CNT=$(cat "$d/$(basename $d).dis" | grep "__prem_notify" | wc -l)
+  makeflags="$only";
+  for unroll in "${unroll_cflags[@]}"; do
+    for polydma in "${polydma_cflags[@]}"; do
+      for debug in "${debug_cflags[@]}"; do
+        cflags="-v $unroll $polydma $debug"
+        for d in openmp-examples/polybench-acc/*/; do
+          if [ $(basename $d) = "common" ]; then
+            continue
+          fi
+          echo -e "\e[96mTEST: $d    $makeflags    $cflags\e[0m"
+          make V=1 -C $d clean all $makeflags cflags="$cflags"
+          if [ "$TEST_PREM" = "YES" ]; then
+            # Check PULP disassembly if exists.
+            if [ -f "$d/$(basename $d).pulp.dis" ]; then
+              CNT=$(cat "$d/$(basename $d).pulp.dis" | grep "__prem_notify" | wc -l)
               if [ "$CNT" -le 0 ]; then
                 echo "No PREM runtime calls generated!"
                 exit 1
               fi
             fi
-          done
+            # Check main disassembly
+            CNT=$(cat "$d/$(basename $d).dis" | grep "__prem_notify" | wc -l)
+            if [ "$CNT" -le 0 ]; then
+              echo "No PREM runtime calls generated!"
+              exit 1
+            fi
+          fi
         done
       done
     done
