@@ -25,9 +25,6 @@ DEFMK_ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 # 3) with _PULP suffix, they apply only to the PULP part of compilation;
 # 4) with _COMMON suffix, they apply to both PULP and host compilation.
 CFLAGS_COMMON += $(cflags) -fopenmp=libomp -O$(opt) -static
-ifdef HERCULES_INSTALL
-	export HERCULES_HERO_PULP_AS=0
-endif
 CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -I$(HERO_PULP_INC_DIR)
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
 LDFLAGS_COMMON ?= $(ldflags) -static
