@@ -13,14 +13,6 @@ ARCH_DEV = openmp-$(TARGET_DEV)
 HOST_OBJDUMP := $(TARGET_HOST)-objdump
 DEV_OBJDUMP := $(TARGET_DEV)-objdump
 
-ifeq ($(strip $(default-as)),)
-ifeq ($(only),pulp)
-  default-as=pulp
-else
-  default-as=host
-endif
-endif
-
 ifeq ($(strip $(opt)),)
   opt = 3
 endif
@@ -33,13 +25,6 @@ DEFMK_ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 # 3) with _PULP suffix, they apply only to the PULP part of compilation;
 # 4) with _COMMON suffix, they apply to both PULP and host compilation.
 CFLAGS_COMMON += $(cflags) -fopenmp=libomp -O$(opt) -static
-ifeq ($(default-as),pulp)
-  CFLAGS_COMMON += -fhero-device-default-as=device
-else
-ifdef HERCULES_INSTALL
-	export HERCULES_HERO_PULP_AS=1
-endif
-endif
 CFLAGS_PULP += $(CFLAGS_COMMON) -target $(TARGET_DEV) -I$(HERO_PULP_INC_DIR)
 CFLAGS += -target $(TARGET_HOST) $(CFLAGS_COMMON) -fopenmp-targets=$(TARGET_DEV)
 LDFLAGS_COMMON ?= $(ldflags) -static
