@@ -25,6 +25,11 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
   exit 1
 fi
 
+if ! command -v memora > /dev/null; then
+  echo "Error: Memora is not in PATH, but is needed to fetch bitstream."
+  exit 1
+fi
+
 # Clone repository at the desired git object.
 git clone --recursive git@iis-git.ee.ethz.ch:hero/hero.git --branch "$git_obj" hero-"$git_obj"
 cd "hero-$git_obj"
