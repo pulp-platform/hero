@@ -97,11 +97,11 @@ tc-pulp: check_environment
 	chmod -R u+w $(HERO_INSTALL) && ln -sf riscv32-unknown-elf $(HERO_INSTALL)/riscv32-hero-unknown-elf && chmod -R u-w $(HERO_INSTALL)
 
 # llvm
-tc-llvm: check_environment
+tc-llvm:
 	mkdir -p $(CURDIR)/output/tc-llvm/
 	cd $(CURDIR)/output/tc-llvm/ && $(ROOT)/toolchain/setup-llvm.sh Release
 
-tc-llvm-debug: check_environment
+tc-llvm-debug:
 	mkdir -p $(CURDIR)/output/tc-llvm-debug/
 	cd $(CURDIR)/output/tc-llvm-debug/ && $(ROOT)/toolchain/setup-llvm.sh Debug
 

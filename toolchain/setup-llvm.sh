@@ -28,6 +28,15 @@ if ! patch -d "$THIS_DIR/llvm-project" -R -p1 -s -f --dry-run < "$HC_PATCH_LOC" 
   patch -d "$THIS_DIR/llvm-project" -p1 < "$HC_PATCH_LOC"
 fi
 
+# if CC and CXX are unset, set them to default values.
+if [ -z "$CC" ]; then
+  export CC=`which gcc`
+fi
+if [ -z "$CXX" ]; then
+  export CXX=`which g++`
+fi
+echo "Requesting C compiler $CC"
+echo "Requesting CXX compiler $CXX"
 
 # clean environment when running together with an env source script
 unset HERO_PULP_INC_DIR
@@ -45,7 +54,7 @@ echo "Building LLVM project"
 # - Use the cmake from the host tools to ensure a recent version.
 # - Do not build PULP libomptarget offloading plugin as part of the LLVM build on the *development*
 #   machine.  That plugin will be compiled for each Host architecture through a Buildroot package.
-$HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+cmake -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DBUILD_SHARED_LIBS=True -DLLVM_USE_SPLIT_DWARF=True \
       -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL \
       -DCMAKE_FIND_NO_INSTALL_PREFIX=True \
@@ -54,11 +63,13 @@ $HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DLLVM_DEFAULT_TARGET_TRIPLE=riscv64-hero-linux-gnu \
       -DLLVM_TARGETS_TO_BUILD="AArch64;RISCV" \
       -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON \
-      -DLLVM_ENABLE_PROJECTS="clang;openmp" \
+      -DLLVM_ENABLE_PROJECTS="clang;openmp;lld" \
       -DLIBOMPTARGET_NVPTX_BUILD=OFF \
       -DLIBOMPTARGET_PULP_BUILD=OFF \
+      -DCMAKE_C_COMPILER=$CC \
+      -DCMAKE_CXX_COMPILER=$CXX \
       $THIS_DIR/llvm-project/llvm
-$HERO_INSTALL/bin/cmake --build . --target install
+cmake --build . --target install
 cd ..
 
 # setup hercules passes build
@@ -68,21 +79,25 @@ cd llvm-support_build
 # run hercules pass build
 # FIXME: integrate LLVM passes better in the HERO architecture
 echo "Building LLVM support passes"
-$HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DLLVM_DIR:STRING=$HERO_INSTALL/lib/cmake/llvm \
+      -DCMAKE_C_COMPILER=$CC \
+      -DCMAKE_CXX_COMPILER=$CXX \
       $THIS_DIR/llvm-support/
-$HERO_INSTALL/bin/cmake --build . --target install
+cmake --build . --target install
 cd ..
 
 mkdir -p hercules_build
 cd hercules_build
 # run hercules pass build
 echo "Building Hercules LLVM passes"
-$HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL \
+cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL \
       -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DLLVM_DIR:STRING=$HERO_INSTALL/lib/cmake/llvm \
+      -DCMAKE_C_COMPILER=$CC \
+      -DCMAKE_CXX_COMPILER=$CXX \
       $THIS_DIR/HerculesCompiler-public/llvm-passes/
-$HERO_INSTALL/bin/cmake --build . --target install
+cmake --build . --target install
 cd ..
 
 # install HERCULES environment script.
