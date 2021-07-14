@@ -22,7 +22,7 @@ mkdir -p $HERO_INSTALL
 chmod -R u+w $HERO_INSTALL
 
 # Apply patch to LLVM
-HC_PATCH_LOC="$THIS_DIR/HerculesCompiler-public/setup/llvm-patches/llvm901_clang.patch"
+HC_PATCH_LOC="$THIS_DIR/HerculesCompiler-public/setup/llvm-patches/llvm_12.0.1-rc4_clang.patch"
 if ! patch -d "$THIS_DIR/llvm-project" -R -p1 -s -f --dry-run < "$HC_PATCH_LOC" >/dev/null; then
   # Patch not already applied.
   patch -d "$THIS_DIR/llvm-project" -p1 < "$HC_PATCH_LOC"
