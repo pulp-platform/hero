@@ -293,7 +293,7 @@ void OmpKernelWrapper::wrapOmpKernels(Module &M) {
     // replace function in OpenMP offload table
     setOmpOffloadFunction(entry, wrapper);
 
-    std::string oldName = kernel->getName();
+    std::string oldName = kernel->getName().str();
     kernel->setName(OMP_WRAPPED_PREFIX + oldName);
     wrapper->setName(oldName);
   }

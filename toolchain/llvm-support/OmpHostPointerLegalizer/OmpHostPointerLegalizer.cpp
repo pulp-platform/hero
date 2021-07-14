@@ -10,7 +10,7 @@
 
 #include "llvm/Transforms/Utils/LowerMemIntrinsics.h"
 #include <llvm/ADT/SmallVector.h>
-#include <llvm/IR/CallSite.h>
+#include <llvm/IR/AbstractCallSite.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/IRBuilder.h>
@@ -76,7 +76,7 @@ public:
                                 M->getDataLayout().getTypeAllocSizeInBits(PST));
     PtrToIntInst *PII = new PtrToIntInst(LI.getPointerOperand(), IST, "", &LI);
     DebugLoc DL = LI.getDebugLoc();
-    CallInst *CI = CallInst::Create(F, {PII}, "", &LI);
+    CallInst *CI = CallInst::Create(FTy, F, {PII}, "", &LI);
     CI->setDebugLoc(DL);
     Instruction *CTI = CI;
     // If the type we are trying to load is not the same as dictated by the
@@ -171,7 +171,7 @@ public:
       }
     }
     DebugLoc DL = SI.getDebugLoc();
-    CallInst *CI = CallInst::Create(F, {PII, SVI}, "", &SI);
+    CallInst *CI = CallInst::Create(FTy, F, {PII, SVI}, "", &SI);
     CI->setDebugLoc(DL);
 
     // Replace store with call
@@ -257,14 +257,14 @@ void addDbgMetadataToCallsIfNonePresent(Function &F, DebugLoc &DL) {
 }
 
 void OmpHostPointerLegalizer::expandMemIntrinsicUses(Function &F) {
-  Intrinsic::ID ID = F.getIntrinsicID();
+  llvm::Intrinsic::ID IID = F.getIntrinsicID();
 
   for (auto I = F.user_begin(), E = F.user_end(); I != E;) {
     Instruction *Inst = cast<Instruction>(*I);
     Function &userF = *Inst->getParent()->getParent();
     ++I;
 
-    switch (ID) {
+    switch (IID) {
     case Intrinsic::memcpy: {
       auto *Memcpy = cast<MemCpyInst>(Inst);
       if (Memcpy->getSourceAddressSpace() == DeviceAS &&
