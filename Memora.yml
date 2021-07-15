@@ -870,11 +870,6 @@ artifacts:
       - install/bin/ifnames
       - install/bin/infocmp
       - install/bin/infotocap
-      - install/bin/intltool-extract
-      - install/bin/intltool-merge
-      - install/bin/intltool-prepare
-      - install/bin/intltool-update
-      - install/bin/intltoolize
       - install/bin/ipcmk
       - install/bin/ipcrm
       - install/bin/ipcs
@@ -1107,7 +1102,6 @@ artifacts:
       - install/share/gettext
       - install/share/gettext-0.19.8
       - install/share/info
-      - install/share/intltool
       - install/share/libtool
       - install/share/locale
       - install/share/man
@@ -1194,11 +1188,6 @@ artifacts:
       - install/bin/ifnames
       - install/bin/infocmp
       - install/bin/infotocap
-      - install/bin/intltool-extract
-      - install/bin/intltool-merge
-      - install/bin/intltool-prepare
-      - install/bin/intltool-update
-      - install/bin/intltoolize
       - install/bin/ipcmk
       - install/bin/ipcrm
       - install/bin/ipcs
@@ -1431,7 +1420,6 @@ artifacts:
       - install/share/gettext
       - install/share/gettext-0.19.8
       - install/share/info
-      - install/share/intltool
       - install/share/libtool
       - install/share/locale
       - install/share/man
@@ -1505,11 +1493,6 @@ artifacts:
       - install/bin/i386
       - install/bin/infocmp
       - install/bin/infotocap
-      - install/bin/intltool-extract
-      - install/bin/intltool-merge
-      - install/bin/intltool-prepare
-      - install/bin/intltool-update
-      - install/bin/intltoolize
       - install/bin/ipcmk
       - install/bin/ipcrm
       - install/bin/ipcs
@@ -1806,7 +1789,6 @@ artifacts:
       - install/share/gettext
       - install/share/gettext-0.19.8
       - install/share/info
-      - install/share/intltool
       - install/share/locale
       - install/share/man
       - install/share/ss
