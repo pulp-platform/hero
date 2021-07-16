@@ -907,7 +907,6 @@ artifacts:
       - install/bin/pkg-config
       - install/bin/pkgconf
       - install/bin/prlimit
-      - install/bin/recode-sr-latin
       - install/bin/rename
       - install/bin/renice
       - install/bin/reset
@@ -1212,7 +1211,6 @@ artifacts:
       - install/bin/pkg-config
       - install/bin/pkgconf
       - install/bin/prlimit
-      - install/bin/recode-sr-latin
       - install/bin/rename
       - install/bin/renice
       - install/bin/reset
@@ -1501,7 +1499,6 @@ artifacts:
       - install/bin/pkg-config
       - install/bin/pkgconf
       - install/bin/prlimit
-      - install/bin/recode-sr-latin
       - install/bin/rename
       - install/bin/renice
       - install/bin/reset
