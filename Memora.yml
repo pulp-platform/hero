@@ -892,7 +892,6 @@ artifacts:
       - install/bin/lslocks
       - install/bin/lsmem
       - install/bin/lsns
-      - install/bin/lzip
       - install/bin/m4
       - install/bin/makedevs
       - install/bin/mcookie
@@ -1210,7 +1209,6 @@ artifacts:
       - install/bin/lslocks
       - install/bin/lsmem
       - install/bin/lsns
-      - install/bin/lzip
       - install/bin/m4
       - install/bin/makedevs
       - install/bin/mcookie
@@ -1513,7 +1511,6 @@ artifacts:
       - install/bin/lslocks
       - install/bin/lsmem
       - install/bin/lsns
-      - install/bin/lzip
       - install/bin/makedevs
       - install/bin/mcookie
       - install/bin/mk_cmds
