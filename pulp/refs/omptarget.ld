@@ -184,6 +184,7 @@ SECTIONS
     *(.libgomp.*)
     KEEP(*(.omp_offloading))
     KEEP(*(.omp_offloading.*))
+    KEEP(*(omp_offloading_entries))
     . = ALIGN(4);
   } > L1
 
