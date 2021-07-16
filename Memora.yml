@@ -932,7 +932,6 @@ artifacts:
       - install/bin/whereis
       - install/bin/x86_64
       - install/bin/xgettext
-      - install/bin/xml2-config
       - install/bin/xmlcatalog
       - install/bin/xmllint
       - install/bin/xmlwf
@@ -1236,7 +1235,6 @@ artifacts:
       - install/bin/whereis
       - install/bin/x86_64
       - install/bin/xgettext
-      - install/bin/xml2-config
       - install/bin/xmlcatalog
       - install/bin/xmllint
       - install/bin/xmlwf
@@ -1525,7 +1523,6 @@ artifacts:
       - install/bin/whereis
       - install/bin/x86_64
       - install/bin/xgettext
-      - install/bin/xml2-config
       - install/bin/xmlcatalog
       - install/bin/xmllint
       - install/bin/xmlwf
