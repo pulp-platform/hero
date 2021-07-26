@@ -932,9 +932,6 @@ artifacts:
       - install/bin/whereis
       - install/bin/x86_64
       - install/bin/xgettext
-      - install/bin/xmlcatalog
-      - install/bin/xmllint
-      - install/bin/xmlwf
       - install/bin/yacc
       - install/etc
       - install/include/FlexLexer.h
@@ -1235,9 +1232,6 @@ artifacts:
       - install/bin/whereis
       - install/bin/x86_64
       - install/bin/xgettext
-      - install/bin/xmlcatalog
-      - install/bin/xmllint
-      - install/bin/xmlwf
       - install/bin/yacc
       - install/etc
       - install/include/FlexLexer.h
@@ -1523,9 +1517,6 @@ artifacts:
       - install/bin/whereis
       - install/bin/x86_64
       - install/bin/xgettext
-      - install/bin/xmlcatalog
-      - install/bin/xmllint
-      - install/bin/xmlwf
       - install/bin/yacc
       - install/etc
       - install/include/FlexLexer.h
