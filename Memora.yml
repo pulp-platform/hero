@@ -957,7 +957,6 @@ artifacts:
       - install/include/uuid
       - install/include/zconf.h
       - install/include/zlib.h
-      - install/lib/cmake
       - install/lib/libacl.la
       - install/lib/libacl.so
       - install/lib/libacl.so.1
@@ -1228,7 +1227,6 @@ artifacts:
       - install/include/uuid
       - install/include/zconf.h
       - install/include/zlib.h
-      - install/lib/cmake
       - install/lib/libacl.la
       - install/lib/libacl.so
       - install/lib/libacl.so.1
@@ -1495,7 +1493,6 @@ artifacts:
       - install/include/uuid
       - install/include/zconf.h
       - install/include/zlib.h
-      - install/lib/cmake
       - install/lib/libacl.la
       - install/lib/libacl.so
       - install/lib/libacl.so.1
@@ -1770,6 +1767,7 @@ artifacts:
       - install/lib/SampleAnalyzerPlugin.so
       - install/lib/clang
       - install/lib/cmake/clang
+      - install/lib/cmake/lld
       - install/lib/cmake/llvm
       - install/lib/hercules
       - install/lib/libLLVMAArch64AsmParser.so
