@@ -1052,7 +1052,7 @@ artifacts:
       - install/share/buildroot
       - install/share/cmake-3.15
       - install/share/et
-      - install/share/gettext
+      #- install/share/gettext      # TODO Absolute symlink, cache breaks
       - install/share/gettext-tiny
       - install/share/info
       - install/share/libtool
@@ -1322,7 +1322,7 @@ artifacts:
       - install/share/buildroot
       - install/share/cmake-3.15
       - install/share/et
-      - install/share/gettext
+      #- install/share/gettext      # TODO Absolute symlink, cache breaks
       - install/share/gettext-tiny
       - install/share/info
       - install/share/libtool
@@ -1643,7 +1643,7 @@ artifacts:
       - install/share/buildroot
       - install/share/cmake-3.15
       - install/share/et
-      - install/share/gettext
+      #- install/share/gettext      # TODO Absolute symlink, cache breaks
       - install/share/gettext-tiny
       - install/share/info
       - install/share/man
