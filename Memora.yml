@@ -1681,7 +1681,7 @@ artifacts:
       - install/bin/c-index-test
       - install/bin/clang
       - install/bin/clang++
-      - install/bin/clang-9
+      - install/bin/clang-12
       - install/bin/clang-check
       - install/bin/clang-cl
       - install/bin/clang-cpp
