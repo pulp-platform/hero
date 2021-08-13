@@ -1980,6 +1980,7 @@ artifacts:
       - install/lib/libomp.so
       - install/lib/libomptarget.rtl.x86_64.so
       - install/lib/libomptarget.so
+      - install/lib/libomptarget.so.12
       - install/lib/llvm-support
       - install/libexec/c++-analyzer
       - install/libexec/ccc-analyzer
