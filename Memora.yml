@@ -1791,6 +1791,8 @@ artifacts:
       - install/lib/libLLVMBitWriter.so.12
       - install/lib/libLLVMBitstreamReader.so
       - install/lib/libLLVMBitstreamReader.so.12
+      - install/lib/libLLVMCFGuard.so
+      - install/lib/libLLVMCFGuard.so.12
       - install/lib/libLLVMCodeGen.so
       - install/lib/libLLVMCodeGen.so.12
       - install/lib/libLLVMCore.so
@@ -1813,18 +1815,32 @@ artifacts:
       - install/lib/libLLVMDemangle.so.12
       - install/lib/libLLVMDlltoolDriver.so
       - install/lib/libLLVMDlltoolDriver.so.12
+      - install/lib/libLLVMDWARFLinker.so
+      - install/lib/libLLVMDWARFLinker.so.12
       - install/lib/libLLVMExecutionEngine.so
       - install/lib/libLLVMExecutionEngine.so.12
+      - install/lib/libLLVMExtensions.so
+      - install/lib/libLLVMExtensions.so.12
+      - install/lib/libLLVMFileCheck.so
+      - install/lib/libLLVMFileCheck.so.12
+      - install/lib/libLLVMFrontendOpenACC.so
+      - install/lib/libLLVMFrontendOpenACC.so.12
+      - install/lib/libLLVMFrontendOpenMP.so
+      - install/lib/libLLVMFrontendOpenMP.so.12
       - install/lib/libLLVMFuzzMutate.so
       - install/lib/libLLVMFuzzMutate.so.12
       - install/lib/libLLVMGlobalISel.so
       - install/lib/libLLVMGlobalISel.so.12
+      - install/lib/libLLVMHelloNew.so
+      - install/lib/libLLVMHelloNew.so.12
       - install/lib/libLLVMIRReader.so
       - install/lib/libLLVMIRReader.so.12
       - install/lib/libLLVMInstCombine.so
       - install/lib/libLLVMInstCombine.so.12
       - install/lib/libLLVMInstrumentation.so
       - install/lib/libLLVMInstrumentation.so.12
+      - install/lib/libLLVMInterfaceStub.so
+      - install/lib/libLLVMInterfaceStub.so.12
       - install/lib/libLLVMInterpreter.so
       - install/lib/libLLVMInterpreter.so.12
       - install/lib/libLLVMJITLink.so
@@ -1859,6 +1875,10 @@ artifacts:
       - install/lib/libLLVMOption.so.12
       - install/lib/libLLVMOrcJIT.so
       - install/lib/libLLVMOrcJIT.so.12
+      - install/lib/libLLVMOrcShared.so
+      - install/lib/libLLVMOrcShared.so.12
+      - install/lib/libLLVMOrcTargetProcess.so
+      - install/lib/libLLVMOrcTargetProcess.so.12
       - install/lib/libLLVMPasses.so
       - install/lib/libLLVMPasses.so.12
       - install/lib/libLLVMProfileData.so
@@ -1917,6 +1937,8 @@ artifacts:
       - install/lib/libclangASTMatchers.so.12
       - install/lib/libclangAnalysis.so
       - install/lib/libclangAnalysis.so.12
+      - install/lib/libclangAPINotes.so
+      - install/lib/libclangAPINotes.so.12
       - install/lib/libclangBasic.so
       - install/lib/libclangBasic.so.12
       - install/lib/libclangCodeGen.so
@@ -1945,6 +1967,8 @@ artifacts:
       - install/lib/libclangHandleLLVM.so.12
       - install/lib/libclangIndex.so
       - install/lib/libclangIndex.so.12
+      - install/lib/libclangIndexSerialization.so
+      - install/lib/libclangIndexSerialization.so.12
       - install/lib/libclangLex.so
       - install/lib/libclangLex.so.12
       - install/lib/libclangParse.so
@@ -1963,6 +1987,8 @@ artifacts:
       - install/lib/libclangStaticAnalyzerCore.so.12
       - install/lib/libclangStaticAnalyzerFrontend.so
       - install/lib/libclangStaticAnalyzerFrontend.so.12
+      - install/lib/libclangTesting.so
+      - install/lib/libclangTesting.so.12
       - install/lib/libclangTooling.so
       - install/lib/libclangTooling.so.12
       - install/lib/libclangToolingASTDiff.so
@@ -1975,6 +2001,8 @@ artifacts:
       - install/lib/libclangToolingRefactoring.so.12
       - install/lib/libclangToolingSyntax.so
       - install/lib/libclangToolingSyntax.so.12
+      - install/lib/libclangTransformer.so
+      - install/lib/libclangTransformer.so.12
       - install/lib/libgomp.so
       - install/lib/libiomp5.so
       - install/lib/libomp.so
