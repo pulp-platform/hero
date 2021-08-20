@@ -89,7 +89,7 @@ $(EXE).dis: $(EXE)
 	$(DEV_OBJDUMP) -d $^ > $@
 
 else
-all: $(DEPS) $(EXE) $(EXE).dis $(EXE).pulp.dis
+all: $(DEPS) $(EXE) $(EXE).dis
 
 %.ll: %.c $(DEPDIR)/%.d | $(DEPDIR)
 	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS) $(INCPATHS) $<
@@ -114,9 +114,6 @@ $(EXE): $(exeobjs)
 
 $(EXE).dis: $(EXE)
 	$(HOST_OBJDUMP) -d $^ > $@
-
-$(EXE).pulp.dis: $(EXE)
-	$(HOST_OBJDUMP) -h $^ | grep .riscv32 | awk '{print "dd if=$^ of=$^_riscv.elf bs=1 count=$$[0x" $$3 "] skip=$$[0x" $$6 "]"}' | bash && $(DEV_OBJDUMP) -d $^_riscv.elf > $@
 
 endif
 
