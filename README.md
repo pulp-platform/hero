@@ -151,7 +151,8 @@ A recent version of QEMU is required to be able to emulate RISC-V, it is current
 ```
 qemu-system-riscv64 \
    -machine virt -nographic \
-   -kernel output/hrv-eqemu-base-bbl.bin \
+   -bios output/hrv-eqemu-base-fw_jump.bin \
+   -kernel output/hrv-eqemu-base-Image \
    -append "root=/dev/vda ro" \
    -drive file=output/hrv-eqemu-base-rootfs.ext2,format=raw,id=hd0 \
    -device virtio-blk-device,drive=hd0 \
