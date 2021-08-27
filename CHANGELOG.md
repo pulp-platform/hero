@@ -10,10 +10,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- Clang/LLVM: Updated from LLVM 9.0.1 to LLVM 12.0.1.
+  As a side-effect, Buildroot was updated to 2021.02.3 to bring tools such as CMAKE to a compatible
+  version. Also allows CC and CXX environment variables to be set when building tc-llvm, in case the
+  default compiler on the system is too old.
+- Changed br-hrv-eqemu to use OpenSBI bootloader instead of RISCV_PK, which has been deprecated in
+  Buildroot.
+- Clang/LLVM: Added support for full xpulpv2 feature, including intrinsics for compatibility with
+  PULP GCC. Partially contributed by University of Tuebingen.
+- Clang/LLVM: Optimized the usage of xpulpv2 extensions already present (post-inc + hardware loops)
+  to significantly improve performance of generated code. Fixed issue with post-inc that could cause
+  OpenMP dynamic for worksharing test to fail.
 - Clang/LLVM: Deprecated the use of configurable host/device address spaces for HERO device (PULP).
   All builds are now fixed (static) at the native address space as AS 0, and the wider address space
   as AS 1. This addresses issue #105, enabling better integration with statistics, and alignment
-  with upstream pending update to latest LLVM.
+  with upstream (which enabled the LLVM 12 update).
+- Clang/LLVM: Join LLVM repositories with Snitch and Mempool IIS projects, to simplify exchange of
+  common fixes.
+- PREM passes (HC-p): Data that already resides in L1 is not copied to the generated L1 buffer, only
+  data in L2 and L3 are now copied. Improved address space awareness in PREM passes, to solve issues
+  with 64-bit pointers on PULP. Further bug fixes to the AutoDMA/PREM passes.
+- OpenMP-Examples makefiles no longer produce the *.pulp.dis file (device code disassembly) due to
+  changes in how these ELFs are embedded in the host binary in LLVM 12.
 
 ### Fixed
 
