@@ -134,7 +134,7 @@ unsigned local_accesses() {
   n_errors += local_accesses_one_counter(hero_perf_event_load, "load", 2);
   n_errors += local_accesses_one_counter(hero_perf_event_store, "store", 3);
   n_errors += local_accesses_two_counters(2, 3);
-  n_errors += local_accesses_cycles_and_instrs(122, 25);
+  n_errors += local_accesses_cycles_and_instrs(80, 16);
   return n_errors;
 }
 
@@ -302,7 +302,7 @@ unsigned external_accesses(void) {
                                      hero_perf_event_load_external, "load_external", 4, &cmp_eq);
   n_errors += external_accesses_two_counters(hero_perf_event_store_external, "store_external", 6,
                                              &cmp_eq, hero_perf_event_instr_retired,
-                                             "instr_retired", 55, &cmp_within_10pct);
+                                             "instr_retired", 45, &cmp_within_10pct);
 
   return n_errors;
 }
