@@ -1,7 +1,15 @@
+#include <assert.h>
 #include <hero-target.h>
 #include "test.h"
 
-inline void local_accesses_kernel(volatile uint32_t* const l1, volatile uint32_t* const l1_alias) {
+inline void local_accesses_kernel() {
+  // Addresses are hardcoded to make sure the performance counters measure memory accesses and not
+  // pointer arithmetic.  The following assertions ensure that the hardcoded addresses are correct.
+  volatile uint32_t* const l1 = (__device uint32_t*)0x1001c000;
+  assert(l1 == (uint32_t*)test_l1_base());
+  volatile uint32_t* const l1_alias = (__device uint32_t*)0x1b01c000;
+  assert(l1_alias == (uint32_t*)test_l1_alias_base());
+
   // Start counters, do two reads and three writes, and pause counters.
   hero_perf_continue_all();
   const uint32_t foo = *l1;
@@ -20,17 +28,13 @@ inline void local_accesses_kernel(volatile uint32_t* const l1, volatile uint32_t
 
 unsigned local_accesses_one_counter(const hero_perf_event_t event, const char* event_suffix,
                                     const unsigned expected) {
-  // Initialize pointer to L1 and L1 alias.
-  volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
-  volatile uint32_t* const l1_alias = (volatile __device uint32_t*)test_l1_alias_base();
-
   // Allocate counter.
   if (hero_perf_alloc(event) != 0) {
     printf("Error allocating counter for hero_perf_event_%s!\n", event_suffix);
     return 1;
   }
 
-  local_accesses_kernel(l1, l1_alias);
+  local_accesses_kernel();
 
   // Read counter.
   const int64_t actual = hero_perf_read(event);
@@ -50,10 +54,6 @@ unsigned local_accesses_one_counter(const hero_perf_event_t event, const char* e
 
 unsigned local_accesses_two_counters(const unsigned expected_loads,
                                      const unsigned expected_stores) {
-  // Initialize pointer to L1 and L1 alias.
-  volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
-  volatile uint32_t* const l1_alias = (volatile __device uint32_t*)test_l1_alias_base();
-
   // Allocate both counters.
   if (hero_perf_alloc(hero_perf_event_load) != 0) {
     printf("Error allocating counter for hero_perf_event_load!\n");
@@ -64,7 +64,7 @@ unsigned local_accesses_two_counters(const unsigned expected_loads,
     return 1;
   }
 
-  local_accesses_kernel(l1, l1_alias);
+  local_accesses_kernel();
 
   // Read counters.
   const int64_t actual_loads = hero_perf_read(hero_perf_event_load);
@@ -88,10 +88,6 @@ unsigned local_accesses_two_counters(const unsigned expected_loads,
 }
 
 unsigned local_accesses_cycles_and_instrs(const unsigned max_cycles, const unsigned max_instrs) {
-  // Initialize pointer to L1 and L1 alias.
-  volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
-  volatile uint32_t* const l1_alias = (volatile __device uint32_t*)test_l1_alias_base();
-
   // Allocate both counters.
   if (hero_perf_alloc(hero_perf_event_cycle) != 0) {
     printf("Error allocating counter for hero_perf_event_cycle!\n");
@@ -102,7 +98,7 @@ unsigned local_accesses_cycles_and_instrs(const unsigned max_cycles, const unsig
     return 1;
   }
 
-  local_accesses_kernel(l1, l1_alias);
+  local_accesses_kernel();
 
   // Read counters.
   const int64_t actual_cycle = hero_perf_read(hero_perf_event_cycle);
@@ -142,8 +138,16 @@ unsigned local_accesses() {
   return n_errors;
 }
 
-inline void external_accesses_kernel(volatile uint32_t* const l1, volatile uint32_t* const l2,
-                                     volatile __host uint32_t* const dram) {
+inline void external_accesses_kernel() {
+  // Addresses are hardcoded to make sure the performance counters measure memory accesses and not
+  // pointer arithmetic.  The following assertions ensure that the hardcoded addresses are correct.
+  volatile uint32_t* const l1 = (__device uint32_t*)0x1001c000;
+  assert(l1 == (uint32_t*)test_l1_base());
+  volatile uint32_t* const l2 = (__device uint32_t*)0x1c01f000;
+  assert(l2 == (uint32_t*)test_l2_base());
+  volatile __host uint32_t* const dram = (__host uint32_t*)0x80000000;
+  assert(dram == (__host uint32_t*)test_dram_base());
+
   // Start counters.
   hero_perf_continue_all();
 
@@ -208,7 +212,7 @@ unsigned external_accesses_one_counter(const hero_perf_event_t event, const char
     return 1;
   }
 
-  external_accesses_kernel(l1, l2, dram);
+  external_accesses_kernel();
 
   // Read counter.
   const int64_t actual = hero_perf_read(event);
@@ -228,11 +232,6 @@ unsigned external_accesses_two_counters(const hero_perf_event_t event1, const ch
                                         const unsigned expected1, cmp_fn_t cmp1,
                                         const hero_perf_event_t event2, const char* event2_suffix,
                                         const unsigned expected2, cmp_fn_t cmp2) {
-  // Initialize pointer to L1, L2, and DRAM.
-  volatile uint32_t* const l1 = (volatile __device uint32_t*)test_l1_base();
-  volatile uint32_t* const l2 = (volatile __device uint32_t*)test_l2_base();
-  volatile __host uint32_t* const dram = (volatile __host uint32_t*)test_dram_base();
-
   // Allocate counters.
   if (hero_perf_alloc(event1) != 0) {
     printf("Error allocating counter for hero_perf_event_%s!\n", event1_suffix);
@@ -243,7 +242,7 @@ unsigned external_accesses_two_counters(const hero_perf_event_t event1, const ch
     return 1;
   }
 
-  external_accesses_kernel(l1, l2, dram);
+  external_accesses_kernel();
 
   // Read counters.
   const int64_t actual1 = hero_perf_read(event1);
