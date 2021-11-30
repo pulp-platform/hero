@@ -197,7 +197,7 @@ inline void external_accesses_kernel() {
 //   2. expected value
 //   3. event suffix
 // - Returns the number of errors in the comparison.
-typedef unsigned (*cmp_fn_t)(int64_t, int64_t, const char*);
+typedef unsigned (*cmp_fn_t)(int64_t, int64_t, const __device char* const);
 
 unsigned external_accesses_one_counter(const hero_perf_event_t event, const char* event_suffix,
                                        const unsigned expected, cmp_fn_t cmp) {
@@ -265,13 +265,13 @@ unsigned external_accesses_two_counters(const hero_perf_event_t event1, const ch
 }
 
 // Assert that the actual value equals the expected value.
-unsigned cmp_eq(const int64_t actual, const int64_t expected, const char* const suffix) {
+unsigned cmp_eq(const int64_t actual, const int64_t expected, const __device char* const suffix) {
   return condition_or_printf(actual == expected, "hero_perf_event_%s was %d instead of %d", suffix,
                              (int32_t)actual, (int32_t)expected);
 }
 
 // Assert that the actual value is within 10% of the expected value.
-unsigned cmp_within_10pct(const int64_t actual, const int64_t expected, const char* const suffix) {
+unsigned cmp_within_10pct(const int64_t actual, const int64_t expected, const __device char* const suffix) {
   const int64_t expected_plus_10pct = (int64_t)((float)expected * 1.1);
   const int64_t expected_minus_10pct = (int64_t)((float)expected * 0.9);
   unsigned n_errors = 0;
