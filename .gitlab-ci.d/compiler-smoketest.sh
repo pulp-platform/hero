@@ -64,8 +64,8 @@ for only in "${only_makeflags[@]}"; do
         make V=1 -C $d clean all $makeflags cflags="$cflags"
         if [ "$TEST_PREM" = "YES" ]; then
           # Check PULP disassembly if exists.
-          if [ -f "$d/$(basename $d).dis" ]; then
-            CNT=$(cat "$d/$(basename $d).dis" | grep "__prem_notify" | wc -l)
+          if [ -f "$d/$(basename $d).pulp.dis" ]; then
+            CNT=$(cat "$d/$(basename $d).pulp.dis" | grep "__prem_notify" | wc -l)
             if [ "$CNT" -le 0 ]; then
               echo "No PREM runtime calls generated!"
               exit 1
@@ -98,8 +98,8 @@ for unroll in "${unroll_cflags[@]}"; do
       make V=1 -C openmp-examples/$d clean all cflags="$cflags"
       if [ "$TEST_PREM" = "YES" ]; then
         # Check PULP disassembly if exists.
-        if [ -f "openmp-examples/$d/$d.dis" ]; then
-          CNT=$(cat "openmp-examples/$d/$d.dis" | grep "__prem_notify" | wc -l)
+        if [ -f "openmp-examples/$d/$d.pulp.dis" ]; then
+          CNT=$(cat "openmp-examples/$d/$d.pulp.dis" | grep "__prem_notify" | wc -l)
           if [ "$CNT" -le 0 ]; then
             echo "No PREM runtime calls generated!"
             exit 1
@@ -132,8 +132,8 @@ for only in "${only_makeflags[@]}"; do
           make V=1 -C $d clean all $makeflags cflags="$cflags"
           if [ "$TEST_PREM" = "YES" ]; then
             # Check PULP disassembly if exists.
-            if [ -f "$d/$(basename $d).dis" ]; then
-              CNT=$(cat "$d/$(basename $d).dis" | grep "__prem_notify" | wc -l)
+            if [ -f "$d/$(basename $d).pulp.dis" ]; then
+              CNT=$(cat "$d/$(basename $d).pulp.dis" | grep "__prem_notify" | wc -l)
               if [ "$CNT" -le 0 ]; then
                 echo "No PREM runtime calls generated!"
                 exit 1

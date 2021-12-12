@@ -89,7 +89,7 @@ $(EXE).dis: $(EXE)
 	$(DEV_OBJDUMP) -d $^ > $@
 
 else
-all: $(DEPS) $(EXE) $(EXE).dis
+all: $(DEPS) $(EXE) $(EXE).dis $(EXE).pulp.dis
 
 %.ll: %.c $(DEPDIR)/%.d | $(DEPDIR)
 	$(CC) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS) $(INCPATHS) $<
@@ -114,6 +114,12 @@ $(EXE): $(exeobjs)
 
 $(EXE).dis: $(EXE)
 	$(HOST_OBJDUMP) -d $^ > $@
+
+$(EXE).pulp.dis: $(EXE)
+	llvm-readelf -s $^ | grep '\s\.omp_offloading.device_image\>' \
+      | awk '{print "dd if=$^ of=$^_riscv.elf bs=1 count=" $$3 " skip=$$[0x" $$2 " - 0x400000]"}' \
+      | bash \
+      && $(DEV_OBJDUMP) -d $^_riscv.elf > $@
 
 endif
 
