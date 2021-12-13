@@ -66,8 +66,9 @@ br-hrv-eqemu-base: check_environment
 	$(MAKE) O=$(CURDIR)/output/br-hrv-eqemu BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hrv_eqemu_defconfig
 	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hrv-eqemu/.config; fi
 	$(MAKE) -C $(CURDIR)/output/br-hrv-eqemu
-	cp $(CURDIR)/output/br-hrv-eqemu/images/bbl $(CURDIR)/output/hrv-eqemu-base-bbl
+	cp $(CURDIR)/output/br-hrv-eqemu/images/fw_jump.bin $(CURDIR)/output/hrv-eqemu-base-fw_jump.bin
 	cp $(CURDIR)/output/br-hrv-eqemu/images/rootfs.ext2 $(CURDIR)/output/hrv-eqemu-base-rootfs.ext2
+	cp $(CURDIR)/output/br-hrv-eqemu/build/linux-4.20.8/arch/riscv/boot/Image $(CURDIR)/output/hrv-eqemu-base-Image
 br-hrv-eqemu: br-hrv-eqemu-base
 
 # TOOLCHAINS
@@ -97,11 +98,11 @@ tc-pulp: check_environment
 	chmod -R u+w $(HERO_INSTALL) && ln -sf riscv32-unknown-elf $(HERO_INSTALL)/riscv32-hero-unknown-elf && chmod -R u-w $(HERO_INSTALL)
 
 # llvm
-tc-llvm: check_environment
+tc-llvm:
 	mkdir -p $(CURDIR)/output/tc-llvm/
 	cd $(CURDIR)/output/tc-llvm/ && $(ROOT)/toolchain/setup-llvm.sh Release
 
-tc-llvm-debug: check_environment
+tc-llvm-debug:
 	mkdir -p $(CURDIR)/output/tc-llvm-debug/
 	cd $(CURDIR)/output/tc-llvm-debug/ && $(ROOT)/toolchain/setup-llvm.sh Debug
 

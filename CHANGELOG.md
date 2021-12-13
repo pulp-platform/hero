@@ -8,14 +8,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+- Clang/LLVM: Add full support for the `Xpulpv2` ISA extension, including intrinsics for
+  compatibility with PULP GCC.  This has been partially contributed by University of Tuebingen.
 
 ### Changed
-- Clang/LLVM: Deprecated the use of configurable host/device address spaces for HERO device (PULP).
-  All builds are now fixed (static) at the native address space as AS 0, and the wider address space
-  as AS 1. This addresses issue #105, enabling better integration with statistics, and alignment
-  with upstream pending update to latest LLVM.
+- Clang/LLVM:
+  - Update from 9.0.1 to 12.0.1.
+  - Deprecate the use of configurable host/device address spaces.  The native address space is now
+    always AS 0, and the wider address space is AS 1.  This addresses issue #105, enabling better
+    integration with statistics and aligns with upstream (to enable the update to LLVM 12).
+  - Join repository with the Snitch and Mempool projects to simplify exchange of common fixes.
+- Buildroot: Update from 2019.02.1 to 2021.02.3 to bring tools such as CMAKE to a version compatible
+  with LLVM 12.  This also allows to set the `CC` and `CXX` environment variables when building
+  `tc-llvm`, in case the default compiler on the system is too old.
+- `br-hrv-eqemu`: Use OpenSBI instead of RISC-V PK as bootloader, because the latter has been
+  deprecated in Buildroot.
+- PREM passes (HC-p): Data that already resides in L1 is not copied to the PREM buffer in L1, only
+  data in L2 and L3 are now copied.
 
 ### Fixed
+- Clang/LLVM:
+  - Optimize the usage of the `Xpulpv2` instructions that were already supported (post-increment and
+    hardware loops) to significantly improve performance of generated code.
+  - Fix issue with post-increment that caused the OpenMP `for` worksharing construct with `dynamic`
+    schedule to fail.
+- PREM passes (HC-p):
+  - Improve address space awareness in PREM passes to solve issues with 64-bit pointers on PULP.
+  - Fix various bugs in the AutoDMA/PREM passes.
 
 
 ## v0.2.1 - 2021-04-15

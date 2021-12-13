@@ -120,7 +120,11 @@ tc-llvm:
       fi
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get sdk-pulp-and-sdk-har
     - chmod -R u-w $HERO_INSTALL
+    - export CXX=/usr/pack/gcc-9.2.0-af/linux-x64/bin/g++ # LLVM 12 needs 5.1+
+    - export CC=/usr/pack/gcc-9.2.0-af/linux-x64/bin/gcc  # LLVM 12 needs 5.1+
     - make tc-llvm
+    - unset CXX # Cleanup after LLVM 12 build
+    - unset CC  # Cleanup after LLVM 12 build
     - git diff --exit-code # assert that applied patches made no difference
     - chmod -R u+w $HERO_INSTALL
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-llvm

@@ -8,6 +8,7 @@
 # [1] https://github.com/delcypher/srg-llvm-pass-tutorial
 #  
 cmake_minimum_required(VERSION 2.8.12)
+project(hero-llvm-support)
 
 #------------------------------------------------------------------------------
 # FindLLVM
@@ -51,7 +52,7 @@ if (NOT LLVM_ENABLE_RTTI)
     message(STATUS "LLVM was built without RTTI, so we must disable it too for linking to work properly")
     add_cxx_flag(-fno-rtti RTTI) # Can't use LLVMSupport properly if we have rtti
 endif()
-add_cxx_flag(-std=c++11 CXX11)
+add_cxx_flag(-std=c++14 CXX14)
 
 #------------------------------------------------------------------------------
 # Handy macro to copy files matching a globbing pattern in the current source

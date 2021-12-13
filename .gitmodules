@@ -6,7 +6,7 @@
 	url = https://github.com/riscv/riscv-openocd
 [submodule "toolchain/llvm-project"]
 	path = toolchain/llvm-project
-	url = git@iis-git.ee.ethz.ch:hero/llvm-project.git
+	url = git@iis-git.ee.ethz.ch:iis-compilers/llvm-project.git
 	branch = hero
 [submodule "pulp/sdk/pulp-tools"]
 	path = pulp/sdk/pulp-tools

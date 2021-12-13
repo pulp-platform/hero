@@ -870,11 +870,6 @@ artifacts:
       - install/bin/ifnames
       - install/bin/infocmp
       - install/bin/infotocap
-      - install/bin/intltool-extract
-      - install/bin/intltool-merge
-      - install/bin/intltool-prepare
-      - install/bin/intltool-update
-      - install/bin/intltoolize
       - install/bin/ipcmk
       - install/bin/ipcrm
       - install/bin/ipcs
@@ -897,7 +892,6 @@ artifacts:
       - install/bin/lslocks
       - install/bin/lsmem
       - install/bin/lsns
-      - install/bin/lzip
       - install/bin/m4
       - install/bin/makedevs
       - install/bin/mcookie
@@ -905,27 +899,14 @@ artifacts:
       - install/bin/mkpasswd
       - install/bin/mount
       - install/bin/mountpoint
-      - install/bin/msgattrib
-      - install/bin/msgcat
-      - install/bin/msgcmp
-      - install/bin/msgcomm
-      - install/bin/msgconv
-      - install/bin/msgen
-      - install/bin/msgexec
-      - install/bin/msgfilter
       - install/bin/msgfmt
-      - install/bin/msggrep
-      - install/bin/msginit
       - install/bin/msgmerge
-      - install/bin/msgunfmt
-      - install/bin/msguniq
       - install/bin/namei
       - install/bin/ncurses6-config
       - install/bin/patchelf
       - install/bin/pkg-config
       - install/bin/pkgconf
       - install/bin/prlimit
-      - install/bin/recode-sr-latin
       - install/bin/rename
       - install/bin/renice
       - install/bin/reset
@@ -951,10 +932,6 @@ artifacts:
       - install/bin/whereis
       - install/bin/x86_64
       - install/bin/xgettext
-      - install/bin/xml2-config
-      - install/bin/xmlcatalog
-      - install/bin/xmllint
-      - install/bin/xmlwf
       - install/bin/yacc
       - install/etc
       - install/include/FlexLexer.h
@@ -964,17 +941,12 @@ artifacts:
       - install/include/com_err.h
       - install/include/e2p
       - install/include/et
-      - install/include/expat.h
-      - install/include/expat_config.h
-      - install/include/expat_external.h
       - install/include/ext2fs
-      - install/include/gettext-po.h
       - install/include/libfdisk
       - install/include/libkmod.h
       - install/include/libltdl
       - install/include/libmount
       - install/include/libsmartcols
-      - install/include/libxml2
       - install/include/ltdl.h
       - install/include/ncurses
       - install/include/netconfig.h
@@ -985,8 +957,6 @@ artifacts:
       - install/include/uuid
       - install/include/zconf.h
       - install/include/zlib.h
-      - install/lib/cmake
-      - install/lib/gettext
       - install/lib/libacl.la
       - install/lib/libacl.so
       - install/lib/libacl.so.1
@@ -1007,10 +977,6 @@ artifacts:
       - install/lib/libe2p.so
       - install/lib/libe2p.so.2
       - install/lib/libe2p.so.2.3
-      - install/lib/libexpat.la
-      - install/lib/libexpat.so
-      - install/lib/libexpat.so.1
-      - install/lib/libexpat.so.1.6.8
       - install/lib/libext2fs.a
       - install/lib/libext2fs.so
       - install/lib/libext2fs.so.2
@@ -1030,20 +996,10 @@ artifacts:
       - install/lib/libform.so.6
       - install/lib/libform.so.6.1
       - install/lib/libform_g.a
-      - install/lib/libgettextlib-0.19.8.1.so
-      - install/lib/libgettextlib.la
-      - install/lib/libgettextlib.so
-      - install/lib/libgettextpo.la
-      - install/lib/libgettextpo.so
-      - install/lib/libgettextpo.so.0
-      - install/lib/libgettextpo.so.0.5.4
-      - install/lib/libgettextsrc-0.19.8.1.so
-      - install/lib/libgettextsrc.la
-      - install/lib/libgettextsrc.so
       - install/lib/libkmod.la
       - install/lib/libkmod.so
       - install/lib/libkmod.so.2
-      - install/lib/libkmod.so.2.3.3
+      - install/lib/libkmod.so.2.3.6
       - install/lib/libltdl.la
       - install/lib/libltdl.so
       - install/lib/libltdl.so.7
@@ -1080,20 +1036,12 @@ artifacts:
       - install/lib/libuuid.so
       - install/lib/libuuid.so.1
       - install/lib/libuuid.so.1.3.0
-      - install/lib/libxml2.la
-      - install/lib/libxml2.so
-      - install/lib/libxml2.so.2
-      - install/lib/libxml2.so.2.9.9
       - install/lib/liby.a
       - install/lib/libz.a
       - install/lib/libz.so
       - install/lib/libz.so.1
       - install/lib/libz.so.1.2.11
-      - install/lib/perl
-      - install/lib/perl5
       - install/lib/pkgconfig
-      - install/lib/preloadable_libintl.so
-      - install/lib/xml2Conf.sh
       - install/libexec/rmt
       - install/sbin
       - install/share/aclocal
@@ -1102,14 +1050,12 @@ artifacts:
       - install/share/automake-1.15
       - install/share/bison
       - install/share/buildroot
-      - install/share/cmake-3.8
+      - install/share/cmake-3.15
       - install/share/et
-      - install/share/gettext
-      - install/share/gettext-0.19.8
+      #- install/share/gettext      # TODO Absolute symlink, cache breaks
+      - install/share/gettext-tiny
       - install/share/info
-      - install/share/intltool
       - install/share/libtool
-      - install/share/locale
       - install/share/man
       - install/share/ss
       - install/usr
@@ -1194,11 +1140,6 @@ artifacts:
       - install/bin/ifnames
       - install/bin/infocmp
       - install/bin/infotocap
-      - install/bin/intltool-extract
-      - install/bin/intltool-merge
-      - install/bin/intltool-prepare
-      - install/bin/intltool-update
-      - install/bin/intltoolize
       - install/bin/ipcmk
       - install/bin/ipcrm
       - install/bin/ipcs
@@ -1221,7 +1162,6 @@ artifacts:
       - install/bin/lslocks
       - install/bin/lsmem
       - install/bin/lsns
-      - install/bin/lzip
       - install/bin/m4
       - install/bin/makedevs
       - install/bin/mcookie
@@ -1229,27 +1169,14 @@ artifacts:
       - install/bin/mkpasswd
       - install/bin/mount
       - install/bin/mountpoint
-      - install/bin/msgattrib
-      - install/bin/msgcat
-      - install/bin/msgcmp
-      - install/bin/msgcomm
-      - install/bin/msgconv
-      - install/bin/msgen
-      - install/bin/msgexec
-      - install/bin/msgfilter
       - install/bin/msgfmt
-      - install/bin/msggrep
-      - install/bin/msginit
       - install/bin/msgmerge
-      - install/bin/msgunfmt
-      - install/bin/msguniq
       - install/bin/namei
       - install/bin/ncurses6-config
       - install/bin/patchelf
       - install/bin/pkg-config
       - install/bin/pkgconf
       - install/bin/prlimit
-      - install/bin/recode-sr-latin
       - install/bin/rename
       - install/bin/renice
       - install/bin/reset
@@ -1275,10 +1202,6 @@ artifacts:
       - install/bin/whereis
       - install/bin/x86_64
       - install/bin/xgettext
-      - install/bin/xml2-config
-      - install/bin/xmlcatalog
-      - install/bin/xmllint
-      - install/bin/xmlwf
       - install/bin/yacc
       - install/etc
       - install/include/FlexLexer.h
@@ -1288,17 +1211,12 @@ artifacts:
       - install/include/com_err.h
       - install/include/e2p
       - install/include/et
-      - install/include/expat.h
-      - install/include/expat_config.h
-      - install/include/expat_external.h
       - install/include/ext2fs
-      - install/include/gettext-po.h
       - install/include/libfdisk
       - install/include/libkmod.h
       - install/include/libltdl
       - install/include/libmount
       - install/include/libsmartcols
-      - install/include/libxml2
       - install/include/ltdl.h
       - install/include/ncurses
       - install/include/netconfig.h
@@ -1309,8 +1227,6 @@ artifacts:
       - install/include/uuid
       - install/include/zconf.h
       - install/include/zlib.h
-      - install/lib/cmake
-      - install/lib/gettext
       - install/lib/libacl.la
       - install/lib/libacl.so
       - install/lib/libacl.so.1
@@ -1331,10 +1247,6 @@ artifacts:
       - install/lib/libe2p.so
       - install/lib/libe2p.so.2
       - install/lib/libe2p.so.2.3
-      - install/lib/libexpat.la
-      - install/lib/libexpat.so
-      - install/lib/libexpat.so.1
-      - install/lib/libexpat.so.1.6.8
       - install/lib/libext2fs.a
       - install/lib/libext2fs.so
       - install/lib/libext2fs.so.2
@@ -1354,20 +1266,10 @@ artifacts:
       - install/lib/libform.so.6
       - install/lib/libform.so.6.1
       - install/lib/libform_g.a
-      - install/lib/libgettextlib-0.19.8.1.so
-      - install/lib/libgettextlib.la
-      - install/lib/libgettextlib.so
-      - install/lib/libgettextpo.la
-      - install/lib/libgettextpo.so
-      - install/lib/libgettextpo.so.0
-      - install/lib/libgettextpo.so.0.5.4
-      - install/lib/libgettextsrc-0.19.8.1.so
-      - install/lib/libgettextsrc.la
-      - install/lib/libgettextsrc.so
       - install/lib/libkmod.la
       - install/lib/libkmod.so
       - install/lib/libkmod.so.2
-      - install/lib/libkmod.so.2.3.3
+      - install/lib/libkmod.so.2.3.6
       - install/lib/libltdl.la
       - install/lib/libltdl.so
       - install/lib/libltdl.so.7
@@ -1404,20 +1306,12 @@ artifacts:
       - install/lib/libuuid.so
       - install/lib/libuuid.so.1
       - install/lib/libuuid.so.1.3.0
-      - install/lib/libxml2.la
-      - install/lib/libxml2.so
-      - install/lib/libxml2.so.2
-      - install/lib/libxml2.so.2.9.9
       - install/lib/liby.a
       - install/lib/libz.a
       - install/lib/libz.so
       - install/lib/libz.so.1
       - install/lib/libz.so.1.2.11
-      - install/lib/perl
-      - install/lib/perl5
       - install/lib/pkgconfig
-      - install/lib/preloadable_libintl.so
-      - install/lib/xml2Conf.sh
       - install/libexec/rmt
       - install/sbin
       - install/share/aclocal
@@ -1426,14 +1320,12 @@ artifacts:
       - install/share/automake-1.15
       - install/share/bison
       - install/share/buildroot
-      - install/share/cmake-3.8
+      - install/share/cmake-3.15
       - install/share/et
-      - install/share/gettext
-      - install/share/gettext-0.19.8
+      #- install/share/gettext      # TODO Absolute symlink, cache breaks
+      - install/share/gettext-tiny
       - install/share/info
-      - install/share/intltool
       - install/share/libtool
-      - install/share/locale
       - install/share/man
       - install/share/ss
       - install/usr
@@ -1505,11 +1397,6 @@ artifacts:
       - install/bin/i386
       - install/bin/infocmp
       - install/bin/infotocap
-      - install/bin/intltool-extract
-      - install/bin/intltool-merge
-      - install/bin/intltool-prepare
-      - install/bin/intltool-update
-      - install/bin/intltoolize
       - install/bin/ipcmk
       - install/bin/ipcrm
       - install/bin/ipcs
@@ -1530,34 +1417,20 @@ artifacts:
       - install/bin/lslocks
       - install/bin/lsmem
       - install/bin/lsns
-      - install/bin/lzip
       - install/bin/makedevs
       - install/bin/mcookie
       - install/bin/mk_cmds
       - install/bin/mkpasswd
       - install/bin/mount
       - install/bin/mountpoint
-      - install/bin/msgattrib
-      - install/bin/msgcat
-      - install/bin/msgcmp
-      - install/bin/msgcomm
-      - install/bin/msgconv
-      - install/bin/msgen
-      - install/bin/msgexec
-      - install/bin/msgfilter
       - install/bin/msgfmt
-      - install/bin/msggrep
-      - install/bin/msginit
       - install/bin/msgmerge
-      - install/bin/msgunfmt
-      - install/bin/msguniq
       - install/bin/namei
       - install/bin/ncurses6-config
       - install/bin/patchelf
       - install/bin/pkg-config
       - install/bin/pkgconf
       - install/bin/prlimit
-      - install/bin/recode-sr-latin
       - install/bin/rename
       - install/bin/renice
       - install/bin/reset
@@ -1584,10 +1457,6 @@ artifacts:
       - install/bin/whereis
       - install/bin/x86_64
       - install/bin/xgettext
-      - install/bin/xml2-config
-      - install/bin/xmlcatalog
-      - install/bin/xmllint
-      - install/bin/xmlwf
       - install/bin/yacc
       - install/etc
       - install/include/FlexLexer.h
@@ -1597,16 +1466,11 @@ artifacts:
       - install/include/com_err.h
       - install/include/e2p
       - install/include/et
-      - install/include/expat.h
-      - install/include/expat_config.h
-      - install/include/expat_external.h
       - install/include/ext2fs
-      - install/include/gettext-po.h
       - install/include/libfdisk
       - install/include/libkmod.h
       - install/include/libmount
       - install/include/libsmartcols
-      - install/include/libxml2
       - install/include/ncurses
       - install/include/ncurses/curses.h
       - install/include/ncurses/eti.h
@@ -1629,8 +1493,6 @@ artifacts:
       - install/include/uuid
       - install/include/zconf.h
       - install/include/zlib.h
-      - install/lib/cmake
-      - install/lib/gettext
       - install/lib/libacl.la
       - install/lib/libacl.so
       - install/lib/libacl.so.1
@@ -1651,10 +1513,6 @@ artifacts:
       - install/lib/libe2p.so
       - install/lib/libe2p.so.2
       - install/lib/libe2p.so.2.3
-      - install/lib/libexpat.la
-      - install/lib/libexpat.so
-      - install/lib/libexpat.so.1
-      - install/lib/libexpat.so.1.6.8
       - install/lib/libext2fs.a
       - install/lib/libext2fs.so
       - install/lib/libext2fs.so.2
@@ -1674,20 +1532,10 @@ artifacts:
       - install/lib/libform.so.6
       - install/lib/libform.so.6.1
       - install/lib/libform_g.a
-      - install/lib/libgettextlib-0.19.8.1.so
-      - install/lib/libgettextlib.la
-      - install/lib/libgettextlib.so
-      - install/lib/libgettextpo.la
-      - install/lib/libgettextpo.so
-      - install/lib/libgettextpo.so.0
-      - install/lib/libgettextpo.so.0.5.4
-      - install/lib/libgettextsrc-0.19.8.1.so
-      - install/lib/libgettextsrc.la
-      - install/lib/libgettextsrc.so
       - install/lib/libkmod.la
       - install/lib/libkmod.so
       - install/lib/libkmod.so.2
-      - install/lib/libkmod.so.2.3.3
+      - install/lib/libkmod.so.2.3.6
       - install/lib/libltdl.la
       - install/lib/libmenu.so
       - install/lib/libmenu.so.6
@@ -1721,20 +1569,12 @@ artifacts:
       - install/lib/libuuid.so
       - install/lib/libuuid.so.1
       - install/lib/libuuid.so.1.3.0
-      - install/lib/libxml2.la
-      - install/lib/libxml2.so
-      - install/lib/libxml2.so.2
-      - install/lib/libxml2.so.2.9.9
       - install/lib/liby.a
       - install/lib/libz.a
       - install/lib/libz.so
       - install/lib/libz.so.1
       - install/lib/libz.so.1.2.11
-      - install/lib/perl
-      - install/lib/perl5
       - install/lib/pkgconfig
-      - install/lib/preloadable_libintl.so
-      - install/lib/xml2Conf.sh
       - install/libexec/rmt
       - install/riscv64-buildroot-linux-gnu
       - install/riscv64-hero-linux-gnu
@@ -1789,7 +1629,6 @@ artifacts:
       - install/sbin/resize2fs
       - install/sbin/resizepart
       - install/sbin/rtcwake
-      - install/sbin/runuser
       - install/sbin/sfdisk
       - install/sbin/swaplabel
       - install/sbin/swapoff
@@ -1801,13 +1640,11 @@ artifacts:
       - install/share/automake-1.15
       - install/share/bison
       - install/share/buildroot
-      - install/share/cmake-3.8
+      - install/share/cmake-3.15
       - install/share/et
-      - install/share/gettext
-      - install/share/gettext-0.19.8
+      #- install/share/gettext      # TODO Absolute symlink, cache breaks
+      - install/share/gettext-tiny
       - install/share/info
-      - install/share/intltool
-      - install/share/locale
       - install/share/man
       - install/share/ss
       - install/usr
@@ -1843,13 +1680,12 @@ artifacts:
       - install/bin/c-index-test
       - install/bin/clang
       - install/bin/clang++
-      - install/bin/clang-9
+      - install/bin/clang-12
       - install/bin/clang-check
       - install/bin/clang-cl
       - install/bin/clang-cpp
       - install/bin/clang-extdef-mapping
       - install/bin/clang-format
-      - install/bin/clang-import-test
       - install/bin/clang-offload-bundler
       - install/bin/clang-refactor
       - install/bin/clang-rename
@@ -1912,244 +1748,267 @@ artifacts:
       - install/bin/llvm-tblgen
       - install/bin/llvm-undname
       - install/bin/llvm-xray
-      - install/bin/obj2yaml
       - install/bin/opt
       - install/bin/sancov
       - install/bin/sanstats
       - install/bin/scan-build
       - install/bin/scan-view
       - install/bin/verify-uselistorder
-      - install/bin/yaml2obj
       - install/include/clang
       - install/include/clang-c
       - install/include/llvm
       - install/include/llvm-c
-      - install/lib/CheckerDependencyHandlingAnalyzerPlugin.so
-      - install/lib/CheckerOptionHandlingAnalyzerPlugin.so
-      - install/lib/SampleAnalyzerPlugin.so
       - install/lib/clang
       - install/lib/cmake/clang
+      - install/lib/cmake/lld
       - install/lib/cmake/llvm
       - install/lib/hercules
       - install/lib/libLLVMAArch64AsmParser.so
-      - install/lib/libLLVMAArch64AsmParser.so.9
+      - install/lib/libLLVMAArch64AsmParser.so.12
       - install/lib/libLLVMAArch64CodeGen.so
-      - install/lib/libLLVMAArch64CodeGen.so.9
+      - install/lib/libLLVMAArch64CodeGen.so.12
       - install/lib/libLLVMAArch64Desc.so
-      - install/lib/libLLVMAArch64Desc.so.9
+      - install/lib/libLLVMAArch64Desc.so.12
       - install/lib/libLLVMAArch64Disassembler.so
-      - install/lib/libLLVMAArch64Disassembler.so.9
+      - install/lib/libLLVMAArch64Disassembler.so.12
       - install/lib/libLLVMAArch64Info.so
-      - install/lib/libLLVMAArch64Info.so.9
+      - install/lib/libLLVMAArch64Info.so.12
       - install/lib/libLLVMAArch64Utils.so
-      - install/lib/libLLVMAArch64Utils.so.9
+      - install/lib/libLLVMAArch64Utils.so.12
       - install/lib/libLLVMAggressiveInstCombine.so
-      - install/lib/libLLVMAggressiveInstCombine.so.9
+      - install/lib/libLLVMAggressiveInstCombine.so.12
       - install/lib/libLLVMAnalysis.so
-      - install/lib/libLLVMAnalysis.so.9
+      - install/lib/libLLVMAnalysis.so.12
       - install/lib/libLLVMAsmParser.so
-      - install/lib/libLLVMAsmParser.so.9
+      - install/lib/libLLVMAsmParser.so.12
       - install/lib/libLLVMAsmPrinter.so
-      - install/lib/libLLVMAsmPrinter.so.9
+      - install/lib/libLLVMAsmPrinter.so.12
       - install/lib/libLLVMBinaryFormat.so
-      - install/lib/libLLVMBinaryFormat.so.9
+      - install/lib/libLLVMBinaryFormat.so.12
       - install/lib/libLLVMBitReader.so
-      - install/lib/libLLVMBitReader.so.9
+      - install/lib/libLLVMBitReader.so.12
       - install/lib/libLLVMBitWriter.so
-      - install/lib/libLLVMBitWriter.so.9
+      - install/lib/libLLVMBitWriter.so.12
       - install/lib/libLLVMBitstreamReader.so
-      - install/lib/libLLVMBitstreamReader.so.9
+      - install/lib/libLLVMBitstreamReader.so.12
+      - install/lib/libLLVMCFGuard.so
+      - install/lib/libLLVMCFGuard.so.12
       - install/lib/libLLVMCodeGen.so
-      - install/lib/libLLVMCodeGen.so.9
+      - install/lib/libLLVMCodeGen.so.12
       - install/lib/libLLVMCore.so
-      - install/lib/libLLVMCore.so.9
+      - install/lib/libLLVMCore.so.12
       - install/lib/libLLVMCoroutines.so
-      - install/lib/libLLVMCoroutines.so.9
+      - install/lib/libLLVMCoroutines.so.12
       - install/lib/libLLVMCoverage.so
-      - install/lib/libLLVMCoverage.so.9
+      - install/lib/libLLVMCoverage.so.12
       - install/lib/libLLVMDebugInfoCodeView.so
-      - install/lib/libLLVMDebugInfoCodeView.so.9
+      - install/lib/libLLVMDebugInfoCodeView.so.12
       - install/lib/libLLVMDebugInfoDWARF.so
-      - install/lib/libLLVMDebugInfoDWARF.so.9
+      - install/lib/libLLVMDebugInfoDWARF.so.12
       - install/lib/libLLVMDebugInfoGSYM.so
-      - install/lib/libLLVMDebugInfoGSYM.so.9
+      - install/lib/libLLVMDebugInfoGSYM.so.12
       - install/lib/libLLVMDebugInfoMSF.so
-      - install/lib/libLLVMDebugInfoMSF.so.9
+      - install/lib/libLLVMDebugInfoMSF.so.12
       - install/lib/libLLVMDebugInfoPDB.so
-      - install/lib/libLLVMDebugInfoPDB.so.9
+      - install/lib/libLLVMDebugInfoPDB.so.12
       - install/lib/libLLVMDemangle.so
-      - install/lib/libLLVMDemangle.so.9
+      - install/lib/libLLVMDemangle.so.12
       - install/lib/libLLVMDlltoolDriver.so
-      - install/lib/libLLVMDlltoolDriver.so.9
+      - install/lib/libLLVMDlltoolDriver.so.12
+      - install/lib/libLLVMDWARFLinker.so
+      - install/lib/libLLVMDWARFLinker.so.12
       - install/lib/libLLVMExecutionEngine.so
-      - install/lib/libLLVMExecutionEngine.so.9
+      - install/lib/libLLVMExecutionEngine.so.12
+      - install/lib/libLLVMExtensions.so
+      - install/lib/libLLVMExtensions.so.12
+      - install/lib/libLLVMFileCheck.so
+      - install/lib/libLLVMFileCheck.so.12
+      - install/lib/libLLVMFrontendOpenACC.so
+      - install/lib/libLLVMFrontendOpenACC.so.12
+      - install/lib/libLLVMFrontendOpenMP.so
+      - install/lib/libLLVMFrontendOpenMP.so.12
       - install/lib/libLLVMFuzzMutate.so
-      - install/lib/libLLVMFuzzMutate.so.9
+      - install/lib/libLLVMFuzzMutate.so.12
       - install/lib/libLLVMGlobalISel.so
-      - install/lib/libLLVMGlobalISel.so.9
+      - install/lib/libLLVMGlobalISel.so.12
+      - install/lib/libLLVMHelloNew.so
+      - install/lib/libLLVMHelloNew.so.12
       - install/lib/libLLVMIRReader.so
-      - install/lib/libLLVMIRReader.so.9
+      - install/lib/libLLVMIRReader.so.12
       - install/lib/libLLVMInstCombine.so
-      - install/lib/libLLVMInstCombine.so.9
+      - install/lib/libLLVMInstCombine.so.12
       - install/lib/libLLVMInstrumentation.so
-      - install/lib/libLLVMInstrumentation.so.9
+      - install/lib/libLLVMInstrumentation.so.12
+      - install/lib/libLLVMInterfaceStub.so
+      - install/lib/libLLVMInterfaceStub.so.12
       - install/lib/libLLVMInterpreter.so
-      - install/lib/libLLVMInterpreter.so.9
+      - install/lib/libLLVMInterpreter.so.12
       - install/lib/libLLVMJITLink.so
-      - install/lib/libLLVMJITLink.so.9
+      - install/lib/libLLVMJITLink.so.12
       - install/lib/libLLVMLTO.so
-      - install/lib/libLLVMLTO.so.9
+      - install/lib/libLLVMLTO.so.12
       - install/lib/libLLVMLibDriver.so
-      - install/lib/libLLVMLibDriver.so.9
+      - install/lib/libLLVMLibDriver.so.12
       - install/lib/libLLVMLineEditor.so
-      - install/lib/libLLVMLineEditor.so.9
+      - install/lib/libLLVMLineEditor.so.12
       - install/lib/libLLVMLinker.so
-      - install/lib/libLLVMLinker.so.9
+      - install/lib/libLLVMLinker.so.12
       - install/lib/libLLVMMC.so
-      - install/lib/libLLVMMC.so.9
+      - install/lib/libLLVMMC.so.12
       - install/lib/libLLVMMCA.so
-      - install/lib/libLLVMMCA.so.9
+      - install/lib/libLLVMMCA.so.12
       - install/lib/libLLVMMCDisassembler.so
-      - install/lib/libLLVMMCDisassembler.so.9
+      - install/lib/libLLVMMCDisassembler.so.12
       - install/lib/libLLVMMCJIT.so
-      - install/lib/libLLVMMCJIT.so.9
+      - install/lib/libLLVMMCJIT.so.12
       - install/lib/libLLVMMCParser.so
-      - install/lib/libLLVMMCParser.so.9
+      - install/lib/libLLVMMCParser.so.12
       - install/lib/libLLVMMIRParser.so
-      - install/lib/libLLVMMIRParser.so.9
+      - install/lib/libLLVMMIRParser.so.12
       - install/lib/libLLVMObjCARCOpts.so
-      - install/lib/libLLVMObjCARCOpts.so.9
+      - install/lib/libLLVMObjCARCOpts.so.12
       - install/lib/libLLVMObject.so
-      - install/lib/libLLVMObject.so.9
+      - install/lib/libLLVMObject.so.12
       - install/lib/libLLVMObjectYAML.so
-      - install/lib/libLLVMObjectYAML.so.9
+      - install/lib/libLLVMObjectYAML.so.12
       - install/lib/libLLVMOption.so
-      - install/lib/libLLVMOption.so.9
+      - install/lib/libLLVMOption.so.12
       - install/lib/libLLVMOrcJIT.so
-      - install/lib/libLLVMOrcJIT.so.9
+      - install/lib/libLLVMOrcJIT.so.12
+      - install/lib/libLLVMOrcShared.so
+      - install/lib/libLLVMOrcShared.so.12
+      - install/lib/libLLVMOrcTargetProcess.so
+      - install/lib/libLLVMOrcTargetProcess.so.12
       - install/lib/libLLVMPasses.so
-      - install/lib/libLLVMPasses.so.9
+      - install/lib/libLLVMPasses.so.12
       - install/lib/libLLVMProfileData.so
-      - install/lib/libLLVMProfileData.so.9
+      - install/lib/libLLVMProfileData.so.12
       - install/lib/libLLVMRISCVAsmParser.so
-      - install/lib/libLLVMRISCVAsmParser.so.9
+      - install/lib/libLLVMRISCVAsmParser.so.12
       - install/lib/libLLVMRISCVCodeGen.so
-      - install/lib/libLLVMRISCVCodeGen.so.9
+      - install/lib/libLLVMRISCVCodeGen.so.12
       - install/lib/libLLVMRISCVDesc.so
-      - install/lib/libLLVMRISCVDesc.so.9
+      - install/lib/libLLVMRISCVDesc.so.12
       - install/lib/libLLVMRISCVDisassembler.so
-      - install/lib/libLLVMRISCVDisassembler.so.9
+      - install/lib/libLLVMRISCVDisassembler.so.12
       - install/lib/libLLVMRISCVInfo.so
-      - install/lib/libLLVMRISCVInfo.so.9
-      - install/lib/libLLVMRISCVUtils.so
-      - install/lib/libLLVMRISCVUtils.so.9
+      - install/lib/libLLVMRISCVInfo.so.12
       - install/lib/libLLVMRemarks.so
-      - install/lib/libLLVMRemarks.so.9
+      - install/lib/libLLVMRemarks.so.12
       - install/lib/libLLVMRuntimeDyld.so
-      - install/lib/libLLVMRuntimeDyld.so.9
+      - install/lib/libLLVMRuntimeDyld.so.12
       - install/lib/libLLVMScalarOpts.so
-      - install/lib/libLLVMScalarOpts.so.9
+      - install/lib/libLLVMScalarOpts.so.12
       - install/lib/libLLVMSelectionDAG.so
-      - install/lib/libLLVMSelectionDAG.so.9
+      - install/lib/libLLVMSelectionDAG.so.12
       - install/lib/libLLVMSupport.so
-      - install/lib/libLLVMSupport.so.9
+      - install/lib/libLLVMSupport.so.12
       - install/lib/libLLVMSymbolize.so
-      - install/lib/libLLVMSymbolize.so.9
+      - install/lib/libLLVMSymbolize.so.12
       - install/lib/libLLVMTableGen.so
-      - install/lib/libLLVMTableGen.so.9
+      - install/lib/libLLVMTableGen.so.12
       - install/lib/libLLVMTarget.so
-      - install/lib/libLLVMTarget.so.9
+      - install/lib/libLLVMTarget.so.12
       - install/lib/libLLVMTextAPI.so
-      - install/lib/libLLVMTextAPI.so.9
+      - install/lib/libLLVMTextAPI.so.12
       - install/lib/libLLVMTransformUtils.so
-      - install/lib/libLLVMTransformUtils.so.9
+      - install/lib/libLLVMTransformUtils.so.12
       - install/lib/libLLVMVectorize.so
-      - install/lib/libLLVMVectorize.so.9
+      - install/lib/libLLVMVectorize.so.12
       - install/lib/libLLVMWindowsManifest.so
-      - install/lib/libLLVMWindowsManifest.so.9
+      - install/lib/libLLVMWindowsManifest.so.12
       - install/lib/libLLVMXRay.so
-      - install/lib/libLLVMXRay.so.9
+      - install/lib/libLLVMXRay.so.12
       - install/lib/libLLVMipo.so
-      - install/lib/libLLVMipo.so.9
+      - install/lib/libLLVMipo.so.12
       - install/lib/libLTO.so
-      - install/lib/libLTO.so.9
+      - install/lib/libLTO.so.12
       - install/lib/libRemarks.so
-      - install/lib/libRemarks.so.9
+      - install/lib/libRemarks.so.12
       - install/lib/libclang-cpp.so
-      - install/lib/libclang-cpp.so.9
+      - install/lib/libclang-cpp.so.12
       - install/lib/libclang.so
-      - install/lib/libclang.so.9
+      - install/lib/libclang.so.12
       - install/lib/libclangARCMigrate.so
-      - install/lib/libclangARCMigrate.so.9
+      - install/lib/libclangARCMigrate.so.12
       - install/lib/libclangAST.so
-      - install/lib/libclangAST.so.9
+      - install/lib/libclangAST.so.12
       - install/lib/libclangASTMatchers.so
-      - install/lib/libclangASTMatchers.so.9
+      - install/lib/libclangASTMatchers.so.12
       - install/lib/libclangAnalysis.so
-      - install/lib/libclangAnalysis.so.9
+      - install/lib/libclangAnalysis.so.12
+      - install/lib/libclangAPINotes.so
+      - install/lib/libclangAPINotes.so.12
       - install/lib/libclangBasic.so
-      - install/lib/libclangBasic.so.9
+      - install/lib/libclangBasic.so.12
       - install/lib/libclangCodeGen.so
-      - install/lib/libclangCodeGen.so.9
+      - install/lib/libclangCodeGen.so.12
       - install/lib/libclangCrossTU.so
-      - install/lib/libclangCrossTU.so.9
+      - install/lib/libclangCrossTU.so.12
       - install/lib/libclangDependencyScanning.so
-      - install/lib/libclangDependencyScanning.so.9
+      - install/lib/libclangDependencyScanning.so.12
       - install/lib/libclangDirectoryWatcher.so
-      - install/lib/libclangDirectoryWatcher.so.9
+      - install/lib/libclangDirectoryWatcher.so.12
       - install/lib/libclangDriver.so
-      - install/lib/libclangDriver.so.9
+      - install/lib/libclangDriver.so.12
       - install/lib/libclangDynamicASTMatchers.so
-      - install/lib/libclangDynamicASTMatchers.so.9
+      - install/lib/libclangDynamicASTMatchers.so.12
       - install/lib/libclangEdit.so
-      - install/lib/libclangEdit.so.9
+      - install/lib/libclangEdit.so.12
       - install/lib/libclangFormat.so
-      - install/lib/libclangFormat.so.9
+      - install/lib/libclangFormat.so.12
       - install/lib/libclangFrontend.so
-      - install/lib/libclangFrontend.so.9
+      - install/lib/libclangFrontend.so.12
       - install/lib/libclangFrontendTool.so
-      - install/lib/libclangFrontendTool.so.9
+      - install/lib/libclangFrontendTool.so.12
       - install/lib/libclangHandleCXX.so
-      - install/lib/libclangHandleCXX.so.9
+      - install/lib/libclangHandleCXX.so.12
       - install/lib/libclangHandleLLVM.so
-      - install/lib/libclangHandleLLVM.so.9
+      - install/lib/libclangHandleLLVM.so.12
       - install/lib/libclangIndex.so
-      - install/lib/libclangIndex.so.9
+      - install/lib/libclangIndex.so.12
+      - install/lib/libclangIndexSerialization.so
+      - install/lib/libclangIndexSerialization.so.12
       - install/lib/libclangLex.so
-      - install/lib/libclangLex.so.9
+      - install/lib/libclangLex.so.12
       - install/lib/libclangParse.so
-      - install/lib/libclangParse.so.9
+      - install/lib/libclangParse.so.12
       - install/lib/libclangRewrite.so
-      - install/lib/libclangRewrite.so.9
+      - install/lib/libclangRewrite.so.12
       - install/lib/libclangRewriteFrontend.so
-      - install/lib/libclangRewriteFrontend.so.9
+      - install/lib/libclangRewriteFrontend.so.12
       - install/lib/libclangSema.so
-      - install/lib/libclangSema.so.9
+      - install/lib/libclangSema.so.12
       - install/lib/libclangSerialization.so
-      - install/lib/libclangSerialization.so.9
+      - install/lib/libclangSerialization.so.12
       - install/lib/libclangStaticAnalyzerCheckers.so
-      - install/lib/libclangStaticAnalyzerCheckers.so.9
+      - install/lib/libclangStaticAnalyzerCheckers.so.12
       - install/lib/libclangStaticAnalyzerCore.so
-      - install/lib/libclangStaticAnalyzerCore.so.9
+      - install/lib/libclangStaticAnalyzerCore.so.12
       - install/lib/libclangStaticAnalyzerFrontend.so
-      - install/lib/libclangStaticAnalyzerFrontend.so.9
+      - install/lib/libclangStaticAnalyzerFrontend.so.12
+      - install/lib/libclangTesting.so
+      - install/lib/libclangTesting.so.12
       - install/lib/libclangTooling.so
-      - install/lib/libclangTooling.so.9
+      - install/lib/libclangTooling.so.12
       - install/lib/libclangToolingASTDiff.so
-      - install/lib/libclangToolingASTDiff.so.9
+      - install/lib/libclangToolingASTDiff.so.12
       - install/lib/libclangToolingCore.so
-      - install/lib/libclangToolingCore.so.9
+      - install/lib/libclangToolingCore.so.12
       - install/lib/libclangToolingInclusions.so
-      - install/lib/libclangToolingInclusions.so.9
+      - install/lib/libclangToolingInclusions.so.12
       - install/lib/libclangToolingRefactoring.so
-      - install/lib/libclangToolingRefactoring.so.9
+      - install/lib/libclangToolingRefactoring.so.12
       - install/lib/libclangToolingSyntax.so
-      - install/lib/libclangToolingSyntax.so.9
+      - install/lib/libclangToolingSyntax.so.12
+      - install/lib/libclangTransformer.so
+      - install/lib/libclangTransformer.so.12
       - install/lib/libgomp.so
       - install/lib/libiomp5.so
       - install/lib/libomp.so
       - install/lib/libomptarget.rtl.x86_64.so
       - install/lib/libomptarget.so
+      - install/lib/libomptarget.so.12
       - install/lib/llvm-support
       - install/libexec/c++-analyzer
       - install/libexec/ccc-analyzer

@@ -22,12 +22,21 @@ mkdir -p $HERO_INSTALL
 chmod -R u+w $HERO_INSTALL
 
 # Apply patch to LLVM
-HC_PATCH_LOC="$THIS_DIR/HerculesCompiler-public/setup/llvm-patches/llvm901_clang.patch"
+HC_PATCH_LOC="$THIS_DIR/HerculesCompiler-public/setup/llvm-patches/llvm_12.0.1-rc4_clang.patch"
 if ! patch -d "$THIS_DIR/llvm-project" -R -p1 -s -f --dry-run < "$HC_PATCH_LOC" >/dev/null; then
   # Patch not already applied.
   patch -d "$THIS_DIR/llvm-project" -p1 < "$HC_PATCH_LOC"
 fi
 
+# if CC and CXX are unset, set them to default values.
+if [ -z "$CC" ]; then
+  export CC=`which gcc`
+fi
+if [ -z "$CXX" ]; then
+  export CXX=`which g++`
+fi
+echo "Requesting C compiler $CC"
+echo "Requesting CXX compiler $CXX"
 
 # clean environment when running together with an env source script
 unset HERO_PULP_INC_DIR
@@ -54,9 +63,11 @@ $HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DLLVM_DEFAULT_TARGET_TRIPLE=riscv64-hero-linux-gnu \
       -DLLVM_TARGETS_TO_BUILD="AArch64;RISCV" \
       -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON \
-      -DLLVM_ENABLE_PROJECTS="clang;openmp" \
+      -DLLVM_ENABLE_PROJECTS="clang;openmp;lld" \
       -DLIBOMPTARGET_NVPTX_BUILD=OFF \
       -DLIBOMPTARGET_PULP_BUILD=OFF \
+      -DCMAKE_C_COMPILER=$CC \
+      -DCMAKE_CXX_COMPILER=$CXX \
       $THIS_DIR/llvm-project/llvm
 $HERO_INSTALL/bin/cmake --build . --target install
 cd ..
@@ -70,6 +81,8 @@ cd llvm-support_build
 echo "Building LLVM support passes"
 $HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DLLVM_DIR:STRING=$HERO_INSTALL/lib/cmake/llvm \
+      -DCMAKE_C_COMPILER=$CC \
+      -DCMAKE_CXX_COMPILER=$CXX \
       $THIS_DIR/llvm-support/
 $HERO_INSTALL/bin/cmake --build . --target install
 cd ..
@@ -81,6 +94,8 @@ echo "Building Hercules LLVM passes"
 $HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL \
       -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DLLVM_DIR:STRING=$HERO_INSTALL/lib/cmake/llvm \
+      -DCMAKE_C_COMPILER=$CC \
+      -DCMAKE_CXX_COMPILER=$CXX \
       $THIS_DIR/HerculesCompiler-public/llvm-passes/
 $HERO_INSTALL/bin/cmake --build . --target install
 cd ..

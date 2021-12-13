@@ -116,7 +116,10 @@ $(EXE).dis: $(EXE)
 	$(HOST_OBJDUMP) -d $^ > $@
 
 $(EXE).pulp.dis: $(EXE)
-	$(HOST_OBJDUMP) -h $^ | grep .riscv32 | awk '{print "dd if=$^ of=$^_riscv.elf bs=1 count=$$[0x" $$3 "] skip=$$[0x" $$6 "]"}' | bash && $(DEV_OBJDUMP) -d $^_riscv.elf > $@
+	llvm-readelf -s $^ | grep '\s\.omp_offloading.device_image\>' \
+      | awk '{print "dd if=$^ of=$^_riscv.elf bs=1 count=" $$3 " skip=$$[0x" $$2 " - 0x400000]"}' \
+      | bash \
+      && $(DEV_OBJDUMP) -d $^_riscv.elf > $@
 
 endif
 
