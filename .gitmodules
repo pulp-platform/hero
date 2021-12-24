@@ -16,4 +16,4 @@
 	url = https://github.com/pulp-platform/json-tools.git
 [submodule "toolchain/HerculesCompiler-public"]
 	path = toolchain/HerculesCompiler-public
-	url = git@iis-git.ee.ethz.ch:H2020-Compiler/HerculesCompiler-public.git
+	url = https://iis-git.ee.ethz.ch/H2020-Compiler/HerculesCompiler-public.git
