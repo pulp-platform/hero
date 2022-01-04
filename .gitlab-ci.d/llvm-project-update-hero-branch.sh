@@ -20,6 +20,14 @@ if test "$CI_COMMIT_BRANCH" = "master"; then
   # Push current commit of `llvm-project` to the `hero` branch.
   if cd toolchain/llvm-project; then
     if git checkout -B hero; then
+      readonly remote_url="$(git remote get-url --push origin)"
+      if echo "$remote_url" | grep -q '^https://'; then
+        readonly new_remote_url="$(echo "$remote_url" \
+            | sed -e 's/https:\/\//git@/' \
+            | sed -e 's/\//:/')"
+        echo "Changing remote URL from '$remote_url' to '$new_remote_url' to enable push access."
+        git remote set-url origin "$new_remote_url"
+      fi
       if git push origin hero; then
         echo "Updated the 'hero' branch of 'llvm-project' to '$(git rev-parse HEAD)'."
       else
