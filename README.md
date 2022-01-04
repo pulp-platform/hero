@@ -17,10 +17,11 @@ All of HERO's software and most of its hardware (everything except the component
 - benchmarks
 - OpenMP applications
 - RISC-V cores
-- on-chip SRAM controllers
+- on-chip memory controllers
 - caches
 - interconnects
 - DMA engines
+- IOMMU
 
 **This repository** contains the source code for the top-level logic of HERO and many of its components.  The source code of other components, such as the Linux kernel and the cross compilers, is not directly stored in this repository.  Instead, that code is stored in other open-source repositories to which this repository links.
 
