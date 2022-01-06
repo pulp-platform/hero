@@ -1,4 +1,5 @@
 variables:
+  DOWNSTREAM: "false"
   GIT_SUBMODULE_STRATEGY: recursive
   HERO_INSTALL: '$CI_PROJECT_DIR/install'
   RUST_LOG: 'memora=debug'
@@ -7,6 +8,22 @@ variables:
 before_script:
   - env
   - mkdir -p $HERO_INSTALL
+  - >
+    if [ "$DOWNSTREAM" = "true" ]; then
+      # Checkout different revision of submodule if running as downstream pipeline.
+      if [ "$SUBMODULE_NAME" = "llvm-project" ]; then
+        cd toolchain/llvm-project
+        # The commit for this downstream pipeline might only exist on GitLab.
+        git remote set-url origin git@iis-git.ee.ethz.ch:iis-compilers/llvm-project.git
+      else
+        echo "Error: Unknown submodule '$SUBMODULE_NAME' for downstream pipeline!"
+        exit 1
+      fi
+      git fetch origin
+      git checkout $SUBMODULE_COMMIT_SHA
+      git log -1
+      cd -
+    fi
 
 after_script:
   - chmod -R u+w $HERO_INSTALL
