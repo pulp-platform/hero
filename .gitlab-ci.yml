@@ -8,21 +8,31 @@ variables:
 before_script:
   - env
   - mkdir -p $HERO_INSTALL
+  - |
+    git config --local user.name 'GitLab CI at IIS'
+    git config --local user.email 'gitlabci@iis-git.ee.ethz.ch'
   - >
     if [ "$DOWNSTREAM" = "true" ]; then
-      # Checkout different revision of submodule if running as downstream pipeline.
+      # This is a downstream job, i.e., it has been triggered as part of an upstream pipeline.
+      # First, make sure that the commit of the upstream repository is available.  That commit might
+      # exist only on GitLab.
       if [ "$SUBMODULE_NAME" = "llvm-project" ]; then
         cd toolchain/llvm-project
-        # The commit for this downstream pipeline might only exist on GitLab.
         git remote set-url origin git@iis-git.ee.ethz.ch:iis-compilers/llvm-project.git
       else
         echo "Error: Unknown submodule '$SUBMODULE_NAME' for downstream pipeline!"
         exit 1
       fi
       git fetch origin
-      git checkout $SUBMODULE_COMMIT_SHA
-      git log -1
       cd -
+      # Second, check out the branch for the tuple of commit in this repository and commit in the
+      # upstream repository.  This branch is created by the `pre-downstream-checkout` job.
+      if [ "$CI_JOB_NAME" != "pre-downstream-checkout" ]; then
+        branch="upstream-$SUBMODULE_NAME-$SUBMODULE_COMMIT_SHA-for-$CI_COMMIT_SHA"
+        git checkout --quiet --recurse-submodules "$branch"
+        echo "Checked out '$branch', which has the following commit:"
+        git show
+      fi
     fi
 
 after_script:
@@ -35,9 +45,33 @@ stages:
   - build4
   - test
 
+pre-downstream-checkout:
+  stage: .pre
+  script:
+    - |
+      if [ "$DOWNSTREAM" = "true" ]; then
+        # This is a downstream pipeline, so we need to create a branch with a commit that applies
+        # the upstream update.
+        branch="upstream-$SUBMODULE_NAME-$SUBMODULE_COMMIT_SHA-for-$CI_COMMIT_SHA"
+        git checkout -b "$branch"
+        if [ "$SUBMODULE_NAME" = "llvm-project" ]; then
+          submodule_path=toolchain/llvm-project
+        else
+          echo "Error: Unknown submodule '$SUBMODULE_NAME' for downstream pipeline!"
+          exit 1
+        fi
+        cd "$submodule_path"
+        git checkout --recurse-submodules "$SUBMODULE_COMMIT_SHA"
+        cd -
+        git add "$submodule_path"
+        git commit -m "$submodule_path: Update to upstream $SUBMODULE_COMMIT_SHA"
+        git remote set-url origin git@iis-git.ee.ethz.ch:hero/hero.git
+        git push origin "$branch"
+      fi
+
 tc-pulp:
   stage: build1
-  needs: []
+  needs: ["pre-downstream-checkout"]
   script:
     - >
       if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-pulp; then
@@ -48,7 +82,7 @@ tc-pulp:
 
 tc-har-olinux:
   stage: build1
-  needs: []
+  needs: ["pre-downstream-checkout"]
   script:
     - >
       if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-har-olinux; then
@@ -59,7 +93,7 @@ tc-har-olinux:
 
 tc-hrv-olinux:
   stage: build1
-  needs: []
+  needs: ["pre-downstream-checkout"]
   script:
     - >
       if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-hrv-olinux; then
@@ -70,7 +104,7 @@ tc-hrv-olinux:
 
 vsim-pulp:
   stage: build1
-  needs: []
+  needs: ["pre-downstream-checkout"]
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup vsim-pulp; then
@@ -149,7 +183,7 @@ tc-llvm:
 
 bitstream-zcu102:
   stage: build3
-  needs: []
+  needs: ["pre-downstream-checkout"]
   script:
     - >
       if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup bitstream-zcu102; then
