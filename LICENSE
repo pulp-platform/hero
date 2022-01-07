@@ -1,0 +1,19 @@
+The HERO project contains digital data under many different licenses. The
+license for any data can be determined as follows, ordered by decreasing
+precedence:
+1. From the license statement in the file containing the data. License
+   statements positioned earlier in the file take precedence over later license
+   statements in the same file.
+2. From the license file in the directory containing the file that contains the
+   data. The file name of the license file starts with "license" or "copying"
+   and may be spelled partially or entirely with capital letters.
+3. From the license file in the parent directory of the file that contains the
+   data, or if that directory does not contain a license file either, in the
+   parent directory of the parent directory, and so on until the directory
+   containing this file.
+4. By e-mail inquiry to `hero (at) iis ee ethz ch` (replace the spaces in the
+   domain name with dots and the ` (at) ` with the corresponding character)
+   specifying the path of the data whose license you could not determine
+   according to points 1-3. The e-mail reply will either refer to one of points
+   1-3 or to a newly published commit that defines the license according to
+   points 1-3 and mention the determined license.
