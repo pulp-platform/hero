@@ -5,6 +5,12 @@ variables:
   RUST_LOG: 'memora=debug'
   PATH: '/home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin'
 
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^upstream-/'
+      when: never # do not run branch pipelines for the CI-generated `upstream-` branches
+    - when: always # default rule, run job if no previous rule matched
+
 before_script:
   - env
   - mkdir -p $HERO_INSTALL
