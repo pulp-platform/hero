@@ -23,8 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `tc-llvm`, in case the default compiler on the system is too old.
 - `br-hrv-eqemu`: Use OpenSBI instead of RISC-V PK as bootloader, because the latter has been
   deprecated in Buildroot.
-- PREM passes (HC-p): Data that already resides in L1 is not copied to the PREM buffer in L1, only
-  data in L2 and L3 are now copied.
+- PREM passes (HC-p):
+  - Data that already resides in L1 is not copied to the PREM buffer in L1, only data in L2 and L3
+    are now copied.
+  - Messages about HERCULES PREM passes are now being printed only if they are active, whereas
+    previously those messages were printed if they were *not* active.
 
 ### Fixed
 - Clang/LLVM:
