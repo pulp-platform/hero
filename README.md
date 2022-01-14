@@ -31,6 +31,8 @@ A second implementation target currently under development is Xilinx' VCU128, wh
 
 This repository is [published on GitHub](https://github.com/pulp-platform/hero), including all releases and the main branch.  As continuous integration and verification (partially) relies on commercial software and FPGA boards, it is hosted on servers of the maintainers.  For the same reason, issues are tracked there.  If you have questions or would like to provide feedback, please e-mail `hero (at) iis ee ethz ch` (replace the spaces in the domain name with dots).
 
+The **design and architecture** of the components of HEROv2 are described in [**this paper** (preprint)](https://arxiv.org/abs/2201.03861). If you use our work in your research, please cite it.
+
 
 ## Getting Started
 
