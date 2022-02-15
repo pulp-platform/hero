@@ -9,14 +9,14 @@ The HERO SDK build process requires additional packages to be installed with res
 
 #### Ubuntu 18.04-LTS, 16.04-LTS
 ```
-sudo apt install curl flex gawk libtool-bin libtool-doc libncurses5-dev bison python3.6-dev  python3.6-venv python3.6-doc ninja-build
+sudo apt install curl flex gawk libtool-bin libtool-doc libncurses5-dev bison python3.6-dev  python3.6-venv python3.6-doc ninja-build libssl-dev
 ```
 
 #### CentOS 7
 ```
 sudo yum groupinstall "Development Tools"
 sudo yum install http://repo.okay.com.mx/centos/7/x86_64/release/okay-release-1-1.noarch.rpm
-sudo yum install ncurses-dev bison-devel ninja-build
+sudo yum install ncurses-dev bison-devel ninja-build openssl-devel
 ```
 
 Additional packages must be installed to build the PULP software stack contained within the HERO SDK (see [README.md](hero/pulp-sdk/README.md)).
