@@ -111,6 +111,8 @@ After the base toolchains and accelerator and host SDKs are installed, the HERO 
 ```
 make tc-llvm
 ```
+(If you are working on ETHZ IIS machines, the default compiler is too old to build LLVM.  To fix this problem, you have to set two environment variables *before* building LLVM: `CC=/usr/pack/gcc-9.2.0-af/linux-x64/bin/gcc CXX=/usr/pack/gcc-9.2.0-af/linux-x64/bin/g++`.)
+
 Note that the LLVM OpenMP target offloading plugin for PULP (i.e., `libomptarget.rtl.pulp.so`) is *not* compiled as part of LLVM.  Instead, it is compiled as package in the host SDK, because it must be compiled for a specific host architecture.  You can thus safely ignore the message `LIBOMPTARGET: Not building PULP offloading plugin: build disabled.`.
 
 ### Environments
