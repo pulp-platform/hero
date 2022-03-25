@@ -116,9 +116,7 @@ $(EXE).dis: $(EXE)
 	$(HOST_OBJDUMP) -d $^ > $@
 
 $(EXE).pulp.dis: $(EXE)
-	llvm-readelf -s $^ | grep '\s\.omp_offloading.device_image\>' \
-      | awk '{print "dd if=$^ of=$^_riscv.elf bs=1 count=" $$3 " skip=$$[0x" $$2 " - 0x400000]"}' \
-      | bash \
+	$(DEFMK_ROOT)/extract_device_image.py $^ $^_riscv.elf \
       && $(DEV_OBJDUMP) -d $^_riscv.elf > $@
 
 endif
