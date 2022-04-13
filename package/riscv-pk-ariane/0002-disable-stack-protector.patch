@@ -1,0 +1,12 @@
+diff -urN a/configure b/configure
+--- a/configure	2019-03-18 16:22:45.000000000 +0100
++++ b/configure	2022-04-06 16:36:42.650962929 +0200
+@@ -4803,7 +4803,7 @@
+ 
+ fi
+ 
+-CFLAGS="-Wall -Werror -D__NO_INLINE__ -mcmodel=medany -O2 -std=gnu99 -Wno-unused -Wno-attributes -fno-delete-null-pointer-checks -fno-PIE"
++CFLAGS="-Wall -Werror -D__NO_INLINE__ -mcmodel=medany -O2 -std=gnu99 -Wno-unused -Wno-attributes -fno-delete-null-pointer-checks -fno-PIE -fno-stack-protector"
+ LDFLAGS="$LDFLAGS -Wl,--build-id=none"
+ 
+ 
