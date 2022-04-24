@@ -24,11 +24,11 @@ module event_unit_core
   input  logic test_mode_i,
 
   // master event lines, partially private for a specific core
-  input  logic [31:0] master_event_lines_i,
+  input  logic [31:0] master_event_lines_i,  // events from acc/dma/timer/prefetch/mutex
 
   // sw event generation output
-  output logic [NB_SW_EVT-1:0] core_sw_events_o,
-  output logic [NB_CORES-1:0]  core_sw_events_mask_o,
+  output logic [NB_SW_EVT-1:0] core_sw_events_o,      // sw-event from EU_CORE
+  output logic [NB_CORES-1:0]  core_sw_events_mask_o, // sw-event mask
 
   // barrier trigger output
   output logic [NB_BARR-1:0]   hw_barr_id_o,
@@ -363,7 +363,7 @@ module event_unit_core
       if ( ({eu_direct_link_slave.add[9],eu_direct_link_slave.add[4:2]} == 4'b1_110) ||
            ({eu_direct_link_slave.add[9],eu_direct_link_slave.add[4:2]} == 4'b1_111)    )
       begin
-        hw_barr_id_o[eu_direct_link_slave.add[8:5]] = 1'b1; ;
+        hw_barr_id_o[eu_direct_link_slave.add[8:5]] = 1'b1;
       end
 
       // try to lock a mutex

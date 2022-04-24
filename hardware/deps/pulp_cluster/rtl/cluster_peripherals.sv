@@ -169,22 +169,22 @@ module cluster_peripherals import pulp_cluster_package::*;
     .clk_i                  ( clk_i                  ),
     .rst_ni                 ( rst_ni                 ),
     .test_mode_i            ( test_mode_i            ),
-    .acc_events_i           ( s_acc_events           ),
-    .dma_events_i           ( s_dma_events           ),
-    .timer_events_i         ( s_timer_events         ),
-    .cluster_events_i       ( s_cluster_events       ),
-    .core_irq_id_o          ( irq_id_o               ),
-    .core_irq_ack_id_i      ( irq_ack_id_i           ),
-    .core_irq_req_o         ( irq_req_o              ),
-    .core_irq_ack_i         ( irq_ack_i              ),
-    .core_busy_i            ( core_busy_i            ),
-    .core_clock_en_o        ( core_clk_en_o          ),
-    .speriph_slave          ( speriph_slave_eu_comb  ),
-    .eu_direct_link         ( core_eu_direct_link    ),
-    .soc_periph_evt_valid_i ( soc_periph_evt_valid_i ),
-    .soc_periph_evt_ready_o ( soc_periph_evt_ready_o ),
-    .soc_periph_evt_data_i  ( soc_periph_evt_data_i  ),  
-    .message_master         ( eu_message_master      )
+    .acc_events_i           ( s_acc_events           ), // from ACC
+    .dma_events_i           ( s_dma_events           ), // from DMA : DMA done event
+    .timer_events_i         ( s_timer_events         ), // from TIMER 
+    .cluster_events_i       ( s_cluster_events       ), // from {I$_CTRL, DMA} -- ({30'd0,pf_event_o,dma_pe_irq_i}) : prefetch done event
+    .core_irq_id_o          ( irq_id_o               ), // from/to RV-CORE (EU is master) 
+    .core_irq_ack_id_i      ( irq_ack_id_i           ), // from/to RV-CORE (EU is master)
+    .core_irq_req_o         ( irq_req_o              ), // from/to RV-CORE (EU is master)
+    .core_irq_ack_i         ( irq_ack_i              ), // from/to RV-CORE (EU is master)
+    .core_busy_i            ( core_busy_i            ), // from/to RV-CORE (EU is master)
+    .core_clock_en_o        ( core_clk_en_o          ), // from/to RV-CORE (EU is master)
+    .speriph_slave          ( speriph_slave_eu_comb  ), // from cluster_interconnector(extern-core, RV-CORE)
+    .eu_direct_link         ( core_eu_direct_link    ), // from RV-CORE
+    .soc_periph_evt_valid_i ( soc_periph_evt_valid_i ), // from off-cluster : dc_token_ring -- N/A(tied-0)
+    .soc_periph_evt_ready_o ( soc_periph_evt_ready_o ), // from off-cluster : dc_token_ring -- N/A(tied-0)
+    .soc_periph_evt_data_i  ( soc_periph_evt_data_i  ), // from off-cluster : dc_token_ring -- N/A(tied-0)
+    .message_master         ( eu_message_master      )  // N/A
   );
 
   // event unit binding
@@ -229,7 +229,7 @@ module cluster_peripherals import pulp_cluster_package::*;
     end
   endgenerate
      
-  mp_pf_icache_ctrl_unit #(
+  mp_pf_icache_ctrl_unit #( // assert pf-req and generate pf-done to I$ unit
     .NB_CACHE_BANKS ( NB_CACHE_BANKS       ),
     .NB_CORES       ( NB_CORES             ),
     .ID_WIDTH       ( NB_CORES+NB_MPERIPHS )
