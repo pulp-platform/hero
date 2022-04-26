@@ -115,7 +115,14 @@ module event_unit_core
   logic        inhibit_req;
 
   // core clock FSM
-  enum logic [2:0] { ACTIVE, SLEEP, WAKEUP_SLEEP, WAKEUP_SLEEP_DEL, WAKEUP_IRQ, IRQ_WHILE_SLEEP } core_clock_CS, core_clock_NS;
+  enum logic [2:0] { 
+      ACTIVE, 
+      SLEEP, 
+      WAKEUP_SLEEP, 
+      WAKEUP_SLEEP_DEL, 
+      WAKEUP_IRQ, 
+      IRQ_WHILE_SLEEP 
+  } core_clock_CS, core_clock_NS;
 
   // ORing of sw event sources
   assign core_sw_events_o      = sw_events_reg | sw_events_wait;
@@ -351,7 +358,7 @@ module event_unit_core
          (replay_sleep_req == 1'b0)         && (inhibit_req == 1'b0) ) begin
       // trigger sw_event+read buffer+sleep(+clear) accesses
       if ( (eu_direct_link_slave.add[9:6] == 4'b0101) || (eu_direct_link_slave.add[9:6] == 4'b0110) ) begin
-        sw_events_wait[eu_direct_link_slave.add[4:2]] = 1'b1;
+        sw_events_wait[eu_direct_link_slave.add[4:2]] = 1'b1; // eu_direct_link_slave.add[4:2] is sw_event_id
         // use all-0 state to trigger all cores
         if ( sw_events_mask_DP == '0 )
           sw_events_mask_wait = '1;

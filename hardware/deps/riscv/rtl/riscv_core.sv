@@ -1091,6 +1091,7 @@ module riscv_core import apu_core_package::*; import riscv_defines::*;
 
   generate
   if(PULP_SECURE && USE_PMP) begin : RISCY_PMP
+  // physical memory protection
   riscv_pmp
   #(
      .N_PMP_ENTRIES(N_PMP_ENTRIES)
