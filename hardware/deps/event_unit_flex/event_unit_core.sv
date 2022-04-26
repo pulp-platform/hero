@@ -129,8 +129,8 @@ module event_unit_core
   assign core_sw_events_mask_o = sw_events_mask_reg | sw_events_mask_wait;
 
   // masking and reduction of buffer
-  assign event_buffer_masked   = event_buffer_DP & event_mask_DP;
-  assign irq_buffer_masked     = event_buffer_DP & irq_mask_DP;
+  assign event_buffer_masked   = event_buffer_DP & event_mask_DP; // EVT : EVT is an event that is processed in the EU-CORE
+  assign irq_buffer_masked     = event_buffer_DP & irq_mask_DP;   // IRQ : IRQ is an event that is processed in the RV-CORE
 
   // calculation of one-hot clear mask for interrupts
   assign irq_pending           = |irq_buffer_masked;
