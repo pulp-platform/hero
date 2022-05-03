@@ -79,7 +79,12 @@ module riscv_controller import riscv_defines::*;
   input  logic        data_req_ex_i,              // data memory access is currently performed in EX stage
   input  logic        data_we_ex_i,
   input  logic        data_misaligned_i,
-  input  logic        data_load_event_i,
+  input  logic        data_load_event_i,          // # USED FOR FSM
+                                                  // from decoder_i.data_load_event_o
+                                                  // to ctrl_fsm_ns, halt_if_o, perf_pipeline_stall_o
+                                                  // data_load_event_i make ELW_EXE state
+                                                  //  - set halt_if_o, halt_id_o to high
+                                                  //  - waiting id_ready_i ==> when id_ready_i is comming, fsm goes to IRQ_FLUSH_ELW
   input  logic        data_err_i,
   output logic        data_err_ack_o,
 

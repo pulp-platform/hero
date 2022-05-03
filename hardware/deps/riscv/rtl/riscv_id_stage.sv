@@ -386,7 +386,9 @@ module riscv_id_stage import riscv_defines::*; import apu_core_package::*;
   logic [1:0]  data_sign_ext_id;
   logic [1:0]  data_reg_offset_id;
   logic        data_req_id;
-  logic        data_load_event_id;
+  logic        data_load_event_id; // from decoder_i.data_load_event_o
+                                   // to controller_i.data_load_event_i  -- control FSM in riscv_controller 
+                                   // to data_load_event_ex_o  --- only connected with core_busy_int
 
   // Atomic memory instruction
   logic [5:0]  atop_id;
