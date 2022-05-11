@@ -43,6 +43,21 @@ br-har-exilzcu102-base: check_environment
 	cp $(CURDIR)/output/br-har-exilzcu102/images/sdcard.img $(CURDIR)/output/har-exilzcu102-base-sdcard.img
 br-har-exilzcu102: br-har-exilzcu102-base
 
+.PHONY: br-hrv-occamy-defconfig
+br-hrv-occamy-defconfig: check_environment
+	mkdir -p $(CURDIR)/output/br-hrv-occamy
+	$(MAKE) O=$(CURDIR)/output/br-hrv-occamy BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hrv_occamy_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hrv-occamy/.config; fi
+
+.PHONY: br-hrv-occamy-base
+br-hrv-occamy-base: br-hrv-occamy-defconfig
+	mkdir -p $(CURDIR)/output/br-hrv-occamy
+	$(MAKE) O=$(CURDIR)/output/br-hrv-occamy BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hrv_occamy_defconfig
+	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hrv-occamy/.config; fi
+	$(MAKE) -C $(CURDIR)/output/br-hrv-occamy
+	$(MAKE) -C $(CURDIR)/output/br-hrv-occamy prepare-sdk
+br-hrv-occamy: br-hrv-occamy-base
+
 # sdk images
 br-hrv: check_environment
 	mkdir -p $(CURDIR)/output/br-hrv
