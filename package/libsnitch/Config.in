@@ -1,0 +1,22 @@
+config BR2_PACKAGE_LIBSNITCH
+	bool "libsnitch: Snitch userspace library"
+	depends on BR2_LINUX_KERNEL
+	depends on BR2_PACKAGE_HERO_PLATFORM != ""
+
+comment "libsnitch needs a Linux kernel to be built"
+	depends on !BR2_LINUX_KERNEL
+
+comment "libsnitch needs a well-defined HERO platform"
+	depends on BR2_PACKAGE_HERO_PLATFORM = ""
+
+if BR2_PACKAGE_LIBSNITCH
+
+config BR2_PACKAGE_LIBSNITCH_DEBUG_LEVEL
+	int "libsnitch debug level"
+	default 0
+	help
+	  Debug level for libsnitch support library.  Higher is more
+	  verbose.  If more than zero, the binaries are also compiled
+	  with debugging symbols.
+
+endif

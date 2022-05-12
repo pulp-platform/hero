@@ -1,0 +1,22 @@
+config BR2_PACKAGE_SNITCH_DRIVER
+	bool "Linux kernel driver for Snitch"
+	depends on BR2_LINUX_KERNEL
+	depends on BR2_PACKAGE_HERO_PLATFORM != ""
+
+comment "Snitch driver needs a Linux kernel to be built"
+	depends on !BR2_LINUX_KERNEL
+
+comment "Snitch driver needs a well-defined HERO platform"
+	depends on BR2_PACKAGE_HERO_PLATFORM = ""
+
+if BR2_PACKAGE_SNITCH_DRIVER
+
+config BR2_PACKAGE_SNITCH_DRIVER_DEBUG_LEVEL
+	int "Snitch driver debug level"
+	default 0
+	help
+	  Debug level for SNITCH driver.  Higher is more verbose.  If more
+	  than zero, the binaries are also compiled with debugging
+	  symbols.
+
+endif
