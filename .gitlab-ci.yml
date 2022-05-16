@@ -246,6 +246,19 @@ br-hrv-eqemu:
     - make br-hrv-eqemu
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-hrv-eqemu
 
+br-hrv-occamy:
+  stage: build4
+  needs: ["pre-downstream-checkout"]
+  script:
+    - >
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-hrv-occamy; then
+        exit 0
+      fi
+    - chmod -R u+w $HERO_INSTALL
+    - make br-hrv-occamy
+    - chmod -R u-w $HERO_INSTALL
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-hrv-occamy
+
 test-zcu102-examples:
   stage: test
   needs: ["vsim-pulp", "tc-pulp", "tc-har-olinux", "tc-llvm", "sdk-pulp-and-sdk-har-and-prem"]
