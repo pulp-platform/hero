@@ -1,9 +1,24 @@
 config BR2_PACKAGE_HERO_OPENMP
-	bool "LLVM OpenMP offload plugin for HERO accelerators (PULP)"
+	bool "LLVM OpenMP offload plugin for HERO accelerators (Snitch/PULP)"
 	select BR2_PACKAGE_ELFUTILS
 	select BR2_PACKAGE_LIBFFI
-	select BR2_PACKAGE_LIBPULP
 	depends on BR2_PACKAGE_HERO_PLATFORM != ""
+
+choice
+	prompt "HERO Device type"
+	depends on BR2_PACKAGE_HERO_OPENMP
+	help
+	  Select what device to target for offloading
+
+config BR2_PACKAGE_HERO_OPENMP_DEVICE_PULP
+	bool "PULP device"
+	select BR2_PACKAGE_LIBPULP
+
+config BR2_PACKAGE_HERO_OPENMP_DEVICE_SNITCH
+	bool "Snitch device"
+	select BR2_PACKAGE_LIBSNITCH
+
+endchoice
 
 config BR2_PACKAGE_HERO_OPENMP_ENABLE_PREM
 	bool "Enable support for PREM in HERO OpenMP"
