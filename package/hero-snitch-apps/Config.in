@@ -1,0 +1,3 @@
+config BR2_PACKAGE_HERO_SNITCH_APPS
+	bool "Support applications (standalone/UART) for HERO with Snitch device"
+	select BR2_PACKAGE_LIBSNITCH
