@@ -2,6 +2,7 @@ source "$BR2_EXTERNAL_HERO_PATH/package/Config.in"
 
 source "$BR2_EXTERNAL_HERO_PATH/package/ariane-support/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/hero-apps/Config.in"
+source "$BR2_EXTERNAL_HERO_PATH/package/hero-snitch-apps/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/hero-openmp/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/libhero-target/Config.in"
 source "$BR2_EXTERNAL_HERO_PATH/package/libpulp/Config.in"
