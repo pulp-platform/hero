@@ -127,7 +127,7 @@ tc-llvm-debug:
 	cd $(CURDIR)/output/tc-llvm-debug/ && $(ROOT)/toolchain/setup-llvm.sh Debug
 
 # SDK
-.PHONY: sdk-pulp-hrv sdk-pulp sdk-pulp-har sdk-hrv sdk-har
+.PHONY: sdk-pulp-hrv sdk-pulp sdk-pulp-har sdk-hrv sdk-har sdk-snitch
 
 sdk-pulp-hrv: check_environment
 	$(ROOT)/pulp/setup-sdk.sh hero-urania
@@ -141,6 +141,10 @@ sdk-hrv: check_environment br-hrv
 
 sdk-har: check_environment br-har
 	cd $(CURDIR)/output/br-har && $(ROOT)/toolchain/install-sdk.sh
+
+sdk-snitch: check_environment
+	mkdir -p $(CURDIR)/output/$@
+	cd $(CURDIR)/output/$@ && $(ROOT)/toolchain/build-snitch-runtime.sh $(ROOT)/../snitch-snruntime-hero/sw
 
 # Utilities
 .PHONY: util-hrv-openocd
