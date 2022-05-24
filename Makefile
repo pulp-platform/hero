@@ -117,6 +117,11 @@ tc-llvm:
 	mkdir -p $(CURDIR)/output/tc-llvm/
 	cd $(CURDIR)/output/tc-llvm/ && $(ROOT)/toolchain/setup-llvm.sh Release
 
+# Additions to LLVM for Snitch
+tc-snitch:
+	mkdir -p $(CURDIR)/output/tc-llvm/
+	cd $(CURDIR)/output/tc-llvm/ && $(ROOT)/toolchain/setup-llvm-snitch.sh
+
 tc-llvm-debug:
 	mkdir -p $(CURDIR)/output/tc-llvm-debug/
 	cd $(CURDIR)/output/tc-llvm-debug/ && $(ROOT)/toolchain/setup-llvm.sh Debug
