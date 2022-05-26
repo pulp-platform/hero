@@ -708,7 +708,7 @@ module riscv_core import apu_core_package::*; import riscv_defines::*;
     .data_type_ex_o               ( data_type_ex         ), // to load store unit
     .data_sign_ext_ex_o           ( data_sign_ext_ex     ), // to load store unit
     .data_reg_offset_ex_o         ( data_reg_offset_ex   ), // to load store unit
-    .data_load_event_ex_o         ( data_load_event_ex   ), // to load store unit
+    .data_load_event_ex_o         ( data_load_event_ex   ), // to load store unit --- Only for core_buys_int, not LSU
 
     .data_misaligned_ex_o         ( data_misaligned_ex   ), // to load store unit
 
@@ -1091,6 +1091,7 @@ module riscv_core import apu_core_package::*; import riscv_defines::*;
 
   generate
   if(PULP_SECURE && USE_PMP) begin : RISCY_PMP
+  // physical memory protection
   riscv_pmp
   #(
      .N_PMP_ENTRIES(N_PMP_ENTRIES)

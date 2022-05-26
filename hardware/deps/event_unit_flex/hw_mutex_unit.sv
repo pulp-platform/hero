@@ -19,8 +19,8 @@ module hw_mutex_unit
   input  logic rst_ni,
 
   // lock and unlock req from each core
-  input  logic [NB_CORES-1:0] lock_req_i,
-  input  logic [NB_CORES-1:0] unlock_req_i,
+  input  logic [NB_CORES-1:0] lock_req_i, // read req from EU_CORE
+  input  logic [NB_CORES-1:0] unlock_req_i, // write req from  EU_CORE
 
   // read and write data for messaging after wakeup
   input  logic [MUTEX_MSG_W-1:0] mutex_msg_wdata_i,

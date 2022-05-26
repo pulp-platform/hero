@@ -386,7 +386,9 @@ module riscv_id_stage import riscv_defines::*; import apu_core_package::*;
   logic [1:0]  data_sign_ext_id;
   logic [1:0]  data_reg_offset_id;
   logic        data_req_id;
-  logic        data_load_event_id;
+  logic        data_load_event_id; // from decoder_i.data_load_event_o
+                                   // to controller_i.data_load_event_i  -- control FSM in riscv_controller 
+                                   // to data_load_event_ex_o  --- only connected with core_busy_int
 
   // Atomic memory instruction
   logic [5:0]  atop_id;
@@ -1140,7 +1142,7 @@ module riscv_id_stage import riscv_defines::*; import apu_core_package::*;
     .data_type_o                     ( data_type_id              ),
     .data_sign_extension_o           ( data_sign_ext_id          ),
     .data_reg_offset_o               ( data_reg_offset_id        ),
-    .data_load_event_o               ( data_load_event_id        ),
+    .data_load_event_o               ( data_load_event_id        ), // only connect with core_busy_int
 
     // Atomic memory access
     .atop_o                          ( atop_id                   ),
@@ -1585,7 +1587,7 @@ module riscv_id_stage import riscv_defines::*; import apu_core_package::*;
           data_type_ex_o            <= data_type_id;
           data_sign_ext_ex_o        <= data_sign_ext_id;
           data_reg_offset_ex_o      <= data_reg_offset_id;
-          data_load_event_ex_o      <= data_load_event_id;
+          data_load_event_ex_o      <= data_load_event_id; // only connect with core_busy_int
           atop_ex_o                 <= atop_id;
         end else begin
           data_load_event_ex_o      <= 1'b0;

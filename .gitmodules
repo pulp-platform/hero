@@ -1,9 +1,9 @@
 [submodule "buildroot"]
 	path = buildroot
-	url = git://git.buildroot.net/buildroot
+	url = https://github.com/buildroot/buildroot.git
 [submodule "tools/riscv-openocd"]
 	path = util/riscv-openocd
-	url = https://github.com/riscv/riscv-openocd
+	url = https://github.com/riscv/riscv-openocd.git
 [submodule "toolchain/llvm-project"]
 	path = toolchain/llvm-project
 	url = https://github.com/pulp-platform/llvm-project.git

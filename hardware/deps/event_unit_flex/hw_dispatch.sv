@@ -22,11 +22,11 @@ module hw_dispatch
   input  logic [NB_CORES-1:0] pop_req_i,
   input  logic [NB_CORES-1:0] pop_ack_i,
   // current read data for each core
-  output logic [NB_CORES-1:0][31:0] dispatch_value_o,
+  output logic [NB_CORES-1:0][31:0] dispatch_value_o, // pop value
 
   // value push and team configuration by master
   input  logic [NB_CORES-1:0]       w_req_i,
-  input  logic [NB_CORES-1:0][31:0] w_data_i,
+  input  logic [NB_CORES-1:0][31:0] w_data_i, // push value
   input  logic [NB_CORES-1:0][1:0]  reg_sel_i,
 
   // event output to flag availability of a value to a specific core
@@ -43,8 +43,8 @@ module hw_dispatch
 
   logic [FIFO_DEPTH-1:0][NB_CORES-1:0] core_set_stat_DP, core_set_stat_DN;
 
-  logic [NB_CORES-1:0][$clog2(FIFO_DEPTH)-1:0] read_ptr_DP, read_ptr_DN;
-  logic [$clog2(FIFO_DEPTH)-1:0]               write_ptr_DP, write_ptr_DN;
+  logic [NB_CORES-1:0][$clog2(FIFO_DEPTH)-1:0] read_ptr_DP, read_ptr_DN; // read for pop-req
+  logic [$clog2(FIFO_DEPTH)-1:0]               write_ptr_DP, write_ptr_DN; // write for w_req
 
   // internal signals
   logic [NB_CORES-1:0][1:0][31:0] w_data_int;

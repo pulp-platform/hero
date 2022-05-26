@@ -142,7 +142,7 @@ module riscv_decoder import riscv_defines::*; import apu_core_package::*;
   output logic [1:0]  data_type_o,             // data type on data memory: byte, half word or word
   output logic [1:0]  data_sign_extension_o,   // sign extension on read data from data memory / NaN boxing
   output logic [1:0]  data_reg_offset_o,       // offset in byte inside register for stores
-  output logic        data_load_event_o,       // data request is in the special event range
+  output logic        data_load_event_o,       // data request is in the special event range(p.elw)
 
   // Atomic memory access
   output  logic [5:0] atop_o,

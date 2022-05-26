@@ -24,11 +24,11 @@ module event_unit_core
   input  logic test_mode_i,
 
   // master event lines, partially private for a specific core
-  input  logic [31:0] master_event_lines_i,
+  input  logic [31:0] master_event_lines_i,  // events from acc/dma/timer/prefetch/mutex
 
   // sw event generation output
-  output logic [NB_SW_EVT-1:0] core_sw_events_o,
-  output logic [NB_CORES-1:0]  core_sw_events_mask_o,
+  output logic [NB_SW_EVT-1:0] core_sw_events_o,      // sw-event from EU_CORE
+  output logic [NB_CORES-1:0]  core_sw_events_mask_o, // sw-event mask
 
   // barrier trigger output
   output logic [NB_BARR-1:0]   hw_barr_id_o,
@@ -115,15 +115,22 @@ module event_unit_core
   logic        inhibit_req;
 
   // core clock FSM
-  enum logic [2:0] { ACTIVE, SLEEP, WAKEUP_SLEEP, WAKEUP_SLEEP_DEL, WAKEUP_IRQ, IRQ_WHILE_SLEEP } core_clock_CS, core_clock_NS;
+  enum logic [2:0] { 
+      ACTIVE, 
+      SLEEP, 
+      WAKEUP_SLEEP, 
+      WAKEUP_SLEEP_DEL, 
+      WAKEUP_IRQ, 
+      IRQ_WHILE_SLEEP 
+  } core_clock_CS, core_clock_NS;
 
   // ORing of sw event sources
   assign core_sw_events_o      = sw_events_reg | sw_events_wait;
   assign core_sw_events_mask_o = sw_events_mask_reg | sw_events_mask_wait;
 
   // masking and reduction of buffer
-  assign event_buffer_masked   = event_buffer_DP & event_mask_DP;
-  assign irq_buffer_masked     = event_buffer_DP & irq_mask_DP;
+  assign event_buffer_masked   = event_buffer_DP & event_mask_DP; // EVT : EVT is an event that is processed in the EU-CORE
+  assign irq_buffer_masked     = event_buffer_DP & irq_mask_DP;   // IRQ : IRQ is an event that is processed in the RV-CORE
 
   // calculation of one-hot clear mask for interrupts
   assign irq_pending           = |irq_buffer_masked;
@@ -351,7 +358,7 @@ module event_unit_core
          (replay_sleep_req == 1'b0)         && (inhibit_req == 1'b0) ) begin
       // trigger sw_event+read buffer+sleep(+clear) accesses
       if ( (eu_direct_link_slave.add[9:6] == 4'b0101) || (eu_direct_link_slave.add[9:6] == 4'b0110) ) begin
-        sw_events_wait[eu_direct_link_slave.add[4:2]] = 1'b1;
+        sw_events_wait[eu_direct_link_slave.add[4:2]] = 1'b1; // eu_direct_link_slave.add[4:2] is sw_event_id
         // use all-0 state to trigger all cores
         if ( sw_events_mask_DP == '0 )
           sw_events_mask_wait = '1;
@@ -363,7 +370,7 @@ module event_unit_core
       if ( ({eu_direct_link_slave.add[9],eu_direct_link_slave.add[4:2]} == 4'b1_110) ||
            ({eu_direct_link_slave.add[9],eu_direct_link_slave.add[4:2]} == 4'b1_111)    )
       begin
-        hw_barr_id_o[eu_direct_link_slave.add[8:5]] = 1'b1; ;
+        hw_barr_id_o[eu_direct_link_slave.add[8:5]] = 1'b1;
       end
 
       // try to lock a mutex

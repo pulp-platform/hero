@@ -12,6 +12,11 @@ if test -z "$CI"; then
   exit 1
 fi
 
+if test "$DOWNSTREAM" != "false"; then
+  echo "Aborting because a downstream pipeline must not update the branch."
+  exit 0
+fi
+
 exitcode=0
 if test "$CI_COMMIT_BRANCH" = "master"; then
   # Initialize SSH agent and add deployment key.
