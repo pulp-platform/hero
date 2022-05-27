@@ -519,13 +519,13 @@ module pulp_cluster import pulp_cluster_package::*; import apu_package::*; impor
     .rst_ni        ( rst_ni            ),
     .test_en_i     ( test_mode_i       ),
     .cluster_id_i  ( cluster_id_i      ),
-    .data_slave    ( s_core_ext_bus    ),
-    .instr_slave   ( s_core_instr_bus  ),
-    .dma_slave     ( s_dma_ext_bus     ),
-    .ext_slave     ( s_data_slave      ),
-    .tcdm_master   ( s_ext_tcdm_bus    ),
-    .periph_master ( s_ext_mperiph_bus ),
-    .ext_master    ( s_data_master     )
+    .data_slave    ( s_core_ext_bus    ), // AXI_BUS.Slave -- from per2axi from cluster_interconnect_wrap
+    .instr_slave   ( s_core_instr_bus  ), // AXI_BUS.Slave -- from serializer_icache from icache_axi
+    .dma_slave     ( s_dma_ext_bus     ), // AXI_BUS.Slave -- from dmac_wrap
+    .ext_slave     ( s_data_slave      ), // AXI_BUS.Slave -- from data_slave_slice from off-cluster(from FC)
+    .tcdm_master   ( s_ext_tcdm_bus    ), // AXI_BUS.Master
+    .periph_master ( s_ext_mperiph_bus ), // AXI_BUS.Master
+    .ext_master    ( s_data_master     )  // AXI_BUS.Master -- to 
   );
 
   logic [NB_EXT2MEM-1:0]        s_ext_xbar_bus_req, s_ext_xbar_bus_gnt,
@@ -730,17 +730,17 @@ module pulp_cluster import pulp_cluster_package::*; import apu_package::*; impor
   ) cluster_interconnect_wrap_i (
     .clk_i                  ( clk_cluster                         ),
     .rst_ni                 ( rst_ni                              ),
-    .core_tcdm_slave        ( s_core_xbar_bus                     ),
+    .core_tcdm_slave        ( s_core_xbar_bus                     ), // XBAR_TCDM_BUS.Slave
     .core_tcdm_slave_atop   ( s_core_xbar_bus_atop                ),
-    .core_periph_slave      ( s_core_periph_tryx                  ),
+    .core_periph_slave      ( s_core_periph_tryx                  ), // XBAR_PERIPH_BUS.Slave
     .core_periph_slave_atop ( s_core_periph_bus_atop              ),
     .core_periph_slave_addrext ( s_core_periph_bus_addrext        ),
-    .ext_slave              ( s_ext_xbar_bus                      ),
+    .ext_slave              ( s_ext_xbar_bus                      ), // XBAR_TCDM_BUS.Slave
     .ext_slave_atop         ( s_ext_xbar_bus_atop                 ),
-    .dma_slave              ( s_dma_xbar_bus                      ),
-    .mperiph_slave          ( s_mperiph_xbar_bus[NB_MPERIPHS-1:0] ),
-    .tcdm_sram_master       ( s_tcdm_bus_sram                     ),
-    .speriph_master         ( s_xbar_speriph_bus                  ),
+    .dma_slave              ( s_dma_xbar_bus                      ), // XBAR_TCDM_BUS.Slave
+    .mperiph_slave          ( s_mperiph_xbar_bus[NB_MPERIPHS-1:0] ), // XBAR_TCDM_BUS.Slave
+    .tcdm_sram_master       ( s_tcdm_bus_sram                     ), // TCDM_BANK_MEM_BUS.Master
+    .speriph_master         ( s_xbar_speriph_bus                  ), // XBAR_PERIPH_BUS.Master
     .speriph_master_atop    ( s_xbar_speriph_atop                 ),
     .TCDM_arb_policy_i      ( s_TCDM_arb_policy                   )
   );
