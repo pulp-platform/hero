@@ -195,7 +195,7 @@ module dmac_wrap
   /* verilator lint_on WIDTHCONCAT */
 
   axi_xbar #(
-    .Cfg          ( XbarCfg       ),
+    .Cfg          ( XbarCfg       ), // NumSlvPorts = NUM_STREAMS
     .slv_aw_chan_t( slv_aw_chan_t ),
     .mst_aw_chan_t( mst_aw_chan_t ),
     .w_chan_t     ( w_chan_t      ),

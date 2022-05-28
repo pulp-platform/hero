@@ -22,15 +22,15 @@
 module pulp_cluster import pulp_cluster_package::*; import apu_package::*; import apu_core_package::*;
 #(
   // cluster parameters
-  parameter bit ASYNC_INTF          = 1'b1,
-  parameter int NB_CORES            = 8,
-  parameter int NB_HWACC_PORTS      = 0,
-  parameter int NB_DMAS             = 4,
-  parameter int NB_EXT2MEM          = 2,
-  parameter int NB_MPERIPHS         = 1,
-  parameter int NB_SPERIPHS         = 8,
-  parameter bit CLUSTER_ALIAS       = 1'b1,
-  parameter int CLUSTER_ALIAS_BASE  = 12'h1B0,
+  parameter bit ASYNC_INTF          = 1'b1,     // RV-CORE is on async-clock domain
+  parameter int NB_CORES            = 8,        // # of RV-CORE
+  parameter int NB_HWACC_PORTS      = 0,        // # of HWPE
+  parameter int NB_DMAS             = 4,        // # of DMA channel for TDCM
+  parameter int NB_EXT2MEM          = 2,        // # of bank that accessable at a once from External
+  parameter int NB_MPERIPHS         = 1,        // # of master peri for interconnect_wrap -- NOTE::DO NOT TOUCH
+  parameter int NB_SPERIPHS         = 8,        // # of slape peri for interconnect_wrap
+  parameter bit CLUSTER_ALIAS       = 1'b1,     // RV-CORE attribution
+  parameter int CLUSTER_ALIAS_BASE  = 12'h1B0,  // RV-CORE attribution
   parameter int TCDM_SIZE           = 256*1024,                // [B], must be 2**N
   parameter int NB_TCDM_BANKS       = 16,                      // must be 2**N
   parameter int TCDM_BANK_SIZE      = TCDM_SIZE/NB_TCDM_BANKS, // [B]
@@ -71,7 +71,7 @@ module pulp_cluster import pulp_cluster_package::*; import apu_package::*; impor
   parameter int ADDR_MEM_WIDTH  = $clog2(TCDM_BANK_SIZE/4), // WORD address width per TCDM bank (the word width is 32 bits)
 
   // DMA parameters
-  parameter int NB_DMA_STREAMS   = 4,
+  parameter int NB_DMA_STREAMS   = 4, // # of DMA master channel
   parameter int NB_OUTSND_BURSTS = 8,
 
   // peripheral and periph interconnect parameters
@@ -1074,7 +1074,7 @@ module pulp_cluster import pulp_cluster_package::*; import apu_package::*; impor
       .rst_ni           ( s_rst_n             ),
       .test_cgbypass_i  ( 1'b0                ),
       .isolate_i        ( 1'b0                ),
-      .axi_slave        ( s_data_master       ),
+      .axi_slave        ( s_data_master       ), // from cluster_bus_wrap
       .axi_master_async ( s_data_master_async )
     );
     axi_slice_dc_master_wrap #(
