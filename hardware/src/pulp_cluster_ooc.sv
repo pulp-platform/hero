@@ -9,6 +9,7 @@
 // specific language governing permissions and limitations under the License.
 
 // Stub of PULP Cluster for out-of-context synthesis
+// pulp_cluster
 module pulp_cluster_ooc (
   input  logic                              clk_i,
   input  logic                              rst_ni,
@@ -343,6 +344,7 @@ module pulp_cluster_ooc (
 endmodule
 
 // Interface wrapper for OOC-synthesized synchronous PULP cluster
+// pulp_cluster
 module pulp_cluster_sync (
   input  logic                              clk_i,
   input  logic                              rst_ni,
