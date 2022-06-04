@@ -350,8 +350,8 @@ module cluster_interconnect_wrap
             .inp_valid_i  (pe_inp_req[i]),
             .inp_ready_o  (pe_inp_gnt[i]),
             .oup_sel_i    (pe_inp_idx[i]),
-            .oup_valid_o  (pe_req[i]),
-            .oup_ready_i  (pe_gnt[i])
+            .oup_valid_o  (pe_req    [i]),
+            .oup_ready_i  (pe_gnt    [i])
         );
         logic [PE_XBAR_N_OUPS-1:0] pe_oup_reqs;
         for (genvar j = 0; j < PE_XBAR_N_OUPS; j++) begin : gen_pe_xbar_inps_oup_reqs
