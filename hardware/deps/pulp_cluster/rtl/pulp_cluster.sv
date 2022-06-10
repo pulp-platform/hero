@@ -836,9 +836,9 @@ module pulp_cluster import pulp_cluster_package::*; import apu_package::*; impor
             .DEM_PER_BEFORE_TCDM_TS    ( DEM_PER_BEFORE_TCDM_TS )
         ) core_region_i (
             .clk_i                    ( clk_cluster               ),
-            .rst_ni                   ( s_rst_n                   ),
+            .rst_ni                   ( s_rst_n                   ), // from rstgen : synchronized reset
             .base_addr_i              ( base_addr_i               ),
-            .init_ni                  ( s_init_n                  ),
+            .init_ni                  ( s_init_n                  ), // from rstgen : init_ni = test_mode_i ? 1 : rst_ni
             .cluster_id_i             ( cluster_id_i              ),
             .clock_en_i               ( clk_core_en[i]            ),
             .fetch_en_i               ( fetch_en_int[i]           ),

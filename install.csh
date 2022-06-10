@@ -12,10 +12,9 @@ make tc-pulp -j
 touch done_tc-pulp
 
 make tc-hrv-olinux -j
-make tc-hrv-obare -j
 touch done-tc-hrv
 
-# pip install artifactory sqlalchemy openpyxl build
+# pip3 install artifactory sqlalchemy openpyxl build
 make sdk-pulp -j
 touch sdk-pulp
 

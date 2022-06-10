@@ -24,7 +24,7 @@ module cluster_bus_wrap
 #(
   parameter NB_CORES              =  4,
   parameter DMA_NB_OUTSND_BURSTS  =  8,
-  parameter TCDM_SIZE             =  0,
+  parameter TCDM_SIZE             =  0, 
   parameter AXI_ADDR_WIDTH        = 32,
   parameter AXI_DATA_WIDTH        = 64,
   parameter AXI_ID_IN_WIDTH       =  4,
@@ -111,7 +111,7 @@ module cluster_bus_wrap
   assign addr_map[2] = '{ // TCDM
     idx:  0,
     start_addr: cluster_base_addr,
-    end_addr:   cluster_base_addr + TCDM_SIZE
+    end_addr:   cluster_base_addr + TCDM_SIZE // 256*1024
   };
   assign addr_map[3] = '{ // Peripherals
     idx:  1,
