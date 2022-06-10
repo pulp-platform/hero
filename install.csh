@@ -7,7 +7,7 @@ endif
 #git submodule update --init --recursive
 git pull --recurse-submodule
 
-make prem-set
+make prem-unset
 make tc-pulp -j
 touch done_tc-pulp
 
