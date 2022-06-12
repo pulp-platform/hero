@@ -1,10 +1,9 @@
 #!/bin/tcsh -f
 
-if (!(-d hero_toolchain)) then
-    mkdir hero_toolchain
+setenv HERO_INSTALL /home/astrohan/utils/pulp/hero_toolchain
+if (!(-d $HERO_INSTALL)) then
+    sudo mkdir $HERO_INSTALL
 endif
-setenv GIT_TOP      `git rev-parse --show-toplevel`
-setenv HERO_INSTALL $GIT_TOP/hero_toolchain
 unsetenv LD_LIBRARY_PATH 
 
 #git submodule update --init --recursive
@@ -14,7 +13,7 @@ make prem-unset
 make tc-pulp -j
 touch done_tc-pulp
 
-make tc-hrv-olinux -j
+make tc-hrv-olinux
 touch done-tc-hrv
 
 set path = ($HERO_INSTALL/bin $path)
@@ -24,10 +23,10 @@ set path = ($HERO_INSTALL/riscv-gcc/lib $path)
 set path = ($HERO_INSTALL/riscv32-unknown-elf/bin $path)
 set path = ($HERO_INSTALL/riscv32-unknown-elf/lib $path)
 
-# # pip3 install artifactory sqlalchemy openpyxl build
-# make sdk-pulp -j
-# touch sdk-pulp
-# 
-# make sdk-hrv
+# pip3 install artifactory sqlalchemy openpyxl build
+make sdk-pulp
+touch sdk-pulp
+
+make sdk-hrv
 
 

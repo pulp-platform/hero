@@ -53,7 +53,8 @@ module pulp_cluster import pulp_cluster_package::*; import apu_package::*; impor
     parameter int INSTR_RDATA_WIDTH       = 128,
 
     // AXI parameters
-    parameter int AXI_ADDR_WIDTH        = 32,
+    //parameter int AXI_ADDR_WIDTH        = 32,
+    parameter int AXI_ADDR_WIDTH        = 64,
     parameter int AXI_DATA_C2S_WIDTH    = 64,
     parameter int AXI_DATA_S2C_WIDTH    = 64,
     parameter int AXI_USER_WIDTH        = 6,
