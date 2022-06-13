@@ -475,22 +475,22 @@ module axi2mem_wrap #(
   localparam type mem_data_t = logic [DataWidth/NumBanks-1:0],
   localparam type mem_strb_t = logic [DataWidth/NumBanks/8-1:0]
 ) (
-  input  logic                      clk_i,
-  input  logic                      rst_ni,
+  input  logic                      clk_i        ,
+  input  logic                      rst_ni       ,
 
-  output logic                      busy_o,
+  output logic                      busy_o       ,
 
-  AXI_BUS.Slave                     slv,
+  AXI_BUS.Slave                     slv          ,
 
-  output logic      [NumBanks-1:0]  mem_req_o,
-  input  logic      [NumBanks-1:0]  mem_gnt_i,
-  output addr_t     [NumBanks-1:0]  mem_addr_o,   // byte address
-  output mem_data_t [NumBanks-1:0]  mem_wdata_o,  // write data
-  output mem_strb_t [NumBanks-1:0]  mem_strb_o,   // byte-wise strobe
-  output mem_atop_t [NumBanks-1:0]  mem_atop_o,   // atomic operation
-  output logic      [NumBanks-1:0]  mem_we_o,     // write enable
-  input  logic      [NumBanks-1:0]  mem_rvalid_i, // response valid
-  input  mem_data_t [NumBanks-1:0]  mem_rdata_i   // read data
+  output logic      [NumBanks-1:0]  mem_req_o    ,
+  input  logic      [NumBanks-1:0]  mem_gnt_i    ,
+  output addr_t     [NumBanks-1:0]  mem_addr_o   , // byte address
+  output mem_data_t [NumBanks-1:0]  mem_wdata_o  , // write data
+  output mem_strb_t [NumBanks-1:0]  mem_strb_o   , // byte-wise strobe
+  output mem_atop_t [NumBanks-1:0]  mem_atop_o   , // atomic operation
+  output logic      [NumBanks-1:0]  mem_we_o     , // write enable
+  input  logic      [NumBanks-1:0]  mem_rvalid_i , // response valid
+  input  mem_data_t [NumBanks-1:0]  mem_rdata_i    // read data
 );
   typedef logic [IdWidth-1:0]     id_t;
   typedef logic [DataWidth-1:0]   data_t;
