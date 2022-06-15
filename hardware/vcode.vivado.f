@@ -1,20 +1,20 @@
--I$HERO_DIR/hardware/deps/axi/include
--I$HERO_DIR/hardware/deps/axi/include/axi
--I$HERO_DIR/hardware/deps/cluster_interconnect/rtl/low_latency_interco
--I$HERO_DIR/hardware/deps/cluster_interconnect/rtl/peripheral_interco
--I$HERO_DIR/hardware/deps/cluster_peripherals/event_unit/include
--I$HERO_DIR/hardware/deps/common_cells/include
--I$HERO_DIR/hardware/deps/event_unit_flex
--I$HERO_DIR/hardware/deps/riscv/rtl/include
--I$HERO_DIR/hardware/src/apb/include
--I$HERO_DIR/hardware/deps/axi/include
--I$HERO_DIR/hardware/deps/cluster_interconnect/rtl/low_latency_interco
--I$HERO_DIR/hardware/deps/cluster_interconnect/rtl/peripheral_interco
--I$HERO_DIR/hardware/deps/cluster_peripherals/event_unit/include
--I$HERO_DIR/hardware/deps/common_cells/include
--I$HERO_DIR/hardware/deps/event_unit_flex
--I$HERO_DIR/hardware/deps/riscv/rtl/include
--I$HERO_DIR/hardware/src/apb/include
+-include $HERO_DIR/hardware/deps/axi/include
+-include $HERO_DIR/hardware/deps/axi/include/axi
+-include $HERO_DIR/hardware/deps/cluster_interconnect/rtl/low_latency_interco
+-include $HERO_DIR/hardware/deps/cluster_interconnect/rtl/peripheral_interco
+-include $HERO_DIR/hardware/deps/cluster_peripherals/event_unit/include
+-include $HERO_DIR/hardware/deps/common_cells/include
+-include $HERO_DIR/hardware/deps/event_unit_flex
+-include $HERO_DIR/hardware/deps/riscv/rtl/include
+-include $HERO_DIR/hardware/src/apb/include
+-include $HERO_DIR/hardware/deps/axi/include
+-include $HERO_DIR/hardware/deps/cluster_interconnect/rtl/low_latency_interco
+-include $HERO_DIR/hardware/deps/cluster_interconnect/rtl/peripheral_interco
+-include $HERO_DIR/hardware/deps/cluster_peripherals/event_unit/include
+-include $HERO_DIR/hardware/deps/common_cells/include
+-include $HERO_DIR/hardware/deps/event_unit_flex
+-include $HERO_DIR/hardware/deps/riscv/rtl/include
+-include $HERO_DIR/hardware/src/apb/include
 $HERO_DIR/hardware/deps/tech_cells_generic/src/deprecated/cluster_clk_cells_xilinx.sv
 $HERO_DIR/hardware/deps/tech_cells_generic/src/fpga/tc_clk_xilinx.sv
 $HERO_DIR/hardware/deps/tech_cells_generic/src/fpga/tc_sram_xilinx.sv

@@ -2,8 +2,8 @@
 # Using vivado
 #=====================================================
 
-DESIGN 		= pulp_cluster
-VCODE 		= vcode.f
+DESIGN 		= top
+VCODE 		= vcode.vivado.f
 WORK 		= worklib
 TCL 		= tb_sim.tcl
 DUMP 		= l1_dump
