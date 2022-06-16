@@ -17,7 +17,8 @@
 +incdir+$HERO_DIR/hardware/src/apb/include
 $HERO_DIR/hardware/deps/tech_cells_generic/src/deprecated/cluster_clk_cells_xilinx.sv
 $HERO_DIR/hardware/deps/tech_cells_generic/src/fpga/tc_clk_xilinx.sv
-$HERO_DIR/hardware/deps/tech_cells_generic/src/fpga/tc_sram_xilinx.sv
+//$HERO_DIR/hardware/deps/tech_cells_generic/src/fpga/tc_sram_xilinx.sv
+$HERO_DIR/hardware/deps/tech_cells_generic/src/rtl/tc_sram.sv
 $HERO_DIR/hardware/deps/tech_cells_generic/src/deprecated/pulp_clock_gating_async.sv
 $HERO_DIR/hardware/deps/common_cells/src/cdc_2phase.sv
 $HERO_DIR/hardware/deps/common_cells/src/cf_math_pkg.sv
@@ -160,7 +161,7 @@ $HERO_DIR/hardware/deps/axi/src/axi_delayer.sv
 $HERO_DIR/hardware/deps/axi/src/axi_demux.sv
 $HERO_DIR/hardware/deps/axi/src/axi_dw_downsizer.sv
 $HERO_DIR/hardware/deps/axi/src/axi_dw_upsizer.sv
-$HERO_DIR/hardware/deps/axi/src/axi_id_remap.sv
+//$HERO_DIR/hardware/deps/axi/src/axi_id_remap.sv
 $HERO_DIR/hardware/deps/axi/src/axi_id_prepend.sv
 $HERO_DIR/hardware/deps/axi/src/axi_isolate.sv
 $HERO_DIR/hardware/deps/axi/src/axi_join.sv
@@ -309,9 +310,9 @@ $HERO_DIR/hardware/deps/timer_unit/rtl/timer_unit_counter.sv
 $HERO_DIR/hardware/deps/timer_unit/rtl/timer_unit_counter_presc.sv
 $HERO_DIR/hardware/deps/timer_unit/rtl/apb_timer_unit.sv
 $HERO_DIR/hardware/deps/timer_unit/rtl/timer_unit.sv
-$HERO_DIR/hardware/deps/axi2apb/src/axi2apb.sv
-$HERO_DIR/hardware/deps/axi2apb/src/axi2apb_64_32.sv
-$HERO_DIR/hardware/deps/axi2apb/src/axi2apb_wrap.sv
+//$HERO_DIR/hardware/deps/axi2apb/src/axi2apb.sv
+//$HERO_DIR/hardware/deps/axi2apb/src/axi2apb_64_32.sv
+//$HERO_DIR/hardware/deps/axi2apb/src/axi2apb_wrap.sv
 $HERO_DIR/hardware/deps/axi_riscv_atomics/src/axi_res_tbl.sv
 $HERO_DIR/hardware/deps/axi_riscv_atomics/src/axi_riscv_amos_alu.sv
 $HERO_DIR/hardware/deps/axi_riscv_atomics/src/axi_riscv_amos.sv
