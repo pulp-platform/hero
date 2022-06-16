@@ -1,2 +1,2 @@
 -f ../vcode.f
-top.sv
+//top.sv

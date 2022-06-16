@@ -45,7 +45,7 @@ set_property(
 # Add the Verilated circuit to the target
 verilate(top SYSTEMC COVERAGE TRACE
   #INCLUDE_DIRS "../make_tracing_sc"
-  VERILATOR_ARGS -sv +1800-2017ext+ --assert --autoflush --sc +notimingchecks --top-module top  +define+SYNTHESIS +define+TARGET_SYNTHESIS
+  VERILATOR_ARGS +1800-2017ext+sv --assert --autoflush --sc +notimingchecks --top-module top  +define+SYNTHESIS +define+TARGET_SYNTHESIS
   SOURCES -f vcode.f
 )
 

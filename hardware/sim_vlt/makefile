@@ -2,20 +2,25 @@
 # Using Verilator
 #=====================================================
 
-DESIGN 		= top
-VCODE 		= vcode.f
-WORK 		= worklib
-TCL 		= tb_sim.tcl
-DUMP 		= l1_dump
-DUMP_VCD	= true
-DEFINE		= +define+SYNTHESIS +define+TARGET_SYNTHESIS 
-RUN_OPT 	= --assert --autoflush --sc +notimingchecks \
-			   -Wall -Wno-BLKANDNBLK -Wno-LITENDIAN -Wno-CASEINCOMPLETE -Wno-CMPCONST -Wno-WIDTH -Wno-WIDTHCONCAT -Wno-UNSIGNED -Wno-UNOPTFLAT -Wno-fatal
+DESIGN 			= top
+VCODE 			= vcode.f
+WORKLIB 		= worklib
 
-.DEFAULT: default
-default : run_vlt
+VERILATOR 		= verilator
+VERILATOR_FLAG 	= -sc --exe --build -j --assert -sv +1800-2017ext+sv +notimingchecks
+VERILATOR_FLAG += --trace +define+VM_TRACE=1
+VERILATOR_FLAG += +define+SYNTHESIS +define+TARGET_SYNTHESIS
+VERILATOR_FLAG += -Wall -Wno-BLKANDNBLK -Wno-LITENDIAN -Wno-CASEINCOMPLETE -Wno-CMPCONST -Wno-WIDTH -Wno-WIDTHCONCAT -Wno-UNSIGNED -Wno-UNOPTFLAT -Wno-fatal
+VERILATOR_FLAG += --Mdir ${WORKLIB}
+VERILATOR_FLAG += --top-module ${DESIGN}
+VERILATOR_INPUT = -f ${VCODE} ${DESIGN}.cpp
 
-run_vlt:
-	@echo "verilator -sv +1800-2017ext+  --Mdir ${WORK}  ${DEFINE}  ${RUN_OPT}  -f ${VCODE}  --top-module top" > vrun.csh
-	@chmod 774 vrun.csh
-	@./vrun.csh |&tee vlt.log
+.PHONY: default
+default:
+	${VERILATOR} ${VERILATOR_FLAG} ${VERILATOR_INPUT}
+	${WORKLIB}/V${DESIGN} +trace
+
+.PHONY: clean
+maintainer-copy::
+clean mostlyclean distclean maintainer-clean::
+	-rm -rf ${WORKLIB} *.log *dump *bpd core
