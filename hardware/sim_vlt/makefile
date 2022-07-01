@@ -1,7 +1,6 @@
 #=====================================================
 # Using Verilator
 #=====================================================
-
 DESIGN 			= pulp_cluster
 VCODE 			= vcode.f
 WORKLIB 		= worklib
