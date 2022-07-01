@@ -10,12 +10,12 @@
 
 namespace KLAS_SIM {
     template<typename AXIPortType>
-    class HOST_MODEL : public SimModule {
+    class HostModel : public SimModule {
     public:
         typedef typename AXIPortType::axi_addr_t axi_addr_t;
 
     public:
-        HOST_MODEL(AXIPortType &axi_mst) {
+        HostModel(AXIPortType &axi_mst) {
             this->axi_driver = axi_mst;
         }
 

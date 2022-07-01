@@ -1,5 +1,4 @@
-#ifndef __klas_vlt__
-#define __klas_vlt__
+#pragma once
 
 #include <memory>       // For std::unique_ptr
 #include <systemc.h>    // SystemC global header
@@ -8,8 +7,9 @@
 #include <verilated.h>
 #include <verilated_vcd_sc.h>
 
-#include "AXIPort.hpp"
+#include "AXIDriver.hpp"
 #include "SimControl.hpp"
+#include "HostModel.hpp"
 
 #define VCD_FILE    "l1_dump.vcd"
 
@@ -40,6 +40,7 @@ public:
 private:
     T *tb;
     SimControl<T> *sim;
+    HostModel<AXIPort<uint64_t, uint64_t>> *host_model;
 
     bool     rst_ni;
     bool     pmu_mem_pwdn_i;
@@ -112,6 +113,9 @@ private:
         AXI_SLAVE_PORT_ASSIGN (tb, data_slave,  &axi_data_slave ); // host to dut
         AXI_MASTER_PORT_ASSIGN(tb, data_master, &axi_data_master); // dut to external memory
 
+        host_model = new HostModel<AXIPort<uint64_t, uint64_t>>(axi_data_slave);
+
+        sim->add_module(*host_model);
         sim->reset();
 
         return 0;
@@ -119,4 +123,3 @@ private:
 };
 
 
-#endif // __klas_vlt__
