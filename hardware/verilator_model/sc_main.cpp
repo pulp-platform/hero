@@ -3,7 +3,7 @@
 
 int sc_main(int argc, char *argv[]) {
 
-    klas_vlt *tb = new klas_vlt<Vpulp_cluster>(argc, argv);
+    auto *tb = new klas_vlt<Vpulp_cluster>(argc, argv);
 
     tb->gdriver_run();
     tb->gdriver_finish();

@@ -14,6 +14,7 @@
 #define VCD_FILE    "l1_dump.vcd"
 
 using namespace KLAS_SIM;
+using namespace std;
 
 template<class T>
 class klas_vlt {
@@ -29,10 +30,12 @@ public:
 
 
     int gdriver_run(void) {
+        cout << "here, gdriver_run" << endl;
         return -1;
     }
 
     int gdriver_finish(void) {
+        cout << "here, gdriver_finish" << endl;
         return -1;
     }
 
@@ -42,24 +45,24 @@ private:
     SimControl<T> *sim;
     HostModel<AXIPort<uint64_t, uint64_t>> *host_model;
 
-    bool     rst_ni;
-    bool     pmu_mem_pwdn_i;
-    uint32_t base_addr_i;
-    bool     test_mode_i;
-    bool     en_sa_boot_i;
-    uint32_t cluster_id_i;
-    bool     fetch_en_i;
-    bool     eoc_o;
-    bool     busy_o;
-    uint32_t ext_events_writetoken_i;
-    uint32_t ext_events_readpointer_o;
-    uint32_t ext_events_dataasync_i;
-    bool     dma_pe_evt_ack_i;
-    bool     dma_pe_evt_valid_o;
-    bool     dma_pe_irq_ack_i;
-    bool     dma_pe_irq_valid_o;
-    bool     pf_evt_ack_i;
-    bool     pf_evt_valid_o;
+    sc_signal<bool    > rst_ni;
+    sc_signal<bool    > pmu_mem_pwdn_i;
+    sc_signal<uint32_t> base_addr_i;
+    sc_signal<bool    > test_mode_i;
+    sc_signal<bool    > en_sa_boot_i;
+    sc_signal<uint32_t> cluster_id_i;
+    sc_signal<bool    > fetch_en_i;
+    sc_signal<bool    > eoc_o;
+    sc_signal<bool    > busy_o;
+    sc_signal<uint32_t> ext_events_writetoken_i;
+    sc_signal<uint32_t> ext_events_readpointer_o;
+    sc_signal<uint32_t> ext_events_dataasync_i;
+    sc_signal<bool    > dma_pe_evt_ack_i;
+    sc_signal<bool    > dma_pe_evt_valid_o;
+    sc_signal<bool    > dma_pe_irq_ack_i;
+    sc_signal<bool    > dma_pe_irq_valid_o;
+    sc_signal<bool    > pf_evt_ack_i;
+    sc_signal<bool    > pf_evt_valid_o;
 
     //     <AW_t    , STRB_T  >
     AXIPort<uint64_t, uint64_t> axi_data_slave;
@@ -82,7 +85,7 @@ private:
     }
 
     int tb_setup(void) {
-        tb = new T();
+        tb = new T("tb");
         sim = new SimControl<T>(tb, VCD_FILE);
 
         // Define clocks
@@ -90,8 +93,8 @@ private:
         ref_clk = new sc_clock("ref_clk_i",  2, SC_NS, 0.5, 2, SC_NS, true);
 
         // connection dut io
-        tb->clk_i                      (clk                        );
-        tb->ref_clk_i                  (ref_clk                    );
+        tb->clk_i                      (*clk                       );
+        tb->ref_clk_i                  (*ref_clk                   );
         tb->pmu_mem_pwdn_i             (pmu_mem_pwdn_i             ); // TODO
         tb->base_addr_i                (base_addr_i                ); // TODO
         tb->test_mode_i                (test_mode_i                ); // TODO
@@ -110,12 +113,12 @@ private:
         tb->pf_evt_ack_i               (pf_evt_ack_i               ); // TODO
         tb->pf_evt_valid_o             (pf_evt_valid_o             ); // TODO
 
-        AXI_SLAVE_PORT_ASSIGN (tb, data_slave,  &axi_data_slave ); // host to dut
-        AXI_MASTER_PORT_ASSIGN(tb, data_master, &axi_data_master); // dut to external memory
+        AXI_MASTER_PORT_ASSIGN(tb, data_slave,  &axi_data_slave ); // host to dut
+        AXI_SLAVE_PORT_ASSIGN (tb, data_master, &axi_data_master); // dut to external memory
 
-        host_model = new HostModel<AXIPort<uint64_t, uint64_t>>(axi_data_slave);
+        //host_model = new HostModel<AXIPort<uint64_t, uint64_t>>(axi_data_slave);
 
-        sim->add_module(*host_model);
+        //sim->add_module(*host_model);
         sim->reset();
 
         return 0;
