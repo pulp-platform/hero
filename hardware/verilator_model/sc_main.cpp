@@ -3,6 +3,8 @@
 
 int sc_main(int argc, char *argv[]) {
 
+    cout << "enter sc_main" << endl;
+
     auto *tb = new klas_vlt<Vpulp_cluster>(argc, argv);
 
     tb->gdriver_run();

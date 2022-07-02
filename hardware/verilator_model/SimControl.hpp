@@ -22,6 +22,7 @@
 
 #include <vector>
 #include <functional>
+#include <systemc.h>    // SystemC global header
 
 template<class T>
 class SimControl
@@ -30,6 +31,7 @@ private:
     T *tb;
     VerilatedVcdC *m_trace;
     uint64_t m_tickcount;
+    sc_signal<bool> rst_ni;
     bool trace;
     std::vector<std::reference_wrapper<SimModule>> sim_modules;
 
@@ -38,6 +40,7 @@ public:
     {
         m_tickcount = 0;
 
+        tb->rst_ni(rst_ni);
 #ifdef VERILATOR_HAS_TRACE
         trace = trace_filename != NULL;
 
@@ -94,9 +97,9 @@ public:
         //}
         //tb->rst_ni = 1;
         //
-        tb->rst_ni = 0;
+        this->rst_ni = false;
         sc_start(100, SC_NS);
-        tb->rst_ni = 1;
+        this->rst_ni = true ;
     }
     
     void run_single()
