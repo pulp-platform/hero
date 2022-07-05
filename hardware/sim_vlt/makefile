@@ -9,7 +9,7 @@ VLT_MODEL_PATH  = ${HERO_DIR}/hardware/verilator_model
 
 VERILATOR 		= verilator
 # Generate SystemC in executable form
-VERILATOR_FLAGS =  -sc --exe --build --assert -j
+VERILATOR_FLAGS =  -cc --exe --build --assert -j
 #VERILATOR_FLAGS += -x-assign fast
 VERILATOR_FLAGS += -sv +1800-2017ext+sv
 VERILATOR_FLAGS += +notimingchecks
@@ -22,10 +22,10 @@ VERILATOR_FLAGS += -I${VLT_MODEL_PATH}
 VERILATOR_FLAGS += --Mdir ${WORKLIB}
 VERILATOR_FLAGS += --top-module ${DESIGN}
 VERILATOR_INPUT = -f ${VCODE} \
-				  ${VLT_MODEL_PATH}/sc_main.cpp 
+				  ${VLT_MODEL_PATH}/main.cpp 
 
-# Check if SC exists via a verilator call (empty if not)
-SYSTEMC_EXISTS  = $(shell $(VERILATOR) --getenv SYSTEMC_INCLUDE)
+# # Check if SC exists via a verilator call (empty if not)
+# SYSTEMC_EXISTS  = $(shell $(VERILATOR) --getenv SYSTEMC_INCLUDE)
 
 
 .PHONY: default
@@ -50,4 +50,4 @@ clean mostlyclean distclean maintainer-clean::
 .PHONY: rerun
 rerun:
 	@clear 
-	@g++ ../verilator_model/sc_main.cpp worklib/Vpulp_cluster.cpp -I./worklib -I../verilator_model -I/opt/tools/pulp/share/verilator/include |&tee vlt.log
+	@g++ ../verilator_model/main.cpp worklib/Vpulp_cluster.cpp -I./worklib -I../verilator_model -I/opt/tools/pulp/share/verilator/include |&tee vlt.log

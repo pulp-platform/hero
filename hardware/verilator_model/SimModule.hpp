@@ -14,7 +14,6 @@
 
 #pragma once
 #include <stdint.h>
-#include <systemc.h>    // SystemC global header
 
 #define SIM_PRINT(FORMAT, ...) printf ("[%lu][%s:%u]: " FORMAT, sim_time(), __FILE__, __LINE__, ## __VA_ARGS__)
 
@@ -26,7 +25,7 @@ public:
     virtual void print_stats() = 0;
 
 public:
-    sc_time sim_time() {
-        return sc_time_stamp();
+    uint64_t sim_time() {
+        return 0; // sc_time_stamp();
     }
 };

@@ -1,9 +1,9 @@
 #include "klas_vlt.h"
 #include "Vpulp_cluster.h"
 
-int sc_main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
 
-    cout << "enter sc_main" << endl;
+    cout << "enter main" << endl;
 
     auto *tb = new klas_vlt<Vpulp_cluster>(argc, argv);
 

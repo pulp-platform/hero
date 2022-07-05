@@ -16,13 +16,11 @@
 
 #include "verilated.h"
 #include "verilated_vcd_c.h"
-#include <systemc.h>    // SystemC global header
 
 #include "SimModule.hpp"
 
 #include <vector>
 #include <functional>
-#include <systemc.h>    // SystemC global header
 
 template<class T>
 class SimControl
@@ -31,7 +29,6 @@ private:
     T *tb;
     VerilatedVcdC *m_trace;
     uint64_t m_tickcount;
-    sc_signal<bool> rst_ni;
     bool trace;
     std::vector<std::reference_wrapper<SimModule>> sim_modules;
 
@@ -40,7 +37,6 @@ public:
     {
         m_tickcount = 0;
 
-        tb->rst_ni(rst_ni);
 #ifdef VERILATOR_HAS_TRACE
         trace = trace_filename != NULL;
 
@@ -87,28 +83,23 @@ public:
 
     void reset()
     {
-        //tb->rst_ni = 0;
-        //for (int i = 0; i < 4; i++)
-        //{
-        //    tb->clk_i = 1;
-        //    tb->eval();
-        //    tb->clk_i = 0;
-        //    tb->eval();
-        //}
-        //tb->rst_ni = 1;
-        //
-        this->rst_ni = false;
-        sc_start(100, SC_NS);
-        this->rst_ni = true ;
+        tb->rst_ni = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            tb->clk_i = 1;
+            tb->eval();
+            tb->clk_i = 0;
+            tb->eval();
+        }
+        tb->rst_ni = 1;
     }
     
     void run_single()
     {
         m_tickcount++;
 
-        //tb->clk_i = 1;
-        //tb->eval();
-        tb->clk_i->posedge_event();
+        tb->clk_i = 1;
+        tb->eval();
 
 #ifdef VERILATOR_HAS_TRACE
         if (trace)
@@ -123,8 +114,8 @@ public:
         //// we may have modified or adjusted the inputs prior to
         //// coming into here, since we need all combinatorial logic
         //// to be settled before we call for a clock tick.
-        //tb->clk_i = 1;
-        //tb->eval();
+        tb->clk_i = 1;
+        tb->eval();
 
 #ifdef VERILATOR_HAS_TRACE
         if (trace)
@@ -134,9 +125,8 @@ public:
         }
 #endif
 
-        //tb->clk_i = 0;
-        //tb->eval();
-        tb->clk_i->negedge_event();
+        tb->clk_i = 0;
+        tb->eval();
 
 #ifdef VERILATOR_HAS_TRACE
         if (trace)
@@ -147,8 +137,8 @@ public:
         
         run_sim_modules_negedge();
 
-        //tb->clk_i = 0;
-        //tb->eval();
+        tb->clk_i = 0;
+        tb->eval();
 
 #ifdef VERILATOR_HAS_TRACE
         if (trace)
@@ -188,6 +178,4 @@ private:
             it->get().negedge();
         }
     }
-
-
 };
