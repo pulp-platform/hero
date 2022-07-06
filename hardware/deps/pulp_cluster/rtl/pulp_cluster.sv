@@ -22,7 +22,7 @@
 module pulp_cluster import pulp_cluster_package::*; import apu_package::*; import apu_core_package::*;
 #(
     // cluster parameters
-    parameter bit ASYNC_INTF          = 1'b1,     // RV-CORE is on async-clock domain
+    parameter bit ASYNC_INTF          = 1'b0,     // RV-CORE is on async-clock domain
     parameter int NB_CORES            = 8,        // # of RV-CORE
     parameter int NB_HWACC_PORTS      = 0,        // # of HWPE
     parameter int NB_DMAS             = 4,        // # of DMA channel for TDCM

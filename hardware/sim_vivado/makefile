@@ -2,8 +2,10 @@
 # Using vivado
 #=====================================================
 
-DESIGN 		= top
-VCODE 		= vcode.vivado.f
+#DESIGN 		= top
+#VCODE 		= vcode.vivado.f
+DESIGN 		= test
+VCODE 		= test.f
 WORK 		= worklib
 TCL 		= tb_sim.tcl
 DUMP 		= l1_dump

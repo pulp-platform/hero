@@ -1,14 +1,11 @@
 #include "klas_vlt.h"
-#include "Vpulp_cluster.h"
-#include <pthread.h>
+#include "Vtop.h"
 
-int main(int argc, char *argv[]) {
 
+int sc_main(int argc, char *argv[]) {
     cout << "enter main" << endl;
-    pthread_t thr_sim_ctrl;
 
-    auto *tb = new klas_vlt<Vpulp_cluster>(argc, argv);
-
+    auto *tb = new klas_vlt<Vtop>(argc, argv);
     tb->klas_run();
 
     return 0;

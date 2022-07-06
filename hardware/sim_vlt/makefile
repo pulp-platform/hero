@@ -1,7 +1,7 @@
 #=====================================================
 # Using Verilator
 #=====================================================
-DESIGN 			= pulp_cluster
+DESIGN 			= top
 VCODE 			= vcode.f
 WORKLIB 		= worklib
 
@@ -9,11 +9,11 @@ VLT_MODEL_PATH  = ${HERO_DIR}/hardware/verilator_model
 
 VERILATOR 		= verilator
 # Generate SystemC in executable form
-VERILATOR_FLAGS =  -cc --exe --build --assert -j
+VERILATOR_FLAGS =  -sc --exe --build --assert -j
 #VERILATOR_FLAGS += -x-assign fast
 VERILATOR_FLAGS += -sv +1800-2017ext+sv
 VERILATOR_FLAGS += +notimingchecks
-VERILATOR_FLAGS += --trace -DVM_TRACE=1 -DVERILATOR_HAS_TRACE=1
+VERILATOR_FLAGS += --trace -DVM_TRACE
 VERILATOR_FLAGS += +define+SYNTHESIS +define+TARGET_SYNTHESIS
 VERILATOR_FLAGS += -Wall -Wno-BLKANDNBLK -Wno-LITENDIAN -Wno-CASEINCOMPLETE \
 				   -Wno-CMPCONST -Wno-WIDTH -Wno-WIDTHCONCAT -Wno-UNSIGNED \
@@ -29,10 +29,7 @@ VERILATOR_INPUT = -f ${VCODE} \
 :worklib
 
 .PHONY: default
-default:
-	@clear 
-	@make clean 
-	@make run |&tee vlt.log
+default: clean run
 
 
 .PHONY: run
