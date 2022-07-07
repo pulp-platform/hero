@@ -15,6 +15,7 @@
 #pragma once
 #include <stdint.h>
 
+#define VERILATOR_HAS_TRACE
 #define SIM_PRINT(FORMAT, ...) printf ("[%lu][%s:%u]: " FORMAT, sim_time(), __FILE__, __LINE__, ## __VA_ARGS__)
 
 class SimModule {

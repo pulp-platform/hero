@@ -2,13 +2,14 @@
 
 #include <iostream>
 #include <memory>       // For std::unique_ptr
+#include <thread>
 
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
 #include "AXIDriver.hpp"
 #include "SimControl.hpp"
-#include "HostModel.hpp"
+#include "axi4_m_bfm.hpp"
 
 #define VCD_FILE    "l1_dump.vcd"
 
@@ -25,28 +26,29 @@ public:
     }
 
 
-    int gdriver_run(void) {
+    int klas_run(void) {
         cout << "enter " << __FUNCTION__ << endl;
-        sim->run_all(); // main loop
+
+        this->gdriver_run();
+        this->vector_run();
+
+        cout << "exit " << __FUNCTION__ << endl;
 
         return 0;
     }
 
-    int gdriver_finish(void) {
-        cout << "enter " << __FUNCTION__ << endl;
-        return -1;
+    double sc_time_stamp() {   // Called by $time in Verilog
+        return sim->time();
     }
-
-    //double sc_time_stamp() {   // Called by $time in Verilog
-    //    return sim->time();
-    //}
 
 
 private:
     VerilatedContext *contextp;
     T *tb;
     SimControl<T> *sim;
-    HostModel<AXIPort<uint64_t, uint8_t>> *host_model;
+    axi4_m_bfm<AXIPort<uint64_t, uint8_t>> *host_model;
+
+    pthread_t *thr_sim_ctrl;
 
     uint8_t *pmu_mem_pwdn_i;
     uint8_t *base_addr_i;
@@ -140,13 +142,31 @@ private:
         AXI_MASTER_PORT_ASSIGN(tb, data_slave,  &axi_data_slave ); // host to dut
         AXI_SLAVE_PORT_ASSIGN (tb, data_master, &axi_data_master); // dut to external memory
 
-        host_model = new HostModel<AXIPort<uint64_t, uint8_t>>(axi_data_slave);
+        host_model = new axi4_m_bfm<AXIPort<uint64_t, uint8_t>>(axi_data_slave);
 
         sim->add_module(*host_model);
         sim->reset();
 
         return 0;
     }
+
+    void gdriver_run(void) {
+        cout << "enter " << __FUNCTION__ << endl;
+        auto thr_sim_ctrl = new thread([this]{
+            sim->run_all(); // main loop
+        });
+        cout << "exit " << __FUNCTION__ << endl;
+    }
+
+    void vector_run(void) {
+        cout << "enter " << __FUNCTION__ << endl;
+        
+        host_model->read
+        cout << "exit " << __FUNCTION__ << endl;
+    }
+
+
+
 };
 
 
