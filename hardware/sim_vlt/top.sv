@@ -282,8 +282,8 @@ module top
         .AXI_DATA_WIDTH ( AXI_DATA_S2C_WIDTH    ),
         .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH        )
     ) HOST (
-        .clk            (clk                    ),
-        .resetn         (resetn                 ),
+        .clk            (clk_i                  ),
+        .resetn         (rst_ni                 ),
         
         // axi4 master
         .araddr         (data_slave_ar_addr_i   ),
@@ -380,6 +380,14 @@ module top
         .O_BRESP     (data_master_b_resp_i      ),   // Write response status
         .O_BID       (data_master_b_id_i        )    // Write response ID
     );
+    // ============================================================
+
+
+    // ============================================================
+    // declare task
+    // ============================================================
+    `include "TB_TASK.sv"
+    `include "DPI_TASK.sv"
     // ============================================================
 
 

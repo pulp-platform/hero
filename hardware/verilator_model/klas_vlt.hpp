@@ -3,15 +3,19 @@
 #define VM_TRACE 1
 
 #include <iostream>
-#include <memory>       // For std::unique_ptr
+#include <memory>      // For std::unique_ptr
 #include <systemc.h>
-#include <verilated.h>
 #include <sys/stat.h>  // mkdir
+#include <verilated.h>
+
+#include <svdpi.h>
+#include <vpi_user.h>
 
 #if VM_TRACE
 #include <verilated_vcd_sc.h>
 #endif
 
+#include "klas_dpi.h"
 
 using namespace std;
 
@@ -28,17 +32,22 @@ public:
 
 #if VM_TRACE
         // Close trace if opened
-        if (tfp) {
-            tfp->flush();
-            tfp->close();
-            tfp = nullptr;
-        }
+        tfp->flush();
+        tfp->close();
+        tfp = nullptr;
 #endif
     }
 
     int klas_run(void) {
         cout << "enter " << __FUNCTION__ << endl;
+        uint32_t    word;
 
+        write_word(0x000, 0x900dc0de);
+        write_word(0x100, 0x900dc0de);
+        sc_start(100, SC_NS);
+
+        read_word(0x000, &word);
+        read_word(0x100, &word);
         sc_start(100, SC_NS);
 
 #if VM_TRACE
@@ -81,7 +90,7 @@ private:
         // Before any evaluation, need to know to calculate those signals only used for tracing
         Verilated::traceEverOn(true);
 #endif
-
+ 
         // Pass arguments so Verilated code can see them, e.g. $value$plusargs
         // This needs to be called before you create any model
         Verilated::commandArgs(argc, argv);
@@ -98,6 +107,9 @@ private:
         top     = new T("top");
         clk     = new sc_clock("clk"    , 1 , SC_NS);
         ref_clk = new sc_clock("ref_clk", 28, SC_NS);
+
+        // set DPI task/function hier
+        svSetScope(svGetScopeFromName("top.top"));
 
         // connection top io
         top->clk_i      (*clk       );
@@ -127,8 +139,8 @@ private:
         }
         resetn = !0;  // Deassert reset
 
-        // Simulate 1ns
-        sc_start(1, SC_NS);
+        // Simulate 100ns
+        sc_start(100, SC_NS);
 
 #if VM_TRACE
         tfp->flush();

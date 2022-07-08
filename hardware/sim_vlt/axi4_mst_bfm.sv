@@ -191,16 +191,17 @@ module axi4_mst_bfm #(
     end
 
     always_ff @(posedge clk) begin
-        while((b_queue.size() == 0) || !tog) begin end
-        b_queue_out = b_queue.pop_front(); // TODO
+        if(b_queue.size() != 0) begin
+            b_queue_out = b_queue.pop_front(); // TODO
 
-        if (b_queue_out.bresp != 2'b0) begin
-            $display("*ERROR:BRESP Error detected while writing");
-            //$stop;
+            if (b_queue_out.bresp != 2'b0) begin
+                $display("*ERROR:BRESP Error detected while writing");
+                //$stop;
+            end
+
+            bresp_pending <= bresp_pending - 1;
         end
-
-        bresp_pending <= bresp_pending - 1;
-        assert(bresp_pending >= 0);
+        //assert(bresp_pending >= 0);
     end
 
 
@@ -227,7 +228,7 @@ module axi4_mst_bfm #(
             arvalid <= 0;
         end
         else begin
-            ar_queue_out <= '0;//ar_queue.pop_front();
+            ar_queue_out = ar_queue.pop_front();
             arvalid <= 1;
         end
     end
