@@ -73,4 +73,4 @@ ln -sf ../${pulp_chip}/rt_conf.o ${PULP_SDK_HOME}/install/hero/hero-sim/
 make -C "${THIS_DIR}/../support/libhero-target/pulp" header build install
 
 # Build libpremnotify for PULP
-${THIS_DIR}/setup-libprem-pulp.sh "${THIS_DIR}/.."
+#${THIS_DIR}/setup-libprem-pulp.sh "${THIS_DIR}/.."
