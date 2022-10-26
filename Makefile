@@ -144,7 +144,8 @@ sdk-har: check_environment br-har
 
 sdk-snitch: check_environment
 	mkdir -p $(CURDIR)/output/$@
-	cd $(CURDIR)/output/$@ && $(ROOT)/toolchain/build-snitch-runtime.sh $(ROOT)/../snitch-snruntime-hero/sw
+	git clone -b hero git@github.com:pulp-platform/snitch.git $(ROOT)/snitch-snruntime-hero
+	cd $(CURDIR)/output/$@ && $(ROOT)/toolchain/build-snitch-runtime.sh $(ROOT)/snitch-snruntime-hero/sw
 
 # Utilities
 .PHONY: util-hrv-openocd

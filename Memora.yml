@@ -2154,10 +2154,7 @@ artifacts:
       - package
       - support
     outputs:
-      - install/riscv64-hero-linux-gnu/sysroot
-      - install/riscv64-hero-linux-gnu/bin
-      - install/riscv64-hero-linux-gnu/lib
-      - install/riscv64-hero-linux-gnu/include
+      - install/riscv64-hero-linux-gnu
       - install/share/man
       - install/share/info
       - install/share/doc
