@@ -49,6 +49,7 @@ stages:
   - build2
   - build3
   - build4
+  - build5
   - test
 
 pre-downstream-checkout:
@@ -84,21 +85,6 @@ tc-pulp:
         make tc-pulp
         chmod -R u+w $HERO_INSTALL
         $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-pulp
-      fi
-
-tc-snitch:
-  stage: build1
-  needs: ["pre-downstream-checkout"]
-  script:
-    - >
-      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-snitch; then
-        export CXX=/usr/pack/gcc-9.2.0-af/linux-x64/bin/g++ # LLVM 12 needs 5.1+
-        export CC=/usr/pack/gcc-9.2.0-af/linux-x64/bin/gcc  # LLVM 12 needs 5.1+
-        make tc-snitch
-        unset CXX # Cleanup after LLVM 12 build
-        unset CC  # Cleanup after LLVM 12 build
-        chmod -R u+w $HERO_INSTALL
-        $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-snitch
       fi
 
 tc-har-olinux:
@@ -177,22 +163,6 @@ sdk-pulp-and-sdk-hrv:
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-olinux
     - chmod -R u-w $HERO_INSTALL
     - make sdk-pulp-hrv
-    - make sdk-hrv
-    - chmod -R u+w $HERO_INSTALL
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert sdk-pulp-and-sdk-hrv
-
-sdk-snitch-and-sdk-hrv:
-  stage: build2
-  needs: ["tc-snitch", "tc-hrv-olinux"]
-  script:
-    - >
-      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup sdk-snitch-and-sdk-hrv; then
-        exit 0
-      fi
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-snitch
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-olinux
-    - chmod -R u-w $HERO_INSTALL
-    - make sdk-snitch
     - make sdk-hrv
     - chmod -R u+w $HERO_INSTALL
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert sdk-pulp-and-sdk-hrv
@@ -289,6 +259,59 @@ br-hrv-occamy:
     - make br-hrv-occamy
     - chmod -R u-w $HERO_INSTALL
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-hrv-occamy
+
+tc-llvm-heroccamy:
+  stage: build5
+  needs: ["br-hrv-occamy"]
+  script:
+    - >
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-llvm-heroccamy; then
+        .gitlab-ci.d/llvm-project-update-hero-branch.sh
+        exit 0
+      fi
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get br-hrv-occamy
+    - chmod -R u-w $HERO_INSTALL
+    - export CXX=/usr/pack/gcc-9.2.0-af/linux-x64/bin/g++ # LLVM 12 needs 5.1+
+    - export CC=/usr/pack/gcc-9.2.0-af/linux-x64/bin/gcc  # LLVM 12 needs 5.1+
+    - make tc-llvm
+    - unset CXX # Cleanup after LLVM 12 build
+    - unset CC  # Cleanup after LLVM 12 build
+    - git diff --exit-code # assert that applied patches made no difference
+    - chmod -R u+w $HERO_INSTALL
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-llvm-heroccamy
+    - .gitlab-ci.d/llvm-project-update-hero-branch.sh
+
+tc-snitch:
+  stage: build5
+  needs: ["tc-llvm-heroccamy"]
+  script:
+    - >
+      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-snitch; then
+        export CXX=/usr/pack/gcc-9.2.0-af/linux-x64/bin/g++ # LLVM 12 needs 5.1+
+        export CC=/usr/pack/gcc-9.2.0-af/linux-x64/bin/gcc  # LLVM 12 needs 5.1+
+        make tc-snitch
+        unset CXX # Cleanup after LLVM 12 build
+        unset CC  # Cleanup after LLVM 12 build
+        chmod -R u+w $HERO_INSTALL
+        $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-snitch
+      fi
+
+sdk-snitch:
+  stage: build5
+  needs: ["tc-snitch"]
+  script:
+    - >
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup sdk-snitch; then
+        exit 0
+      fi
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-llvm-heroccamy
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-snitch
+    - chmod -R u-w $HERO_INSTALL
+    - unset CC
+    - unset CXX
+    - make sdk-snitch
+    - chmod -R u+w $HERO_INSTALL
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert sdk-snitch
 
 test-zcu102-examples:
   stage: test
