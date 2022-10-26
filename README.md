@@ -243,3 +243,16 @@ where `<app_name>` is the path to the directory from the `openmp-examples` direc
 ```
 make util-hrv-openocd
 ```
+## RISCV64 Host + Snitch
+The procedure exposed above for the installation of the ARM Host + PULP is slightly different from the procedure needed to install the components for RISCV Host + Snitch.
+In order to do it, do the following:
+* Install the Host toolchain and SDK by running:
+`make br-hrv-occamy`
+* If you work on ETH Zurich Lagrev machines, export the following environment variables for the correct compiler to build LLVM Toolchain
+`export CC=/usr/pack/gcc-9.2.0-af/linux-x64/bin/gcc`
+`export CXX=/usr/pack/gcc-9.2.0-af/linux-x64/bin/g++`
+* Install the LLVM tolchain for the Host and for Snitch by running:
+`make tc-llvm`
+`make tc-snitch`
+* If you have previously set the CC and CXX environment variables, unset them and then run:
+`make sdk-snitch`
