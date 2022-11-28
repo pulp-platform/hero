@@ -67,7 +67,7 @@ make install
 echo "Compiler-rt for Snitch"
 old_pwd=$(pwd)
 mkdir -p snitch-crt; cd snitch-crt
-$HERO_INSTALL/bin/cmake -G"Unix Makefiles"                                \
+${CMAKE} -G"Unix Makefiles"                                \
   -DCMAKE_SYSTEM_NAME=Linux                                               \
   -DCMAKE_INSTALL_PREFIX=$(${HERO_INSTALL}/bin/clang -print-resource-dir) \
   -DCMAKE_C_COMPILER=${HERO_INSTALL}/bin/clang                            \
@@ -93,7 +93,7 @@ $HERO_INSTALL/bin/cmake -G"Unix Makefiles"                                \
   -DCOMPILER_RT_OS_DIR=""                                                 \
   -DLLVM_CONFIG_PATH=${HERO_INSTALL}/bin/llvm-config                      \
   -S $THIS_DIR/llvm-project/compiler-rt -B .
-$HERO_INSTALL/bin/cmake --build . --target install -j
+${CMAKE} --build . --target install -j
 cd ${old_pwd}
 
 # finalize install

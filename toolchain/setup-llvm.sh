@@ -54,7 +54,7 @@ echo "Building LLVM project"
 # - Use the cmake from the host tools to ensure a recent version.
 # - Do not build PULP libomptarget offloading plugin as part of the LLVM build on the *development*
 #   machine.  That plugin will be compiled for each Host architecture through a Buildroot package.
-$HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+${CMAKE} -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DBUILD_SHARED_LIBS=True -DLLVM_USE_SPLIT_DWARF=True \
       -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL \
       -DCMAKE_FIND_NO_INSTALL_PREFIX=True \
@@ -69,7 +69,7 @@ $HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DCMAKE_C_COMPILER=$CC \
       -DCMAKE_CXX_COMPILER=$CXX \
       $THIS_DIR/llvm-project/llvm
-$HERO_INSTALL/bin/cmake --build . --target install
+${CMAKE} --build . --target install
 cd ..
 
 # setup hercules passes build
@@ -79,25 +79,25 @@ cd llvm-support_build
 # run hercules pass build
 # FIXME: integrate LLVM passes better in the HERO architecture
 echo "Building LLVM support passes"
-$HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+${CMAKE} -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DLLVM_DIR:STRING=$HERO_INSTALL/lib/cmake/llvm \
       -DCMAKE_C_COMPILER=$CC \
       -DCMAKE_CXX_COMPILER=$CXX \
       $THIS_DIR/llvm-support/
-$HERO_INSTALL/bin/cmake --build . --target install
+${CMAKE} --build . --target install
 cd ..
 
 mkdir -p hercules_build
 cd hercules_build
 # run hercules pass build
 echo "Building Hercules LLVM passes"
-$HERO_INSTALL/bin/cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL \
+${CMAKE} -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL \
       -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DLLVM_DIR:STRING=$HERO_INSTALL/lib/cmake/llvm \
       -DCMAKE_C_COMPILER=$CC \
       -DCMAKE_CXX_COMPILER=$CXX \
       $THIS_DIR/HerculesCompiler-public/llvm-passes/
-$HERO_INSTALL/bin/cmake --build . --target install
+${CMAKE} --build . --target install
 cd ..
 
 # install HERCULES environment script.

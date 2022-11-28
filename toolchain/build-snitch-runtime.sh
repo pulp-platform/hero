@@ -35,7 +35,7 @@ ${CMAKE} \
   -DMEM_DRAM_ORIGIN="0xc0000000" \
   ${SNITCH_SRC}/snRuntime
 make -j$(nproc)
-make install
+#make install
 
 ##############################
 # snblas
@@ -50,4 +50,4 @@ ${CMAKE} \
   -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm \
   ${SNITCH_SRC}/snBLAS
 make -j$(nproc)
-make install
+#make install
