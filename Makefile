@@ -1,5 +1,5 @@
 ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-
+PYTHON = python3
 PREM_BR_CMUX_CONFSTR := BR2_PACKAGE_PREM_CMUX=y
 PREM_BR_OMP_CONFSTR := BR2_PACKAGE_HERO_OPENMP_ENABLE_PREM=y
 
