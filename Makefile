@@ -58,6 +58,9 @@ br-hrv-occamy-base: br-hrv-occamy-defconfig
 	$(MAKE) -C $(CURDIR)/output/br-hrv-occamy prepare-sdk
 br-hrv-occamy: br-hrv-occamy-base
 
+upload-linux-image:
+	scp /scratch/cykoenig/development/hero-occamy/output/br-hrv-occamy/images/Image.itb vcu128-01@bordcomputer.ee.ethz.ch:/srv/tftp/vcu128-01/Image.itb
+
 # sdk images
 br-hrv: check_environment
 	mkdir -p $(CURDIR)/output/br-hrv

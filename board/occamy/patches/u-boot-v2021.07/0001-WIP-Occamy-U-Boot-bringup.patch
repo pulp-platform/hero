@@ -172,7 +172,7 @@ new file mode 100644
 index 0000000000..ebfbdce331
 --- /dev/null
 +++ b/arch/riscv/dts/occamy.dts
-@@ -0,0 +1,149 @@
+@@ -0,0 +1,222 @@
 +// Copyright 2021 ETH Zurich and University of Bologna.
 +// Licensed under the Apache License, Version 2.0, see LICENSE for details.
 +// SPDX-License-Identifier: Apache-2.0
@@ -319,6 +319,79 @@ index 0000000000..ebfbdce331
 +      riscv,max-priority = <6>;
 +      riscv,ndev = <72>;
 +      reg = <0x0 0xc000000 0x0 0x4000000>;
++    };
++    eth_dma0: eth_dma@4d000000 {
++      #dma-cells = <1>;
++      #address-cells = <1>;
++      #size-cells = <1>;
++      compatible = "xlnx,axi-dma-1.00.a";
++      reg = <0x0 0x4d000000 0x0 0x10000>;
++      interrupts-extended = <&PLIC0 3 &PLIC0 4>;
++      xlnx,addrwidth = <0x40>;
++      xlnx,include-sg;
++      dma-channel@4d000000 {
++        compatible = "xlnx,axi-dma-mm2s-channel";
++        reg = <0 0>;
++        dma-channels = <0x1>;
++        interrupts-extended = <&PLIC0 3>;
++        xlnx,datawidth = <0x20>;
++        xlnx,device-id = <0x0>;
++        xlnx,include-dre ;
++      };
++      dma-channel@4d000030 {
++        compatible = "xlnx,axi-dma-s2mm-channel";
++        reg = <0 0>;
++        dma-channels = <0x1>;
++        interrupts-extended = <&PLIC0 4>;
++        xlnx,datawidth = <0x20>;
++        xlnx,device-id = <0x0>;
++        xlnx,include-dre ;
++      };
++    };
++    eth0: eth0@4c400000 {
++      compatible = "xlnx,axi-ethernet-1.00.a";
++      reg = <0x0 0x4c400000 0x0 0x40000>;
++      // attacked to system clock, provide name for matching
++      clocks = <&sysclk>, <&sysclk>;
++      clock-names = "s_axi_lite_clk", "axis_clk";
++      // interrupt and mac_irq
++      interrupts-extended = <&PLIC0 1 &PLIC0 6>;
++      // local-mac-address = [ 00 0A 35 04 E1 60 ]; // hero-vcu128-01
++      local-mac-address = [ 00 0A 35 04 E1 52 ]; // hero-vcu128-02
++      mac-address = [ 00 0A 35 04 E1 52 ];
++      device_type = "network";
++      axistream-connected = <&eth_dma0>;
++      axistream-control-connected = <&eth_dma0>;
++      phy-handle = <&dp83867_0>;
++      // xlnx,phy-type = <0x4>; // XAE_PHY_TYPE_SGMII. linux: deprecated, use phy-mode
++      phy-mode = "sgmii";
++      xlnx,phyaddr = <0x0>;
++      xlnx,rxcsum = <0x2>; // 0, 1, 2 for no/partial/full offloading
++      xlnx,rxmem = <0x1000>;
++      xlnx,txcsum = <0x2>; // 0, 1, 2 for no/partial/full offloading
++      xlnx,txmem = <0x1000>;
++
++      mdio: mdio {
++        #address-cells = <1>;
++        #size-cells = <0>;
++        // reset-gpios = <&tca6416a 6 GPIO_ACTIVE_LOW>;
++        // reset-delay-us = <2>;
++        // PCS/PMA PHY
++        xilinx_phy: ethernet-phy@0 {
++          #phy-cells = <1>;
++          device_type = "ethernet-phy";
++          reg = <0>;
++        };
++        // External PHY
++        dp83867_0: ethernet-phy@3 {
++          compatible = "ethernet-phy-ieee802.3-c22";
++          reg = <3>;
++          #phy-cells = <1>;
++          device_type = "ethernet-phy";
++          ti,sgmii-ref-clock-output-enable;
++          ti,dp83867-rxctrl-strap-quirk;
++        };
++      };
 +    };
 +  };
 +};
