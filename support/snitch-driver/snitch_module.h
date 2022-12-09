@@ -138,6 +138,11 @@ struct axi_tlb_entry {
  *
  */
 #define SNIOS_READ_TLB_ENTRY _IOW(SNIOC_MAGIC, 9, struct axi_tlb_entry)
+/**
+ * @brief Test read in all the IO mapped memory regions
+ *
+ */
+#define SNIOS_TEST_READ_REGIONS _IOR(SNIOC_MAGIC, 10, struct snios_reg)
 
 // Values for SNIOC_SET_OPTIONS
 #define SNIOS_DEISOLATE 0x0001 /* Isolate the cluster */

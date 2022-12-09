@@ -17,6 +17,8 @@ export HERO_TARGET_PATH_LIB="${HERO_TARGET_PATH}/libs"
 export PLATFORM=OCCAMY
 export BOARD=OCCAMYVCU128
 
+#export CFLAGS="--sysroot ${HERO_INSTALL}/riscv64-hero-linux-gnu/sysroot/"
+
 export ARCH="riscv64"
 export HERO_TOOLCHAIN_HOST_TARGET="${ARCH}-hero-linux-gnu"
 export CROSS_COMPILE="${HERO_TOOLCHAIN_HOST_TARGET}-"

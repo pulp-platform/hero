@@ -1,3 +1,4 @@
+#define DEBUG
 #include <asm/io.h>       /* ioremap, iounmap, iowrite32 */
 #include <asm/uaccess.h>  /* for put_user */
 #include <linux/cdev.h>   /* cdev struct */
@@ -127,6 +128,7 @@ static uint32_t get_clint(uint32_t reg_off);
 static struct quadrant_ctrl *get_quadrant_ctrl(u32 quadrant_idx);
 static int write_tlb(struct sn_cluster *sc, struct axi_tlb_entry *tlbe);
 static int read_tlb(struct sn_cluster *sc, struct axi_tlb_entry *tlbe);
+static int test_read_regions(struct sn_cluster *sc, uint32_t reg_off);
 // ----------------------------------------------------------------------------
 //
 //   Static data
@@ -210,7 +212,7 @@ static int snitch_open(struct inode *inode, struct file *file) {
   }
 
   err = 0;
-  dbg("cluster %d opened\n", sc->minor);
+  info("cluster %d opened\n", sc->minor);
 
 fail:
   // mutex_unlock(&sn_mtx);
@@ -223,7 +225,7 @@ fail:
 static int snitch_release(struct inode *inode, struct file *file) {
   struct sn_cluster *sc;
   sc = file->private_data;
-  dbg("cluster %d released\n", sc->minor);
+  info("cluster %d released\n", sc->minor);
   return 0;
 }
 
@@ -267,11 +269,14 @@ static long snitch_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
   if (_IOC_TYPE(cmd) != SNIOC_MAGIC)
     return -ENOTTY;
 
-  dbg("ioctl with cmd %d arg %ld\n", cmd, arg);
+  info("Received ioctl with cmd %d arg %ld\n", cmd, arg);
+
+  test_read_regions(sc, 0);
 
   // Switch according to the ioctl called
   switch (cmd) {
   case SNIOC_SET_OPTIONS: {
+    info("(CMD SNIOC_SET_OPTIONS)\n");
     int options, retval = -EINVAL;
     if (get_user(options, p))
       return -EFAULT;
@@ -285,40 +290,45 @@ static long snitch_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
     return retval;
   }
   case SNIOS_SCRATCH_W: {
+    info("(CMD SNIOS_SCRATCH_W)\n");
     if (copy_from_user(&sreg, p, sizeof(sreg)))
       return -EFAULT;
     // Sanitize to 4 scratch registers
     if (sreg.off > 4)
       return -EINVAL;
-    dbg("scratch write reg %d val %#x\n", sreg.off, sreg.val);
+    info("scratch write reg %d val %#x\n", sreg.off, sreg.val);
     soc_reg_write(SCTL_SCRATCH_0_REG_OFFSET / 4 + sreg.off, sreg.val);
     return 0;
   }
   case SNIOS_SCRATCH_R: {
+    info("(CMD SNIOS_SCRATCH_R)\n");
     if (copy_from_user(&sreg, p, sizeof(sreg)))
       return -EFAULT;
     // Sanitize to 4 scratch registers
     if (sreg.off > 4)
       return -EINVAL;
     sreg.val = soc_reg_read(SCTL_SCRATCH_0_REG_OFFSET / 4 + sreg.off);
-    dbg("scratch read reg %d val %#x\n", sreg.off, sreg.val);
+    info("scratch read reg %d val %#x\n", sreg.off, sreg.val);
     if (copy_to_user(p, &sreg, sizeof(sreg)))
       return -EFAULT;
     return 0;
   }
   case SNIOS_READ_ISOLATION: {
+    info("(CMD SNIOS_READ_ISOLATION)\n");
     uint32_t quadrant;
     if (get_user(quadrant, p))
       return -EFAULT;
     return get_isolation(quadrant);
   }
   case SNIOS_SET_IPI: {
+    info("(CMD SNIOS_SET_IPI)\n");
     if (copy_from_user(&sreg, p, sizeof(sreg)))
       return -EFAULT;
     set_clint(&sreg);
     return 0;
   }
   case SNIOS_GET_IPI: {
+    info("(CMD SNIOS_GET_IPI)\n");
     if (copy_from_user(&sreg, p, sizeof(sreg)))
       return -EFAULT;
     sreg.val = get_clint(sreg.off);
@@ -327,28 +337,38 @@ static long snitch_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
     return 0;
   }
   case SNIOS_CLEAR_IPI: {
+    info("(CMD SNIOS_CLEAR_IPI)\n");
     if (copy_from_user(&sreg, p, sizeof(sreg)))
       return -EFAULT;
     clear_clint(&sreg);
     return 0;
   }
   case SNIOS_FLUSH: {
+    info("(CMD SNIOS_FLUSH)\n");
     asm volatile("fence");
     return 0;
   }
   case SNIOS_WRITE_TLB_ENTRY: {
+    info("(CMD SNIOS_WRITE_TLB_ENTRY)\n");
     if (copy_from_user(&tlbe, p, sizeof(tlbe)))
       return -EFAULT;
     return write_tlb(sc, &tlbe);
   }
   case SNIOS_READ_TLB_ENTRY: {
     int ret;
+    info("(CMD SNIOS_READ_TLB_ENTRY)\n");
     if (copy_from_user(&tlbe, p, sizeof(tlbe)))
       return -EFAULT;
     ret = read_tlb(sc, &tlbe);
     if (copy_to_user(p, &tlbe, sizeof(tlbe)))
       return -EFAULT;
     return ret;
+  }
+  case SNIOS_TEST_READ_REGIONS: {
+    info("(CMD SNIOS_TEST_READ_REGIONS)\n");
+    if (copy_from_user(&sreg, p, sizeof(sreg)))
+      return -EFAULT;
+    return test_read_regions(sc, sreg.off);
   }
   default:
     return -ENOTTY;
@@ -369,8 +389,6 @@ int snitch_mmap(struct file *file, struct vm_area_struct *vma) {
   struct sn_cluster *sc;
   sc = file->private_data;
 
-  dbg("mmap with offset %#lx\n", vma->vm_pgoff);
-
   switch (vma->vm_pgoff) {
   case 0:
     strncpy(type, "l3", sizeof(type));
@@ -386,10 +404,12 @@ int snitch_mmap(struct file *file, struct vm_area_struct *vma) {
     return -EINVAL;
   }
 
+  info("Map region %s from kernel to user space with offset %#lx\n", type, vma->vm_pgoff);
+
   vsize = vma->vm_end - vma->vm_start;
   if (vsize > psize) {
-    dbg("error: vsize %ld > psize %ld\n", vsize, psize);
-    dbg("  vma->vm_end %lx vma->vm_start %lx\n", vma->vm_end, vma->vm_start);
+    info("error: vsize %ld > psize %ld\n", vsize, psize);
+    info("  vma->vm_end %lx vma->vm_start %lx\n", vma->vm_end, vma->vm_start);
     return -EINVAL;
   }
 
@@ -397,13 +417,13 @@ int snitch_mmap(struct file *file, struct vm_area_struct *vma) {
   vma->vm_flags |= VM_IO | VM_RESERVED;
   vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
 
-  dbg("%s mmap: phys: %#lx, virt: %#lx vsize: %#lx psize: %#lx\n", type, mapoffset, vma->vm_start,
+  info("%s mmap: phys: %#lx, virt: %#lx vsize: %#lx psize: %#lx\n", type, mapoffset, vma->vm_start,
       vsize, psize);
 
   ret = remap_pfn_range(vma, vma->vm_start, mapoffset >> PAGE_SHIFT, vsize, vma->vm_page_prot);
 
   if (ret)
-    dbg("mmap error: %d\n", ret);
+    info("mmap error: %d\n", ret);
 
   return ret;
 }
@@ -415,7 +435,7 @@ int snitch_flush(struct file *file, fl_owner_t id) {
   // struct sn_cluster *sc;
   // sc = file->private_data;
 
-  dbg("flush\n");
+  info("Device file flushed\n");
   return 0;
 }
 
@@ -445,7 +465,7 @@ static void set_isolation(struct sn_cluster *sc, int iso) {
   val = iso ? 1U : 0U;
   mask = (val << QCTL_ISOLATE_NARROW_IN_BIT) | (val << QCTL_ISOLATE_NARROW_OUT_BIT) |
          (val << QCTL_ISOLATE_WIDE_IN_BIT) | (val << QCTL_ISOLATE_WIDE_OUT_BIT);
-  dbg("set_isolation quadrant %d value %01x\n", sc->quadrant_ctrl->quadrant_idx, mask);
+  info("set_isolation quadrant %d value %01x\n", sc->quadrant_ctrl->quadrant_idx, mask);
   quadrant_ctrl_reg_write(sc->quadrant_ctrl, QCTL_ISOLATE_REG_OFFSET / 4, mask);
 }
 
@@ -455,7 +475,7 @@ static void set_isolation(struct sn_cluster *sc, int iso) {
  * @param reset 1 to assert reset, 0 de-assert reset
  */
 static void set_reset(struct sn_cluster *sc, int reset) {
-  dbg("set_reset quadrant %d %s\n", sc->quadrant_ctrl->quadrant_idx,
+  info("set_reset quadrant %d %s\n", sc->quadrant_ctrl->quadrant_idx,
       reset ? "ASSERT" : "DE-ASSERT");
   // Active-low reset
   quadrant_ctrl_reg_write(sc->quadrant_ctrl, QCTL_RESET_N_REG_OFFSET / 4,
@@ -529,7 +549,7 @@ static void soc_reg_write(uint32_t reg_off, uint32_t val) {
   iowrite32(val, (uint32_t *)soc_regs + reg_off);
   rb = ioread32((uint32_t *)soc_regs + reg_off);
   spin_unlock(&soc_lock);
-  dbg("soc_reg_write reg %d value %08x rb: %08x\n", reg_off, val, rb);
+  info("soc_reg_write reg %d value %08x rb: %08x (va=%px)\n", reg_off, val, rb, (uint32_t *)soc_regs + reg_off);
 }
 static uint32_t soc_reg_read(uint32_t reg_off) {
   u32 val;
@@ -556,22 +576,27 @@ static void set_clint(const struct snios_reg *sr) {
   val = ioread32((uint32_t *)clint_regs + sr->off);
   iowrite32(val | sr->val, (uint32_t *)clint_regs + sr->off);
   spin_unlock(&clint_lock);
-  dbg("clint write reg %d value %08x\n", sr->off, val | sr->val);
+  info("clint write reg %d value %08x\n", sr->off, val | sr->val);
 }
 static void clear_clint(const struct snios_reg *sr) {
   u32 val;
+  info("write at %px\n", (uint32_t *)clint_regs + sr->off);
+  iowrite32((uint32_t) 0, (uint32_t *)clint_regs + sr->off);
+  info("clint ready to clear at %px\n", (uint32_t *)clint_regs + sr->off);
   spin_lock(&clint_lock);
+  info("read at %px\n", (uint32_t *)clint_regs + sr->off);
   val = ioread32((uint32_t *)clint_regs + sr->off);
+  info("write at %px\n", (uint32_t *)clint_regs + sr->off);
   iowrite32(val & (~sr->val), (uint32_t *)clint_regs + sr->off);
   spin_unlock(&clint_lock);
-  dbg("clint write reg %d value %08x\n", sr->off, val & (~sr->val));
+  info("clint write reg %d value %08x\n", sr->off, val & (~sr->val));
 }
 static uint32_t get_clint(uint32_t reg_off) {
   u32 val;
   spin_lock(&clint_lock);
   val = ioread32((uint32_t *)clint_regs + reg_off);
   spin_unlock(&clint_lock);
-  dbg("clint read reg %d val %08x\n", reg_off, val);
+  info("clint read reg %d val %08x\n", reg_off, val);
   return val;
 }
 static struct quadrant_ctrl *get_quadrant_ctrl(u32 quadrant_idx) {
@@ -599,7 +624,7 @@ static int write_tlb(struct sn_cluster *sc, struct axi_tlb_entry *tlbe) {
   } else
     return -EINVAL;
 
-  // dbg("tlb write offset %#x first %#llx last %#llx base %#llx flags %#x\n", reg_off,
+  // info("tlb write offset %#x first %#llx last %#llx base %#llx flags %#x\n", reg_off,
   //     tlbe->first >> 12, tlbe->last >> 12, tlbe->base >> 12, tlbe->flags);
 
   iowrite64(tlbe->first >> 12, sc->quadrant_ctrl->regs + reg_off + 0);
@@ -628,7 +653,34 @@ static int read_tlb(struct sn_cluster *sc, struct axi_tlb_entry *tlbe) {
   tlbe->base = ioread64(sc->quadrant_ctrl->regs + reg_off + 16) << 12;
   tlbe->flags = ioread32(sc->quadrant_ctrl->regs + reg_off + 24);
 
-  // dbg("  TLB read first %#llx last %#llx\n", tlbe->first, tlbe->last);
+  // info("  TLB read first %#llx last %#llx\n", tlbe->first, tlbe->last);
+
+  return 0;
+}
+
+static int test_read_regions(struct sn_cluster *sc, uint32_t reg_off) {
+  u32 val;
+
+  info("SOC_CTL : Attempting to read at %px + %x\n", (uint32_t *)soc_regs, reg_off);
+  spin_lock(&soc_lock);
+  val = ioread32((uint32_t *)soc_regs + reg_off);
+  spin_unlock(&soc_lock);
+
+  info("TCDM : Attempting to read at %px + %x\n", (void *)sc->l1.vbase, reg_off);
+  val = ioread32((uint32_t *)sc->l1.vbase + reg_off);
+
+  info("PERIPHERALS : Attempting to read at %px + %x\n", (void *)sc->pbase, reg_off);
+  val = ioread32((uint32_t *)sc->pbase + reg_off);
+
+  info("CLUSTER L3 : Attempting to read at %px + %x\n", (void *)sc->l3.vbase, reg_off);
+  val = ioread32((void *)sc->l3.vbase + reg_off);
+
+  //info("QUAD CTL : Attempting to read at %px + %x\n", qc->regs, reg_off);
+  //val = ioread32((uint32_t *)qc->regs + reg_off);
+
+  info("CLINT : Attempting to read at %px + %x\n", (uint32_t *) clint_regs, reg_off);
+  val = ioread32((uint32_t *)clint_regs + reg_off);
+
 
   return 0;
 }
@@ -673,6 +725,7 @@ static int snitch_probe(struct platform_device *pdev) {
   int ret;
   int err = 0;
 
+  info("<-------SNITCH PROBE STARTS------->\n");
   dev_info(&pdev->dev, "probe\n");
 
   // Allocate memory for the snitch cluster structure
@@ -706,8 +759,8 @@ static int snitch_probe(struct platform_device *pdev) {
     err = -ENOMEM;
     goto out;
   }
-  dev_info(&pdev->dev, "Remapped TCDM phys %px virt %px size %x\n", (void *)sc->l1.pbase,
-           (void *)sc->l1.vbase, (unsigned int)sc->l1.size);
+  dev_info(&pdev->dev, "Remapped cluster's TCDM\n");
+  info("TCDM : phys=%px virt=%px size=%px\n", (void *)sc->l1.pbase, (void *)sc->l1.vbase, (unsigned int)sc->l1.size);
 
   // Cluster peripheral is mapped as resource
   res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
@@ -717,7 +770,8 @@ static int snitch_probe(struct platform_device *pdev) {
     goto out;
   }
   sc->sci.periph_size = resource_size(res);
-  dev_info(&pdev->dev, "peripherals virt %px\n", sc->pbase);
+  dev_info(&pdev->dev, "Remapped cluster's PERIPHERALS\n");
+  info("PERIPHERALS : phys=%px virt=%px size=%px\n", (void *)res->start, (void *)sc->pbase, resource_size(res));
 
   // SoC control
   if (!soc_regs) {
@@ -736,7 +790,8 @@ static int snitch_probe(struct platform_device *pdev) {
       goto out;
     }
   }
-  dev_info(&pdev->dev, "soc_regs virt %px\n", (void *)soc_regs);
+  dev_info(&pdev->dev, "Remapped SOC_CTL\n");
+  info("SOC_CTL : phys=%px virt=%px size=%px\n", (void *)socres.start, soc_regs, (resource_size(&socres)));
 
   // CLINT
   if (!clint_regs) {
@@ -756,7 +811,8 @@ static int snitch_probe(struct platform_device *pdev) {
       goto out;
     }
   }
-  dev_info(&pdev->dev, "clint virt %px res.start: %px\n", (void *)clint_regs, clint_regs_p);
+  dev_info(&pdev->dev, "Remapped CLINT\n");
+  info("CLINT : phys=%px virt=%px size=%px\n", (void *)clintres.start, clint_regs, (resource_size(&clintres)));
 
   // Quadrant control
   qc = get_quadrant_ctrl(sc->sci.quadrant_idx);
@@ -784,7 +840,8 @@ static int snitch_probe(struct platform_device *pdev) {
     }
   }
   sc->quadrant_ctrl = qc;
-  dev_info(&pdev->dev, "quadrant ctrl virt %px quadrant %d\n", (void *)qc->regs, qc->quadrant_idx);
+  dev_info(&pdev->dev, "Remapped Quadrant's CTL\n");
+  info("QUAD CTL : phys=%px virt=%px size=%px\n", (void *)quadctrlres.start, qc->regs, (resource_size(&quadctrlres)));
 
   // Get reserved memory region from Device-tree
   np = of_parse_phandle(pdev->dev.of_node, "memory-region", 0);
@@ -793,7 +850,6 @@ static int snitch_probe(struct platform_device *pdev) {
     err = -EINVAL;
     goto out;
   }
-
   // map it to kernel space
   ret = of_address_to_resource(np, 0, &memres);
   if (ret) {
@@ -801,7 +857,6 @@ static int snitch_probe(struct platform_device *pdev) {
     err = -EINVAL;
     goto out;
   }
-
   sc->l3.pbase = memres.start;
   sc->l3.size = resource_size(&memres);
   sc->l3.vbase = memremap(memres.start, resource_size(&memres), MEMREMAP_WB);
@@ -811,8 +866,8 @@ static int snitch_probe(struct platform_device *pdev) {
     err = -ENOMEM;
     goto out;
   }
-  dev_info(&pdev->dev, "Remapped shred L3 phys %px virt %px\n", (void *)sc->l3.pbase,
-           (void *)sc->l3.vbase);
+  dev_info(&pdev->dev, "Remapped cluster's program MEM\n");
+  info("CLUSTER L3 : phys=%px virt=%px size=%px\n", (void *)sc->l3.pbase, (void *)sc->l3.vbase, sc->l3.size);
 
   sc->sci.periph_size = sc->l3.size;
   sc->sci.l1_size = sc->l1.size;
@@ -824,6 +879,7 @@ static int snitch_probe(struct platform_device *pdev) {
   list_add(&sc->list, &sc_list);
 out:
   // mutex_unlock(&sn_mtx);
+  info("<-------SNITCH PROBE ENDS------->\n");
   return err;
 }
 

@@ -1,0 +1,35 @@
+From 363d5baa5b540e47bd118a2bb4b93de516845564 Mon Sep 17 00:00:00 2001
+From: Cyril Koenig <cykoenig@iis.ee.ethz.ch>
+Date: Mon, 5 Dec 2022 16:37:11 +0100
+Subject: [PATCH 1/1] Added LIBFDT
+
+---
+ configs/pulp-platform_occamy_defconfig | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/configs/pulp-platform_occamy_defconfig b/configs/pulp-platform_occamy_defconfig
+index 3cdb710..403b330 100644
+--- a/configs/pulp-platform_occamy_defconfig
++++ b/configs/pulp-platform_occamy_defconfig
+@@ -9,8 +9,9 @@ CONFIG_DEFAULT_DEVICE_TREE="occamy"
+ CONFIG_TARGET_PULP_PLATFORM_OCCAMY=y
+ CONFIG_ARCH_RV64I=y
+ CONFIG_RISCV_SMODE=y
++CONFIG_OF_LIBFDT=y
+ CONFIG_FIT=y
+-CONFIG_SPL_LOAD_FIT_ADDRESS=0x90000000
++#CONFIG_SPL_LOAD_FIT_ADDRESS=0x90000000
+ CONFIG_OF_BOARD_SETUP=y
+ CONFIG_BOOTDELAY=1
+ CONFIG_USE_BOOTCOMMAND=y
+@@ -24,6 +25,7 @@ CONFIG_LOG_ERROR_RETURN=y
+ CONFIG_DISPLAY_CPUINFO=y
+ CONFIG_SPL_MTD_SUPPORT=y
+ CONFIG_SPL_DM_SPI_FLASH=y
++CONFIG_SPL_LIBCOMMON_SUPPORT=y
+ CONFIG_SPL_RAM_SUPPORT=y
+ CONFIG_SPL_RAM_DEVICE=y
+ CONFIG_SPL_SPI_FLASH_MTD=y
+-- 
+2.16.5
+

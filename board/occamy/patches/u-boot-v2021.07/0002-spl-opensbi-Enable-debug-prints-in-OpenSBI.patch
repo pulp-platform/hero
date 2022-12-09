@@ -1,4 +1,4 @@
-From 52d9a83a562e007ddc7b11468b20531561159731 Mon Sep 17 00:00:00 2001
+From 734edaa728d6cdc237184db4b2b46df240e4d334 Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
 Date: Tue, 26 Apr 2022 15:16:30 +0200
 Subject: spl/opensbi: Enable debug prints in OpenSBI

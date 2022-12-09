@@ -10,7 +10,7 @@ ARCH          := ${KERNEL_ARCH}
 CROSS_COMPILE := ${KERNEL_CROSS_COMPILE}
 
 # -I${HERO_LIBPULP_DIR}/inc -I${HERO_PULP_INC_DIR}
-ccflags-y += -DPLATFORM=${PLATFORM} ${CFLAGS} -O2
+ccflags-y += -DPLATFORM=${PLATFORM} ${CFLAGS} -O2 -DDEBUG
 snitch-objs := snitch_module.o
 
 .PHONY: all deploy dis clean build

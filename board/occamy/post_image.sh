@@ -7,21 +7,20 @@ MKIMAGE="${HOST_DIR}/bin/mkimage"
 DTC="${HOST_DIR}/bin/dtc"
 IMAGE_ITS="fit_kernel_dtb.its"
 OUTPUT_IMAGE="Image.itb"
-OUTPUT_DTB="occamy_hero.dtb"
+OUTPUT_DTB="occamy.dtb"
 
 # Fetch infos from config
-UBOOT_CUSTOM_VERSION=$(grep BR2_TARGET_UBOOT_CUSTOM_VERSION_VALUE ${BR2_CONFIG} | sed 's/.*=//' | tr -d '"')
-
-# DTC
-echo " DTC     ${OUTPUT_DTB}"
-cd "${BINARIES_DIR}"
-DTSI=${BUILD_DIR}/uboot-${UBOOT_CUSTOM_VERSION}/arch/riscv/dts
-${DTC} -I dts -O dtb -o ${OUTPUT_DTB} --include ${DTSI} ${BOARD_DIR}/occamy_hero.dts
+# TODO (ckoenig) : consider both BR2_TARGET_UBOOT_CUSTOM_REPO_VERSION and BR2_TARGET_UBOOT_CUSTOM_VERSION_VALUE
+UBOOT_CUSTOM_VERSION=$(grep BR2_TARGET_UBOOT_CUSTOM_REPO_VERSION ${BR2_CONFIG} | sed 's/.*=//' | tr -d '"')
 
 # Generate uImage with kernel and dtb
-echo " MKIMAGE ${OUTPUT_IMAGE}"
-cp -v "${BOARD_DIR}/${IMAGE_ITS}" "${BINARIES_DIR}"
 cd "${BINARIES_DIR}"
+cp -v "${BOARD_DIR}/${IMAGE_ITS}" .
+cp -v /scratch/cykoenig/development/iis-ci-3/hw/system/occamy/fpga/bootrom/occamy.dtb ${OUTPUT_DTB}
+echo "DTC ${OUTPUT_DTB} from ${BOARD_DIR}/occamy.dts"
+${DTC} -I dts -O dtb -o ${OUTPUT_DTB} ${BOARD_DIR}/occamy.dts
+echo "ZIP Image"
 gzip -c Image > Image.gz
+echo "MKIMAGE ${OUTPUT_IMAGE}"
 ${MKIMAGE} -f ${IMAGE_ITS} ${OUTPUT_IMAGE}
 rm ${IMAGE_ITS}

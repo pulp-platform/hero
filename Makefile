@@ -58,8 +58,23 @@ br-hrv-occamy-base: br-hrv-occamy-defconfig
 	$(MAKE) -C $(CURDIR)/output/br-hrv-occamy prepare-sdk
 br-hrv-occamy: br-hrv-occamy-base
 
+
+flashrun:
+	vitis-2020.2 vivado -mode batch -source util/occamy_vcu128_flashrun.tcl -tclargs bordcomputer:3232 091847100638A flash.mcs 0x6000000 ./output/br-hrv-occamy/images/u-boot.itb  /scratch/cykoenig/development/noah_snitch/hw/system/occamy/fpga/occamy_vcu128/occamy_vcu128.runs/impl_1/occamy_vcu128_wrapper.bit /scratch/cykoenig/development/iis-ci-3/hw/system/occamy/fpga/bootrom/bootrom-spl.tcl
 upload-linux-image:
-	scp /scratch/cykoenig/development/hero-occamy/output/br-hrv-occamy/images/Image.itb vcu128-01@bordcomputer.ee.ethz.ch:/srv/tftp/vcu128-01/Image.itb
+	scp ./output/br-hrv-occamy/images/Image.itb vcu128-01@bordcomputer.ee.ethz.ch:/srv/tftp/vcu128-01/Image.itb
+clean-pkg:
+	(cd output/br-hrv-occamy && find ../../package/* -maxdepth 1 -type d | awk -F '/' '{print $$4 "-dirclean"}' | xargs make)
+clean-target:
+	rm -f output/br-hrv-occamy/build/host-gcc-final-11.2.0/.stamp_host_installed
+	find output/ -name ".stamp_target_installed" -delete
+	rm -rf output/br-hrv-occamy/target
+upload-driver:
+	scp ./output/br-hrv-occamy/build/snitch-driver-0.1/snitch.ko root@hero-vcu128-02.ee.ethz.ch:/usr/lib
+gdb:
+	./util/ssh_tunnel.sh start
+	$(HERO_INSTALL)/bin/riscv64-hero-linux-gnu-gdb -ex "target extended-remote :3334" ; \
+	./util/ssh_tunnel.sh stop
 
 # sdk images
 br-hrv: check_environment
@@ -145,9 +160,11 @@ sdk-hrv: check_environment br-hrv
 sdk-har: check_environment br-har
 	cd $(CURDIR)/output/br-har && $(ROOT)/toolchain/install-sdk.sh
 
-sdk-snitch: check_environment
+$(ROOT)/snitch-snruntime-hero:
+	git clone -b hero git@github.com:pulp-platform/snitch.git $(ROOT)/snitch-snruntime-hero -b iis-ci-3
+
+sdk-snitch: check_environment $(ROOT)/snitch-snruntime-hero
 	mkdir -p $(CURDIR)/output/$@
-	#git clone -b hero git@github.com:pulp-platform/snitch.git $(ROOT)/snitch-snruntime-hero -b iis-ci-3
 	cd $(CURDIR)/output/$@ && $(ROOT)/toolchain/build-snitch-runtime.sh $(ROOT)/snitch-snruntime-hero/sw
 
 # Utilities

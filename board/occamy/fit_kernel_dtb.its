@@ -1,12 +1,13 @@
 /dts-v1/;
 
 /{
-  description = "U-Boot fitImage for Occamy";
+  description = "U-Boot fitImage for Occamy from heroccamy";
   #address-cells = <1>;
 
   images {
+    // Older u-boot images don't accept '@' in node names and fail verification
     kernel0 {
-      description = "Linux kernel";
+      description = "Linux kernel from heroccamy";
       data = /incbin/("Image.gz");
       type = "kernel";
       arch = "riscv";
@@ -19,10 +20,10 @@
       };
     };
     fdt0 {
-      description = "Flattened Device Tree blob";
-      data = /incbin/("occamy_hero.dtb");
+      description = "Flattened Device Tree blob from heroccamy";
+      data = /incbin/("occamy.dtb");
       type = "flat_dt";
-      arch = "riscv";
+      arch = "arm";
       compression = "none";
       hash0 {
         algo = "sha1";
@@ -32,7 +33,7 @@
   configurations {
     default = "conf0";
     conf0 {
-      description = "Linux kernel, FDT blob";
+      description = "Linux kernel, FDT blob from heroccamy";
       kernel = "kernel0";
       fdt = "fdt0";
       hash0 {

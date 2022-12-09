@@ -474,6 +474,16 @@ int snitch_ipi_get(snitch_dev_t *dev, uint32_t reg, uint32_t *mask) {
   return ret;
 }
 
+int snitch_scratch_reg_read(snitch_dev_t *dev, uint32_t reg, uint32_t *val) {
+  int ret;
+  struct snios_reg sreg;
+  sreg.off = reg;
+  if ((ret = ioctl(dev->fd, SNIOS_SCRATCH_R, &sreg))) {
+    pr_error("ioctl() failed. %s \n", strerror(errno));
+  }
+  return ret;
+}
+
 void snitch_fesrv_run(snitch_dev_t *dev) {
   pr_error("unimplemented\n");
   // // init fesrv
