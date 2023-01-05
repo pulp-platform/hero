@@ -60,7 +60,7 @@ br-hrv-occamy: br-hrv-occamy-base
 
 
 flashrun:
-	vitis-2020.2 vivado -mode batch -source util/occamy_vcu128_flashrun.tcl -tclargs bordcomputer:3232 091847100638A flash.mcs 0x6000000 ./output/br-hrv-occamy/images/u-boot.itb  /scratch/cykoenig/development/noah_snitch/hw/system/occamy/fpga/occamy_vcu128/occamy_vcu128.runs/impl_1/occamy_vcu128_wrapper.bit /scratch/cykoenig/development/iis-ci-3/hw/system/occamy/fpga/bootrom/bootrom-spl.tcl
+	vitis-2020.2 vivado -mode batch -source util/occamy_vcu128_flashrun.tcl -tclargs bordcomputer:3232 091847100638A flash.mcs 0x6000000 ./output/br-hrv-occamy/images/u-boot.itb /scratch/cykoenig/development/noah_snitch_last/hw/system/occamy/fpga/occamy_vcu128/occamy_vcu128.runs/impl_1/occamy_vcu128_wrapper.bit /scratch/cykoenig/development/noah_snitch_last/hw/system/occamy/fpga/bootrom/bootrom-spl.tcl
 upload-linux-image:
 	scp ./output/br-hrv-occamy/images/Image.itb vcu128-01@bordcomputer.ee.ethz.ch:/srv/tftp/vcu128-01/Image.itb
 clean-pkg:

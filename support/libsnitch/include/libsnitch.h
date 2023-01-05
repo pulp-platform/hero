@@ -282,4 +282,7 @@ int snitch_tlb_read(snitch_dev_t *dev, struct axi_tlb_entry *e);
  */
 void snitch_set_device_loglevel(snitch_dev_t *dev, int lvl);
 
+int snitch_test_read_regions(snitch_dev_t *dev, uint32_t reg);
+
+
 //!@}

@@ -474,15 +474,6 @@ int snitch_ipi_get(snitch_dev_t *dev, uint32_t reg, uint32_t *mask) {
   return ret;
 }
 
-int snitch_scratch_reg_read(snitch_dev_t *dev, uint32_t reg, uint32_t *val) {
-  int ret;
-  struct snios_reg sreg;
-  sreg.off = reg;
-  if ((ret = ioctl(dev->fd, SNIOS_SCRATCH_R, &sreg))) {
-    pr_error("ioctl() failed. %s \n", strerror(errno));
-  }
-  return ret;
-}
 
 void snitch_fesrv_run(snitch_dev_t *dev) {
   pr_error("unimplemented\n");
@@ -688,4 +679,14 @@ static void populate_boot_data(snitch_dev_t *dev, struct BootData *bd) {
   bd->clint_base = dev->sci.clint_base;
   // unused
   bd->boot_addr = (uint32_t)(uintptr_t)dev->sci.l3_paddr;
+}
+
+int snitch_test_read_regions(snitch_dev_t *dev, uint32_t reg) {
+  int ret;
+  struct snios_reg sreg;
+  sreg.off = reg;
+  if ((ret = ioctl(dev->fd, SNIOS_TEST_READ_REGIONS, &sreg))) {
+    pr_error("ioctl() failed. %s \n", strerror(errno));
+  }
+  return ret;
 }

@@ -271,8 +271,6 @@ static long snitch_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 
   info("Received ioctl with cmd %d arg %ld\n", cmd, arg);
 
-  test_read_regions(sc, 0);
-
   // Switch according to the ioctl called
   switch (cmd) {
   case SNIOC_SET_OPTIONS: {
