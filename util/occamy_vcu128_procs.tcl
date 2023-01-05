@@ -65,15 +65,17 @@ proc occ_program_bit { } {
 
 proc occ_rst { } {
     global occ_hw_device
+    puts [get_hw_vios -of_objects [get_hw_devices ${occ_hw_device}]]
     set vio_sys [get_hw_vios -of_objects [get_hw_devices ${occ_hw_device}] -filter {CELL_NAME=~"*vio_sys"}]
-    set_property OUTPUT_VALUE 0 [get_hw_probes */occamy_rstn -of_objects $vio_sys]
-    commit_hw_vio [get_hw_probes {*/occamy_rstn} -of_objects $vio_sys]
+    puts [get_hw_probes */occamy_rstn*]
+    set_property OUTPUT_VALUE 0 [get_hw_probes */occamy_rstn* -of_objects $vio_sys]
+    commit_hw_vio [get_hw_probes {*/occamy_rstn*} -of_objects $vio_sys]
 }
 proc occ_go { } {
     global occ_hw_device
     set vio_sys [get_hw_vios -of_objects [get_hw_devices ${occ_hw_device}] -filter {CELL_NAME=~"*vio_sys"}]
-    set_property OUTPUT_VALUE 1 [get_hw_probes */occamy_rstn -of_objects $vio_sys]
-    commit_hw_vio [get_hw_probes {*/occamy_rstn} -of_objects $vio_sys]
+    set_property OUTPUT_VALUE 1 [get_hw_probes */occamy_rstn* -of_objects $vio_sys]
+    commit_hw_vio [get_hw_probes {*/occamy_rstn*} -of_objects $vio_sys]
 }
 
 proc occ_rst_toggle { } {

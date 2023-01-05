@@ -35,8 +35,12 @@ fi
 if [ -z "$CXX" ]; then
   export CXX=`which g++`
 fi
+if [ -z "$CMAKE" ]; then
+  export CMAKE=`which cmake`
+fi
 echo "Requesting C compiler $CC"
 echo "Requesting CXX compiler $CXX"
+echo "Requesting cmake $CMAKE"
 
 # clean environment when running together with an env source script
 unset HERO_PULP_INC_DIR
@@ -59,8 +63,7 @@ ${CMAKE} -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
       -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL \
       -DCMAKE_FIND_NO_INSTALL_PREFIX=True \
       -DLLVM_OPTIMIZED_TABLEGEN=True -DLLVM_BUILD_TESTS=False \
-      -DDEFAULT_SYSROOT=$HERO_INSTALL/riscv64-hero-linux-gnu \
-      -DLLVM_DEFAULT_TARGET_TRIPLE=riscv64-hero-linux-gnu \
+      -DLLVM_DEFAULT_TARGET_TRIPLE="riscv32-unknown-elf" \
       -DLLVM_TARGETS_TO_BUILD="AArch64;RISCV" \
       -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON \
       -DLLVM_ENABLE_PROJECTS="clang;openmp;lld" \

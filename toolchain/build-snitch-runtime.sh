@@ -4,10 +4,7 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
-THIS_DIR=$(pwd)
-
-INSTALLPREFIX=${THIS_DIR}/install
-BUILDPREFIX=${THIS_DIR}/build
+THIS_DIR=$(dirname "$(readlink -f "$0")")
 SNITCH_SRC=$1
 
 TARGET="riscv32-unknown-elf"
@@ -22,32 +19,32 @@ export PATH=${HERO_INSTALL}/bin:${PATH}
 ##############################
 # snruntime
 ##############################
-rm -rf ${BUILDPREFIX}-snruntime && mkdir ${BUILDPREFIX}-snruntime
-cd ${BUILDPREFIX}-snruntime
+rm -rf build-snruntime && mkdir build-snruntime
+cd build-snruntime
 ${CMAKE} \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
   -DCMAKE_C_FLAGS="$SNITCH_CFLAGS" \
-  -DCMAKE_INSTALL_PREFIX=${INSTALLPREFIX} \
+  -DCMAKE_INSTALL_PREFIX=../install \
   -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm \
   -DSNITCH_RUNTIME="snRuntime-hero" \
   -DOMPSTATIC_NUMTHREADS="0" \
   -DMEM_DRAM_ORIGIN="0xc0000000" \
-  ${SNITCH_SRC}/snRuntime
-make -j$(nproc)
-#make install
+  $SNITCH_SRC/sw/snRuntime
+make
+make install
+cd ..
 
 ##############################
 # snblas
 ##############################
-rm -rf ${BUILDPREFIX}-snblas && mkdir ${BUILDPREFIX}-snblas
-cd ${BUILDPREFIX}-snblas
+rm -rf build-snblas && mkdir build-snblas
+cd build-snblas
 ${CMAKE} \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
   -DCMAKE_C_FLAGS="$SNITCH_CFLAGS" \
-  -DCMAKE_INSTALL_PREFIX=${INSTALLPREFIX} \
+  -DCMAKE_INSTALL_PREFIX=../install \
   -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm \
-  ${SNITCH_SRC}/snBLAS
-make -j$(nproc)
-#make install
+  $SNITCH_SRC/sw/snBLAS
+make

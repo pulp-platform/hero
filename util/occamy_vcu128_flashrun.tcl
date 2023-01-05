@@ -62,11 +62,11 @@ set_property PROGRAM.CHECKSUM  0 $hw_cfgmem
 
 # Create bitstream to access SPI flash
 create_hw_bitstream -hw_device $hw_device [get_property PROGRAM.HW_CFGMEM_BITFILE $hw_device]; 
-program_hw_devices $hw_device; 
-refresh_hw_device $hw_device;
+#program_hw_devices $hw_device; 
+#refresh_hw_device $hw_device;
 
 # Program SPI flash
-program_hw_cfgmem -hw_cfgmem $hw_cfgmem
+#program_hw_cfgmem -hw_cfgmem $hw_cfgmem
 
 # Program BIT
 global occ_hw_server
