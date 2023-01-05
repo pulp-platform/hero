@@ -1,0 +1,37 @@
+From c46655cc7c9a05f4e8452598f95acf29b2933dfc Mon Sep 17 00:00:00 2001
+From: Noah Huetter <noahhuetter@gmail.com>
+Date: Tue, 28 Dec 2021 12:07:35 +0100
+Subject: Move htif section before data in RAM
+
+Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
+---
+ sw/snRuntime/link/common.ld.in | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/sw/snRuntime/link/common.ld.in b/sw/snRuntime/link/common.ld.in
+index 7b302f7..91edd33 100644
+--- a/sw/snRuntime/link/common.ld.in
++++ b/sw/snRuntime/link/common.ld.in
+@@ -27,6 +27,9 @@ SECTIONS
+     _etext = .;
+   } >DRAM
+ 
++  /* HTIF */
++  .htif         : { } >DRAM
++
+   .rodata :
+   {
+     . = ALIGN(4);
+@@ -35,9 +38,6 @@ SECTIONS
+     . = ALIGN(4);
+   } >DRAM
+ 
+-  /* HTIF */
+-  .htif         : { } >DRAM
+-
+   /* Thread Local Storage sections  */
+   .tdata    :
+   {
+-- 
+2.15.1
+

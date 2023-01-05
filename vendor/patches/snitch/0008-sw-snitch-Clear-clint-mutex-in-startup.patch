@@ -1,0 +1,26 @@
+From 947099fae44d693c16bb536427cb54b748849ba5 Mon Sep 17 00:00:00 2001
+From: Noah Huetter <noahhuetter@gmail.com>
+Date: Sun, 5 Dec 2021 14:28:21 +0100
+Subject: [sw/snitch] Clear clint mutex in startup
+
+Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
+---
+ sw/snRuntime/src/interrupt.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/sw/snRuntime/src/interrupt.c b/sw/snRuntime/src/interrupt.c
+index cfb7eaa..868ebd8 100644
+--- a/sw/snRuntime/src/interrupt.c
++++ b/sw/snRuntime/src/interrupt.c
+@@ -36,6 +36,8 @@ void irq_m_cluster(uint32_t core_idx);
+ //================================================================================
+ 
+ void snrt_int_init(struct snrt_team_root *team) {
++    // TODO: this is highly dangerous in multi-cluster systems and must be removed
++    clint_mutex = 0;
+     // Put the clint address in tls for faster access
+     clint_p = team->peripherals.clint;
+     cl_clint_p = team->peripherals.cl_clint;
+-- 
+2.15.1
+

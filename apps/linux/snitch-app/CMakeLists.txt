@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 3.13)
 ################################################################################
 
 # Path to snitch/sw directory from which snRuntime & co are derived
-set(SNITCH_SOFTWARE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../snitch-snruntime-hero/sw)
+set(SNITCH_SOFTWARE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../vendor/snitch/sw)
 
 # Include cmake files for toolchain
 list(APPEND CMAKE_MODULE_PATH ${SNITCH_SOFTWARE_DIR}/cmake)
@@ -34,7 +34,8 @@ set(MEM_DRAM_SIZE "512M" CACHE STRING "Size of external memory")
 ################################################################################
 
 set(sn_common_src
-  ../../../snitch-snruntime-hero/sw/snRuntime/src/snitch_hero_support.c
+  ${SNITCH_SOFTWARE_DIR}/snRuntime/src/snitch_hero_support.c
+  hier_wake.c
 )
 set(sn_common_include
   .

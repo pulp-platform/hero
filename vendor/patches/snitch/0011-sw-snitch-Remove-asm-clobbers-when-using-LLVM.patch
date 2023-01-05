@@ -1,0 +1,40 @@
+From 77d9c536f462a94a8ecba8dd75116e725ed434b9 Mon Sep 17 00:00:00 2001
+From: Noah Huetter <noahhuetter@gmail.com>
+Date: Tue, 7 Dec 2021 15:56:05 +0100
+Subject: [sw/snitch] Remove asm clobbers when using LLVM
+
+Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
+---
+ sw/applications/src/kernels/gemm.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/sw/applications/src/kernels/gemm.c b/sw/applications/src/kernels/gemm.c
+index 380fcb5..81f0029 100644
+--- a/sw/applications/src/kernels/gemm.c
++++ b/sw/applications/src/kernels/gemm.c
+@@ -95,10 +95,12 @@ void gemm_fp64_ssr_frep(uint32_t M, uint32_t N, uint32_t K, double* A,
+                         uint32_t ldA, uint32_t ta, double* B, uint32_t ldB,
+                         uint32_t tb, double* C, uint32_t ldC,
+                         const uint32_t* ALPHA, uint32_t setup_SSR) {
++#if !defined(__TOOLCHAIN_LLVM__)
+     register volatile double ft0 asm("ft0");
+     register volatile double ft1 asm("ft1");
+     register volatile double ft2 asm("ft2");
+     asm volatile("" : "=f"(ft0), "=f"(ft1), "=f"(ft2));
++#endif
+ 
+     // Unrolling factor of most inner loop.
+     // Should be at least as high as the FMA delay
+@@ -221,7 +223,9 @@ void gemm_fp64_ssr_frep(uint32_t M, uint32_t N, uint32_t K, double* A,
+         }
+     }
+ 
++#if !defined(__TOOLCHAIN_LLVM__)
+     asm volatile("" ::"f"(ft0), "f"(ft1), "f"(ft2));
++#endif
+ }
+ 
+ /**
+-- 
+2.15.1
+

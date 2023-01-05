@@ -1,0 +1,135 @@
+From f313c4077fd081c51e3a8dfa92945d81df0e8ffd Mon Sep 17 00:00:00 2001
+From: Noah Huetter <noahhuetter@gmail.com>
+Date: Mon, 16 May 2022 14:55:30 +0200
+Subject: snrt: Additions to kmp and omp
+
+Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
+---
+ sw/snRuntime/include/omp.h |  9 ++++-----
+ sw/snRuntime/src/omp/kmp.c | 19 +++++++++++++++----
+ sw/snRuntime/src/omp/omp.c | 12 ++++++++++--
+ 3 files changed, 29 insertions(+), 11 deletions(-)
+
+diff --git a/sw/snRuntime/include/omp.h b/sw/snRuntime/include/omp.h
+index aef079e..9128f60 100644
+--- a/sw/snRuntime/include/omp.h
++++ b/sw/snRuntime/include/omp.h
+@@ -86,7 +86,7 @@ extern omp_prof_t *omp_prof;
+ #endif
+ 
+ #ifndef OMPSTATIC_NUMTHREADS
+-extern __thread omp_t volatile *omp_p;
++extern __thread omp_t *omp_p;
+ #else
+ extern omp_t omp_p;
+ #endif
+@@ -105,6 +105,9 @@ void omp_print_prof(void);
+ extern omp_prof_t *omp_prof;
+ #endif
+ 
++unsigned omp_get_thread_num(void);
++unsigned omp_get_num_threads(void);
++
+ //================================================================================
+ // inlines
+ //================================================================================
+@@ -121,10 +124,6 @@ static inline const omp_team_t *omp_get_team(const omp_t *_this) {
+ }
+ #endif
+ 
+-static inline unsigned omp_get_thread_num(void) {
+-    return snrt_cluster_core_idx();
+-}
+-
+ static inline void __attribute__((always_inline))
+ parallelRegionExec(int32_t argc, void *data, void (*fn)(void *, uint32_t),
+                    int num_threads) {
+diff --git a/sw/snRuntime/src/omp/kmp.c b/sw/snRuntime/src/omp/kmp.c
+index 8dc46ae..a8f2c78 100644
+--- a/sw/snRuntime/src/omp/kmp.c
++++ b/sw/snRuntime/src/omp/kmp.c
+@@ -5,10 +5,8 @@
+ #include "kmp.h"
+ 
+ #include <inttypes.h>  // for PRIx##
+-#include <stdio.h>
+-#include <stdlib.h>
++#include <stdarg.h>    // for vararg
+ 
+-#include "encoding.h"
+ #include "omp.h"
+ 
+ //=============================================================================
+@@ -283,6 +281,7 @@ void __kmpc_for_static_init_4(ident_t *loc, kmp_int32 gtid,
+     unsigned threadNum = omp_get_thread_num();
+     kmp_uint32 loopSize = (*pupper - *plower) / incr + 1;
+     kmp_int32 globalUpper = *pupper;
++    int leftOver;
+ 
+     PR_TRACE(
+                "fsi_4 %d %d %d [%d,%d,%d] %d %d\r\n",
+@@ -301,7 +300,7 @@ void __kmpc_for_static_init_4(ident_t *loc, kmp_int32 gtid,
+     // no specified chunk size
+     else if (sched == kmp_sch_static) {
+         chunk = loopSize / team->nbThreads;
+-        int leftOver = loopSize - chunk * team->nbThreads;
++        leftOver = loopSize - chunk * team->nbThreads;
+ 
+         // calculate precise chunk size and lower and upper bound
+         if ((int)threadNum < leftOver) {
+@@ -404,6 +403,18 @@ void __kmpc_for_static_init_8u(ident_t *loc, kmp_int32 gtid, kmp_int32 sched,
+                gtid, sched, *plastiter, *plower, *pupper, *pstride, incr, chunk);
+ }
+ 
++void __kmpc_for_static_init_8(ident_t *loc, kmp_int32 gtid,
++                               kmp_int32 schedtype, kmp_int32 *plastiter,
++                               kmp_int64 *plower, kmp_int64 *pupper,
++                               kmp_int64 *pstride, kmp_int64 incr,
++                               kmp_int32 chunk) {
++    // TODO: This is handling the different data types compleletly wrong and must be corrected to support all cases
++    kmp_uint64 ilower = *plower;
++    kmp_uint64 iupper = *pupper;
++    __kmpc_for_static_init_8u(loc, gtid, schedtype, plastiter, &ilower, &iupper,
++                             pstride, incr, chunk);
++    *plower = ilower;
++    *pupper = iupper;
+ }
+ 
+ //================================================================================
+diff --git a/sw/snRuntime/src/omp/omp.c b/sw/snRuntime/src/omp/omp.c
+index 92045ae..d1d6f92 100644
+--- a/sw/snRuntime/src/omp/omp.c
++++ b/sw/snRuntime/src/omp/omp.c
+@@ -46,7 +46,7 @@
+ static omp_t *volatile omp_p_global;
+ 
+ #ifndef OMPSTATIC_NUMTHREADS
+-__thread omp_t volatile *omp_p;
++__thread omp_t *omp_p;
+ #else
+ omp_t omp_p = {
+     .plainTeam = {.nbThreads = OMPSTATIC_NUMTHREADS},
+@@ -83,7 +83,7 @@ void omp_init(void) {
+         omp_p->plainTeam.loop_epoch = 0;
+         omp_p->plainTeam.loop_is_setup = 0;
+ 
+-        for (int i = 0; i < sizeof(omp_p->plainTeam.core_epoch) /
++        for (unsigned i = 0; i < sizeof(omp_p->plainTeam.core_epoch) /
+                                 sizeof(omp_p->plainTeam.core_epoch[0]);
+              i++)
+             omp_p->plainTeam.core_epoch[i] = 0;
+@@ -165,3 +165,11 @@ void omp_print_prof(void) {
+     printf("%-20s %d\r\n", "fork_oh", omp_prof->fork_oh);
+ }
+ #endif
++
++unsigned omp_get_thread_num(void) {
++    return snrt_cluster_core_idx();
++}
++
++unsigned omp_get_num_threads(void) {
++    return omp_getData()->numThreads;
++}
+-- 
+2.16.5
+

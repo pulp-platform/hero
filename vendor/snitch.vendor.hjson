@@ -1,0 +1,29 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+  "name": "snitch",
+  "target_dir": "snitch",
+  "upstream": {
+    "url": "https://github.com/pulp-platform/snitch.git",
+    "rev": "6e90362642db1bcf83e8011d3a3b163d2839f1b1"
+  },
+  "patch_dir": "patches/snitch",
+  "exclude_from_upstream": [
+    ".github",
+    "docs",
+    "hw",
+    "sw/banshee",
+    "sw/vendor/riscv-isa-sim",
+    "util",
+    ".*",
+    "apt-requirements.txt",
+    "Bender.local",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "mkdocs.yml",
+    "python-requirements.txt",
+    "README.md",
+    "setup.cfg"
+  ]
+}

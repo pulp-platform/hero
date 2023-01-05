@@ -1,0 +1,31 @@
+From a851924d2e55f0a9a1cde5f50580f1d15e1a2bad Mon Sep 17 00:00:00 2001
+From: Noah Huetter <noahhuetter@gmail.com>
+Date: Tue, 11 Jan 2022 17:21:48 +0100
+Subject: [sw/axpy] Double buffering
+
+Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
+---
+ sw/snBLAS/src/axpy.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/sw/snBLAS/src/axpy.c b/sw/snBLAS/src/axpy.c
+index 9738783..ccfdcb6 100644
+--- a/sw/snBLAS/src/axpy.c
++++ b/sw/snBLAS/src/axpy.c
+@@ -29,6 +29,13 @@ void axpy_block(uint32_t n, uint32_t tile_n, double *alpha, double *dx, double *
+   double *l1_alpha = ptr;
+   ptr += 1;
+ 
++  // Distribute vector across clusters
++  const uint32_t chunk = n / ccfg->cluster_num;
++  const uint32_t left_over = n - chunk * ccfg->cluster_num;
++  dx += chunk * ccfg->cluster_idx;
++  dy += chunk * ccfg->cluster_idx;
++  n = ccfg->cluster_idx == ccfg->cluster_num ? chunk + left_over : chunk;
++
+   // ------------------
+   //   Data mover
+   // ------------------
+-- 
+2.15.1
+

@@ -1,0 +1,830 @@
+From d8ec8c33a4dd2b288ddbec23fb585be69bf98572 Mon Sep 17 00:00:00 2001
+From: Noah Huetter <noahhuetter@gmail.com>
+Date: Mon, 16 May 2022 14:55:05 +0200
+Subject: snrt: Debugging unified and programmable
+
+Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
+---
+ sw/snRuntime/include/debug.h |  75 +++++++++++++++++------
+ sw/snRuntime/include/eu.h    |  18 ------
+ sw/snRuntime/include/kmp.h   |  20 ------
+ sw/snRuntime/include/omp.h   |  16 -----
+ sw/snRuntime/include/snrt.h  |   5 ++
+ sw/snRuntime/src/alloc.c     |   1 -
+ sw/snRuntime/src/dm.c        |  62 ++++++++++++-------
+ sw/snRuntime/src/omp/eu.c    |  33 +++++++---
+ sw/snRuntime/src/omp/kmp.c   | 142 +++++++++++++++++++++++++------------------
+ sw/snRuntime/src/omp/omp.c   |  27 +++++++-
+ sw/snRuntime/src/team.c      |   3 +
+ 11 files changed, 238 insertions(+), 164 deletions(-)
+
+diff --git a/sw/snRuntime/include/debug.h b/sw/snRuntime/include/debug.h
+index d504a59..dd439f4 100644
+--- a/sw/snRuntime/include/debug.h
++++ b/sw/snRuntime/include/debug.h
+@@ -3,35 +3,74 @@
+ // SPDX-License-Identifier: Apache-2.0
+ #pragma once
+ 
++#include <stdint.h>
++
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+ 
+-#if defined(__SNRT_USE_TRACE)
++extern uint32_t snrt_log_level;
+ 
+-#include "printf.h"
++static inline void snrt_debug_set_loglevel(uint32_t lvl) { snrt_log_level = lvl; };
+ 
+-#define snrt_msg(fmt, x...)                                             \
+-    do {                                                                \
+-        printf("[\033[35mSNRT(%d,%d)\033[0m] " fmt, snrt_cluster_idx(), \
+-               snrt_cluster_core_idx(), ##x);                           \
+-    } while (0)
++#define LOG_ERROR 0
++#define LOG_WARN 1
++#define LOG_INFO 2
++#define LOG_DEBUG 3
++#define LOG_TRACE 4
+ 
+-#define SNRT_TRACE_INIT 0
+-#define SNRT_TRACE_ALLOC 1
++#if defined(DEBUG)
+ 
+-#define snrt_trace(trace, x...) \
+-    do {                        \
+-        snrt_msg(x);            \
+-    } while (0)
++#define snrt_error(fmt, ...)                                                                       \
++  ({                                                                                               \
++    if (LOG_ERROR <= snrt_log_level)                                                               \
++      snrt_printf("[\033[31msnrt(%d,%d):error:%s\033[0m] " fmt, snrt_cluster_idx(),                \
++                  snrt_cluster_core_idx(), __func__, ##__VA_ARGS__);                               \
++  })
++#define snrt_warn(fmt, ...)                                                                        \
++  ({                                                                                               \
++    if (LOG_WARN <= snrt_log_level)                                                                \
++      snrt_printf("[\033[91msnrt(%d,%d):warn:%s\033[0m] " fmt, snrt_cluster_idx(),                 \
++                  snrt_cluster_core_idx(), __func__, ##__VA_ARGS__);                               \
++  })
++#define snrt_info(fmt, ...)                                                                        \
++  ({                                                                                               \
++    if (LOG_INFO <= snrt_log_level)                                                                \
++      snrt_printf("[\033[33msnrt(%d,%d):info:%s\033[0m] " fmt, snrt_cluster_idx(),                 \
++                  snrt_cluster_core_idx(), __func__, ##__VA_ARGS__);                               \
++  })
++#define snrt_debug(fmt, ...)                                                                       \
++  ({                                                                                               \
++    if (LOG_DEBUG <= snrt_log_level)                                                               \
++      snrt_printf("[\033[35msnrt(%d,%d):debug:%s\033[0m] " fmt, snrt_cluster_idx(),                \
++                  snrt_cluster_core_idx(), __func__, ##__VA_ARGS__);                               \
++  })
++#define snrt_trace(fmt, ...)                                                                       \
++  ({                                                                                               \
++    if (LOG_TRACE <= snrt_log_level)                                                               \
++      snrt_printf("[\033[96msnrt(%d,%d):trace:%s\033[0m] " fmt, snrt_cluster_idx(),                \
++                  snrt_cluster_core_idx(), __func__, ##__VA_ARGS__);                               \
++  })
+ 
+-#else
++#else // #if defined(DEBUG)
+ 
+-#define snrt_trace(x...) \
+-    do {                 \
+-    } while (0)
++#define snrt_error(x...)                                                                           \
++  do {                                                                                             \
++  } while (0)
++#define snrt_warn(x...)                                                                            \
++  do {                                                                                             \
++  } while (0)
++#define snrt_info(x...)                                                                            \
++  do {                                                                                             \
++  } while (0)
++#define snrt_debug(x...)                                                                           \
++  do {                                                                                             \
++  } while (0)
++#define snrt_trace(x...)                                                                           \
++  do {                                                                                             \
++  } while (0)
+ 
+-#endif  // defined(__SNRT_USE_TRACE)
++#endif // defined(SNRT_DEBUG)
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/sw/snRuntime/include/eu.h b/sw/snRuntime/include/eu.h
+index 40fb384..e38b790 100644
+--- a/sw/snRuntime/include/eu.h
++++ b/sw/snRuntime/include/eu.h
+@@ -65,21 +65,3 @@ void eu_mutex_release();
+  */
+ uint32_t eu_get_workers_in_loop();
+ uint32_t eu_get_workers_in_wfi();
+-
+-//================================================================================
+-// debug
+-//================================================================================
+-
+-#ifdef EU_DEBUG_LEVEL
+-#include "printf.h"
+-#define _EU_PRINTF(...)             \
+-    if (1) {                        \
+-        printf("[eu] "__VA_ARGS__); \
+-    }
+-#define EU_PRINTF(d, ...)        \
+-    if (EU_DEBUG_LEVEL >= d) {   \
+-        _EU_PRINTF(__VA_ARGS__); \
+-    }
+-#else
+-#define EU_PRINTF(d, ...)
+-#endif
+diff --git a/sw/snRuntime/include/kmp.h b/sw/snRuntime/include/kmp.h
+index 254b832..39efb2b 100644
+--- a/sw/snRuntime/include/kmp.h
++++ b/sw/snRuntime/include/kmp.h
+@@ -5,27 +5,7 @@
+ #pragma once
+ 
+ #include "interface.h"
+-#include "snrt.h"
+ 
+ typedef void (*kmpc_micro)(kmp_int32 *global_tid, kmp_int32 *bound_tid, ...);
+ 
+ extern _kmp_ptr32 *kmpc_args;
+-
+-////////////////////////////////////////////////////////////////////////////////
+-// debug
+-////////////////////////////////////////////////////////////////////////////////
+-
+-#ifdef KMP_DEBUG_LEVEL
+-#include "encoding.h"
+-#include "printf.h"
+-#define _KMP_PRINTF(...)             \
+-    if (1) {                         \
+-        printf("[kmc] "__VA_ARGS__); \
+-    }
+-#define KMP_PRINTF(d, ...)        \
+-    if (KMP_DEBUG_LEVEL >= d) {   \
+-        _KMP_PRINTF(__VA_ARGS__); \
+-    }
+-#else
+-#define KMP_PRINTF(d, ...)
+-#endif
+diff --git a/sw/snRuntime/include/omp.h b/sw/snRuntime/include/omp.h
+index 555a7e5..aef079e 100644
+--- a/sw/snRuntime/include/omp.h
++++ b/sw/snRuntime/include/omp.h
+@@ -8,7 +8,6 @@
+ 
+ #include "eu.h"
+ #include "kmp.h"
+-#include "snrt.h"
+ 
+ //================================================================================
+ // debug
+@@ -26,21 +25,6 @@
+     } while (0)
+ #endif
+ 
+-#ifdef OMP_DEBUG_LEVEL
+-#include "encoding.h"
+-#include "printf.h"
+-#define _OMP_PRINTF(...)             \
+-    if (1) {                         \
+-        printf("[omp] "__VA_ARGS__); \
+-    }
+-#define OMP_PRINTF(d, ...)        \
+-    if (OMP_DEBUG_LEVEL >= d) {   \
+-        _OMP_PRINTF(__VA_ARGS__); \
+-    }
+-#else
+-#define OMP_PRINTF(d, ...)
+-#endif
+-
+ //================================================================================
+ // Macros
+ //================================================================================
+diff --git a/sw/snRuntime/include/snrt.h b/sw/snRuntime/include/snrt.h
+index a5d2250..a1ab2ad 100644
+--- a/sw/snRuntime/include/snrt.h
++++ b/sw/snRuntime/include/snrt.h
+@@ -233,6 +233,11 @@ static inline __attribute__((noreturn)) void snrt_exit(int status) {
+         ;
+ }
+ 
++//================================================================================
++// print functions
++//================================================================================
++extern void snrt_printf(const char *format, ...);
++
+ //================================================================================
+ // Allocation functions
+ //================================================================================
+diff --git a/sw/snRuntime/src/alloc.c b/sw/snRuntime/src/alloc.c
+index d23c71a..c780666 100644
+--- a/sw/snRuntime/src/alloc.c
++++ b/sw/snRuntime/src/alloc.c
+@@ -24,7 +24,6 @@ void *snrt_l1alloc(size_t size) {
+ 
+     if (alloc->next + size > alloc->base + alloc->size) {
+         snrt_trace(
+-            SNRT_TRACE_ALLOC,
+             "Not enough memory to allocate: base %#x size %#x next %#x\n",
+             alloc->base, alloc->size, alloc->next);
+         return 0;
+diff --git a/sw/snRuntime/src/dm.c b/sw/snRuntime/src/dm.c
+index 2c23f6a..9e7a912 100644
+--- a/sw/snRuntime/src/dm.c
++++ b/sw/snRuntime/src/dm.c
+@@ -107,23 +107,41 @@ __thread uint32_t cluster_dm_core_idx;
+ static void wfi_dm(uint32_t cluster_core_idx);
+ static void wake_dm(void);
+ 
+-//================================================================================
+-// Debug
+-//================================================================================
+-// #define DM_DEBUG_LEVEL 100
++//=============================================================================
++// debug
++//=============================================================================
++
++#define DM_DEBUG_LEVEL 100
+ 
+ #ifdef DM_DEBUG_LEVEL
+-#include "printf.h"
+-#define _DM_PRINTF(...)             \
+-    if (1) {                        \
+-        printf("[dm] "__VA_ARGS__); \
+-    }
+-#define DM_PRINTF(d, ...)        \
+-    if (DM_DEBUG_LEVEL >= d) {   \
+-        _DM_PRINTF(__VA_ARGS__); \
+-    }
++#define DEBUG
++#include "debug.h"
++#define PR_DEBUG(...)                                                                                 \
++  if (DM_DEBUG_LEVEL >= LOG_DEBUG) {                                                              \
++    snrt_debug("[kmpc] "__VA_ARGS__);                                                              \
++  }
++#define PR_TRACE(...)                                                                                 \
++  if (DM_DEBUG_LEVEL >= LOG_TRACE) {                                                              \
++    snrt_trace("[kmpc] "__VA_ARGS__);                                                              \
++  }
++#define PR_INFO(...)                                                                                  \
++  if (DM_DEBUG_LEVEL >= LOG_INFO) {                                                                \
++    snrt_info("[kmpc] "__VA_ARGS__);                                                               \
++  }
++#define PR_WARN(...)                                                                                  \
++  if (DM_DEBUG_LEVEL >= LOG_WARN) {                                                                \
++    snrt_warn("[kmpc] "__VA_ARGS__);                                                               \
++  }
++#define PR_ERROR(...)                                                                                 \
++  if (DM_DEBUG_LEVEL >= LOG_ERROR) {                                                              \
++    snrt_error("[kmpc] "__VA_ARGS__);                                                              \
++  }
+ #else
+-#define DM_PRINTF(d, ...)
++#define PR_TRACE(d, ...)
++#define PR_DEBUG(d, ...)
++#define PR_WARN(d, ...)
++#define PR_INFO(d, ...)
++#define PR_ERROR(d, ...)
+ #endif
+ 
+ //================================================================================
+@@ -153,7 +171,7 @@ void dm_main(void) {
+     uint32_t do_exit = 0;
+     uint32_t cluster_core_idx = snrt_cluster_core_idx();
+ 
+-    DM_PRINTF(10, "enter main\n");
++    PR_DEBUG("enter main\n");
+ 
+     while (!do_exit) {
+         /// New transaction to issue?
+@@ -165,11 +183,11 @@ void dm_main(void) {
+             t = &dm_p->queue[dm_p->queue_back];
+ 
+             if (t->twod) {
+-                DM_PRINTF(10, "start twod\n");
++                PR_DEBUG("start twod\n");
+                 __builtin_sdma_start_twod(t->src, t->dst, t->size, t->sstrd,
+                                           t->dstrd, t->nreps, t->cfg);
+             } else {
+-                DM_PRINTF(10, "start oned\n");
++                PR_DEBUG("start oned\n");
+                 __builtin_sdma_start_oned(t->src, t->dst, t->size, t->cfg);
+             }
+ 
+@@ -185,7 +203,7 @@ void dm_main(void) {
+                     // check status and set pvalid if DMA is idle and clear
+                     // request
+                     if (__builtin_sdma_stat(DM_STATUS_BUSY) == 0) {
+-                        DM_PRINTF(50, "idle\n");
++                        PR_TRACE("idle\n");
+                         dm_p->stat_pvalid = 1;
+                         dm_p->stat_q = 0;
+                     }
+@@ -194,7 +212,7 @@ void dm_main(void) {
+                     do_exit = 1;
+                     break;
+                 case STAT_READY:
+-                    DM_PRINTF(50, "ready\n");
++                    PR_TRACE("ready\n");
+                     dm_p->stat_pvalid = 1;
+                     dm_p->stat_q = 0;
+                     break;
+@@ -206,7 +224,7 @@ void dm_main(void) {
+             wfi_dm(cluster_core_idx);
+         }
+     }
+-    DM_PRINTF(10, "dm: exit\n");
++    PR_DEBUG("dm: exit\n");
+ #ifdef DM_USE_GLOBAL_CLINT
+     snrt_interrupt_disable(IRQ_M_SOFT);
+ #else
+@@ -219,7 +237,7 @@ void dm_memcpy_async(void *dest, const void *src, size_t n) {
+     uint32_t s;
+     volatile dm_task_t *t;
+ 
+-    DM_PRINTF(10, "dm_memcpy_async %#x -> %#x size %d\n", src, dest,
++    PR_DEBUG("dm_memcpy_async %#x -> %#x size %d\n", src, dest,
+               (uint32_t)n);
+ 
+     // poll queue size
+@@ -249,7 +267,7 @@ void dm_memcpy2d_async(uint64_t src, uint64_t dst, uint32_t size,
+     uint32_t s;
+     volatile dm_task_t *t;
+ 
+-    DM_PRINTF(10, "dm_memcpy2d_async %#x -> %#x size %d\n", src, dst,
++    PR_DEBUG("dm_memcpy2d_async %#x -> %#x size %d\n", src, dst,
+               (uint32_t)size);
+ 
+     // poll queue size
+diff --git a/sw/snRuntime/src/omp/eu.c b/sw/snRuntime/src/omp/eu.c
+index 905e971..3a28e16 100644
+--- a/sw/snRuntime/src/omp/eu.c
++++ b/sw/snRuntime/src/omp/eu.c
+@@ -22,6 +22,25 @@
+  */
+ // #define EU_USE_GLOBAL_CLINT
+ 
++//================================================================================
++// debug
++//================================================================================
++#define EU_DEBUG_LEVEL 10
++#ifdef EU_DEBUG_LEVEL
++#define DEBUG
++#include "debug.h"
++#define _EU_PRINTF(...)             \
++    if (1) {                        \
++        snrt_trace("[eu] "__VA_ARGS__); \
++    }
++#define EU_PRINTF(d, ...)        \
++    if (EU_DEBUG_LEVEL >= d) {   \
++        _EU_PRINTF(__VA_ARGS__); \
++    }
++#else
++#define EU_PRINTF(d, ...)
++#endif
++
+ //================================================================================
+ // Types
+ //================================================================================
+@@ -113,7 +132,7 @@ uint32_t eu_get_workers_in_wfi() {
+  *
+  */
+ void eu_print_status() {
+-    EU_PRINTF(0, "workers_in_loop=%d\n", eu_p->workers_in_loop);
++    EU_PRINTF(0, "workers_in_loop=%d\r\n", eu_p->workers_in_loop);
+ }
+ 
+ /**
+@@ -135,7 +154,7 @@ void eu_event_loop(uint32_t cluster_core_idx) {
+     snrt_interrupt_enable(IRQ_M_CLUSTER);
+ #endif
+ 
+-    EU_PRINTF(0, "#%d entered event loop\n", cluster_core_idx);
++    EU_PRINTF(0, "#%d entered event loop\r\n", cluster_core_idx);
+ 
+     while (1) {
+         // check for exit
+@@ -153,7 +172,7 @@ void eu_event_loop(uint32_t cluster_core_idx) {
+             // hart will reset eu_p->e.nthreads as soon as all workers finished
+             // which might cause a race condition
+             nthds = eu_p->e.nthreads;
+-            EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\n", eu_p->e.fn,
++            EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\r\n", eu_p->e.fn,
+                       ((uint32_t *)eu_p->e.data)[0]);
+             // call
+             eu_p->e.fn(eu_p->e.data, eu_p->e.argc);
+@@ -185,7 +204,7 @@ int eu_dispatch_push(void (*fn)(void *, uint32_t), uint32_t argc, void *data,
+     eu_p->e.argc = argc;
+     eu_p->e.nthreads = nthreads;
+ 
+-    EU_PRINTF(10, "eu_dispatch_push success, workers %d in loop %d\n", nthreads,
++    EU_PRINTF(10, "eu_dispatch_push success, workers %d in loop %d\r\n", nthreads,
+               eu_p->workers_in_loop);
+ 
+     return 0;
+@@ -199,7 +218,7 @@ void eu_run_empty(uint32_t core_idx) {
+     unsigned nfini, scratch;
+     scratch = eu_p->e.nthreads;
+     if (!scratch) return;
+-    EU_PRINTF(10, "eu_run_empty enter: q size %d\n", eu_p->e.nthreads);
++    EU_PRINTF(10, "enter: q size %d\r\n", eu_p->e.nthreads);
+ 
+     eu_p->e.fini_count = 0;
+     if (scratch > 1) wake_workers();
+@@ -207,7 +226,7 @@ void eu_run_empty(uint32_t core_idx) {
+     // Am i also part of the team?
+     if (core_idx < eu_p->e.nthreads) {
+         // call
+-        EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\n", eu_p->e.fn,
++        EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\r\n", eu_p->e.fn,
+                   ((uint32_t *)eu_p->e.data)[0]);
+         eu_p->e.fn(eu_p->e.data, eu_p->e.argc);
+     }
+@@ -223,7 +242,7 @@ void eu_run_empty(uint32_t core_idx) {
+     // stop workers from re-executing the task
+     eu_p->e.nthreads = 0;
+ 
+-    EU_PRINTF(10, "eu_run_empty exit\n");
++    EU_PRINTF(10, "exit\r\n");
+ }
+ 
+ /**
+diff --git a/sw/snRuntime/src/omp/kmp.c b/sw/snRuntime/src/omp/kmp.c
+index 8276cb6..8dc46ae 100644
+--- a/sw/snRuntime/src/omp/kmp.c
++++ b/sw/snRuntime/src/omp/kmp.c
+@@ -11,6 +11,43 @@
+ #include "encoding.h"
+ #include "omp.h"
+ 
++//=============================================================================
++// debug
++//=============================================================================
++
++#define KMP_LOG_LEVEL 100
++
++#ifdef KMP_LOG_LEVEL
++#define DEBUG
++#include "debug.h"
++#define PR_DEBUG(...)                                                                                 \
++  if (KMP_LOG_LEVEL >= LOG_DEBUG) {                                                              \
++    snrt_debug("[kmpc] "__VA_ARGS__);                                                              \
++  }
++#define PR_TRACE(...)                                                                                 \
++  if (KMP_LOG_LEVEL >= LOG_TRACE) {                                                              \
++    snrt_trace("[kmpc] "__VA_ARGS__);                                                              \
++  }
++#define PR_INFO(...)                                                                                  \
++  if (KMP_LOG_LEVEL >= LOG_INFO) {                                                                \
++    snrt_info("[kmpc] "__VA_ARGS__);                                                               \
++  }
++#define PR_WARN(...)                                                                                  \
++  if (KMP_LOG_LEVEL >= LOG_WARN) {                                                                \
++    snrt_warn("[kmpc] "__VA_ARGS__);                                                               \
++  }
++#define PR_ERROR(...)                                                                                 \
++  if (KMP_LOG_LEVEL >= LOG_ERROR) {                                                              \
++    snrt_error("[kmpc] "__VA_ARGS__);                                                              \
++  }
++#else
++#define PR_TRACE(d, ...)
++#define PR_DEBUG(d, ...)
++#define PR_WARN(d, ...)
++#define PR_INFO(d, ...)
++#define PR_ERROR(d, ...)
++#endif
++
+ typedef void (*__task_type32)(_kmp_ptr32, _kmp_ptr32, _kmp_ptr32);
+ typedef void (*__task_type64)(_kmp_ptr64, _kmp_ptr64, _kmp_ptr64);
+ 
+@@ -37,9 +74,16 @@ static void __microtask_wrapper(void *arg, uint32_t argc) {
+     OMP_PROF(if (snrt_hartid() == 1) omp_prof->fork_oh =
+                  cycle - omp_prof->fork_oh);
+ 
++    if(snrt_hartid() == 1) {
++      PR_DEBUG("fn %08x argc %d\r\n", fn, argc);
++      for(unsigned i = 0; i < argc; ++i)
++        // PR_DEBUG("  p_argv %d = %08x *%08x **%08x\r\n", i, (uint32_t)p_argv[i], *(uint32_t*)p_argv[i], **(uint32_t**)p_argv[i] );
++        PR_DEBUG("  p_argv %d = %08x\r\n", i, (uint32_t)p_argv[i]);
++    }
++
+     switch (argc) {
+         default:
+-            // printf("Too many args to __microtask_wrapper: %d!\n", argc);
++            PR_ERROR("Too many args to __microtask_wrapper: %d!\r\n", argc);
+             snrt_exit(-1);
+         case 0:
+             fn(&gtid, id_addr);
+@@ -114,7 +158,7 @@ kmp_int32 __kmpc_global_thread_num(ident_t *loc) {
+     (void)loc;
+     // return csr value of hartware thread ID
+     kmp_int32 gtid = read_csr(mhartid);
+-    KMP_PRINTF(10, "__kmpc_global_thread_num: T#%d\n", gtid);
++    PR_DEBUG("__kmpc_global_thread_num: T#%d\r\n", gtid);
+     return gtid;
+ }
+ 
+@@ -123,7 +167,7 @@ void __kmpc_barrier(ident_t *loc, kmp_int32 tid) {
+     (void)tid;
+     _OMP_T *_this = omp_getData();
+     uint32_t ret;
+-    KMP_PRINTF(50, "barrier numThreads: %d\n", (uint32_t)_this->numThreads);
++    PR_TRACE("barrier numThreads: %d\r\n", (uint32_t)_this->numThreads);
+     snrt_barrier(_this->kmpc_barrier, (uint32_t)_this->numThreads);
+ }
+ 
+@@ -141,7 +185,7 @@ void __kmpc_push_num_threads(ident_t *loc, kmp_int32 global_tid,
+     (void)loc;
+     (void)global_tid;
+     (void)num_threads;
+-    KMP_PRINTF(20, "__kmpc_push_num_threads: enter T#%d num_threads=%d\n",
++    PR_DEBUG("__kmpc_push_num_threads: enter T#%d num_threads=%d\r\n",
+                global_tid, num_threads);
+ #ifndef OMPSTATIC_NUMTHREADS
+     omp_t *omp = omp_getData();
+@@ -166,6 +210,8 @@ void __kmpc_fork_call(ident_t *loc, kmp_int32 argc, kmpc_micro microtask, ...) {
+     (void)loc;
+     _OMP_T *omp = omp_getData();
+ 
++    PR_DEBUG("__kmpc_fork_call: argc=%d\r\n", argc);
++
+     OMP_PROF(omp_prof->fork_oh = read_csr(mcycle));
+ 
+     va_list vl;
+@@ -182,17 +228,13 @@ void __kmpc_fork_call(ident_t *loc, kmp_int32 argc, kmpc_micro microtask, ...) {
+     va_start(vl, microtask);
+     for (int i = 1; i <= argc; ++i) {
+         kmpc_args[i] = (_kmp_ptr32)va_arg(vl, _kmp_ptr32);
++        PR_DEBUG("  arg %d = %08x (*%08x)\r\n", i, (uint32_t)kmpc_args[i], *(uint32_t*)kmpc_args[i]);
+     }
+     va_end(vl);
+ 
+-    KMP_PRINTF(10,
+-               "__kmpc_fork_call: argc=%d numthreads=%d omp->numThreads=%d "
+-               "microtask @%#x\n",
+-               argc, omp->numThreads, omp->numThreads, (uint32_t)microtask);
+-
+     /// a worker enters this fork call: this means nested parallelism
+     if (snrt_cluster_core_idx() != 0) {
+-        KMP_PRINTF(0, "error: nested parallelism\n");
++        PR_ERROR("error: nested parallelism\r\n");
+         snrt_exit(-1);
+         /// TODO: This almost works. The problem is, that the current task in
+         /// the EU is not yet completed (due to this thread forking). Correctly,
+@@ -242,18 +284,12 @@ void __kmpc_for_static_init_4(ident_t *loc, kmp_int32 gtid,
+     kmp_uint32 loopSize = (*pupper - *plower) / incr + 1;
+     kmp_int32 globalUpper = *pupper;
+ 
+-    KMP_PRINTF(50,
+-               "__kmpc_for_static_init_4 gtid %d schedtype %d plast %#x p[%#x, "
+-               "%#x, %#x] incr %d chunk %d\n",
+-               gtid, sched, (uint32_t)plastiter, (uint32_t)plower,
+-               (uint32_t)pupper, (uint32_t)pstride, incr, chunk);
+-    KMP_PRINTF(50, "    plast %4d p[%4d, %4d, %4d]\n", *plastiter, *plower,
+-               *pupper, *pstride);
+-    KMP_PRINTF(50, "    loopsize %d\n", loopSize);
++    PR_TRACE(
++               "fsi_4 %d %d %d [%d,%d,%d] %d %d\r\n",
++               gtid, sched, *plastiter, *plower, *pupper, *pstride, incr, chunk);
+ 
+     // chunk size is specified
+     if (sched == kmp_sch_static_chunked) {
+-        KMP_PRINTF(50, "    sched: static_chunked\n");
+         int span = incr * chunk;
+         *pstride = span * team->nbThreads;
+         *plower = *plower + span * threadNum;
+@@ -264,7 +300,6 @@ void __kmpc_for_static_init_4(ident_t *loc, kmp_int32 gtid,
+ 
+     // no specified chunk size
+     else if (sched == kmp_sch_static) {
+-        KMP_PRINTF(50, "    sched: static\n");
+         chunk = loopSize / team->nbThreads;
+         int leftOver = loopSize - chunk * team->nbThreads;
+ 
+@@ -279,15 +314,11 @@ void __kmpc_for_static_init_4(ident_t *loc, kmp_int32 gtid,
+         if (plastiter != NULL)
+             *plastiter = (*pupper == globalUpper && *plower <= globalUpper);
+         *pstride = loopSize;
+-
+-        KMP_PRINTF(50, "    team thds: %d chunk: %d leftOver: %d\n",
+-                   team->nbThreads, chunk, leftOver);
+     }
+ 
+-    KMP_PRINTF(10,
+-               "__kmpc_for_static_init_4 plast %4d p[l %4d, u %4d, i %4d, str "
+-               "%4d] chunk %d\n",
+-               *plastiter, *plower, *pupper, incr, *pstride, chunk);
++    PR_TRACE(
++               " ->   %d %d %d [%d,%d,%d] %d %d\r\n",
++               gtid, sched, *plastiter, *plower, *pupper, *pstride, incr, chunk);
+ }
+ 
+ /*!
+@@ -300,6 +331,11 @@ void __kmpc_for_static_init_4u(ident_t *loc, kmp_int32 gtid,
+                                kmp_int32 chunk) {
+     kmp_int32 ilower = *plower;
+     kmp_int32 iupper = *pupper;
++    if(gtid==0) {
++      PR_TRACE("fsi_4u p[%p,%p,%p,%p] \r\n", plastiter, plower, pupper, pstride);
++    }
++    PR_TRACE("fsi_4u [%"PRIu32",%"PRIu32",%"PRIu32",%"PRId32"]\r\n", *plastiter, *plower, *pupper, *pstride);
++
+     __kmpc_for_static_init_4(loc, gtid, schedtype, plastiter, &ilower, &iupper,
+                              pstride, incr, chunk);
+     *plower = ilower;
+@@ -309,10 +345,7 @@ void __kmpc_for_static_init_4u(ident_t *loc, kmp_int32 gtid,
+ void __kmpc_for_static_fini(ident_t *loc, kmp_int32 globaltid) {
+     (void)loc;
+     (void)globaltid;
+-    KMP_PRINTF(10, "__kmpc_for_static_fini\n");
+-    // TODO: Implement
+-    // omp_t *omp = omp_getData();
+-    // doBarrier(getTeam(omp));
++    PR_DEBUG("__kmpc_for_static_fini\r\n");
+ }
+ 
+ void __kmpc_for_static_init_8u(ident_t *loc, kmp_int32 gtid, kmp_int32 sched,
+@@ -327,19 +360,13 @@ void __kmpc_for_static_init_8u(ident_t *loc, kmp_int32 gtid, kmp_int32 sched,
+     kmp_uint64 loopSize = (*pupper - *plower) / incr + 1;
+     kmp_uint64 globalUpper = *pupper;
+ 
+-    KMP_PRINTF(50,
+-               "__kmpc_for_static_init_8u gtid %d schedtype %d incr %" PRId64
+-               " chunk %" PRId64 "\n",
+-               gtid, sched, incr, chunk);
+-    KMP_PRINTF(50,
+-               "    plast %" PRIu32 " lo,up,strd = [%" PRIu64 ", %" PRIu64
+-               ", %" PRId64 "]\n",
+-               *plastiter, *plower, *pupper, *pstride);
+-    KMP_PRINTF(50, "    loopsize %" PRIu64 "\n", loopSize);
++    PR_TRACE(
++               "fsi_8u %"PRId32" %"PRId32" %"PRId32" [%"PRIu64",%"PRIu64",%"PRId64"] %"PRId64" %"PRId64"\r\n",
++               gtid, sched, *plastiter, *plower, *pupper, *pstride, incr, chunk);
+ 
+     // chunk size is specified
+     if (sched == kmp_sch_static_chunked) {
+-        KMP_PRINTF(50, "    sched: static_chunked\n");
++        PR_TRACE("    sched: static_chunked\r\n");
+         kmp_int64 span = incr * chunk;
+         *pstride = span * team->nbThreads;
+         *plower = *plower + span * threadNum;
+@@ -350,7 +377,7 @@ void __kmpc_for_static_init_8u(ident_t *loc, kmp_int32 gtid, kmp_int32 sched,
+ 
+     // no specified chunk size
+     else if (sched == kmp_sch_static) {
+-        KMP_PRINTF(50, "    sched: static\n");
++        PR_TRACE("    sched: static\r\n");
+         chunk = loopSize / team->nbThreads;
+         kmp_int64 leftOver = loopSize - chunk * team->nbThreads;
+ 
+@@ -366,16 +393,17 @@ void __kmpc_for_static_init_8u(ident_t *loc, kmp_int32 gtid, kmp_int32 sched,
+             *plastiter = (*pupper == globalUpper && *plower <= globalUpper);
+         *pstride = loopSize;
+ 
+-        KMP_PRINTF(
+-            50, "    team thds: %d chunk: %" PRId64 " leftOver: %" PRId64 "\n",
++        PR_TRACE(
++            "    team thds: %d chunk: %" PRId64 " leftOver: %" PRId64 "\r\n",
+             team->nbThreads, chunk, leftOver);
+     }
+ 
+-    KMP_PRINTF(10,
+-               "__kmpc_for_static_init_8u plast %4" PRId32 "p[l %4" PRIu64
+-               ", u %4" PRIu64 ", i %4" PRId64 ", str %4" PRId64
+-               "] chunk %" PRId64 "\n",
+-               *plastiter, *plower, *pupper, incr, *pstride, chunk);
++
++    PR_TRACE(
++               " ->   %"PRId32" %"PRId32" %"PRId32" [%"PRIu64",%"PRIu64",%"PRId64"] %"PRId64" %"PRId64"\r\n",
++               gtid, sched, *plastiter, *plower, *pupper, *pstride, incr, chunk);
++}
++
+ }
+ 
+ //================================================================================
+@@ -413,8 +441,8 @@ void __kmpc_dispatch_init_4(ident_t *loc, kmp_int32 gtid,
+     // {
+     //   eu_mutex_release();
+     //   team->core_epoch[core_id]++;
+-    //   KMP_PRINTF(10, "__kmpc_dispatch_init_4 core_epoch[%d] =
+-    //   %d\n",core_id,team->core_epoch[core_id]); return;
++    //   PR_DEBUG("__kmpc_dispatch_init_4 core_epoch[%d] =
++    //   %d\r\n",core_id,team->core_epoch[core_id]); return;
+     // }
+ 
+     if (!team->loop_is_setup) {
+@@ -423,9 +451,8 @@ void __kmpc_dispatch_init_4(ident_t *loc, kmp_int32 gtid,
+         team->loop_end = ub;
+         team->loop_incr = st;
+         team->loop_chunk = chunk;
+-        KMP_PRINTF(
+-            10,
+-            "__kmpc_dispatch_init_4 setup: start %d end %d incr %d chunk %d\n",
++        PR_DEBUG(
++            "__kmpc_dispatch_init_4 setup: start %d end %d incr %d chunk %d\r\n",
+             team->loop_start, team->loop_end, team->loop_incr,
+             team->loop_chunk);
+     }
+@@ -472,9 +499,6 @@ int __kmpc_dispatch_next_4(ident_t *loc, kmp_int32 gtid, kmp_int32 *p_last,
+     // have already iterated over all the iterations(no more work), return 0
+     if (team->loop_start > team->loop_end) {
+         team->loop_is_setup = 0;
+-        KMP_PRINTF(
+-            10, "__kmpc_dispatch_next_4 start > end: team->loop_is_setup %d\n",
+-            team->loop_is_setup);
+         eu_mutex_release();
+         return 0;
+     }
+@@ -487,9 +511,9 @@ int __kmpc_dispatch_next_4(ident_t *loc, kmp_int32 gtid, kmp_int32 *p_last,
+     }
+ 
+     team->loop_start += team->loop_chunk;
+-    KMP_PRINTF(10,
++    PR_DEBUG(
+                "__kmpc_dispatch_next_4 : last: %d [l %4d u %4d s %4d] "
+-               "team->loop_start %d\n",
++               "team->loop_start %d\r\n",
+                *p_last, *p_lb, *p_ub, *p_st, team->loop_start);
+     eu_mutex_release();
+     return 1;
+diff --git a/sw/snRuntime/src/omp/omp.c b/sw/snRuntime/src/omp/omp.c
+index 622a9b7..92045ae 100644
+--- a/sw/snRuntime/src/omp/omp.c
++++ b/sw/snRuntime/src/omp/omp.c
+@@ -19,6 +19,27 @@
+  */
+ #define KMP_FORK_MAX_NARGS 12
+ 
++//================================================================================
++// debug
++//================================================================================
++
++#define OMP_DEBUG_LEVEL 100
++
++#ifdef OMP_DEBUG_LEVEL
++#define DEBUG
++#include "debug.h"
++#define _OMP_PRINTF(...)             \
++    if (1) {                         \
++        snrt_trace("[omp] "__VA_ARGS__); \
++    }
++#define OMP_PRINTF(d, ...)        \
++    if (OMP_DEBUG_LEVEL >= d) {   \
++        _OMP_PRINTF(__VA_ARGS__); \
++    }
++#else
++#define OMP_PRINTF(d, ...)
++#endif
++
+ //================================================================================
+ // data
+ //================================================================================
+@@ -91,7 +112,7 @@ void omp_init(void) {
+ #endif
+     }
+ 
+-    OMP_PRINTF(10, "omp_init numThreads=%d maxThreads=%d\n", omp_p->numThreads,
++    OMP_PRINTF(10, "omp_init numThreads=%d maxThreads=%d\r\n", omp_p->numThreads,
+                omp_p->maxThreads);
+ }
+ 
+@@ -134,13 +155,13 @@ void partialParallelRegion(int32_t argc, void *data,
+     omp_p->plainTeam.nbThreads = num_threads;
+ #endif
+ 
+-    OMP_PRINTF(10, "num_threads=%d nbThreads=%d omp_p->numThreads=%d\n",
++    OMP_PRINTF(10, "num_threads=%d nbThreads=%d omp_p->numThreads=%d\r\n",
+                num_threads, omp_p->plainTeam.nbThreads, omp_p->numThreads);
+     parallelRegionExec(argc, data, fn, num_threads);
+ }
+ 
+ #ifdef OPENMP_PROFILE
+ void omp_print_prof(void) {
+-    printf("%-20s %d\n", "fork_oh", omp_prof->fork_oh);
++    printf("%-20s %d\r\n", "fork_oh", omp_prof->fork_oh);
+ }
+ #endif
+diff --git a/sw/snRuntime/src/team.c b/sw/snRuntime/src/team.c
+index e4573d1..ff725f7 100644
+--- a/sw/snRuntime/src/team.c
++++ b/sw/snRuntime/src/team.c
+@@ -9,6 +9,9 @@
+ __thread struct snrt_team *_snrt_team_current;
+ __thread uint32_t _snrt_core_idx;
+ 
++// Global log level
++uint32_t snrt_log_level = 0;
++
+ const uint32_t _snrt_team_size __attribute__((section(".rodata"))) =
+     sizeof(struct snrt_team_root);
+ 
+-- 
+2.16.5
+

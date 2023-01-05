@@ -138,7 +138,7 @@ tc-llvm:
 # Additions to LLVM for Snitch
 tc-snitch:
 	mkdir -p $(CURDIR)/output/tc-llvm/
-	cd $(CURDIR)/output/tc-llvm/ && $(ROOT)/toolchain/setup-llvm-snitch.sh
+	cd $(CURDIR)/output/tc-llvm/ && $(ROOT)/toolchain/setup-llvm-snitch.sh $(ROOT)/toolchain/llvm-project
 
 tc-llvm-debug:
 	mkdir -p $(CURDIR)/output/tc-llvm-debug/
@@ -160,12 +160,12 @@ sdk-hrv: check_environment br-hrv
 sdk-har: check_environment br-har
 	cd $(CURDIR)/output/br-har && $(ROOT)/toolchain/install-sdk.sh
 
-$(ROOT)/snitch-snruntime-hero:
-	git clone -b hero git@github.com:pulp-platform/snitch.git $(ROOT)/snitch-snruntime-hero -b iis-ci-3
+$(ROOT)/vendor/snitch:
+	./util/vendor.py vendor/snitch.vendor.hjson --update
 
-sdk-snitch: check_environment $(ROOT)/snitch-snruntime-hero
-	mkdir -p $(CURDIR)/output/$@
-	cd $(CURDIR)/output/$@ && $(ROOT)/toolchain/build-snitch-runtime.sh $(ROOT)/snitch-snruntime-hero/sw
+sdk-snitch: check_environment
+	mkdir -p $(CURDIR)/output/snitch-runtime
+	cd $(CURDIR)/output/snitch-runtime && $(ROOT)/toolchain/build-snitch-runtime.sh $(ROOT)/vendor/snitch
 
 # Utilities
 .PHONY: util-hrv-openocd

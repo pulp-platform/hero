@@ -1,0 +1,51 @@
+From 0dea453e2bf80af62cfb9862b6927dce1fc1c7f9 Mon Sep 17 00:00:00 2001
+From: Noah Huetter <noahhuetter@gmail.com>
+Date: Mon, 16 May 2022 14:51:46 +0200
+Subject: snrt: Add allocator reset function
+
+Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
+---
+ sw/snRuntime/include/snrt.h |  1 +
+ sw/snRuntime/src/alloc.c    | 14 ++++++++++++++
+ 2 files changed, 15 insertions(+)
+
+diff --git a/sw/snRuntime/include/snrt.h b/sw/snRuntime/include/snrt.h
+index 7002688..a5d2250 100644
+--- a/sw/snRuntime/include/snrt.h
++++ b/sw/snRuntime/include/snrt.h
+@@ -238,6 +238,7 @@ static inline __attribute__((noreturn)) void snrt_exit(int status) {
+ //================================================================================
+ extern void snrt_alloc_init(struct snrt_team_root *team, uint32_t l3off);
+ extern void *snrt_l1alloc(size_t size);
++extern void snrt_l1alloc_reset(void* base);
+ extern void *snrt_l3alloc(size_t size);
+ 
+ //================================================================================
+diff --git a/sw/snRuntime/src/alloc.c b/sw/snRuntime/src/alloc.c
+index 8fb1c01..d23c71a 100644
+--- a/sw/snRuntime/src/alloc.c
++++ b/sw/snRuntime/src/alloc.c
+@@ -35,6 +35,20 @@ void *snrt_l1alloc(size_t size) {
+     return ret;
+ }
+ 
++/**
++ * @brief Reset the L1 allocator to its initial state so that memmory can be re-allocated in L1. 
++ * @details This is a temporary solution until l1free() is implemented
++ * @param base base address to reset to. 0 for initial base, non-zero for custom base
++ */
++void snrt_l1alloc_reset(void* base) {
++    struct snrt_allocator_inst *alloc = &snrt_current_team()->allocator.l1;
++    // team->allocator.l1.base/size is not modified by alloc()
++    if(base == 0)
++      alloc->next = alloc->base;
++    else 
++      alloc->next = base;
++}
++
+ /**
+  * @brief Allocate a chunk of memory in the L3 memory
+  * @details This currently does not support free-ing of memory
+-- 
+2.16.5
+

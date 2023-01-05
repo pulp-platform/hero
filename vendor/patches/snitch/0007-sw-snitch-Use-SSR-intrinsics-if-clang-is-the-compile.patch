@@ -1,0 +1,119 @@
+From 4d0f2639f9c230cebebe65e0926d35895906dcd6 Mon Sep 17 00:00:00 2001
+From: Noah Huetter <noahhuetter@gmail.com>
+Date: Sun, 5 Dec 2021 14:27:18 +0100
+Subject: [sw/snitch] Use SSR intrinsics if clang is the compiler
+
+Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
+---
+ sw/snRuntime/CMakeLists.txt | 14 +++++++--
+ sw/snRuntime/src/ssr_v3.c   | 72 +++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 84 insertions(+), 2 deletions(-)
+ create mode 100644 sw/vendor/snitch/sw/snRuntime/src/ssr_v3.c
+
+diff --git a/sw/snRuntime/CMakeLists.txt b/sw/snRuntime/CMakeLists.txt
+index 2929b5f..24afc3e 100644
+--- a/sw/snRuntime/CMakeLists.txt
++++ b/sw/snRuntime/CMakeLists.txt
+@@ -107,9 +107,19 @@ else()
+         add_snitch_library(snRuntime src/start.S ${sources} src/ssr_v2.c)
+     # Bare Runtimes (with startup code)
+     elseif(SNITCH_RUNTIME STREQUAL "snRuntime-banshee")
+-        add_snitch_library(snRuntime-banshee src/start_banshee.S src/start_banshee.c ${sources} src/ssr_v1.c)
++        # Use ssr_v3 which makes use of clang-builtins in the LLVM toolchain
++        if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
++            add_snitch_library(snRuntime-banshee src/start_banshee.S src/start_banshee.c ${sources} src/ssr_v3.c)
++        else()
++            add_snitch_library(snRuntime-banshee src/start_banshee.S src/start_banshee.c ${sources} src/ssr_v2.c)
++        endif()
+     elseif(SNITCH_RUNTIME STREQUAL "snRuntime-cluster")
+-        add_snitch_library(snRuntime-cluster src/start_cluster.S src/start_cluster.c ${sources} src/ssr_v2.c)
++        # Use ssr_v3 which makes use of clang-builtins in the LLVM toolchain
++        if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
++            add_snitch_library(snRuntime-cluster src/start_cluster.S src/start_cluster.c ${sources} src/ssr_v3.c)
++        else()
++            add_snitch_library(snRuntime-cluster src/start_cluster.S src/start_cluster.c ${sources} src/ssr_v2.c)
++        endif()
+     elseif(SNITCH_RUNTIME STREQUAL "snRuntime-billywig")
+         add_snitch_library(snRuntime-billywig src/start_billywig.S ${sources} src/ssr_v1.c)
+     elseif(SNITCH_RUNTIME STREQUAL "snRuntime-bowtruckle")
+diff --git a/sw/snRuntime/src/ssr_v3.c b/sw/snRuntime/src/ssr_v3.c
+new file mode 100644
+index 0000000..260d8f5
+--- /dev/null
++++ b/sw/snRuntime/src/ssr_v3.c
+@@ -0,0 +1,72 @@
++// Copyright 2020 ETH Zurich and University of Bologna.
++// Licensed under the Apache License, Version 2.0, see LICENSE for details.
++// SPDX-License-Identifier: Apache-2.0
++#include "snrt.h"
++
++// Configure an SSR data mover for a 1D loop nest.
++inline void snrt_ssr_loop_1d(enum snrt_ssr_dm dm, size_t b0, size_t i0) {
++    --b0;
++    __builtin_ssr_setup_bound_stride_1d(dm, b0, i0 - 0);
++}
++
++// Configure an SSR data mover for a 2D loop nest.
++void snrt_ssr_loop_2d(enum snrt_ssr_dm dm, size_t b0, size_t b1, size_t i0,
++                      size_t i1) {
++    --b0;
++    --b1;
++    size_t a = 0;
++    __builtin_ssr_setup_bound_stride_1d(dm, b0, i0 - a);
++    a += i0 * b0;
++    __builtin_ssr_setup_bound_stride_2d(dm, b1, i1 - a);
++}
++
++// Configure an SSR data mover for a 3D loop nest.
++void snrt_ssr_loop_3d(enum snrt_ssr_dm dm, size_t b0, size_t b1, size_t b2,
++                      size_t i0, size_t i1, size_t i2) {
++    --b0;
++    --b1;
++    --b2;
++    size_t a = 0;
++    __builtin_ssr_setup_bound_stride_1d(dm, b0, i0 - a);
++    a += i0 * b0;
++    __builtin_ssr_setup_bound_stride_2d(dm, b1, i1 - a);
++    a += i1 * b1;
++    __builtin_ssr_setup_bound_stride_3d(dm, b2, i2 - a);
++}
++
++// Configure an SSR data mover for a 4D loop nest.
++// b0: Inner-most bound (limit of loop)
++// b3: Outer-most bound (limit of loop)
++// i0: increment size of inner-most loop
++void snrt_ssr_loop_4d(enum snrt_ssr_dm dm, size_t b0, size_t b1, size_t b2,
++                      size_t b3, size_t i0, size_t i1, size_t i2, size_t i3) {
++    --b0;
++    --b1;
++    --b2;
++    --b3;
++    size_t a = 0;
++    __builtin_ssr_setup_bound_stride_1d(dm, b0, i0 - a);
++    a += i0 * b0;
++    __builtin_ssr_setup_bound_stride_2d(dm, b1, i1 - a);
++    a += i1 * b1;
++    __builtin_ssr_setup_bound_stride_3d(dm, b2, i2 - a);
++    a += i2 * b2;
++    __builtin_ssr_setup_bound_stride_4d(dm, b3, i3 - a);
++}
++
++/// Configure the repetition count for a stream.
++void snrt_ssr_repeat(enum snrt_ssr_dm dm, size_t count) {
++    __builtin_ssr_setup_repetition(dm, count - 1);
++}
++
++/// Start a streaming read.
++void snrt_ssr_read(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim,
++                   volatile void *ptr) {
++    __builtin_ssr_read(dm, dim, ptr);
++}
++
++/// Start a streaming write.
++void snrt_ssr_write(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim,
++                    volatile void *ptr) {
++    __builtin_ssr_write(dm, dim, ptr);
++}
+-- 
+2.15.1
+

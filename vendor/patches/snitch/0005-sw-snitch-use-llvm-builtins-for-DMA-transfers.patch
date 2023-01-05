@@ -1,0 +1,54 @@
+From 1916bc1b308ce72a332b52da3a7f9ca9183d3369 Mon Sep 17 00:00:00 2001
+From: Noah Huetter <noahhuetter@gmail.com>
+Date: Thu, 2 Dec 2021 12:14:06 +0100
+Subject: [sw/snitch] use llvm builtins for DMA transfers
+
+Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
+---
+ sw/snRuntime/src/dma.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/sw/snRuntime/src/dma.c b/sw/snRuntime/src/dma.c
+index b0d9ad0..c7b09ed 100644
+--- a/sw/snRuntime/src/dma.c
++++ b/sw/snRuntime/src/dma.c
+@@ -6,6 +6,9 @@
+ /// Initiate an asynchronous 1D DMA transfer with wide 64-bit pointers.
+ snrt_dma_txid_t snrt_dma_start_1d_wideptr(uint64_t dst, uint64_t src,
+                                           size_t size) {
++#ifdef __TOOLCHAIN_LLVM__
++    return __builtin_sdma_start_oned(src, dst, size, 0);
++#else
+     register uint32_t reg_dst_low asm("a0") = dst >> 0;    // 10
+     register uint32_t reg_dst_high asm("a1") = dst >> 32;  // 11
+     register uint32_t reg_src_low asm("a2") = src >> 0;    // 12
+@@ -43,6 +46,7 @@ snrt_dma_txid_t snrt_dma_start_1d_wideptr(uint64_t dst, uint64_t src,
+         : "r"(reg_size));
+ 
+     return reg_txid;
++#endif
+ }
+ 
+ /// Initiate an asynchronous 1D DMA transfer.
+@@ -54,6 +58,10 @@ snrt_dma_txid_t snrt_dma_start_1d(void *dst, const void *src, size_t size) {
+ snrt_dma_txid_t snrt_dma_start_2d_wideptr(uint64_t dst, uint64_t src,
+                                           size_t size, size_t dst_stride,
+                                           size_t src_stride, size_t repeat) {
++#ifdef __TOOLCHAIN_LLVM__
++    return __builtin_sdma_start_twod(src, dst, size, src_stride, dst_stride,
++                                     repeat, 0);
++#else
+     register uint32_t reg_dst_low asm("a0") = dst >> 0;       // 10
+     register uint32_t reg_dst_high asm("a1") = dst >> 32;     // 11
+     register uint32_t reg_src_low asm("a2") = src >> 0;       // 12
+@@ -113,6 +121,7 @@ snrt_dma_txid_t snrt_dma_start_2d_wideptr(uint64_t dst, uint64_t src,
+         : "r"(reg_size));
+ 
+     return reg_txid;
++#endif
+ }
+ 
+ /// Initiate an asynchronous 2D DMA transfer.
+-- 
+2.15.1
+

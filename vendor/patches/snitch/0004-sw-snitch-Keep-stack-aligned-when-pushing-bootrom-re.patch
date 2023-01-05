@@ -1,0 +1,35 @@
+From 451161f637811235a2b9a550f64c576b0afb2b20 Mon Sep 17 00:00:00 2001
+From: Noah Huetter <noahhuetter@gmail.com>
+Date: Wed, 1 Dec 2021 17:31:33 +0100
+Subject: [sw/snitch] Keep stack aligned when pushing bootrom return address
+
+Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
+---
+ sw/snRuntime/src/start.S | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/sw/snRuntime/src/start.S b/sw/snRuntime/src/start.S
+index bbb4d92..5b1e893 100644
+--- a/sw/snRuntime/src/start.S
++++ b/sw/snRuntime/src/start.S
+@@ -156,7 +156,7 @@ snrt.crt0.init_tls:
+ 2:
+ 
+     # Store bootloader return address on top of stack
+-    addi      sp, sp, -4
++    addi      sp, sp, -8
+     sw        s1, 0(sp)
+ 
+     # Initialize the root team.
+@@ -210,7 +210,7 @@ snrt.crt0.end:
+ snrt.crt0.exit:
+     # load bootloader return address from stack and jump out of snRuntime
+     lw        ra, 0(sp)
+-    addi      sp, sp, 4
++    addi      sp, sp, 8
+     jr        ra
+ 
+ __snrt_crt0_interrupt_handler:
+-- 
+2.15.1
+

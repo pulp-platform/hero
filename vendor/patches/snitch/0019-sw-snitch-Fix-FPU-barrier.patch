@@ -1,0 +1,34 @@
+From 09637b17973a2ae22166ef53d5a8efe25845db34 Mon Sep 17 00:00:00 2001
+From: Noah Huetter <noahhuetter@gmail.com>
+Date: Tue, 11 Jan 2022 13:51:21 +0100
+Subject: [sw/snitch] Fix FPU barrier
+
+Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
+---
+ sw/snRuntime/src/ssr.c | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/sw/snRuntime/src/ssr.c b/sw/snRuntime/src/ssr.c
+index 3f6bb1b..cc3d681 100644
+--- a/sw/snRuntime/src/ssr.c
++++ b/sw/snRuntime/src/ssr.c
+@@ -3,5 +3,14 @@
+ // SPDX-License-Identifier: Apache-2.0
+ #include "snrt.h"
+ 
+-/// Synchronize the integer and float pipelines.
+-void snrt_fpu_fence() { asm volatile("fmv.x.w zero, fa0"); }
++/**
++ * @brief Synchronize the integer and float pipelines by creating a dependency in the scoreboard on
++ * `tmp`
++ *
++ */
++void snrt_fpu_fence() {
++  unsigned tmp;
++  asm volatile("fmv.x.w %0, fa0\n"
++               "mv      %0, %0"
++               : "+r"(tmp)::);
++}
+-- 
+2.15.1
+

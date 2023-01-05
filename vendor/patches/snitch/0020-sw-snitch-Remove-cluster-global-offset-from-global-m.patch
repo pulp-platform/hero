@@ -1,0 +1,35 @@
+From 3c3baa04bad1789fba5a747ba7073cefbb090f84 Mon Sep 17 00:00:00 2001
+From: Noah Huetter <noahhuetter@gmail.com>
+Date: Tue, 11 Jan 2022 13:52:08 +0100
+Subject: [sw/snitch] Remove cluster global offset from global memory in team
+ struct
+
+Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
+---
+ sw/snRuntime/src/start_cluster.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/sw/snRuntime/src/start_cluster.c b/sw/snRuntime/src/start_cluster.c
+index b8c11e7..07a5773 100644
+--- a/sw/snRuntime/src/start_cluster.c
++++ b/sw/snRuntime/src/start_cluster.c
+@@ -9,7 +9,6 @@ extern const uint32_t _snrt_cluster_cluster_core_num;
+ extern const uint32_t _snrt_cluster_cluster_base_hartid;
+ extern const uint32_t _snrt_cluster_cluster_num;
+ extern const uint32_t _snrt_cluster_cluster_id;
+-void *const _snrt_cluster_global_offset = (void *)0x10000000;
+ 
+ const uint32_t snrt_stack_size __attribute__((weak, section(".rodata"))) = 10;
+ 
+@@ -57,7 +56,7 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
+     team->cluster_core_base_hartid = bootdata->hartid_base;
+     team->cluster_core_num = cluster_core_num;
+     team->global_mem.start =
+-        (uint64_t)(bootdata->global_mem_start + _snrt_cluster_global_offset);
++        (uint64_t)(bootdata->global_mem_start);
+     team->global_mem.end = (uint64_t)bootdata->global_mem_end;
+     team->cluster_mem.start = (uint64_t)spm_start;
+     team->cluster_mem.end = (uint64_t)spm_end;
+-- 
+2.15.1
+
