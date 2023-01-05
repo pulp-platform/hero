@@ -1,0 +1,4 @@
+*.o
+*.d
+cva6-app/bringup
+snitch-app/build

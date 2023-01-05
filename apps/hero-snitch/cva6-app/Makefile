@@ -43,7 +43,7 @@ bringup: bringup.o ${OBJ_C} ${LIBSNITCH}
 	$(RV64_CC) $(LDFLAGS) -o $@ $< ${OBJ_C}
 
 clean:
-	rm ${OBJ_C} ${APPS}
+	rm *.o *.d ${APPS}
 
 install-rootfs:
 	mkdir -p ${RFS_TARGET_DIR}

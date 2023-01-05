@@ -1,0 +1,30 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+# root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# SystemVerilog wants 2 spaces of indentation
+[*.{sv,svh,sv.tpl}]
+indent_size = 2
+
+[*.{yaml,yml}]
+indent_size = 2
+
+[*.hjson]
+indent_size = 2
+
+[*.py]
+indent_size = 4
+
+# Use tabs for Makefiles.
+[Makefile]
+indent_style = tab
