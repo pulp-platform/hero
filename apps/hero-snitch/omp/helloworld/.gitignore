@@ -1,0 +1,16 @@
+/helloworld
+*.out
+*.ll
+hello_world
+hello_world-host-*
+*.o
+*.bc
+*.s
+.deps
+a.out
+a.out*
+a.lh
+*.dis
+*.elf
+*.rodata_off
+*.i
