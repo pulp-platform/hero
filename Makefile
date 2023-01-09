@@ -51,11 +51,14 @@ br-hrv-occamy-defconfig: check_environment
 
 .PHONY: br-hrv-occamy-base
 br-hrv-occamy-base: br-hrv-occamy-defconfig
+	chmod -R u+w ${HERO_INSTALL}
 	mkdir -p $(CURDIR)/output/br-hrv-occamy
 	$(MAKE) O=$(CURDIR)/output/br-hrv-occamy BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hrv_occamy_defconfig
 	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hrv-occamy/.config; fi
 	$(MAKE) -C $(CURDIR)/output/br-hrv-occamy
 	$(MAKE) -C $(CURDIR)/output/br-hrv-occamy prepare-sdk
+	chmod -R u-w ${HERO_INSTALL}
+
 br-hrv-occamy: br-hrv-occamy-base
 
 
@@ -70,7 +73,10 @@ clean-target:
 	find output/ -name ".stamp_target_installed" -delete
 	rm -rf output/br-hrv-occamy/target
 upload-driver:
-	scp ./output/br-hrv-occamy/build/snitch-driver-0.1/snitch.ko root@hero-vcu128-02.ee.ethz.ch:/usr/lib
+	scp ./output/br-hrv-occamy/build/snitch-driver-0.1/snitch.ko root@hero-vcu128-02.ee.ethz.ch:/root
+	scp ./output/br-hrv-occamy/build/libsnitch-0.1/lib/libsnitch.so root@hero-vcu128-02.ee.ethz.ch:/usr/lib
+upload-openmp:
+	scp output/br-hrv-occamy/target/usr/lib/*omp* root@hero-vcu128-02.ee.ethz.ch:/usr/lib
 gdb:
 	./util/ssh_tunnel.sh start
 	$(HERO_INSTALL)/bin/riscv64-hero-linux-gnu-gdb -ex "target extended-remote :3334" ; \
@@ -163,7 +169,7 @@ sdk-har: check_environment br-har
 $(ROOT)/vendor/snitch:
 	./util/vendor.py vendor/snitch.vendor.hjson --update
 
-sdk-snitch: check_environment
+sdk-snitch: check_environment $(ROOT)/vendor/snitch
 	mkdir -p $(CURDIR)/output/snitch-runtime
 	cd $(CURDIR)/output/snitch-runtime && $(ROOT)/toolchain/build-snitch-runtime.sh $(ROOT)/vendor/snitch
 

@@ -609,49 +609,66 @@ static struct quadrant_ctrl *get_quadrant_ctrl(u32 quadrant_idx) {
 
 static int write_tlb(struct sn_cluster *sc, struct axi_tlb_entry *tlbe) {
   uint32_t reg_off;
+  uint64_t page_num_first = tlbe->first >> 12;
+  uint64_t page_num_last  = tlbe->last  >> 12;
+  uint64_t page_num_base  = tlbe->base  >> 12;
 
   // TODO: Sanitize index in range correctly
   if (tlbe->idx > 64)
     return -EINVAL;
 
   uint32_t i;
+  // Add 4 to TLB_ENTRY_BYTES since there is one reserved word between each TLB_ENTRY
   if (tlbe->loc == AXI_TLB_NARROW) {
-    reg_off = QCTL_TLB_NARROW_REG_OFFSET + tlbe->idx * TLB_ENTRY_BYTES;
+    reg_off = (QCTL_TLB_NARROW_REG_OFFSET + tlbe->idx * (TLB_ENTRY_BYTES+4)) / 4;
   } else if (tlbe->loc == AXI_TLB_WIDE) {
-    reg_off = QCTL_TLB_WIDE_REG_OFFSET + tlbe->idx * TLB_ENTRY_BYTES;
+    reg_off = (QCTL_TLB_WIDE_REG_OFFSET   + tlbe->idx * (TLB_ENTRY_BYTES+4)) / 4;
   } else
     return -EINVAL;
 
-  // info("tlb write offset %#x first %#llx last %#llx base %#llx flags %#x\n", reg_off,
-  //     tlbe->first >> 12, tlbe->last >> 12, tlbe->base >> 12, tlbe->flags);
-
-  iowrite64(tlbe->first >> 12, sc->quadrant_ctrl->regs + reg_off + 0);
-  iowrite64(tlbe->last >> 12, sc->quadrant_ctrl->regs + reg_off + 8);
-  iowrite64(tlbe->base >> 12, sc->quadrant_ctrl->regs + reg_off + 16);
-  iowrite32((uint32_t)tlbe->flags, sc->quadrant_ctrl->regs + reg_off + 24);
+  info("Writing at %px -> %px\n", (uint32_t *) sc->quadrant_ctrl->regs + reg_off + 0, (uint32_t *) sc->quadrant_ctrl->regs + reg_off + 6);
+  iowrite32((uint32_t) page_num_first        , (uint32_t *) sc->quadrant_ctrl->regs + reg_off + 0 );
+  iowrite32((uint32_t) (page_num_first >> 32), (uint32_t *) sc->quadrant_ctrl->regs + reg_off + 1 );
+  iowrite32((uint32_t) page_num_last         , (uint32_t *) sc->quadrant_ctrl->regs + reg_off + 2 );
+  iowrite32((uint32_t) (page_num_last >> 32) , (uint32_t *) sc->quadrant_ctrl->regs + reg_off + 3 );
+  iowrite32((uint32_t) page_num_base         , (uint32_t *) sc->quadrant_ctrl->regs + reg_off + 4 );
+  iowrite32((uint32_t) (page_num_base >> 32) , (uint32_t *) sc->quadrant_ctrl->regs + reg_off + 5 );
+  iowrite32((uint32_t) tlbe->flags           , (uint32_t *) sc->quadrant_ctrl->regs + reg_off + 6 );
   return 0;
 }
+
 static int read_tlb(struct sn_cluster *sc, struct axi_tlb_entry *tlbe) {
   uint32_t reg_off;
+  uint32_t page_num_first_low, page_num_first_high;
+  uint32_t page_num_last_low , page_num_last_high ;
+  uint32_t page_num_base_low , page_num_base_high ;
 
   // TODO: Sanitize index in range correctly
   if (tlbe->idx > 64)
     return -EINVAL;
 
   uint32_t i;
+  // Add 4 to TLB_ENTRY_BYTES since there is one reserved word between each TLB_ENTRY
   if (tlbe->loc == AXI_TLB_NARROW) {
-    reg_off = QCTL_TLB_NARROW_REG_OFFSET + tlbe->idx * TLB_ENTRY_BYTES;
+    reg_off = (QCTL_TLB_NARROW_REG_OFFSET + tlbe->idx * (TLB_ENTRY_BYTES+4)) / 4;
   } else if (tlbe->loc == AXI_TLB_WIDE) {
-    reg_off = QCTL_TLB_NARROW_REG_OFFSET + tlbe->idx * TLB_ENTRY_BYTES;
+    reg_off = (QCTL_TLB_WIDE_REG_OFFSET   + tlbe->idx * (TLB_ENTRY_BYTES+4)) / 4;
   } else
     return -EINVAL;
+  
 
-  tlbe->first = ioread64(sc->quadrant_ctrl->regs + reg_off + 0) << 12;
-  tlbe->last = ioread64(sc->quadrant_ctrl->regs + reg_off + 8) << 12;
-  tlbe->base = ioread64(sc->quadrant_ctrl->regs + reg_off + 16) << 12;
-  tlbe->flags = ioread32(sc->quadrant_ctrl->regs + reg_off + 24);
+  info("Reading at %px -> %px (off %x, %x)\n", (uint32_t *) sc->quadrant_ctrl->regs + reg_off + 0 , (uint32_t *) sc->quadrant_ctrl->regs + reg_off + 6, QCTL_TLB_NARROW_REG_OFFSET, reg_off);
+  page_num_first_low  = ioread32((uint32_t *) sc->quadrant_ctrl->regs + reg_off + 0 );
+  page_num_first_high = ioread32((uint32_t *) sc->quadrant_ctrl->regs + reg_off + 1 );
+  page_num_last_low   = ioread32((uint32_t *) sc->quadrant_ctrl->regs + reg_off + 2 );
+  page_num_last_high  = ioread32((uint32_t *) sc->quadrant_ctrl->regs + reg_off + 3 );
+  page_num_base_low   = ioread32((uint32_t *) sc->quadrant_ctrl->regs + reg_off + 4 );
+  page_num_base_high  = ioread32((uint32_t *) sc->quadrant_ctrl->regs + reg_off + 5 );
+  tlbe->flags =         ioread32((uint32_t *) sc->quadrant_ctrl->regs + reg_off + 6 );
 
-  // info("  TLB read first %#llx last %#llx\n", tlbe->first, tlbe->last);
+  tlbe->first =  ((uint64_t) page_num_first_low << 12) + ((uint64_t) page_num_first_high << 32);
+  tlbe->last  =  ((uint64_t) page_num_last_low  << 12) + ((uint64_t) page_num_last_high  << 32);
+  tlbe->base  =  ((uint64_t) page_num_base_low  << 12) + ((uint64_t) page_num_base_high  << 32);
 
   return 0;
 }

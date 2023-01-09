@@ -1,11 +1,11 @@
-############################ OpenMP Sources ############################
 ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-
-# Settings
 TARGET_HOST  = riscv64-hero-linux-gnu
 TARGET_DEV   = riscv32-snitch-unknown-elf
-HERO_INSTALL ?= /scratch/cykoenig/development/master-thesis/install
-MSC_ROOT     ?= /scratch/cykoenig/development/master-thesis
+REPO_ROOT    = ../../../..
+SNRT_INSTALL = $(REPO_ROOT)/output/snitch-runtime/install
+ifndef HERO_INSTALL
+$(error HERO_INSTALL is not set)
+endif
 
 # RV64_INSTALL   = /home/huettern/git/ariane-sdk/install
 # RV64_INSTALL   = /home/huettern/git/riscv-gnu-toolchain/install
@@ -20,15 +20,14 @@ MSC_ROOT     ?= /scratch/cykoenig/development/master-thesis
 # RV64_SYSROOT   = /home/huettern/git/ariane-sdk-gcc11/buildroot/output/host/lib/gcc
 # RV64_LIBPATH   = -L/home/huettern/git/ariane-sdk-gcc11/buildroot/output/host/riscv64-hero-linux-gnu/sysroot/usr/lib
 
-LLVM_INSTALL   = $(HERO_INSTALL)
 
 # Toolchain
+LLVM_INSTALL = $(HERO_INSTALL)
 CC := $(LLVM_INSTALL)/bin/clang
 LINK := $(LLVM_INSTALL)/bin/llvm-link
 COB := $(LLVM_INSTALL)/bin/clang-offload-bundler
 DIS := $(LLVM_INSTALL)/bin/llvm-dis
-HOP := $(MSC_ROOT)/util/hero/hc-omp-pass
-
+HOP := $(HERO_INSTALL)/bin/hc-omp-pass
 GCC := $(HERO_INSTALL)/bin/$(TARGET_HOST)-gcc
 
 ARCH_HOST = host-$(TARGET_HOST)
@@ -37,12 +36,11 @@ ARCH_DEV = openmp-$(TARGET_DEV)
 HOST_OBJDUMP := $(LLVM_INSTALL)/bin/$(TARGET_HOST)-objdump
 DEV_OBJDUMP := $(LLVM_INSTALL)/bin/llvm-objdump --mcpu=snitch
 
-opt = 3
+opt = 0
 # compilation debug
 # debug = -v -debug -save-temps=obj
 
 .DEFAULT_GOAL = all
-DEFMK_ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 # CFLAGS and LDFLAGS have three components/stages
 # 1) without suffix, they apply to heterogeneous compilation;
@@ -65,8 +63,8 @@ LDFLAGS += $(LDFLAGS_COMMON)
 # 	LDFLAGS += -Wl,-dynamic-linker,/lib/ld-linux-riscv64-lp64.so.1
 # endif
 
-INCPATHS += -I$(MSC_ROOT)/support/libhero-target/inc
-INCPATHS += -I$(DEFMK_ROOT) -include hero_64.h
+INCPATHS += -I$(REPO_ROOT)/support/libhero-target/inc
+INCPATHS += -I$(ROOT) -include hero_64.h
 LIBPATHS += $(RV64_LIBPATH)
 LIBPATHS ?=
 
@@ -87,9 +85,9 @@ all: $(DEPS) $(EXE) $(EXE).dis $(EXE).snitch.dis
 # Compile heterogeneous source and split into host/device .ll
 %.ll: %.c $(DEPDIR)/%.d | $(DEPDIR)
 	@echo "CC     <= $<"
-	@$(CC) $(debug) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS) $(INCPATHS) $<
+	SNRT_INSTALL=$(SNRT_INSTALL) $(CC) $(debug) -c -emit-llvm -S $(DEPFLAGS) $(CFLAGS) $(INCPATHS) $<
 	@echo "COB    <= $<"
-	@$(COB) -debug -inputs=$@ -outputs="$(<:.c=-host.ll),$(<:.c=-dev.ll)" -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)" -unbundle
+	@$(COB) -inputs=$@ -outputs="$(<:.c=-host.ll),$(<:.c=-dev.ll)" -type=ll -targets="$(ARCH_HOST),$(ARCH_DEV)" -unbundle
 
 .PRECIOUS: %-dev.OMP.ll
 %-dev.OMP.ll: %.ll
@@ -112,7 +110,8 @@ all: $(DEPS) $(EXE) $(EXE).dis $(EXE).snitch.dis
 exeobjs := $(patsubst %.c, %-out.ll, $(SRC))
 $(EXE): $(exeobjs)
 	@echo "CCLD   <= $<"
-	@$(CC) $(debug) $(LIBPATHS) $(CFLAGS) $(exeobjs) $(LDFLAGS) -o $@
+	SNRT_INSTALL=$(SNRT_INSTALL) $(CC) $(debug) $(LIBPATHS) $(CFLAGS) $(exeobjs) $(LDFLAGS) -o $@
+	echo "done"
 
 $(EXE).dis: $(EXE)
 	@echo "OBJDUMP <= $<"
@@ -143,18 +142,10 @@ clean::
 	-rm -rvf $(DEPDIR)
 	-rm -vf *-host-llvm *-host-gnu
 
-# Bringup: Compile/link for host only
-host::
-	$(CC) $(debug) -target $(TARGET_HOST) -O0 -static $(INCPATHS) $(CSRCS) -o hello_world-host-llvm
-
-# Bringup: Compile/link for host only with GNU toolchain
-host-gnu::
-	$(GCC) -O0 -static $(INCPATHS) $(CSRCS) -o hello_world-host-gnu
-
 .PHONY: deploy
 deploy: $(EXE)
 	rsync $? root@hero-vcu128-02.ee.ethz.ch:/root
 
 .PHONY: install
 install: $(EXE)
-	cp $? $(MSC_ROOT)/rootfs/root
+	cp $? $(REPO_ROOT)/board/common/overlay/root

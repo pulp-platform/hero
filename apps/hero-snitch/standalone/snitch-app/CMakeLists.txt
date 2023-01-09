@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 3.13)
 ################################################################################
 
 # Path to snitch/sw directory from which snRuntime & co are derived
-set(SNITCH_SOFTWARE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../vendor/snitch/sw)
+set(SNITCH_SOFTWARE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../vendor/snitch/sw)
 
 # Include cmake files for toolchain
 list(APPEND CMAKE_MODULE_PATH ${SNITCH_SOFTWARE_DIR}/cmake)

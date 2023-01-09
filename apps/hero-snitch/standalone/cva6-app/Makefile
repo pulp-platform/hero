@@ -5,7 +5,7 @@
 # Pull common makefile
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR  := $(dir $(MKFILE_PATH))
-ROOT        := ${MKFILE_DIR}../../..
+ROOT        := ${MKFILE_DIR}../../../..
 #include $(ROOT)/util/Makefrag.mk
 
 OBJ_C := common.o

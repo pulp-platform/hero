@@ -6,7 +6,6 @@
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR  := $(dir $(MKFILE_PATH))
 ROOT        := ${MKFILE_DIR}../..
-include $(ROOT)/util/Makefrag.mk
 
 # Directories
 BUILD = ${MKFILE_DIR}/build

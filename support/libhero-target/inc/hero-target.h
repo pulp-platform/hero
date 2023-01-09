@@ -62,8 +62,8 @@
 #  endif
 #endif
 
-#define BIGPULP_SVM     (0)
-#define BIGPULP_MEMCPY  (1)
+#define HERODEV_SVM     (0)
+#define HERODEV_MEMCPY  (1)
 #define HOST            (2)
 
 #define HERO_L1_DATA __attribute__((section(".data_l1")))

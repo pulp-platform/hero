@@ -218,6 +218,7 @@ int hero_dev_munmap(HeroDev *dev) {
   time_t start;
   start = time(NULL);
   while(!gd.fs->coreExited) {
+    printf("difftime : %f\n", difftime(time(NULL), start));
     if (difftime(time(NULL), start) >= 60.0 /* seconds */)
       break;
     usleep(10000);
@@ -225,7 +226,7 @@ int hero_dev_munmap(HeroDev *dev) {
   if(!gd.fs->coreExited)
     pr_warn("No exit code received from cluster!\n");
 
-  // kill fesvr
+  // kill fesrv
   gd.fs->abort = true;
   pthread_join(gd.fesrv_thd, NULL);
 
@@ -300,6 +301,13 @@ static void set_direct_tlb_map(snitch_dev_t *snitch, uint32_t idx, uint32_t low,
   snitch_tlb_write(snitch, &tlb_entry);
   tlb_entry.loc = AXI_TLB_WIDE;
   snitch_tlb_write(snitch, &tlb_entry);
+  
+  tlb_entry.first = 0;
+  tlb_entry.last = 0;
+  tlb_entry.base = 0;
+  snitch_tlb_read(snitch, &tlb_entry);
+  printf("Readback : %lx %lx %lx\n", tlb_entry.first, tlb_entry.last, tlb_entry.base);
+
 }
 
 static void reset_tlbs(snitch_dev_t *snitch) {
@@ -327,7 +335,7 @@ void hero_dev_reset(HeroDev *dev, unsigned full) {
   snitch_dev_t *snitch = (snitch_dev_t *)dev->dev;
 
   // Add TLB entry for required ranges
-  reset_tlbs(snitch);
+  //reset_tlbs(snitch);
   set_direct_tlb_map(snitch, 0, 0x01000000, 0x0101ffff); // BOOTROM
   set_direct_tlb_map(snitch, 1, 0x02000000, 0x02000fff); // SoC Control
   set_direct_tlb_map(snitch, 2, 0x04000000, 0x040fffff); // CLINT
