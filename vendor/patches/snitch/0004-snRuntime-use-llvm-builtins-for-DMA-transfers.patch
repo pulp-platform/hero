@@ -1,15 +1,14 @@
-From 1916bc1b308ce72a332b52da3a7f9ca9183d3369 Mon Sep 17 00:00:00 2001
+From 4dd722da5a38b181e1c455ec77cc35a179090191 Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
-Date: Thu, 2 Dec 2021 12:14:06 +0100
-Subject: [sw/snitch] use llvm builtins for DMA transfers
+Date: Mon, 16 Jan 2023 12:15:22 +0100
+Subject: [PATCH 04/15] [snRuntime] use llvm builtins for DMA transfers
 
-Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
 ---
  sw/snRuntime/src/dma.c | 9 +++++++++
  1 file changed, 9 insertions(+)
 
 diff --git a/sw/snRuntime/src/dma.c b/sw/snRuntime/src/dma.c
-index b0d9ad0..c7b09ed 100644
+index 59cd762..29867aa 100644
 --- a/sw/snRuntime/src/dma.c
 +++ b/sw/snRuntime/src/dma.c
 @@ -6,6 +6,9 @@
@@ -50,5 +49,5 @@ index b0d9ad0..c7b09ed 100644
  
  /// Initiate an asynchronous 2D DMA transfer.
 -- 
-2.15.1
+2.16.5
 

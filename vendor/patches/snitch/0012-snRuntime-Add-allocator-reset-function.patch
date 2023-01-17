@@ -1,19 +1,18 @@
-From 0dea453e2bf80af62cfb9862b6927dce1fc1c7f9 Mon Sep 17 00:00:00 2001
+From dfeacad5fb5995db80ef035c7fae958d5e7a6c4d Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
-Date: Mon, 16 May 2022 14:51:46 +0200
-Subject: snrt: Add allocator reset function
+Date: Mon, 16 Jan 2023 14:16:46 +0100
+Subject: [PATCH 12/15] [snRuntime] Add allocator reset function
 
-Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
 ---
  sw/snRuntime/include/snrt.h |  1 +
  sw/snRuntime/src/alloc.c    | 14 ++++++++++++++
  2 files changed, 15 insertions(+)
 
 diff --git a/sw/snRuntime/include/snrt.h b/sw/snRuntime/include/snrt.h
-index 7002688..a5d2250 100644
+index 86b6c60..df28cc6 100644
 --- a/sw/snRuntime/include/snrt.h
 +++ b/sw/snRuntime/include/snrt.h
-@@ -238,6 +238,7 @@ static inline __attribute__((noreturn)) void snrt_exit(int status) {
+@@ -195,6 +195,7 @@ static inline uint32_t __attribute__((pure)) snrt_hartid() {
  //================================================================================
  extern void snrt_alloc_init(struct snrt_team_root *team, uint32_t l3off);
  extern void *snrt_l1alloc(size_t size);

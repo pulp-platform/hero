@@ -1,15 +1,15 @@
-From 451161f637811235a2b9a550f64c576b0afb2b20 Mon Sep 17 00:00:00 2001
+From fde20b3808529d009608c48a5d947d0193f1d984 Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
-Date: Wed, 1 Dec 2021 17:31:33 +0100
-Subject: [sw/snitch] Keep stack aligned when pushing bootrom return address
+Date: Mon, 16 Jan 2023 12:06:30 +0100
+Subject: [PATCH 03/15] [snRuntime] Keep stack aligned when pushing bootrom
+ return address
 
-Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
 ---
  sw/snRuntime/src/start.S | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/sw/snRuntime/src/start.S b/sw/snRuntime/src/start.S
-index bbb4d92..5b1e893 100644
+index 7437a15..7a2b13e 100644
 --- a/sw/snRuntime/src/start.S
 +++ b/sw/snRuntime/src/start.S
 @@ -156,7 +156,7 @@ snrt.crt0.init_tls:
@@ -31,5 +31,5 @@ index bbb4d92..5b1e893 100644
  
  __snrt_crt0_interrupt_handler:
 -- 
-2.15.1
+2.16.5
 

@@ -1,0 +1,65 @@
+From 014159d13a3edb1de58add9336f8797aeaffb3ab Mon Sep 17 00:00:00 2001
+From: Noah Huetter <noahhuetter@gmail.com>
+Date: Mon, 16 Jan 2023 12:01:52 +0100
+Subject: [PATCH 02/15] [snRuntime] SSR enable/disable patch
+
+---
+ sw/snRuntime/include/snrt.h | 12 ++++++++++--
+ sw/snRuntime/src/ssr.c      | 18 ------------------
+ 2 files changed, 10 insertions(+), 20 deletions(-)
+
+diff --git a/sw/snRuntime/include/snrt.h b/sw/snRuntime/include/snrt.h
+index 626e1e2..86b6c60 100644
+--- a/sw/snRuntime/include/snrt.h
++++ b/sw/snRuntime/include/snrt.h
+@@ -153,8 +153,16 @@ extern void snrt_ssr_loop_4d(enum snrt_ssr_dm dm, size_t b0, size_t b1,
+                              size_t b2, size_t b3, size_t i0, size_t i1,
+                              size_t i2, size_t i3);
+ extern void snrt_ssr_repeat(enum snrt_ssr_dm dm, size_t count);
+-extern void snrt_ssr_enable();
+-extern void snrt_ssr_disable();
++
++/// Enable/Disable SSR
++#ifdef __TOOLCHAIN_LLVM__
++#define snrt_ssr_enable() __builtin_ssr_enable()
++#define snrt_ssr_disable() __builtin_ssr_disable()
++#else
++#define snrt_ssr_enable() asm volatile("csrsi 0x7C0, 1")
++#define snrt_ssr_disable() asm volatile("csrci 0x7C0, 1")
++#endif
++
+ extern void snrt_ssr_read(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim,
+                           volatile void *ptr);
+ extern void snrt_ssr_write(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim,
+diff --git a/sw/snRuntime/src/ssr.c b/sw/snRuntime/src/ssr.c
+index cd4d33b..f5854bf 100644
+--- a/sw/snRuntime/src/ssr.c
++++ b/sw/snRuntime/src/ssr.c
+@@ -3,24 +3,6 @@
+ // SPDX-License-Identifier: Apache-2.0
+ #include "snrt.h"
+ 
+-/// Enable SSR.
+-void snrt_ssr_enable() {
+-#ifdef __TOOLCHAIN_LLVM__
+-    __builtin_ssr_enable();
+-#else
+-    asm volatile("csrsi 0x7C0, 1");
+-#endif
+-}
+-
+-/// Disable SSR.
+-void snrt_ssr_disable() {
+-#ifdef __TOOLCHAIN_LLVM__
+-    __builtin_ssr_disable();
+-#else
+-    asm volatile("csrci 0x7C0, 1");
+-#endif
+-}
+-
+ /// Synchronize the integer and float pipelines.
+ void snrt_fpu_fence() {
+     unsigned tmp;
+-- 
+2.16.5
+

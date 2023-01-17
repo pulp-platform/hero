@@ -1,9 +1,8 @@
-From d8ec8c33a4dd2b288ddbec23fb585be69bf98572 Mon Sep 17 00:00:00 2001
+From 0c36ca9e2e583e72920671ae9c093a4511dbbb9a Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
-Date: Mon, 16 May 2022 14:55:05 +0200
-Subject: snrt: Debugging unified and programmable
+Date: Mon, 16 Jan 2023 14:21:07 +0100
+Subject: [PATCH 13/15] [snRuntime] Debugging unified and programmable
 
-Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
 ---
  sw/snRuntime/include/debug.h |  75 +++++++++++++++++------
  sw/snRuntime/include/eu.h    |  18 ------
@@ -208,11 +207,11 @@ index 555a7e5..aef079e 100644
  // Macros
  //================================================================================
 diff --git a/sw/snRuntime/include/snrt.h b/sw/snRuntime/include/snrt.h
-index a5d2250..a1ab2ad 100644
+index df28cc6..1e134b8 100644
 --- a/sw/snRuntime/include/snrt.h
 +++ b/sw/snRuntime/include/snrt.h
-@@ -233,6 +233,11 @@ static inline __attribute__((noreturn)) void snrt_exit(int status) {
-         ;
+@@ -190,6 +190,11 @@ static inline uint32_t __attribute__((pure)) snrt_hartid() {
+     return hartid;
  }
  
 +//================================================================================
@@ -812,7 +811,7 @@ index 622a9b7..92045ae 100644
  }
  #endif
 diff --git a/sw/snRuntime/src/team.c b/sw/snRuntime/src/team.c
-index e4573d1..ff725f7 100644
+index 60c019b..e06029e 100644
 --- a/sw/snRuntime/src/team.c
 +++ b/sw/snRuntime/src/team.c
 @@ -9,6 +9,9 @@

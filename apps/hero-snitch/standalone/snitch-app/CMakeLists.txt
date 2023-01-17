@@ -15,7 +15,7 @@ set(SNITCH_SOFTWARE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../vendor/snitch/sw
 list(APPEND CMAKE_MODULE_PATH ${SNITCH_SOFTWARE_DIR}/cmake)
 
 # snRuntime-cluster to include start_cluster.S/.c
-set(SNITCH_RUNTIME snRuntime-cluster CACHE STRING "")
+set(SNITCH_RUNTIME snRuntime-hero CACHE STRING "")
 
 # We want to use the LLVM toolchain
 set(CMAKE_TOOLCHAIN_FILE toolchain-llvm CACHE STRING "")
@@ -34,8 +34,6 @@ set(MEM_DRAM_SIZE "512M" CACHE STRING "Size of external memory")
 ################################################################################
 
 set(sn_common_src
-  ${SNITCH_SOFTWARE_DIR}/snRuntime/src/snitch_hero_support.c
-  hier_wake.c
 )
 set(sn_common_include
   .

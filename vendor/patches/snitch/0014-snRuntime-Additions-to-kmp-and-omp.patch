@@ -1,9 +1,8 @@
-From f313c4077fd081c51e3a8dfa92945d81df0e8ffd Mon Sep 17 00:00:00 2001
+From 1cc125337ec3330e9eebae8fb3ac01a5e26059fd Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
-Date: Mon, 16 May 2022 14:55:30 +0200
-Subject: snrt: Additions to kmp and omp
+Date: Mon, 16 Jan 2023 14:23:25 +0100
+Subject: [PATCH 14/15] [snRuntime] Additions to kmp and omp
 
-Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
 ---
  sw/snRuntime/include/omp.h |  9 ++++-----
  sw/snRuntime/src/omp/kmp.c | 19 +++++++++++++++----

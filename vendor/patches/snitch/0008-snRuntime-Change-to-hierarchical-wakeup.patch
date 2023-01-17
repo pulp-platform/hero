@@ -1,15 +1,14 @@
-From e59add18398b33172a251eafc1a29753f4a14731 Mon Sep 17 00:00:00 2001
+From 7fa52ebb28d95f6130b09faa749307bdb7ea16b4 Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
-Date: Wed, 5 Jan 2022 17:16:37 +0100
-Subject: [sw/knn] Change to hierarchical wakeup
+Date: Mon, 16 Jan 2023 12:26:22 +0100
+Subject: [PATCH 08/15] [snRuntime] Change to hierarchical wakeup
 
-Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
 ---
  sw/snRuntime/src/start.S | 1 +
  1 file changed, 1 insertion(+)
 
 diff --git a/sw/snRuntime/src/start.S b/sw/snRuntime/src/start.S
-index 5b1e893..09f28f1 100644
+index 7a2b13e..d58d21a 100644
 --- a/sw/snRuntime/src/start.S
 +++ b/sw/snRuntime/src/start.S
 @@ -182,6 +182,7 @@ snrt.crt0.init_interrupt:
@@ -21,5 +20,5 @@ index 5b1e893..09f28f1 100644
  
      # Execute the main function.
 -- 
-2.15.1
+2.16.5
 

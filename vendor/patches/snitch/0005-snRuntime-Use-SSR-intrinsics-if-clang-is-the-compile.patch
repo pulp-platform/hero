@@ -1,41 +1,40 @@
-From 4d0f2639f9c230cebebe65e0926d35895906dcd6 Mon Sep 17 00:00:00 2001
+From 6bdf01cc0d7aa950b71aa71db5a5bd6946fcd322 Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
-Date: Sun, 5 Dec 2021 14:27:18 +0100
-Subject: [sw/snitch] Use SSR intrinsics if clang is the compiler
+Date: Mon, 16 Jan 2023 12:22:31 +0100
+Subject: [PATCH 05/15] [snRuntime] Use SSR intrinsics if clang is the compiler
 
-Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
 ---
  sw/snRuntime/CMakeLists.txt | 14 +++++++--
  sw/snRuntime/src/ssr_v3.c   | 72 +++++++++++++++++++++++++++++++++++++++++++++
  2 files changed, 84 insertions(+), 2 deletions(-)
- create mode 100644 sw/vendor/snitch/sw/snRuntime/src/ssr_v3.c
+ create mode 100644 sw/snRuntime/src/ssr_v3.c
 
 diff --git a/sw/snRuntime/CMakeLists.txt b/sw/snRuntime/CMakeLists.txt
-index 2929b5f..24afc3e 100644
+index 4953979..d761d42 100644
 --- a/sw/snRuntime/CMakeLists.txt
 +++ b/sw/snRuntime/CMakeLists.txt
-@@ -107,9 +107,19 @@ else()
-         add_snitch_library(snRuntime src/start.S ${sources} src/ssr_v2.c)
+@@ -114,9 +114,19 @@ else()
+         add_snitch_library(snRuntime src/platforms/shared/start.c src/start.S ${sources} src/ssr_v2.c)
      # Bare Runtimes (with startup code)
      elseif(SNITCH_RUNTIME STREQUAL "snRuntime-banshee")
--        add_snitch_library(snRuntime-banshee src/start_banshee.S src/start_banshee.c ${sources} src/ssr_v1.c)
+-        add_snitch_library(snRuntime-banshee src/platforms/shared/start.c ${banshee_snitch_sources} ${sources} src/ssr_v1.c)
 +        # Use ssr_v3 which makes use of clang-builtins in the LLVM toolchain
 +        if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
-+            add_snitch_library(snRuntime-banshee src/start_banshee.S src/start_banshee.c ${sources} src/ssr_v3.c)
++            add_snitch_library(snRuntime-banshee src/platforms/shared/start.c ${banshee_snitch_sources} ${sources} src/ssr_v3.c)
 +        else()
-+            add_snitch_library(snRuntime-banshee src/start_banshee.S src/start_banshee.c ${sources} src/ssr_v2.c)
++            add_snitch_library(snRuntime-banshee src/platforms/shared/start.c ${banshee_snitch_sources} ${sources} src/ssr_v2.c)
 +        endif()
      elseif(SNITCH_RUNTIME STREQUAL "snRuntime-cluster")
--        add_snitch_library(snRuntime-cluster src/start_cluster.S src/start_cluster.c ${sources} src/ssr_v2.c)
+-        add_snitch_library(snRuntime-cluster src/platforms/shared/start.c ${rtl_snitch_sources} ${sources} src/ssr_v2.c)
 +        # Use ssr_v3 which makes use of clang-builtins in the LLVM toolchain
 +        if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
-+            add_snitch_library(snRuntime-cluster src/start_cluster.S src/start_cluster.c ${sources} src/ssr_v3.c)
++            add_snitch_library(snRuntime-cluster src/platforms/shared/start.c ${rtl_snitch_sources} ${sources} src/ssr_v3.c)
 +        else()
-+            add_snitch_library(snRuntime-cluster src/start_cluster.S src/start_cluster.c ${sources} src/ssr_v2.c)
++            add_snitch_library(snRuntime-cluster src/platforms/shared/start.c ${rtl_snitch_sources} ${sources} src/ssr_v2.c)
 +        endif()
-     elseif(SNITCH_RUNTIME STREQUAL "snRuntime-billywig")
-         add_snitch_library(snRuntime-billywig src/start_billywig.S ${sources} src/ssr_v1.c)
-     elseif(SNITCH_RUNTIME STREQUAL "snRuntime-bowtruckle")
+     else()
+         message(FATAL_ERROR "Requested runtime not implemented: ${SNITCH_RUNTIME}")
+     endif()
 diff --git a/sw/snRuntime/src/ssr_v3.c b/sw/snRuntime/src/ssr_v3.c
 new file mode 100644
 index 0000000..260d8f5
@@ -115,5 +114,5 @@ index 0000000..260d8f5
 +    __builtin_ssr_write(dm, dim, ptr);
 +}
 -- 
-2.15.1
+2.16.5
 

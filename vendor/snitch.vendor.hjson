@@ -6,7 +6,7 @@
   "target_dir": "snitch",
   "upstream": {
     "url": "https://github.com/pulp-platform/snitch.git",
-    "rev": "6e90362642db1bcf83e8011d3a3b163d2839f1b1"
+    "rev": "a77b09f60ee62db3f298e4b9b2be300b121015dd"
   },
   "patch_dir": "patches/snitch",
   "exclude_from_upstream": [

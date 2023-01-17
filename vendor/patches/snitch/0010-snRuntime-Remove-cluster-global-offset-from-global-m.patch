@@ -1,18 +1,17 @@
-From 3c3baa04bad1789fba5a747ba7073cefbb090f84 Mon Sep 17 00:00:00 2001
+From 0b069aa74250ee68a46d9904ac51383f0d885787 Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
-Date: Tue, 11 Jan 2022 13:52:08 +0100
-Subject: [sw/snitch] Remove cluster global offset from global memory in team
- struct
+Date: Mon, 16 Jan 2023 13:16:10 +0100
+Subject: [PATCH 10/15] [snRuntime] Remove cluster global offset from global
+ memory in team
 
-Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
 ---
- sw/snRuntime/src/start_cluster.c | 3 +--
+ sw/snRuntime/src/platforms/shared/start.c | 3 +--
  1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/sw/snRuntime/src/start_cluster.c b/sw/snRuntime/src/start_cluster.c
-index b8c11e7..07a5773 100644
---- a/sw/snRuntime/src/start_cluster.c
-+++ b/sw/snRuntime/src/start_cluster.c
+diff --git a/sw/snRuntime/src/platforms/shared/start.c b/sw/snRuntime/src/platforms/shared/start.c
+index ce2e045..0303636 100644
+--- a/sw/snRuntime/src/platforms/shared/start.c
++++ b/sw/snRuntime/src/platforms/shared/start.c
 @@ -9,7 +9,6 @@ extern const uint32_t _snrt_cluster_cluster_core_num;
  extern const uint32_t _snrt_cluster_cluster_base_hartid;
  extern const uint32_t _snrt_cluster_cluster_num;
@@ -31,5 +30,5 @@ index b8c11e7..07a5773 100644
      team->cluster_mem.start = (uint64_t)spm_start;
      team->cluster_mem.end = (uint64_t)spm_end;
 -- 
-2.15.1
+2.16.5
 

@@ -1,15 +1,14 @@
-From c46655cc7c9a05f4e8452598f95acf29b2933dfc Mon Sep 17 00:00:00 2001
+From ff5f4cf00bed06e8c6a3a6b26927fcdb71b4851c Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
-Date: Tue, 28 Dec 2021 12:07:35 +0100
-Subject: Move htif section before data in RAM
+Date: Mon, 16 Jan 2023 12:24:41 +0100
+Subject: [PATCH 07/15] [snRuntime] Move htif section before data in RAM
 
-Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
 ---
  sw/snRuntime/link/common.ld.in | 6 +++---
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/sw/snRuntime/link/common.ld.in b/sw/snRuntime/link/common.ld.in
-index 7b302f7..91edd33 100644
+index 63423e1..8409b3a 100644
 --- a/sw/snRuntime/link/common.ld.in
 +++ b/sw/snRuntime/link/common.ld.in
 @@ -27,6 +27,9 @@ SECTIONS
@@ -33,5 +32,5 @@ index 7b302f7..91edd33 100644
    .tdata    :
    {
 -- 
-2.15.1
+2.16.5
 

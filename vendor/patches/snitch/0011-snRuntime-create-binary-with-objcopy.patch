@@ -1,0 +1,29 @@
+From 8df8c524a774d27434ac5df5308df41db8f22aca Mon Sep 17 00:00:00 2001
+From: Noah Huetter <noahhuetter@gmail.com>
+Date: Mon, 16 Jan 2023 14:10:54 +0100
+Subject: [PATCH 11/15] [snRuntime] create binary with objcopy
+
+---
+ sw/cmake/SnitchUtilities.cmake | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/sw/cmake/SnitchUtilities.cmake b/sw/cmake/SnitchUtilities.cmake
+index c39d399..d2a1def 100644
+--- a/sw/cmake/SnitchUtilities.cmake
++++ b/sw/cmake/SnitchUtilities.cmake
+@@ -38,6 +38,12 @@ macro(add_snitch_executable name)
+     add_executable(${ARGV})
+     target_link_libraries(${name} ${SNITCH_RUNTIME})
+     target_link_options(${name} PRIVATE "SHELL:-T ${LINKER_SCRIPT}")
++    add_custom_command(
++        TARGET ${name}
++        POST_BUILD
++        COMMAND ${CMAKE_OBJCOPY}
++        ARGS -O binary --strip-unneeded $<TARGET_FILE:${name}> $<TARGET_FILE:${name}>.bin
++    )
+     add_custom_command(
+         TARGET ${name}
+         POST_BUILD
+-- 
+2.16.5
+

@@ -1,9 +1,8 @@
-From 947099fae44d693c16bb536427cb54b748849ba5 Mon Sep 17 00:00:00 2001
+From 7394b7ea8f87611db1d16328125e5a3a0b21ae91 Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
-Date: Sun, 5 Dec 2021 14:28:21 +0100
-Subject: [sw/snitch] Clear clint mutex in startup
+Date: Mon, 16 Jan 2023 12:23:31 +0100
+Subject: [PATCH 06/15] [snRuntime] Clear clint mutex in startup
 
-Signed-off-by: Noah Huetter <noahhuetter@gmail.com>
 ---
  sw/snRuntime/src/interrupt.c | 2 ++
  1 file changed, 2 insertions(+)
@@ -22,5 +21,5 @@ index cfb7eaa..868ebd8 100644
      clint_p = team->peripherals.clint;
      cl_clint_p = team->peripherals.cl_clint;
 -- 
-2.15.1
+2.16.5
 
