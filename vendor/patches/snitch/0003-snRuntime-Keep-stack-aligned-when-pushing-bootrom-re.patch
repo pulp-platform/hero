@@ -1,7 +1,7 @@
 From fde20b3808529d009608c48a5d947d0193f1d984 Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
 Date: Mon, 16 Jan 2023 12:06:30 +0100
-Subject: [PATCH 03/15] [snRuntime] Keep stack aligned when pushing bootrom
+Subject: [PATCH 03/16] [snRuntime] Keep stack aligned when pushing bootrom
  return address
 
 ---

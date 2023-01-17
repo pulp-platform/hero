@@ -1,7 +1,7 @@
 From 7394b7ea8f87611db1d16328125e5a3a0b21ae91 Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
 Date: Mon, 16 Jan 2023 12:23:31 +0100
-Subject: [PATCH 06/15] [snRuntime] Clear clint mutex in startup
+Subject: [PATCH 06/16] [snRuntime] Clear clint mutex in startup
 
 ---
  sw/snRuntime/src/interrupt.c | 2 ++

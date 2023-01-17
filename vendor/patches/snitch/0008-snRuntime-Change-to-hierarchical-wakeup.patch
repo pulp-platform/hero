@@ -1,7 +1,7 @@
 From 7fa52ebb28d95f6130b09faa749307bdb7ea16b4 Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
 Date: Mon, 16 Jan 2023 12:26:22 +0100
-Subject: [PATCH 08/15] [snRuntime] Change to hierarchical wakeup
+Subject: [PATCH 08/16] [snRuntime] Change to hierarchical wakeup
 
 ---
  sw/snRuntime/src/start.S | 1 +

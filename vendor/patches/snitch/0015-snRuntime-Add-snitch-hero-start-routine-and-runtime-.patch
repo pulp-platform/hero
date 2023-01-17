@@ -1,24 +1,24 @@
-From 4d769195d6cf4af1c8cdf3562a165186884c794c Mon Sep 17 00:00:00 2001
-From: Noah Huetter <noahhuetter@gmail.com>
-Date: Mon, 16 Jan 2023 15:29:52 +0100
-Subject: [PATCH 15/15] [snRuntime] Add snitch-hero start routine and runtime
+From 2cde85540a678d5b172665bd5c4093fc8c4dc8ac Mon Sep 17 00:00:00 2001
+From: Cyril Koenig <cykoenig@iis.ee.ethz.ch>
+Date: Tue, 17 Jan 2023 13:32:58 +0100
+Subject: [PATCH 15/16] [snRuntime] Add snitch-hero start routine and runtime
  target
 
 ---
- sw/snRuntime/CMakeLists.txt                        |  12 +
+ sw/snRuntime/CMakeLists.txt                        |  11 +
  sw/snRuntime/include/snitch_hero_support.h         | 159 +++++++++
  .../src/platforms/hero/snitch_hero_support.c       |  89 +++++
  sw/snRuntime/src/platforms/hero/start_hero.c       | 373 +++++++++++++++++++++
- 4 files changed, 633 insertions(+)
+ 4 files changed, 632 insertions(+)
  create mode 100644 sw/snRuntime/include/snitch_hero_support.h
  create mode 100644 sw/snRuntime/src/platforms/hero/snitch_hero_support.c
  create mode 100644 sw/snRuntime/src/platforms/hero/start_hero.c
 
 diff --git a/sw/snRuntime/CMakeLists.txt b/sw/snRuntime/CMakeLists.txt
-index d761d42..5e374ee 100644
+index d761d42..39a8960 100644
 --- a/sw/snRuntime/CMakeLists.txt
 +++ b/sw/snRuntime/CMakeLists.txt
-@@ -76,6 +76,12 @@ set(rtl_snitch_sources
+@@ -76,6 +76,11 @@ set(rtl_snitch_sources
      src/platforms/rtl/start_snitch.S
      src/platforms/rtl/putchar.c
  )
@@ -26,12 +26,11 @@ index d761d42..5e374ee 100644
 +    src/platforms/hero/start_snitch.S
 +    src/platforms/hero/start_hero.c
 +    src/platforms/hero/snitch_hero_support.c
-+    src/platforms/hero/putchar.c
 +)
  
  # Sources only compatible with the LLVM toolchain
  if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
-@@ -105,6 +111,8 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+@@ -105,6 +110,8 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
      # Bare Runtimes (with startup code)
      add_snitch_library(snRuntime-banshee src/platforms/shared/start.c ${banshee_snitch_sources} ${sources} src/ssr_v1.c)
      add_snitch_library(snRuntime-cluster src/platforms/shared/start.c ${rtl_snitch_sources} ${sources} src/ssr_v2.c)
@@ -40,7 +39,7 @@ index d761d42..5e374ee 100644
  
  
  else()
-@@ -127,6 +135,10 @@ else()
+@@ -127,6 +134,10 @@ else()
          else()
              add_snitch_library(snRuntime-cluster src/platforms/shared/start.c ${rtl_snitch_sources} ${sources} src/ssr_v2.c)
          endif()

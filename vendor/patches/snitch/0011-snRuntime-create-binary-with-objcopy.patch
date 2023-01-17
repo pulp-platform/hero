@@ -1,7 +1,7 @@
 From 8df8c524a774d27434ac5df5308df41db8f22aca Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
 Date: Mon, 16 Jan 2023 14:10:54 +0100
-Subject: [PATCH 11/15] [snRuntime] create binary with objcopy
+Subject: [PATCH 11/16] [snRuntime] create binary with objcopy
 
 ---
  sw/cmake/SnitchUtilities.cmake | 6 ++++++

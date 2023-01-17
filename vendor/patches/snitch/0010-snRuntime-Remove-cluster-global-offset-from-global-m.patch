@@ -1,7 +1,7 @@
 From 0b069aa74250ee68a46d9904ac51383f0d885787 Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
 Date: Mon, 16 Jan 2023 13:16:10 +0100
-Subject: [PATCH 10/15] [snRuntime] Remove cluster global offset from global
+Subject: [PATCH 10/16] [snRuntime] Remove cluster global offset from global
  memory in team
 
 ---

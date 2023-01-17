@@ -1,7 +1,7 @@
 From 0c36ca9e2e583e72920671ae9c093a4511dbbb9a Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
 Date: Mon, 16 Jan 2023 14:21:07 +0100
-Subject: [PATCH 13/15] [snRuntime] Debugging unified and programmable
+Subject: [PATCH 13/16] [snRuntime] Debugging unified and programmable
 
 ---
  sw/snRuntime/include/debug.h |  75 +++++++++++++++++------

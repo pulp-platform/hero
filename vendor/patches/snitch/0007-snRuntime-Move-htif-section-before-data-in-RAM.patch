@@ -1,7 +1,7 @@
 From ff5f4cf00bed06e8c6a3a6b26927fcdb71b4851c Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
 Date: Mon, 16 Jan 2023 12:24:41 +0100
-Subject: [PATCH 07/15] [snRuntime] Move htif section before data in RAM
+Subject: [PATCH 07/16] [snRuntime] Move htif section before data in RAM
 
 ---
  sw/snRuntime/link/common.ld.in | 6 +++---

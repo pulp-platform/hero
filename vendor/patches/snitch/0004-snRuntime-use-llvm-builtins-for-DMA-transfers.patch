@@ -1,7 +1,7 @@
 From 4dd722da5a38b181e1c455ec77cc35a179090191 Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
 Date: Mon, 16 Jan 2023 12:15:22 +0100
-Subject: [PATCH 04/15] [snRuntime] use llvm builtins for DMA transfers
+Subject: [PATCH 04/16] [snRuntime] use llvm builtins for DMA transfers
 
 ---
  sw/snRuntime/src/dma.c | 9 +++++++++

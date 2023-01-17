@@ -1,7 +1,7 @@
 From 6bdf01cc0d7aa950b71aa71db5a5bd6946fcd322 Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
 Date: Mon, 16 Jan 2023 12:22:31 +0100
-Subject: [PATCH 05/15] [snRuntime] Use SSR intrinsics if clang is the compiler
+Subject: [PATCH 05/16] [snRuntime] Use SSR intrinsics if clang is the compiler
 
 ---
  sw/snRuntime/CMakeLists.txt | 14 +++++++--

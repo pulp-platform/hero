@@ -1,7 +1,7 @@
 From dfeacad5fb5995db80ef035c7fae958d5e7a6c4d Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
 Date: Mon, 16 Jan 2023 14:16:46 +0100
-Subject: [PATCH 12/15] [snRuntime] Add allocator reset function
+Subject: [PATCH 12/16] [snRuntime] Add allocator reset function
 
 ---
  sw/snRuntime/include/snrt.h |  1 +

@@ -1,7 +1,7 @@
 From 014159d13a3edb1de58add9336f8797aeaffb3ab Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
 Date: Mon, 16 Jan 2023 12:01:52 +0100
-Subject: [PATCH 02/15] [snRuntime] SSR enable/disable patch
+Subject: [PATCH 02/16] [snRuntime] SSR enable/disable patch
 
 ---
  sw/snRuntime/include/snrt.h | 12 ++++++++++--

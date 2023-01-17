@@ -1,7 +1,7 @@
 From 42766ad04a717d3f03c08e2ea17c325b693c0bd7 Mon Sep 17 00:00:00 2001
 From: Cyril Koenig <cykoenig@iis.ee.ethz.ch>
 Date: Mon, 16 Jan 2023 11:31:35 +0100
-Subject: [PATCH 01/15] [snRuntime] Exit to bootrom after returning from main
+Subject: [PATCH 01/16] [snRuntime] Exit to bootrom after returning from main
 
 ---
  sw/snRuntime/link/common.ld.in                 |  2 ++

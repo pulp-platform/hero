@@ -1,7 +1,7 @@
 From a197fd7141875e4ebe8daeeee4b8a7e54a864c08 Mon Sep 17 00:00:00 2001
 From: Noah Huetter <noahhuetter@gmail.com>
 Date: Mon, 16 Jan 2023 12:28:18 +0100
-Subject: [PATCH 09/15] [snRuntime] Fix FPU barrier
+Subject: [PATCH 09/16] [snRuntime] Fix FPU barrier
 
 ---
  sw/snRuntime/src/ssr.c | 16 ++++++++++------
