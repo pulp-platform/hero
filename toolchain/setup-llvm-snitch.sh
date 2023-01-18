@@ -28,7 +28,6 @@ echo "Requesting cmake $CMAKE"
 
 PATH=${HERO_INSTALL}/bin:${PATH}
 
-chmod -R u+w $HERO_INSTALL
 
 ##############################
 # newlib
@@ -59,6 +58,8 @@ mkdir -p compiler-rt32
 cd compiler-rt32
 # NOTE: CMAKE_SYSTEM_NAME is set to linux to allow the configure step to
 #       correctly validate that clang works for cross compiling
+pwd
+ls ../llvm_build/bin/
 ${CMAKE} -G"Unix Makefiles"                                                     \
     -DCMAKE_SYSTEM_NAME=Linux                                                \
     -DCMAKE_INSTALL_PREFIX=$(${HERO_INSTALL}/bin/clang -print-resource-dir) \
@@ -122,5 +123,3 @@ for TRIPLE in riscv32-unknown-elf; do
   done
 done
 
-
-chmod -R u-w $HERO_INSTALL
