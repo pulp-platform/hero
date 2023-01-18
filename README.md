@@ -1,3 +1,64 @@
+# HerOccamy draft
+
+## Linux
+
+Before all you will need to compile a GCC RISCV64 toolchain, OpenSBI, U-boot and Linux, everything is taken care of by buildroot and it just needs the device tree as an input. The device tree is located in the snitch repository, go there and checkout to `iis-ci-4`.
+
+```bash
+# Setup the installation directory
+export HERO_INSTALL=`pwd`/install
+HERO_DEVICE_DTS=path_to_snitch/hw/system/occamy/fpga/bootrom/occamy.dts make br-hrv-occamy
+```
+
+This should work straight, you can now add the `riscv64-buildroot-linux` to your path :
+
+```bash
+export PATH=$HERO_INSTALL/share:$HERO_INSTALL/bin:$PATH
+```
+
+You can find the buildoot config in `configs/hrv_occamy_defconfig`, linux/busybox patches and config in `configs/hrv_occamy_defconfig`.
+__Attention:__ Right now U-Boot is made to fetch the linux image via TFTP, edit the address in CONFIG_BOOTCOMMAND in `board/occamy/patches/u-boot-v2021.07/0001-WIP-Occamy-U-Boot-bringup.patch`, you could also edit this to boot from flash instead. __TODO:__ Externalize buildroot config, remove old (unused) dts from patch, buildroot gets the device tree from the bootrom itself.
+
+Once compiled you find buildroot+osbi in `output/br-hrv-occamy/images/u-boot-spl.bin` your image is in `output/br-hrv-occamy/images/Image.itb`
+
+In IIS you can use `make upload-linux-image` to send the image on the bordcomputer.
+
+## Hardware
+
+Goto the snitch repository and checkout to `iis-ci-4` (if not done), find `README.md` there in `hw/system/occamy/fpga`.
+
+## Boot
+
+Once booted there is an issue with OpenSBI wrongly setting up physical memory protection and restraining access to the cluster. Start openOCD with the config in `board/occamy/vcu128-1-digilent.cfg`. Connect GCC and set the correct PMP CSR : `set $pmpcfg0=0x1f1f18`. __TODO:__ Patch OpenSBI.
+
+## Library and driver
+
+Driver and library are located in `support/libsnitch` `support/libsnitch`. The library is imported by applications to interact with the cluster and offload. Actual communication is handled by the driver through ioctl calls. The driver maps the physical addresses of the cluster to virtual addresses.
+
+Both are compiled directly by buildroot. If you want to recompile them :
+
+```bash
+cd output/br-hrv-occamy
+make snitch-driver-dirclean snitch-driver
+make libsnitch-dirclean libsnitch
+```
+## LLVM toolchain
+
+* If you work on ETH Zurich Lagrev machines, export the following environment variables for the correct compiler to build LLVM Toolchain
+`export CC=/usr/pack/gcc-9.2.0-af/linux-x64/bin/gcc`
+`export CXX=/usr/pack/gcc-9.2.0-af/linux-x64/bin/g++`
+* Install the LLVM tolchain for the Host and for Snitch by running:
+`make tc-llvm`
+`make tc-snitch`
+* If you have previously set the CC and CXX environment variables, unset them and then run:
+`make sdk-snitch`
+
+You can now offload applications! Goto `hero-occamy/apps/hero-snitch/standalone/README.md`.
+
+## OpenMP
+
+
+
 # Heterogeneous Research Platform (HERO)
 
 HERO is an **FPGA-based research platform** that enables accurate and fast exploration of **heterogeneous computers** consisting of **programmable many-core accelerators** and an **application-class host CPU**.  Currently, 32-bit RISC-V cores are supported in the accelerator and 64-bit ARMv8 or RISC-V cores as host CPU.  HERO allows to **seamlessly share data between host and accelerator** through a unified heterogeneous programming interface based on OpenMP 4.5 and a mixed-data-model, mixed-ISA heterogeneous compiler based on LLVM.
@@ -243,16 +304,3 @@ where `<app_name>` is the path to the directory from the `openmp-examples` direc
 ```
 make util-hrv-openocd
 ```
-## RISCV64 Host + Snitch
-The procedure exposed above for the installation of the ARM Host + PULP is slightly different from the procedure needed to install the components for RISCV Host + Snitch.
-In order to do it, do the following:
-* Install the Host toolchain and SDK by running:
-`make br-hrv-occamy`
-* If you work on ETH Zurich Lagrev machines, export the following environment variables for the correct compiler to build LLVM Toolchain
-`export CC=/usr/pack/gcc-9.2.0-af/linux-x64/bin/gcc`
-`export CXX=/usr/pack/gcc-9.2.0-af/linux-x64/bin/g++`
-* Install the LLVM tolchain for the Host and for Snitch by running:
-`make tc-llvm`
-`make tc-snitch`
-* If you have previously set the CC and CXX environment variables, unset them and then run:
-`make sdk-snitch`
