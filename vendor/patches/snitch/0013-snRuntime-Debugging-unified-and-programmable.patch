@@ -18,7 +18,7 @@ Subject: [PATCH 13/16] [snRuntime] Debugging unified and programmable
  11 files changed, 238 insertions(+), 164 deletions(-)
 
 diff --git a/sw/snRuntime/include/debug.h b/sw/snRuntime/include/debug.h
-index d504a59..dd439f4 100644
+index d504a598..dd439f4c 100644
 --- a/sw/snRuntime/include/debug.h
 +++ b/sw/snRuntime/include/debug.h
 @@ -3,35 +3,74 @@
@@ -115,7 +115,7 @@ index d504a59..dd439f4 100644
  #ifdef __cplusplus
  }
 diff --git a/sw/snRuntime/include/eu.h b/sw/snRuntime/include/eu.h
-index 40fb384..e38b790 100644
+index 40fb3848..e38b7902 100644
 --- a/sw/snRuntime/include/eu.h
 +++ b/sw/snRuntime/include/eu.h
 @@ -65,21 +65,3 @@ void eu_mutex_release();
@@ -141,7 +141,7 @@ index 40fb384..e38b790 100644
 -#define EU_PRINTF(d, ...)
 -#endif
 diff --git a/sw/snRuntime/include/kmp.h b/sw/snRuntime/include/kmp.h
-index 254b832..39efb2b 100644
+index 254b832b..39efb2b2 100644
 --- a/sw/snRuntime/include/kmp.h
 +++ b/sw/snRuntime/include/kmp.h
 @@ -5,27 +5,7 @@
@@ -173,7 +173,7 @@ index 254b832..39efb2b 100644
 -#define KMP_PRINTF(d, ...)
 -#endif
 diff --git a/sw/snRuntime/include/omp.h b/sw/snRuntime/include/omp.h
-index 555a7e5..aef079e 100644
+index 555a7e5b..aef079e0 100644
 --- a/sw/snRuntime/include/omp.h
 +++ b/sw/snRuntime/include/omp.h
 @@ -8,7 +8,6 @@
@@ -207,7 +207,7 @@ index 555a7e5..aef079e 100644
  // Macros
  //================================================================================
 diff --git a/sw/snRuntime/include/snrt.h b/sw/snRuntime/include/snrt.h
-index df28cc6..1e134b8 100644
+index df28cc63..1e134b8d 100644
 --- a/sw/snRuntime/include/snrt.h
 +++ b/sw/snRuntime/include/snrt.h
 @@ -190,6 +190,11 @@ static inline uint32_t __attribute__((pure)) snrt_hartid() {
@@ -223,7 +223,7 @@ index df28cc6..1e134b8 100644
  // Allocation functions
  //================================================================================
 diff --git a/sw/snRuntime/src/alloc.c b/sw/snRuntime/src/alloc.c
-index d23c71a..c780666 100644
+index d23c71a7..c7806667 100644
 --- a/sw/snRuntime/src/alloc.c
 +++ b/sw/snRuntime/src/alloc.c
 @@ -24,7 +24,6 @@ void *snrt_l1alloc(size_t size) {
@@ -235,7 +235,7 @@ index d23c71a..c780666 100644
              alloc->base, alloc->size, alloc->next);
          return 0;
 diff --git a/sw/snRuntime/src/dm.c b/sw/snRuntime/src/dm.c
-index 2c23f6a..9e7a912 100644
+index 2c23f6ae..9e7a912a 100644
 --- a/sw/snRuntime/src/dm.c
 +++ b/sw/snRuntime/src/dm.c
 @@ -107,23 +107,41 @@ __thread uint32_t cluster_dm_core_idx;
@@ -363,7 +363,7 @@ index 2c23f6a..9e7a912 100644
  
      // poll queue size
 diff --git a/sw/snRuntime/src/omp/eu.c b/sw/snRuntime/src/omp/eu.c
-index 905e971..3a28e16 100644
+index 905e971f..3a28e168 100644
 --- a/sw/snRuntime/src/omp/eu.c
 +++ b/sw/snRuntime/src/omp/eu.c
 @@ -22,6 +22,25 @@
@@ -456,7 +456,7 @@ index 905e971..3a28e16 100644
  
  /**
 diff --git a/sw/snRuntime/src/omp/kmp.c b/sw/snRuntime/src/omp/kmp.c
-index 8276cb6..8dc46ae 100644
+index 8276cb6e..8dc46aea 100644
 --- a/sw/snRuntime/src/omp/kmp.c
 +++ b/sw/snRuntime/src/omp/kmp.c
 @@ -11,6 +11,43 @@
@@ -754,7 +754,7 @@ index 8276cb6..8dc46ae 100644
      eu_mutex_release();
      return 1;
 diff --git a/sw/snRuntime/src/omp/omp.c b/sw/snRuntime/src/omp/omp.c
-index 622a9b7..92045ae 100644
+index 622a9b7a..92045ae5 100644
 --- a/sw/snRuntime/src/omp/omp.c
 +++ b/sw/snRuntime/src/omp/omp.c
 @@ -19,6 +19,27 @@
@@ -811,7 +811,7 @@ index 622a9b7..92045ae 100644
  }
  #endif
 diff --git a/sw/snRuntime/src/team.c b/sw/snRuntime/src/team.c
-index 60c019b..e06029e 100644
+index 60c019bb..e06029ee 100644
 --- a/sw/snRuntime/src/team.c
 +++ b/sw/snRuntime/src/team.c
 @@ -9,6 +9,9 @@

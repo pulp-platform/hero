@@ -9,7 +9,7 @@ Subject: [PATCH 03/16] [snRuntime] Keep stack aligned when pushing bootrom
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/sw/snRuntime/src/start.S b/sw/snRuntime/src/start.S
-index 7437a15..7a2b13e 100644
+index 7437a150..7a2b13e7 100644
 --- a/sw/snRuntime/src/start.S
 +++ b/sw/snRuntime/src/start.S
 @@ -156,7 +156,7 @@ snrt.crt0.init_tls:

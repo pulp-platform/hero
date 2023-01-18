@@ -8,7 +8,7 @@ Subject: [PATCH 06/16] [snRuntime] Clear clint mutex in startup
  1 file changed, 2 insertions(+)
 
 diff --git a/sw/snRuntime/src/interrupt.c b/sw/snRuntime/src/interrupt.c
-index cfb7eaa..868ebd8 100644
+index cfb7eaab..868ebd8f 100644
 --- a/sw/snRuntime/src/interrupt.c
 +++ b/sw/snRuntime/src/interrupt.c
 @@ -36,6 +36,8 @@ void irq_m_cluster(uint32_t core_idx);

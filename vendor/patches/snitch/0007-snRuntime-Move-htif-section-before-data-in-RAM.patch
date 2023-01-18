@@ -8,7 +8,7 @@ Subject: [PATCH 07/16] [snRuntime] Move htif section before data in RAM
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/sw/snRuntime/link/common.ld.in b/sw/snRuntime/link/common.ld.in
-index 63423e1..8409b3a 100644
+index 63423e10..8409b3a5 100644
 --- a/sw/snRuntime/link/common.ld.in
 +++ b/sw/snRuntime/link/common.ld.in
 @@ -27,6 +27,9 @@ SECTIONS

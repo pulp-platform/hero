@@ -1,0 +1,117 @@
+From 82080f22974539dba65343b93c60aa33ce5aaef2 Mon Sep 17 00:00:00 2001
+From: Cyril Koenig <cykoenig@iis.ee.ethz.ch>
+Date: Tue, 17 Jan 2023 13:31:44 +0100
+Subject: [PATCH 16/16] [snRuntime] ajustments for HERO repository
+
+---
+ sw/cmake/SnitchUtilities.cmake            |  8 ++++++++
+ sw/snRuntime/CMakeLists.txt               | 33 ++++++++++++++++++++++---------
+ sw/snRuntime/{src => include}/team.h      |  0
+ sw/snRuntime/src/platforms/shared/start.c |  2 +-
+ 4 files changed, 33 insertions(+), 10 deletions(-)
+ rename sw/snRuntime/{src => include}/team.h (100%)
+
+diff --git a/sw/cmake/SnitchUtilities.cmake b/sw/cmake/SnitchUtilities.cmake
+index d2a1def8..903058e8 100644
+--- a/sw/cmake/SnitchUtilities.cmake
++++ b/sw/cmake/SnitchUtilities.cmake
+@@ -32,6 +32,14 @@ macro(add_snitch_library name)
+         TARGET ${name}
+         POST_BUILD
+         COMMAND ${CMAKE_OBJDUMP} -dhS $<TARGET_FILE:${name}> > $<TARGET_FILE:${name}>.s)
++    set_target_properties(${name} PROPERTIES
++      PUBLIC_HEADER "${public_headers}")
++    install(TARGETS ${name}
++      RUNTIME DESTINATION bin
++      LIBRARY DESTINATION lib
++      ARCHIVE DESTINATION lib/static
++      PUBLIC_HEADER DESTINATION include)
++        
+ endmacro()
+ 
+ macro(add_snitch_executable name)
+diff --git a/sw/snRuntime/CMakeLists.txt b/sw/snRuntime/CMakeLists.txt
+index 39a89600..b0c10325 100644
+--- a/sw/snRuntime/CMakeLists.txt
++++ b/sw/snRuntime/CMakeLists.txt
+@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 3.13)
+ 
+ # Allow snRuntime to be built as a standalone library.
+ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
++    message(STATUS "Building standlone library")
+     # Read SnitchUtilities
+     list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
+     include(SnitchUtilities)
+@@ -23,14 +24,10 @@ else()
+         PARENT_SCOPE)
+ endif()
+ 
+-# Default memory regions
+-if(SNITCH_RUNTIME STREQUAL "snRuntime-cluster")
+-    set(MEM_DRAM_ORIGIN "0x80000000" CACHE STRING "Base address of external memory")
+-    set(MEM_DRAM_SIZE "0x80000000" CACHE STRING "Size of external memory")
+-else()
+-    set(MEM_DRAM_ORIGIN "0x80000000" CACHE STRING "Base address of external memory")
+-    set(MEM_DRAM_SIZE "256M" CACHE STRING "Size of external memory")
+-endif()
++# Generate linker script
++set(MEM_DRAM_ORIGIN 0x80000000 CACHE STRING "Base address of external memory")
++set(MEM_DRAM_SIZE 0x80000000 CACHE STRING "Size of external memory")
++
+ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/link/common.ld.in common.ld @ONLY)
+ set(LINKER_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/common.ld CACHE PATH "")
+ 
+@@ -54,6 +51,23 @@ include_directories(
+     vendor/riscv-opcodes
+ )
+ 
++# Public headers to install
++set(public_headers
++  include/debug.h
++  include/dm.h
++  include/eu.h
++  include/interface.h
++  include/kmp.h
++  include/occamy_soc_peripheral.h
++  include/omp.h
++  include/perf_cnt.h
++  include/snitch_cluster_peripheral.h
++  include/snrt.h
++  include/team.h
++  vendor/printf.h
++  vendor/riscv-opcodes/encoding.h
++)
++
+ # Common sources
+ set(sources
+     src/barrier.c
+@@ -112,7 +126,8 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+     add_snitch_library(snRuntime-cluster src/platforms/shared/start.c ${rtl_snitch_sources} ${sources} src/ssr_v2.c)
+     add_snitch_library(snRuntime-hero ${hero_snitch_sources} ${sources} src/ssr_v2.c)
+ 
+-
++    # Install linker script
++    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/common.ld DESTINATION lib)
+ 
+ else()
+     # snRuntime is added externally, only build required runtime
+diff --git a/sw/snRuntime/src/team.h b/sw/snRuntime/include/team.h
+similarity index 100%
+rename from sw/snRuntime/src/team.h
+rename to sw/snRuntime/include/team.h
+diff --git a/sw/snRuntime/src/platforms/shared/start.c b/sw/snRuntime/src/platforms/shared/start.c
+index 0303636c..20732021 100644
+--- a/sw/snRuntime/src/platforms/shared/start.c
++++ b/sw/snRuntime/src/platforms/shared/start.c
+@@ -1,7 +1,7 @@
+ // Copyright 2020 ETH Zurich and University of Bologna.
+ // Licensed under the Apache License, Version 2.0, see LICENSE for details.
+ // SPDX-License-Identifier: Apache-2.0
+-#include "../../team.h"
++#include "team.h"
+ #include "snitch_cluster_peripheral.h"
+ #include "snrt.h"
+ 
+-- 
+2.16.5
+

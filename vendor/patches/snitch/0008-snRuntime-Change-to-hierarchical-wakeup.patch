@@ -8,7 +8,7 @@ Subject: [PATCH 08/16] [snRuntime] Change to hierarchical wakeup
  1 file changed, 1 insertion(+)
 
 diff --git a/sw/snRuntime/src/start.S b/sw/snRuntime/src/start.S
-index 7a2b13e..d58d21a 100644
+index 7a2b13e7..d58d21af 100644
 --- a/sw/snRuntime/src/start.S
 +++ b/sw/snRuntime/src/start.S
 @@ -182,6 +182,7 @@ snrt.crt0.init_interrupt:

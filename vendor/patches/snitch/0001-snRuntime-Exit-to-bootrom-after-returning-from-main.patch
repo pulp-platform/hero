@@ -11,7 +11,7 @@ Subject: [PATCH 01/16] [snRuntime] Exit to bootrom after returning from main
  create mode 100644 sw/snRuntime/src/platforms/hero/start_snitch.S
 
 diff --git a/sw/snRuntime/link/common.ld.in b/sw/snRuntime/link/common.ld.in
-index 41ec54d..63423e1 100644
+index 41ec54d8..63423e10 100644
 --- a/sw/snRuntime/link/common.ld.in
 +++ b/sw/snRuntime/link/common.ld.in
 @@ -12,6 +12,8 @@ MEMORY
@@ -25,7 +25,7 @@ index 41ec54d..63423e1 100644
    {
 diff --git a/sw/snRuntime/src/platforms/hero/start_snitch.S b/sw/snRuntime/src/platforms/hero/start_snitch.S
 new file mode 100644
-index 0000000..985fcaa
+index 00000000..985fcaa1
 --- /dev/null
 +++ b/sw/snRuntime/src/platforms/hero/start_snitch.S
 @@ -0,0 +1,40 @@
@@ -70,7 +70,7 @@ index 0000000..985fcaa
 +.align 6; .global tohost; tohost: .dword 0;
 +.align 6; .global fromhost; fromhost: .dword 0;
 diff --git a/sw/snRuntime/src/start.S b/sw/snRuntime/src/start.S
-index 1574452..7437a15 100644
+index 1574452e..7437a150 100644
 --- a/sw/snRuntime/src/start.S
 +++ b/sw/snRuntime/src/start.S
 @@ -22,6 +22,8 @@ snrt.crt0.init_global_pointer:

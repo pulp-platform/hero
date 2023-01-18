@@ -9,7 +9,7 @@ Subject: [PATCH 10/16] [snRuntime] Remove cluster global offset from global
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/sw/snRuntime/src/platforms/shared/start.c b/sw/snRuntime/src/platforms/shared/start.c
-index ce2e045..0303636 100644
+index ce2e0456..0303636c 100644
 --- a/sw/snRuntime/src/platforms/shared/start.c
 +++ b/sw/snRuntime/src/platforms/shared/start.c
 @@ -9,7 +9,6 @@ extern const uint32_t _snrt_cluster_cluster_core_num;

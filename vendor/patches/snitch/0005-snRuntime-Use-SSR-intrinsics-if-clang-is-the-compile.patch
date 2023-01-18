@@ -10,7 +10,7 @@ Subject: [PATCH 05/16] [snRuntime] Use SSR intrinsics if clang is the compiler
  create mode 100644 sw/snRuntime/src/ssr_v3.c
 
 diff --git a/sw/snRuntime/CMakeLists.txt b/sw/snRuntime/CMakeLists.txt
-index 4953979..d761d42 100644
+index 4953979e..d761d425 100644
 --- a/sw/snRuntime/CMakeLists.txt
 +++ b/sw/snRuntime/CMakeLists.txt
 @@ -114,9 +114,19 @@ else()
@@ -37,7 +37,7 @@ index 4953979..d761d42 100644
      endif()
 diff --git a/sw/snRuntime/src/ssr_v3.c b/sw/snRuntime/src/ssr_v3.c
 new file mode 100644
-index 0000000..260d8f5
+index 00000000..260d8f5b
 --- /dev/null
 +++ b/sw/snRuntime/src/ssr_v3.c
 @@ -0,0 +1,72 @@

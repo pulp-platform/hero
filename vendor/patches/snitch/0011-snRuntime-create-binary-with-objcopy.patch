@@ -8,7 +8,7 @@ Subject: [PATCH 11/16] [snRuntime] create binary with objcopy
  1 file changed, 6 insertions(+)
 
 diff --git a/sw/cmake/SnitchUtilities.cmake b/sw/cmake/SnitchUtilities.cmake
-index c39d399..d2a1def 100644
+index c39d399f..d2a1def8 100644
 --- a/sw/cmake/SnitchUtilities.cmake
 +++ b/sw/cmake/SnitchUtilities.cmake
 @@ -38,6 +38,12 @@ macro(add_snitch_executable name)

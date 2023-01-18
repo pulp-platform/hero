@@ -9,7 +9,7 @@ Subject: [PATCH 12/16] [snRuntime] Add allocator reset function
  2 files changed, 15 insertions(+)
 
 diff --git a/sw/snRuntime/include/snrt.h b/sw/snRuntime/include/snrt.h
-index 86b6c60..df28cc6 100644
+index 86b6c60e..df28cc63 100644
 --- a/sw/snRuntime/include/snrt.h
 +++ b/sw/snRuntime/include/snrt.h
 @@ -195,6 +195,7 @@ static inline uint32_t __attribute__((pure)) snrt_hartid() {
@@ -21,7 +21,7 @@ index 86b6c60..df28cc6 100644
  
  //================================================================================
 diff --git a/sw/snRuntime/src/alloc.c b/sw/snRuntime/src/alloc.c
-index 8fb1c01..d23c71a 100644
+index 8fb1c01d..d23c71a7 100644
 --- a/sw/snRuntime/src/alloc.c
 +++ b/sw/snRuntime/src/alloc.c
 @@ -35,6 +35,20 @@ void *snrt_l1alloc(size_t size) {

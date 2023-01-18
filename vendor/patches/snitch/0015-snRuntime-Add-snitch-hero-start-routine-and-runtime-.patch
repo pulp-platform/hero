@@ -15,7 +15,7 @@ Subject: [PATCH 15/16] [snRuntime] Add snitch-hero start routine and runtime
  create mode 100644 sw/snRuntime/src/platforms/hero/start_hero.c
 
 diff --git a/sw/snRuntime/CMakeLists.txt b/sw/snRuntime/CMakeLists.txt
-index d761d42..39a8960 100644
+index d761d425..39a89600 100644
 --- a/sw/snRuntime/CMakeLists.txt
 +++ b/sw/snRuntime/CMakeLists.txt
 @@ -76,6 +76,11 @@ set(rtl_snitch_sources
@@ -52,7 +52,7 @@ index d761d42..39a8960 100644
      endif()
 diff --git a/sw/snRuntime/include/snitch_hero_support.h b/sw/snRuntime/include/snitch_hero_support.h
 new file mode 100644
-index 0000000..0bad1e2
+index 00000000..0bad1e21
 --- /dev/null
 +++ b/sw/snRuntime/include/snitch_hero_support.h
 @@ -0,0 +1,159 @@
@@ -217,7 +217,7 @@ index 0000000..0bad1e2
 +int snitch_mbox_write(uint32_t word);
 diff --git a/sw/snRuntime/src/platforms/hero/snitch_hero_support.c b/sw/snRuntime/src/platforms/hero/snitch_hero_support.c
 new file mode 100644
-index 0000000..c508413
+index 00000000..c508413e
 --- /dev/null
 +++ b/sw/snRuntime/src/platforms/hero/snitch_hero_support.c
 @@ -0,0 +1,89 @@
@@ -312,7 +312,7 @@ index 0000000..c508413
 +}
 diff --git a/sw/snRuntime/src/platforms/hero/start_hero.c b/sw/snRuntime/src/platforms/hero/start_hero.c
 new file mode 100644
-index 0000000..d7d7747
+index 00000000..d7d77479
 --- /dev/null
 +++ b/sw/snRuntime/src/platforms/hero/start_hero.c
 @@ -0,0 +1,373 @@

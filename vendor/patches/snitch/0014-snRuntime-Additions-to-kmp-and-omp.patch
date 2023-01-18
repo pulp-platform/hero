@@ -10,7 +10,7 @@ Subject: [PATCH 14/16] [snRuntime] Additions to kmp and omp
  3 files changed, 29 insertions(+), 11 deletions(-)
 
 diff --git a/sw/snRuntime/include/omp.h b/sw/snRuntime/include/omp.h
-index aef079e..9128f60 100644
+index aef079e0..9128f60f 100644
 --- a/sw/snRuntime/include/omp.h
 +++ b/sw/snRuntime/include/omp.h
 @@ -86,7 +86,7 @@ extern omp_prof_t *omp_prof;
@@ -44,7 +44,7 @@ index aef079e..9128f60 100644
  parallelRegionExec(int32_t argc, void *data, void (*fn)(void *, uint32_t),
                     int num_threads) {
 diff --git a/sw/snRuntime/src/omp/kmp.c b/sw/snRuntime/src/omp/kmp.c
-index 8dc46ae..a8f2c78 100644
+index 8dc46aea..a8f2c78e 100644
 --- a/sw/snRuntime/src/omp/kmp.c
 +++ b/sw/snRuntime/src/omp/kmp.c
 @@ -5,10 +5,8 @@
@@ -96,7 +96,7 @@ index 8dc46ae..a8f2c78 100644
  
  //================================================================================
 diff --git a/sw/snRuntime/src/omp/omp.c b/sw/snRuntime/src/omp/omp.c
-index 92045ae..d1d6f92 100644
+index 92045ae5..d1d6f929 100644
 --- a/sw/snRuntime/src/omp/omp.c
 +++ b/sw/snRuntime/src/omp/omp.c
 @@ -46,7 +46,7 @@

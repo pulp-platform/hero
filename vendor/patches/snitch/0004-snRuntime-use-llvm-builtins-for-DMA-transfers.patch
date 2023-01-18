@@ -8,7 +8,7 @@ Subject: [PATCH 04/16] [snRuntime] use llvm builtins for DMA transfers
  1 file changed, 9 insertions(+)
 
 diff --git a/sw/snRuntime/src/dma.c b/sw/snRuntime/src/dma.c
-index 59cd762..29867aa 100644
+index 59cd7628..29867aae 100644
 --- a/sw/snRuntime/src/dma.c
 +++ b/sw/snRuntime/src/dma.c
 @@ -6,6 +6,9 @@
