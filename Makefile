@@ -51,19 +51,19 @@ br-hrv-occamy-defconfig: check_environment
 
 .PHONY: br-hrv-occamy-base
 br-hrv-occamy-base: br-hrv-occamy-defconfig
-	chmod -R u+w ${HERO_INSTALL}
+	chmod -R u+w $(HERO_INSTALL)
 	mkdir -p $(CURDIR)/output/br-hrv-occamy
 	$(MAKE) O=$(CURDIR)/output/br-hrv-occamy BR2_EXTERNAL=$(ROOT) -C $(ROOT)/buildroot hrv_occamy_defconfig
 	if [ -a $(CURDIR)/local.cfg ]; then cat $(CURDIR)/local.cfg >> $(CURDIR)/output/br-hrv-occamy/.config; fi
 	$(MAKE) -C $(CURDIR)/output/br-hrv-occamy
 	$(MAKE) -C $(CURDIR)/output/br-hrv-occamy prepare-sdk
-	chmod -R u-w ${HERO_INSTALL}
+	chmod -R u-w $(HERO_INSTALL)
 
 br-hrv-occamy: br-hrv-occamy-base
 
 
 flashrun:
-	vitis-2020.2 vivado -mode batch -source util/occamy_vcu128_flashrun.tcl -tclargs bordcomputer:3232 091847100638A flash.mcs 0x6000000 ./output/br-hrv-occamy/images/u-boot.itb /usr/scratch/fenga6/cykoenig/development/snitch/hw/system/occamy/fpga/occamy_vcu128/occamy_vcu128.runs/impl_1/occamy_vcu128_wrapper.bit /usr/scratch/fenga6/cykoenig/development/snitch/hw/system/occamy/fpga/bootrom/bootrom-spl.tcl
+	vitis-2020.2 vivado -mode tcl -source util/occamy_vcu128_flash.tcl -tclargs bordcomputer:3232 091847100638A flash.mcs 0x6000000 ./output/br-hrv-occamy/images/u-boot.itb /usr/scratch/fenga6/cykoenig/development/snitch/hw/system/occamy/fpga/occamy_vcu128/occamy_vcu128.runs/impl_1/occamy_vcu128_wrapper.bit /scratch/cykoenig/development/snitch/hw/system/occamy/fpga/bootrom/bootrom-spl.tcl
 upload-linux-image:
 	scp ./output/br-hrv-occamy/images/Image.itb vcu128-01@bordcomputer.ee.ethz.ch:/srv/tftp/vcu128-01/Image.itb
 clean-pkg:
@@ -138,13 +138,17 @@ tc-pulp: check_environment
 
 # llvm
 tc-llvm:
+	chmod -R u+w $(HERO_INSTALL)
 	mkdir -p $(CURDIR)/output/tc-llvm/
 	cd $(CURDIR)/output/tc-llvm/ && $(ROOT)/toolchain/setup-llvm.sh Release
+	chmod -R u-w $(HERO_INSTALL)
 
 # Additions to LLVM for Snitch
 tc-snitch:
+	chmod -R u+w $(HERO_INSTALL)
 	mkdir -p $(CURDIR)/output/tc-llvm/
 	cd $(CURDIR)/output/tc-llvm/ && $(ROOT)/toolchain/setup-llvm-snitch.sh $(ROOT)/toolchain/llvm-project
+	chmod -R u-w $(HERO_INSTALL)
 
 tc-llvm-debug:
 	mkdir -p $(CURDIR)/output/tc-llvm-debug/
