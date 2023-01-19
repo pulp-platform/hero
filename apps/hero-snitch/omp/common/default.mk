@@ -144,7 +144,7 @@ clean::
 
 .PHONY: deploy
 deploy: $(EXE)
-	rsync $? root@hero-vcu128-02.ee.ethz.ch:/root
+	scp $? root@hero-vcu128-02.ee.ethz.ch:/root
 
 .PHONY: install
 install: $(EXE)

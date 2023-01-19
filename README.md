@@ -17,7 +17,7 @@ This should work straight, you can now add the `riscv64-buildroot-linux` to your
 export PATH=$HERO_INSTALL/share:$HERO_INSTALL/bin:$PATH
 ```
 
-You can find the buildoot config in `configs/hrv_occamy_defconfig`, linux/busybox patches and config in `configs/hrv_occamy_defconfig`.
+You can find the buildoot config in `configs/hrv_occamy_defconfig`, linux/busybox patches and config in `board/occamy` and the linux file system overlay in `board/common`.
 __Attention:__ Right now U-Boot is made to fetch the linux image via TFTP, edit the address in CONFIG_BOOTCOMMAND in `board/occamy/patches/u-boot-v2021.07/0001-WIP-Occamy-U-Boot-bringup.patch`, you could also edit this to boot from flash instead. __TODO:__ Externalize buildroot config, remove old (unused) dts from patch, buildroot gets the device tree from the bootrom itself.
 
 If you need to recompile uboot for instance :
