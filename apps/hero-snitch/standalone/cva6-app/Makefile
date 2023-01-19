@@ -13,10 +13,10 @@ APPS  := bringup
 
 # Toolchain
 RV64_INSTALL ?= $(HERO_INSTALL)
-RV64_CC      ?= $(HERO_INSTALL)/bin/riscv64-buildroot-linux-gnu-gcc
-RV64_OBJDUMP ?= $(HERO_INSTALL)/bin/riscv64-buildroot-linux-gnu-objdump
-RV64_OBJCOPY ?= $(HERO_INSTALL)/bin/riscv64-buildroot-linux-gnu-objcopy
-RV64_AR      ?= $(HERO_INSTALL)/bin/riscv64-buildroot-linux-gnu-ar
+RV64_CC      ?= $(HERO_INSTALL)/bin/riscv64-hero-linux-gnu-gcc
+RV64_OBJDUMP ?= $(HERO_INSTALL)/bin/riscv64-hero-linux-gnu-objdump
+RV64_OBJCOPY ?= $(HERO_INSTALL)/bin/riscv64-hero-linux-gnu-objcopy
+RV64_AR      ?= $(HERO_INSTALL)/bin/riscv64-hero-linux-gnu-ar
 
 
 # C flags
@@ -41,9 +41,10 @@ all: ${APPS}
 bringup: bringup.o ${OBJ_C} ${LIBSNITCH}
 	@echo LD $@
 	$(RV64_CC) $(LDFLAGS) -o $@ $< ${OBJ_C}
+	$(RV64_OBJDUMP) -xxdS $@ > $@.dump
 
 clean:
-	rm *.o *.d ${APPS}
+	rm -f *.o *.d ${APPS}
 
 install-rootfs:
 	mkdir -p ${RFS_TARGET_DIR}

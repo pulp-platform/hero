@@ -15,7 +15,7 @@ set(SNITCH_SOFTWARE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../vendor/snitch/sw
 list(APPEND CMAKE_MODULE_PATH ${SNITCH_SOFTWARE_DIR}/cmake)
 
 # snRuntime-cluster to include start_cluster.S/.c
-set(SNITCH_RUNTIME snRuntime-hero CACHE STRING "")
+set(SNITCH_RUNTIME snRuntime-cluster CACHE STRING "")
 
 # We want to use the LLVM toolchain
 set(CMAKE_TOOLCHAIN_FILE toolchain-llvm CACHE STRING "")
@@ -38,7 +38,6 @@ set(sn_common_src
 set(sn_common_include
   .
 )
-
 
 ################################################################################
 # PROJECT
@@ -89,5 +88,5 @@ target_link_libraries(utils ${SNITCH_RUNTIME})
 ################################################################################
 
 # Target applications
-add_snitch_executable(hello_world ${sn_common_src} snitch_hello_world.c)
+add_snitch_executable(hello_world ${sn_common_src} hier_wake.c snitch_hello_world.c)
 

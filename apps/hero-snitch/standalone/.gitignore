@@ -1,0 +1,4 @@
+/snitch-app/build/
+/cva6-app/*.o
+/cva6-app/*.dump
+/cva6-app/bringup
