@@ -32,7 +32,8 @@ PATH=${HERO_INSTALL}/bin:${PATH}
 ##############################
 # newlib
 ##############################
-[ ! -d newlib-rv32 ] && git clone --depth 1 -b newlib-3.3.0 https://sourceware.org/git/newlib-cygwin.git newlib-rv32
+[ -d newlib-rv32 ] && rm -rf newlib-rv32
+git clone --depth 1 -b newlib-3.3.0 https://sourceware.org/git/newlib-cygwin.git newlib-rv32
 
 # Newlib for rv32
 cd newlib-rv32
@@ -58,7 +59,7 @@ mkdir -p compiler-rt32
 cd compiler-rt32
 # NOTE: CMAKE_SYSTEM_NAME is set to linux to allow the configure step to
 #       correctly validate that clang works for cross compiling
-pwd
+
 ls ../llvm_build/bin/
 ${CMAKE} -G"Unix Makefiles"                                                     \
     -DCMAKE_SYSTEM_NAME=Linux                                                \
@@ -99,13 +100,13 @@ cd llvm-support_build
 
 # run hercules pass build
 # FIXME: integrate LLVM passes better in the HERO architecture
-echo "Building LLVM support passes"
-${CMAKE} -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL -DCMAKE_BUILD_TYPE="Release" \
-      -DLLVM_DIR:STRING=$HERO_INSTALL/lib/cmake/llvm \
-      -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX \
-      ${THIS_DIR}/llvm-support/
-${CMAKE} --build . --target install
-cd ..
+ echo "Building LLVM support passes"
+ ${CMAKE} -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL -DCMAKE_BUILD_TYPE="Release" \
+       -DLLVM_DIR:STRING=$HERO_INSTALL/lib/cmake/llvm \
+       -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX \
+       ${THIS_DIR}/llvm-support/
+ ${CMAKE} --build . --target install
+ cd ..
 
 ##############################
 # Symlinks
@@ -123,3 +124,4 @@ for TRIPLE in riscv32-unknown-elf; do
   done
 done
 
+cp ${THIS_DIR}/hc-omp-pass $HERO_INSTALL/bin

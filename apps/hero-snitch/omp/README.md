@@ -15,3 +15,7 @@ make deploy
 ```
 
 You may now ssh on the fpga and run `./helloworld`
+
+```bash
+LIBSNITCH_DEBUG=0 LIBOMPTARGET_INFO=-1 LIBOMPTARGET_DEBUG=-1 ./helloworld
+```

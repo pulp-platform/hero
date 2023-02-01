@@ -1,0 +1,28 @@
+From 39e2373056734650dcc09b9a58103f42e696fd2a Mon Sep 17 00:00:00 2001
+From: Cyril Koenig <cykoenig@iis.ee.ethz.ch>
+Date: Wed, 25 Jan 2023 10:24:27 +0100
+Subject: [PATCH] Remove PMP on Clint
+
+---
+ lib/sbi/sbi_hart.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/lib/sbi/sbi_hart.c b/lib/sbi/sbi_hart.c
+index 02ce991..522b448 100644
+--- a/lib/sbi/sbi_hart.c
++++ b/lib/sbi/sbi_hart.c
+@@ -318,6 +318,11 @@ int sbi_hart_pmp_configure(struct sbi_scratch *scratch)
+ 		if (reg->flags & SBI_DOMAIN_MEMREGION_SU_EXECUTABLE)
+ 			pmp_flags |= PMP_X;
+ 
++		// Hack to enable RW to the Clint
++		if (reg->flags & SBI_DOMAIN_MEMREGION_MMIO) {
++			pmp_flags |= PMP_R | PMP_W;
++		}
++
+ 		pmp_addr =  reg->base >> PMP_SHIFT;
+ 		if (pmp_gran_log2 <= reg->order && pmp_addr < pmp_addr_max)
+ 			pmp_set(pmp_idx++, pmp_flags, reg->base, reg->order);
+-- 
+2.16.5
+

@@ -67,9 +67,9 @@ ${CMAKE} \
     -DBUILD_SHARED_LIBS=True \
     -DCMAKE_INSTALL_PREFIX=${HERO_INSTALL} \
     -DLLVM_ENABLE_PROJECTS="clang;openmp;lld" \
-    -DLLVM_TARGETS_TO_BUILD="RISCV" \
+    -DLLVM_TARGETS_TO_BUILD="RISCV;AArch64;X86" \
     -DLLVM_DEFAULT_TARGET_TRIPLE="riscv32-unknown-elf" \
-		-DLLVM_ENABLE_LLD=False -DLLVM_APPEND_VC_REV=ON \
+	-DLLVM_ENABLE_LLD=False -DLLVM_APPEND_VC_REV=ON \
     -DLLVM_OPTIMIZED_TABLEGEN=True \
     -DCMAKE_C_COMPILER=$CC \
     -DCMAKE_CXX_COMPILER=$CXX \
@@ -77,21 +77,6 @@ ${CMAKE} \
     -G Ninja $THIS_DIR/llvm-project/llvm
 ninja -j ${PARALLEL_JOBS}
 ninja install
-cd ..
-
-# setup hercules passes build
-mkdir -p llvm-support_build
-cd llvm-support_build
-
-# run hercules pass build
-# FIXME: integrate LLVM passes better in the HERO architecture
-echo "Building LLVM support passes"
-${CMAKE} -G Ninja -DCMAKE_INSTALL_PREFIX=$HERO_INSTALL -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
-      -DLLVM_DIR:STRING=$HERO_INSTALL/lib/cmake/llvm \
-      -DCMAKE_C_COMPILER=$CC \
-      -DCMAKE_CXX_COMPILER=$CXX \
-      $THIS_DIR/llvm-support/
-${CMAKE} --build . --target install
 cd ..
 
 mkdir -p hercules_build

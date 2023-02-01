@@ -16,17 +16,17 @@
 
 #define DFLT_CLUSTER_IDX 0
 
-#define max(a, b)                                                                                  \
-  ({                                                                                               \
-    __typeof__(a) _a = (a);                                                                        \
-    __typeof__(b) _b = (b);                                                                        \
-    _a > _b ? _a : _b;                                                                             \
+#define max(a, b)           \
+  ({                        \
+    __typeof__(a) _a = (a); \
+    __typeof__(b) _b = (b); \
+    _a > _b ? _a : _b;      \
   })
-#define min(a, b)                                                                                  \
-  ({                                                                                               \
-    __typeof__(a) _a = (a);                                                                        \
-    __typeof__(b) _b = (b);                                                                        \
-    _a < _b ? _a : _b;                                                                             \
+#define min(a, b)           \
+  ({                        \
+    __typeof__(a) _a = (a); \
+    __typeof__(b) _b = (b); \
+    _a < _b ? _a : _b;      \
   })
 
 #define ALIGN_UP(x, p) (((x) + (p)-1) & ~((p)-1))
@@ -52,11 +52,9 @@ void set_direct_tlb_map(snitch_dev_t *snitch, uint32_t idx, uint32_t low, uint32
   tlb_entry.first = low;
   tlb_entry.last = high;
   tlb_entry.base = low;
-  if(snitch_tlb_write(snitch, &tlb_entry))
-    printf("Wrong tlb write");
+  if (snitch_tlb_write(snitch, &tlb_entry)) printf("Wrong tlb write");
   tlb_entry.loc = AXI_TLB_WIDE;
-  if(snitch_tlb_write(snitch, &tlb_entry))
-    printf("Wrong tlb write");
+  if (snitch_tlb_write(snitch, &tlb_entry)) printf("Wrong tlb write");
 }
 
 void reset_tlbs(snitch_dev_t *snitch) {
@@ -65,7 +63,7 @@ void reset_tlbs(snitch_dev_t *snitch) {
   tlb_entry.first = 0;
   tlb_entry.last = 0;
   tlb_entry.base = 0;
-  for(unsigned idx = 0; idx < 32; ++idx) {
+  for (unsigned idx = 0; idx < 32; ++idx) {
     tlb_entry.idx = idx;
     tlb_entry.loc = AXI_TLB_NARROW;
     snitch_tlb_write(snitch, &tlb_entry);
@@ -80,7 +78,7 @@ int main(int argc, char *argv[]) {
   // snitch_perf_t perf;
   void *shared_l3_v;
   int size;
-  uint32_t cluster_idx, nr_dev, wake_up_core=0;
+  uint32_t cluster_idx, nr_dev, wake_up_core = 0;
   void *addr, *a2h_rb_addr;
   int ret;
   uint32_t mask;
@@ -113,7 +111,7 @@ int main(int argc, char *argv[]) {
   clusters = snitch_mmap_all(&nr_dev);
   // Restrict to local cluster and remote on qc
   nr_dev = 1;
-  printf("clusters : %lx\n", (uint64_t) &clusters);
+  printf("clusters : %lx\n", (uint64_t)&clusters);
   snitch = clusters[cluster_idx];
 
   // Use L3 layout struct from the cluster provided as argument and set it's pointer in scratch[2]
@@ -125,27 +123,27 @@ int main(int argc, char *argv[]) {
   snitch_ipi_clear(snitch, 0, ~0U);
 
   // Add TLB entry for required ranges
-  //reset_tlbs(snitch);
-  set_direct_tlb_map(snitch, 0, 0x01000000, 0x0101ffff); // BOOTROM
-  set_direct_tlb_map(snitch, 1, 0x02000000, 0x02000fff); // SoC Control
-  set_direct_tlb_map(snitch, 2, 0x04000000, 0x040fffff); // CLINT
-  set_direct_tlb_map(snitch, 3, 0x10000000, 0x105fffff); // Quadrants
-  set_direct_tlb_map(snitch, 4, 0x80000000, 0xffffffff); // HBM0/1
+  // reset_tlbs(snitch);
+  set_direct_tlb_map(snitch, 0, 0x01000000, 0x0101ffff);  // BOOTROM
+  set_direct_tlb_map(snitch, 1, 0x02000000, 0x02000fff);  // SoC Control
+  set_direct_tlb_map(snitch, 2, 0x04000000, 0x040fffff);  // CLINT
+  set_direct_tlb_map(snitch, 3, 0x10000000, 0x105fffff);  // Quadrants
+  set_direct_tlb_map(snitch, 4, 0x80000000, 0xffffffff);  // HBM0/1
 
-  for(unsigned i = 0; i < 5; ++i) {
+  for (unsigned i = 0; i < 5; ++i) {
     memset(&tlb_entry, 0, sizeof(tlb_entry));
     tlb_entry.loc = AXI_TLB_WIDE;
     tlb_entry.idx = i;
     snitch_tlb_read(snitch, &tlb_entry);
-    printf("TLB readback Wide: idx %ld first %012lx last %012lx base %012lx flags %02x\n", tlb_entry.idx,
-          tlb_entry.first, tlb_entry.last, tlb_entry.base, tlb_entry.flags);
+    printf("TLB readback Wide: idx %ld first %012lx last %012lx base %012lx flags %02x\n",
+           tlb_entry.idx, tlb_entry.first, tlb_entry.last, tlb_entry.base, tlb_entry.flags);
     fflush(stdout);
     memset(&tlb_entry, 0, sizeof(tlb_entry));
     tlb_entry.loc = AXI_TLB_NARROW;
     tlb_entry.idx = i;
     snitch_tlb_read(snitch, &tlb_entry);
-    printf("TLB readback Narrow: idx %ld first %012lx last %012lx base %012lx flags %02x\n", tlb_entry.idx,
-          tlb_entry.first, tlb_entry.last, tlb_entry.base, tlb_entry.flags);
+    printf("TLB readback Narrow: idx %ld first %012lx last %012lx base %012lx flags %02x\n",
+           tlb_entry.idx, tlb_entry.first, tlb_entry.last, tlb_entry.base, tlb_entry.flags);
     fflush(stdout);
   }
 
@@ -164,8 +162,7 @@ int main(int argc, char *argv[]) {
   snitch->l3l->a2h_rb = (uint32_t)(uintptr_t)a2h_rb_addr;
 
   // fill memory with known pattern
-  if (memtest(snitch->l1.v_addr, snitch->l1.size, "TCDM", 'T'))
-    return -1;
+  if (memtest(snitch->l1.v_addr, snitch->l1.size, "TCDM", 'T')) return -1;
 
   // and some test scratch l3 memory
   // For largest axpy problem: (2*N+1)*sizeof(double), N=3*3*6*2048
@@ -175,15 +172,39 @@ int main(int argc, char *argv[]) {
   assert(shared_l3_v);
   snitch->l3l->heap = (uint32_t)(uintptr_t)addr;
   printf("alloc l3l_v->heap: %08x\r\n", snitch->l3l->heap);
-  if (memtest(shared_l3_v, 1024, "L3", '3'))
-    return -1;
+  if (memtest(shared_l3_v, 1024, "L3", '3')) return -1;
+
   snprintf(shared_l3_v, 1024, "this is linux");
   fflush(stdout);
 
+  /* READ IMAGE START */
+  FILE *fp = fopen("/root/test_img.png", "rb");
+  if (!fp) {
+    perror("fopen");
+    return EXIT_FAILURE;
+  }
+
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+
+  unsigned char buffer[8];
+
+  unsigned int offload_ptr = 0;
+
+  while (!feof(fp)) {
+    for (unsigned int i = 0; i < fread(buffer, sizeof(*buffer), ARRAY_SIZE(buffer), fp); i++) {
+      ((char *)shared_l3_v)[offload_ptr] = buffer[offload_ptr%8];
+      offload_ptr += 1;
+    }
+  }
+
+  printf("---> PNG magic: %#04x%02x%02x%02x\n", ((char *)shared_l3_v)[0], ((char *)shared_l3_v)[1], ((char *)shared_l3_v)[2], ((char *)shared_l3_v)[3]);
+  printf("---> Bytes read : %u\n", offload_ptr);
+
+  /* READ IMAGE ENDS */
+
   if (argc >= 2) {
     size = snitch_load_bin(snitch, argv[1]);
-    if (size < 0)
-      goto exit;
+    if (size < 0) goto exit;
 
     printf("Data in allocated L3:\n");
     hexdump((void *)shared_l3_v, 32);
@@ -197,8 +218,8 @@ int main(int argc, char *argv[]) {
     snitch_mbox_write(snitch, 102);
 
     printf("Set interrupt on core %u\n", wake_up_core);
-    snitch_ipi_set(snitch, 0, 1 << (wake_up_core + cluster_idx * 9 + 1) );
-    //snitch_ipi_set(snitch, 0, 0x3FE);
+    snitch_ipi_set(snitch, 0, 1 << (wake_up_core + cluster_idx * 9 + 1));
+    // snitch_ipi_set(snitch, 0, 0x3FE);
     fflush(stdout);
 
     printf("Waiting for program to terminate..\n");

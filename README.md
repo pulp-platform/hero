@@ -4,6 +4,8 @@
 
 Before all you will need to compile a GCC RISCV64 toolchain, OpenSBI, U-boot and Linux, everything is taken care of by buildroot and it just needs the device tree as an input. The device tree is located in the snitch repository, go there and checkout to `iis-ci-4`.
 
+Now come back in the hero repository and create your installation directory at the root.
+
 ```bash
 # Setup the installation directory
 mkdir install
@@ -57,8 +59,8 @@ make libsnitch-dirclean libsnitch
 
 If you work on ETH Zurich machines, export the following environment variables for the correct compiler to build LLVM Toolchain
 ```bash
-export CC=/usr/pack/gcc-9.2.0-af/linux-x64/bin/gcc`
-export CXX=/usr/pack/gcc-9.2.0-af/linux-x64/bin/g++`
+export CC=/usr/pack/gcc-9.2.0-af/linux-x64/bin/gcc
+export CXX=/usr/pack/gcc-9.2.0-af/linux-x64/bin/g++
 ```
 
 Install the LLVM tolchain for the Host and for Snitch by running:

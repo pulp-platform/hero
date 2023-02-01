@@ -56,6 +56,10 @@ FINAL_OPTIMIZATIONS="-dce -gvn -instcombine -mergefunc -always-inline -simplifyc
 
 # =============================== EXECUTION ================================ #
 
+echo "[hc_omp_pass] ${LLVM_BIN_DIR}opt \"$BASENAME.ll\" \
+-load=\"$PASS_OMP_PATH\" $EXTRA_ARGS $PASS_OMP_PREREQ $PASS_OMP_NAME \
+$FINAL_OPTIMIZATIONS -o \"$OUTPUT\" -S"
+
 ${LLVM_BIN_DIR}opt "$BASENAME.ll" \
 -load="$PASS_OMP_PATH" $EXTRA_ARGS $PASS_OMP_PREREQ $PASS_OMP_NAME \
 $FINAL_OPTIMIZATIONS -o "$OUTPUT" -S

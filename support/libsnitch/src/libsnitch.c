@@ -209,8 +209,8 @@ int snitch_mmap(snitch_dev_t *dev, char *fname) {
     pr_error("Reading snitch cluster info failed\n");
     goto close;
   }
-  pr_info("computer-cores: %d dm-cores: %d l1: %ldKiB l3: %ldKiB clint: %08lx\n",
-          dev->sci.compute_num, dev->sci.dm_num, dev->sci.l1_size / 1024, dev->sci.l3_size / 1024,
+  pr_info("computer-cores: %d dm-cores: %d l1: %08lx %ldKiB l3: %08lx %ldKiB clint: %08lx\n",
+          dev->sci.compute_num, dev->sci.dm_num, dev->sci.l1_paddr, dev->sci.l1_size / 1024, dev->sci.l3_paddr, dev->sci.l3_size / 1024,
           dev->sci.clint_base);
 
   // mmap tcdm
