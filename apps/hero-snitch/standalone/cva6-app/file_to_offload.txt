@@ -1,0 +1,1 @@
+I am a test file, the goal is that CVA6 reads me and sends my bytes to the Snitch cluster thanks to the L3. Is it gonna work? Try sending me by ssh and we will see.

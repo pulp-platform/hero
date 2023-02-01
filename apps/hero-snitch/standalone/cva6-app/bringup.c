@@ -79,24 +79,26 @@ int main(int argc, char *argv[]) {
   void *shared_l3_v;
   int size;
   uint32_t cluster_idx, nr_dev, wake_up_core = 0;
+  char *file_to_send = NULL;
   void *addr, *a2h_rb_addr;
   int ret;
   uint32_t mask;
   struct axi_tlb_entry tlb_entry;
 
   printf("This is %s\n", argv[0]);
-  printf("Usage: %s [snitch_binary [cluster_idx]]\n", argv[0]);
-  printf("  Default cluster index is %d\n", DFLT_CLUSTER_IDX);
-  fflush(stdout);
+  printf("Usage: %s snitch_binary [file_to_send] [cluster_idx]\n", argv[0]);
   cluster_idx = DFLT_CLUSTER_IDX;
-  if (argc == 3) {
-    cluster_idx = atoi(argv[2]);
-    printf("Running on cluster %d\n", cluster_idx);
+  if (argc >= 3) {
+    file_to_send = argv[2];
+    printf("  File to send %s\n", file_to_send);
   }
-  if (argc == 4) {
-    wake_up_core = atoi(argv[3]);
-    printf("Wake up core = %d\n", wake_up_core);
-  }
+  if (argc >= 4)
+    cluster_idx = atoi(argv[3]);
+  if (argc >= 5)
+    wake_up_core = atoi(argv[4]);
+  
+  printf("  Wake up core = %d\n", wake_up_core);
+  printf("  Running on cluster %d\n", cluster_idx);
 
   // No app specified discover and exit
   snitch_set_log_level(LOG_INFO);
@@ -177,30 +179,30 @@ int main(int argc, char *argv[]) {
   snprintf(shared_l3_v, 1024, "this is linux");
   fflush(stdout);
 
-  /* READ IMAGE START */
-  FILE *fp = fopen("/root/test_img.png", "rb");
+  /* READ FILE START */
+  ret = access(argv[2], R_OK);
+  if (ret) {
+    printf("Can't access file %s: %s\n", argv[2], strerror(ret));
+    return ret;
+  }
+  printf("\nFile opened %s\n", argv[2]);
+
+  FILE *fp = fopen(argv[2], "rb");
   if (!fp) {
-    perror("fopen");
+    printf("fopen file error");
     return EXIT_FAILURE;
   }
 
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+  // Read file buffer
+  uint8_t buffer[1000];
 
-  unsigned char buffer[8];
-
-  unsigned int offload_ptr = 0;
-
-  while (!feof(fp)) {
-    for (unsigned int i = 0; i < fread(buffer, sizeof(*buffer), ARRAY_SIZE(buffer), fp); i++) {
-      ((char *)shared_l3_v)[offload_ptr] = buffer[offload_ptr%8];
-      offload_ptr += 1;
-    }
+  unsigned int n_data_read = fread(buffer, sizeof(uint8_t), 1000, fp);
+  for (unsigned int i = 0; i < n_data_read; i++) {
+    ((uint8_t*)shared_l3_v)[i] = buffer[i];
   }
 
-  printf("---> PNG magic: %#04x%02x%02x%02x\n", ((char *)shared_l3_v)[0], ((char *)shared_l3_v)[1], ((char *)shared_l3_v)[2], ((char *)shared_l3_v)[3]);
-  printf("---> Bytes read : %u\n", offload_ptr);
-
-  /* READ IMAGE ENDS */
+  printf("Copied %u bytes from %s to L3\n\n", n_data_read, argv[2]);
+  /* READ FILE ENDS */
 
   if (argc >= 2) {
     size = snitch_load_bin(snitch, argv[1]);

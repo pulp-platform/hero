@@ -12,7 +12,12 @@ Or run from here :
 
 ```bash
 make all
-make deploy
+make deploy -B
 ```
 
-You may now ssh on the fpga and run `./bringup hello_world.bin`
+You may now ssh on the fpga and run
+
+```bash
+cd deploy_standalone
+./bringup hello_world.bin file_to_offload.txt
+```

@@ -19,6 +19,9 @@ extern volatile struct ring_buf *g_h2a_mbox;
 static volatile int32_t print_lock;
 static volatile uint8_t *l3;
 
+#define FILE_SIZE 128
+uint8_t file_content[FILE_SIZE];
+
 /***********************************************************************************
  * MAIN
  ***********************************************************************************/
@@ -54,22 +57,43 @@ int main(void) {
   snrt_cluster_hw_barrier();
 
   snrt_mutex_lock(&print_lock);
-  printf("Hello from snitch hartid %d (cluster %u, idx %u/%u, is_dma = %i)\n", snrt_hartid(),
-         cluster_idx, core_idx, core_num - 1, snrt_is_dm_core());
+  printf("(cluster %u, idx %u/%u, is_dma = %i) Hello from snitch hartid %d\n", cluster_idx,
+         core_idx, core_num - 1, snrt_is_dm_core(), snrt_hartid());
   snrt_mutex_release(&print_lock);
 
-  if (core_idx == 2) {
+  snrt_cluster_hw_barrier();
+
+  // From now on every thing is initialized
+
+  /* Get file */
+
+  if (snrt_is_dm_core()) {
     snrt_mutex_lock(&print_lock);
-    printf("(cluster %u, idx %u/%u, is_dma = %i) ---> PNG magic: %#04x%02x%02x%02x\n", cluster_idx,
-           core_idx, core_num - 1, snrt_is_dm_core(), l3[0], l3[1], l3[2], l3[3]);
-    printf("%u %u %u %u\n", l3[152], l3[153], l3[154], l3[155]);
+    printf("\n(cluster %u, idx %u/%u, is_dma = %i) Reading data from L3:", cluster_idx, core_idx,
+           core_num - 1, snrt_is_dm_core());
+    for (unsigned int i = 0; i < FILE_SIZE; i++) {
+      file_content[i] = l3[i];
+      if (i % 16 == 0) printf("\n%#x -> %#x -- ", &l3[i], &file_content[i]);
+      printf("%x ", file_content[i]);
+    }
+    printf("\n");
     snrt_mutex_release(&print_lock);
   }
 
   snrt_cluster_hw_barrier();
 
+  /* Print file */
+  if (core_idx == 2) {
+    snrt_mutex_lock(&print_lock);
+    printf("(cluster %u, idx %u/%u, is_dma = %i) Printing data from L2:\n %s\n", cluster_idx, core_idx, core_num - 1,
+           snrt_is_dm_core(), file_content);
+    snrt_mutex_release(&print_lock);
+  }
+
+  snrt_cluster_hw_barrier();
+
+  /* Print FP test */
   if (!snrt_is_dm_core()) {
-    // Now everything is initialized....
     uint16_t act_hex = 0x000094a2;
     uint16_t img_hex = 0x00002905;
     uint16_t weight_hex = 0x0000275f;
@@ -84,6 +108,7 @@ int main(void) {
     snrt_mutex_release(&print_lock);
   }
 
+  /* Barrier before exiting */
   snrt_cluster_hw_barrier();
 
   // Signal exit
