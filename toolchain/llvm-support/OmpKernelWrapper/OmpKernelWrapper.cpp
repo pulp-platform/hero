@@ -20,6 +20,10 @@
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
 #include <llvm/Transforms/Utils/BasicBlockUtils.h>
 
+#include <llvm/Transforms/IPO/OpenMPOpt.h>
+
+#include <llvm/Support/Debug.h>
+
 #include <array>
 
 #define OMP_WRAPPER_PREFIX "__wrapper_omp"
@@ -88,6 +92,8 @@ void setOmpOffloadFunction(GlobalVariable *offloadingEntry,
 void OmpKernelWrapper::getAnalysisUsage(AnalysisUsage &AU) const {}
 
 bool OmpKernelWrapper::runOnModule(Module &M) {
+  errs() << "Starting pass OmpKernelWrapper\n";
+  errs() << "Target triple is " << M.getTargetTriple() << "\n";
   // Workaround to convert arg_sizes arrays from i32* to i64*
   if (M.getTargetTriple() == "armv6kz-unknown-linux-gnueabihf") {
     this->changeTypeOfArgSizes(M, "__tgt_target_data_begin", 4);
@@ -111,8 +117,12 @@ bool OmpKernelWrapper::runOnModule(Module &M) {
     this->changeTypeOfArgSizes(M, "__tgt_target_teams_nowait", 5);
   }
 
-  if (M.getTargetTriple() == "riscv32-hero-unknown-elf") {
+  if (M.getTargetTriple() == "riscv32-hero-unknown-elf" || M.getTargetTriple() == "riscv32-snitch-unknown-elf") {
     this->wrapOmpKernels(M);
+  }
+  if (M.getTargetTriple() == "riscv32-hero-unknown-elf") {
+    // TODO: PULP uses libgomp and therefore requires this wrapper pass that dereferences all arguments
+    // Snitch's OpenMP RT is based on LLVM's implementation and does not require it
     this->wrapOmpOutlinedFuncs(M);
   }
   return true;
@@ -243,6 +253,7 @@ void OmpKernelWrapper::wrapOmpKernels(Module &M) {
   } else {
     HostAS = 0;
   }
+
   Type *rawArgTy = Type::getInt64Ty(M.getContext());
   Type *argTy = Type::getInt64Ty(M.getContext())->getPointerTo(HostAS);
   Type *voidTy = Type::getVoidTy(M.getContext());
@@ -258,6 +269,7 @@ void OmpKernelWrapper::wrapOmpKernels(Module &M) {
     Function *wrapper =
         Function::Create(wrapperTy, Function::WeakAnyLinkage,
                          OMP_WRAPPER_PREFIX + kernel->getName(), &M);
+
 
     // begin building body of wrapper function
     IRBuilder<> builder(M.getContext());

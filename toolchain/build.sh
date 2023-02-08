@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 
+THIS_DIR=$(dirname "$(readlink -f "$0")")
+
 ### BUILDS A TOOLCHAIN USING CROSSTOOL-NG ###
 
 # stop on errors
 set -e
 
 # configuration
-CROSSTOOL_VERSION=1.24.0
+CROSSTOOL_VERSION=1.25.0
 HELP2MAN_VERSION=1.47.10
 TEXINFO_VERSION=6.6
+
+echo "Using PYTHON=$PYTHON"
 
 if [ "$#" -lt 1 ] || [ ! -f "$1" ]; then
     echo "Fatal error: expects at least a single argument with crosstool config"
@@ -28,7 +32,7 @@ if ! command -v help2man >/dev/null 2>&1; then
     echo "Not having help2man, installing a temporary version for crosstool..."
     curl https://ftp.gnu.org/gnu/help2man/help2man-$HELP2MAN_VERSION.tar.xz | tar -xJp
     cd help2man-$HELP2MAN_VERSION/
-    ./configure --prefix=$(pwd)/../install
+    ./configure --prefix=$HERO_INSTALL
     make -j$(nproc)
     make install
     cd ..
@@ -38,7 +42,7 @@ if ! command -v makeinfo >/dev/null 2>&1; then
     echo "Not having texinfo, installing a temporary version for crosstool..."
     curl https://ftp.gnu.org/gnu/texinfo/texinfo-$TEXINFO_VERSION.tar.xz | tar -xJp
     cd texinfo-$TEXINFO_VERSION/
-    ./configure --prefix=$(pwd)/../install
+    ./configure --prefix=$HERO_INSTALL
     make -j$(nproc)
     make install
     cd ..
@@ -51,6 +55,7 @@ if [ ! -x "$HERO_INSTALL/bin/ct-ng" ]; then
     echo "No crosstool-ng found, installing..."
     curl https://codeload.github.com/crosstool-ng/crosstool-ng/tar.gz/crosstool-ng-$CROSSTOOL_VERSION | tar -xzp
     cd crosstool-ng-crosstool-ng-$CROSSTOOL_VERSION
+    # FIXME removed patches for 1.25
     for f in $conf_dir/patches/crosstool-ng/*.patch; do
         patch -p1 < $f
     done
@@ -90,6 +95,7 @@ $HERO_INSTALL/bin/ct-ng upgradeconfig > /dev/null
 
 # # deduce tuple, sysroot
 TUPLE=$($HERO_INSTALL/bin/ct-ng -s show-tuple)
+echo "Tuple found : ${TUPLE}"
 if [ -z "$TUPLE" ]; then
     echo "Failed to get tuple for config $1!"
     exit 1
@@ -99,6 +105,7 @@ if [ -z "$ARCH" ]; then
     echo "Failed to deduce architecture from tuple $TUPLE with config $1!"
     exit 1
 fi
+echo "Arch found : ${ARCH}"
 SYSROOT=$HERO_INSTALL/$TUPLE/sysroot
 
 # check previous install and clear sysroot between builds if exists
@@ -229,15 +236,20 @@ if case $ARCH in riscv*) ;; *) false;; esac; then
 fi
 
 # alias the toolchain if requested ($2 = vendor alias, $3 = optional suffix useful for buildroot)
+# FIXME !!!!
 if [ ! -z "$2" ] || [ ! -z "$3" ]; then
     chmod -R u+w $HERO_INSTALL/bin
     vendor=$(echo "$TUPLE" | sed -E 's/^\w*-(\w*)-.*/\1/')
     cd "$HERO_INSTALL/bin"
     for tf in $TUPLE*; do
         alias=$(echo "$tf" | sed -e "s/$vendor/$2/")
+        echo "tuple=$TUPLE vendor=$vendor alias=$alias"
+        echo "ln -sf $tf $alias"
         ln -sf $tf $alias
         if [ ! -z "$3" ]; then
+            echo "ln -sf $tf $alias.$3"
             ln -sf $tf $alias.$3
+            echo "ln -sf $tf $tf.$3"
             ln -sf $tf $tf.$3
         fi
     done

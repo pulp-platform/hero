@@ -1,8 +1,8 @@
 /helloworld
 *.out
 *.ll
-mm-small
-mm-small-host-*
+data-mapping
+data-mapping-host-*
 *.o
 *.bc
 *.s

@@ -218,11 +218,12 @@ int hero_dev_munmap(HeroDev *dev) {
   time_t start;
   start = time(NULL);
   while(!gd.fs->coreExited) {
-    printf("difftime : %f\n", difftime(time(NULL), start));
+    pr_debug("difftime : %f\n", difftime(time(NULL), start));
     if (difftime(time(NULL), start) >= 60.0 /* seconds */)
       break;
     usleep(10000);
   }
+
   if(!gd.fs->coreExited)
     pr_warn("No exit code received from cluster!\n");
 
@@ -400,8 +401,8 @@ void hero_dev_exe_start(HeroDev *dev) {
   hexdump(snitch->l1.v_addr, 0x30);
 
   // Set log level from env
-  pr_trace("Setting loglevel at maximum on snitch\n");
-  snitch_set_device_loglevel(snitch, LOG_MAX);
+  pr_trace("Setting loglevel at -1 (env var SNITCH_DEBUG will be used)\n");
+  snitch_set_device_loglevel(snitch, -1);
 
   // For single-cluster, set interrupt on first core of this cluster. It will bring up the rest of
   // the clusters through hierarchical wakeup

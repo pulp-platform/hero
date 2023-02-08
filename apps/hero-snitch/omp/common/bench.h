@@ -85,7 +85,7 @@ static inline double bench_stop(void) {
   clock_gettime(CLOCK_MONOTONIC_RAW, &bench_ts_stop);
   const unsigned long long ns = __ts_to_nsec(&bench_ts_stop) - __ts_to_nsec(&bench_ts_start);
   const double ms = ns / 1e6;
-  printf("Execution time [host] = %.3f ms\n", ms);
+  printf("Execution time = %.3f ms\n", ms);
   return ms;
 }
 

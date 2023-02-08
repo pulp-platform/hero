@@ -1,14 +1,20 @@
-From 82080f22974539dba65343b93c60aa33ce5aaef2 Mon Sep 17 00:00:00 2001
+From 3a8d31a97151c312e18099f8fd18a7ecef48f6a5 Mon Sep 17 00:00:00 2001
 From: Cyril Koenig <cykoenig@iis.ee.ethz.ch>
 Date: Tue, 17 Jan 2023 13:31:44 +0100
 Subject: [PATCH 16/16] [snRuntime] ajustments for HERO repository
 
 ---
- sw/cmake/SnitchUtilities.cmake            |  8 ++++++++
- sw/snRuntime/CMakeLists.txt               | 33 ++++++++++++++++++++++---------
- sw/snRuntime/{src => include}/team.h      |  0
- sw/snRuntime/src/platforms/shared/start.c |  2 +-
- 4 files changed, 33 insertions(+), 10 deletions(-)
+ sw/cmake/SnitchUtilities.cmake               |  8 +++++++
+ sw/snRuntime/CMakeLists.txt                  | 35 +++++++++++++++++++++-------
+ sw/snRuntime/{src => include}/team.h         |  0
+ sw/snRuntime/src/alloc.c                     | 12 ++++++----
+ sw/snRuntime/src/dm.c                        |  2 +-
+ sw/snRuntime/src/omp/eu.c                    |  6 ++---
+ sw/snRuntime/src/omp/kmp.c                   |  2 +-
+ sw/snRuntime/src/omp/omp.c                   |  2 +-
+ sw/snRuntime/src/platforms/hero/start_hero.c | 11 ++++-----
+ sw/snRuntime/src/platforms/shared/start.c    |  2 +-
+ 10 files changed, 52 insertions(+), 28 deletions(-)
  rename sw/snRuntime/{src => include}/team.h (100%)
 
 diff --git a/sw/cmake/SnitchUtilities.cmake b/sw/cmake/SnitchUtilities.cmake
@@ -31,7 +37,7 @@ index d2a1def8..903058e8 100644
  
  macro(add_snitch_executable name)
 diff --git a/sw/snRuntime/CMakeLists.txt b/sw/snRuntime/CMakeLists.txt
-index 39a89600..b0c10325 100644
+index 39a89600..e62d0c86 100644
 --- a/sw/snRuntime/CMakeLists.txt
 +++ b/sw/snRuntime/CMakeLists.txt
 @@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 3.13)
@@ -61,7 +67,7 @@ index 39a89600..b0c10325 100644
  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/link/common.ld.in common.ld @ONLY)
  set(LINKER_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/common.ld CACHE PATH "")
  
-@@ -54,6 +51,23 @@ include_directories(
+@@ -54,6 +51,24 @@ include_directories(
      vendor/riscv-opcodes
  )
  
@@ -77,6 +83,7 @@ index 39a89600..b0c10325 100644
 +  include/perf_cnt.h
 +  include/snitch_cluster_peripheral.h
 +  include/snrt.h
++  include/snitch_hero_support.h
 +  include/team.h
 +  vendor/printf.h
 +  vendor/riscv-opcodes/encoding.h
@@ -85,7 +92,15 @@ index 39a89600..b0c10325 100644
  # Common sources
  set(sources
      src/barrier.c
-@@ -112,7 +126,8 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+@@ -75,6 +90,7 @@ set(banshee_snitch_sources
+ set(rtl_snitch_sources
+     src/platforms/rtl/start_snitch.S
+     src/platforms/rtl/putchar.c
++    src/platforms/hero/snitch_hero_support.c
+ )
+ set(hero_snitch_sources
+     src/platforms/hero/start_snitch.S
+@@ -112,7 +128,8 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
      add_snitch_library(snRuntime-cluster src/platforms/shared/start.c ${rtl_snitch_sources} ${sources} src/ssr_v2.c)
      add_snitch_library(snRuntime-hero ${hero_snitch_sources} ${sources} src/ssr_v2.c)
  
@@ -99,6 +114,140 @@ diff --git a/sw/snRuntime/src/team.h b/sw/snRuntime/include/team.h
 similarity index 100%
 rename from sw/snRuntime/src/team.h
 rename to sw/snRuntime/include/team.h
+diff --git a/sw/snRuntime/src/alloc.c b/sw/snRuntime/src/alloc.c
+index c7806667..d4f6f0dc 100644
+--- a/sw/snRuntime/src/alloc.c
++++ b/sw/snRuntime/src/alloc.c
+@@ -1,10 +1,13 @@
+ // Copyright 2020 ETH Zurich and University of Bologna.
+ // Licensed under the Apache License, Version 2.0, see LICENSE for details.
+ // SPDX-License-Identifier: Apache-2.0
+-#include "debug.h"
++
+ #include "snrt.h"
+ #include "team.h"
+ 
++#define DEBUG
++#include "debug.h"
++
+ #define ALIGN_UP(addr, size) (((addr) + (size)-1) & ~((size)-1))
+ #define ALIGN_DOWN(addr, size) ((addr) & ~((size)-1))
+ 
+@@ -20,12 +23,11 @@
+ void *snrt_l1alloc(size_t size) {
+     struct snrt_allocator_inst *alloc = &snrt_current_team()->allocator.l1;
+ 
+-    size = ALIGN_UP(size, MIN_CHUNK_SIZE);
++    snrt_trace("Trying to allocate %#x bytes (avalailable: %#x bytes)\n", size, alloc->base + alloc->size - alloc->next);
+ 
++    size = ALIGN_UP(size, MIN_CHUNK_SIZE);
+     if (alloc->next + size > alloc->base + alloc->size) {
+-        snrt_trace(
+-            "Not enough memory to allocate: base %#x size %#x next %#x\n",
+-            alloc->base, alloc->size, alloc->next);
++        snrt_error("Not enough memory to allocate size %#x (base %#x size %#x next %#x)\n", size, alloc->base, alloc->size, alloc->next);
+         return 0;
+     }
+ 
+diff --git a/sw/snRuntime/src/dm.c b/sw/snRuntime/src/dm.c
+index 9e7a912a..e8001999 100644
+--- a/sw/snRuntime/src/dm.c
++++ b/sw/snRuntime/src/dm.c
+@@ -111,7 +111,7 @@ static void wake_dm(void);
+ // debug
+ //=============================================================================
+ 
+-#define DM_DEBUG_LEVEL 100
++#define DM_DEBUG_LEVEL 0
+ 
+ #ifdef DM_DEBUG_LEVEL
+ #define DEBUG
+diff --git a/sw/snRuntime/src/omp/eu.c b/sw/snRuntime/src/omp/eu.c
+index 3a28e168..6336b1bd 100644
+--- a/sw/snRuntime/src/omp/eu.c
++++ b/sw/snRuntime/src/omp/eu.c
+@@ -25,7 +25,7 @@
+ //================================================================================
+ // debug
+ //================================================================================
+-#define EU_DEBUG_LEVEL 10
++#define EU_DEBUG_LEVEL 0
+ #ifdef EU_DEBUG_LEVEL
+ #define DEBUG
+ #include "debug.h"
+@@ -172,7 +172,7 @@ void eu_event_loop(uint32_t cluster_core_idx) {
+             // hart will reset eu_p->e.nthreads as soon as all workers finished
+             // which might cause a race condition
+             nthds = eu_p->e.nthreads;
+-            EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\r\n", eu_p->e.fn,
++            EU_PRINTF(3, "run fn @ %#x (arg 0 = %#x)\r\n", eu_p->e.fn,
+                       ((uint32_t *)eu_p->e.data)[0]);
+             // call
+             eu_p->e.fn(eu_p->e.data, eu_p->e.argc);
+@@ -226,7 +226,7 @@ void eu_run_empty(uint32_t core_idx) {
+     // Am i also part of the team?
+     if (core_idx < eu_p->e.nthreads) {
+         // call
+-        EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\r\n", eu_p->e.fn,
++        EU_PRINTF(3, "run fn @ %#x (arg 0 = %#x)\r\n", eu_p->e.fn,
+                   ((uint32_t *)eu_p->e.data)[0]);
+         eu_p->e.fn(eu_p->e.data, eu_p->e.argc);
+     }
+diff --git a/sw/snRuntime/src/omp/kmp.c b/sw/snRuntime/src/omp/kmp.c
+index a8f2c78e..6813c63b 100644
+--- a/sw/snRuntime/src/omp/kmp.c
++++ b/sw/snRuntime/src/omp/kmp.c
+@@ -13,7 +13,7 @@
+ // debug
+ //=============================================================================
+ 
+-#define KMP_LOG_LEVEL 100
++#define KMP_LOG_LEVEL 0
+ 
+ #ifdef KMP_LOG_LEVEL
+ #define DEBUG
+diff --git a/sw/snRuntime/src/omp/omp.c b/sw/snRuntime/src/omp/omp.c
+index d1d6f929..cdf73e87 100644
+--- a/sw/snRuntime/src/omp/omp.c
++++ b/sw/snRuntime/src/omp/omp.c
+@@ -23,7 +23,7 @@
+ // debug
+ //================================================================================
+ 
+-#define OMP_DEBUG_LEVEL 100
++#define OMP_DEBUG_LEVEL 0
+ 
+ #ifdef OMP_DEBUG_LEVEL
+ #define DEBUG
+diff --git a/sw/snRuntime/src/platforms/hero/start_hero.c b/sw/snRuntime/src/platforms/hero/start_hero.c
+index d7d77479..14da7c37 100644
+--- a/sw/snRuntime/src/platforms/hero/start_hero.c
++++ b/sw/snRuntime/src/platforms/hero/start_hero.c
+@@ -1,8 +1,6 @@
+ // Copyright 2020 ETH Zurich and University of Bologna.
+ // Licensed under the Apache License, Version 2.0, see LICENSE for details.
+ // SPDX-License-Identifier: Apache-2.0
+-#define DEBUG
+-
+ #include <stdarg.h>
+ 
+ #include "omp.h"
+@@ -297,11 +295,10 @@ static int gomp_offload_manager() {
+     // reset_timer();
+     // start_timer();
+ 
+-    for (unsigned i = 0; i < 10; i += 2) {
+-      snrt_trace(" %2d: 0x%08x = %08d  %2d: 0x%08x = %08d\n", i, ((uint32_t *)offloadArgs)[i],
+-                 *((uint32_t *)(((uint32_t *)offloadArgs)[i])), i + 1,
+-                 ((uint32_t *)offloadArgs)[i + 1],
+-                 *((uint32_t *)(((uint32_t *)offloadArgs)[i + 1])));
++    for (unsigned i = 0; i < 16; i += 2) {
++      snrt_trace(" %2d: 0x%08x = ... ; %2d: 0x%08x = ...\n", i, ((uint32_t *)offloadArgs)[i],
++                 /* *((uint32_t *)(((uint32_t *)offloadArgs)[i])) ,*/  i + 1,
++                 ((uint32_t *)offloadArgs)[i + 1] /*, *((uint32_t *)(((uint32_t *)offloadArgs)[i + 1]))*/ );
+     }
+ 
+     // (5) Execute the offloaded function.
 diff --git a/sw/snRuntime/src/platforms/shared/start.c b/sw/snRuntime/src/platforms/shared/start.c
 index 0303636c..20732021 100644
 --- a/sw/snRuntime/src/platforms/shared/start.c

@@ -14,7 +14,7 @@ index ffae478d..39a156d5 100644
 @@ -1,6 +1,6 @@
  repository='git git://repo.or.cz/isl.git'
  bootstrap='./autogen.sh'
--mirrors='http://isl.gforge.inria.fr'
+-mirrors='https://libisl.sourceforge.io'
 +mirrors='https://sourceforge.net/projects/libisl/files/ https://mirror.sobukus.de/files/src/isl http://isl.gforge.inria.fr'
  relevantpattern='*.*|.'
  milestones='0.12 0.13 0.14 0.15 0.18'

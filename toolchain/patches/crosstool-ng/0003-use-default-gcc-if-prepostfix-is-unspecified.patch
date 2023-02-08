@@ -1,6 +1,6 @@
-diff -rub crosstool-ng-crosstool-ng-1.24.0-orig/scripts/crosstool-NG.sh crosstool-ng-crosstool-ng-1.24.0/scripts/crosstool-NG.sh
---- crosstool-ng-crosstool-ng-1.24.0-orig/scripts/crosstool-NG.sh	2021-10-25 04:09:22.103285225 +0200
-+++ crosstool-ng-crosstool-ng-1.24.0/scripts/crosstool-NG.sh	2021-10-25 05:05:22.505930675 +0200
+diff -rub crosstool-ng-crosstool-ng-1.25.0-orig/scripts/crosstool-NG.sh crosstool-ng-crosstool-ng-1.25.0/scripts/crosstool-NG.sh
+--- crosstool-ng-crosstool-ng-1.25.0-orig/scripts/crosstool-NG.sh	2021-10-25 04:09:22.103285225 +0200
++++ crosstool-ng-crosstool-ng-1.25.0/scripts/crosstool-NG.sh	2021-10-25 05:05:22.505930675 +0200
 @@ -432,11 +432,8 @@
          v="CT_${m}"
          p="CT_${m}_PREFIX"

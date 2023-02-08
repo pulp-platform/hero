@@ -1,5 +1,5 @@
 ROOT := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-PYTHON = python3
+PYTHON ?= python3
 PREM_BR_CMUX_CONFSTR := BR2_PACKAGE_PREM_CMUX=y
 PREM_BR_OMP_CONFSTR := BR2_PACKAGE_HERO_OPENMP_ENABLE_PREM=y
 
@@ -76,7 +76,7 @@ upload-driver:
 	scp ./output/br-hrv-occamy/build/snitch-driver-0.1/snitch.ko root@hero-vcu128-02.ee.ethz.ch:/root
 	scp ./output/br-hrv-occamy/build/libsnitch-0.1/lib/libsnitch.so root@hero-vcu128-02.ee.ethz.ch:/usr/lib
 upload-openmp:
-	scp output/br-hrv-occamy/target/usr/lib/*omp* root@hero-vcu128-02.ee.ethz.ch:/usr/lib
+	scp output/br-hrv-occamy/target/usr/lib/libomptarget* root@hero-vcu128-02.ee.ethz.ch:/usr/lib
 gdb:
 	./util/ssh_tunnel.sh start
 	$(HERO_INSTALL)/bin/riscv64-hero-linux-gnu-gdb -ex "target extended-remote :3334" ; \
@@ -174,8 +174,10 @@ $(ROOT)/vendor/snitch:
 	./util/vendor.py vendor/snitch.vendor.hjson --update
 
 sdk-snitch: check_environment $(ROOT)/vendor/snitch
+	chmod -R u+w $(HERO_INSTALL)
 	mkdir -p $(CURDIR)/output/snitch-runtime
 	cd $(CURDIR)/output/snitch-runtime && $(ROOT)/toolchain/build-snitch-runtime.sh $(ROOT)/vendor/snitch
+	chmod -R u-w $(HERO_INSTALL)
 
 # Utilities
 .PHONY: util-hrv-openocd

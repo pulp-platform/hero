@@ -185,13 +185,13 @@ fail:
 int snitch_mmap(snitch_dev_t *dev, char *fname) {
   // int offset;
   ssize_t size;
-  void *addr, *addr2;
+  void *addr=NULL, *addr2=NULL;
 
   // This is probably the first call into this library, set the debug level from ENV here
   const char *s = getenv("LIBSNITCH_DEBUG");
   if (s != NULL) {
     g_debuglevel = atoi(s);
-    pr_trace("Set debug level to %d\n", g_debuglevel);
+    pr_trace("Env variable LIBSNITCH_DEBUG sets debug level to %d\n", g_debuglevel);
   }
 
   pr_trace("mmap with %s\n", fname);
@@ -242,7 +242,7 @@ int snitch_mmap(snitch_dev_t *dev, char *fname) {
   // Initialize L3 heap manager in the middle of the reserved memory range
   if (!g_l3_heap_mgr) {
     g_l3_data_offset = ALIGN_UP(dev->l3.size / 2, O1HEAP_ALIGNMENT);
-    pr_debug("Initializing o1heap at %p size %x\n", (void *)(dev->l3.v_addr + g_l3_data_offset),
+    pr_debug("Initializing o1heap at %p (%p) size %x\n", (void *)(dev->l3.v_addr + g_l3_data_offset), (void *)(dev->l3.p_addr + g_l3_data_offset),
              dev->l3.size / 2);
     g_l3_heap_mgr =
         o1heapInit((void *)(dev->l3.v_addr + g_l3_data_offset), dev->l3.size / 2, NULL, NULL);
@@ -271,6 +271,8 @@ int snitch_mmap(snitch_dev_t *dev, char *fname) {
   rb_init(dev->a2h_mbox, 16, sizeof(uint32_t));
   pr_debug("a2h mailbox at phys %08x data %08lx\n", dev->l3l->a2h_mbox, dev->a2h_mbox->data_p);
   // Mailboxes a2h and h2a of 16*uint32_t each
+  addr = NULL;
+  addr2 = NULL;
   dev->h2a_mbox = (struct ring_buf *)snitch_l3_malloc(dev, sizeof(struct ring_buf), &addr);
   assert(dev->h2a_mbox);
   dev->l3l->h2a_mbox = (uint32_t)(uintptr_t)addr;

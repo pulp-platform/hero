@@ -4,30 +4,17 @@ Date: Thu, 28 Nov 2019 19:25:44 +0100
 Subject: [PATCH] provide other mirrors for zlib and expat
 
 ---
- packages/expat/package.desc | 2 +-
  packages/zlib/package.desc  | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/packages/expat/package.desc b/packages/expat/package.desc
-index 4e3e1a0..432f3ac 100644
---- a/packages/expat/package.desc
-+++ b/packages/expat/package.desc
-@@ -1,6 +1,6 @@
- repository='git https://github.com/libexpat/libexpat.git'
- repository_subdir='expat'
- bootstrap='./buildconf.sh && make -C doc all'
--mirrors='http://downloads.sourceforge.net/project/expat/expat/${CT_EXPAT_VERSION}'
-+mirrors='http://downloads.sourceforge.net/project/expat/expat/${CT_EXPAT_VERSION} https://github.com/libexpat/libexpat/releases/download/R_${CT_EXPAT_VERSION//./_}'
- archive_formats='.tar.bz2'
- relevantpattern='*.*|.'
 diff --git a/packages/zlib/package.desc b/packages/zlib/package.desc
 index a444d3c..6500629 100644
 --- a/packages/zlib/package.desc
 +++ b/packages/zlib/package.desc
 @@ -1,4 +1,4 @@
  repository='git https://github.com/madler/zlib.git'
--mirrors='http://downloads.sourceforge.net/project/libpng/zlib/${CT_ZLIB_VERSION}'
-+mirrors='http://downloads.sourceforge.net/project/libpng/zlib/${CT_ZLIB_VERSION} https://www.zlib.net/zlib-${CT_ZLIB_VERSION}'
+-mirrors='http://downloads.sourceforge.net/project/libpng/zlib/${CT_ZLIB_VERSION} https://www.zlib.net/'
++mirrors='http://downloads.sourceforge.net/project/libpng/zlib/${CT_ZLIB_VERSION} https://www.zlib.net/zlib-${CT_ZLIB_VERSION} https://www.zlib.net/fossils/'
  archive_formats='.tar.xz .tar.gz'
  signature_format='packed/.asc'
 2.4.8
