@@ -1,7 +1,7 @@
 /*
- * HERO Matrix-Matrix Multiplication for Small Matrices Example Application
+ * HERO Data Mapping test
  *
- * Copyright 2018 ETH Zurich, University of Bologna
+ * Copyright 2023 ETH Zurich, University of Bologna
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

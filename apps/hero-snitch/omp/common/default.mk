@@ -144,6 +144,7 @@ clean::
 
 .PHONY: deploy
 deploy: $(EXE)
+	[ "${DEPLOY_FILES}" ] && scp ${DEPLOY_FILES} root@hero-vcu128-02.ee.ethz.ch:/root || echo "Sending only binary..."
 	scp $? root@hero-vcu128-02.ee.ethz.ch:/root
 
 .PHONY: install

@@ -1,4 +1,4 @@
-// #define DEBUG
+//#define DEBUG
 #include <asm/io.h>       /* ioremap, iounmap, iowrite32 */
 #include <asm/uaccess.h>  /* for put_user */
 #include <linux/cdev.h>   /* cdev struct */

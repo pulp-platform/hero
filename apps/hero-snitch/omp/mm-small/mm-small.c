@@ -53,12 +53,15 @@ int compare_matrices(DTYPE *a, DTYPE *b, uint32_t width, uint32_t height) {
     }
   }
   printf("Result match\n");
+  return 0;
 }
 
 int main(int argc, char *argv[]) {
   printf("HERO matrix multiplication started.\n");
 
   uint32_t width = 128;
+  double time;
+  uint32_t error = 0;
   if (argc > 1) {
     width = strtoul(argv[1], NULL, 0);
   }
@@ -108,7 +111,9 @@ int main(int argc, char *argv[]) {
       }
     }
   }
-  bench_stop();
+  time = bench_stop();
+  printf("csv : %u\n", width);
+  printf("csv : %i %f\n", error, time);
 
   /*
    * Execute on Device
@@ -147,8 +152,10 @@ int main(int argc, char *argv[]) {
       }
     }
   }
-  bench_stop();
-  compare_matrices(c, d, width, height);
+  time = bench_stop();
+  error = compare_matrices(c, d, width, height);
+  printf("csv : %i %f\n", error, time);
+
   memset(c, 0, (size_t)(sizeof(DTYPE) * width * height));
 
   // omp_set_num_threads(omp_get_thread_limit());
@@ -169,8 +176,10 @@ int main(int argc, char *argv[]) {
       }
     }
   }
-  bench_stop();
-  compare_matrices(c, d, width, height);
+  time = bench_stop();
+  error = compare_matrices(c, d, width, height);
+  printf("csv : %i %f\n", error, time);
+
   memset(c, 0, (size_t)(sizeof(DTYPE) * width * height));
 
   printf("\n");
@@ -215,8 +224,10 @@ int main(int argc, char *argv[]) {
     // snrt_l1free(b_local);
     // snrt_l1free(c_local);
   }
-  bench_stop();
-  compare_matrices(c, d, width, height);
+  time = bench_stop();
+  error = compare_matrices(c, d, width, height);
+  printf("csv : %i %f\n", error, time);
+
   memset(c, 0, (size_t)(sizeof(DTYPE) * width * height));
 
 
@@ -263,8 +274,10 @@ int main(int argc, char *argv[]) {
     // snrt_l1free(b_local);
     // snrt_l1free(c_local);
   }
-  bench_stop();
-  compare_matrices(c, d, width, height);
+  time = bench_stop();
+  error = compare_matrices(c, d, width, height);
+  printf("csv : %i %f\n", error, time);
+
   memset(c, 0, (size_t)(sizeof(DTYPE) * width * height));
 
   //   // The following code is commented out, as it requires SVM support. This is
