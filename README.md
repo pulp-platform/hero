@@ -140,7 +140,14 @@ This creates an SD card image from the Buildroot filesystem and additionally inv
 2. Format the first partition with `vfat` and the second partition with `ext4`.
 3. Mount the first partition, copy `BOOT.BIN` and `image.ub` from `output/br-har-exilzcu102/images/` to the mounted partition, and unmount it.
 
-The system can then be booted up after configuring the ZCU102 board jumpers to boot from the SD card.  On the first boot, change the U-Boot variables as described in issue #107.  To do this, plug a USB cable into the USB-UART port of the board, connect it to your workstation, and configure a serial terminal of your choice (such as `minicom` or `screen`) to access it.  Once Linux has booted, you can log in as `root` on the serial terminal without a password.
+The system can then be booted up after configuring the ZCU102 board jumpers to boot from the SD card.  On the first boot, change the U-Boot variables as described in issue #107; at a minimum you must set the initrd_high variable to 0x10000000, and it is recommended to make this configuration permanent:
+
+```
+setenv initrd_high 0x10000000
+saveenv
+```
+
+To do this, plug a USB cable into the USB-UART port of the board, connect it to your workstation, and configure a serial terminal of your choice (such as `minicom` or `screen`) to access it.  Once Linux has booted, you can log in as `root` on the serial terminal without a password.
 
 Next, we highly recommend to set up SSH access to the board, because:
 - it makes transferring applications to the board much simpler than having to modify the SD card or transferring files over the serial terminal, and
