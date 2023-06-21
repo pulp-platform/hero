@@ -30,3 +30,23 @@ config BR2_HERO_EXT_MOUNT
 	  Binds system to the filesystem.  Options can be specified
 	  before (with -o) as the options are completely forwarded to
 	  mount.  Leave empty to not mount external partition.
+
+config BR2_HERO_ETH_IP_ADDR
+	string "Optional static IP address for the Host"
+	help
+	  Static IP address. Leave empty to use DHCP.
+
+config BR2_HERO_ETH_NETMASK
+	string "Optional static IP netmask"
+	help
+	  Static netmask. Only considered when static IP address is set.
+
+config BR2_HERO_ETH_GATEWAY
+	string "Optional static IP gateway"
+	help
+	  Static gateway. Only considered when static IP address is set.
+
+config BR2_HERO_ETH_DNS
+	string "Optional static IP DNS"
+	help
+	  Static DNS server. Only considered when static IP address is set.

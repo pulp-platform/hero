@@ -187,7 +187,10 @@ insmod /run/media/mmcblk0p2/lib/modules/4.19.0/extra/pulp.ko
 ```
 after every reboot.  The kernel messages on the serial terminal will inform you about the outcome (it should end with `PULP: Device registered.` if successful).
 
-Finally, to develop applications for this setup, initialize the environment on your development workstation with `source env/exilzcu102.sh`.  Afterwards applications can be built with the provided `Makefile`s and transferred to the board with `scp`.
+Users can enable NFS-based RootFS by configuring in `local.cfg` the following variables: `PT_NFSSERVER_IP="<server_ip>"`, `PT_ROOTFS_NFS="y"`, `PT_NFSROOT_DIR="</path/to/nfs/rootfs>"`. The configurations will be propagated in the Petalinux build process, thus such variables must be set before the `make br-har-exilzcu102` command execution.
+Additional information about IP configuration, and about to how to boot Linux without SD card (using JTAG) can be found [here](doc/BootZCU102WithoutSDCard.md).
+
+To develop applications for this setup, initialize the environment on your development workstation with `source env/exilzcu102.sh`.  Afterwards applications can be built with the provided `Makefile`s and transferred to the board with `scp` or using NFS.
 
 ##### QEMU RISC-V
 

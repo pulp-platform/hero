@@ -30,6 +30,7 @@ python3.6 -m venv .venv
 ln -sf python3.6 .venv/bin/python3
 source .venv/bin/activate
 
+# Read Petalinux name
 if [ -n "$NO_IIS" ]; then
   PETALINUX_VER=''
 else
@@ -58,19 +59,86 @@ cd linux-xlnx
 git checkout tags/xilinx-v2019.2.01
 
 cd ../../../
-sed -i 's|CONFIG_SUBSYSTEM_COMPONENT_LINUX__KERNEL_NAME_LINUX__XLNX||' project-spec/configs/config
-sed -i 's|CONFIG_SUBSYSTEM_ROOTFS_INITRAMFS||' project-spec/configs/config
-echo 'CONFIG_SUBSYSTEM_ROOTFS_SD=y' >> project-spec/configs/config
+sed -i 's|CONFIG_SUBSYSTEM_COMPONENT_LINUX__KERNEL_NAME_LINUX__XLNX.*||' project-spec/configs/config
 echo 'CONFIG_SUBSYSTEM_COMPONENT_LINUX__KERNEL_NAME_EXT__LOCAL__SRC=y' >> project-spec/configs/config
 echo 'CONFIG_SUBSYSTEM_COMPONENT_LINUX__KERNEL_NAME_EXT_LOCAL_SRC_PATH="${TOPDIR}/../components/ext_sources/linux-xlnx"' >> project-spec/configs/config
-echo 'CONFIG_SUBSYSTEM_SDROOT_DEV="/dev/mmcblk0p2"' >> project-spec/configs/config
+sed -i 's|CONFIG_SUBSYSTEM_MACHINE_NAME.*||' project-spec/configs/config
 echo 'CONFIG_SUBSYSTEM_MACHINE_NAME="zcu102-revb"' >> project-spec/configs/config
 
-if [ -f "$LOCAL_CFG" ] && grep -q PT_ETH_MAC "$LOCAL_CFG"; then
-    sed -e 's/PT_ETH_MAC/CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_MAC/;t;d' "$LOCAL_CFG" >> project-spec/configs/config
+# Cleanup All RootFS Options
+sed -i 's|CONFIG_SUBSYSTEM_ROOTFS_INITRAMFS.*||' project-spec/configs/config
+sed -i 's|CONFIG_SUBSYSTEM_ROOTFS_INITRD.*||' project-spec/configs/config
+sed -i 's|CONFIG_SUBSYSTEM_ROOTFS_JFFS2.*||' project-spec/configs/config
+sed -i 's|CONFIG_SUBSYSTEM_ROOTFS_JFFS2.*||' project-spec/configs/config
+sed -i 's|CONFIG_SUBSYSTEM_ROOTFS_NFS.*||' project-spec/configs/config
+sed -i 's|CONFIG_SUBSYSTEM_ROOTFS_OTHER.*||' project-spec/configs/config
+
+# Select RootFS Option (Default: SD_CARD)
+nfsrootfs="$("$HERO_ROOT/util/configfile/get_value" -s "$LOCAL_CFG" PT_ROOTFS_NFS \
+    | tr -d '"')";
+if ! [[ $nfsrootfs == "y" ]]; then
+  # SD-CARD
+  echo 'CONFIG_SUBSYSTEM_ROOTFS_SD=y' >> project-spec/configs/config
+  echo 'CONFIG_SUBSYSTEM_SDROOT_DEV="/dev/mmcblk0p2"' >> project-spec/configs/config
+else
+  # NFS ROOTFS
+  nfsrootdir="$("$HERO_ROOT/util/configfile/get_value" -s "$LOCAL_CFG" PT_NFSROOT_DIR)";
+  if [ -z $nfsrootdir ]; then
+    >&2 echo "Error: PT_NFSROOT_DIR is not defined in '$LOCAL_CFG'!"
+    exit 1
+  fi
+  nfsserverip="$("$HERO_ROOT/util/configfile/get_value" -s "$LOCAL_CFG" PT_NFSSERVER_IP \
+    | tr -d '"')";
+  if [ -z $nfsserverip ]; then
+    >&2 echo "Error: PT_NFSSERVER_IP is not defined in '$LOCAL_CFG'!"
+    exit 1
+  fi
+  set -e
+  echo "CONFIG_SUBSYSTEM_ROOTFS_NFS=$nfsrootfs" >> project-spec/configs/config
+  echo "CONFIG_SUBSYSTEM_NFSROOT_DIR=$nfsrootdir" >> project-spec/configs/config
+  echo "CONFIG_SUBSYSTEM_NFSSERVER_IP=$nfsserverip" >> project-spec/configs/config
 fi
 
-$PETALINUX_VER petalinux-config --oldconfig --get-hw-description "$HERO_ROOT/hardware/fpga/hero_exil$TARGET/hero_exil$TARGET.sdk"
+# Ethernet Settings
+
+# Set MAC address if specified
+sed -i 's|CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_MAC.*||' project-spec/configs/config
+eth_mac="$("$HERO_ROOT/util/configfile/get_value" -s "$LOCAL_CFG" PT_ETH_MAC \
+    | tr -d '"')";
+if ! [ -n $eth_mac ]; then
+    echo "CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_MAC=$eth_mac" >> project-spec/configs/config
+else
+    echo "CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_MAC=\"ff:ff:ff:ff:ff:ff\"" >> project-spec/configs/config
+fi
+
+# Set IP Configuration
+sed -i 's|CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_USE_DHCP=y||' project-spec/configs/config
+ip="$("$HERO_ROOT/util/configfile/get_value" -s "$LOCAL_CFG" BR2_HERO_ETH_IP_ADDR \
+    | tr -d '"')";
+if [ -z $ip ]; then
+  # DHCP
+  echo 'CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_USE_DHCP=y' >> project-spec/configs/config
+else
+  # Static IP Configuration
+  echo '# CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_USE_DHCP is not set' >> project-spec/configs/config
+  set +e
+  netmask="$("$HERO_ROOT/util/configfile/get_value" -s "$LOCAL_CFG" BR2_HERO_ETH_NETMASK \
+    | tr -d '"')";
+  if [ -z $netmask ]; then
+    >&2 echo "Error: BR2_HERO_ETH_NETMASK is not defined in '$LOCAL_CFG'!"
+    exit 1
+  fi
+  gateway="$("$HERO_ROOT/util/configfile/get_value" -s "$LOCAL_CFG" BR2_HERO_ETH_GATEWAY \
+    | tr -d '"')";
+  if [ -z $gateway ]; then
+    >&2 echo "Error: BR2_HERO_ETH_GATEWAY is not defined in '$LOCAL_CFG'!"
+    exit 1
+  fi
+  set -e
+  echo "CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_IP_ADDRESS=$ip" >> project-spec/configs/config
+  echo "CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_IP_NETMASK=$netmask" >> project-spec/configs/config
+  echo "CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_IP_GATEWAY=$gateway" >> project-spec/configs/config
+fi
 
 echo "
 /include/ \"system-conf.dtsi\"
