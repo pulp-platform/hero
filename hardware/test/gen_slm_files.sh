@@ -8,7 +8,15 @@ readonly examples_path="$script_path/../../openmp-examples"
 
 slm_conv='slm_conv-0.3'
 if ! which $slm_conv &>/dev/null; then
-    slm_conv=~andkurt/bin/slm_conv-0.3
+    # Try unversioned variant of 'slm_conv' executable.
+    slm_conv='slm_conv'
+    if ! which $slm_conv &>/dev/null; then
+        # Neither versioned nor unversioned variant found.
+        echo "Error: 'slm_conv' not found in PATH.  Please install it (e.g. with 'cargo install --git https://github.com/andreaskurth/slm_conv')." >&2
+        exit 1
+    fi
+    # Fall back to unversioned variant.
+    echo "Warning: 'slm_conv-0.3' not found; falling back to generic 'slm_conv'." >&2
 fi
 declare -r slm_conv
 
